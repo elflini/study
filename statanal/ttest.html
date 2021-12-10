@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 1 평균차이 검정 | Statistical Analysis</title>
+  <meta name="description" content="This is a Statistical Analysis" />
+  <meta name="generator" content="bookdown 0.22 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 1 평균차이 검정 | Statistical Analysis" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="This is a Statistical Analysis" />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 1 평균차이 검정 | Statistical Analysis" />
+  
+  <meta name="twitter:description" content="This is a Statistical Analysis" />
+  
+
+<meta name="author" content="Jin Hyun Nam" />
+
+
+<meta name="date" content="2021-12-11" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="index.html"/>
+
+<script src="libs/header-attrs-2.8/header-attrs.js"></script>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+
+
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Statistical Analysis</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>머리말</a></li>
+<li class="chapter" data-level="1" data-path="ttest.html"><a href="ttest.html"><i class="fa fa-check"></i><b>1</b> 평균차이 검정</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="ttest.html"><a href="ttest.html#일표본-t-검정"><i class="fa fa-check"></i><b>1.1</b> 일표본 <span class="math inline">\(t\)</span>-검정</a></li>
+<li class="chapter" data-level="1.2" data-path="ttest.html"><a href="ttest.html#독립표본-t-검정"><i class="fa fa-check"></i><b>1.2</b> 독립표본 <span class="math inline">\(t\)</span>-검정</a>
+<ul>
+<li class="chapter" data-level="1.2.1" data-path="ttest.html"><a href="ttest.html#두-모분산-비의-검정"><i class="fa fa-check"></i><b>1.2.1</b> 두 모분산 비의 검정</a></li>
+</ul></li>
+<li class="chapter" data-level="1.3" data-path="ttest.html"><a href="ttest.html#대응표본-t-검정"><i class="fa fa-check"></i><b>1.3</b> 대응표본 <span class="math inline">\(t\)</span>-검정</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Statistical Analysis</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="ttest" class="section level1" number="1">
+<h1><span class="header-section-number">Chapter 1</span> 평균차이 검정</h1>
+<div id="일표본-t-검정" class="section level2" number="1.1">
+<h2><span class="header-section-number">1.1</span> 일표본 <span class="math inline">\(t\)</span>-검정</h2>
+<ul>
+<li><p><span class="math inline">\(z\)</span>-test는 다음과 같은 두 가정 중 최소 하나의 가정을 요구함</p>
+<ul>
+<li><p>모집단의 분포는 정규(normal) 분포이고 모분산 <span class="math inline">\(\sigma^2\)</span>이 알려져
+있다.</p></li>
+<li><p>표본크기가 크다.</p></li>
+</ul></li>
+<li><p>현실적으로 모분산 <span class="math inline">\(\sigma^2\)</span>은 대부분 알려져 있지 않음</p></li>
+<li><p>만약 표본크기 <span class="math inline">\(n\)</span>이 크고 모집단의 분포가 평균이 <span class="math inline">\(\mu\)</span> 분산이
+<span class="math inline">\(\sigma^2\)</span>(unknown)인 정규분포라면, 자유도가 <span class="math inline">\(n-1\)</span>인 <span class="math inline">\(t\)</span>분포를
+따르는 검정통계량 <span class="math inline">\(T\)</span>를 정의할 수 있으며, 이러한 검정 통계량을
+이용하여 모평균 <span class="math inline">\(\mu\)</span>에 대해 검정하는 방법을 일표본
+<span class="math inline">\(t\)</span>검정(one-sample t-test)이라고 함</p></li>
+<li><p>가설의 형태</p></li>
+<li><p>양측검정 : <span class="math inline">\(H_0 : \mu=\mu_0 \quad vs. \quad H_1 : \mu \ne \mu_0\)</span></p></li>
+<li><p>단측(좌측)검정 : <span class="math inline">\(H_0 : \mu=\mu_0 \quad vs. \quad H_1 : \mu &lt; \mu_0\)</span></p></li>
+<li><p>단측(우측)검정 : <span class="math inline">\(H_0 : \mu=\mu_0 \quad vs. \quad H_1 : \mu &gt; \mu_0\)</span></p></li>
+<li><p>검정통계량 <span class="math display">\[T=\frac{\bar{X} - \mu_0}{S/\sqrt{n}} \sim t_{(n-1)}\]</span></p></li>
+<li><p>유의수준 <span class="math inline">\(\alpha\)</span>에서 임계값
+<span class="math display">\[\pm t_{\alpha/2,(n-1)} \quad \text{또는} \quad \pm t_{\alpha,(n-1)}\]</span></p></li>
+<li><p>양측검정에서의 기각역</p></li>
+<li><p>Reject <span class="math inline">\(H_0\)</span> if
+<span class="math display">\[T \ge t_{\alpha/2,(n-1)} \quad \text{또는} \quad T \le -t_{\alpha/2,(n-1)}\]</span></p></li>
+<li><p>단측검정에서의 기각역</p></li>
+<li><p>In right-tail test, reject <span class="math inline">\(H_0\)</span> if <span class="math display">\[T \ge t_{\alpha,(n-1)}\]</span></p></li>
+<li><p>In left-tail test, reject <span class="math inline">\(H_0\)</span> if <span class="math display">\[T \le -t_{\alpha,(n-1)}\]</span></p></li>
+</ul>
+<p><img src="ttest/f10.jpg" style="width:100.0%" /></p>
+<ul>
+<li>Suppose the "average" cholesterol level in children is <span class="math inline">\(175mg/dl\)</span> and
+the mean cholesterol level of <span class="math inline">\(10\)</span> children whose fathers died from
+heart disease is <span class="math inline">\(200ml/dl\)</span> and the sample standard deviation is
+<span class="math inline">\(50mg/dl\)</span>. Test the hypothesis that the mean cholesterol level is higher
+in this group than in the general population.</li>
+</ul>
+<ol style="list-style-type: decimal">
+<li><p>(풀이)</p></li>
+<li><p>The hypothesis:
+<span class="math inline">\(H_0 : \mu=175, \hskip5pt vs. \hskip5pt H_1 : \mu &gt; 175\)</span></p></li>
+<li><p>Significance level: <span class="math inline">\(\alpha=0.05\)</span></p></li>
+<li><p>Rejection region: <span class="math inline">\(t&gt;t_{(\alpha,n-1)}=t_{(0.05,9)}=1.833\)</span></p></li>
+<li><p>Value of test statistic: <span class="math inline">\(t_0=\frac{200-175}{50\sqrt{10}}=1.58\)</span></p></li>
+<li><p><span class="math inline">\(P\)</span>-value: <span class="math inline">\(P(t_9&gt;1.58)=0.074\)</span></p></li>
+<li><p>Conclusion: Because the value of test statistic, <span class="math inline">\(1.58\)</span> is less than
+the critical value <span class="math inline">\(1.833\)</span> or the P-value <span class="math inline">\(0.074\)</span> is greater than
+the siganificance level <span class="math inline">\(0.05\)</span>, we conclude that our results are not
+statistically significant and the null hypothesis is accepted.</p></li>
+</ol>
+<ul>
+<li></li>
+<li>새로운 항우울제의 치료 효과를 증명하기 위해 40명의 우울증 환자에게
+항우울제를 투여하였다. 1개월의 치료 뒤 측정한 우울증 점수를 통해
+항우울제의 효과를 알아보고자 한다. 이때 우울증 점수가 25점 이하이면
+항우울제가 효과가 있다고 판단한다. 항우울제가 효과가 있는지 검정하라.</li>
+</ul>
+<p><img src="ttest/ex1.jpg" style="width:85.0%" /></p>
+<blockquote>
+<p>SAS Code</p>
+</blockquote>
+<p><img src="ttest/ex2.jpg" style="width:40.0%" /></p>
+<ul>
+<li>Results - two sided test</li>
+</ul>
+<p><img src="ttest/ex3.jpg" style="width:70.0%" /></p>
+<ul>
+<li><p><span class="math inline">\(P\)</span>-value <span class="math inline">\(0.0291\)</span>은 유의수준 <span class="math inline">\(5\%\)</span>보다 작으므로 통계적으로
+유의하다. 이때 표본평균은 <span class="math inline">\(22.75\)</span>로 <span class="math inline">\(25\)</span>보다 작으므로 항우울제는
+효과가 있다고 할 수 있다.</p></li>
+<li><p>Results - one sided test</p></li>
+</ul>
+<p><img src="ttest/ex4.jpg" style="width:65.0%" /></p>
+<ul>
+<li><span class="math inline">\(P\)</span>-value <span class="math inline">\(0.0145\)</span>는 유의수준 <span class="math inline">\(5\%\)</span>보다 작으므로 귀무가설을
+기각한다. 따라서 항우울제는 효과가 있다고 할 수 있다.</li>
+</ul>
+</div>
+<div id="독립표본-t-검정" class="section level2" number="1.2">
+<h2><span class="header-section-number">1.2</span> 독립표본 <span class="math inline">\(t\)</span>-검정</h2>
+<ul>
+<li><p>확률표본 (<span class="math inline">\(X_1, X_2, \ldots , X_{n_1}\)</span>)과
+(<span class="math inline">\(Y_1, Y_2, \ldots , Y_{n_2}\)</span>)이 서로 독립인 두 정규모집단
+<span class="math inline">\(N(\mu_1, \sigma_1^2)\)</span>, <span class="math inline">\(N(\mu_2, \sigma_2^2)\)</span>으로부터 각각 표본크기
+<span class="math inline">\(n_1\)</span>과 <span class="math inline">\(n_2\)</span>만큼 추출되고, 모분산 <span class="math inline">\(\sigma_1^2\)</span>과 <span class="math inline">\(\sigma_2^2\)</span>이
+알려지지 않았을 때, 두 모평균 차 <span class="math inline">\(\mu_1 - \mu_2\)</span>에 대한 검정방법을
+독립표본 <span class="math inline">\(t\)</span>-검정(independent two-sample <span class="math inline">\(t\)</span>-test)이라고 함</p></li>
+<li><p>검정통계량은 두 모분산이 알려지지 않았지만, 두 모분산이 서로 같다고
+가정했을 경우(<span class="math inline">\(\sigma_1^2=\sigma_2^2=\sigma^2\)</span>)와 그렇지 않은
+경우(<span class="math inline">\(\sigma_1^2\ne\sigma_2^2\)</span>)로 구분하여 사용됨</p></li>
+<li><p>가설의 형태</p></li>
+<li><p>양측검정 :
+<span class="math inline">\(H_0 : \mu_1-\mu_2=d_0 \quad vs. \quad H_1 : \mu_1-\mu_2 \ne d_0\)</span></p></li>
+<li><p>단측(좌측)검정 :
+<span class="math inline">\(H_0 : \mu_1-\mu_2=d_0 \quad vs. \quad H_1 : \mu_1-\mu_2 &lt; d_0\)</span></p></li>
+<li><p>단측(우측)검정 :
+<span class="math inline">\(H_0 : \mu_1-\mu_2=d_0 \quad vs. \quad H_1 : \mu_1-\mu_2 &gt; d_0\)</span></p></li>
+<li><p>검정통계량: 두 모집단의 분산이 같은 경우
+<span class="math display">\[T=\frac{(\bar{X}-\bar{Y})-d_0}{S_p\sqrt{1/n_1+1/n_2}}\sim t_{(n_1+n_2-2)}\]</span>
+여기서 사용되는 <span class="math inline">\(S_p\)</span>는 합동표준편차
+<span class="math display">\[S_p=\sqrt{\frac{(n_1-1)S_1^2+(n_2-1)S_2^2}{n_1+n_2-2}}\]</span> 이고
+<span class="math inline">\(S_1^2\)</span>과 <span class="math inline">\(S_2^2\)</span>은 각각 크기가 <span class="math inline">\(n_1\)</span>과 <span class="math inline">\(n_2\)</span>인 표본으로부터 구한
+표본분산임</p></li>
+<li><p>검정통계량: 두 모집단의 분산이 다른 경우
+<span class="math display">\[T=\frac{(\bar{X}-\bar{Y})-d_0}{\sqrt{S_1^2/n_1+S_2^2/n_2}}\sim t_{(\nu)}\]</span>
+여기서 자유도 <span class="math inline">\(\nu\)</span>는 구간추정에서와 마찬가지로 새터스웨이트의
+자유도를 이용함
+<span class="math display">\[\nu=\frac{\left(\frac{S_1^2}{n_1}+\frac{S_2^2}{n_2} \right) ^2}{\frac{(S_1^2/n_1)^2}{n_1-1}+\frac{(S_2^2/n_2)^2}{n_2-1}}\]</span></p></li>
+<li><p>양측검정에서의 기각역</p></li>
+<li><p>Reject <span class="math inline">\(H_0\)</span> if
+<span class="math display">\[T \ge t_{\alpha/2,(d.f)} \quad \text{또는} \quad T \le -t_{\alpha/2,(d.f)}\]</span></p></li>
+<li><p>단측검정에서의 기각역</p></li>
+<li><p>In right-tail test, reject <span class="math inline">\(H_0\)</span> if <span class="math display">\[T \ge t_{\alpha,(d.f)}\]</span></p></li>
+<li><p>In left-tail test, reject <span class="math inline">\(H_0\)</span> if <span class="math display">\[T \le -t_{\alpha,(d.f)}\]</span></p></li>
+</ul>
+<p><img src="ttest/f11.jpg" style="width:90.0%" /></p>
+<ul>
+<li>Suppose a sample of eight <span class="math inline">\(35\)</span>- to <span class="math inline">\(39\)</span>-year-old nonpregnant,
+premenopausal OC users who work in a company are identified who have
+mean systolic blood pressure of <span class="math inline">\(132.86mmHG\)</span> and sample standard
+deviation of <span class="math inline">\(15.34mmHg\)</span>. A sample of twenty-one <span class="math inline">\(35\)</span>- to <span class="math inline">\(39\)</span>-year-old
+nonpregnant, premenopausal non-OC users are similarly identified who
+have mean systolic blood pressure of <span class="math inline">\(127.44mmHg\)</span> and sample standard
+deviation of <span class="math inline">\(18.23mmHg\)</span>. When the two variances are equal, assess the
+statistical significance of mean difference in blood pressure between
+the two group.</li>
+</ul>
+<ol style="list-style-type: decimal">
+<li><p>(풀이)</p></li>
+<li><p>The hypothesis:
+<span class="math inline">\(H_0 : \mu_1=\mu_2 \quad vs. \quad H_1 : \mu_1 \ne \mu_2\)</span></p></li>
+<li><p>Significance level: <span class="math inline">\(\alpha=0.05\)</span></p></li>
+<li><p>Rejection region: <span class="math inline">\(|t|&gt;t_{(\alpha/2,n-1)}=t_{(0.025,27)}=2.052\)</span></p></li>
+<li><p>Value of test statistic:</p></li>
+<li><p><span class="math inline">\(s_p^2=\frac{7(15.34)^2+20(18.23)^2}{27}=307.18\)</span></p></li>
+<li><p><span class="math inline">\(t_0=\frac{132.86-127.44}{17.527\sqrt{1/8+1/21}}=0.74\)</span></p></li>
+<li><p><span class="math inline">\(P\)</span>-value: <span class="math inline">\(2\times P(t_27&gt;0.74)=0.46\)</span></p></li>
+<li><p>Conclusion: Because the value of test statistic is
+<span class="math inline">\(-2.052&lt;0.74&lt;2.052\)</span> or the P-value <span class="math inline">\(0.46\)</span> is greater than the
+siganificance level <span class="math inline">\(0.05\)</span>, we conclude that our results are not
+statistically significant and the null hypothesis is accepted. Thus
+the mean blood pressures of the two groups of OC users and non-OC
+users do not significantly differ from each other.</p></li>
+</ol>
+<div id="두-모분산-비의-검정" class="section level3" number="1.2.1">
+<h3><span class="header-section-number">1.2.1</span> 두 모분산 비의 검정</h3>
+<ul>
+<li><p>정규분포를 따르는 상호 독립인 두 모집단 <span class="math inline">\(N(\mu_1, \sigma_1^2)\)</span>,
+<span class="math inline">\(N(\mu_2,\sigma_2^2)\)</span>으로부터의 표본크기가 <span class="math inline">\(n_1\)</span>과 <span class="math inline">\(n_2\)</span>인
+확률표본을 각각 <span class="math inline">\(X_1, \ldots, X_{n_1}\)</span>과 <span class="math inline">\(Y_1, \ldots, Y_{n_2}\)</span>라고
+할 때 이에 대한 표본분산을 각각
+<span class="math inline">\(S_1^2=\frac{1}{n_1-1}\sum_{i=1}^{n_1}(X_i-\bar{X})^2\)</span>,
+<span class="math inline">\(S_2^2=\frac{1}{n_2-1}\sum_{i=1}^{n_2}(Y_i-\bar{Y})^2\)</span>이라고 하자.</p></li>
+<li><p>그러면 <span class="math inline">\(U=(n_1-1)S_1^2/\sigma_1^2\)</span>와 <span class="math inline">\(V=(n_2-1)S_2^2/\sigma_2^2\)</span>은
+각각 자유도가 <span class="math inline">\(n_1-1\)</span>, <span class="math inline">\(n_2-1\)</span>인 <span class="math inline">\(\chi^2\)</span>분포를 따르고 <span class="math inline">\(F\)</span>분포의
+정의에 의해 다음이 성립함
+<span class="math display">\[F=\frac{U/(n_1-1)}{v/(n_2-1)}=\frac{S_1^2/\sigma_1^2}{S_2^2/\sigma_2^2}\sim F_{n_1-1,n_2-1}\]</span></p></li>
+<li><p>귀무가설을 <span class="math inline">\(H_0 : \sigma_1^2/\sigma_2^2=1\)</span>(즉,
+<span class="math inline">\(\sigma_1^2=\sigma_2^2\)</span>)이라고 정의하면 <span class="math inline">\(H_0\)</span>하에서의 검정통계량
+<span class="math inline">\(F_0\)</span>는 다음과 같음 <span class="math display">\[F_0=\frac{S_1^2}{S_2^2}\sim F_{n_1-1,n_2-1}\]</span></p></li>
+<li><p>따라서 유의수준 <span class="math inline">\(\alpha\)</span>하에서 <span class="math inline">\(\sigma_1^2\)</span>과 <span class="math inline">\(\sigma_2^2\)</span>의 동일성
+여부에 대한 가설검정 절차를 요약하면 다음과 같음</p>
+<p><img src="ttest/f18.jpg" style="width:90.0%" /></p></li>
+<li><p>두 모분산 비의 검정에서 유의수준 <span class="math inline">\(\alpha\)</span>는 우측검정의 경우는
+<span class="math inline">\(\alpha=P(F_0\ge F_{(\alpha,n_1-1,n_2-1)})\)</span>이고 좌측검정의 경우는
+<span class="math inline">\(\alpha=P(F_0\le F_{(1-\alpha,n_1-1,n_2-1)})\)</span>임</p></li>
+<li><p>여기서
+<span class="math inline">\(F_{(1-\alpha,n_1-1,n_2-1)}=(F_{(\alpha,n_2-1,n_1-1)})^{-1}\)</span>이므로
+좌측검정의 유의수준 <span class="math inline">\(\alpha\)</span>는
+<span class="math inline">\(\alpha=P(F_0\le (F_{(\alpha,n_2-1,n_1-1)})^{-1})\)</span>과 같음</p></li>
+<li><p>양측검정의 경우는
+<span class="math inline">\(\alpha=P(F_0\ge F_{(\alpha/2,n_1-1,n_2-1)}) \hskip5pt \text{또는} \hskip5pt F_0\le (F_{(\alpha/2,n_2-1,n_1-1)})^{-1}\)</span></p></li>
+<li><p><span class="math inline">\(12\)</span>세의 남아와 여아 중에서 남아 <span class="math inline">\(25\)</span>명, 여아 <span class="math inline">\(23\)</span>명을 단순무작위
+추출하여 폐활량을 조사한 결과, 남아의 분산은 <span class="math inline">\(0.145\)</span>, 여아의 분산은
+<span class="math inline">\(0.0942\)</span>였다.(남녀 폐활량은 정규분포를 따른다고 가정) 두 모집단의 분산이
+같은 지를 유의수준 <span class="math inline">\(5\%\)</span>에서 검정하라.(단, <span class="math inline">\(1\)</span>: 남아, <span class="math inline">\(2\)</span>: 여아)</p></li>
+</ul>
+<ol style="list-style-type: decimal">
+<li><p>(풀이)</p></li>
+<li><p>귀무가설과 대립가설:
+<span class="math inline">\(H_0 : \sigma_1^2=\sigma_2^2, \hskip5pt vs. \hskip5pt H_1 : \sigma_1^2\ne \sigma_2^2\)</span></p></li>
+<li><p>유의수준: <span class="math inline">\(\alpha=0.05\)</span></p></li>
+<li><p>임계값: <span class="math inline">\(F_{(0.025,24,22)}=2.3315\)</span>,
+<span class="math inline">\((F_{(0.025,22,24)})^{-1}=0.4356\)</span></p></li>
+<li><p>기각역: <span class="math inline">\(F_0\ge 2.3315\)</span> 또는 <span class="math inline">\(F_0\le 0.4356\)</span></p></li>
+<li><p>검정통계량값: <span class="math inline">\(s_1^2=0.145\)</span>, <span class="math inline">\(s_2^2=0.0942\)</span>,
+<span class="math inline">\(f_0=\frac{0.145}{0.0942}=1.5393\)</span></p></li>
+<li><p><span class="math inline">\(P\)</span>-값 계산: 검정통계량의 값 <span class="math inline">\(1.5393\)</span>은 중심에서 우측영역에
+위치하므로 <span class="math inline">\(P\)</span>-값=<span class="math inline">\(2\times P(F\ge 1.5393)=0.3219\)</span>이다.</p></li>
+<li><p><span class="math inline">\(f_0=1.5393\)</span>은 기각역에 속하지 않으므로 유의수준 <span class="math inline">\(\alpha=0.05\)</span>에서
+귀무가설 <span class="math inline">\(H_0\)</span>를 기각할 수 없다. 또한 <span class="math inline">\(P\)</span>-값<span class="math inline">\(&gt;\alpha\)</span>이므로 귀무가설
+<span class="math inline">\(H_0\)</span>를 기각할 수 없다. 따라서 유의수준 <span class="math inline">\(5\%\)</span>에서 두 모집단의 분산은
+같다고 할 수 있다.</p></li>
+</ol>
+<ul>
+<li>새로운 항우울제의 치료 효과를 증명하기 위해 <span class="math inline">\(40\)</span>명의 우울증 환자를 군당
+<span class="math inline">\(20\)</span>명씩 실험군과 대조군으로 무작위 배정하여 실험군에게는 항우울제를,
+대조군에게는 위약을 투여하였다. <span class="math inline">\(1\)</span>개월의 치료 뒤 측정한 우울증 점수를
+통해 두 군의 치료 효과의 크기를 비교하고자 한다. 두 군 사이에 우울증
+점수의 차이가 있는지 검정하라.</li>
+</ul>
+<p><img src="ttest/ex5.jpg" style="width:100.0%" /></p>
+<ul>
+<li>SAS Code</li>
+</ul>
+<p><img src="ttest/ex6.jpg" style="width:40.0%" /></p>
+<ul>
+<li>Results</li>
+</ul>
+<p><img src="ttest/ex7_1.jpg" style="width:100.0%" /></p>
+<ul>
+<li>Results</li>
+</ul>
+<p><img src="ttest/ex7_2.jpg" style="width:100.0%" /></p>
+<ul>
+<li>Results</li>
+</ul>
+<p><img src="ttest/ex7_3.jpg" style="width:70.0%" /></p>
+<p>Results</p>
+<p><img src="ttest/ex7_4.jpg" style="width:80.0%" /></p>
+</div>
+</div>
+<div id="대응표본-t-검정" class="section level2" number="1.3">
+<h2><span class="header-section-number">1.3</span> 대응표본 <span class="math inline">\(t\)</span>-검정</h2>
+<ul>
+<li><p>관측값들이 짝을 이루고 있는 표본을 대응표본(paired sample) 이라고 함</p></li>
+<li><p>예를 들어 고혈압 환자에 대한 치료제의 임상시험을 한다고 할 때 우리는
+치료제가 효과가 있는지에 관심이 있으며, 이것을 조사하기 위해서
+<span class="math inline">\(n\)</span>명의 고혈압 환자를 추출하여 동일한 환자에게서 치료제를 투여하기
+전과 투여한 후의 혈압을 측정하여 관찰하였다고 하면 투여하기 전의
+<span class="math inline">\(n\)</span>개의 관찰값과 투여한 후의 <span class="math inline">\(n\)</span>개의 관찰값은 서로 짝을 이루며
+대응되는데, 이러한 표본을 대응표본이라고 함</p></li>
+<li><p><span class="math inline">\(n\)</span>개의 짝을 이루는 대응표본의 차이, 즉 투여전과 투여 후의 혈압의
+차이를 분석하기 위해서는 관찰값들 각각의 차이 <span class="math inline">\(D_i=X_i-Y_i\)</span>를
+계산하여 단일표본으로 생각하면 됨</p></li>
+<li><p>모집단의 차이 <span class="math inline">\(\Delta\)</span>에 대한 검정은 검정통계량에 평균 <span class="math inline">\(\bar{D}\)</span>를
+사용하며, 이러한 검정법을 대응표본 <span class="math inline">\(t\)</span>-검정(paired sample
+<span class="math inline">\(t\)</span>-test)이라고 함</p></li>
+<li><p><span class="math inline">\(n\)</span>개의 차이 <span class="math inline">\(D_1,\ldots, D_n(D_i=X_i-Y_i)\)</span>이 정규모집단으로부터의
+추출된 확률표본이라 하고 모집단 차이 <span class="math inline">\(\Delta\)</span>에 대한 귀무가설이
+<span class="math inline">\(H_0 : \Delta=d_0\)</span>라고 하면 계산된 검정통계량은 다음과 같이
+주어지고, 이것은 자유도가 <span class="math inline">\(n-1\)</span>인 <span class="math inline">\(t\)</span>분포를 따름
+<span class="math display">\[T=\frac{\bar{D}-d_0}{S_d/\sqrt{n}}\sim t_{(n-1)}\]</span> 여기서
+<span class="math inline">\(S_d^2=\frac{1}{n-1}\sum_{i=1}^n(D_i-\bar{D})^2\)</span>,
+<span class="math inline">\(\bar{D}=\frac{1}{n}\sum_{i=1}^nD_i\)</span>.</p>
+<p><img src="ttest/f13.jpg" style="width:90.0%" /></p></li>
+<li><p>가설의 형태</p></li>
+<li><p>양측검정 : <span class="math inline">\(H_0 : \Delta=d_0 \quad vs. \quad H_1 : \Delta \ne d_0\)</span></p></li>
+<li><p>단측(좌측)검정 :
+<span class="math inline">\(H_0 : \Delta=d_0 \quad vs. \quad H_1 : \Delta &lt; d_0\)</span></p></li>
+<li><p>단측(우측)검정 :
+<span class="math inline">\(H_0 : \Delta=d_0 \quad vs. \quad H_1 : \Delta &gt; d_0\)</span></p></li>
+<li><p>검정통계량 <span class="math display">\[T=\frac{\bar{D}-d_0}{S_d/\sqrt{n}}\sim t_{(n-1)}\]</span></p></li>
+<li><p>유의수준 <span class="math inline">\(\alpha\)</span>에서 임계값
+<span class="math display">\[\pm t_{\alpha/2,(n-1)} \quad \text{또는} \quad \pm t_{\alpha,(n-1)}\]</span></p></li>
+<li><p>양측검정에서의 기각역</p></li>
+<li><p>Reject <span class="math inline">\(H_0\)</span> if
+<span class="math display">\[T \ge t_{\alpha/2,(n-1)} \quad \text{또는} \quad T \le -t_{\alpha/2,(n-1)}\]</span></p></li>
+<li><p>단측검정에서의 기각역</p></li>
+<li><p>In right-tail test, reject <span class="math inline">\(H_0\)</span> if <span class="math display">\[T \ge t_{\alpha,(n-1)}\]</span></p></li>
+<li><p>In left-tail test, reject <span class="math inline">\(H_0\)</span> if <span class="math display">\[T \le -t_{\alpha,(n-1)}\]</span></p></li>
+<li><p>다음 자료는 지난 <span class="math inline">\(20\)</span>일 동안에 한 극장내의 <span class="math inline">\(A\)</span>매표소와 <span class="math inline">\(B\)</span>매표소의 영화
+관람권 판매수이다. 두 매표소간의 평균 판매 수에 차이가 있는지 유의수준
+<span class="math inline">\(5\%\)</span>에서 검정하라.</p></li>
+</ul>
+<p><img src="ttest/f14.jpg" style="width:90.0%" /></p>
+<ol style="list-style-type: decimal">
+<li><p>(풀이)</p></li>
+<li><p>귀무가설과 대립가설:
+<span class="math inline">\(H_0 : \Delta=0, \hskip5pt vs. \hskip5pt H_1 : \Delta\ne 0\)</span></p></li>
+<li><p>유의수준: <span class="math inline">\(\alpha=0.05\)</span></p></li>
+<li><p>임계값: <span class="math inline">\(t_{(0.025,19)}=2.093\)</span>, <span class="math inline">\(-t_{(0.025,19)}=-2.093\)</span></p></li>
+<li><p>기각역: <span class="math inline">\(T\ge 2.093\)</span> 또는 <span class="math inline">\(T\le -2.093\)</span></p></li>
+<li><p>검정통계량값 계산: <span class="math inline">\(d_i=x_i-y_i\)</span>라면 <span class="math inline">\(\bar{d}=0.505\)</span>, <span class="math inline">\(s_d^2=0.378\)</span>,
+<span class="math inline">\(n=20\)</span>, <span class="math inline">\(t_0=\frac{0.505}{\sqrt{0.378/20}}=3.6733\)</span></p></li>
+<li><p><span class="math inline">\(t_0=3.6733\)</span>은 기각역에 속하므로 유의수준 <span class="math inline">\(\alpha=0.05\)</span>에서 귀무가설
+<span class="math inline">\(H_0\)</span>를 기각한다. 따라서 두 매표소의 판매 수에는 차이가 있다고 할 수
+있다.</p></li>
+<li><p><span class="math inline">\(P\)</span>-값 계산: <span class="math inline">\(P\)</span>-값=<span class="math inline">\(2\times P(T\ge 3.6733)=0.0016\)</span></p></li>
+<li><p>따라서 <span class="math inline">\(P\)</span>-값<span class="math inline">\(&lt;\alpha\)</span>이므로 귀무가설 <span class="math inline">\(H_0\)</span>를 기각한다.</p></li>
+</ol>
+<ul>
+<li>새로운 항우울제의 치료 효과를 증명하기 위한 연구이다. 총 <span class="math inline">\(26\)</span>명의 우울증
+환자를 대상으로 항우울제 치료전/후(Pre/Post)의 우울증 점수를 측정하였다.
+치료 전과 비교하여 새 항우울제 치료 후 우울증 점수가 유의하게
+감소하였는지 검정하라.</li>
+</ul>
+<p><img src="ttest/ex8.jpg" style="width:40.0%" /></p>
+<ul>
+<li>SAS Code</li>
+</ul>
+<p><img src="ttest/ex9.jpg" style="width:40.0%" /></p>
+<ul>
+<li>Results</li>
+</ul>
+<p><img src="ttest/ex10.jpg" style="width:60.0%" /></p>
+<!-------------------------------------->
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="index.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["rmanual.pdf", "rmanual.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
