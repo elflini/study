@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 3 비모수 검정 | Statistical Analysis</title>
+  <title>Chapter 8 성향점수(propensity score) | Statistical Analysis</title>
   <meta name="description" content="This is a Statistical Analysis" />
   <meta name="generator" content="bookdown 0.22 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 3 비모수 검정 | Statistical Analysis" />
+  <meta property="og:title" content="Chapter 8 성향점수(propensity score) | Statistical Analysis" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 3 비모수 검정 | Statistical Analysis" />
+  <meta name="twitter:title" content="Chapter 8 성향점수(propensity score) | Statistical Analysis" />
   
   <meta name="twitter:description" content="This is a Statistical Analysis" />
   
@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="anova.html"/>
-<link rel="next" href="category.html"/>
+<link rel="prev" href="survival.html"/>
+
 <script src="libs/header-attrs-2.8/header-attrs.js"></script>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -266,233 +266,535 @@
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="nonpara" class="section level1" number="3">
-<h1><span class="header-section-number">Chapter 3</span> 비모수 검정</h1>
-<ul>
-<li><p>모수적 추론(parametric inference):</p></li>
-<li><p>모집단의 분포가 정규분포를 따를 경우: 표본 추출 <span class="math inline">\(\rightarrow\)</span>
-추정량, 검정통계량의 분포 파악 <span class="math inline">\(\rightarrow\)</span> 모수의 추론</p></li>
-<li><p>모집단의 분포가 임의의 분포를 따를 경우: 대표본 추출 <span class="math inline">\(\rightarrow\)</span>
-중심극한정리 <span class="math inline">\(\rightarrow\)</span> 추정량, 검정통계량의 분포 파악
-<span class="math inline">\(\rightarrow\)</span> 모수의 추론</p></li>
-<li><p>모집단의 분포가 정규분포가 아니고 표본의 크기가 충분히 크지 않을
-경우 추론의 효율성이 낮아질 가능성이 있음</p></li>
-<li><p>모수적 방법</p>
-<ul>
-<li><p>일표본, 대응표본 : one sample t-test</p></li>
-<li><p>독립인 2집단 : two sample t-test</p></li>
-<li><p>독립인 3집단 이상 : ANOVA</p></li>
-</ul></li>
-<li><p>비모수적 추론(nonparametric inference):</p></li>
-<li><p>모집단에 대하여 분포함수의 모수형을 가정하지 않고 추론하는 방법을
-비모수적 방법(nonparametric method)이라고 함</p></li>
-<li><p>비모수적 방법에서는 ’모집단의 분포함수가 연속이다’라는 연속성
-가정이나 ’모집단의 분포함수가 연속이고 대칭이다’라는 대칭성 가정을
-많이 사용함</p></li>
-<li><p>비모수적 방법은 관측값이 어떤 분포를 따르는지에 관계없이 항상 적용할
-수 있는 분포무관(distribution-free) 방법</p></li>
-<li><p>추론을 위해 주로 관측값의 부호(sign)와 순위(rank)를 이용</p></li>
-<li><p>비모수적 방법</p>
-<ul>
-<li><p>일표본, 대응표본 : Wilcoxon signed rank test</p></li>
-<li><p>독립인 2집단 : Wilcoxon rank sum test, Mann-whitney test</p></li>
-<li><p>독립인 3집단 이상 : Kruskall-Wallis test</p></li>
-</ul></li>
-</ul>
-<div id="정규성-검정" class="section level2" number="3.1">
-<h2><span class="header-section-number">3.1</span> 정규성 검정</h2>
-<ul>
-<li><p>많은 통계적인 방법들이 자료가 정규분포임을 가정하기 때문에 자료의
-정규성을 확인하는 것이 중요함</p></li>
-<li><p>탐색적 자료분석을 통해 자료의 분포 형태를 파악하고, 평균과 중앙값이
-차이가 많이 나는지, 왜도와 첨도값이 <span class="math inline">\(-2\sim 2\)</span>사이에 위치하는지 등을
-확인</p></li>
-<li><p>일반적으로 표본크기가 <span class="math inline">\(30\)</span>을 넘는 경우 중심극한정리에 의해 모집단의
-분포에 상관없이 표본평균이 정규성을 갖는다고 가정할 수 있음</p></li>
-<li><p>하지만 표본크기가 <span class="math inline">\(10\sim 30\)</span>인 경우에는 정규성 검정을 통해 정규분포
-인지 아닌지를 파악해야 함</p></li>
-<li><p>표본크기가 <span class="math inline">\(10\)</span> 미만인 경우에는 비모수적인 통계방법을 사용</p></li>
-<li><p>정규성 검정을 위해 흔히 사용되는 검정 방법은 Kolmogorov-Smirnov
-test와 Shapiro-Wilk test를 들 수 있음</p></li>
-<li><p>가설</p></li>
-<li><p><span class="math inline">\(H_0\)</span>: 자료는 정규분포를 따른다.</p></li>
-<li><p><span class="math inline">\(H_1\)</span>: 자료는 정규분포를 따르지 않는다.</p></li>
-<li><p>검정: <span class="math inline">\(P\)</span>-value가 유의수준 <span class="math inline">\(\alpha\)</span>보다 작다면 귀무가설을 기각하여
-정규성이 만족되지 않는 것이고, <span class="math inline">\(P\)</span>-value가 유의수준 <span class="math inline">\(\alpha\)</span>보다
-크면 귀무가설이 채택되어 정규분포를 따른다고 간주</p></li>
-<li><p>정규성 검정을 위해 test 이외에도 그림을 통해 살펴보기도 함</p></li>
-<li><p>2.1 Normal Probability Plot</p></li>
-</ul>
-<p><img src="nonpara/ex1.jpg" style="width:100.0%" /></p>
-<p><img src="nonpara/ex2.jpg" style="width:100.0%" /></p>
-<ul>
-<li>Normal Probability Plot - Normal dist.</li>
-</ul>
-<p><img src="nonpara/ex3.jpg" style="width:100.0%" /></p>
-<ul>
-<li>Normal Probability Plot - Mixed Normal dist.</li>
-</ul>
-<p><img src="nonpara/ex4.jpg" style="width:100.0%" /></p>
-<ul>
-<li>Normal Probability Plot - Outlier</li>
-</ul>
-<p><img src="nonpara/ex5.jpg" style="width:100.0%" /></p>
-<ul>
-<li>Normal Probability Plot - Uniform dist.</li>
-</ul>
-<p><img src="nonpara/ex6.jpg" style="width:100.0%" /></p>
-<p>새로운 항우울제의 치료 효과를 증명하기 위해 40명의 우울증 환자에게
-항우울제를 투여하였다. 1개월의 치료 뒤 측정한 우울증 점수를 통해
-항우울제의 효과를 알아보고자 한다. 분석에 앞서 항우울제가 정규분포를
-따르는지 검정하라.</p>
-<p><img src="nonpara/ex7.jpg" style="width:85.0%" /></p>
-<p>SAS Code</p>
-<p><img src="nonpara/ex8.jpg" style="width:50.0%" /></p>
-<p><img src="nonpara/ex9.jpg" style="width:50.0%" /></p>
-<p><img src="nonpara/ex10.jpg" style="width:90.0%" /></p>
-<p><img src="nonpara/ex11.jpg" style="width:100.0%" /></p>
-<p><img src="nonpara/ex12.jpg" style="width:100.0%" /></p>
+<div id="psm" class="section level1" number="8">
+<h1><span class="header-section-number">Chapter 8</span> 성향점수(propensity score)</h1>
+<div id="observational-study" class="section level2" number="8.1">
+<h2><span class="header-section-number">8.1</span> Observational Study?</h2>
+<div id="randomized-controlled-trials-gold-standard" class="section level3 unnumbered">
+<h3>Randomized Controlled Trials ("gold standard")</h3>
+<p><img src="psm/f0.jpg" style="width:85.0%" /></p>
 </div>
-<div id="윌콕슨-부호순위-검정" class="section level2" number="3.2">
-<h2><span class="header-section-number">3.2</span> 윌콕슨 부호순위 검정</h2>
+<div id="characteristics-of-rcts" class="section level3 unnumbered">
+<h3>Characteristics of RCTs</h3>
 <ul>
-<li><p>윌콕슨 부호순위 검정(Wilcoxon signed-rank test)</p></li>
-<li><p>자료의 형태: <span class="math inline">\(X_1, X_2, \ldots, X_n\)</span>은 연속이고 대칭인 분포
-<span class="math inline">\(F(x-\theta)\)</span>에서 추출한 확률표본</p>
-<p>검정 절차 귀무가설 <span class="math inline">\(H_0 : \theta=\theta_0\)</span></p>
+<li><p>Randomization ensures subjects in both treatment groups are equally
+matched on all factors.</p></li>
+<li><p>Allow causal inference.</p></li>
+<li><p>High cost</p></li>
+<li><p>Often short duration and/or underpowered.</p></li>
+<li><p>Problems with generalizability:</p>
+<ul>
+<li><p>Treatment is "ideal" (high compliance, careful follow-up means
+that any problems may be caught early).</p></li>
+<li><p>Many people who are given the treatments in "real life" are
+excluded from the trials.</p></li>
+</ul></li>
+<li><p>Some situations cannot be randomized.</p></li>
+</ul>
+</div>
+<div id="what-is-observational-data" class="section level3 unnumbered">
+<h3>What is Observational Data?</h3>
+<p>The choice of treatment is not under the control of the researcher - the
+researcher can only ‘observe’ what treatment was given.<br />
+Examples:</p>
+<ul>
+<li><p>Data obtained using chart review</p></li>
+<li><p>Electronic medical records</p></li>
+<li><p>Survey data or health study data</p></li>
+<li><p>Administrative data</p></li>
+<li><p>Insurance claims data</p></li>
+</ul>
+</div>
+<div id="confounding-due-to-selection-bias" class="section level3 unnumbered">
+<h3>Confounding due to Selection Bias</h3>
+<p><img src="psm/f1.jpg" style="width:100.0%" /></p>
+</div>
+<div id="impact-of-selection-bias-on-analytic-inferences" class="section level3 unnumbered">
+<h3>Impact of Selection Bias on Analytic Inferences</h3>
+<p><img src="psm/f2.jpg" style="width:100.0%" /></p>
+</div>
+<div id="statistical-adjustment-for-observational-data" class="section level3 unnumbered">
+<h3>Statistical Adjustment for Observational Data</h3>
+<ul>
+<li><p>Conventional multivariate analysis<br />
+</p>
+<ul>
+<li>Multivariate regression analysis<br />
+</li>
+<li>Generalized linear model<br />
+</li>
+<li>Cox’s proportional hazards model<br />
+</li>
+<li>Conditional logistic regression<br />
+</li>
+<li>Generalize estimating equation</li>
+</ul></li>
+<li><p>Exact matching</p></li>
+<li><p>Propensity score methods</p></li>
+<li><p>And others</p></li>
+</ul>
+</div>
+<div id="addressing-selection-bias-with-exact-matching" class="section level3 unnumbered">
+<h3>Addressing Selection Bias with Exact Matching</h3>
+<ul>
+<li><p>Goal: Match patients so well that you could imagine that they were
+randomly assigned to each group.</p></li>
+<li><p>For each patient in the treatment group, find at least one untreated
+patient from the comparison group who is identical or as similar as
+possible on all baseline characteristics.</p></li>
+<li><p>By matching patients at the individual level, the treatment and
+comparison groups will be matched at the group level.</p></li>
+</ul>
+</div>
+<div id="matching-on-specific-variables" class="section level3 unnumbered">
+<h3>Matching on Specific Variables</h3>
+<p><img src="psm/f3.jpg" style="width:100.0%" /></p>
+</div>
+<div id="matching-on-specific-variables-1" class="section level3 unnumbered">
+<h3>Matching on Specific Variables</h3>
+<p><img src="psm/f4.jpg" style="width:100.0%" /></p>
+</div>
+</div>
+<div id="propensity-score" class="section level2" number="8.2">
+<h2><span class="header-section-number">8.2</span> Propensity Score?</h2>
+<ul>
+<li><p>Isn’t there an easier way?<br />
+<span class="math inline">\(\rightarrow\)</span> Propensity score methods</p></li>
+<li><p>Rosenbaum and Rubin (1983) realized the bias from covariates can be
+eliminated by controlling for a scalar-valued funtion (a "balancing
+score") calculated from the baseline covariates, i.e., the
+propensity score.</p></li>
+<li><p>The propensity score is a way of summarizing the information in all
+the prognostic variables.</p></li>
+<li><p>Create a single composite score of all observed, measured potential
+confounders of the association between treatment and outcome</p></li>
+<li><p>Propensity score is the conditional probability of treatment given
+the observed covariates <span class="math inline">\(X\)</span> <span class="math display">\[PS = P(Z=1 | X)\]</span></p></li>
+<li><p>Match or weight on this one-dimensional score alone.</p></li>
+<li><p>Do this without knowledge of the outcome variable</p></li>
+<li><p>Propensity score assumption</p></li>
+<li><p>Given a set of covariates:<br />
+</p>
+<ul>
+<li>Treatment assignment and outcome are independent<br />
+</li>
+<li>Everyone has a nonzero chance of receiving the treatment</li>
+</ul></li>
+<li><p>Propensity scores can:<br />
+</p>
+<ul>
+<li>Help find matches from comparison group so that <strong>measured</strong>
+confounders are equally distributed between treatment <span class="math inline">\(\&amp;\)</span>
+comparison groups<br />
+</li>
+<li>Improve precision of treatment effect estimates</li>
+</ul></li>
+<li><p>Propensity scores cannot:<br />
+</p>
+<ul>
+<li>Account for <strong>unmeasured</strong> and <strong>unmeasurable</strong> confounders</li>
+</ul></li>
+</ul>
+<div id="general-procedure" class="section level3 unnumbered">
+<h3>General Procedure</h3>
 <ol style="list-style-type: decimal">
-<li><p><span class="math inline">\(Z_i = X_i - \theta_0, \quad i=1, 2, \ldots, n\)</span> 자료로부터
-귀무가설하의 <span class="math inline">\(\theta_0\)</span>값을 뺀다</p></li>
-<li><p>절대값 <span class="math inline">\(|Z_i|\)</span>를 취하고 이에 해당하는 순위를 <span class="math inline">\(R_i\)</span>라 하자.</p></li>
-<li><p>윌콕슨 부호순위 통계량 <span class="math inline">\(V=\sum_{i=1}^n \psi_iR_i\)</span>, 여기서
-<span class="math inline">\(Z_i &gt;0\)</span>이면 <span class="math inline">\(\psi_i=1\)</span>, 아니면 <span class="math inline">\(\psi_i=0\)</span>이다.</p></li>
-<li><p>유의수준 <span class="math inline">\(\alpha\)</span>에서 <span class="math display">\[\begin{cases}
-            H_1: \theta&gt;\theta_0\text{일 때} \hskip3pt V \ge v(\alpha, n) \text{이면} \hskip3pt H_0 \hskip3pt \text{기각} \\
-                        H_1: \theta&lt;\theta_0\text{일 때} \hskip3pt V &lt; v(\alpha, n) \text{이면} \hskip3pt H_0 \hskip3pt \text{기각} \\
-                                    H_1: \theta \ne \theta_0\text{일 때} \hskip3pt V \ge v(\alpha/2, n)\hskip3pt \text{또는}\hskip3pt V &lt; v(1-\alpha/2, n) \text{이면} \hskip3pt H_0 \hskip3pt \text{기각} 
-        \end{cases}\]</span></p></li>
-<li><p>여기서 <span class="math inline">\(v(\alpha,n)\)</span>는 <span class="math inline">\(H_0\)</span>하에서 부호순위 통계량 <span class="math inline">\(V\)</span>의 분포의
-상위 <span class="math inline">\(100\alpha\%\)</span> 백분위수를 나타냄</p></li>
-</ol></li>
-<li><p>검정통계량의 의미</p>
+<li><p>Choose variables to include in propensity score</p></li>
+<li><p>Ensure that propensity score is balanced across treatment and
+comparison groups</p></li>
+<li><p>Ensure that covariates are balanced across treatment and comparison
+groups within blocks of the propensity score</p></li>
+<li><p>Choose a matching or weighting strategy</p></li>
+<li><p>Ensure that covariates are balanced across treatment and comparison
+groups in sample matched or weighted by propensity score</p></li>
+<li><p>Proceed with analyses based on sample matched or weighted by
+propensity score</p></li>
+</ol>
+</div>
+<div id="choosing-variables-for-propensity-scores" class="section level3 unnumbered">
+<h3>Choosing Variables for Propensity Scores</h3>
 <ul>
-<li><p>윌콕슨 부호순위 검정법은 자료의 절대값에 대해서 제일 작은
-값에서부터 제일 큰 값까지 순위를 매긴 후에 양수값을 갖는 자료의
-순위 합을 통계량으로 함</p></li>
-<li><p>원자료를 사용하지 않고 순위를 사용함으로써 비정규분포의 특성을
-제거할 수가 있음</p></li>
-<li><p>표본의 개수가 <span class="math inline">\(n\)</span>일 때, 통계량 <span class="math inline">\(V\)</span>는 <span class="math inline">\(H_0\)</span> 하에서 최소 <span class="math inline">\(0\)</span>부터
-최대 <span class="math inline">\(n(n+1)/2\)</span>의 값을 가질 수 있는데, 이 값은 각각 모든 자료가
-<span class="math inline">\(\theta_0\)</span>보다 작은 경우와, 모든 자료가 <span class="math inline">\(\theta_0\)</span>보다 큰 경우일
-때의 값</p></li>
-<li><p>표본크기 <span class="math inline">\(n\)</span>만 주어지면 <span class="math inline">\(V\)</span>의 확률분포를 알 수 있음</p></li>
+<li>Include:<br />
+
+<ul>
+<li>Theoretically related to treatment and outcome<br />
+</li>
+<li>Available <span class="math inline">\(\&amp;\)</span> easy/reliable to collect on everyone<br />
+</li>
+<li>Correlated with unmeasured confounders<br />
+</li>
 </ul></li>
-<li><p>검정통계량의 대표본근사</p>
+<li>Do not include:<br />
+
 <ul>
-<li><p>표본크기 <span class="math inline">\(n\)</span>이 충분히 큰 경우에는 순위합의 분포가
-대표본근사이론(large sample asymptotic theory)에 의해 정규분포로
-근사</p></li>
-<li><p><span class="math inline">\(V\)</span>의 평균은 귀무가설하에서 <span class="math inline">\(E(V)=n(n+1)/4\)</span>, 분산은
-<span class="math inline">\(Var(V)=n(n+1)(2n+1)/24\)</span>임. 따라서,
-<span class="math display">\[Z_V=\frac{V-E(V)}{\sqrt{Var(V)}} \sim N(0,1)\]</span></p></li>
+<li>Variables hypothesized to be associated with treatment but not
+with outcome<br />
+</li>
+<li>Variables that may be affected by the treatment<br />
+</li>
+<li>Variables that predict treatment status perfectly</li>
 </ul></li>
 </ul>
-<p><img src="nonpara/ex13.jpg" style="width:80.0%" /></p>
-<p>다음은 새로운 항우울제의 치료 효과를 증명하기 위한 예비 연구이다. 총
-8명의 우울증 환자를 대상으로 항우울제 치료 전/후(Pre/Post)의 우울증
-점수를 측정하였다. 치료 전과 비교하여 새 항우울제 치료 후 우울증 점수가
-유의하게 감소하였는지 검정하라.</p>
-<p><img src="nonpara/ex16.jpg" style="width:40.0%" /></p>
-<p>SAS Code</p>
-<p><img src="nonpara/ex17.jpg" style="width:50.0%" /></p>
-<p><img src="nonpara/ex18.jpg" style="width:80.0%" /></p>
 </div>
-<div id="윌콕슨-순위합-검정" class="section level2" number="3.3">
-<h2><span class="header-section-number">3.3</span> 윌콕슨 순위합 검정</h2>
+<div id="calculate-propensity-score" class="section level3 unnumbered">
+<h3>Calculate Propensity Score</h3>
 <ul>
-<li><p>윌콕슨 순위합 검정(Wilcoxon rank sum test)</p></li>
-<li><p>자료의 형태: <span class="math inline">\(X_1, X_2, \ldots, X_m\)</span>은 연속분포 <span class="math inline">\(F(x)\)</span>에서 추출한
-확률표본</p></li>
-<li><p><span class="math inline">\(Y_1, Y_2, \ldots, Y_n\)</span>은 연속분포 <span class="math inline">\(F(x-\Delta)\)</span>에서 추출한 확률표본</p>
-<p>검정 절차 귀무가설 <span class="math inline">\(H_0 : \Delta=\theta_0\)</span></p>
+<li>Maximum likelihood estimation<br />
+
+<ul>
+<li>Logistic regression<br />
+</li>
+<li>Probit regression<br />
+</li>
+<li>Discriminant analysis<br />
+</li>
+</ul></li>
+<li>Generalized boosting methods<br />
+
+<ul>
+<li>Classification and regression trees (CART)<br />
+</li>
+<li>Neural networks</li>
+</ul></li>
+<li>Generalized method of moments (covariate balancing propensity score
+(CBPS))</li>
+</ul>
+</div>
+<div id="initial-checks-balance-across-groups" class="section level3 unnumbered">
+<h3>Initial Checks: Balance across Groups</h3>
+<p><img src="psm/f5.jpg" style="width:100.0%" /></p>
+</div>
+<div id="check-balance-of-covariates" class="section level3 unnumbered">
+<h3>Check Balance of Covariates</h3>
+<ul>
+<li><p>Ideally, for each unique value of the propensity score, the
+distribution of <span class="math inline">\(X\)</span> (composite of all covariates) is the same for
+the treatment and comparison groups.</p></li>
+<li><p>This is practically impossible, so we check the balance of each
+observed covariate within blocks of the propensity score.</p></li>
+<li><p>Some imbalance between the groups is usually expected.</p></li>
+<li><p>Focus on balance of covariates that are more theoretically
+important.</p></li>
+<li><p>Consider interactions/correlations between covariates.</p></li>
+<li><p>Drop 1 or 2 covariates that are less important.</p></li>
+<li><p>Re-categorize variables.</p></li>
+<li><p>Include higher order terms or splines of variables.</p></li>
+</ul>
+</div>
+<div id="assess-balance-with-standardized-differences" class="section level3 unnumbered">
+<h3>Assess Balance with Standardized Differences</h3>
+<ul>
+<li><p>Account for means and variances</p></li>
+<li><p>Not sensitive to sample size</p></li>
+<li><p>Do not use statistical test such as t-test.</p></li>
+</ul>
+<p><img src="psm/f6.jpg" style="width:100.0%" /></p>
+</div>
+<div id="balance-of-covariates-caution" class="section level3 unnumbered">
+<h3>Balance of Covariates: Caution</h3>
+<ul>
+<li><p>Propensity scores only balance measured confounders.</p></li>
+<li><p>Balance in measured variables does not indicate balance in
+unmeasured variables.</p></li>
+<li><p>Unmeasured confounders will bias treatment effect estimates.</p></li>
+<li><p>Do not use c-statistics, area under the curve, or any other model
+fit statistics to measure propensity score performance.<br />
+</p>
+<ul>
+<li>They do not measure reduction in confounding.</li>
+</ul></li>
+</ul>
+</div>
+<div id="matching-and-weighting-strategies" class="section level3 unnumbered">
+<h3>Matching and Weighting Strategies</h3>
+<p><img src="psm/f7.jpg" style="width:100.0%" /></p>
+</div>
+<div id="choices-when-matching-sample-by-propensity-score" class="section level3 unnumbered">
+<h3>Choices When Matching Sample by Propensity Score</h3>
+<ul>
+<li><p>How close of a match is acceptable?</p></li>
+<li><p>Should every treated individual have one or many matches in the
+comparison group?</p></li>
+<li><p>Should treated individuals be matched with or without replacement?</p></li>
+<li><p>Should matching be greedy or optimal?</p></li>
+</ul>
+</div>
+<div id="which-strategy-to-chooose" class="section level3 unnumbered">
+<h3>Which Strategy to Chooose?</h3>
+<ul>
+<li><p>No best method</p></li>
+<li><p>Without examining outcome, evaluate covariate balance in several
+strategies.</p></li>
+<li><p>Choose the method that has the best balance and still meets the
+analytic goal.</p></li>
+</ul>
+</div>
+<div id="evaluate-balance-in-sample-matched-or-weighted" class="section level3 unnumbered">
+<h3>Evaluate Balance in Sample Matched or Weighted</h3>
+<ul>
+<li><p>Standardized differences</p></li>
+<li><p>Graphs<br />
+</p>
+<ul>
+<li>Quantile-quantile plots<br />
+</li>
+<li>Plots of covariates in treated and comparison groups</li>
+</ul></li>
+<li><p>Ratios of variance</p></li>
+</ul>
+</div>
+<div id="visualization-of-standardized-differences" class="section level3 unnumbered">
+<h3>Visualization of Standardized Differences</h3>
+<p><img src="psm/f8.jpg" style="width:90.0%" /></p>
+</div>
+<div id="plots-of-covariates-between-groups" class="section level3 unnumbered">
+<h3>Plots of Covariates between Groups</h3>
+<ul>
+<li><p>Plot density of weighted continuous covariate in treated group
+against density in comparison group</p></li>
+<li><p>Subjective comparison</p></li>
+</ul>
+<p><img src="psm/f9.jpg" style="width:60.0%" /></p>
+</div>
+</div>
+<div id="propensity-score-methods" class="section level2" number="8.3">
+<h2><span class="header-section-number">8.3</span> Propensity Score Methods</h2>
+<div id="propensity-score-matching" class="section level3" number="8.3.1">
+<h3><span class="header-section-number">8.3.1</span> Propensity Score Matching</h3>
 <ol style="list-style-type: decimal">
-<li><p><span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>의 혼합표본에서 <span class="math inline">\(Y_j\)</span>의 순위를 <span class="math inline">\(R_j\)</span>라 하자.</p></li>
-<li><p>윌콕슨 순위합 통계량 <span class="math inline">\(V=\sum_{i=1}^n R_j\)</span></p></li>
-<li><p>유의수준 <span class="math inline">\(\alpha\)</span>에서 <span class="math display">\[\begin{cases}
-                H_1: \Delta&gt;\theta_0\text{일 때} \hskip3pt V \ge v(\alpha, m,n) \text{이면} \hskip3pt H_0 \hskip3pt \text{기각} \\
-                H_1: \Delta&lt;\theta_0\text{일 때} \hskip3pt V &lt; v(\alpha,m, n) \text{이면} \hskip3pt H_0 \hskip3pt \text{기각} \\
-                H_1: \Delta \ne \theta_0\text{일 때} \hskip3pt V \ge v(\alpha/2,m, n)\hskip3pt \text{또는}\hskip3pt V &lt; v(1-\alpha/2,m, n) \text{이면} \hskip3pt H_0 \hskip3pt \text{기각} 
-                \end{cases}\]</span></p></li>
-<li><p>여기서 <span class="math inline">\(v(\alpha,m,n)\)</span>는 <span class="math inline">\(H_0\)</span>하에서 부호순위 통계량 <span class="math inline">\(V\)</span>의
-분포의 상위 <span class="math inline">\(100\alpha\%\)</span> 백분위수를 나타냄</p></li>
-</ol></li>
-<li><p>검정통계량의 의미</p>
+<li><p>Create a matched sample based on logit(PS)</p></li>
+<li><p>Assess balance between treated and untreated subjects in the matched
+sample.<br />
+</p>
 <ul>
-<li><p>윌콕슨 순위합 검정법은 두 그룹의 자료 <span class="math inline">\(X, Y\)</span>를 섞은 혼합표본에서
-순위를 매기고, 한 그룹 <span class="math inline">\(Y\)</span>의 순위합 만을 구함</p></li>
-<li><p>이 값이 크면 그룹 <span class="math inline">\(Y\)</span>의 자료는 자연스럽게 그룹 <span class="math inline">\(X\)</span>의 자료보다
-대체적으로 큰 값을 가진다고 볼 수 있음</p></li>
-<li><p><span class="math inline">\(t\)</span>-test와 같이 대조군과 처리군의 평균의 차이가 있는지를
-검정하는 것과 같은 개념으로 생각할 수 있음</p></li>
-<li><p>맨-휘트니 검정(Mann-Whitney test)의 검정통계량
-<span class="math inline">\(U=mn+m(m+1)/2-V\)</span>로써 윌콕슨 순위합 검정과 동치의 관계를 가짐</p></li>
+<li>The test of a good propensity score model is how well it balances
+the measured variables between treated and untreated subjects.</li>
 </ul></li>
-<li><p>검정통계량의 대표본근사</p>
-<ul>
-<li><p>표본크기 <span class="math inline">\(m, n\)</span>이 충분히 큰 경우에 통계량 <span class="math inline">\(V\)</span>는 정규근사 가능</p></li>
-<li><p><span class="math inline">\(V\)</span>의 평균은 귀무가설하에서 <span class="math inline">\(E(V)=n(m+n+1)/4\)</span>, 분산은
-<span class="math inline">\(Var(V)=mn(m+n+1)/12\)</span>임. 따라서,
-<span class="math display">\[Z_V=\frac{V-E(V)}{\sqrt{Var(V)}} \sim N(0,1)\]</span></p></li>
-</ul></li>
-</ul>
-<p><img src="nonpara/ex14.jpg" style="width:80.0%" /></p>
-<p>다음은 새로운 항우울제의 치료 효과를 비교하기 위한 예비 연구이다. 실험군
-5명, 대조군 4명에게 각각 새 항우울제와 위약을 투여한 뒤 1개월 뒤 우울증
-점수를 측정하여 두 군의 치료 효과를 비교하고자 한다. 새 항우울제가
-위약에 비해 효과가 있는지 검정하라.</p>
-<p><img src="nonpara/ex19.jpg" style="width:70.0%" /></p>
-<p>SAS Code</p>
-<p><img src="nonpara/ex20.jpg" style="width:50.0%" /></p>
-<p><img src="nonpara/ex21.jpg" style="width:70.0%" /></p>
-<p><img src="nonpara/ex22.jpg" style="width:70.0%" /></p>
-<p><img src="nonpara/ex23.jpg" style="width:55.0%" /></p>
+<li><p>For unbalanced variables, add interactions or higher order terms to
+the propensity score logistic regression, recalculate the propensity
+score and repeat the process.</p></li>
+</ol>
 </div>
-<div id="크루스칼-왈리스-검정" class="section level2" number="3.4">
-<h2><span class="header-section-number">3.4</span> 크루스칼-왈리스 검정</h2>
+<div id="general-procedure-for-propensity-score-matching" class="section level3 unnumbered">
+<h3>General Procedure for Propensity Score Matching</h3>
+<p><img src="psm/f10.jpg" style="width:100.0%" /></p>
+</div>
+<div id="greedy-matching" class="section level3 unnumbered">
+<h3>Greedy Matching</h3>
 <ul>
-<li><ol start="5" style="list-style-type: decimal">
-<li>크루스칼-왈리스 검정(Kruskall-Wallis test)</li>
-</ol></li>
-<li><p>귀무가설과 대립가설</p></li>
-<li><p><span class="math inline">\(H_0 : k\)</span>개의 모집단의 평균이 같다.</p></li>
-<li><p><span class="math inline">\(H_1 :\)</span> 적어도 하나의 집단은 평균이 같지 않다.</p></li>
-<li><p>자료의 구조</p>
-<p><img src="nonpara/f1.jpg" style="width:60.0%" /></p></li>
-<li><p><span class="math inline">\(k\)</span>개의 모집단에서 얻은 <span class="math inline">\(n=\sum_i n_i\)</span>개의 자료에 대한 혼합표본을
-만든 다음 오름차순으로 순위를 부여</p></li>
-<li><p>혼합표본의 순위</p>
-<p><img src="nonpara/f2.jpg" style="width:70.0%" /></p></li>
-<li><p><span class="math inline">\(R_{ij}\)</span>는 <span class="math inline">\(X_{ij}\)</span>에 대응하는 순위</p></li>
-<li><p>혼합표본의 총 평균순위
-<span class="math display">\[\bar{R}=\frac{1+2+\cdots +n}{n}=\frac{n+1}{2}, \quad n=\sum_{i=1}^k n_i\]</span></p></li>
-<li><p><span class="math inline">\(H_0\)</span>가 참일 때 각 집단의 평균순위 <span class="math inline">\(\bar{R}_i\)</span>는 <span class="math inline">\(\bar{R}\)</span>과 큰
-차이가 없을 것으로 기대</p></li>
-<li><p>검정통계량
-<span class="math display">\[H=\frac{12}{n(n+1)}\sum_{i=1}^nn_i(\bar{R}_i -\bar{R})^2 \sim \chi^2(k-1)\]</span></p></li>
-<li><p>기각역 <span class="math display">\[H \ge \chi^2 (k-1; \alpha)\]</span></p></li>
+<li><p>Nearest neighbor: <span class="math inline">\(C(P_i)=min_j |P_i-P_j|, \,\,\, j\in I_0\)</span><br />
+</p>
+<ul>
+<li>The nonparticipant with the value of <span class="math inline">\(P_j\)</span> that is closest to
+<span class="math inline">\(P_i\)</span> is selected as the match.</li>
+</ul></li>
+<li><p>Caliper: A variation of nearest neighbor: A match for persion <span class="math inline">\(i\)</span> is
+selected only if <span class="math inline">\(|P_i-P_j|&lt;\epsilon, \,\,\, j\in I_0\)</span> where
+<span class="math inline">\(\epsilon\)</span> is a pre-specified tolerance. Recommended caliper size:
+<span class="math inline">\(0.25\sigma_p\)</span>.</p></li>
+<li><p>1-to-1 Nearest neighbor within caliper (common practice)</p></li>
+<li><p>1-to-n Nearest neighbor within caliper</p></li>
 </ul>
-<p><img src="nonpara/ex15.jpg" style="width:80.0%" /></p>
-<p>다음은 서로 다른 항우울제의 치료 효과를 비교하기 위한 연구이다. A군,
-B군, C군에 우울증 환자를 <span class="math inline">\(6\)</span>명씩 무작위로 배정하고 각각 A약, B약, C약을
-2개월씩 투여한 뒤 우울증 점수를 측정하였다. 이 세가지 약의 치료 효과에
-차이가 있는지 통계적으로 검정하라.</p>
-<p><img src="nonpara/ex24.jpg" style="width:100.0%" /></p>
-<p>SAS Code</p>
-<p><img src="nonpara/ex25.jpg" style="width:45.0%" /></p>
-<p><img src="nonpara/ex26.jpg" style="width:70.0%" /></p>
-<p><img src="nonpara/ex27.jpg" style="width:60.0%" /></p>
+</div>
+<div id="mahalanobis-metric-matching" class="section level3 unnumbered">
+<h3>Mahalanobis Metric Matching</h3>
+<ul>
+<li><p>Mahalanobis without PS: Randomly ordering subjects, calculate the
+distance between the first participant and all nonparticipants. The
+distance, <span class="math inline">\(d(i,j)\)</span> can be defined by the Mahalanobis distance
+<span class="math display">\[d(i,j)=(u-v)^TC^{-1}(u-v)\]</span> where <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> are values of the
+matching variables for participant <span class="math inline">\(i\)</span> and nonparticipant <span class="math inline">\(j\)</span>, and
+<span class="math inline">\(C\)</span> is the sample covariance matrix of the matching variables from
+the full set of nonparticipants.</p></li>
+<li><p>Mahalanobis metric matching with PS added (to <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span>).</p></li>
+<li><p>Nearest available Mahalanobis metric matching within calipers
+defined by the prepensity score.</p></li>
+</ul>
+</div>
+<div id="stratification-using-propensity-score" class="section level3" number="8.3.2">
+<h3><span class="header-section-number">8.3.2</span> Stratification using Propensity Score</h3>
+<ul>
+<li><p>PS stratification splits the dataset into several strata on the
+basis of the individual’s PS alone, without reference to treatment
+(exposure) group.</p></li>
+<li><p>A treatment effect is then estimated within each stratum, and an
+overall estimated treatment effect is calculated by taking a
+(weighted) average across strata.</p></li>
+<li><p>Equal number of individuals in each stratum (5 or 10 strata).</p></li>
+<li><p>Alternatively, split the range of possible PS into equal parts -
+fewer individuals in the more extreme strata.</p></li>
+<li><p>Advantage: potential heterogeneity of "treatment" effects across
+strata.</p></li>
+</ul>
+</div>
+<div id="inverse-probability-of-treatment-weighting" class="section level3" number="8.3.3">
+<h3><span class="header-section-number">8.3.3</span> Inverse Probability of Treatment Weighting</h3>
+<ul>
+<li><p>Uses the whole dataset but reweights individuals to increase the
+weights of those who received unexpected exposures.</p></li>
+<li><p>This procedure can be thought of as producing additional
+observations for those parts of the target population from which
+there were few observations.</p></li>
+<li><p>It effectively generates a pseudopopulation with near-perfect
+covariate balance between treatment groups.</p></li>
+<li><p>Propensity score close to 0 (for the treated) or 1 (for the control)
+may be problematic for IPTW - trimming or truncating large weights.</p></li>
+<li><p>The weights:<br />
+<span class="math display">\[W = \frac{Z}{PS} + \frac{1-Z}{1-PS}\]</span> where <span class="math inline">\(Z=1\)</span> for the
+treatment group and 0 for the control group.<br />
+</p></li>
+<li><p>Treatment group:<br />
+<span class="math display">\[W = \frac{1}{PS}\]</span> weight = 1/(probability of receiving
+treatment)<br />
+</p></li>
+<li><p>Control group:<br />
+<span class="math display">\[W = \frac{1}{1-PS}\]</span> weight = 1/(1-probability of receiving
+treatment)</p></li>
+</ul>
+</div>
+<div id="propensity-score-adjustment-as-covariate" class="section level3" number="8.3.4">
+<h3><span class="header-section-number">8.3.4</span> Propensity Score Adjustment as Covariate</h3>
+<ul>
+<li><p>Including the PS as an additional covariate in the regression model.</p></li>
+<li><p>Alternatively, one could have only the PS and treatment in a model
+of the outcome of interest.</p></li>
+<li><p>Showed excellent agreement across all PS methods and covariate
+adjustment.</p></li>
+</ul>
+<p><img src="psm/f11.jpg" style="width:60.0%" /></p>
+<ul>
+<li><p>Covariate adjustment, matching, IPTW, and use of the PS as a
+covariate all showed similar results.</p></li>
+<li><p>Stratification showed a wider CI with 5 strata and an unstable
+results with 10 strata.</p></li>
+</ul>
+<p><img src="psm/f12.jpg" style="width:50.0%" /></p>
+<ul>
+<li><p>Different PS methods and covariate adjustment mostly produced
+similar results.</p></li>
+<li><p>IPTW: smaller treatment effect with a wider CI - trimming,
+truncating, doubly robust</p></li>
+</ul>
+<p><img src="psm/f13.jpg" style="width:50.0%" /></p>
+<ul>
+<li>Showed substantial disagreement between the methods, although the
+results were nonsignificant for almost all methods.</li>
+</ul>
+<p><img src="psm/f14.jpg" style="width:50.0%" /></p>
+<ul>
+<li><p>PS matching appears to be a reliable method, in that it provides
+excellent covariate balance in most circumstances.</p></li>
+<li><p>PS stratification tends to work well when covariate imbalance is not
+very marked.</p></li>
+<li><p>Inverse probability weighting offers a conceptually simple method
+that is easy to implement in practice and retains all study
+participants.</p></li>
+<li><p>Covariate adjustment is the conventional method for correcting for
+covariate imbalance, selection bias, and potential confounding and
+provided reliable and statistically efficient estimates. Adding the
+PS as an additional covariate produces results very similar to
+covariate adjustment.</p></li>
+</ul>
+</div>
+<div id="property-of-propensity-score" class="section level3" number="8.3.5">
+<h3><span class="header-section-number">8.3.5</span> Property of Propensity Score</h3>
+<ul>
+<li><p>Available data is probably missing key covariates (e.g., living
+arrangements, smoling history)</p></li>
+<li><p>Definition of the baseline time may be difficult (it suhould be the
+time at which the decision about treatment was made).</p></li>
+<li><p>Reduced dimensionality of covariates (important for rare outcomes)</p></li>
+<li><p>Can demonstrate that the two groups are similar on all measured
+covariates</p></li>
+</ul>
+</div>
+<div id="property-of-observational-studies" class="section level3 unnumbered">
+<h3>Property of Observational Studies</h3>
+<ul>
+<li><p>Researcher has no control over assignment of subjects to treatments.</p></li>
+<li><p>Researcher often has no control over what covariates are available,
+their definitions, or the quality of their measurement.</p></li>
+<li><p>Useful when it is not feasible to use an RCT<br />
+</p>
+<ul>
+<li>Unethical to withhold treatment<br />
+</li>
+<li>Exposure believed to be harmful<br />
+</li>
+<li>Patients will not agree to be randomized<br />
+</li>
+<li>RCT too expensive</li>
+</ul></li>
+<li><p>Generalizable (all patients, all providers)</p></li>
+<li><p>Allows studies of rare events, and studies with long follow-up times</p></li>
+</ul>
+</div>
+</div>
+<div id="practice---sas" class="section level2" number="8.4">
+<h2><span class="header-section-number">8.4</span> Practice - SAS</h2>
+<div id="greedy-nearest-neighbor-matching" class="section level3" number="8.4.1">
+<h3><span class="header-section-number">8.4.1</span> Greedy Nearest Neighbor Matching</h3>
+<pre><code>ods graphics on;\
+proc psmatch data=bb.School region=treated;\
+class Music Gender;\
+psmodel Music(Treated=&#39;Yes&#39;)= Gender Absence;\
+match method=greedy(k=2) caliper=0.25;\
+assess ps var=(Gender Absence) / plots=all weight=none;\
+output out(obs=match)=matchdata matchid=MatchID;\
+run;\
+
+proc sort data=matchdata;\
+by matchid;\
+run;</code></pre>
+<p>Examples: PSMATCH Procedure<br />
+"<a href="https://documentation.sas.com/?docsetId=statug&amp;docsetVersion=14.2\" class="uri">https://documentation.sas.com/?docsetId=statug&amp;docsetVersion=14.2\</a>
+&amp;docsetTarget=statug_psmatch_examples.htm&amp;locale=ko"</p>
+<p><img src="psm/p1.jpg" style="width:80.0%" /></p>
+</div>
+<div id="propensity-score-stratification" class="section level3" number="8.4.2">
+<h3><span class="header-section-number">8.4.2</span> Propensity Score Stratification</h3>
+<pre><code>proc psmatch data=bb.drugs region=allobs;\
+class Drug Gender;\
+psmodel Drug(Treated=&#39;Drug\_X&#39;)= Gender Age Bmi;\
+strata nstrata=5;\
+assess ps var=(Gender Age Bmi) / varinfo plots=(boxplot barchart);\
+output out(obs=all)=OutEx2;\
+run;</code></pre>
+<p><img src="psm/p2.jpg" style="width:80.0%" /></p>
+</div>
+<div id="inverse-probability-treatment-weighting" class="section level3" number="8.4.3">
+<h3><span class="header-section-number">8.4.3</span> Inverse Probability Treatment Weighting</h3>
+<pre><code>proc psmatch data=bb.drugs region=allobs;\
+class Drug Gender;\
+psmodel Drug(Treated=&#39;Drug\_X&#39;)= Gender Age Bmi;\
+assess lps var=(Gender Age Bmi) / varinfo plots=(boxplot barchart)
+weight=atewgt;\
+output out(obs=all)=OutEx1 atewgt=atewgt;\
+run;</code></pre>
+<p><img src="psm/p3.jpg" style="width:80.0%" /></p>
+</div>
+<div id="matching-with-existing-propensity-scores" class="section level3" number="8.4.4">
+<h3><span class="header-section-number">8.4.4</span> Matching with Existing propensity scores</h3>
+<pre><code>ods select none;\
+proc logistic data=bb.drugs;\
+class Drug Gender;\
+model Drug(Event=&#39;Drug\_X&#39;)= Gender Age Bmi / link=cloglog;\
+output out=drug1 p=pscore;\
+run;\</code></pre>
+<pre><code>ods select all;\
+proc psmatch data=Drug1 region=cs;\
+class Drug Gender;\
+psdata treatvar=Drug(Treated=&#39;Drug\_X&#39;) ps=pscore;\
+match method=optimal(k=1) exact=Gender stat=lps caliper=0.5;\
+assess lps var=(Gender Age Bmi) / weight=none;\
+output out(obs=match)=OutEx7 lps=\_Lps matchid=\_MatchID;\
+run;</code></pre>
+</div>
+<div id="matching-with-existing-propensity-scores-1" class="section level3" number="8.4.5">
+<h3><span class="header-section-number">8.4.5</span> Matching with Existing propensity scores</h3>
+<p><img src="psm/p4.jpg" style="width:80.0%" /></p>
 <!-------------------------------------->
 
+</div>
 </div>
 </div>
             </section>
@@ -500,8 +802,8 @@ B군, C군에 우울증 환자를 <span class="math inline">\(6\)</span>명씩 �
           </div>
         </div>
       </div>
-<a href="anova.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="category.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="survival.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
