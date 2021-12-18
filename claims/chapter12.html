@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 4 데이터프레임의 활용 | Insurance Claims Data Analysis with R</title>
+  <title>Chapter 12 예제1 | Insurance Claims Data Analysis with R</title>
   <meta name="description" content="This is a R manual for analysis of insurance claims data" />
   <meta name="generator" content="bookdown 0.22 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 4 데이터프레임의 활용 | Insurance Claims Data Analysis with R" />
+  <meta property="og:title" content="Chapter 12 예제1 | Insurance Claims Data Analysis with R" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 4 데이터프레임의 활용 | Insurance Claims Data Analysis with R" />
+  <meta name="twitter:title" content="Chapter 12 예제1 | Insurance Claims Data Analysis with R" />
   
   <meta name="twitter:description" content="This is a R manual for analysis of insurance claims data" />
   
@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="chapter3.html"/>
-<link rel="next" href="chapter5.html"/>
+<link rel="prev" href="chapter11.html"/>
+
 <script src="libs/header-attrs-2.8/header-attrs.js"></script>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -305,235 +305,328 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="chapter4" class="section level1" number="4">
-<h1><span class="header-section-number">Chapter 4</span> 데이터프레임의 활용</h1>
-<div id="데이터-프레임" class="section level2" number="4.1">
-<h2><span class="header-section-number">4.1</span> 데이터 프레임</h2>
+<div id="chapter12" class="section level1" number="12">
+<h1><span class="header-section-number">Chapter 12</span> 예제1</h1>
+<p>공단자료와 필요 패키지 불러오기</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="chapter12.html#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">&quot;claim.RData&quot;</span>)</span>
+<span id="cb1-2"><a href="chapter12.html#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-3"><a href="chapter12.html#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate) <span class="co"># 날짜 함수</span></span></code></pre></div>
+<div id="연구-설계" class="section level2" number="12.1">
+<h2><span class="header-section-number">12.1</span> 연구 설계</h2>
+<p>공단 표본코호트 데모 자료를 이용하여 다음과 같은 분석을 시행하고자 한다. 이를 위한 데이터셋을 구성해보자.</p>
+<p><br /></p>
 <ul>
-<li>데이터 프레임은 [x,y] 형태로 된 데이터셋을 의미한다. 여기서 x는 행을, y는 열을 의미한다.</li>
-<li>R에서 통계자료 분석을 위한 일반적인 형태이다.</li>
-</ul>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="chapter4.html#cb1-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">name=</span><span class="fu">c</span>(<span class="st">&quot;GSK&quot;</span>, <span class="st">&quot;MSD&quot;</span>), <span class="at">age=</span><span class="fu">c</span>(<span class="dv">20</span>,<span class="dv">30</span>), <span class="at">address=</span><span class="fu">c</span>(<span class="st">&quot;서울&quot;</span>,<span class="st">&quot;대전&quot;</span>)); x</span></code></pre></div>
-<pre><code>##   name age address
-## 1  GSK  20    서울
-## 2  MSD  30    대전</code></pre>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="chapter4.html#cb3-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">cbind</span>(x, <span class="at">dep=</span><span class="fu">c</span>(<span class="st">&quot;제약&quot;</span>,<span class="st">&quot;경영&quot;</span>)); x</span></code></pre></div>
-<pre><code>##   name age address  dep
-## 1  GSK  20    서울 제약
-## 2  MSD  30    대전 경영</code></pre>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="chapter4.html#cb5-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rbind</span>(x,<span class="fu">c</span>(<span class="st">&quot;Bayer&quot;</span>, <span class="at">age=</span><span class="dv">40</span>, <span class="at">address=</span><span class="st">&quot;대구&quot;</span>, <span class="at">dep=</span><span class="st">&quot;마켓팅&quot;</span>)); x</span></code></pre></div>
-<pre><code>##    name age address    dep
-## 1   GSK  20    서울   제약
-## 2   MSD  30    대전   경영
-## 3 Bayer  40    대구 마켓팅</code></pre>
-</div>
-<div id="데이터-프레임-인덱싱" class="section level2" number="4.2">
-<h2><span class="header-section-number">4.2</span> 데이터 프레임 인덱싱</h2>
-<p>R 명령어와 관련된 자세한 사항은 <a href="https://elflini.github.io/study/rmanual/">https://elflini.github.io/study/rmanual/</a> 또는 <a href="https://sites.google.com/view/statedu/r-program">https://sites.google.com/view/statedu/r-program</a>을 참조하길 바란다.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="chapter4.html#cb7-1" aria-hidden="true" tabindex="-1"></a>x[<span class="dv">2</span>,<span class="dv">3</span>]</span></code></pre></div>
-<pre><code>## [1] &quot;대전&quot;</code></pre>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="chapter4.html#cb9-1" aria-hidden="true" tabindex="-1"></a>x[<span class="dv">3</span>,]</span></code></pre></div>
-<pre><code>##    name age address    dep
-## 3 Bayer  40    대구 마켓팅</code></pre>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="chapter4.html#cb11-1" aria-hidden="true" tabindex="-1"></a>x[,<span class="dv">3</span>]</span></code></pre></div>
-<pre><code>## [1] &quot;서울&quot; &quot;대전&quot; &quot;대구&quot;</code></pre>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="chapter4.html#cb13-1" aria-hidden="true" tabindex="-1"></a>x[<span class="sc">-</span><span class="dv">2</span>,]</span></code></pre></div>
-<pre><code>##    name age address    dep
-## 1   GSK  20    서울   제약
-## 3 Bayer  40    대구 마켓팅</code></pre>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="chapter4.html#cb15-1" aria-hidden="true" tabindex="-1"></a>x[<span class="st">&quot;name&quot;</span>]</span></code></pre></div>
-<pre><code>##    name
-## 1   GSK
-## 2   MSD
-## 3 Bayer</code></pre>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="chapter4.html#cb17-1" aria-hidden="true" tabindex="-1"></a>x<span class="sc">$</span>name</span></code></pre></div>
-<pre><code>## [1] &quot;GSK&quot;   &quot;MSD&quot;   &quot;Bayer&quot;</code></pre>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="chapter4.html#cb19-1" aria-hidden="true" tabindex="-1"></a>x[[<span class="dv">1</span>]]</span></code></pre></div>
-<pre><code>## [1] &quot;GSK&quot;   &quot;MSD&quot;   &quot;Bayer&quot;</code></pre>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="chapter4.html#cb21-1" aria-hidden="true" tabindex="-1"></a>x[[<span class="dv">1</span>]][<span class="dv">2</span>]</span></code></pre></div>
-<pre><code>## [1] &quot;MSD&quot;</code></pre>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="chapter4.html#cb23-1" aria-hidden="true" tabindex="-1"></a>x<span class="sc">$</span>name[<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="st">&quot;Novartis&quot;</span>; x</span></code></pre></div>
-<pre><code>##       name age address    dep
-## 1      GSK  20    서울   제약
-## 2 Novartis  30    대전   경영
-## 3    Bayer  40    대구 마켓팅</code></pre>
-</div>
-<div id="공단자료와-필요패키지-불러오기" class="section level2" number="4.3">
-<h2><span class="header-section-number">4.3</span> 공단자료와 필요패키지 불러오기</h2>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="chapter4.html#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div>
-<pre><code>## -- Attaching packages --------------------------------------- tidyverse 1.3.1 --</code></pre>
-<pre><code>## v ggplot2 3.3.5     v purrr   0.3.4
-## v tibble  3.1.2     v dplyr   1.0.6
-## v tidyr   1.1.3     v stringr 1.4.0
-## v readr   1.4.0     v forcats 0.5.1</code></pre>
-<pre><code>## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
-## x dplyr::filter() masks stats::filter()
-## x dplyr::lag()    masks stats::lag()</code></pre>
-<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="chapter4.html#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="do">## 공단자료 부르기</span></span>
-<span id="cb29-2"><a href="chapter4.html#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">&quot;claim.RData&quot;</span>)</span>
-<span id="cb29-3"><a href="chapter4.html#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span>()</span></code></pre></div>
-<pre><code>## [1] &quot;death&quot; &quot;inst&quot;  &quot;jk&quot;    &quot;t20&quot;   &quot;t30&quot;   &quot;t40&quot;   &quot;t60&quot;   &quot;x&quot;</code></pre>
-</div>
-<div id="특정-변수만-남기기" class="section level2" number="4.4">
-<h2><span class="header-section-number">4.4</span> 특정 변수만 남기기</h2>
-<p>특정 변수만 취하여 새로운 데이터셋을 구성하고 싶을때, 데이터프레임 인덱싱 작업 또는 여러 함수를 통해서 구성이 가능하다(예: select() 함수).</p>
-<pre><code>select(데이터셋, 변수1, 변수2, ...) 또는
-데이터셋 %&gt;% select(변수1, 변수2, ...)</code></pre>
-<p>T20 데이터셋에서 개인고유번호(RN_INDI), 청구고유번호(RN_KEY), 심결요양급여비용총액(ED_RC_TOT_AMT) 세 개의 변수만 남겨서 데이터셋을 생성시켜보자. 프로그램은 다음과 같다.</p>
+<li>연구 설계
 <ul>
-<li>방법1</li>
+<li>연구기간: 2002년 1월 1일 ~ 2015년 12월 31일</li>
+<li>선별기간: 2003년 1월 1일 ~ 2014년 12월 31일</li>
+<li>관찰기간: indexdate를 기준으로 이후 6개월</li>
+<li>indexdate: 선별기간동안 ‘L20’(아토피성 피부염)으로 인한 첫 방문일 - <strong>모든 주/부상병 고려</strong></li>
+</ul></li>
 </ul>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="chapter4.html#cb32-1" aria-hidden="true" tabindex="-1"></a>t20_ex <span class="ot">&lt;-</span> t20[<span class="fu">c</span>(<span class="st">&quot;rn_indi&quot;</span>, <span class="st">&quot;rn_key&quot;</span>, <span class="st">&quot;ed_rc_tot_amt&quot;</span>)]</span>
-<span id="cb32-2"><a href="chapter4.html#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t20_ex)</span></code></pre></div>
-<pre><code>## # A tibble: 6 x 3
-##   rn_indi rn_key        ed_rc_tot_amt
-##     &lt;dbl&gt; &lt;chr&gt;                 &lt;dbl&gt;
-## 1  746491 2002100382947         10590
-## 2  848340 2002070609412         10590
-## 3  992522 2002091020009         10590
-## 4  543044 2002090218816         10590
-## 5  928716 2002080203933         10590
-## 6  633585 2002050156181         10590</code></pre>
+<p><br /></p>
 <ul>
-<li>방법2</li>
-</ul>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="chapter4.html#cb34-1" aria-hidden="true" tabindex="-1"></a>t20_ex <span class="ot">&lt;-</span> t20 <span class="sc">%&gt;%</span> </span>
-<span id="cb34-2"><a href="chapter4.html#cb34-2" aria-hidden="true" tabindex="-1"></a>          <span class="fu">select</span>(rn_indi, rn_key, ed_rc_tot_amt)</span>
-<span id="cb34-3"><a href="chapter4.html#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t20_ex)</span></code></pre></div>
-<pre><code>## # A tibble: 6 x 3
-##   rn_indi rn_key        ed_rc_tot_amt
-##     &lt;dbl&gt; &lt;chr&gt;                 &lt;dbl&gt;
-## 1  746491 2002100382947         10590
-## 2  848340 2002070609412         10590
-## 3  992522 2002091020009         10590
-## 4  543044 2002090218816         10590
-## 5  928716 2002080203933         10590
-## 6  633585 2002050156181         10590</code></pre>
-</div>
-<div id="특정-변수-지우기" class="section level2" number="4.5">
-<h2><span class="header-section-number">4.5</span> 특정 변수 지우기</h2>
-<p>특정 변수를 지우고 새로운 데이터셋을 구성하고 싶을때 인덱싱 방법이나 select() 함수를 이용할때는 ‘-’를 붙여서 삭제한다. 또는!’’(not)을 이용하여 변수를 삭제한다.</p>
-<pre><code>select(데이터셋, -변수1, -변수2, ...) 또는
-데이터셋 %&gt;% select(-변수1, -변수2, ...)</code></pre>
-<p>T40 데이터셋에서 요양개시일자(MDCARE_STRT_DT), 서식코드(FORM_CD), 세부전문과목코드(DETAIL_TMSG_SUBJ_CD), 상병분류구분코드(SICK_CLSF_TYPE)을 제거하고 개인고유번호(RN_INDI), 청구고유번호(RN_KEY), 심결요양급여비용총액(ED_RC_TOT_AMT), 기준년도(STD_YYYY) 네 개의 변수만 남겨서 이터셋을 생성시켜보자. 프로그램은 다음과 같다.</p>
+<li>연구 대상
 <ul>
-<li>방법1</li>
+<li>환자군:
+<ol style="list-style-type: decimal">
+<li>Index date 이후 6개월 동안 전신 면역조절제 또는 전신 스테로이드 또는 광선치료를 사용하지 않고, 국소 calcineurin inhibitor 또는 국소 스테로이드 치료를 실시한 아토피 환자</li>
+<li>또는, 6개월 관찰기간 동안 어떠한 아토피 치료를 하지 않은 환자</li>
+</ol></li>
+</ul></li>
 </ul>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="chapter4.html#cb37-1" aria-hidden="true" tabindex="-1"></a>index <span class="ot">&lt;-</span> <span class="fu">names</span>(t40) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;mdcare_strt_dt&quot;</span>, <span class="st">&quot;form_cd&quot;</span>, <span class="st">&quot;detail_tmsg_subj_cd&quot;</span>, <span class="st">&quot;sick_clsf_type&quot;</span>)</span>
-<span id="cb37-2"><a href="chapter4.html#cb37-2" aria-hidden="true" tabindex="-1"></a>t40_ex <span class="ot">&lt;-</span> t40[,<span class="sc">!</span>index]</span>
-<span id="cb37-3"><a href="chapter4.html#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t40_ex)</span></code></pre></div>
-<pre><code>## # A tibble: 6 x 4
-##   rn_indi rn_key        mcex_sick_sym std_yyyy
-##     &lt;dbl&gt; &lt;chr&gt;         &lt;chr&gt;         &lt;chr&gt;   
-## 1  596535 2002120187152 J209          2002    
-## 2  615374 2002121012274 J209          2002    
-## 3 1005547 2002120808216 J209          2002    
-## 4  226594 2002120381612 J209          2002    
-## 5  204930 2002120790182 J209          2002    
-## 6  798943 2002040446183 J209          2002</code></pre>
+<p><br /></p>
 <ul>
-<li>방법2</li>
+<li>Outcome
+<ol style="list-style-type: decimal">
+<li>AD-related cost: outpatient cost, hospitalization cost, total cost</li>
+<li>All-cause cost: outpatient cost, hospitalization cost, total cost</li>
+</ol>
+<ul>
+<li><ul>
+<li>Cost = 심결요양급여비용총액 + 처방약가</li>
+</ul></li>
+</ul></li>
 </ul>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="chapter4.html#cb39-1" aria-hidden="true" tabindex="-1"></a>t40_ex <span class="ot">&lt;-</span> t40 <span class="sc">%&gt;%</span> </span>
-<span id="cb39-2"><a href="chapter4.html#cb39-2" aria-hidden="true" tabindex="-1"></a>          <span class="fu">select</span>(<span class="sc">-</span>mdcare_strt_dt, <span class="sc">-</span>form_cd, <span class="sc">-</span>detail_tmsg_subj_cd, <span class="sc">-</span>sick_clsf_type)</span>
-<span id="cb39-3"><a href="chapter4.html#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t40_ex)</span></code></pre></div>
-<pre><code>## # A tibble: 6 x 4
-##   rn_indi rn_key        mcex_sick_sym std_yyyy
-##     &lt;dbl&gt; &lt;chr&gt;         &lt;chr&gt;         &lt;chr&gt;   
-## 1  596535 2002120187152 J209          2002    
-## 2  615374 2002121012274 J209          2002    
-## 3 1005547 2002120808216 J209          2002    
-## 4  226594 2002120381612 J209          2002    
-## 5  204930 2002120790182 J209          2002    
-## 6  798943 2002040446183 J209          2002</code></pre>
+<p><br /></p>
+<ul>
+<li>Covariate
+<ol style="list-style-type: decimal">
+<li>보험자구분: 건강보험 명세서만 고려</li>
+<li>연령: 9세이하, 9세초과</li>
+<li>성별</li>
+<li>의료기관종별: 상급종합병원, 종합병원, 병원, 의원</li>
+<li>아토피 치료제 사용유무(중복가능): index 이전 고려</li>
+</ol>
+<ul>
+<li>국소스테로이드제</li>
+<li>국소 Calcineurin inhibitor</li>
+<li>광선요법</li>
+<li>전신 면역조절제</li>
+<li>전신 스테로이드제</li>
+</ul></li>
+</ul>
 </div>
-<div id="변수-이름-바꾸기" class="section level2" number="4.6">
-<h2><span class="header-section-number">4.6</span> 변수 이름 바꾸기</h2>
-<p>생성된 데이터셋의 변수 이름을 바꾸거나 새로운 데이터셋 생성시 다른 이름으로 변수를 저장해야 하는 경우 사용하는 명령문이 RENAME 이다. RENAME 문을 사용하는 방법은 다음과 같다.</p>
-<pre><code>rename(데이터셋, 새로운변수명1=기존변수명1,새로운변수명2=기존변수명2,...) 또는
-데이터셋 %&gt;% select(새로운변수명1=기존변수명1,새로운변수명2=기존변수명2,...)</code></pre>
-<p>T20 데이터셋에서 개인고유번호(RN_INDI)를 PERSON_ID로, 청구고유번호(RN_KEY)를 MID, 심결요양급여비용총액(ED_RC_TOT_AMT)를 COST로 변경하여 데이터셋을 생성시켜보자. 프로그램은 다음과 같다.</p>
-<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="chapter4.html#cb42-1" aria-hidden="true" tabindex="-1"></a>t20_ex <span class="ot">&lt;-</span> t20 <span class="sc">%&gt;%</span> <span class="fu">select</span>(rn_indi, rn_key, ed_rc_tot_amt)</span>
-<span id="cb42-2"><a href="chapter4.html#cb42-2" aria-hidden="true" tabindex="-1"></a>t20_ex <span class="ot">&lt;-</span> t20_ex <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="at">person_id=</span>rn_indi, <span class="at">mid=</span>rn_key, <span class="at">cost=</span>ed_rc_tot_amt)</span>
-<span id="cb42-3"><a href="chapter4.html#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t20_ex)</span></code></pre></div>
-<pre><code>## # A tibble: 6 x 3
-##   person_id mid            cost
-##       &lt;dbl&gt; &lt;chr&gt;         &lt;dbl&gt;
-## 1    746491 2002100382947 10590
-## 2    848340 2002070609412 10590
-## 3    992522 2002091020009 10590
-## 4    543044 2002090218816 10590
-## 5    928716 2002080203933 10590
-## 6    633585 2002050156181 10590</code></pre>
-<p>위의 프로그램은 pipe를 이용하여 하나의 구문으로 실행이 가능하다.</p>
-<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="chapter4.html#cb44-1" aria-hidden="true" tabindex="-1"></a>t20_ex <span class="ot">&lt;-</span> t20 <span class="sc">%&gt;%</span> </span>
-<span id="cb44-2"><a href="chapter4.html#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(rn_indi, rn_key, ed_rc_tot_amt) <span class="sc">%&gt;%</span> </span>
-<span id="cb44-3"><a href="chapter4.html#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">person_id=</span>rn_indi, <span class="at">mid=</span>rn_key, <span class="at">cost=</span>ed_rc_tot_amt)</span>
-<span id="cb44-4"><a href="chapter4.html#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t20_ex)</span></code></pre></div>
-<pre><code>## # A tibble: 6 x 3
-##   person_id mid            cost
-##       &lt;dbl&gt; &lt;chr&gt;         &lt;dbl&gt;
-## 1    746491 2002100382947 10590
-## 2    848340 2002070609412 10590
-## 3    992522 2002091020009 10590
-## 4    543044 2002090218816 10590
-## 5    928716 2002080203933 10590
-## 6    633585 2002050156181 10590</code></pre>
-</div>
-<div id="특정-위치의-관찰값-추출" class="section level2" number="4.7">
-<h2><span class="header-section-number">4.7</span> 특정 위치의 관찰값 추출</h2>
-<p>R에서는 특정 위치의 관찰값은 인덱싱을 이용하여 아주 쉽게 추출이 가능하다.</p>
-<pre><code>데이터셋[시작위치:끝위치,] 또는
-데이터셋[c(위치값들),]</code></pre>
-<p>T20 데이터셋에서 1,001번 행부터 2,000번 행까지 1,000개의 행만 추출하여 데이터셋을 생성하는 경우를 생각해보자. 프로그램은 다음과 같다.</p>
-<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="chapter4.html#cb47-1" aria-hidden="true" tabindex="-1"></a>t20_ex <span class="ot">&lt;-</span> t20[<span class="dv">1001</span><span class="sc">:</span><span class="dv">2000</span>,]</span>
-<span id="cb47-2"><a href="chapter4.html#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t20_ex)</span></code></pre></div>
-<pre><code>## # A tibble: 6 x 22
-##   rn_indi rn_key        rn_inst mdcare_strt_dt form_cd mcare_subj_cd sick_sym1
-##     &lt;dbl&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;   &lt;chr&gt;         &lt;chr&gt;    
-## 1  880016 2002020351011   98672 20020214       03      11            J069     
-## 2  963070 2002100012551   87635 20021009       03      01            J06      
-## 3  295221 2002030283673   58543 20020305       03      11            J039     
-## 4    5707 2002060682805   36485 20020613       03      01            A09      
-## 5  964637 2002090956675   37020 20020904       03      05            S934     
-## 6  250680 2002010064683  135669 20020121       03      14            L84      
-## # ... with 15 more variables: sick_sym2 &lt;chr&gt;, hsptz_path_type &lt;chr&gt;,
-## #   ofij_type &lt;chr&gt;, oprtn_yn &lt;chr&gt;, mdcare_dd_cnt &lt;dbl&gt;, vshsp_dd_cnt &lt;dbl&gt;,
-## #   tot_prsc_dd_cnt &lt;dbl&gt;, mcare_rslt_type &lt;chr&gt;, fst_hsptz_dt &lt;chr&gt;,
-## #   edc_add_rt &lt;dbl&gt;, spcf_sym_type &lt;chr&gt;, ed_rc_tot_amt &lt;dbl&gt;, edc_sba &lt;dbl&gt;,
-## #   edc_insur_brdn_amt &lt;dbl&gt;, std_yyyy &lt;chr&gt;</code></pre>
-<p>첫번째 부터 5번째까지는</p>
-<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="chapter4.html#cb49-1" aria-hidden="true" tabindex="-1"></a>t20[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,]</span></code></pre></div>
-<pre><code>## # A tibble: 5 x 22
-##   rn_indi rn_key        rn_inst mdcare_strt_dt form_cd mcare_subj_cd sick_sym1
-##     &lt;dbl&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;   &lt;chr&gt;         &lt;chr&gt;    
-## 1  746491 2002100382947   47036 20021016       03      14            L218     
-## 2  848340 2002070609412   47036 20020712       03      14            B351     
-## 3  992522 2002091020009   70468 20020923       03      10            N_       
-## 4  543044 2002090218816   22970 20020930       03      13            J304     
-## 5  928716 2002080203933   37742 20020826       03      13            J311     
-## # ... with 15 more variables: sick_sym2 &lt;chr&gt;, hsptz_path_type &lt;chr&gt;,
-## #   ofij_type &lt;chr&gt;, oprtn_yn &lt;chr&gt;, mdcare_dd_cnt &lt;dbl&gt;, vshsp_dd_cnt &lt;dbl&gt;,
-## #   tot_prsc_dd_cnt &lt;dbl&gt;, mcare_rslt_type &lt;chr&gt;, fst_hsptz_dt &lt;chr&gt;,
-## #   edc_add_rt &lt;dbl&gt;, spcf_sym_type &lt;chr&gt;, ed_rc_tot_amt &lt;dbl&gt;, edc_sba &lt;dbl&gt;,
-## #   edc_insur_brdn_amt &lt;dbl&gt;, std_yyyy &lt;chr&gt;</code></pre>
-<p>135,000번째부터 마지막까지는</p>
-<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="chapter4.html#cb51-1" aria-hidden="true" tabindex="-1"></a>temp <span class="ot">&lt;-</span> t20[<span class="dv">135000</span><span class="sc">:</span><span class="fu">nrow</span>(t20),]</span>
-<span id="cb51-2"><a href="chapter4.html#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(temp)</span></code></pre></div>
-<pre><code>## # A tibble: 6 x 22
-##   rn_indi rn_key        rn_inst mdcare_strt_dt form_cd mcare_subj_cd sick_sym1
-##     &lt;dbl&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;   &lt;chr&gt;         &lt;chr&gt;    
-## 1   66424 2015071124149  113143 20150720       08      00            U280     
-## 2   66424 2015072047475  113143 20150702       08      00            U280     
-## 3   66424 2015070290135  113143 20150710       08      00            U280     
-## 4   66424 2015071016842  113143 20150728       08      00            U280     
-## 5   66424 2015081338863  113143 20150807       08      00            U280     
-## 6   66424 2015081529196  113143 20150819       08      00            U280     
-## # ... with 15 more variables: sick_sym2 &lt;chr&gt;, hsptz_path_type &lt;chr&gt;,
-## #   ofij_type &lt;chr&gt;, oprtn_yn &lt;chr&gt;, mdcare_dd_cnt &lt;dbl&gt;, vshsp_dd_cnt &lt;dbl&gt;,
-## #   tot_prsc_dd_cnt &lt;dbl&gt;, mcare_rslt_type &lt;chr&gt;, fst_hsptz_dt &lt;chr&gt;,
-## #   edc_add_rt &lt;dbl&gt;, spcf_sym_type &lt;chr&gt;, ed_rc_tot_amt &lt;dbl&gt;, edc_sba &lt;dbl&gt;,
-## #   edc_insur_brdn_amt &lt;dbl&gt;, std_yyyy &lt;chr&gt;</code></pre>
+<div id="프로그램" class="section level2" number="12.2">
+<h2><span class="header-section-number">12.2</span> 프로그램</h2>
+<ul>
+<li>성별, 보험종별 자료 추가</li>
+</ul>
+<pre><code>  t20_1 &lt;- t20 %&gt;% 
+    left_join(jk %&gt;% select(rn_indi, sex, gaibja_type, std_yyyy), by=c(&quot;rn_indi&quot;,&quot;std_yyyy&quot;))</code></pre>
+<ul>
+<li>요양기관 정보 불러오기</li>
+</ul>
+<pre><code>t20_1 &lt;- t20_1 %&gt;% 
+    left_join(inst %&gt;% select(rn_inst, std_yyyy, y_jong=inst_clsfc_cd), by=c(&quot;rn_inst&quot;,&quot;std_yyyy&quot;))</code></pre>
+<ul>
+<li>20 Table 정리</li>
+</ul>
+<pre><code>t20_2 &lt;- t20_1 %&gt;%
+      mutate(
+      #입원/내원 시작 일시  
+      date1=ymd(mdcare_strt_dt),
+    # 요양기관종별
+           yko=case_when(y_jong==&#39;0&#39; ~ 1,
+                y_jong==&#39;1&#39; ~ 2,
+                y_jong==&#39;20&#39; ~ 3,
+                y_jong==&#39;3&#39; ~ 4),
+    # 입원/외래 구분
+           inp=ifelse(form_cd==&#39;02&#39;, 1, 0),
+           outp=ifelse(form_cd==&#39;03&#39;, 1, 0),
+    # 심결요양급여비용총액     
+           tcost=ed_rc_tot_amt,
+    ) %&gt;% 
+    # 자료 클리닝
+      filter(tcost!=0 , gaibja_type %in% c(&#39;1&#39;, &#39;2&#39;, &#39;5&#39;, &#39;6&#39;) , yko %in% c(1,2,3,4)) %&gt;% 
+    # 변수 선택
+    select(rn_indi, rn_key, date1, sex, yko, inp, outp, tcost)</code></pre>
+<ul>
+<li>40 Table 정리</li>
+</ul>
+<pre><code>t40_1 &lt;- t40 %&gt;% 
+    mutate(
+      sick3=substr(mcex_sick_sym, 1, 3),
+      disease=ifelse(sick3 %in% c(&#39;L20&#39;), 1, 0),
+    ) %&gt;% 
+     select(rn_key, disease)</code></pre>
+<pre><code> t40_2 &lt;- t40_1 %&gt;% 
+   group_by(rn_key) %&gt;% 
+   summarise(
+     disease=max(disease),
+     # asthma=max(asthma),
+     # depress=max(depress),
+     # disorder=max(disorder)
+     )</code></pre>
+<ul>
+<li>30 Table 정리</li>
+</ul>
+<pre><code>#국소 스테로이드
+  d1_drug &lt;- scan(what=&quot;&quot;)
+  &#39;103433CCM&#39;   &#39;547100CCM&#39; &#39;547400CCM&#39; &#39;528300CCM&#39; &#39;528400CCM&#39; &#39;528700CCM&#39; &#39;547300CCM&#39; &#39;548600COM&#39; &#39;549300COM&#39; &#39;657500CCM&#39; &#39;548600CCM&#39; &#39;548700CCM&#39; &#39;548800CCM&#39; &#39;548900CCM&#39; &#39;549300CCM&#39; &#39;549400CCM&#39; 
+  &#39;549700CCM&#39;   &#39;549700CEN&#39; &#39;549700COM&#39; &#39;549800CCM&#39; &#39;549800COM&#39; &#39;800500CCM&#39; &#39;800600COM&#39; &#39;135833CLQ&#39; &#39;135835CLQ&#39; &#39;135836CLQ&#39; &#39;135837CLQ&#39; &#39;135830COM&#39; &#39;135831CCM&#39; &#39;135831COM&#39; &#39;135842CCM&#39; &#39;135842COM&#39;
+  &#39;135844CCM&#39;   &#39;135844COM&#39; &#39;135845COM&#39; &#39;135834CLQ&#39; &#39;135838CLQ&#39; &#39;135839CLT&#39; &#39;135930CCM&#39; &#39;135930COM&#39; &#39;144430CCM&#39; &#39;144431CCM&#39; &#39;144432CCM&#39; &#39;144433CCM&#39; &#39;144434CCM&#39; &#39;141531CCM&#39; &#39;141533CCM&#39; &#39;141536CCM&#39; &#39;141542CCM&#39;
+  &#39;141535CLT&#39;   &#39;141537CLT&#39; &#39;141540CLT&#39; &#39;141543CLT&#39; &#39;141631CCM&#39; &#39;141632CCM&#39; &#39;141636CCM&#39; &#39;141633CLT&#39; &#39;141634CLT&#39; &#39;144430CCM&#39; &#39;144431CCM&#39; &#39;144432CCM&#39; &#39;144433CCM&#39; &#39;144434CCM&#39; &#39;144530COM&#39; &#39;144531COM&#39; &#39;144532CLT&#39;
+  &#39;528800CCM&#39;   &#39;528900CCM&#39; &#39;548200CCM&#39; &#39;548300CCM&#39; &#39;160830CCM&#39; &#39;160832CCM&#39; &#39;160835CCM&#39; &#39;160836CCM&#39; &#39;160834CLQ&#39; &#39;162234CCM&#39; &#39;167830COM&#39; &#39;170931COM&#39; &#39;170932CCM&#39; &#39;170947COM&#39; &#39;170937CLT&#39; &#39;170938CLT&#39; &#39;170939CLT&#39;
+  &#39;170943CLT&#39;   &#39;170933CSS&#39; &#39;170950CLT&#39; &#39;170941CLT&#39; &#39;170944CLT&#39; &#39;170945CLT&#39; &#39;170946CLT&#39; &#39;170949CLT&#39; &#39;170934CSS&#39; &#39;171030CCM&#39; &#39;171130CCM&#39; &#39;171332CCM&#39; &#39;546600CCM&#39; &#39;546700CCM&#39; &#39;546900CCM&#39; &#39;193431CLT&#39; &#39;193432CCM&#39; &#39;193432CLT&#39;
+  &#39;193432COM&#39;   &#39;193433CCM&#39; &#39;193433COM&#39; &#39;193434CLT&#39; &#39;193435CLT&#39; &#39;193436CCM&#39; &#39;193438CLT&#39; &#39;361330CCM&#39; &#39;361332CCM&#39; &#39;361333CCM&#39; &#39;361333COM&#39; &#39;361334CCM&#39; &#39;361334COM&#39; &#39;361336CCM&#39; &#39;361338CCM&#39; &#39;361341CCM&#39; &#39;361341COM&#39;
+  &#39;361345CCM&#39;   &#39;361346CCM&#39; &#39;361346COM&#39; &#39;361347CCM&#39; &#39;361347COM&#39; &#39;361335CLT&#39; &#39;361337CLT&#39; &#39;361339CLT&#39; &#39;361340CLT&#39; &#39;361342CLT&#39; &#39;361344CLT&#39; &#39;216931COM&#39; &#39;216932CCM&#39; &#39;216932COM&#39; &#39;216933CCM&#39; &#39;216933COM&#39; &#39;216935CCM&#39;
+  &#39;216935CLT&#39;   &#39;216935COM&#39; &#39;216939CCM&#39; &#39;216939COM&#39; &#39;216944COM&#39; &#39;216945CLT&#39; &#39;216946CCM&#39; &#39;216947CCM&#39; &#39;216947CLT&#39; &#39;216947COM&#39; &#39;216936CLQ&#39; &#39;216940CLQ&#39; &#39;216941CLQ&#39; &#39;216943CLQ&#39; &#39;216949CLQ&#39; &#39;243331CCM&#39; &#39;243333COM&#39;
+  &#39;243338CCM&#39;   &#39;243339COM&#39; &#39;545500CCM&#39; &#39;545600CCM&#39; &#39;545800CCM&#39; &#39;545900CCM&#39;</code></pre>
+<pre><code>  #국소 Calcineurin inhibitor
+  d2_drug &lt;- scan(what=&quot;&quot;)
+  &#39;426330COM&#39;   &#39;426331COM&#39; &#39;426332COM&#39; &#39;426333COM&#39; &#39;446430CCM&#39; &#39;446431CCM&#39;</code></pre>
+<pre><code> #광선치료
+ d3_drug &lt;- scan(what=&quot;&quot;)
+ &#39;MM341&#39;   &#39;MM342&#39; &#39;MM343&#39; &#39;MM344&#39; &#39;MM331&#39; &#39;MM332&#39; &#39;MM333&#39; &#39;MM334&#39;</code></pre>
+<pre><code>  #전신 면역조절제
+  d4_drug &lt;- scan(what=&quot;&quot;)
+  &#39;139201ACS&#39;   &#39;139204ACS&#39; &#39;194701ACS&#39; &#39;194702ACS&#39; &#39;194730ALQ&#39;</code></pre>
+<pre><code>  #전신 스테로이드제
+  d5_drug &lt;- scan(what=&quot;&quot;)
+  &#39;116401ATB&#39;   &#39;296900ATB&#39; &#39;160201ATB&#39; &#39;170901ATB&#39; &#39;170906ATB&#39; &#39;193302ATB&#39; &#39;193305ATB&#39; &#39;217001ATB&#39; &#39;217034ASY&#39; &#39;217035ASY&#39; &#39;243201ATB&#39; &#39;243202ATB&#39; &#39;243203ATB&#39; &#39;141901ATB&#39; &#39;141903ATB&#39; &#39;116530BIJ&#39;
+  &#39;142030BIJ&#39;   &#39;142230BIJ&#39; &#39;142232BIJ&#39; &#39;142233BIJ&#39; &#39;171201BIJ&#39; &#39;193601BIJ&#39; &#39;193603BIJ&#39; &#39;193604BIJ&#39; &#39;243336BIJ&#39; &#39;243335BIJ&#39; &#39;243337BIJ&#39;</code></pre>
+<pre><code>  t30_1 &lt;- t30 %&gt;% 
+    mutate(
+      d1=ifelse(mcare_div_cd %in% d1_drug,1,0),
+      d2=ifelse(mcare_div_cd %in% d2_drug,1,0),
+      d3=ifelse(mcare_div_cd %in% d3_drug,1,0),
+      d4=ifelse(mcare_div_cd %in% d4_drug,1,0),
+      d5=ifelse(mcare_div_cd %in% d5_drug,1,0)
+    ) %&gt;% 
+    select(rn_key, d1, d2, d3, d4, d5, clsf_pttn_cd, amt)</code></pre>
+<pre><code>  t30_2 &lt;- t30_1 %&gt;% 
+     group_by(rn_key) %&gt;% 
+     summarise(
+      d130=max(d1),
+      d230=max(d2),
+      d330=max(d3),
+      d430=max(d4),
+      d530=max(d5),
+      drug_30=sum(ifelse(clsf_pttn_cd==&#39;3&#39;,amt,0)),
+      drug_30_d1=sum(ifelse(d1==&#39;1&#39;,amt,0)),
+      drug_30_d2=sum(ifelse(d2==&#39;1&#39;,amt,0)),
+      drug_30_d3=sum(ifelse(d3==&#39;1&#39;,amt,0)),
+      drug_30_d4=sum(ifelse(d4==&#39;1&#39;,amt,0)),
+      drug_30_d5=sum(ifelse(d5==&#39;1&#39;,amt,0))
+    )</code></pre>
+<ul>
+<li>60 Table 정리</li>
+</ul>
+<pre><code>  t60_1 &lt;- t60 %&gt;% 
+     mutate(
+      d1=ifelse(gnl_nm_cd %in% d1_drug,1,0),
+      d2=ifelse(gnl_nm_cd %in% d2_drug,1,0),
+      d3=ifelse(gnl_nm_cd %in% d3_drug,1,0),
+      d4=ifelse(gnl_nm_cd %in% d4_drug,1,0),
+      d5=ifelse(gnl_nm_cd %in% d5_drug,1,0)
+    ) %&gt;% 
+    select(rn_key, d1, d2, d3, d4, d5, amt)</code></pre>
+<pre><code>  t60_2 &lt;- t60_1 %&gt;% 
+     group_by(rn_key) %&gt;% 
+     summarise(
+      d160=max(d1),
+      d260=max(d2),
+      d460=max(d4),
+      d560=max(d5),
+      drug_60=sum(amt),
+      drug_60_d1=sum(ifelse(d1==&#39;1&#39;,amt,0)),
+      drug_60_d2=sum(ifelse(d2==&#39;1&#39;,amt,0)),
+      drug_60_d4=sum(ifelse(d4==&#39;1&#39;,amt,0)),
+      drug_60_d5=sum(ifelse(d5==&#39;1&#39;,amt,0))
+    )</code></pre>
+<ul>
+<li>40, 30 and 60 to 20 합쳐서 fullset 정의</li>
+</ul>
+<pre><code>  fulldata &lt;- t20_2 %&gt;% 
+    left_join(t40_2, by=c(&quot;rn_key&quot;)) %&gt;% 
+    left_join(t30_2, by=c(&quot;rn_key&quot;)) %&gt;% 
+    left_join(t60_2, by=c(&quot;rn_key&quot;))</code></pre>
+<pre><code>  fulldata[is.na(fulldata)] &lt;- 0</code></pre>
+<ul>
+<li>변수 정의</li>
+</ul>
+<pre><code>  fulldata1 &lt;- fulldata %&gt;% 
+    group_by(rn_key) %&gt;% 
+    mutate(
+      d1=max(d130,d160),
+      d2=max(d230,d260),
+      d3=max(d330),
+      d4=max(d430,d460),
+      d5=max(d530,d560)
+    ) %&gt;% 
+    select(-c(d130,d160,d230,d260,d330,d430,d460,d530,d560))</code></pre>
+<ul>
+<li>index date 정의</li>
+</ul>
+<pre><code>  # 날짜 조건
+  index &lt;- fulldata1$date1&gt;= ymd(20030101) &amp; fulldata1$date1 &lt;= ymd(20141231)
+  indexdata &lt;- fulldata1[index,]</code></pre>
+<pre><code>  indexdata &lt;- indexdata %&gt;% 
+    select(rn_indi:disease)</code></pre>
+<pre><code>  indexdata2 &lt;- indexdata %&gt;% 
+    filter(disease==1) %&gt;% 
+    group_by(rn_indi) %&gt;% 
+    arrange(rn_indi, date1) %&gt;% 
+    filter(row_number()==1) </code></pre>
+<ul>
+<li>Follow-up period</li>
+</ul>
+<pre><code>  followdata &lt;- fulldata1 %&gt;% 
+    inner_join(indexdata2 %&gt;% select(rn_indi,indexdate=date1), by=c(&quot;rn_indi&quot;)) %&gt;% 
+    filter(date1 &gt;= indexdate, date1 &lt;= (indexdate+182))</code></pre>
+<ul>
+<li>Pre-index pesriod</li>
+</ul>
+<pre><code>  predata &lt;- fulldata1 %&gt;% 
+    inner_join(indexdata2 %&gt;% select(rn_indi,indexdate=date1), by=c(&quot;rn_indi&quot;)) %&gt;% 
+    filter(date1 &lt; indexdate)</code></pre>
+<ul>
+<li>index 이전 이후 약제 사용정보 통합합</li>
+</ul>
+<pre><code>  followdata_1 &lt;- followdata %&gt;% 
+    group_by(rn_indi) %&gt;% 
+    summarise(d1=max(d1), d2=max(d2), d3=max(d3), d4=max(d4), d5=max(d5))</code></pre>
+<pre><code>  predata_1 &lt;- predata %&gt;% 
+    group_by(rn_indi) %&gt;% 
+    summarise(pred1=max(d1), pred2=max(d2), pred3=max(d3), pred4=max(d4), pred5=max(d5))</code></pre>
+<ul>
+<li>조건 통합 / 환자군 생성</li>
+</ul>
+<pre><code>  candidate &lt;- followdata_1 %&gt;% 
+    left_join(predata_1, by=&quot;rn_indi&quot;)</code></pre>
+<pre><code> candidate[is.na(candidate)] &lt;- 0</code></pre>
+<pre><code> candidate &lt;- candidate %&gt;% 
+   group_by(rn_indi) %&gt;% 
+   mutate(cad=ifelse(((d3==0 &amp; d4==0 &amp; d5==0) &amp; (d1==1 | d2==1)) | (d1==0 &amp; d2==0 &amp; d3==0 &amp; d4==0 &amp; d5==0),
+                     1,0))
+ 
+    # ifelse(any(all(sum(d3,d4,d5)==0,any(d1==1,d2==1)),sum(d1,d2,d3,d4,d5)==0),0,1)</code></pre>
+<ul>
+<li>데이터 통합</li>
+</ul>
+<pre><code> indexdata3 &lt;- indexdata2 %&gt;% 
+   left_join(candidate, by=&quot;rn_indi&quot;)</code></pre>
+<pre><code># 변수정의
+  followdata2 &lt;- followdata %&gt;% 
+    group_by(rn_key) %&gt;% 
+    mutate(total_cost=sum(tcost,drug_60))</code></pre>
+<pre><code>  followdata3 &lt;- followdata2 %&gt;% 
+    group_by(rn_indi) %&gt;% 
+    summarise(total_cost_all=sum(total_cost),
+              total_cost_out=sum(ifelse(outp==1,total_cost,0)),
+              total_cost_in=sum(ifelse(inp==1,total_cost,0)),
+              total_cost_ad=sum(ifelse(disease==1,total_cost,0)),
+              total_cost_out_ad=sum(ifelse(disease==1 &amp; outp==1,total_cost,0)),
+              total_cost_in_ad=sum(ifelse(disease==1 &amp; inp==1,total_cost,0))
+                            )</code></pre>
+<pre><code>  indexdata4 &lt;- indexdata3 %&gt;% 
+    left_join(followdata3, by=&quot;rn_indi&quot;)</code></pre>
+<ul>
+<li>AGE 계산</li>
+</ul>
+<pre><code>  indexdata5 &lt;- indexdata4 %&gt;% 
+    left_join(death %&gt;% select(rn_indi,bth_yyyy), by=&quot;rn_indi&quot;)</code></pre>
+<ul>
+<li>Final data</li>
+</ul>
+<pre><code>  final &lt;- indexdata5 %&gt;% 
+    group_by(rn_indi) %&gt;% 
+    mutate(birth=as.numeric(substr(bth_yyyy,1,4)),
+           age=year(date1)-birth,
+           age_group=ifelse(age&lt;=9,1,2),
+           notreat=ifelse(sum(pred1,pred2,pred3,pred4,pred5)==0,1,0),)</code></pre>
+<ul>
+<li>최종 데이터셋 저장</li>
+</ul>
+<pre><code>  save.image(&quot;claims_final.RData&quot;)</code></pre>
+<pre><code>  str(final)
+  glimpse(final)</code></pre>
+<ul>
+<li>Baseline Chracteristic</li>
+</ul>
+<pre><code>  a &lt;- c(&quot;age_group&quot;,&quot;sex&quot;,&quot;yko&quot;,&quot;notreat&quot;,
+         paste(&quot;pred&quot;,1:5,sep=&quot;&quot;))
+  
+  contingency &lt;- function(data,var) {
+  
+  a &lt;- var
+  result &lt;- NULL
+  for (i in 1:length(a)) {
+    
+    m &lt;- data[a[i]]
+    m.freq &lt;- table(m)
+    m.prop &lt;- prop.table(m.freq)
+    re &lt;- data.frame(Var=a[i],Value=rownames(m.freq),cbind(m.freq,m.prop))
+    rownames(re) &lt;- NULL
+    
+    result &lt;- rbind(result,re)
+  }
+  
+  result
+  }
+  
+  contingency(final,a)</code></pre>
 <!-------- End ------------>
 
 </div>
@@ -543,8 +636,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           </div>
         </div>
       </div>
-<a href="chapter3.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="chapter5.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="chapter11.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

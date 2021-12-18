@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 4 데이터프레임의 활용 | Insurance Claims Data Analysis with R</title>
+  <title>Chapter 8 반복문 | Insurance Claims Data Analysis with R</title>
   <meta name="description" content="This is a R manual for analysis of insurance claims data" />
   <meta name="generator" content="bookdown 0.22 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 4 데이터프레임의 활용 | Insurance Claims Data Analysis with R" />
+  <meta property="og:title" content="Chapter 8 반복문 | Insurance Claims Data Analysis with R" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 4 데이터프레임의 활용 | Insurance Claims Data Analysis with R" />
+  <meta name="twitter:title" content="Chapter 8 반복문 | Insurance Claims Data Analysis with R" />
   
   <meta name="twitter:description" content="This is a R manual for analysis of insurance claims data" />
   
@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="chapter3.html"/>
-<link rel="next" href="chapter5.html"/>
+<link rel="prev" href="chapter7.html"/>
+<link rel="next" href="chapter9.html"/>
 <script src="libs/header-attrs-2.8/header-attrs.js"></script>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -305,235 +305,135 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="chapter4" class="section level1" number="4">
-<h1><span class="header-section-number">Chapter 4</span> 데이터프레임의 활용</h1>
-<div id="데이터-프레임" class="section level2" number="4.1">
-<h2><span class="header-section-number">4.1</span> 데이터 프레임</h2>
-<ul>
-<li>데이터 프레임은 [x,y] 형태로 된 데이터셋을 의미한다. 여기서 x는 행을, y는 열을 의미한다.</li>
-<li>R에서 통계자료 분석을 위한 일반적인 형태이다.</li>
-</ul>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="chapter4.html#cb1-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">name=</span><span class="fu">c</span>(<span class="st">&quot;GSK&quot;</span>, <span class="st">&quot;MSD&quot;</span>), <span class="at">age=</span><span class="fu">c</span>(<span class="dv">20</span>,<span class="dv">30</span>), <span class="at">address=</span><span class="fu">c</span>(<span class="st">&quot;서울&quot;</span>,<span class="st">&quot;대전&quot;</span>)); x</span></code></pre></div>
-<pre><code>##   name age address
-## 1  GSK  20    서울
-## 2  MSD  30    대전</code></pre>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="chapter4.html#cb3-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">cbind</span>(x, <span class="at">dep=</span><span class="fu">c</span>(<span class="st">&quot;제약&quot;</span>,<span class="st">&quot;경영&quot;</span>)); x</span></code></pre></div>
-<pre><code>##   name age address  dep
-## 1  GSK  20    서울 제약
-## 2  MSD  30    대전 경영</code></pre>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="chapter4.html#cb5-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rbind</span>(x,<span class="fu">c</span>(<span class="st">&quot;Bayer&quot;</span>, <span class="at">age=</span><span class="dv">40</span>, <span class="at">address=</span><span class="st">&quot;대구&quot;</span>, <span class="at">dep=</span><span class="st">&quot;마켓팅&quot;</span>)); x</span></code></pre></div>
-<pre><code>##    name age address    dep
-## 1   GSK  20    서울   제약
-## 2   MSD  30    대전   경영
-## 3 Bayer  40    대구 마켓팅</code></pre>
+<div id="chapter8" class="section level1" number="8">
+<h1><span class="header-section-number">Chapter 8</span> 반복문</h1>
+<p>공단자료와 필요 패키지 불러오기</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="chapter8.html#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">&quot;claim.RData&quot;</span>)</span>
+<span id="cb1-2"><a href="chapter8.html#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-3"><a href="chapter8.html#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate) <span class="co"># 날짜 함수</span></span></code></pre></div>
+<p>일정한 조건하에서 정의된 명령문의 반복 수행을 지시하는 반복문의 종류는 다음과 같다.</p>
+<pre><code>* for (반복) 명령문
+* while (조건) 명령문
+* repeat 명령문</code></pre>
+<p>for() 문은 정의된 반복 형태에 따라 명령문을 수행하며, while() 문은 조건이 참인 경우에만 명령문을 수행한다. repeat() 문은 조건 없이 명령문을 반복 수행하는 것으로 무한 반복 수행을 막기 위해서 무조건 분기문을 반드시 포함해야 한다. for() 문과 while() 문은 조건을 먼저 확인한 후 명령문 수행 여부를 결정하지만 repeat() 문은 주어진 명령문을 먼저 수행한다. 따라서 명령문의 순서에 따라 동일한 내용의 프로그램이라도 결과가 다를 수 있다.</p>
+<p>데이터 전처리 과정에서 반복문은 일반적으로 반복 수행에 대한 조건을 알고 시행하는 것이기 때문에 for() 문을 이용한 반복이 적합하며, 따라서 여기서는 for 문을 이용하여 데이터 전처리 과정의 예를 살펴본다. for 문의 기본적인 사용법은 다음과 같다.</p>
+<pre><code>for (variable in vector) {반복 실행}</code></pre>
+<p>여기서 item은 지수(index)에 사용할 임의의 변수이며, vector는 반복횟수를 결정지을 백터 객체이다.</p>
+<p>데이터 전처리에서 반복문은 주로 조건문과 결합하여 사용되며, 특정 조건을 만족하는 경우 그 조건에서 동일한 형태의 명령어를 시행해야 하는 경우 사용된다.</p>
+<div id="조건에-의한-반복" class="section level2" number="8.1">
+<h2><span class="header-section-number">8.1</span> 조건에 의한 반복</h2>
+<p>t20 데이터셋에서 기준연도(std_yyyy)가 ‘2002’년일 때 심결요양급여비용총액(ed_rc_tot_amt)에 1%를 더해 totalcost 변수를 생성하고, ’2003’년에는 2% 추가와 같은 식으로 매해 1%씩 더 더해져서 totalcost가 산출된다고 가정하자. 이 경우 ’기준년도’가 바뀜에 따라 비슷한 패턴의 계산이 계속 반복되기 때문에 반복문을 이용할 수 있으며, 방법은 다음과 같다.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="chapter8.html#cb4-1" aria-hidden="true" tabindex="-1"></a>t20_for <span class="ot">&lt;-</span> t20</span>
+<span id="cb4-2"><a href="chapter8.html#cb4-2" aria-hidden="true" tabindex="-1"></a>t20_for<span class="sc">$</span>totalcost <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb4-3"><a href="chapter8.html#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="chapter8.html#cb4-4" aria-hidden="true" tabindex="-1"></a>condition <span class="ot">&lt;-</span> <span class="fu">unique</span>(t20_for<span class="sc">$</span>std_yyyy)</span>
+<span id="cb4-5"><a href="chapter8.html#cb4-5" aria-hidden="true" tabindex="-1"></a>condition</span></code></pre></div>
+<pre><code>##  [1] &quot;2002&quot; &quot;2003&quot; &quot;2004&quot; &quot;2005&quot; &quot;2006&quot; &quot;2007&quot; &quot;2008&quot; &quot;2009&quot; &quot;2010&quot; &quot;2011&quot;
+## [11] &quot;2012&quot; &quot;2013&quot; &quot;2014&quot; &quot;2015&quot;</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="chapter8.html#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(condition)) {</span>
+<span id="cb6-2"><a href="chapter8.html#cb6-2" aria-hidden="true" tabindex="-1"></a>  t20_for<span class="sc">$</span>totalcost[t20_for<span class="sc">$</span>std_yyyy<span class="sc">==</span>condition[i]] <span class="ot">&lt;-</span> t20_for<span class="sc">$</span>ed_rc_tot_amt[t20_for<span class="sc">$</span>std_yyyy<span class="sc">==</span>condition[i]]<span class="sc">*</span>(<span class="dv">1</span><span class="sc">+</span>i<span class="sc">*</span><span class="fl">0.01</span>)</span>
+<span id="cb6-3"><a href="chapter8.html#cb6-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-4"><a href="chapter8.html#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="chapter8.html#cb6-5" aria-hidden="true" tabindex="-1"></a>t20_for <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(std_yyyy) <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(std_yyyy) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-6"><a href="chapter8.html#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">row_number</span>()<span class="sc">==</span><span class="dv">1</span>) <span class="sc">%&gt;%</span> <span class="fu">select</span>(rn_indi, rn_key, std_yyyy, ed_rc_tot_amt, totalcost)</span></code></pre></div>
+<pre><code>## # A tibble: 14 x 5
+## # Groups:   std_yyyy [14]
+##    rn_indi rn_key        std_yyyy ed_rc_tot_amt totalcost
+##      &lt;dbl&gt; &lt;chr&gt;         &lt;chr&gt;            &lt;dbl&gt;     &lt;dbl&gt;
+##  1  746491 2002100382947 2002             10590    10696.
+##  2   16430 2003070011077 2003             16400    16728 
+##  3  680495 2004110205136 2004             10220    10527.
+##  4  474476 2005121436860 2005             10740    11170.
+##  5  232963 2006050376205 2006             11120    11676 
+##  6  694083 2007020317531 2007                 0        0 
+##  7  642899 2008061747781 2008                 0        0 
+##  8  835408 2009101452136 2009                 0        0 
+##  9  737871 2010040982745 2010                 0        0 
+## 10  242807 2011111860317 2011              8960     9856 
+## 11  303645 2012011097230 2012             14000    15540 
+## 12  849556 2013100937678 2013             14340    16061.
+## 13  160611 2014100895259 2014             14770    16690.
+## 14  483473 2015092307498 2015             10000    11400</code></pre>
 </div>
-<div id="데이터-프레임-인덱싱" class="section level2" number="4.2">
-<h2><span class="header-section-number">4.2</span> 데이터 프레임 인덱싱</h2>
-<p>R 명령어와 관련된 자세한 사항은 <a href="https://elflini.github.io/study/rmanual/">https://elflini.github.io/study/rmanual/</a> 또는 <a href="https://sites.google.com/view/statedu/r-program">https://sites.google.com/view/statedu/r-program</a>을 참조하길 바란다.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="chapter4.html#cb7-1" aria-hidden="true" tabindex="-1"></a>x[<span class="dv">2</span>,<span class="dv">3</span>]</span></code></pre></div>
-<pre><code>## [1] &quot;대전&quot;</code></pre>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="chapter4.html#cb9-1" aria-hidden="true" tabindex="-1"></a>x[<span class="dv">3</span>,]</span></code></pre></div>
-<pre><code>##    name age address    dep
-## 3 Bayer  40    대구 마켓팅</code></pre>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="chapter4.html#cb11-1" aria-hidden="true" tabindex="-1"></a>x[,<span class="dv">3</span>]</span></code></pre></div>
-<pre><code>## [1] &quot;서울&quot; &quot;대전&quot; &quot;대구&quot;</code></pre>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="chapter4.html#cb13-1" aria-hidden="true" tabindex="-1"></a>x[<span class="sc">-</span><span class="dv">2</span>,]</span></code></pre></div>
-<pre><code>##    name age address    dep
-## 1   GSK  20    서울   제약
-## 3 Bayer  40    대구 마켓팅</code></pre>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="chapter4.html#cb15-1" aria-hidden="true" tabindex="-1"></a>x[<span class="st">&quot;name&quot;</span>]</span></code></pre></div>
-<pre><code>##    name
-## 1   GSK
-## 2   MSD
-## 3 Bayer</code></pre>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="chapter4.html#cb17-1" aria-hidden="true" tabindex="-1"></a>x<span class="sc">$</span>name</span></code></pre></div>
-<pre><code>## [1] &quot;GSK&quot;   &quot;MSD&quot;   &quot;Bayer&quot;</code></pre>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="chapter4.html#cb19-1" aria-hidden="true" tabindex="-1"></a>x[[<span class="dv">1</span>]]</span></code></pre></div>
-<pre><code>## [1] &quot;GSK&quot;   &quot;MSD&quot;   &quot;Bayer&quot;</code></pre>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="chapter4.html#cb21-1" aria-hidden="true" tabindex="-1"></a>x[[<span class="dv">1</span>]][<span class="dv">2</span>]</span></code></pre></div>
-<pre><code>## [1] &quot;MSD&quot;</code></pre>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="chapter4.html#cb23-1" aria-hidden="true" tabindex="-1"></a>x<span class="sc">$</span>name[<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="st">&quot;Novartis&quot;</span>; x</span></code></pre></div>
-<pre><code>##       name age address    dep
-## 1      GSK  20    서울   제약
-## 2 Novartis  30    대전   경영
-## 3    Bayer  40    대구 마켓팅</code></pre>
+<div id="개체에-의한-반복" class="section level2" number="8.2">
+<h2><span class="header-section-number">8.2</span> 개체에 의한 반복</h2>
+<p>t20 데이터셋에서 기준연도(std_yyyy)가 ‘2002’년일 때 심결요양급여비용총액(ed_rc_tot_amt)에 1000을 더해 totalcost 변수를 생성하고, 동일 조건에 만약 심결본인부담금(edc_sba)이 3000보다 크다면 0원으로 대체하여 edc_sba2 변수를 생성해보자. 또한 기준연도(std_yyyy)가 ‘2003’년일 때 심결요양급여비용총액(ed_rc_tot_amt)에 2000을 더해 totalcost 변수를 생성하고, 동일 조건에 만약 심결본인부담금(edc_sba)이 3000보다 크다면 2000원으로 대체하여 edc_sba2 변수를 생성해보자. 즉, std_yyyy가 ‘2002’ 일 때 두 가지 작업을 시행하고 마찬가지로 std_yyyy가 ‘2003’ 일 때도 두 가지 작업을 시행한다. 이를 위한 프로그램은 다음과 같다.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="chapter8.html#cb8-1" aria-hidden="true" tabindex="-1"></a>t20_temp <span class="ot">&lt;-</span> t20 <span class="sc">%&gt;%</span> </span>
+<span id="cb8-2"><a href="chapter8.html#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(std_yyyy <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&#39;2002&#39;</span>, <span class="st">&#39;2003&#39;</span>, <span class="st">&#39;2004&#39;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-3"><a href="chapter8.html#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(rn_indi, std_yyyy, rn_key, ed_rc_tot_amt, edc_sba)</span>
+<span id="cb8-4"><a href="chapter8.html#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="chapter8.html#cb8-5" aria-hidden="true" tabindex="-1"></a>t20_temp<span class="sc">$</span>totalcost <span class="ot">&lt;-</span> t20_temp<span class="sc">$</span>edc_sba2 <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb8-6"><a href="chapter8.html#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="chapter8.html#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(t20_temp) ) {</span>
+<span id="cb8-8"><a href="chapter8.html#cb8-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-9"><a href="chapter8.html#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (t20_temp[i,<span class="st">&quot;std_yyyy&quot;</span>]<span class="sc">==</span><span class="st">&#39;2002&#39;</span>) {</span>
+<span id="cb8-10"><a href="chapter8.html#cb8-10" aria-hidden="true" tabindex="-1"></a>  t20_temp<span class="sc">$</span>totalcost[i] <span class="ot">&lt;-</span> t20_temp<span class="sc">$</span>ed_rc_tot_amt[i] <span class="sc">+</span> <span class="dv">1000</span></span>
+<span id="cb8-11"><a href="chapter8.html#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (t20_temp[i,<span class="st">&quot;edc_sba&quot;</span>]<span class="sc">&gt;</span><span class="dv">3000</span>) {</span>
+<span id="cb8-12"><a href="chapter8.html#cb8-12" aria-hidden="true" tabindex="-1"></a>  t20_temp<span class="sc">$</span>edc_sba2[i] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb8-13"><a href="chapter8.html#cb8-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-14"><a href="chapter8.html#cb8-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-15"><a href="chapter8.html#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="chapter8.html#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (t20_temp[i,<span class="st">&quot;std_yyyy&quot;</span>]<span class="sc">==</span><span class="st">&#39;2003&#39;</span>) {</span>
+<span id="cb8-17"><a href="chapter8.html#cb8-17" aria-hidden="true" tabindex="-1"></a>  t20_temp<span class="sc">$</span>totalcost[i] <span class="ot">&lt;-</span> t20_temp<span class="sc">$</span>ed_rc_tot_amt[i] <span class="sc">+</span> <span class="dv">2000</span></span>
+<span id="cb8-18"><a href="chapter8.html#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (t20_temp[i,<span class="st">&quot;edc_sba&quot;</span>]<span class="sc">&gt;</span><span class="dv">3000</span>) {</span>
+<span id="cb8-19"><a href="chapter8.html#cb8-19" aria-hidden="true" tabindex="-1"></a>  t20_temp<span class="sc">$</span>edc_sba2[i] <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
+<span id="cb8-20"><a href="chapter8.html#cb8-20" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-21"><a href="chapter8.html#cb8-21" aria-hidden="true" tabindex="-1"></a>  }  </span>
+<span id="cb8-22"><a href="chapter8.html#cb8-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-23"><a href="chapter8.html#cb8-23" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-24"><a href="chapter8.html#cb8-24" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-25"><a href="chapter8.html#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-26"><a href="chapter8.html#cb8-26" aria-hidden="true" tabindex="-1"></a>t20_temp</span></code></pre></div>
+<pre><code>## # A tibble: 15,074 x 7
+##    rn_indi std_yyyy rn_key        ed_rc_tot_amt edc_sba edc_sba2 totalcost
+##      &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;                 &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+##  1  746491 2002     2002100382947         10590    3000       NA     11590
+##  2  848340 2002     2002070609412         10590    3000       NA     11590
+##  3  992522 2002     2002091020009         10590    3000       NA     11590
+##  4  543044 2002     2002090218816         10590    3000       NA     11590
+##  5  928716 2002     2002080203933         10590    3000       NA     11590
+##  6  633585 2002     2002050156181         10590    3000       NA     11590
+##  7  706339 2002     2002040696294         10590    3000       NA     11590
+##  8  515572 2002     2002070735314         10590    3000       NA     11590
+##  9   71582 2002     2002070205573         10590    3000       NA     11590
+## 10  701404 2002     2002070165758         10590    3000       NA     11590
+## # ... with 15,064 more rows</code></pre>
 </div>
-<div id="공단자료와-필요패키지-불러오기" class="section level2" number="4.3">
-<h2><span class="header-section-number">4.3</span> 공단자료와 필요패키지 불러오기</h2>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="chapter4.html#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div>
-<pre><code>## -- Attaching packages --------------------------------------- tidyverse 1.3.1 --</code></pre>
-<pre><code>## v ggplot2 3.3.5     v purrr   0.3.4
-## v tibble  3.1.2     v dplyr   1.0.6
-## v tidyr   1.1.3     v stringr 1.4.0
-## v readr   1.4.0     v forcats 0.5.1</code></pre>
-<pre><code>## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
-## x dplyr::filter() masks stats::filter()
-## x dplyr::lag()    masks stats::lag()</code></pre>
-<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="chapter4.html#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="do">## 공단자료 부르기</span></span>
-<span id="cb29-2"><a href="chapter4.html#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">&quot;claim.RData&quot;</span>)</span>
-<span id="cb29-3"><a href="chapter4.html#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span>()</span></code></pre></div>
-<pre><code>## [1] &quot;death&quot; &quot;inst&quot;  &quot;jk&quot;    &quot;t20&quot;   &quot;t30&quot;   &quot;t40&quot;   &quot;t60&quot;   &quot;x&quot;</code></pre>
-</div>
-<div id="특정-변수만-남기기" class="section level2" number="4.4">
-<h2><span class="header-section-number">4.4</span> 특정 변수만 남기기</h2>
-<p>특정 변수만 취하여 새로운 데이터셋을 구성하고 싶을때, 데이터프레임 인덱싱 작업 또는 여러 함수를 통해서 구성이 가능하다(예: select() 함수).</p>
-<pre><code>select(데이터셋, 변수1, 변수2, ...) 또는
-데이터셋 %&gt;% select(변수1, 변수2, ...)</code></pre>
-<p>T20 데이터셋에서 개인고유번호(RN_INDI), 청구고유번호(RN_KEY), 심결요양급여비용총액(ED_RC_TOT_AMT) 세 개의 변수만 남겨서 데이터셋을 생성시켜보자. 프로그램은 다음과 같다.</p>
-<ul>
-<li>방법1</li>
-</ul>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="chapter4.html#cb32-1" aria-hidden="true" tabindex="-1"></a>t20_ex <span class="ot">&lt;-</span> t20[<span class="fu">c</span>(<span class="st">&quot;rn_indi&quot;</span>, <span class="st">&quot;rn_key&quot;</span>, <span class="st">&quot;ed_rc_tot_amt&quot;</span>)]</span>
-<span id="cb32-2"><a href="chapter4.html#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t20_ex)</span></code></pre></div>
-<pre><code>## # A tibble: 6 x 3
-##   rn_indi rn_key        ed_rc_tot_amt
-##     &lt;dbl&gt; &lt;chr&gt;                 &lt;dbl&gt;
-## 1  746491 2002100382947         10590
-## 2  848340 2002070609412         10590
-## 3  992522 2002091020009         10590
-## 4  543044 2002090218816         10590
-## 5  928716 2002080203933         10590
-## 6  633585 2002050156181         10590</code></pre>
-<ul>
-<li>방법2</li>
-</ul>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="chapter4.html#cb34-1" aria-hidden="true" tabindex="-1"></a>t20_ex <span class="ot">&lt;-</span> t20 <span class="sc">%&gt;%</span> </span>
-<span id="cb34-2"><a href="chapter4.html#cb34-2" aria-hidden="true" tabindex="-1"></a>          <span class="fu">select</span>(rn_indi, rn_key, ed_rc_tot_amt)</span>
-<span id="cb34-3"><a href="chapter4.html#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t20_ex)</span></code></pre></div>
-<pre><code>## # A tibble: 6 x 3
-##   rn_indi rn_key        ed_rc_tot_amt
-##     &lt;dbl&gt; &lt;chr&gt;                 &lt;dbl&gt;
-## 1  746491 2002100382947         10590
-## 2  848340 2002070609412         10590
-## 3  992522 2002091020009         10590
-## 4  543044 2002090218816         10590
-## 5  928716 2002080203933         10590
-## 6  633585 2002050156181         10590</code></pre>
-</div>
-<div id="특정-변수-지우기" class="section level2" number="4.5">
-<h2><span class="header-section-number">4.5</span> 특정 변수 지우기</h2>
-<p>특정 변수를 지우고 새로운 데이터셋을 구성하고 싶을때 인덱싱 방법이나 select() 함수를 이용할때는 ‘-’를 붙여서 삭제한다. 또는!’’(not)을 이용하여 변수를 삭제한다.</p>
-<pre><code>select(데이터셋, -변수1, -변수2, ...) 또는
-데이터셋 %&gt;% select(-변수1, -변수2, ...)</code></pre>
-<p>T40 데이터셋에서 요양개시일자(MDCARE_STRT_DT), 서식코드(FORM_CD), 세부전문과목코드(DETAIL_TMSG_SUBJ_CD), 상병분류구분코드(SICK_CLSF_TYPE)을 제거하고 개인고유번호(RN_INDI), 청구고유번호(RN_KEY), 심결요양급여비용총액(ED_RC_TOT_AMT), 기준년도(STD_YYYY) 네 개의 변수만 남겨서 이터셋을 생성시켜보자. 프로그램은 다음과 같다.</p>
-<ul>
-<li>방법1</li>
-</ul>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="chapter4.html#cb37-1" aria-hidden="true" tabindex="-1"></a>index <span class="ot">&lt;-</span> <span class="fu">names</span>(t40) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;mdcare_strt_dt&quot;</span>, <span class="st">&quot;form_cd&quot;</span>, <span class="st">&quot;detail_tmsg_subj_cd&quot;</span>, <span class="st">&quot;sick_clsf_type&quot;</span>)</span>
-<span id="cb37-2"><a href="chapter4.html#cb37-2" aria-hidden="true" tabindex="-1"></a>t40_ex <span class="ot">&lt;-</span> t40[,<span class="sc">!</span>index]</span>
-<span id="cb37-3"><a href="chapter4.html#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t40_ex)</span></code></pre></div>
-<pre><code>## # A tibble: 6 x 4
-##   rn_indi rn_key        mcex_sick_sym std_yyyy
-##     &lt;dbl&gt; &lt;chr&gt;         &lt;chr&gt;         &lt;chr&gt;   
-## 1  596535 2002120187152 J209          2002    
-## 2  615374 2002121012274 J209          2002    
-## 3 1005547 2002120808216 J209          2002    
-## 4  226594 2002120381612 J209          2002    
-## 5  204930 2002120790182 J209          2002    
-## 6  798943 2002040446183 J209          2002</code></pre>
-<ul>
-<li>방법2</li>
-</ul>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="chapter4.html#cb39-1" aria-hidden="true" tabindex="-1"></a>t40_ex <span class="ot">&lt;-</span> t40 <span class="sc">%&gt;%</span> </span>
-<span id="cb39-2"><a href="chapter4.html#cb39-2" aria-hidden="true" tabindex="-1"></a>          <span class="fu">select</span>(<span class="sc">-</span>mdcare_strt_dt, <span class="sc">-</span>form_cd, <span class="sc">-</span>detail_tmsg_subj_cd, <span class="sc">-</span>sick_clsf_type)</span>
-<span id="cb39-3"><a href="chapter4.html#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t40_ex)</span></code></pre></div>
-<pre><code>## # A tibble: 6 x 4
-##   rn_indi rn_key        mcex_sick_sym std_yyyy
-##     &lt;dbl&gt; &lt;chr&gt;         &lt;chr&gt;         &lt;chr&gt;   
-## 1  596535 2002120187152 J209          2002    
-## 2  615374 2002121012274 J209          2002    
-## 3 1005547 2002120808216 J209          2002    
-## 4  226594 2002120381612 J209          2002    
-## 5  204930 2002120790182 J209          2002    
-## 6  798943 2002040446183 J209          2002</code></pre>
-</div>
-<div id="변수-이름-바꾸기" class="section level2" number="4.6">
-<h2><span class="header-section-number">4.6</span> 변수 이름 바꾸기</h2>
-<p>생성된 데이터셋의 변수 이름을 바꾸거나 새로운 데이터셋 생성시 다른 이름으로 변수를 저장해야 하는 경우 사용하는 명령문이 RENAME 이다. RENAME 문을 사용하는 방법은 다음과 같다.</p>
-<pre><code>rename(데이터셋, 새로운변수명1=기존변수명1,새로운변수명2=기존변수명2,...) 또는
-데이터셋 %&gt;% select(새로운변수명1=기존변수명1,새로운변수명2=기존변수명2,...)</code></pre>
-<p>T20 데이터셋에서 개인고유번호(RN_INDI)를 PERSON_ID로, 청구고유번호(RN_KEY)를 MID, 심결요양급여비용총액(ED_RC_TOT_AMT)를 COST로 변경하여 데이터셋을 생성시켜보자. 프로그램은 다음과 같다.</p>
-<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="chapter4.html#cb42-1" aria-hidden="true" tabindex="-1"></a>t20_ex <span class="ot">&lt;-</span> t20 <span class="sc">%&gt;%</span> <span class="fu">select</span>(rn_indi, rn_key, ed_rc_tot_amt)</span>
-<span id="cb42-2"><a href="chapter4.html#cb42-2" aria-hidden="true" tabindex="-1"></a>t20_ex <span class="ot">&lt;-</span> t20_ex <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="at">person_id=</span>rn_indi, <span class="at">mid=</span>rn_key, <span class="at">cost=</span>ed_rc_tot_amt)</span>
-<span id="cb42-3"><a href="chapter4.html#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t20_ex)</span></code></pre></div>
-<pre><code>## # A tibble: 6 x 3
-##   person_id mid            cost
-##       &lt;dbl&gt; &lt;chr&gt;         &lt;dbl&gt;
-## 1    746491 2002100382947 10590
-## 2    848340 2002070609412 10590
-## 3    992522 2002091020009 10590
-## 4    543044 2002090218816 10590
-## 5    928716 2002080203933 10590
-## 6    633585 2002050156181 10590</code></pre>
-<p>위의 프로그램은 pipe를 이용하여 하나의 구문으로 실행이 가능하다.</p>
-<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="chapter4.html#cb44-1" aria-hidden="true" tabindex="-1"></a>t20_ex <span class="ot">&lt;-</span> t20 <span class="sc">%&gt;%</span> </span>
-<span id="cb44-2"><a href="chapter4.html#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(rn_indi, rn_key, ed_rc_tot_amt) <span class="sc">%&gt;%</span> </span>
-<span id="cb44-3"><a href="chapter4.html#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">person_id=</span>rn_indi, <span class="at">mid=</span>rn_key, <span class="at">cost=</span>ed_rc_tot_amt)</span>
-<span id="cb44-4"><a href="chapter4.html#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t20_ex)</span></code></pre></div>
-<pre><code>## # A tibble: 6 x 3
-##   person_id mid            cost
-##       &lt;dbl&gt; &lt;chr&gt;         &lt;dbl&gt;
-## 1    746491 2002100382947 10590
-## 2    848340 2002070609412 10590
-## 3    992522 2002091020009 10590
-## 4    543044 2002090218816 10590
-## 5    928716 2002080203933 10590
-## 6    633585 2002050156181 10590</code></pre>
-</div>
-<div id="특정-위치의-관찰값-추출" class="section level2" number="4.7">
-<h2><span class="header-section-number">4.7</span> 특정 위치의 관찰값 추출</h2>
-<p>R에서는 특정 위치의 관찰값은 인덱싱을 이용하여 아주 쉽게 추출이 가능하다.</p>
-<pre><code>데이터셋[시작위치:끝위치,] 또는
-데이터셋[c(위치값들),]</code></pre>
-<p>T20 데이터셋에서 1,001번 행부터 2,000번 행까지 1,000개의 행만 추출하여 데이터셋을 생성하는 경우를 생각해보자. 프로그램은 다음과 같다.</p>
-<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="chapter4.html#cb47-1" aria-hidden="true" tabindex="-1"></a>t20_ex <span class="ot">&lt;-</span> t20[<span class="dv">1001</span><span class="sc">:</span><span class="dv">2000</span>,]</span>
-<span id="cb47-2"><a href="chapter4.html#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t20_ex)</span></code></pre></div>
-<pre><code>## # A tibble: 6 x 22
-##   rn_indi rn_key        rn_inst mdcare_strt_dt form_cd mcare_subj_cd sick_sym1
-##     &lt;dbl&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;   &lt;chr&gt;         &lt;chr&gt;    
-## 1  880016 2002020351011   98672 20020214       03      11            J069     
-## 2  963070 2002100012551   87635 20021009       03      01            J06      
-## 3  295221 2002030283673   58543 20020305       03      11            J039     
-## 4    5707 2002060682805   36485 20020613       03      01            A09      
-## 5  964637 2002090956675   37020 20020904       03      05            S934     
-## 6  250680 2002010064683  135669 20020121       03      14            L84      
-## # ... with 15 more variables: sick_sym2 &lt;chr&gt;, hsptz_path_type &lt;chr&gt;,
-## #   ofij_type &lt;chr&gt;, oprtn_yn &lt;chr&gt;, mdcare_dd_cnt &lt;dbl&gt;, vshsp_dd_cnt &lt;dbl&gt;,
-## #   tot_prsc_dd_cnt &lt;dbl&gt;, mcare_rslt_type &lt;chr&gt;, fst_hsptz_dt &lt;chr&gt;,
-## #   edc_add_rt &lt;dbl&gt;, spcf_sym_type &lt;chr&gt;, ed_rc_tot_amt &lt;dbl&gt;, edc_sba &lt;dbl&gt;,
-## #   edc_insur_brdn_amt &lt;dbl&gt;, std_yyyy &lt;chr&gt;</code></pre>
-<p>첫번째 부터 5번째까지는</p>
-<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="chapter4.html#cb49-1" aria-hidden="true" tabindex="-1"></a>t20[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,]</span></code></pre></div>
-<pre><code>## # A tibble: 5 x 22
-##   rn_indi rn_key        rn_inst mdcare_strt_dt form_cd mcare_subj_cd sick_sym1
-##     &lt;dbl&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;   &lt;chr&gt;         &lt;chr&gt;    
-## 1  746491 2002100382947   47036 20021016       03      14            L218     
-## 2  848340 2002070609412   47036 20020712       03      14            B351     
-## 3  992522 2002091020009   70468 20020923       03      10            N_       
-## 4  543044 2002090218816   22970 20020930       03      13            J304     
-## 5  928716 2002080203933   37742 20020826       03      13            J311     
-## # ... with 15 more variables: sick_sym2 &lt;chr&gt;, hsptz_path_type &lt;chr&gt;,
-## #   ofij_type &lt;chr&gt;, oprtn_yn &lt;chr&gt;, mdcare_dd_cnt &lt;dbl&gt;, vshsp_dd_cnt &lt;dbl&gt;,
-## #   tot_prsc_dd_cnt &lt;dbl&gt;, mcare_rslt_type &lt;chr&gt;, fst_hsptz_dt &lt;chr&gt;,
-## #   edc_add_rt &lt;dbl&gt;, spcf_sym_type &lt;chr&gt;, ed_rc_tot_amt &lt;dbl&gt;, edc_sba &lt;dbl&gt;,
-## #   edc_insur_brdn_amt &lt;dbl&gt;, std_yyyy &lt;chr&gt;</code></pre>
-<p>135,000번째부터 마지막까지는</p>
-<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="chapter4.html#cb51-1" aria-hidden="true" tabindex="-1"></a>temp <span class="ot">&lt;-</span> t20[<span class="dv">135000</span><span class="sc">:</span><span class="fu">nrow</span>(t20),]</span>
-<span id="cb51-2"><a href="chapter4.html#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(temp)</span></code></pre></div>
-<pre><code>## # A tibble: 6 x 22
-##   rn_indi rn_key        rn_inst mdcare_strt_dt form_cd mcare_subj_cd sick_sym1
-##     &lt;dbl&gt; &lt;chr&gt;           &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;   &lt;chr&gt;         &lt;chr&gt;    
-## 1   66424 2015071124149  113143 20150720       08      00            U280     
-## 2   66424 2015072047475  113143 20150702       08      00            U280     
-## 3   66424 2015070290135  113143 20150710       08      00            U280     
-## 4   66424 2015071016842  113143 20150728       08      00            U280     
-## 5   66424 2015081338863  113143 20150807       08      00            U280     
-## 6   66424 2015081529196  113143 20150819       08      00            U280     
-## # ... with 15 more variables: sick_sym2 &lt;chr&gt;, hsptz_path_type &lt;chr&gt;,
-## #   ofij_type &lt;chr&gt;, oprtn_yn &lt;chr&gt;, mdcare_dd_cnt &lt;dbl&gt;, vshsp_dd_cnt &lt;dbl&gt;,
-## #   tot_prsc_dd_cnt &lt;dbl&gt;, mcare_rslt_type &lt;chr&gt;, fst_hsptz_dt &lt;chr&gt;,
-## #   edc_add_rt &lt;dbl&gt;, spcf_sym_type &lt;chr&gt;, ed_rc_tot_amt &lt;dbl&gt;, edc_sba &lt;dbl&gt;,
-## #   edc_insur_brdn_amt &lt;dbl&gt;, std_yyyy &lt;chr&gt;</code></pre>
+<div id="다중-반복" class="section level2" number="8.3">
+<h2><span class="header-section-number">8.3</span> 다중 반복</h2>
+<p>조건문에서 if 문을 중첩해서 사용하듯 반복문도 중첩해서 사용 가능하며 사용 방법은 다음과 같다.</p>
+<pre><code>for (i in 1:N) {
+  for (j in 1:K) {
+실행문
+  }
+}</code></pre>
+<p>여기서 반복 순서는 첫 번째 반복인 i가 1일때 j가 1부터 K까지 반복이 일어나며, 이러한 반복은 i의 값이 N에 이를 때까지 계속된다.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="chapter8.html#cb11-1" aria-hidden="true" tabindex="-1"></a>t20_double <span class="ot">&lt;-</span> t20 <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">year=</span><span class="fu">as.numeric</span>(<span class="fu">substr</span>(mdcare_strt_dt,<span class="dv">1</span>,<span class="dv">4</span>)),</span>
+<span id="cb11-2"><a href="chapter8.html#cb11-2" aria-hidden="true" tabindex="-1"></a>                             <span class="at">month=</span><span class="fu">as.numeric</span>(<span class="fu">substr</span>(mdcare_strt_dt,<span class="dv">5</span>,<span class="dv">6</span>))) <span class="sc">%&gt;%</span> <span class="fu">select</span>(rn_indi, year, month)</span>
+<span id="cb11-3"><a href="chapter8.html#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="chapter8.html#cb11-4" aria-hidden="true" tabindex="-1"></a>t20_double<span class="sc">$</span>yymm <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb11-5"><a href="chapter8.html#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2002</span><span class="sc">:</span><span class="dv">2015</span>) {</span>
+<span id="cb11-6"><a href="chapter8.html#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {</span>
+<span id="cb11-7"><a href="chapter8.html#cb11-7" aria-hidden="true" tabindex="-1"></a>   t20_double<span class="sc">$</span>yymm[t20_double<span class="sc">$</span>year<span class="sc">==</span>i <span class="sc">&amp;</span> t20_double<span class="sc">$</span>month<span class="sc">==</span>j] <span class="ot">&lt;-</span> <span class="fu">paste</span>(i,j,<span class="at">sep=</span><span class="st">&quot;-&quot;</span>)</span>
+<span id="cb11-8"><a href="chapter8.html#cb11-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb11-9"><a href="chapter8.html#cb11-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-10"><a href="chapter8.html#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="chapter8.html#cb11-11" aria-hidden="true" tabindex="-1"></a>t20_double</span></code></pre></div>
+<pre><code>## # A tibble: 135,524 x 4
+##    rn_indi  year month yymm   
+##      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  
+##  1  746491  2002    10 2002-10
+##  2  848340  2002     7 2002-7 
+##  3  992522  2002     9 2002-9 
+##  4  543044  2002     9 2002-9 
+##  5  928716  2002     8 2002-8 
+##  6  633585  2002     5 2002-5 
+##  7  706339  2002     4 2002-4 
+##  8  515572  2002     7 2002-7 
+##  9   71582  2002     7 2002-7 
+## 10  701404  2002     7 2002-7 
+## # ... with 135,514 more rows</code></pre>
+<p>i는 2002부터 2015까지 1단위로 증가하면서 값이 바뀌며, 2002부터 2015까지의 크기인 14만큼 반복 수행하게 된다. j는 1부터 12까지 1단위로 증가하면서 값이 바뀌며, 12만큼 반복수행 하게 된다. 이때 반복수행 순서는 i의 값이 바뀔 때마다 j는 전체 반복을 한다. 즉, i=2002일 때 j는 1부터 12까지 반복하며 다시 i=2003일 때 j는 1부터 12까지 반복한다. 다시 말해서 반복 순서는 바깥쪽에서부터 색인의 값이 하나씩 결정되며 제일 안쪽에 있는 for 문은 전체를 반복한다. 안쪽의 for 문이 끝나면 바깥쪽으로 순서대로 for 문을 끝낸다. 프로그램에서 paste 함수는 문자열을 결합할 때 사용하는 함수이다. 따라서 [paste(i,j,sep=“-”)]는 year=i이고 month=j일 때 yymm 변수는 ’i – j’ 값을 가지게 된다. 예를 들어, i=2002, month=12이면, yymm 변수는 ‘2002 – 12’ 라는 값을 가지게 되며 이러한 과정을 2002부터 2015까지, 1월부터 12월까지 모든 조합으로 조건을 검색하여 yymm 변수를 생성한다.</p>
 <!-------- End ------------>
 
 </div>
@@ -543,8 +443,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           </div>
         </div>
       </div>
-<a href="chapter3.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="chapter5.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="chapter7.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="chapter9.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
