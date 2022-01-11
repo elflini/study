@@ -24,7 +24,7 @@
 <meta name="author" content="Jin Hyun Nam" />
 
 
-<meta name="date" content="2022-01-06" />
+<meta name="date" content="2022-01-11" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -119,7 +119,7 @@
 <li class="chapter" data-level="4.1" data-path="chapter4.html"><a href="chapter4.html#칼럼-포인터-사용하기와-label문-사용하기"><i class="fa fa-check"></i><b>4.1</b> 칼럼 포인터 @ 사용하기와 LABEL문 사용하기</a></li>
 <li class="chapter" data-level="4.2" data-path="chapter4.html"><a href="chapter4.html#proc-contents의-형식"><i class="fa fa-check"></i><b>4.2</b> PROC CONTENTS의 형식</a></li>
 <li class="chapter" data-level="4.3" data-path="chapter4.html"><a href="chapter4.html#특정-변수를-취하여-새로운-dataset-만들기-keep문"><i class="fa fa-check"></i><b>4.3</b> 특정 변수를 취하여 새로운 DATASET 만들기 (KEEP문)</a></li>
-<li class="chapter" data-level="4.4" data-path="chapter4.html"><a href="chapter4.html#변수를-제외하고-새로운-dataset-만들기-drop문"><i class="fa fa-check"></i><b>4.4</b> 변수를 제외하고 새로운 DATASET 만들기 (DROP문)</a></li>
+<li class="chapter" data-level="4.4" data-path="chapter4.html"><a href="chapter4.html#특정-변수를-제외하고-새로운-dataset-만들기-drop문"><i class="fa fa-check"></i><b>4.4</b> 특정 변수를 제외하고 새로운 DATASET 만들기 (DROP문)</a></li>
 <li class="chapter" data-level="4.5" data-path="chapter4.html"><a href="chapter4.html#특정-관찰값부터-시작하여-dataset-만들기firstobs문"><i class="fa fa-check"></i><b>4.5</b> 특정 관찰값부터 시작하여 DATASET 만들기(FIRSTOBS문)</a></li>
 <li class="chapter" data-level="4.6" data-path="chapter4.html"><a href="chapter4.html#기존-dataset으로-다수의-새로운-dataset-만들기"><i class="fa fa-check"></i><b>4.6</b> 기존 DATASET으로 다수의 새로운 DATASET 만들기</a></li>
 <li class="chapter" data-level="4.7" data-path="chapter4.html"><a href="chapter4.html#변수-이름-바꾸기"><i class="fa fa-check"></i><b>4.7</b> 변수 이름 바꾸기</a></li>
@@ -141,7 +141,7 @@
 <li class="chapter" data-level="6.2" data-path="chapter6.html"><a href="chapter6.html#연속자료의-범주화"><i class="fa fa-check"></i><b>6.2</b> 연속자료의 범주화</a></li>
 <li class="chapter" data-level="6.3" data-path="chapter6.html"><a href="chapter6.html#조건식에서-여러-연산자-사용하기"><i class="fa fa-check"></i><b>6.3</b> 조건식에서 여러 연산자 사용하기</a></li>
 <li class="chapter" data-level="6.4" data-path="chapter6.html"><a href="chapter6.html#조건식에서-연산순서"><i class="fa fa-check"></i><b>6.4</b> 조건식에서 연산순서</a></li>
-<li class="chapter" data-level="6.5" data-path="chapter6.html"><a href="chapter6.html#여러-조건-사용하기"><i class="fa fa-check"></i><b>6.5</b> 여러 조건 사용하기</a></li>
+<li class="chapter" data-level="6.5" data-path="chapter6.html"><a href="chapter6.html#여러-조건-사용하기"><i class="fa fa-check"></i><b>6.5</b> 5. 여러 조건 사용하기</a></li>
 <li class="chapter" data-level="6.6" data-path="chapter6.html"><a href="chapter6.html#특정-관찰값-삭제"><i class="fa fa-check"></i><b>6.6</b> 특정 관찰값 삭제</a></li>
 <li class="chapter" data-level="6.7" data-path="chapter6.html"><a href="chapter6.html#특정-관찰값-선택"><i class="fa fa-check"></i><b>6.7</b> 특정 관찰값 선택</a></li>
 <li class="chapter" data-level="6.8" data-path="chapter6.html"><a href="chapter6.html#upcase함수를-이용한-특정-관찰값-선택"><i class="fa fa-check"></i><b>6.8</b> UPCASE함수를 이용한 특정 관찰값 선택</a></li>
@@ -244,42 +244,1396 @@
 <h1><span class="header-section-number">Chapter 10</span> DATASET 합치기</h1>
 <div id="두-개의-dataset-합치기-set문" class="section level2" number="10.1">
 <h2><span class="header-section-number">10.1</span> 두 개의 DATASET 합치기 (SET문)</h2>
+<p>▶ dept1, dept2 DATASET을 붙여 하나의 DATASET을 만드는 것</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data dept1; 
+input ssn $ 1-9 name $ 11-29 @30 hired date7. salary phone $; 
+format hired date7. ;
+cards ;
+429685482 Martin, Virginia 09aug80 34800 493-0824 
+244967839 Singleton, MaryAnn 24apr85 27900 929-2623 
+996740216 Leighton, Maurice 16dec83 32600 933-6908 
+675443925 Freuler, Carl 15feb88 29900 493-3993 
+845729308 Cage, Merce 19oct82 39800 286-0519 
+;
+proc print data=dept1 ; 
+title &#39;Data Set DEPT1&#39; ;
+run ;</code></pre>
+<p>▶ DATA의 구성 : ssn, name, hired, salary, phone변수로 구성된 dept1 dataset</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                             Data Set DEPT1                            
+
+Obs       ssn       name                    hired    salary     phone
+
+ 1     429685482    Martin, Virginia      09AUG80     34800    493-0824
+ 2     244967839    Singleton, MaryAnn    24APR85     27900    929-2623
+ 3     996740216    Leighton, Maurice     16DEC83     32600    933-6908
+ 4     675443925    Freuler, Carl         15FEB88     29900    493-3993
+ 5     845729308    Cage, Merce           19OCT82     39800    286-0519</code></pre>
+<p><br></p>
+<pre><code>&lt;SAS PROGRAM&gt;</code></pre>
+<pre><code>data dept2; 
+input ssn $ 1-9 name $ 11-29 @30 hired date7. salary phone $; 
+format hired date7. ;
+cards ;
+324987451 Sayre, Jay 15nov84 44800 933-2998 
+596771321 Tolson, Andrew 18mar88 41200 929-4800 
+477562122 Jensen, Helga 01feb81 47400 286-2816 
+894724859 Kulenic, Marie 24jun83 41400 493-1472 
+988427431 Zweerink, Anna 07jul85 43700 929-3885 
+;
+proc print data=dept2 ; 
+title &#39;Data Set DEPT2&#39; ;
+run ;</code></pre>
+<p>▶ DATA의 구성 : ssn, name, hired, salary, phone변수로 구성된 dept2 dataset</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                           Data Set DEPT2                            
+
+Obs       ssn            name           hired    salary     phone
+
+ 1     324987451    Sayre, Jay        15NOV84     44800    933-2998
+ 2     596771321    Tolson, Andrew    18MAR88     41200    929-4800
+ 3     477562122    Jensen, Helga     01FEB81     47400    286-2816
+ 4     894724859    Kulenic, Marie    24JUN83     41400    493-1472
+ 5     988427431    Zweerink, Anna    07JUL85     43700    929-3885</code></pre>
+<p><br></p>
+<p>▶ SET문을 이용하여 dept1, dept2 DATASET을 붙여 하나의 DATASET을 만듦.</p>
+<pre><code>&lt;SAS PROGRAM&gt;</code></pre>
+<pre><code>data dept1_2; 
+set dept1 dept2; 
+run ;
+proc print data=dept1_2; 
+title &#39;Concatenating DEPT1 and DEPT2&#39; ;
+title2 &#39;to Create DEPT1_2&#39; ;
+run ;</code></pre>
+<p>• SET문 : DATASET이 아래에 붙으며 SET문 다음에 먼저 나오는 것이 위쪽에 붙음.</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                     Concatenating DEPT1 and DEPT2                     
+                           to Create DEPT1_2  11:13 Tuesday, May 9, 2006
+
+Obs       ssn       name                    hired    salary     phone
+
+  1    429685482    Martin, Virginia      09AUG80     34800    493-0824 
+  2    244967839    Singleton, MaryAnn    24APR85     27900    929-2623
+  3    996740216    Leighton, Maurice     16DEC83     32600    933-6908
+  4    675443925    Freuler, Carl         15FEB88     29900    493-3993
+  5    845729308    Cage, Merce           19OCT82     39800    286-0519
+  6    324987451    Sayre, Jay            15NOV84     44800    933-2998
+  7    596771321    Tolson, Andrew        18MAR88     41200    929-4800
+  8    477562122    Jensen, Helga         01FEB81     47400    286-2816
+  9    894724859    Kulenic, Marie        24JUN83     41400    493-1472
+ 10    988427431    Zweerink, Anna        07JUL85     43700    929-3885</code></pre>
+<p>• 두 개의 DATASET을 붙여 하나의 DATASET을 형성한 것을 볼 수 있다.<br />
+• <strong>SET dept1 dept2;</strong> 라고 하였으므로 dept1 DATASET이 먼저 위치함을 볼 수 있다.</p>
+<p><br></p>
 </div>
 <div id="세-개의-dataset-합치기-set문" class="section level2" number="10.2">
 <h2><span class="header-section-number">10.2</span> 세 개의 DATASET 합치기 (SET문)</h2>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data dept3; 
+input ssn $ 1-9 name $ 11-29 sex $ 30 @32 hired date7. salary; 
+format hired date7. ;
+cards ;
+744289612 Saparilas, Theresa F 09may88 33400 
+824904032 Brosnihan, Dylan M 04jan82 38200 
+242779184 Chao, Daeyong M 28sep85 37500 
+544382887 Slifkin, Leah F 24jul84 45000 
+933476520 Perry, Marguerite F 19apr82 39900 
+;
+proc print data=dept3; 
+title &#39;Data Set DEPT3&#39; ;
+run ;</code></pre>
+<p>▶ DATA의 구성 : ssn, name, sex, hired, salary 변수로 구성된 dept3 dataset</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                             Data Set DEPT3                            
+
+   Obs       ssn              name           sex      hired    salary
+
+    1     744289612    Saparilas, Theresa     F     09MAY88     33400
+    2     824904032    Brosnihan, Dylan       M     04JAN82     38200
+    3     242779184    Chao, Daeyong          M     28SEP85     37500
+    4     544382887    Slifkin, Leah          F     24JUL84     45000
+    5     933476520    Perry, Marguerite      F     19APR82     39900</code></pre>
+<p><br></p>
+<p>▶ 변수의 구성과 순서가 다른 경우</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data dept1_3; 
+set dept1 dept2 dept3; 
+run ;
+proc print data=dept1_3; 
+title &#39;Combining Data Sets with Different Variables&#39; ;
+run ;</code></pre>
+<p>▶ 3개의 DATASET을 붙이는데 변수의 순서와 구성이 다른 경우<br />
+• dept1, dept2 DATASET은 ssn, name, hired, salary, phone 변수의 순으로 구성<br />
+dept3 DATASET은 ssn, name, sex, hired, salary 변수의 순서로 구성<br />
+• <strong>SET dept1 dept2 dept3;</strong> 이라고 하면 처음 사용한 dept1의 순서대로 변수가 기준이 되고 존재하지 않는 변수에 해당하는 것을 결측값으로 처리<br />
+• dept1_3 DATASET에는 ssn, name, hired, salary, phone, sex 변수의 순서로 나열.<br />
+• 없는 변수는 문자변수이므로 공백으로 들어가게 됨</p>
+<pre><code>&lt;OUTPUT&gt;
+
+              Combining Data Sets with Different Variables             
+
+Obs      ssn      name                   hired   salary    phone     sex
+
+  1   429685482   Martin, Virginia     09AUG80    34800   493-0824
+  2   244967839   Singleton, MaryAnn   24APR85    27900   929-2623
+  3   996740216   Leighton, Maurice    16DEC83    32600   933-6908
+  4   675443925   Freuler, Carl        15FEB88    29900   493-3993
+  5   845729308   Cage, Merce          19OCT82    39800   286-0519
+  6   324987451   Sayre, Jay           15NOV84    44800   933-2998
+  7   596771321   Tolson, Andrew       18MAR88    41200   929-4800
+  8   477562122   Jensen, Helga        01FEB81    47400   286-2816
+  9   894724859   Kulenic, Marie       24JUN83    41400   493-1472  
+ 10   988427431   Zweerink, Anna       07JUL85    43700   929-3885
+ 11   744289612   Saparilas, Theresa   09MAY88    33400               F
+ 12   824904032   Brosnihan, Dylan     04JAN82    38200               M
+ 13   242779184   Chao, Daeyong        28SEP85    37500               M
+ 14   544382887   Slifkin, Leah        24JUL84    45000               F
+ 15   933476520   Perry, Marguerite    19APR82    39900               F</code></pre>
+<p>• 3개의 DATASET을 합친 것으로 존재하지 않는 변수에 대해 문자변수이므로 공백표시<br />
+• 변수의 나열 순서가 SET문에서 DATASET이름의 나열 순서에 의거하는 것을 볼 수 있음</p>
+<p><br></p>
 </div>
 <div id="변수명이-다른-네-개의-dataset-합치기-set문" class="section level2" number="10.3">
 <h2><span class="header-section-number">10.3</span> 변수명이 다른 네 개의 DATASET 합치기 (SET문)</h2>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data dept4; 
+input ssn 1-9 name $ 11-29 sex $ 30 @32 hired date7. salary; 
+format hired date7. ;
+cards ;
+634875680 Gardinski, Barbara F 29may88 49800 
+824576630 Robertson, Hannah F 14mar85 52700 
+744826703 Gresham, Jean F 28apr82 54000 
+824447605 Kruize, Ronald M 23may84 49200 
+988674342 Linzer, Fritz M 23jul82 50400 
+;
+proc print data=dept4; 
+title &#39;Data Set DEPT4&#39; ;
+run ;</code></pre>
+<p>▶ DATA의 구성 : ssn, name, sex, hired, salary변수로 구성된 dept4 dataset</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                             Data Set DEPT4                            
+
+   Obs       ssn              name           sex      hired    salary
+
+    1     634875680    Gardinski, Barbara     F     29MAY88     49800
+    2     824576630    Robertson, Hannah      F     14MAR85     52700
+    3     744826703    Gresham, Jean          F     28APR82     54000
+    4     824447605    Kruize, Ronald         M     23MAY84     49200
+    5     988674342    Linzer, Fritz          M     23JUL82     50400</code></pre>
+<p><br></p>
+<p>▶ <strong>RENAME</strong>문을 이용하여 기존 변수의 이름을 변경</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data newdept4 (drop=tempvar) ; 
+length ssn $ 9 ;
+set dept4 (rename=(ssn=tempvar)) ; 
+ssn=tempvar; 
+run ;
+proc print data=newdept4; 
+title &#39;New Data Set with SSN as a Character Variable&#39; ;
+run ;</code></pre>
+<p>• <strong>(RENAME=(ssn=tempvar))</strong> : ssn변수명과 tempvar변수명이 동일<br />
+• <strong>ssn=tempvar;</strong> : tempvar변수의 값에 있는 것은 ssn변수에 다시 넣는 것</p>
+<pre><code>&lt;OUTPUT&gt;
+
+             New Data Set with SSN as a Character Variable             
+
+  Obs     ssn      tempvar          name         sex    hired  salary
+
+   1   634875680  634875680  Gardinski, Barbara   F   29MAY88   49800
+   2   824576630  824576630  Robertson, Hannah    F   14MAR85   52700
+   3   744826703  744826703  Gresham, Jean        F   28APR82   54000
+   4   824447605  824447605  Kruize, Ronald       M   23MAY84   49200
+   5   988674342  988674342  Linzer, Fritz        M   23JUL82   5040</code></pre>
+<p><br></p>
+<pre><code>             New Data Set with SSN as a Character Variable             
+
+   Obs       ssn              name           sex      hired    salary
+
+    1     634875680    Gardinski, Barbara     F     29MAY88     49800 
+    2     824576630    Robertson, Hannah      F     14MAR85     52700
+    3     744826703    Gresham, Jean          F     28APR82     54000
+    4     824447605    Kruize, Ronald         M     23MAY84     49200
+    5     988674342    Linzer, Fritz          M     23JUL82     50400</code></pre>
+<p>• tempvar을 제거하지 않은 출력 결과와 제거한 출력결과를 보임.<br />
+• 두 출력결과에서 ssn변수와 tempvar변수가 동일한 값을 갖고 있음을 알 수 있다.</p>
+<p><br></p>
+<p>▶ 각각의 DATASET을 구성하는 변수명이 다른 경우에 4개의 DATASET을 합치는 것.</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data dept1_4; 
+set dept1 dept2 dept3 newdept4; 
+run ;
+proc print data=dept1_4; 
+title &#39;Successful Concatenation After Changing the Type of SSN&#39; ;
+title2 &#39;from Numeric to Character&#39; ;
+run ;</code></pre>
+<pre><code>&lt;OUTPUT&gt;
+
+        Successful Concatenation After Changing the Type of SSN        
+                       from Numeric to Character
+
+Obs      ssn      name                   hired   salary    phone     sex
+
+  1   429685482   Martin, Virginia     09AUG80    34800   493-0824
+  2   244967839   Singleton, MaryAnn   24APR85    27900   929-2623
+  3   996740216   Leighton, Maurice    16DEC83    32600   933-6908
+  4   675443925   Freuler, Carl        15FEB88    29900   493-3993
+  5   845729308   Cage, Merce          19OCT82    39800   286-0519
+  6   324987451   Sayre, Jay           15NOV84    44800   933-2998
+  7   596771321   Tolson, Andrew       18MAR88    41200   929-4800
+  8   477562122   Jensen, Helga        01FEB81    47400   286-2816
+  9   894724859   Kulenic, Marie       24JUN83    41400   493-1472
+ 10   988427431   Zweerink, Anna       07JUL85    43700   929-3885
+ 11   744289612   Saparilas, Theresa   09MAY88    33400               F
+ 12   824904032   Brosnihan, Dylan     04JAN82    38200               M
+ 13   242779184   Chao, Daeyong        28SEP85    37500               M
+ 14   544382887   Slifkin, Leah        24JUL84    45000               F
+ 15   933476520   Perry, Marguerite    19APR82    39900               F
+ 16   634875680   Gardinski, Barbara   29MAY88    49800               F
+ 17   824576630   Robertson, Hannah    14MAR85    52700               F
+ 18   744826703   Gresham, Jean        28APR82    54000               F
+ 19   824447605   Kruize, Ronald       23MAY84    49200               M
+ 20   988674342   Linzer, Fritz        23JUL82    50400               M</code></pre>
+<p><br></p>
 </div>
 <div id="변수명의-배열이-다른-dataset-합치기-set문" class="section level2" number="10.4">
 <h2><span class="header-section-number">10.4</span> 변수명의 배열이 다른 DATASET 합치기 (SET문)</h2>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data dept5; 
+input ssn $ 1-9 name $ 11-29 sex $ 30 @32 hired date7.@40 salary; 
+format hired date9. salary comma6. ;
+cards ;
+688774609 Carlton, Susan F 28jan85 29200 
+922448328 Hoffmann, Gerald M 12oct87 27600 
+544909752 DePuis, David M 23aug84 32900 
+745609821 Hahn, Kenneth M 23aug84 33300 
+634774295 Landau, Jennifer F 30apr86 32900 
+;
+proc print data=dept5; 
+title &#39;Data Set DEPT5&#39; ;
+title2 &#39;Has Different Formats for HIRED and SALARY&#39; ;
+run ;</code></pre>
+<p>▶ DATA의 구성 : ssn, name, sex, hired, salary변수로 구성된 dept5 dataset</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                             Data Set DEPT5                           
+               Has Different Formats for HIRED and SALARY
+
+   Obs       ssn             name          sex        hired    salary
+
+    1     688774609    Carlton, Susan       F     28JAN1985    29,200
+    2     922448328    Hoffmann, Gerald     M     12OCT1987    27,600
+    3     544909752    DePuis, David        M     23AUG1984    32,900
+    4     745609821    Hahn, Kenneth        M     23AUG1984    33,300
+    5     634774295    Landau, Jennifer     F     30APR1986    32,900</code></pre>
+<p><br></p>
+<p>▶ DATASET의 나열순서와 FORMAT문이 다를 경우</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data dept1_5; 
+set dept1 dept2 dept3 newdept4 dept5; 
+run ;
+proc print data=dept1_5; 
+title &#39;Concatenating with Different Formats&#39; ;
+run ;</code></pre>
+<p>• dept1_5 : dept1 DATASET이 기준. hired변수는 date7.로 인식 salary변수는 ,포함</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                  Concatenating with Different Formats                
+
+Obs      ssn      name                   hired   salary    phone     sex
+
+  1   429685482   Martin, Virginia     09AUG80   34,800   493-0824
+  2   244967839   Singleton, MaryAnn   24APR85   27,900   929-2623
+  3   996740216   Leighton, Maurice    16DEC83   32,600   933-6908
+  4   675443925   Freuler, Carl        15FEB88   29,900   493-3993
+
+ 22   922448328   Hoffmann, Gerald     12OCT87   27,600               M
+ 23   544909752   DePuis, David        23AUG84   32,900               M
+ 24   745609821   Hahn, Kenneth        23AUG84   33,300               M
+ 25   634774295   Landau, Jennifer     30APR86   32,900               F</code></pre>
+<p><br></p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data dept5_1; 
+set dept5 newdept4 dept3 dept2 dept1 ; 
+run ;
+proc print data=dept5_1; 
+title &#39;Concatenating with Different Formats&#39; ;
+title2 &#39;and Reversing the Order of the Data Sets&#39; ;
+title3 &#39;in the SET Statement&#39; ;
+run ;</code></pre>
+<p>• dept5_1 : dept5 DATASET이 기준. hired변수는 date7.로 연도에 두자리가 늘어나 19가 포함. salary변수는 ,포함, 자릿수는 기준이 있지만 ,의 경우는 어디든 같다.</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                  Concatenating with Different Formats                12
+                and Reversing the Order of the Data Sets
+                          in the SET Statement
+
+  Obs     ssn     name                sex      hired  salary   phone
+
+    1  688774609  Carlton, Susan       F   28JAN1985  29,200
+    2  922448328  Hoffmann, Gerald     M   12OCT1987  27,600
+    3  544909752  DePuis, David        M   23AUG1984  32,900
+    4  745609821  Hahn, Kenneth        M   23AUG1984  33,300
+                                       
+   23  996740216  Leighton, Maurice        16DEC1983  32,600  933-6908
+   24  675443925  Freuler, Carl            15FEB1988  29,900  493-3993
+   25  845729308  Cage, Merce              19OCT1982  39,800  286-0519</code></pre>
+<p><br></p>
 </div>
 <div id="지정된-관찰값의-길이가-다른-dataset-합치기-set문" class="section level2" number="10.5">
 <h2><span class="header-section-number">10.5</span> 지정된 관찰값의 길이가 다른 DATASET 합치기 (SET문)</h2>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data dept6; 
+input ssn $ 1-9 name $ 11-37 sex $ 38 @40 hired date7. salary; 
+format hired date7. ;
+cards ;
+922854076 Schoenberg, Marguerite F 19nov84 39800 
+770434994 Addison-Hardy, Jonathon M 23feb82 41400 
+242784883 McNaughton, Elizabeth F 24jul83 45000 
+377882806 Tharrington, Catherine F 28sep84 38600 
+292450691 Frangipani, Christopher M 12aug80 43900 
+;
+proc print data=dept6; 
+title &#39;Data Set DEPT6&#39; ;
+run ;</code></pre>
+<p>▶ DATA의 구성 : ssn, name, sex, hired, salary 변수로 구성된 dept6 dataset</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                             Data Set DEPT6                           13
+
+Obs       ssn                name              sex      hired    salary
+
+ 1     922854076    Schoenberg, Marguerite      F     19NOV84     39800
+ 2     770434994    Addison-Hardy, Jonathon     M     23FEB82     41400
+ 3     242784883    McNaughton, Elizabeth       F     24JUL83     45000
+ 4     377882806    Tharrington, Catherine      F     28SEP84     38600
+ 5     292450691    Frangipani, Christopher     M     12AUG80     43900</code></pre>
+<p><br></p>
+<p>▶ 같은 문자 변수에 대해 길이 지정이 다르게 되어 있는 경우</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data dept1_6; 
+set dept1 dept2 dept3 newdept4 dept5 dept6; 
+run ;
+proc print data=dept1_6; 
+title &#39;Concatenating with Different Lengths&#39; ;
+run ;</code></pre>
+<p>• <strong>set dept1 dept2 dept3 newdept4 dept5 dept6;</strong> 이라고 하였으므로 dept1이 기준<br />
+• dept6 DATASET의 경우 name 변수는 27칼럼으로 지정되어 다른 DATASET보다 8칼럼 큼.<br />
+• dept1이 기준이기에 19칼럼을 기준으로 name변수 생성, 19칼럼 넘기면 잘려나감.</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                  Concatenating with Different Lengths                14
+
+  Obs     ssn     name                   hired  salary   phone    sex
+
+    1  429685482  Martin, Virginia     09AUG80  34,800  493-0824
+    2  244967839  Singleton, MaryAnn   24APR85  27,900  929-2623
+    3  996740216  Leighton, Maurice    16DEC83  32,600  933-6908
+                                       
+   26  922854076  Schoenberg, Marguer  19NOV84  39,800             F
+   27  770434994  Addison-Hardy, Jona  23FEB82  41,400             M
+   28  242784883  McNaughton, Elizabe  24JUL83  45,000             F
+   29  377882806  Tharrington, Cather  28SEP84  38,600             F
+   30  292450691  Frangipani, Christo  12AUG80  43,900             M</code></pre>
+<p><br></p>
+<p>▶ 변수의 길이 지정이 다른 경우 변수값이 잘려나가는 것을 방지한다.</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data dept6_1; 
+set dept6 dept5 newdept4 dept3 dept2 dept1 ; 
+run ;
+ 
+data dept1_6a; 
+length name $ 27 ;
+set dept1 dept2 dept3 newdept4 dept5 dept6; 
+run ;
+ 
+/*procprintdata=dept6_1;*/
+proc print data=dept1_6a; 
+title &#39;Changing the Length of a Character Variable&#39; ;
+title2 &#39;before Concatenating the Data Sets&#39; ;
+run ;</code></pre>
+<p>• dept6_1 : name변수값의 길이가 가장 긴 dept6 DATASET을 먼저 나열.<br />
+• dept1_6a : 나열되는 순서를 고려하지 않고 <strong>LENGTH name $27;</strong> 을 사용.</p>
+<pre><code>&lt;OUTPUT&gt;
+
+              Changing the Length of a Character Variable             
+                   before Concatenating the Data Sets
+
+Obs     ssn     name                     sex    hired  salary   phone
+
+  1  922854076  Schoenberg, Marguerite    F   19NOV84  39,800
+  2  770434994  Addison-Hardy, Jonathon   M   23FEB82  41,400
+  3  242784883  McNaughton, Elizabeth     F   24JUL83  45,000
+  4  377882806  Tharrington, Catherine    F   28SEP84  38,600
+                                       
+ 27  244967839  Singleton, MaryAnn            24APR85  27,900  929-2623
+ 28  996740216  Leighton, Maurice             16DEC83  32,600  933-6908
+ 29  675443925  Freuler, Carl                 15FEB88  29,900  493-3993
+ 30  845729308  Cage, Merce                   19OCT82  39,800  286-0519</code></pre>
+<p><br></p>
+<pre><code>              Changing the Length of a Character Variable             
+                   before Concatenating the Data Sets
+
+Obs  name                        ssn       hired  salary   phone    sex
+
+  1  Martin, Virginia         429685482  09AUG80  34,800  493-0824
+  2  Singleton, MaryAnn       244967839  24APR85  27,900  929-2623
+  3  Leighton, Maurice        996740216  16DEC83  32,600  933-6908
+  4  Freuler, Carl            675443925  15FEB88  29,900  493-3993
+                                         
+ 27  Addison-Hardy, Jonathon  770434994  23FEB82  41,400             M
+ 28  McNaughton, Elizabeth    242784883  24JUL83  45,000             F
+ 29  Tharrington, Catherine   377882806  28SEP84  38,600             F
+ 30  Frangipani, Christopher  292450691  12AUG80  43,900             M</code></pre>
+<p>• name변수값을 보면 잘려나간 것 없이 제대로 보이는 것을 알 수 있다.</p>
+<p><br></p>
 </div>
 <div id="proc-append의-형식" class="section level2" number="10.6">
 <h2><span class="header-section-number">10.6</span> PROC APPEND의 형식</h2>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+proc append base=dept1 data=dept2; 
+run ;
+proc print data=dept1; 
+title &#39;DEPT1 After Appending DEPT2&#39; ;
+run ;</code></pre>
+<p>▶ proc append : DATASET을 합치는 것 한쪽을 기준으로 놓고 다른 한쪽을 추가.</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                      DEPT1 After Appending DEPT2                     
+
+Obs       ssn       name                    hired    salary     phone
+
+  1    429685482    Martin, Virginia      09AUG80     34800    493-0824
+  2    244967839    Singleton, MaryAnn    24APR85     27900    929-2623
+  3    996740216    Leighton, Maurice     16DEC83     32600    933-6908
+  4    675443925    Freuler, Carl         15FEB88     29900    493-3993
+  5    845729308    Cage, Merce           19OCT82     39800    286-0519
+  6    324987451    Sayre, Jay            15NOV84     44800    933-2998
+  7    596771321    Tolson, Andrew        18MAR88     41200    929-4800
+  8    477562122    Jensen, Helga         01FEB81     47400    286-2816
+  9    894724859    Kulenic, Marie        24JUN83     41400    493-1472
+ 10    988427431    Zweerink, Anna        07JUL85     43700    929-3885</code></pre>
+<p><br></p>
+<p>▶ 두 DATASET의 변수가 틀린 경우 <strong>FORCE</strong>를 사용</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+proc append base=dept1 data=dept3 force ; 
+run ;
+proc print data=dept1; 
+title &#39;Using the FORCE Option to Append Data Sets that Contain&#39; ;
+title2 &#39;Different Variables&#39; ;
+run ;</code></pre>
+<p>• force문은 base 다음에 오는 DATASET에 해당 변수가 없으면 그 변수를 삭제 시킨다.<br />
+• dept3 DATASET의 sex 변수가 삭제되어 추가.</p>
+<pre><code>&lt;OUTPUT&gt;
+
+        Using the FORCE Option to Append Data Sets that Contain       
+                          Different Variables
+
+Obs       ssn       name                    hired    salary     phone
+
+  1    429685482    Martin, Virginia      09AUG80     34800    493-0824
+  2    244967839    Singleton, MaryAnn    24APR85     27900    929-2623
+  3    996740216    Leighton, Maurice     16DEC83     32600    933-6908
+  4    675443925    Freuler, Carl         15FEB88     29900    493-3993
+  5    845729308    Cage, Merce           19OCT82     39800    286-0519
+  6    324987451    Sayre, Jay            15NOV84     44800    933-2998
+  7    596771321    Tolson, Andrew        18MAR88     41200    929-4800
+  8    477562122    Jensen, Helga         01FEB81     47400    286-2816
+  9    894724859    Kulenic, Marie        24JUN83     41400    493-1472
+ 10    988427431    Zweerink, Anna        07JUL85     43700    929-3885
+ 11    744289612    Saparilas, Theresa    09MAY88     33400
+ 12    824904032    Brosnihan, Dylan      04JAN82     38200
+ 13    242779184    Chao, Daeyong         28SEP85     37500
+ 14    544382887    Slifkin, Leah         24JUL84     45000
+ 15    933476520    Perry, Marguerite     19APR82     39900</code></pre>
+<p>※ PROC APPEND<br />
+- 한 DATASET의 끝에 다른 DATASET을 추가하는데 사용되는 PROCEDURE</p>
+<pre><code>  PROC APPEND [BASE=추가되는 dataset명1]
+                  [DATA=추가될 dataset명2] [FORCE]; RUN;</code></pre>
+<p>• DATASET명이 생략될 경우 가장 최근에 사용된 것을 사용함.<br />
+FORCE : 추가될 DATASET에는 없는 변수가 추가되는 DATASET에 있는 경우 이를 삭제시키는데 이용.</p>
+<p><br>
+<br></p>
 </div>
 <div id="기준-변수를-이용한-dataset-합치기-set문" class="section level2" number="10.7">
 <h2><span class="header-section-number">10.7</span> 기준 변수를 이용한 DATASET 합치기 (SET문)</h2>
+<p>▶ Randd DATASET을 project, dept, manager, headcoun변수로 구성하기</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data randd; 
+length dept manager $ 10; 
+input project $ dept $ manager $ headcoun; 
+cards; 
+MP971 Designing Daugherty 10 
+MP971 Coding Newton 8 
+MP971 Testing Miller 7 
+SL827 Designing Robinson 8 
+SL827 Coding Moore 10 
+SL827 Testing Baker 7 
+WP057 Designing Cliver 11 
+WP057 Coding Constant 13 
+WP057 Testing Slivko 10 
+; 
+proc print data=randd; 
+title &#39;Data Set RANDD&#39; ;
+run; </code></pre>
+<pre><code>&lt;OUTPUT&gt;
+
+                             Data Set RANDD
+
+          Obs    dept         manager      project    headcoun
+
+           1     Designing    Daugherty     MP971        10
+           2     Coding       Newton        MP971         8
+           3     Testing      Miller        MP971         7
+           4     Designing    Robinson      SL827         8
+           5     Coding       Moore         SL827        10
+           6     Testing      Baker         SL827         7
+           7     Designing    Cliver        WP057        11
+           8     Coding       Constant      WP057        13
+           9     Testing      Slivko        WP057        10</code></pre>
+<p>▶ LENGH 문으로 지정된 dept, manager변수가 먼저 출력됨을 볼 수 있음</p>
+<p><br></p>
+<p>▶ pubs DATASET을 manager, dept, project, headcoun변수로 구성하기</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data pubs; 
+length dept manager $ 10 ;
+input manager $ dept $ project $ headcoun; 
+cards; 
+Cook Writing WP057 5 
+Deakins Writing SL827 7 
+Franscombe Editing MP971 4 
+Henry Editing WP057 3 
+King Production SL827 5 
+Krysonski Production WP057 3 
+Lassiter Graphics SL827 3 
+Miedema Editing SL827 5 
+Morard Writing MP971 6 
+Posey Production MP971 4 
+Spackle Graphics WP057 2 
+;
+proc sort data=pubs; 
+by project; 
+run ;
+proc print data=pubs; 
+title &#39;Data Set PUBS Sorted by Project&#39; ;
+run ;</code></pre>
+<pre><code>&lt;OUTPUT&gt;
+
+                   Data Set PUBS Sorted by Project                    
+
+         Obs       dept       manager       project    headcoun
+
+           1    Editing       Franscombe     MP971         4
+           2    Writing       Morard         MP971         6
+           3    Production    Posey          MP971         4
+           4    Writing       Deakins        SL827         7
+           5    Production    King           SL827         5
+           6    Graphics      Lassiter       SL827         3
+           7    Editing       Miedema        SL827         5
+           8    Writing       Cook           WP057         5
+           9    Editing       Henry          WP057         3
+          10    Production    Krysonski      WP057         3
+          11    Graphics      Spackle        WP057         2</code></pre>
+<p><br></p>
+<p>▶ 특정 변수에 의해 정렬된 상태에서 DATASET합치기</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data randdpub; 
+set randd pubs; 
+by project; 
+run ; 
+proc print data=randdpub; 
+title &#39;Interleaving RANDD and PUBS&#39; ;
+title2 &#39;by PROJECT&#39;; 
+run ;</code></pre>
+<dl>
+<dt>▶ BY문을 이용</dt>
+<dd><p>항상 BY문을 사용하기 전에 사용될 변수에 의해 정렬이 되어있어야 가능<br />
+▶ randd DATASET의 경우 : 합쳐질 DATA에 원래 자료인 project변수값에 의해 정렬<br />
+pubs DATASET의 경우 : project변수에 의해 정렬을 시켜놨음<br />
+따라서 randdpub DATASET : project변수값에 의해 randd, pubs DATASET을 합친 것</p>
+<OUTPUT>
+<pre><code>                    Interleaving RANDD and PUBS
+                           by PROJECT
+
+     Obs    dept          manager       project    headcoun
+
+       1    Designing     Daugherty      MP971        10
+       2    Coding        Newton         MP971         8
+       3    Testing       Miller         MP971         7
+       4    Editing       Franscombe     MP971         4
+       5    Writing       Morard         MP971         6
+       6    Production    Posey          MP971         4
+       7    Designing     Robinson       SL827         8
+       8    Coding        Moore          SL827        10
+       9    Testing       Baker          SL827         7
+      10    Writing       Deakins        SL827         7
+      11    Production    King           SL827         5
+      12    Graphics      Lassiter       SL827         3
+      13    Editing       Miedema        SL827         5
+      14    Designing     Cliver         WP057        11
+      15    Coding        Constant       WP057        13
+      16    Testing       Slivko         WP057        10
+      17    Writing       Cook           WP057         5
+      18    Editing       Henry          WP057         3
+      19    Production    Krysonski      WP057         3
+      20    Graphics      Spackle        WP057         2</code></pre>
+</dd>
+</dl>
+<p>▶ 두 개의 DATASET이 합쳐졌는데 순서는 project변수값에 의존하는 것을 알 수 있음</p>
+<p>※ 기준 변수를 이용하여 두 개의 DATASET 합치기</p>
+<p>• 기준 변수를 이용하여 두 개의 DATASET을 하나의 DATASET으로 구성을 하는 경우 SET문과 BY문을 이용하면 되고, BY문 다음에 사용될 변수는 이미 정렬되어 있어야 가능하다.</p>
+<pre><code>    DATA 생성될 dataset명;
+      SET 합쳐질 dataset명1 dataset명2 ;
+    BY 기준 변수명 ;</code></pre>
+<p><br></p>
 </div>
 <div id="두-개의-dataset-합치기-merge문" class="section level2" number="10.8">
 <h2><span class="header-section-number">10.8</span> 두 개의 DATASET 합치기 (MERGE문)</h2>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data class; 
+input name $ 1-25 year $ 26-34 major $ 36-50 ;
+cards ;
+Abbott, Jennifer freshman 
+Carter, Tom junior Theater 
+Kirby, Elissa senior Mathematics 
+Tucker, Rachel freshman 
+Uhl, Roland sophomore 
+Wacenske, Maurice junior Theater 
+;
+proc print data=class; 
+title &#39;The Data Set CLASS&#39; ;
+run ;</code></pre>
+<p>▶ DATA의 구성 : name, year, major변수로 구성된 class dataset</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                                 The Data Set CLASS                               
+
+                Obs    name                 year         major
+
+                 1     Abbott, Jennifer     freshman
+                 2     Carter, Tom          junior       Theater
+                 3     Kirby, Elissa        senior       Mathematics
+                 4     Tucker, Rachel       freshman
+                 5     Uhl, Roland          sophomore
+                 6     Wacenske, Maurice    junior       Theater</code></pre>
+<p><br></p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data timeslot; 
+input date date7. @10 time $ @17 room $; 
+format date date7. ;
+cards ;
+12sep88 10:00 103 
+12sep88 10:30 103 
+12sep88 11:00 207 
+13sep88 10:00 105 
+13sep88 10:30 105 
+15sep88 11:00 207 
+;
+proc print data=timeslot; 
+title &#39;Dates, Times, and Locations of Conferences&#39; ;
+run ;</code></pre>
+<p>▶ DATA의 구성 : date, time, room변수로 구성된 timeslot dataset</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                       Dates, Times, and Locations of Conferences                    
+
+                           Obs       date    time     room
+
+                            1     12SEP88    10:00    103
+                            2     12SEP88    10:30    103
+                            3     12SEP88    11:00    207
+                            4     13SEP88    10:00    105
+                            5     13SEP88    10:30    105
+                            6     15SEP88    11:00    207</code></pre>
+<p><br></p>
+<p>▶ MERGE를 사용하여 위의 각각의 DATASET을 가로로 붙여 새로운 DATASET생성</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data schedule; 
+merge class timeslot; 
+run ;
+proc print data=schedule; 
+title &#39;Merging CLASS and TIMESLOT to Assign&#39; ;
+title2 &#39;Conference Times to Students&#39; ;
+run ;</code></pre>
+<p>• <strong>MERGE class timeslot;</strong> : class와 timeslot을 가로로 붙여 생성, 관찰값의 수가 다른 경우 부족한 쪽에는 결측값이 들어가게 됨.</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                       Merging CLASS and TIMESLOT to Assign                            
+                            Conference Times to Students      
+
+  Obs    name                 year         major             date    time     room
+
+   1     Abbott, Jennifer     freshman                    12SEP88    10:00    103
+   2     Carter, Tom          junior       Theater        12SEP88    10:30    103
+   3     Kirby, Elissa        senior       Mathematics    12SEP88    11:00    207
+   4     Tucker, Rachel       freshman                    13SEP88    10:00    105
+   5     Uhl, Roland          sophomore                   13SEP88    10:30    105
+   6     Wacenske, Maurice    junior       Theater        15SEP88    11:00    207</code></pre>
+<p>• <strong>MERGE</strong>문에서 먼저 나열된 DATASET이 왼쪽에, 나중에 나열된 DATASET은 오른쪽에 있음.<br />
+• 두 DATASET 모두 6개의 관찰값을 갖고 있으므로 결측값이 나오지 않음.</p>
+<p><br></p>
 </div>
 <div id="세-개의-dataset-합치기-merge문" class="section level2" number="10.9">
 <h2><span class="header-section-number">10.9</span> 세 개의 DATASET 합치기 (MERGE문)</h2>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data class2; 
+input name $ 1-25 year $ 26-34 major $ 36-50 ;
+cards ;
+Hitchcock-Tyler, Erin sophomore 
+Keil, Deborah junior Theater 
+Nacewicz, Chester junior Theater 
+Norgaard, Rolf sophomore 
+Prism, Lindsay senior Anthropology 
+Singh, Rajiv sophomore 
+Wittich, Stefan junior Physics 
+;
+proc print data=class2; 
+title &#39;The Data Set CLASS2&#39; ;
+run ;</code></pre>
+<p>▶ DATA의 구성 : name, year, major변수로 구성된 class2 dataset</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                                 The Data Set CLASS2                               
+
+              Obs    name                     year         major
+
+               1     Hitchcock-Tyler, Erin    sophomore
+               2     Keil, Deborah            junior       Theater
+               3     Nacewicz, Chester        junior       Theater
+               4     Norgaard, Rolf           sophomore
+               5     Prism, Lindsay           senior       Anthropology
+               6     Singh, Rajiv             sophomore
+               7     Wittich, Stefan          junior       Physics</code></pre>
+<p><br></p>
+<p>▶ 3개의 DATASET을 가로로 붙이는 경우</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data exercise; 
+merge class (drop=year major) 
+class2 (drop=year major rename=(name=name2)) 
+timeslot; 
+run ;
+proc printdata=exercise; 
+title &#39;Merging Three Data Sets While Dropping and Renaming&#39; ;
+title2 &#39;Some Variables&#39; ;
+run ;</code></pre>
+<p>• class, class2, timeslot를 갖고 Exercise DATASET을 형성<br />
+• class : year, major변수를 제거<br />
+class2 : year, major변수 제거하고, name변수는 name2로 변수명 변경<br />
+timeslot : 제거하거나 변화 없이 그대로 사용<br />
+• MERGE문을 이용하여 DATASET을 합치는 경우 합쳐지는 DATASET의 변수의 제거나 변수명을 바꾸는 것은 해당 DATASET 뒤에 써주면 됨</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                 Merging Three Data Sets While Dropping and Renaming                  5
+
+    Obs    name                 name2                       date    time     room
+
+     1     Abbott, Jennifer     Hitchcock-Tyler, Erin    12SEP88    10:00    103
+     2     Carter, Tom          Keil, Deborah            12SEP88    10:30    103
+     3     Kirby, Elissa        Nacewicz, Chester        12SEP88    11:00    207
+     4     Tucker, Rachel       Norgaard, Rolf           13SEP88    10:00    105
+     5     Uhl, Roland          Prism, Lindsay           13SEP88    10:30    105
+     6     Wacenske, Maurice    Singh, Rajiv             15SEP88    11:00    207
+     7                          Wittich, Stefan                .</code></pre>
+<p>• class와 timeslot DATASET은 관찰값의 수가 6개이고 class2 DATASET은 7개 이므로 이를 합친 경우에 7번째 관찰값에서 문자변수 name, time, room는 공백을 결측값으로 갖고, 날짜변수 date는 숫자로 인식하므로 .을 결측값으로 갖고 있음을 알 수 있다.<br />
+• class2 DATASET에 해당하는 name2변수는 원래 name 변수의 내용인 것을 알 수 있다.</p>
+<p><br></p>
 </div>
 <div id="기준변수에-의한-dataset-합치기-merge문" class="section level2" number="10.10">
 <h2><span class="header-section-number">10.10</span> 기준변수에 의한 DATASET 합치기 (MERGE문)</h2>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data company; 
+input name $ 1-25 age 27-28 sex $ 30 ;
+cards ;
+Vincent, Martina 34 F 
+Phillipon, Marie-Odile 28 F 
+Gunter, Thomas 27 M 
+Harbinger, Nicholas 36 M 
+Benito, Gisela 32 F 
+Rudelich, Herbert 39 M 
+Sirignano, Emily 12 F 
+Morrison, Michael 32 M 
+;
+proc sortdata=company; 
+by name; 
+run ;
+proc printdata=company; 
+title &#39;The Data Set COMPANY Sorted by NAME&#39; ;
+run ;</code></pre>
+<p>▶ DATA의 구성 : name, age, sex변수로 구성된 company dataset</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                         The Data Set COMPANY Sorted by NAME                         
+
+                     Obs    name                      age    sex
+
+                      1     Benito, Gisela             32     F
+                      2     Gunter, Thomas             27     M
+                      3     Harbinger, Nicholas        36     M
+                      4     Morrison, Michael          32     M
+                      5     Phillipon, Marie-Odile     28     F
+                      6     Rudelich, Herbert          39     M
+                      7     Sirignano, Emily           12     F
+                      8     Vincent, Martina           34     F</code></pre>
+<p>• 8개의 관찰값으로 구성 name변수에 의해 오름차순으로 정렬</p>
+<p><br></p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data finance; 
+input ssn $ 1-11 name $ 13-40 salary; 
+cards ;
+074-53-9892 Vincent, Martina 35000 
+776-84-5391 Phillipon, Marie-Odile 29750 
+929-75-0218 Gunter, Thomas 27500 
+446-93-2122 Harbinger, Nicholas 33900 
+228-88-9649 Benito, Gisela 28000 
+029-46-9261 Rudelich, Herbert 35000 
+442-21-8075 Sirignano, Emily 5000 
+;
+proc sortdata=finance; 
+by name; 
+run ;
+proc printdata=finance; 
+title &#39;The Data Set FINANCE Sorted by NAME&#39; ;
+run ;</code></pre>
+<pre><code>&lt;OUTPUT&gt;
+
+                         The Data Set FINANCE Sorted by NAME                          
+
+               Obs        ssn        name                      salary
+
+                1     228-88-9649    Benito, Gisela             28000
+                2     929-75-0218    Gunter, Thomas             27500
+                3     446-93-2122    Harbinger, Nicholas        33900
+                4     776-84-5391    Phillipon, Marie-Odile     29750
+                5     029-46-9261    Rudelich, Herbert          35000
+                6     442-21-8075    Sirignano, Emily            5000
+                7     074-53-9892    Vincent, Martina           35000</code></pre>
+<p>• ssn, name, salary 변수의 7개의 관찰값으로 구성, nacreous수에 의해 오름차순 정렬</p>
+<p><br></p>
+<p>▶ 특정 변수를 기준으로 하여 2개의 DATASET을 가로로 합치기.</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data compfin; 
+merge company finance; 
+by name; 
+run ;
+proc printdata=compfin; 
+title &#39;Merging COMPANY and FINANCE&#39; ;
+run ;</code></pre>
+<p>• 관리자가 관리상 따로 DATASET을 구분해 두었다가 합쳐야 되는 경우 유용.<br />
+• 단, 하나 이상 같은 변수가 존재하고 있어야 함.<br />
+• name 변수를 이용하여 company와 finance DATASET을 합침.</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                             Merging COMPANY and FINANCE                              
+
+        Obs    name                      age    sex        ssn        salary
+
+         1     Benito, Gisela             32     F     228-88-9649     28000
+         2     Gunter, Thomas             27     M     929-75-0218     27500
+         3     Harbinger, Nicholas        36     M     446-93-2122     33900
+         4     Morrison, Michael          32     M                         .
+         5     Phillipon, Marie-Odile     28     F     776-84-5391     29750
+         6     Rudelich, Herbert          39     M     029-46-9261     35000
+         7     Sirignano, Emily           12     F     442-21-8075      5000
+         8     Vincent, Martina           34     F     074-53-9892     35000</code></pre>
+<p>• 각 관찰값들이 name 변수값에 의해 합쳐져 있음<br />
+• company DATASET의 관찰값은 8개, finance DATASET의 관찰값은 7개로 서로 관찰값의 수가 갖지 않은 경우를 합쳐서 생성된 결과는 name변수를 기준으로 하였으므로 한쪽에 없는 관찰값의 경우 결측값으로 들어감.<br />
+• 4번째 관찰값에서 company는 존재하나, finance는 없기 때문에 ssn, salary만 결측값</p>
+<p><br></p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data reptory; 
+input play $ 1-23 role $ 25-48 ssn $ 50-60 ;
+cards ;
+No Exit Estelle 074-53-9892 
+No Exit Inez 776-84-5391 
+No Exit Valet 929-75-0218 
+No Exit Garcin 446-93-2122 
+Happy Days Winnie 074-53-9892 
+Happy Days Willie 446-93-2122 
+The Glass Menagerie Amanda Wingfield 228-88-9649 
+The Glass Menagerie Laura Wingfield 776-84-5391 
+The Glass Menagerie Tom Wingfield 929-75-0218 
+The Glass Menagerie Jim O&#39;Connor 029-46-9261 
+The Dear Departed Mrs. Slater 228-88-9649 
+The Dear Departed Mrs. Jordan 074-53-9892 
+The Dear Departed Henry Slater 029-46-9261 
+The Dear Departed Ben Jordan 446-93-2122 
+The Dear Departed Victoria Slater 442-21-8075 
+The Dear Departed Abel Merryweather 929-75-0218 
+;
+proc printdata=reptory; 
+title &#39;The Data Set REPTORY&#39; ;
+run ;</code></pre>
+<p>▶ DATA의 구성 : play, role, ssn변수로 구성된 reptory dataset</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                                The Data Set REPTORY                                 
+
+           Obs    play                   role                     ssn
+
+             1    No Exit                Estelle              074-53-9892
+             2    No Exit                Inez                 776-84-5391
+             3    No Exit                Valet                929-75-0218
+             4    No Exit                Garcin               446-93-2122
+             5    Happy Days             Winnie               074-53-9892
+             6    Happy Days             Willie               446-93-2122
+             7    The Glass Menagerie    Amanda Wingfield     228-88-9649
+             8    The Glass Menagerie    Laura Wingfield      776-84-5391
+             9    The Glass Menagerie    Tom Wingfield        929-75-0218
+            10    The Glass Menagerie    Jim O&#39;Connor         029-46-9261
+            11    The Dear Departed      Mrs. Slater          228-88-9649
+            12    The Dear Departed      Mrs. Jordan          074-53-9892
+            13    The Dear Departed      Henry Slater         029-46-9261
+            14    The Dear Departed      Ben Jordan           446-93-2122
+            15    The Dear Departed      Victoria Slater      442-21-8075
+            16    The Dear Departed      Abel Merryweather    929-75-0218</code></pre>
+<p><br></p>
+<p>▶ ssn 변수에 의해 각 DATASET의 정렬</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+proc sortdata=finance; 
+by ssn; 
+run ;
+proc sortdata=reptory; 
+by ssn; 
+run ;
+proc printdata=finance; 
+title &#39;The Data Set FINANCE Sorted by SSN&#39; ;
+run ;
+proc printdata=reptory; 
+title &#39;The Data Set REPTORY Sorted by SSN&#39; ;
+run ;</code></pre>
+<pre><code>&lt;OUTPUT&gt;
+
+                         The Data Set FINANCE Sorted by SSN                          
+
+               Obs        ssn        name                      salary
+
+                1     029-46-9261    Rudelich, Herbert          35000
+                2     074-53-9892    Vincent, Martina           35000
+                3     228-88-9649    Benito, Gisela             28000
+                4     442-21-8075    Sirignano, Emily            5000
+                5     446-93-2122    Harbinger, Nicholas        33900
+                6     776-84-5391    Phillipon, Marie-Odile     29750
+                7     929-75-0218    Gunter, Thomas             27500</code></pre>
+<p><br></p>
+<pre><code>                         The Data Set REPTORY Sorted by SSN                          
+                                                              
+           Obs    play                   role                     ssn
+
+             1    The Glass Menagerie    Jim O&#39;Connor         029-46-9261
+             2    The Dear Departed      Henry Slater         029-46-9261
+             3    No Exit                Estelle              074-53-9892
+             4    Happy Days             Winnie               074-53-9892
+             5    The Dear Departed      Mrs. Jordan          074-53-9892
+             6    The Glass Menagerie    Amanda Wingfield     228-88-9649
+             7    The Dear Departed      Mrs. Slater          228-88-9649
+             8    The Dear Departed      Victoria Slater      442-21-8075
+             9    No Exit                Garcin               446-93-2122
+            10    Happy Days             Willie               446-93-2122
+            11    The Dear Departed      Ben Jordan           446-93-2122
+            12    No Exit                Inez                 776-84-5391
+            13    The Glass Menagerie    Laura Wingfield      776-84-5391
+            14    No Exit                Valet                929-75-0218
+            15    The Glass Menagerie    Tom Wingfield        929-75-0218
+            16    The Dear Departed      Abel Merryweather    929-75-0218</code></pre>
+<p><br></p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data finrep; 
+merge finance reptory; 
+by ssn; 
+run ;
+proc printdata=finrep; 
+title &#39;Adding Players&#39;&#39; Names to REPTORY&#39; ;
+title2 &#39;by&#39; ;
+title3 &#39;Merging It with FINANCE&#39; ;
+run ;</code></pre>
+<p>• 관찰값의 수가 다르지만, ssn 변수가 겹치기 때문에 총 16개의 관찰값을 가짐</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                              Adding Players&#39; Names to REPTORY                           
+                                               by 
+                                   Merging It with FINANCE
+
+Obs       ssn       name                     salary   play                  role
+
+  1   029-46-9261   Rudelich, Herbert         35000   The Glass Menagerie   Jim O&#39;Connor
+  2   029-46-9261   Rudelich, Herbert         35000   The Dear Departed     Henry Slater
+  3   074-53-9892   Vincent, Martina          35000   No Exit               Estelle
+  4   074-53-9892   Vincent, Martina          35000   Happy Days            Winnie
+  5   074-53-9892   Vincent, Martina          35000   The Dear Departed     Mrs. Jordan
+  6   228-88-9649   Benito, Gisela            28000   The Glass Menagerie   Amanda Wingfield
+  7   228-88-9649   Benito, Gisela            28000   The Dear Departed     Mrs. Slater
+  8   442-21-8075   Sirignano, Emily           5000   The Dear Departed     Victoria Slater
+  9   446-93-2122   Harbinger, Nicholas       33900   No Exit               Garcin
+ 10   446-93-2122   Harbinger, Nicholas       33900   Happy Days            Willie
+ 11   446-93-2122   Harbinger, Nicholas       33900   The Dear Departed     Ben Jordan
+ 12   776-84-5391   Phillipon, Marie-Odile    29750   No Exit               Inez
+ 13   776-84-5391   Phillipon, Marie-Odile    29750   The Glass Menagerie   Laura Wingfield
+ 14   929-75-0218   Gunter, Thomas            27500   No Exit               Valet
+ 15   929-75-0218   Gunter, Thomas            27500   The Glass Menagerie   Tom Wingfield
+ 16   929-75-0218   Gunter, Thomas            27500   The Dear Departed     Abel Merryweathe</code></pre>
+<p><br></p>
 </div>
 <div id="특정변수를-제거하고-dataset-합치기-merge문" class="section level2" number="10.11">
 <h2><span class="header-section-number">10.11</span> 특정변수를 제거하고 DATASET 합치기 (MERGE문)</h2>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data newrep (drop=ssn); 
+merge finance (drop=salary) reptory; 
+by ssn; 
+run ;
+proc printdata=newrep; 
+title &#39;Replacing Players&#39;&#39; Social Security Numbers&#39; ;
+title2 &#39;with Their Names&#39; ;
+run ;</code></pre>
+<p>▶ 변수ssn을 토대로 salary를 제거한 finance DATASET과 reptory DATASET을 합치고, 새로운 newrep DATASET을 생성할 때 기준변수인 ssn을 제거</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                     Replacing Players&#39; Social Security Numbers                      
+                                  with Their Names            
+
+      Obs    name                      play                   role
+
+        1    Rudelich, Herbert         The Glass Menagerie    Jim O&#39;Connor
+        2    Rudelich, Herbert         The Dear Departed      Henry Slater
+        3    Vincent, Martina          No Exit                Estelle
+        4    Vincent, Martina          Happy Days             Winnie
+        5    Vincent, Martina          The Dear Departed      Mrs. Jordan
+        6    Benito, Gisela            The Glass Menagerie    Amanda Wingfield
+        7    Benito, Gisela            The Dear Departed      Mrs. Slater
+        8    Sirignano, Emily          The Dear Departed      Victoria Slater
+        9    Harbinger, Nicholas       No Exit                Garcin
+       10    Harbinger, Nicholas       Happy Days             Willie
+       11    Harbinger, Nicholas       The Dear Departed      Ben Jordan
+       12    Phillipon, Marie-Odile    No Exit                Inez
+       13    Phillipon, Marie-Odile    The Glass Menagerie    Laura Wingfield
+       14    Gunter, Thomas            No Exit                Valet
+       15    Gunter, Thomas            The Glass Menagerie    Tom Wingfield
+       16    Gunter, Thomas            The Dear Departed      Abel Merryweather</code></pre>
+<p><br></p>
+<p>※ MERGE문을 이용한 DATASET 합치기</p>
+<p>• <strong>MERGE</strong>문을 이용하여 DATASET을 가로로 붙일 수 있으며, <strong>BY</strong>문을 이용하여 같은 관찰값끼리 연결시킬 수 있다. 단 이미 정렬되어 있어야 가능</p>
+<pre><code>  DATA 생성될 dataset명 (DROP = 변수명);
+   MERGE 합쳐질 dataset명1 (DROP=변수명1)
+          합쳐질 dataset명2 (DROP=변수명2)
+                          
+          합쳐질 dataset명N (DROP=변수명N) ;
+   BY 변수명3 ;</code></pre>
+<p><br></p>
+<p>※ 두 개 이상의 DATASET 합치기 (<strong>SET, MERGE, UPDATE, APPEND</strong>)</p>
+<p>• <strong>SET</strong>문은 두 개 이상의 DATASET을 세로로 합치는 것, 합칠 DATASET을 나열<br />
+• <strong>MERGE</strong>문은 DATASET을 가로로 합치는 것<br />
+• <strong>UPDATE</strong>는 기존 DATASET을 새로운 DATASET의 값으로 교체, 동일 변수가 존재<br />
+• <strong>APPEND PROCEDURE</strong>는 기본 DATASET에 다른 DATASET을 추가</p>
+<p><br></p>
 </div>
 <div id="두-개의-dataset-합치기-merge문-1" class="section level2" number="10.12">
 <h2><span class="header-section-number">10.12</span> 두 개의 DATASET 합치기 (MERGE문)</h2>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data donkey; 
+input year 1-4 pres $ 6-29 vicepres $ 31-55 result $ 60-64 ;
+cards ;
+1920 James M. Cox Franklin D. Roosevelt lost 
+1924 John W. Davis Charles W. Bryan lost 
+1928 Alfred E. Smith Joseph T. Robinson lost 
+1932 Franklin D. Roosevelt John N. Garner won 
+1936 Franklin D. Roosevelt John N. Garner won 
+1940 Franklin D. Roosevelt Henry A. Wallace won 
+1944 Franklin D. Roosevelt Harry S. Truman won 
+1948 Harry S. Truman Alben W. Barkley won 
+1952 Adlai E. Stevenson John J. Sparkman lost 
+1956 Adlai E. Stevenson Estes Kefauver lost 
+1960 John F. Kennedy Lyndon B. Johnson won 
+1964 Lyndon B. Johnson Hubert H. Humphrey won 
+1968 Hubert H. Humphrey Edmund S. Muskie lost 
+1972 George S. McGovern R. Sargent Shriver Jr. lost 
+1976 Jimmy Carter Walter F. Mondale won 
+1980 Jimmy Carter Walter F. Mondale lost 
+1984 Walter F. Mondale Geraldine Ferraro lost 
+;
+proc print data=donkey; 
+title &#39;Democratic Presidential and Vice-Presidential Candidates&#39; ;
+title2 &#39;from 1920 to 1984&#39; ;
+run ;</code></pre>
+<p>▶ DATA의 구성 : year, pres, vicepres, result 변수로 구성된 donkey dataset</p>
+<pre><code>&lt;OUTPUT&gt;
+
+        Democratic Presidential and Vice-Presidential Candidates       
+                           from 1920 to 1984
+
+Obs    year    pres                     vicepres                  result
+
+  1    1920    James M. Cox             Franklin D. Roosevelt      lost
+  2    1924    John W. Davis            Charles W. Bryan           lost
+  3    1928    Alfred E. Smith          Joseph T. Robinson         lost
+  4    1932    Franklin D. Roosevelt    John N. Garner             won
+  5    1936    Franklin D. Roosevelt    John N. Garner             won
+  6    1940    Franklin D. Roosevelt    Henry A. Wallace           won
+  7    1944    Franklin D. Roosevelt    Harry S. Truman            won
+  8    1948    Harry S. Truman          Alben W. Barkley           won
+  9    1952    Adlai E. Stevenson       John J. Sparkman           lost
+ 10    1956    Adlai E. Stevenson       Estes Kefauver             lost
+ 11    1960    John F. Kennedy          Lyndon B. Johnson          won
+ 12    1964    Lyndon B. Johnson        Hubert H. Humphrey         won
+ 13    1968    Hubert H. Humphrey       Edmund S. Muskie           lost
+ 14    1972    George S. McGovern       R. Sargent Shriver Jr.     lost
+ 15    1976    Jimmy Carter             Walter F. Mondale          won
+ 16    1980    Jimmy Carter             Walter F. Mondale          lost
+ 17    1984    Walter F. Mondale        Geraldine Ferraro          lost</code></pre>
+<p><br></p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data elephant; 
+input year 1-4 pres $ 6-29 vicepres $ 31-55 result $ 60-64 ;
+cards ;
+1920 Warren G. Harding Calvin Coolidge won 
+1924 Calvin Coolidge Charles G. Dawes won 
+1928 Herbert Hoover Charles Curtis won 
+1932 Herbert Hoover Charles Curtis lost 
+1936 Alfred M. Landon Frank Knox lost 
+1940 Wendell L. Willkie Charles McNary lost 
+1944 Thomas E. Dewey John W. Bricker lost 
+1948 Thomas E. Dewey Earl Warren lost 
+1952 Dwight D. Eisenhower Richard M. Nixon won 
+1956 Dwight D. Eisenhower Richard M. Nixon won 
+1960 Richard M. Nixon Henry Cabot Lodge lost 
+1964 Barry M. Goldwater William E. Miller lost 
+1968 Richard M. Nixon Spiro T. Agnew won 
+1972 Richard M. Nixon Spiro T. Agnew won 
+1976 Gerald R. Ford Robert J. Dole lost 
+1980 Ronald Reagan George Bush won 
+1984 Ronald Reagan George Bush won 
+;
+proc print data=elephant; 
+title &#39;Republican Presidential and Vice-Presidential Candidates&#39; ;
+title2 &#39;from 1920 to 1984&#39; ;
+run ;</code></pre>
+<p>▶ DATA의 구성 : year, pres, vicepres, result 변수로 구성된 elephant dataset</p>
+<pre><code>&lt;OUTPUT&gt;
+
+        Republican Presidential and Vice-Presidential Candidates       
+                           from 1920 to 1984
+
+
+   Obs    year    pres                    vicepres             result
+
+     1    1920    Warren G. Harding       Calvin Coolidge       won
+     2    1924    Calvin Coolidge         Charles G. Dawes      won
+     3    1928    Herbert Hoover          Charles Curtis        won
+     4    1932    Herbert Hoover          Charles Curtis        lost
+     5    1936    Alfred M. Landon        Frank Knox            lost
+     6    1940    Wendell L. Willkie      Charles McNary        lost
+     7    1944    Thomas E. Dewey         John W. Bricker       lost
+     8    1948    Thomas E. Dewey         Earl Warren           lost
+     9    1952    Dwight D. Eisenhower    Richard M. Nixon      won
+    10    1956    Dwight D. Eisenhower    Richard M. Nixon      won
+    11    1960    Richard M. Nixon        Henry Cabot Lodge     lost
+    12    1964    Barry M. Goldwater      William E. Miller     lost
+    13    1968    Richard M. Nixon        Spiro T. Agnew        won
+    14    1972    Richard M. Nixon        Spiro T. Agnew        won
+    15    1976    Gerald R. Ford          Robert J. Dole        lost
+    16    1980    Ronald Reagan           George Bush           won
+    17    1984    Ronald Reagan           George Bush           won</code></pre>
+<p>▶ Donkey DATASET과 elephant DATASET은 동일한 변수를 갖고 있지만 result변수의 경우 서로 반대 값을 갖고 있음을 알 수 있다.</p>
+<p><br></p>
+<p>▶ 연도별에 의한 donkey DATASET과 elephant DATASET 합치기</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data intleave; 
+set donkey elephant; 
+by year; 
+run ;
+proc printdata=intleave; 
+title &#39;Presidential and Vice-Presidential Candidates&#39; ;
+title2 &#39;from 1920 to 1984&#39; ;
+run ;</code></pre>
+<pre><code>&lt;OUTPUT&gt;
+
+             Presidential and Vice-Presidential Candidates             
+                           from 1920 to 1984
+
+Obs    year    pres                     vicepres                  result
+
+  1    1920    James M. Cox             Franklin D. Roosevelt      lost
+  2    1920    Warren G. Harding        Calvin Coolidge            won
+  3    1924    John W. Davis            Charles W. Bryan           lost
+  4    1924    Calvin Coolidge          Charles G. Dawes           won
+  5    1928    Alfred E. Smith          Joseph T. Robinson         lost
+  6    1928    Herbert Hoover           Charles Curtis             won
+  7    1932    Franklin D. Roosevelt    John N. Garner             won
+  8    1932    Herbert Hoover           Charles Curtis             lost
+
+(중간 생략)
+
+ 23    1964    Lyndon B. Johnson        Hubert H. Humphrey         won
+ 24    1964    Barry M. Goldwater       William E. Miller          lost
+ 25    1968    Hubert H. Humphrey       Edmund S. Muskie           lost
+ 26    1968    Richard M. Nixon         Spiro T. Agnew             won
+ 27    1972    George S. McGovern       R. Sargent Shriver Jr.     lost
+ 28    1972    Richard M. Nixon         Spiro T. Agnew             won
+ 29    1976    Jimmy Carter             Walter F. Mondale          won
+ 30    1976    Gerald R. Ford           Robert J. Dole             lost
+ 31    1980    Jimmy Carter             Walter F. Mondale          lost
+ 32    1980    Ronald Reagan            George Bush                won
+ 33    1984    Walter F. Mondale        Geraldine Ferraro          lost
+ 34    1984    Ronald Reagan            George Bush                won</code></pre>
+<p><br></p>
+<p>▶ party 변수를 추가하여 어느 쪽 DATASET의 자료인지 구분</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data party; 
+set donkey (in=D) elephant; 
+by year; 
+if D then party=&#39;Democratic&#39; ;
+else party=&#39;Republican&#39; ;
+run ;
+proc printdata=party; 
+title &#39;Presidential and Vice-Presidential Candidates&#39; ;
+title2 &#39;from 1920 to 1984&#39; ;
+title3 &#39;including Candidates&#39;&#39; Party&#39; ;
+run ;</code></pre>
+<p>• (IN=D) : DATASET이름을 전부 쓰지 않고 약어로 쓰는 것SET문에서 해당 DATASET의 바로 위에‘IN=지정약어’사용하면 그 뒤로 지정 약어를 사용해도 무방함.<br />
+• <strong>SET donkey (IN=D) elephant</strong>; : donkey 대신에 D 라고 하면 됨.<br />
+• <strong>IF D THEN party=‘Democratic’; ELSE party=‘Republican’;</strong> :<br />
+정당 지정 donkey는 Democratic으로 나머지는 Republican으로 구분</p>
+<pre><code>&lt;OUTPUT&gt;
+
+             Presidential and Vice-Presidential Candidates             4
+                           from 1920 to 1984
+                      including Candidates&#39; Party
+
+Obs year pres                  vicepres               result   party
+
+  1 1920 James M. Cox          Franklin D. Roosevelt   lost  Democratic
+  2 1920 Warren G. Harding     Calvin Coolidge         won   Republican
+  3 1924 John W. Davis         Charles W. Bryan        lost  Democratic
+  4 1924 Calvin Coolidge       Charles G. Dawes        won   Republican
+  5 1928 Alfred E. Smith       Joseph T. Robinson      lost  Democratic
+  6 1928 Herbert Hoover        Charles Curtis          won   Republican
+  7 1932 Franklin D. Roosevelt John N. Garner          won   Democratic
+  8 1932 Herbert Hoover        Charles Curtis          lost  Republican
+
+(중간 생략)
+
+ 23 1964 Lyndon B. Johnson     Hubert H. Humphrey      won   Democratic
+ 24 1964 Barry M. Goldwater    William E. Miller       lost  Republican
+ 25 1968 Hubert H. Humphrey    Edmund S. Muskie        lost  Democratic
+ 26 1968 Richard M. Nixon      Spiro T. Agnew          won   Republican
+ 27 1972 George S. McGovern    R. Sargent Shriver Jr.  lost  Democratic
+ 28 1972 Richard M. Nixon      Spiro T. Agnew          won   Republican
+ 29 1976 Jimmy Carter          Walter F. Mondale       won   Democratic
+ 30 1976 Gerald R. Ford        Robert J. Dole          lost  Republican
+ 31 1980 Jimmy Carter          Walter F. Mondale       lost  Democratic
+ 32 1980 Ronald Reagan         George Bush             won   Republican
+ 33 1984 Walter F. Mondale     Geraldine Ferraro       lost  Democratic
+ 34 1984 Ronald Reagan         George Bush             won   Republican</code></pre>
+<p><br></p>
 </div>
 <div id="특정-관찰값만으로-dataset-만들기" class="section level2" number="10.13">
 <h2><span class="header-section-number">10.13</span> 특정 관찰값만으로 DATASET 만들기</h2>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data winners(drop=result); 
+set donkey (in=D) elephant; 
+by year; 
+if result=&#39;won&#39; ;
+if D then party=&#39;Democratic&#39; ;
+else party=&#39;Republican&#39; ;
+run ;
+proc printdata=winners; 
+title &#39;Winning Ticket from 1920 to 1984&#39; ;
+title2 &#39;including Candidates&#39;&#39; Party&#39; ;
+run ;</code></pre>
+<p>▶ result 변수값이‘won’인 자료만을 추출한 것으로 party변수로 정당을 구분</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                    Winning Ticket from 1920 to 1984                   5
+                      including Candidates&#39; Party
+
+Obs    year    pres                     vicepres                party
+
+  1    1920    Warren G. Harding        Calvin Coolidge       Republican
+  2    1924    Calvin Coolidge          Charles G. Dawes      Republican
+  3    1928    Herbert Hoover           Charles Curtis        Republican
+  4    1932    Franklin D. Roosevelt    John N. Garner        Democratic
+  5    1936    Franklin D. Roosevelt    John N. Garner        Democratic
+  6    1940    Franklin D. Roosevelt    Henry A. Wallace      Democratic
+  7    1944    Franklin D. Roosevelt    Harry S. Truman       Democratic
+  8    1948    Harry S. Truman          Alben W. Barkley      Democratic
+  9    1952    Dwight D. Eisenhower     Richard M. Nixon      Republican
+ 10    1956    Dwight D. Eisenhower     Richard M. Nixon      Republican
+ 11    1960    John F. Kennedy          Lyndon B. Johnson     Democratic
+ 12    1964    Lyndon B. Johnson        Hubert H. Humphrey    Democratic
+ 13    1968    Richard M. Nixon         Spiro T. Agnew        Republican
+ 14    1972    Richard M. Nixon         Spiro T. Agnew        Republican
+ 15    1976    Jimmy Carter             Walter F. Mondale     Democratic
+ 16    1980    Ronald Reagan            George Bush           Republican
+ 17    1984    Ronald Reagan            George Bush           Republican</code></pre>
+<p><br></p>
+<p>▶ 각 정당의 대통령 차지 기간 구하기</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data timespan (keep=yrsdem yrsrep); 
+set donkey (in=D) elephant end=lastyear; 
+by year; 
+if result=&#39;won&#39; then 
+do ;
+if D then dwins+1 ;
+else rwins+1 ;
+end ;
+if lastyear then 
+do ;
+yrsdem=dwins*4 ;
+yrsrep=rwins*4 ;
+output ;
+end ;
+run ;
+proc printdata=timespan; 
+title &#39;Total Years of Administration of Each Major Party&#39; ;
+title2 &#39;from 1921 to 1989&#39; ;
+run ;</code></pre>
+<p>• result값이 ‘won’인경우만 각 정당별로 세는데 D DATASET인 경우는 dwins변수에 elephant DATASET인 경우는 rwins변수에 누적하여 최종 관찰값까지 구한 후 4를 곱하면 정당별로 대통령을 차지한 기간이 되고, yrsdem, yrsep변수만 취하여 출력</p>
+<pre><code>&lt;OUTPUT&gt;
+
+       Total Years of Administration of Each Major Party           
+                       from 1921 to 1989
+
+                    Obs    yrsdem    yrsrep
+
+                     1       32        36</code></pre>
 
 </div>
 </div>

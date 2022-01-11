@@ -24,7 +24,7 @@
 <meta name="author" content="Jin Hyun Nam" />
 
 
-<meta name="date" content="2022-01-06" />
+<meta name="date" content="2022-01-11" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -119,7 +119,7 @@
 <li class="chapter" data-level="4.1" data-path="chapter4.html"><a href="chapter4.html#칼럼-포인터-사용하기와-label문-사용하기"><i class="fa fa-check"></i><b>4.1</b> 칼럼 포인터 @ 사용하기와 LABEL문 사용하기</a></li>
 <li class="chapter" data-level="4.2" data-path="chapter4.html"><a href="chapter4.html#proc-contents의-형식"><i class="fa fa-check"></i><b>4.2</b> PROC CONTENTS의 형식</a></li>
 <li class="chapter" data-level="4.3" data-path="chapter4.html"><a href="chapter4.html#특정-변수를-취하여-새로운-dataset-만들기-keep문"><i class="fa fa-check"></i><b>4.3</b> 특정 변수를 취하여 새로운 DATASET 만들기 (KEEP문)</a></li>
-<li class="chapter" data-level="4.4" data-path="chapter4.html"><a href="chapter4.html#변수를-제외하고-새로운-dataset-만들기-drop문"><i class="fa fa-check"></i><b>4.4</b> 변수를 제외하고 새로운 DATASET 만들기 (DROP문)</a></li>
+<li class="chapter" data-level="4.4" data-path="chapter4.html"><a href="chapter4.html#특정-변수를-제외하고-새로운-dataset-만들기-drop문"><i class="fa fa-check"></i><b>4.4</b> 특정 변수를 제외하고 새로운 DATASET 만들기 (DROP문)</a></li>
 <li class="chapter" data-level="4.5" data-path="chapter4.html"><a href="chapter4.html#특정-관찰값부터-시작하여-dataset-만들기firstobs문"><i class="fa fa-check"></i><b>4.5</b> 특정 관찰값부터 시작하여 DATASET 만들기(FIRSTOBS문)</a></li>
 <li class="chapter" data-level="4.6" data-path="chapter4.html"><a href="chapter4.html#기존-dataset으로-다수의-새로운-dataset-만들기"><i class="fa fa-check"></i><b>4.6</b> 기존 DATASET으로 다수의 새로운 DATASET 만들기</a></li>
 <li class="chapter" data-level="4.7" data-path="chapter4.html"><a href="chapter4.html#변수-이름-바꾸기"><i class="fa fa-check"></i><b>4.7</b> 변수 이름 바꾸기</a></li>
@@ -141,7 +141,7 @@
 <li class="chapter" data-level="6.2" data-path="chapter6.html"><a href="chapter6.html#연속자료의-범주화"><i class="fa fa-check"></i><b>6.2</b> 연속자료의 범주화</a></li>
 <li class="chapter" data-level="6.3" data-path="chapter6.html"><a href="chapter6.html#조건식에서-여러-연산자-사용하기"><i class="fa fa-check"></i><b>6.3</b> 조건식에서 여러 연산자 사용하기</a></li>
 <li class="chapter" data-level="6.4" data-path="chapter6.html"><a href="chapter6.html#조건식에서-연산순서"><i class="fa fa-check"></i><b>6.4</b> 조건식에서 연산순서</a></li>
-<li class="chapter" data-level="6.5" data-path="chapter6.html"><a href="chapter6.html#여러-조건-사용하기"><i class="fa fa-check"></i><b>6.5</b> 여러 조건 사용하기</a></li>
+<li class="chapter" data-level="6.5" data-path="chapter6.html"><a href="chapter6.html#여러-조건-사용하기"><i class="fa fa-check"></i><b>6.5</b> 5. 여러 조건 사용하기</a></li>
 <li class="chapter" data-level="6.6" data-path="chapter6.html"><a href="chapter6.html#특정-관찰값-삭제"><i class="fa fa-check"></i><b>6.6</b> 특정 관찰값 삭제</a></li>
 <li class="chapter" data-level="6.7" data-path="chapter6.html"><a href="chapter6.html#특정-관찰값-선택"><i class="fa fa-check"></i><b>6.7</b> 특정 관찰값 선택</a></li>
 <li class="chapter" data-level="6.8" data-path="chapter6.html"><a href="chapter6.html#upcase함수를-이용한-특정-관찰값-선택"><i class="fa fa-check"></i><b>6.8</b> UPCASE함수를 이용한 특정 관찰값 선택</a></li>
@@ -244,9 +244,262 @@
 <h1><span class="header-section-number">Chapter 11</span> 자료의 갱신</h1>
 <div id="update문을-이용한-자료의-갱신" class="section level2" number="11.1">
 <h2><span class="header-section-number">11.1</span> UPDATE문을 이용한 자료의 갱신</h2>
+<p>▶ 기준 변수에 의해 기존 DATASET을 최신 정보로 바꾸고자 할 때 UPDATE문 사용하기</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+ 
+data master; 
+input id 1-8 name $ 9-27 street $ 28-47 city $ 48-62 
+state $ 63-64 zip $ 67-71; 
+cards ;
+1001 Ericson, Jane 111 Clancey Court Chapel Hill NC 27514 
+1002 Dix, Martin 4 Shepherd St. Norwich VT 05055 
+1003 Gabrielli, Theresa 24 Ridgetop Rd. Westboro MA 01581 
+1004 Clayton, Aria 14 Bridge St. San Francisco CA 94124 
+1005 Archuleta, Ruby Box 108 Milagro NM 87429 
+1006 Misiewicz, Jeremy 43-C Lakeview Apts. Madison WI 53704 
+1007 Ahmadi, Hafez 5203 Marston Way Boulder CO 80302 
+1008 Jacobson, Becky 1 Lincoln St. Tallahassee FL 32312 
+1009 An, Ing 95 Willow Dr. Charlotte NC 28211 
+1010 Slater, Emily 1009 Cherry St. York PA 17407 
+; 
+proc print data=master; 
+title &#39;The Master Mailing List Is Sorted by ID&#39;; 
+run ; </code></pre>
+<pre><code>&lt;OUTPUT&gt;
+
+                           The Master Mailing List Is Sorted by ID                          
+
+ Obs     id     name                  street                 city             state     zip
+
+   1    1001    Ericson, Jane         111 Clancey Court      Chapel Hill       NC      27514
+   2    1002    Dix, Martin           4 Shepherd St.         Norwich           VT      05055
+   3    1003    Gabrielli, Theresa    24 Ridgetop Rd.        Westboro          MA      01581
+   4    1004    Clayton, Aria         14 Bridge St.          San Francisco     CA      94124
+   5    1005    Archuleta, Ruby       Box 108                Milagro           NM      87429
+   6    1006    Misiewicz, Jeremy     43-C Lakeview Apts.    Madison           WI      53704
+   7    1007    Ahmadi, Hafez         5203 Marston Way       Boulder           CO      80302
+   8    1008    Jacobson, Becky       1 Lincoln St.          Tallahassee       FL      32312
+   9    1009    An, Ing               95 Willow Dr.          Charlotte         NC      28211
+  10    1010    Slater, Emily         1009 Cherry St.        York              PA      17407</code></pre>
+<p><br></p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data trans; 
+input id 1-8 name $ 9-27 street $ 28-47 city $ 48-62 
+state $ 63-64 zip $ 67-71 ;
+cards ;
+1002 Dix-Rosen, Martin 
+1001 27516 
+1006 932 Webster St. 
+1009 2540 Pleasant St. Raleigh 27622 
+1011 Mitchell, Wayne 28 Morningside Dr. New York NY 10017 
+1002 R.R. 2, Box 1850 Hanover NH 03755 
+1012 Stavros, Gloria 212 Northampton Rd. South Hadley MA 01075 
+; 
+proc sort data=trans; 
+by id; 
+run ; 
+proc print data=trans; 
+title &#39;Transaction Data Set Sorted by ID&#39; ;
+run ; </code></pre>
+<pre><code>&lt;OUTPUT&gt;
+
+                     Transaction Data Set Sorted by ID                   
+
+Obs  id        name              street        city         state  zip
+
+ 1  1001                                                          27516
+ 2  1002 Dix-Rosen, Martin
+ 3  1002                   R.R. 2, Box 1850    Hanover       NH   03755
+ 4  1006                   932 Webster St.
+ 5  1009                   2540 Pleasant St.   Raleigh            27622
+ 6  1011 Mitchell, Wayne   28 Morningside Dr.  New York      NY   10017
+ 7  1012 Stavros, Gloria   212 Northampton Rd. South Hadley  MA   01075</code></pre>
+<p><br></p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data newlist; 
+update master trans; 
+by id; 
+run ; 
+proc print data=newlist; 
+title &#39;Updated Mailing List&#39;; 
+run ;</code></pre>
+<p>▶ 기준 변수 : id변수<br />
+기존 DATASET : master DATASET<br />
+최신 정보 : trans DATASET의 정보로 고치는 것<br />
+← master DATASET의 id 변수값 중 동일한 값이 2개 이상이면 안 됨</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                                    Updated Mailing List                                   
+
+ Obs     id     name                  street                 city             state     zip
+
+   1    1001    Ericson, Jane         111 Clancey Court      Chapel Hill       NC      27516
+   2    1002    Dix-Rosen, Martin     R.R. 2, Box 1850       Hanover           NH      03755
+   3    1003    Gabrielli, Theresa    24 Ridgetop Rd.        Westboro          MA      01581
+   4    1004    Clayton, Aria         14 Bridge St.          San Francisco     CA      94124
+   5    1005    Archuleta, Ruby       Box 108                Milagro           NM      87429
+   6    1006    Misiewicz, Jeremy     932 Webster St.        Madison           WI      53704
+   7    1007    Ahmadi, Hafez         5203 Marston Way       Boulder           CO      80302
+   8    1008    Jacobson, Becky       1 Lincoln St.          Tallahassee       FL      32312
+   9    1009    An, Ing               2540 Pleasant St.      Raleigh           NC      27622
+  10    1010    Slater, Emily         1009 Cherry St.        York              PA      17407
+  11    1011    Mitchell, Wayne       28 Morningside Dr.     New York          NY      10017
+  12    1012    Stavros, Gloria       212 Northampton Rd.    South Hadley      MA      01075</code></pre>
+<p><br></p>
+<p>▶ yrsales DATASET형성하기</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data yrsales; 
+input title $ 1-25 author $ 27-50 sales; 
+cards; 
+The Milagro Beanfield War Nichols, John 303 
+The Golden Gate Seth, Vikran 150 
+Always Coming Home LeGuin, Ursula 79 
+Falling through Space Gilchrist, Ellen 128 
+Ender&#39;s Game Card, Orson Scott 87 
+The Handmaid&#39;s Tale Atwood, Margaret 64 
+; 
+proc sort data=yrsales; 
+by title; 
+run ;
+proc print data=yrsales; 
+title &#39;Sales to Date&#39; ;
+title2; 
+title3 &#39;Sorted by TITLE&#39; ;
+run ; </code></pre>
+<p>▶ title, author, sales변수로 구성</p>
+<p>▶ title변수값에 의해 오름차순으로 정렬</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                          Sales to Date                             
+
+                        Sorted by TITLE
+
+ Obs    title                             author          sales
+
+  1     Always Coming Home           LeGuin, Ursula         79
+  2     Ender&#39;s Game                 Card, Orson Scott      87
+  3     Falling through Space        Gilchrist, Ellen      128
+  4     The Golden Gate              Seth, Vikran          150
+  5     The Handmaid&#39;s Tale          Atwood, Margaret       64
+  6     The Milagro Beanfield War    Nichols, John         303</code></pre>
+<p><br></p>
+<p>▶ weeklist DATASET을 형성하기</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data weeklist; 
+input title $ 1-25 author $ 27-50 sales; 
+cards;
+The Milagro Beanfield War Nichols, John 32 
+The Golden Gate Seth, Vikran 17 
+Always Coming Home LeGuin, Ursula 10 
+Falling through Space Gilchrist, Ellen 12 
+The Accidental Tourist Tyler, Anne 15 
+The Handmaid&#39;s Tale Atwood, Margaret 8 
+;
+proc sort data=weeklist; 
+by title; 
+run; 
+proc print data=weeklist; 
+title &#39;This Week&#39;&#39;s Sales Sorted by TITLE&#39; ;
+run ;</code></pre>
+<p>▶ title, author, sales변수로 구성</p>
+<p>▶ title변수값에 의해 오름차순으로 정렬</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                 This Week&#39;s Sales Sorted by TITLE                   
+
+ Obs    title                             author         sales
+
+  1     Always Coming Home           LeGuin, Ursula        10
+  2     Falling through Space        Gilchrist, Ellen      12
+  3     The Accidental Tourist       Tyler, Anne           15
+  4     The Golden Gate              Seth, Vikran          17
+  5     The Handmaid&#39;s Tale          Atwood, Margaret       8
+  6     The Milagro Beanfield War    Nichols, John         32</code></pre>
+<p><br></p>
+<p>※ <strong>UPDATE문을 이용한 자료의 갱신</strong></p>
+<p>• UPDATE문은 기존의 DATASET을 새로운 정보가 있는 DATASET을 적용하여 갱신
+하기 위해 사용된다.</p>
+<p>• 이때 갱신하기 위한 기준 변수가 있어야 하고 기준 변수는 BY문 뒤에 사용되며 정렬
+이 되어 있어야 하고 두 개 이상의 관찰값을 가져서는 안된다.</p>
+<pre><code> UPDATE 기존 dataset명1 새로운 정보의 dataset명 2 ;
+ BY 변수명 ;</code></pre>
+<p><br></p>
 </div>
 <div id="기존의-값에-새로운-값을-추가하기" class="section level2" number="11.2">
 <h2><span class="header-section-number">11.2</span> 기존의 값에 새로운 값을 추가하기</h2>
+<p>▶ UPDATE문을 이용하여 DATASET을 바꾸기</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data totsales; 
+update yrsales weeklist (rename=(sales=newsales)); 
+by title; 
+sales=sum(sales,newsales); 
+drop newsales; 
+run; 
+proc print data=totsales; 
+title &#39;Updated Year-to-Date Sales&#39; ;
+run ;</code></pre>
+<p>▶ 특정 변수의 값을 고치는 것 뿐만 아니라 기존의 값에 새로운 값을 추가하여 더하는 것</p>
+<p>▶ Totsales DATASET 이용하여 설명<br />
+• yrsales DATASET에 weeklist DATASET의 정보를 추가하기<br />
+• sales변수의 값을 누적시켜야 하므로 weeklist DATASET의 sales 변수 → newsales<br />
+명칭을 바꾼 후 sales=SUM(sales, newsales);라고 하여 합을 구한다.<br />
+• sales변수에 다시 넣고 불필요한 newsales변수는 삭제한다.<br />
+• sales=sales+newsales라고 하지 않는 이유<br />
+: yrsales DATASET의 sales변수에 결측값이 존재하는 경우에 누적된 값도 결측값이 되기 때문이다</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                      Updated Year-to-Date Sales                      
+
+ Obs    title                        author               sales
+
+  1     Always Coming Home           LeGuin, Ursula         89
+  2     Ender&#39;s Game                 Card, Orson Scott      87
+  3     Falling through Space        Gilchrist, Ellen      140
+  4     The Accidental Tourist       Tyler, Anne            15
+  5     The Golden Gate              Seth, Vikran          167
+  6     The Handmaid&#39;s Tale          Atwood, Margaret       72
+  7     The Milagro Beanfield War    Nichols, John         335</code></pre>
+<p><br></p>
+<p>▶ MERGE문을 사용하는 경우로 UPDATE문을 사용한 경우와 차이비교</p>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data merged; 
+merge master trans; 
+by id; 
+run ;
+proc print data=merged; 
+title &#39;Merging the Master and Transaction Data Sets&#39;; 
+title2 &#39;instead of Updating Them&#39; ;
+run ;</code></pre>
+<p>▶ id변수값이 동일한 것이 존재하는 경우 : UPDATE문은 새로운 값으로 갱신되는 반면 MERGE문은 관찰값이 추가<br />
+▶ 차이점<br />
+UPDATE : 동일한 변수에 대해 trans DATASET의 변수값이 존재하면 그 값으로 바뀜<br />
+MERGE : 새로운 관찰값으로 인식함</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                          Merging the Master and Transaction Data Sets                        
+                                  instead of Updating Them     
+
+ Obs     id            name           street                 city             state     zip
+
+   1    1001                                                                           27516
+   2    1002    Dix-Rosen, Martin
+   3    1002                          R.R. 2, Box 1850       Hanover           NH      03755
+   4    1003    Gabrielli, Theresa    24 Ridgetop Rd.        Westboro          MA      01581
+   5    1004    Clayton, Aria         14 Bridge St.          San Francisco     CA      94124
+   6    1005    Archuleta, Ruby       Box 108                Milagro           NM      87429
+   7    1006                          932 Webster St.
+   8    1007    Ahmadi, Hafez         5203 Marston Way       Boulder           CO      80302
+   9    1008    Jacobson, Becky       1 Lincoln St.          Tallahassee       FL      32312
+  10    1009                          2540 Pleasant St.      Raleigh                   27622
+  11    1010    Slater, Emily         1009 Cherry St.        York              PA      17407
+  12    1011    Mitchell, Wayne       28 Morningside Dr.     New York          NY      10017
+  13    1012    Stavros, Gloria       212 Northampton Rd.    South Hadley      MA      01075</code></pre>
 
 </div>
 </div>

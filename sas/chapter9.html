@@ -24,7 +24,7 @@
 <meta name="author" content="Jin Hyun Nam" />
 
 
-<meta name="date" content="2022-01-06" />
+<meta name="date" content="2022-01-11" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -119,7 +119,7 @@
 <li class="chapter" data-level="4.1" data-path="chapter4.html"><a href="chapter4.html#칼럼-포인터-사용하기와-label문-사용하기"><i class="fa fa-check"></i><b>4.1</b> 칼럼 포인터 @ 사용하기와 LABEL문 사용하기</a></li>
 <li class="chapter" data-level="4.2" data-path="chapter4.html"><a href="chapter4.html#proc-contents의-형식"><i class="fa fa-check"></i><b>4.2</b> PROC CONTENTS의 형식</a></li>
 <li class="chapter" data-level="4.3" data-path="chapter4.html"><a href="chapter4.html#특정-변수를-취하여-새로운-dataset-만들기-keep문"><i class="fa fa-check"></i><b>4.3</b> 특정 변수를 취하여 새로운 DATASET 만들기 (KEEP문)</a></li>
-<li class="chapter" data-level="4.4" data-path="chapter4.html"><a href="chapter4.html#변수를-제외하고-새로운-dataset-만들기-drop문"><i class="fa fa-check"></i><b>4.4</b> 변수를 제외하고 새로운 DATASET 만들기 (DROP문)</a></li>
+<li class="chapter" data-level="4.4" data-path="chapter4.html"><a href="chapter4.html#특정-변수를-제외하고-새로운-dataset-만들기-drop문"><i class="fa fa-check"></i><b>4.4</b> 특정 변수를 제외하고 새로운 DATASET 만들기 (DROP문)</a></li>
 <li class="chapter" data-level="4.5" data-path="chapter4.html"><a href="chapter4.html#특정-관찰값부터-시작하여-dataset-만들기firstobs문"><i class="fa fa-check"></i><b>4.5</b> 특정 관찰값부터 시작하여 DATASET 만들기(FIRSTOBS문)</a></li>
 <li class="chapter" data-level="4.6" data-path="chapter4.html"><a href="chapter4.html#기존-dataset으로-다수의-새로운-dataset-만들기"><i class="fa fa-check"></i><b>4.6</b> 기존 DATASET으로 다수의 새로운 DATASET 만들기</a></li>
 <li class="chapter" data-level="4.7" data-path="chapter4.html"><a href="chapter4.html#변수-이름-바꾸기"><i class="fa fa-check"></i><b>4.7</b> 변수 이름 바꾸기</a></li>
@@ -141,7 +141,7 @@
 <li class="chapter" data-level="6.2" data-path="chapter6.html"><a href="chapter6.html#연속자료의-범주화"><i class="fa fa-check"></i><b>6.2</b> 연속자료의 범주화</a></li>
 <li class="chapter" data-level="6.3" data-path="chapter6.html"><a href="chapter6.html#조건식에서-여러-연산자-사용하기"><i class="fa fa-check"></i><b>6.3</b> 조건식에서 여러 연산자 사용하기</a></li>
 <li class="chapter" data-level="6.4" data-path="chapter6.html"><a href="chapter6.html#조건식에서-연산순서"><i class="fa fa-check"></i><b>6.4</b> 조건식에서 연산순서</a></li>
-<li class="chapter" data-level="6.5" data-path="chapter6.html"><a href="chapter6.html#여러-조건-사용하기"><i class="fa fa-check"></i><b>6.5</b> 여러 조건 사용하기</a></li>
+<li class="chapter" data-level="6.5" data-path="chapter6.html"><a href="chapter6.html#여러-조건-사용하기"><i class="fa fa-check"></i><b>6.5</b> 5. 여러 조건 사용하기</a></li>
 <li class="chapter" data-level="6.6" data-path="chapter6.html"><a href="chapter6.html#특정-관찰값-삭제"><i class="fa fa-check"></i><b>6.6</b> 특정 관찰값 삭제</a></li>
 <li class="chapter" data-level="6.7" data-path="chapter6.html"><a href="chapter6.html#특정-관찰값-선택"><i class="fa fa-check"></i><b>6.7</b> 특정 관찰값 선택</a></li>
 <li class="chapter" data-level="6.8" data-path="chapter6.html"><a href="chapter6.html#upcase함수를-이용한-특정-관찰값-선택"><i class="fa fa-check"></i><b>6.8</b> UPCASE함수를 이용한 특정 관찰값 선택</a></li>
@@ -242,11 +242,207 @@
             <section class="normal" id="section-">
 <div id="chapter9" class="section level1" number="9">
 <h1><span class="header-section-number">Chapter 9</span> 날짜 자료</h1>
+<p>▶ SAS시스템은 1960년 1월 1일을 기준으로 숫자값으로 날짜 시간, datetime을 저장한다.</p>
 <div id="date-문" class="section level2" number="9.1">
 <h2><span class="header-section-number">9.1</span> DATE 문</h2>
+<pre><code>&lt;SAS PROGRAM&gt;
+
+data dates;
+ input country $ 1-11 @13 depart date7. nights;
+cards;
+Japan       13may89 8
+Greece      17oct89 12
+New Zealand 03feb90 16
+Brazil      28feb90 8
+Venezuela   10nov89 9
+; run;
+proc print data=dates;
+run;
+
+data dates_2;
+set dates;
+format depart date7.;
+run;
+proc print data=dates_2;
+run;
+
+
+proc print data=dates;
+format depart mmddyy8.;
+run;</code></pre>
+<p>▶ input 문장에서 날짜 자료는 위의 형식과 같이 ‘date자릿수.’ 형식을 이용한다.</p>
+<p>▶ 형식은 자료의 형태마다 달라진다.</p>
+<p><strong>[날짜 형식과 출력형식의 관계]</strong><br />
+- MMDDYYw. : (예. MMDDYY6. → 102301, MMDDYY8. → 10/23/01, MMDDYY10. → 10/23/2001)<br />
+- DDMMYYw.<br />
+- YYMMDDw. : (예.YYMMDD6. → 011023, YYMMDD8. → 01-10-23, YYMMDD10. → 2001-10-23)<br />
+- YYMMDDnw. : no separator (예.YYMMDDn8. → 20011023)<br />
+- YYMMDDpw. : period (예.YYMMDDp8. → 01.10.23, YYMMDDp10. → 2001.10.23)<br />
+- YYMMDDsw. : slash(/)<br />
+- YYMMDDcw. : colon(:)<br />
+- YYMMDDdw. : dash(-)
+- DATE7. : 일 월(영문3자리) 년 (05OCT88)<br />
+- WORDDATE. : 영문월 일, 년(OCTOBER 05, 88)</p>
+<pre><code>&lt;OUTPUT&gt;
+
+                            Using DO
+
+             OBS    country        depart    nights
+              1     Japan           10725       8
+              2     Greece          10882      12
+              3     New Zealand     10991      16
+              4     Brazil          11016       8
+              5     Venezuela       10906       9</code></pre>
+<p><br></p>
+<pre><code>                            Using DO
+
+            OBS    country         depart    nights
+             1     Japan          13MAY89       8
+             2     Greece         17OCT89      12
+             3     New Zealand    03FEB90      16
+             4     Brazil         28FEB90       8
+             5     Venezuela      10NOV89       9</code></pre>
+<p><br></p>
+<pre><code>                           Using DO
+
+            OBS    country          depart    nights
+             1     Japan          05/13/89       8
+             2     Greece         10/17/89      12
+             3     New Zealand    02/03/90      16
+             4     Brazil         02/28/90       8
+             5     Venezuela      11/10/89       9</code></pre>
+<p><br></p>
 </div>
 <div id="날짜-계산" class="section level2" number="9.2">
 <h2><span class="header-section-number">9.2</span> 날짜 계산</h2>
+<pre><code> &lt;SAS PROGRAM&gt;
+ 
+ data date_cal;
+  set dates;
+  new=depart+nights;
+  format new date7.;
+  run;
+
+  data date_dif;
+  set date_cal;
+  dif=intck(&#39;day&#39;,depart,new);
+  dif1=intck(&#39;week&#39;,depart,new);
+  run;
+
+  data date_dd;
+   date = INTCK (&#39;year&#39;,&#39;31dec89&#39;d,&#39;1jan90&#39;d);
+   year = INTCK (&#39;year&#39;,&#39;1jan89&#39;d,&#39;31dec89&#39;d);
+   mon1 = put(INTNX(&#39;month&#39;,&#39;23oct01&#39;d,5,&#39;beginning&#39;),yymmddn8.);
+   mon2 = put(INTNX (&#39;month&#39;,&#39;23oct01&#39;d,5,&#39;middle&#39;),yymmddn8.);
+   mon3 = put(INTNX (&#39;month&#39;,&#39;23oct01&#39;d,5,&#39;end&#39;),yymmddn8.);
+  run;</code></pre>
+<p>▶ 날짜 변수는 숫자로 인식되어 더하기, 빼기가 가능하다.</p>
+<p>▶ 오늘 일자와 관련된 함수</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">구 분</th>
+<th align="center">방 법</th>
+<th align="left">설 명</th>
+<th align="left">실 용 예</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">TODAY <br> DATE</td>
+<td align="center">now=TODAY() <br> now=DATE()</td>
+<td align="left">오늘의 날짜</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="center">MDY</td>
+<td align="center">mdy=MDY(month,day,year)</td>
+<td align="left">일자</td>
+<td align="left">MDY(10,23,2001)</td>
+</tr>
+<tr class="odd">
+<td align="center">TIME</td>
+<td align="center">curtime=TIME()</td>
+<td align="left">오늘의 시간</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+<p>▶ 월 ,분기, 일자와 년도를 알기 위한 함수</p>
+<table>
+<colgroup>
+<col width="13%" />
+<col width="41%" />
+<col width="44%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">함수명</th>
+<th align="left">프로그램 방법</th>
+<th align="left">함수 설명</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">DAY</td>
+<td align="left">day=DAY(date);</td>
+<td align="left">날짜(1~31)</td>
+</tr>
+<tr class="even">
+<td align="center">QTR</td>
+<td align="left">quarter=QTR(date);</td>
+<td align="left">분기(1~4)</td>
+</tr>
+<tr class="odd">
+<td align="center">WEEKDAY</td>
+<td align="left">wday=WEEKDAY(date); 1(일요일), 2(월요일)</td>
+<td align="left">주(1~7)</td>
+</tr>
+<tr class="even">
+<td align="center">MONTH</td>
+<td align="left">month=MONTH(date);</td>
+<td align="left">월(1~12)</td>
+</tr>
+<tr class="odd">
+<td align="center">YEAR</td>
+<td align="left">yr=YEAR(date);</td>
+<td align="left">년(4자리숫자)</td>
+</tr>
+<tr class="even">
+<td align="center">INTCK</td>
+<td align="left">x=INTCK(‘day,’d1,d2); <br> x=INTCK(‘week,’d1,d2); <br> x=INTCK(‘month,’d1,d2); <br> x=INTCK(‘qtr,’d1,d2); <br> x=INTCK(‘year,’d1,d2);</td>
+<td align="left">Days from D1 to D2 <br> Weeks from D1 to D2 <br> Months from D1 to D2 <br> Quarters from D1 to D2 <br> year from D1 to D2</td>
+</tr>
+<tr class="odd">
+<td align="center">INTNX</td>
+<td align="left"><br> x=INTNX(‘month,’d1,increment,’beginning’); <br> x=INTNX(‘month,’d1,increment,’middle’); <br> x=INTNX(‘month,’d1,increment,’end’);</td>
+<td align="left">특정 날짜로부터 증가분에 의해 계산되어진 <br> Month의 시작일자 <br> Month의 중간일자 <br> Month의 마지막일자</td>
+</tr>
+</tbody>
+</table>
+<p>▶ INTNX 함수 설명<br />
+• mon1 = put(INTNX(‘month,’‘23oct01’d,5,’beginning’),yymmddn8.);<br />
+특정시점 2001년 10월23일로부터 5개월 후의 처음 시작 일자를 생성함.<br />
+즉 2001년10월23일에서 5개월 이후는 2002년 3월인데 그 중에 beginning 라는 문장이 있기 때문에 2002년 3월에서 첫 일자를 선택한다.</p>
+<p>• mon2 = put(INTNX (‘month,’‘23oct01’d,5,’middle’),yymmddn8.);<br />
+특정시점 2001년 10월23일로부터 5개월 후의 중간 일자를 생성함.<br />
+즉 2001년10월23일에서 5개월 이후는 2002년 3월인데 그 중에 middle 라는 문장이 있기 때문에 2002년 3월에서 중간 일자를 선택한다.</p>
+<p>• mon3 = put(INTNX (‘month,’‘23oct01’d,5,’end’),yymmddn8.);<br />
+특정시점 2001년 10월23일로부터 5개월 후의 마지막 일자를 생성함.<br />
+즉 2001년10월23일에서 5개월 이후는 2002년 3월인데 그 중에 end 는 문장이 있기 때문에 2002년 3월에서 마지막 일자를 선택.</p>
+<ul>
+<li>사용하는 목적: 어느 그룹에서 어떤 특정한 값을 산출 하거나 특정 시점에서 작업을 원할 경우 필요함.</li>
+</ul>
+<p>▶ INTCK 함수 프로그램 설명<br />
+• date = INTCK (‘year,’’31dec89’d,’1jan90’d);<br />
+특정시점 1989년12월31일에서 1990년1월1일까지 걸쳐진 년도를 생성함.<br />
+즉 1990-1989 이므로 1 이란 값이 생성.</p>
+<p>• year = INTCK (‘year,’’1jan89’d,’31dec89’d);<br />
+특정시점 1989년1월1일부터 1989년12월31이므로 즉 1989-1989 이므로 0 이란 값이 생성됨</p>
+<p>• INTCK 함수에서 YEAR , MONTH , QTR, DAY , WEEK 는 구하고자 하는 용도에 따라 사용됨.</p>
+<ul>
+<li>사용목적: 어느 그룹에서 과거나 미래의 어떤 특정한 시점에서 달이나 년이나 월이나 분기를 구하고자 할 때 사용됨.</li>
+</ul>
 
 </div>
 </div>
