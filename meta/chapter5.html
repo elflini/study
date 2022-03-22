@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 5 출판 비뚤림 분석 | Meta-analysis with R</title>
   <meta name="description" content="This is a manual for meta-analysis with R" />
-  <meta name="generator" content="bookdown 0.22 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 5 출판 비뚤림 분석 | Meta-analysis with R" />
   <meta property="og:type" content="book" />
@@ -24,7 +24,7 @@
 <meta name="author" content="Jin Hyun Nam" />
 
 
-<meta name="date" content="2021-06-18" />
+<meta name="date" content="2022-03-22" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -33,8 +33,9 @@
   
 <link rel="prev" href="chapter4.html"/>
 <link rel="next" href="chapter6.html"/>
-<script src="libs/header-attrs-2.8/header-attrs.js"></script>
-<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<script src="libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -42,7 +43,6 @@
 <link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
-
 
 
 
@@ -353,7 +353,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>출판 비뚤림은 일반적으로 연구 결과의 속성이나 방향에 따라 연구 결과가 출판되거나 출판 되지 못하는 비뚤림을 의미한다. 하지만 메타분석에서 출판 비뚤림을 논할 때는 Copas &amp; Shi(2000)가 언급한 출판(publication)의 의미 즉, 메타분석에 포함될 연구를 선정하는 전체 과정(the whole process of selecting a study)을 의미한다.</p>
 <p>메타분석에 포함된 연구로부터 나타난 분석 결과가 분석에 포함되어야 할 연구들이 모두 포함되었을 때 나타나는 분석 결과와 체계적으로 다르다면 출판 비뚤림이 존재한다고 할 수 있다. 즉, 출판된 연구의 결과가 모든(수행된) 연구의 결과를 대표하지 못할 때 출판 비뚤림이 발생하는 것이다. 따라서 메타분석에 포함된 연구가 관련된 모든 연구들의 왜곡된 표본(biased sample)이라면, 그 결과(즉 메타분석의 결과로) 나타난 전체효과크기는 왜곡된 – 일반적으로 과대추정(overestimated)된 – 결과라고 할 수 있다.</p>
 <p>문헌에는 출판된 문헌뿐만 아니라 출판되지 않은 회색문헌(grey literature)도 존재하는데 이는 기술 보고서(technical reports), 정부 보고서(governmental reports), 학위논문(thesis/dissertation), 회의자료(conference papers) 등과 같은 것이다. 만약 이러한 회색문헌이 메타분석에 포함되지 않았다면 메타분석은 표본추출 비뚤림(sampling bias)으로부터 자유로울 수 없다. 또한 긍정적인 결과를 보여주는, 그리고 통계적으로 유의미한 결과를 보여주는 연구는 그렇지 않은 연구보다 출판될 가능성이 높으므로 출판된 연구는 메타분석에 포함될 가능성이 높다. 따라서 통계적으로 유의하지 않거나 긍정적인 결과를 도출하지 못한 연구는 출판되지 않아서 메타분석에 포함되지 않을 가능성이 높으므로 이는 누락된 연구(missing studies)로 나타난다.</p>
-<p>메타분석에 있어서 표본크기(sample size)가 작은 연구들이 상대적으로 큰 효과크기를 보이는 경향을 small-study effects라고 한다. 통계적 유의성에 상관없이 표본이 큰 연구들은 출판될 가능성이 높고, 표본이 중간 크기인 경우 출판되지 않을 가능성이 있다. 또한 표본이 작은 연구들은 출판되지 않을 가능성(missing)이 가장 높지만 효과크기가 크다면 출판될 가능성이 있다. 즉, 메타분석에 포함된 연구 중 표본크기가 작은 연구는 효과크기가 상대적으로 큰 연구일 가능성이 높다고 할 수 있다. 따라서 ‘small-study effects’에 대한 이러한 가설을 검정하기 위해 표본크기와 효과크기의 관계를 고찰할 필요가 있다. 만약 이 양자 간에 어떤 의미 있는 관계가 존재한다면 표본크기가 작은 연구로 인한 영향에 대한 가설은 사실(true)이라고 볼 수 있다. 즉, 메타분석에 포함된 연구들 중에서 표본크기가 작은 연구들의 효과크기가 상대적으로 크다면, 이것은 samll-study effects, 출판 비뚤림이 존재한다는 근거로 볼 수 있다.</p>
+<p>메타분석에 있어서 표본크기(sample size)가 작은 연구들이 상대적으로 큰 효과크기를 보이는 경향을 small-study effects라고 한다. 통계적 유의성에 상관없이 표본이 큰 연구들은 출판될 가능성이 높고, 표본이 중간 크기인 경우 출판되지 않을 가능성이 있다. 또한 표본이 작은 연구들은 출판되지 않을 가능성(missing)이 가장 높지만 효과크기가 크다면 출판될 가능성이 있다. 즉, 메타분석에 포함된 연구 중 표본크기가 작은 연구는 효과크기가 상대적으로 큰 연구일 가능성이 높다고 할 수 있다. 따라서 ’small-study effects’에 대한 이러한 가설을 검정하기 위해 표본크기와 효과크기의 관계를 고찰할 필요가 있다. 만약 이 양자 간에 어떤 의미 있는 관계가 존재한다면 표본크기가 작은 연구로 인한 영향에 대한 가설은 사실(true)이라고 볼 수 있다. 즉, 메타분석에 포함된 연구들 중에서 표본크기가 작은 연구들의 효과크기가 상대적으로 크다면, 이것은 samll-study effects, 출판 비뚤림이 존재한다는 근거로 볼 수 있다.</p>
 <p><br / ></p>
 </div>
 <div id="출판-비뚤림의-분석-과정" class="section level2" number="5.2">
@@ -474,63 +474,29 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## 35 study_35  0.372  0.015283 0.727838 0.033042
 ## 36 study_36  0.703 -0.737410 2.143606 0.540157
 ## 37 study_37  0.182 -0.110940 0.475588 0.022388</code></pre>
-<pre><code>## Loading &#39;meta&#39; package (version 4.18-1).
-## Type &#39;help(meta)&#39; for a brief overview.</code></pre>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="chapter5.html#cb6-1" aria-hidden="true" tabindex="-1"></a>fit<span class="ot">&lt;-</span> <span class="fu">metagen</span>(yi,<span class="fu">sqrt</span>(vi),</span>
-<span id="cb6-2"><a href="chapter5.html#cb6-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> publi[<span class="fu">order</span>(publi<span class="sc">$</span>vi),],</span>
-<span id="cb6-3"><a href="chapter5.html#cb6-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">studlab =</span> <span class="fu">paste</span>(study),</span>
-<span id="cb6-4"><a href="chapter5.html#cb6-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">comb.fixed =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb6-5"><a href="chapter5.html#cb6-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">comb.random =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb6-6"><a href="chapter5.html#cb6-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">prediction =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb6-7"><a href="chapter5.html#cb6-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">sm =</span> <span class="st">&quot;RR&quot;</span>)</span>
-<span id="cb6-8"><a href="chapter5.html#cb6-8" aria-hidden="true" tabindex="-1"></a>fit</span></code></pre></div>
-<pre><code>##              RR           95%-CI %W(fixed)
-## study_29 1.2599 [1.0353; 1.5331]      13.9
-## study_25 0.9704 [0.7792; 1.2087]      11.1
-## study_22 0.7898 [0.6158; 1.0130]       8.6
-## study_34 1.1806 [0.9025; 1.5443]       7.4
-## study_37 1.1996 [0.8947; 1.6084]       6.2
-## study_14 1.6504 [1.1595; 2.3490]       4.3
-## study_35 1.4506 [1.0159; 2.0715]       4.2
-## study_21 1.0597 [0.7394; 1.5188]       4.1
-## study_15 1.1901 [0.8193; 1.7285]       3.8
-## study_31 1.6603 [1.1226; 2.4556]       3.5
-## study_7  1.2300 [0.8095; 1.8688]       3.1
-## study_32 1.1595 [0.7063; 1.9035]       2.2
-## study_33 1.1096 [0.6696; 1.8388]       2.1
-## study_18 1.0800 [0.6405; 1.8213]       2.0
-## study_12 1.0305 [0.6101; 1.7403]       1.9
-## study_11 1.5496 [0.8997; 2.6690]       1.8
-## study_9  1.5204 [0.8745; 2.6435]       1.7
-## study_1  0.7498 [0.4312; 1.3036]       1.7
-## study_30 1.0997 [0.6185; 1.9552]       1.6
-## study_3  2.1297 [1.1872; 3.8207]       1.6
-## study_27 1.1901 [0.6625; 2.1378]       1.6
-## study_20 1.6193 [0.9006; 2.9117]       1.6
-## study_6  2.0097 [1.0879; 3.7127]       1.4
-## study_26 1.6000 [0.8263; 3.0983]       1.2
-## study_17 2.1598 [1.0837; 4.3044]       1.1
-## study_28 1.6603 [0.7297; 3.7780]       0.8
-## study_23 0.7401 [0.3220; 1.7007]       0.8
-## study_4  0.8001 [0.3385; 1.8914]       0.7
-## study_10 1.0305 [0.4132; 2.5697]       0.6
-## study_2  2.0709 [0.8135; 5.2722]       0.6
-## study_8  1.1996 [0.4670; 3.0817]       0.6
-## study_13 2.3396 [0.8105; 6.7537]       0.5
-## study_24 2.2705 [0.7530; 6.8464]       0.4
-## study_5  0.7898 [0.2523; 2.4723]       0.4
-## study_19 2.5498 [0.7403; 8.7824]       0.3
-## study_16 1.5204 [0.3890; 5.9435]       0.3
-## study_36 2.0198 [0.4783; 8.5291]       0.3
-## 
-## Number of studies combined: k = 37
+<pre><code>## Warning: 패키지 &#39;meta&#39;는 R 버전 4.1.3에서 작성되었습니다</code></pre>
+<pre><code>## Loading &#39;meta&#39; package (version 5.2-0).
+## Type &#39;help(meta)&#39; for a brief overview.
+## Readers of &#39;Meta-Analysis with R (Use R!)&#39; should install
+## older version of &#39;meta&#39; package: https://tinyurl.com/dt4y5drs</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="chapter5.html#cb7-1" aria-hidden="true" tabindex="-1"></a>fit<span class="ot">&lt;-</span> <span class="fu">metagen</span>(yi,<span class="fu">sqrt</span>(vi),</span>
+<span id="cb7-2"><a href="chapter5.html#cb7-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> publi[<span class="fu">order</span>(publi<span class="sc">$</span>vi),],</span>
+<span id="cb7-3"><a href="chapter5.html#cb7-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">studlab =</span> <span class="fu">paste</span>(study),</span>
+<span id="cb7-4"><a href="chapter5.html#cb7-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">comb.fixed =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-5"><a href="chapter5.html#cb7-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">comb.random =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb7-6"><a href="chapter5.html#cb7-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">prediction =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-7"><a href="chapter5.html#cb7-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">sm =</span> <span class="st">&quot;RR&quot;</span>)</span></code></pre></div>
+<pre><code>## Warning: Use argument &#39;fixed&#39; instead of &#39;comb.fixed&#39; (deprecated).</code></pre>
+<pre><code>## Warning: Use argument &#39;random&#39; instead of &#39;comb.random&#39; (deprecated).</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="chapter5.html#cb10-1" aria-hidden="true" tabindex="-1"></a>fit</span></code></pre></div>
+<pre><code>## Number of studies combined: k = 37
 ## 
 ##                         RR           95%-CI    z  p-value
-## Fixed effect model  1.2048 [1.1199; 1.2962] 5.00 &lt; 0.0001
-## Prediction interval        [0.9350; 1.6424]              
+## Common effect model 1.2048 [1.1199; 1.2962] 5.00 &lt; 0.0001
+## Prediction interval        [0.9032; 1.7181]              
 ## 
 ## Quantifying heterogeneity:
-##  tau^2 = 0.0170 [0.0000; 0.0680]; tau = 0.1305 [0.0000; 0.2607]
+##  tau^2 = 0.0226 [0.0000; 0.0663]; tau = 0.1504 [0.0000; 0.2575]
 ##  I^2 = 24.2% [0.0%; 49.8%]; H = 1.15 [1.00; 1.41]
 ## 
 ## Test of heterogeneity:
@@ -539,27 +505,27 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## 
 ## Details on meta-analytical method:
 ## - Inverse variance method
-## - DerSimonian-Laird estimator for tau^2
-## - Jackson method for confidence interval of tau^2 and tau</code></pre>
+## - Restricted maximum-likelihood estimator for tau^2
+## - Q-profile method for confidence interval of tau^2 and tau</code></pre>
 </div>
 <div id="forest-plot을-이용한-데이터-검토" class="section level4" number="5.4.0.2">
 <h4><span class="header-section-number">5.4.0.2</span> Forest plot을 이용한 데이터 검토</h4>
 <p>비뚤림이 존재하는지 살펴보는 가장 좋은 출발점은 forest plot으로 메타분석 결과를 검토해보는 것이다. 여기서는 ’small-study effects’가 존재하는지 살펴보기 위해 자료를 분산 크기순으로 정렬하여 분석하였다(publi[order(publi$vi),]).</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="chapter5.html#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">forest</span>(fit)</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="chapter5.html#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">forest</span>(fit)</span></code></pre></div>
 <p><img src="meta_files/figure-html/unnamed-chunk-4-1.png" width="768" /></p>
 <p>각 개별연구들의 결과(효과크기 및 통계적 유의성)와 패턴, 그리고 전체 연구 결과의 모습(평균효과크기 및 통계적 유의성)을 보여준다. 그림의 아래쪽에 있는 가중치가 작은 연구들 즉, 표본의 크기가 작은 연구들이 대체로 효과크기가 큰 것으로 나타났음을 알 수 있으며, 이는 ’small-study effects’가 존재할 가능성이 있음을 시사한다.</p>
 </div>
 <div id="funnel-plot을-이용한-small-study-effects-존재-유무-확인" class="section level4" number="5.4.0.3">
 <h4><span class="header-section-number">5.4.0.3</span> Funnel plot을 이용한 ‘small-study effects’ 존재 유무 확인</h4>
 <p>Funnel plot은 <strong>meta</strong> package에서 <em>funnel</em> 함수를 이용하여 출력한다. 이때 <em>funnel</em> 함수의 첫번째 인수는 메타분석 결과를 담은 object를 사용한다.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="chapter5.html#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">funnel</span>(fit,<span class="at">comb.fixed=</span>T, <span class="at">comb.random=</span>F)</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="chapter5.html#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">funnel</span>(fit,<span class="at">comb.fixed=</span>T, <span class="at">comb.random=</span>F)</span></code></pre></div>
 <p><img src="meta_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <p><span class="math inline">\(X\)</span>축에는 효과크기, <span class="math inline">\(Y\)</span>축에는 표준오차를 사용하여 표본크기가 작은 연구들이 그래프 하단에 보다 폭넓게 위치할 수 있다. 그리고 relative risk=1.0을 기준으로 볼때 주로 오른쪽에 위치하고 있어 비대칭(asymmetry)임을 육안으로 비교적 쉽게 확인할 수 있다. 하지만 funnel plot은 오류에 대한 증명이 아니라 비뚤림의 가능성(possibility of bias)을 제기하기 위한 도구이며, ’small-study effects’를 검토하기 위한 하나의 일반적인 수단(generic means)이라고 보는 것이 타당하다.</p>
 </div>
 <div id="비대칭에-대한-통계적-분석" class="section level4" number="5.4.0.4">
 <h4><span class="header-section-number">5.4.0.4</span> 비대칭에 대한 통계적 분석</h4>
 <p>Funnel plot을 통해 효과크기의 분포가 비대칭음을 쉽게 알 수 있지만, 시각적 분석은 주관적 판단에 의존하기 때문에 엄격한 방법이 될 수 없으므로 보다 과학적인 통계적 분석이 필요하다. 이때 일반적으로 활용되는 방법이 Egger’s regression test가 있으며 <em>metabias</em> 함수를 이용한다.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="chapter5.html#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">metabias</span>(fit, <span class="at">method.bias=</span><span class="st">&quot;linreg&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="chapter5.html#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">metabias</span>(fit, <span class="at">method.bias=</span><span class="st">&quot;linreg&quot;</span>)</span></code></pre></div>
 <pre><code>## Linear regression test of funnel plot asymmetry
 ## 
 ## Test result: t = 2.35, df = 35, p-value = 0.0248
@@ -575,7 +541,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## - reference: Egger et al. (1997), BMJ</code></pre>
 <p>Egger et al., (1997)는 각 연구의 효과크기와 표준오차와의 관계를 회귀식으로 설명하고 있으며, 위의 결과는 bias의 <span class="math inline">\(p-value\)</span>가 0.0248로 유의수준 <span class="math inline">\(5\%\)</span>에서 유의함을 알 수 있다. 즉 효과크기와 표준오차는 관계가 없다는 귀무가설(bias=0, no small-study effects)을 기각하게 되어 효과크기와 표준오차의 관계는 통계적으로 유의미한 관계가 있다고 말할 수 있다. 즉, 전반적으로 표본의 크기가 작은 연구들은 큰 연구들보다 간접흡연과 폐암 사이의 관계 곧 효과크기가 크다는 것을 보여주고 있기 때문에 통계적으로도 funnel plot의 비대칭을 증명하게 된다.</p>
 <p>Funnel plot의 비대칭성을 검증하기 위한 또 다른 방법으로 Begg &amp; Mazumdar (1994)의 rank correlation test를 이용할 수 있다. 이 방법은 효과크기와 분산과의 서열상관관계를 검증하기 때문에 Egger의 regression test보다 검증력이 약한 것으로 평가되어 널리 사용되지는 않는다. 이 방법 역시 <em>metabias</em> 함수를 이용하여 사용할 수 있다.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="chapter5.html#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">metabias</span>(fit, <span class="at">method.bias=</span><span class="st">&quot;rank&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="chapter5.html#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">metabias</span>(fit, <span class="at">method.bias=</span><span class="st">&quot;rank&quot;</span>)</span></code></pre></div>
 <pre><code>## Rank correlation test of funnel plot asymmetry
 ## 
 ## Test result: z = 1.23, p-value = 0.2189
@@ -599,7 +565,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
-<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
 <script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
 <script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
 <script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
@@ -639,6 +604,10 @@ gitbook.start({
 "text": null
 },
 "download": ["meta.pdf", "meta.epub"],
+"search": {
+"engine": "fuse",
+"options": null
+},
 "toc": {
 "collapse": "subsection"
 }
