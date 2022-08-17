@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 7 propensity score Methods | Bio-Health Data Analysis</title>
+  <meta name="description" content="This is lecture for the bio-health data analysis" />
+  <meta name="generator" content="bookdown 0.22 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 7 propensity score Methods | Bio-Health Data Analysis" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="This is lecture for the bio-health data analysis" />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 7 propensity score Methods | Bio-Health Data Analysis" />
+  
+  <meta name="twitter:description" content="This is lecture for the bio-health data analysis" />
+  
+
+<meta name="author" content="Jin Hyun Nam" />
+
+
+<meta name="date" content="2022-08-17" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="Chapter6.html"/>
+
+<script src="libs/header-attrs-2.15/header-attrs.js"></script>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Bio-Health Data Analysis</a></li>
+
+<li class="divider"></li>
+<li><a href="index.html#머리말" id="toc-머리말">머리말<span></span></a></li>
+<li><a href="chapter1.html#chapter1" id="toc-chapter1"><span class="toc-section-number">1</span> Introduction to Claims Data<span></span></a>
+<ul>
+<li><a href="chapter1.html#국내-보건의료-빅데이터" id="toc-국내-보건의료-빅데이터"><span class="toc-section-number">1.1</span> 국내 보건의료 빅데이터<span></span></a></li>
+<li><a href="chapter1.html#건강보험-청구자료" id="toc-건강보험-청구자료"><span class="toc-section-number">1.2</span> 건강보험 청구자료<span></span></a>
+<ul>
+<li><a href="chapter1.html#건강보험심사평가원" id="toc-건강보험심사평가원">건강보험심사평가원<span></span></a></li>
+<li><a href="chapter1.html#건강보험공단" id="toc-건강보험공단">건강보험공단<span></span></a></li>
+</ul></li>
+<li><a href="chapter1.html#청구자료-구성-요소" id="toc-청구자료-구성-요소"><span class="toc-section-number">1.3</span> 청구자료 구성 요소<span></span></a></li>
+<li><a href="chapter1.html#건강보험청구자료-활용" id="toc-건강보험청구자료-활용"><span class="toc-section-number">1.4</span> 건강보험청구자료 활용<span></span></a>
+<ul>
+<li><a href="chapter1.html#활용-예시---명세서-기반" id="toc-활용-예시---명세서-기반"><span class="toc-section-number">1.4.1</span> 활용 예시 - 명세서 기반<span></span></a></li>
+<li><a href="chapter1.html#활용-예시---환자-기반" id="toc-활용-예시---환자-기반"><span class="toc-section-number">1.4.2</span> 활용 예시 - 환자 기반<span></span></a></li>
+</ul></li>
+</ul></li>
+<li><a href="Chapter2.html#Chapter2" id="toc-Chapter2"><span class="toc-section-number">2</span> Observational Study<span></span></a>
+<ul>
+<li><a href="Chapter2.html#case-control-study" id="toc-case-control-study"><span class="toc-section-number">2.1</span> Case-Control study<span></span></a>
+<ul>
+<li><a href="Chapter2.html#환자군-선정" id="toc-환자군-선정"><span class="toc-section-number">2.1.1</span> 환자군 선정<span></span></a></li>
+<li><a href="Chapter2.html#대조군-선정" id="toc-대조군-선정"><span class="toc-section-number">2.1.2</span> 대조군 선정<span></span></a></li>
+<li><a href="Chapter2.html#비교성-확보를-위한-짝짓기-수행" id="toc-비교성-확보를-위한-짝짓기-수행"><span class="toc-section-number">2.1.3</span> 비교성 확보를 위한 짝짓기 수행<span></span></a></li>
+<li><a href="Chapter2.html#과거-정보-수집" id="toc-과거-정보-수집"><span class="toc-section-number">2.1.4</span> 과거 정보 수집<span></span></a></li>
+<li><a href="Chapter2.html#기본-특징-분석" id="toc-기본-특징-분석"><span class="toc-section-number">2.1.5</span> 기본 특징 분석<span></span></a></li>
+<li><a href="Chapter2.html#결과변수와-중재-노출간의-관련성-파악" id="toc-결과변수와-중재-노출간의-관련성-파악"><span class="toc-section-number">2.1.6</span> 결과변수와 중재 노출간의 관련성 파악<span></span></a></li>
+<li><a href="Chapter2.html#환자-대조군-연구의-장점과-단점" id="toc-환자-대조군-연구의-장점과-단점"><span class="toc-section-number">2.1.7</span> 환자-대조군 연구의 장점과 단점<span></span></a></li>
+</ul></li>
+<li><a href="Chapter2.html#cohort-study" id="toc-cohort-study"><span class="toc-section-number">2.2</span> Cohort study<span></span></a>
+<ul>
+<li><a href="Chapter2.html#코호트-선정" id="toc-코호트-선정"><span class="toc-section-number">2.2.1</span> 코호트 선정<span></span></a></li>
+<li><a href="Chapter2.html#중재-노출-정의" id="toc-중재-노출-정의"><span class="toc-section-number">2.2.2</span> 중재 노출 정의<span></span></a></li>
+<li><a href="Chapter2.html#결과변수-정의" id="toc-결과변수-정의"><span class="toc-section-number">2.2.3</span> 결과변수 정의<span></span></a></li>
+<li><a href="Chapter2.html#교란요인-정의" id="toc-교란요인-정의"><span class="toc-section-number">2.2.4</span> 교란요인 정의<span></span></a></li>
+<li><a href="Chapter2.html#기본-특징-분석-1" id="toc-기본-특징-분석-1"><span class="toc-section-number">2.2.5</span> 기본 특징 분석<span></span></a></li>
+<li><a href="Chapter2.html#인과성-평가" id="toc-인과성-평가"><span class="toc-section-number">2.2.6</span> 인과성 평가<span></span></a></li>
+<li><a href="Chapter2.html#코호트-연구의-장점과-단점" id="toc-코호트-연구의-장점과-단점"><span class="toc-section-number">2.2.7</span> 코호트 연구의 장점과 단점<span></span></a></li>
+</ul></li>
+</ul></li>
+<li><a href="Chapter3.html#Chapter3" id="toc-Chapter3"><span class="toc-section-number">3</span> Medical Cost Data Analysis<span></span></a>
+<ul>
+<li><a href="Chapter3.html#health-care-cost" id="toc-health-care-cost"><span class="toc-section-number">3.1</span> health care cost<span></span></a></li>
+<li><a href="Chapter3.html#regression-analysis-with-log-transformation" id="toc-regression-analysis-with-log-transformation"><span class="toc-section-number">3.2</span> Regression analysis with log transformation<span></span></a>
+<ul>
+<li><a href="Chapter3.html#general-linear-model" id="toc-general-linear-model"><span class="toc-section-number">3.2.1</span> General linear model<span></span></a></li>
+<li><a href="Chapter3.html#log-cost-regression-model" id="toc-log-cost-regression-model"><span class="toc-section-number">3.2.2</span> Log cost regression model<span></span></a></li>
+</ul></li>
+<li><a href="Chapter3.html#gamma-generalized-linear-models" id="toc-gamma-generalized-linear-models"><span class="toc-section-number">3.3</span> Gamma generalized Linear Models<span></span></a>
+<ul>
+<li><a href="Chapter3.html#generalized-linear-models-glms" id="toc-generalized-linear-models-glms"><span class="toc-section-number">3.3.1</span> Generalized linear models (GLMs)<span></span></a></li>
+<li><a href="Chapter3.html#gamma-generalized-linear-models-1" id="toc-gamma-generalized-linear-models-1"><span class="toc-section-number">3.3.2</span> Gamma generalized linear models<span></span></a></li>
+</ul></li>
+<li><a href="Chapter3.html#transformation-vs.-glms" id="toc-transformation-vs.-glms"><span class="toc-section-number">3.4</span> Transformation vs. GLMs<span></span></a></li>
+<li><a href="Chapter3.html#appendix" id="toc-appendix"><span class="toc-section-number">3.5</span> Appendix<span></span></a>
+<ul>
+<li><a href="Chapter3.html#exponential-family" id="toc-exponential-family"><span class="toc-section-number">3.5.1</span> Exponential Family<span></span></a></li>
+<li><a href="Chapter3.html#canonical-links" id="toc-canonical-links"><span class="toc-section-number">3.5.2</span> Canonical Links<span></span></a></li>
+<li><a href="Chapter3.html#estimation-of-the-model-parameters" id="toc-estimation-of-the-model-parameters"><span class="toc-section-number">3.5.3</span> Estimation of the Model Parameters<span></span></a></li>
+<li><a href="Chapter3.html#distribution-and-link-function" id="toc-distribution-and-link-function"><span class="toc-section-number">3.5.4</span> Distribution and Link Function<span></span></a></li>
+</ul></li>
+</ul></li>
+<li><a href="Chapter4.html#Chapter4" id="toc-Chapter4"><span class="toc-section-number">4</span> Binary and Categorical data Analysis<span></span></a>
+<ul>
+<li><a href="Chapter4.html#binary-outcomes" id="toc-binary-outcomes"><span class="toc-section-number">4.1</span> Binary Outcomes<span></span></a></li>
+</ul></li>
+<li><a href="Chapter5.html#Chapter5" id="toc-Chapter5"><span class="toc-section-number">5</span> Count Data Analysis<span></span></a>
+<ul>
+<li><a href="Chapter5.html#poisson-regression" id="toc-poisson-regression"><span class="toc-section-number">5.1</span> Poisson Regression<span></span></a></li>
+<li><a href="Chapter5.html#example-danish-lung-cancer-counts" id="toc-example-danish-lung-cancer-counts"><span class="toc-section-number">5.2</span> Example: Danish Lung Cancer Counts<span></span></a></li>
+<li><a href="Chapter5.html#what-about-accounting-for-population-size" id="toc-what-about-accounting-for-population-size"><span class="toc-section-number">5.3</span> What About Accounting for Population Size?<span></span></a></li>
+</ul></li>
+<li><a href="Chapter6.html#Chapter6" id="toc-Chapter6"><span class="toc-section-number">6</span> Survival Analysis<span></span></a>
+<ul>
+<li><a href="Chapter6.html#생존분석" id="toc-생존분석"><span class="toc-section-number">6.1</span> 생존분석<span></span></a></li>
+<li><a href="Chapter6.html#비모수적-생존함수-추정" id="toc-비모수적-생존함수-추정"><span class="toc-section-number">6.2</span> 비모수적 생존함수 추정<span></span></a>
+<ul>
+<li><a href="Chapter6.html#생명표-방법" id="toc-생명표-방법"><span class="toc-section-number">6.2.1</span> 생명표 방법<span></span></a></li>
+<li><a href="Chapter6.html#누적한계추정법" id="toc-누적한계추정법"><span class="toc-section-number">6.2.2</span> 누적한계추정법<span></span></a></li>
+<li><a href="Chapter6.html#생존분포-비교" id="toc-생존분포-비교"><span class="toc-section-number">6.2.3</span> 생존분포 비교<span></span></a></li>
+</ul></li>
+<li><a href="Chapter6.html#모수적-생존함수-추정과-회귀모형" id="toc-모수적-생존함수-추정과-회귀모형"><span class="toc-section-number">6.3</span> 모수적 생존함수 추정과 회귀모형<span></span></a>
+<ul>
+<li><a href="Chapter6.html#지수분포" id="toc-지수분포"><span class="toc-section-number">6.3.1</span> 지수분포<span></span></a></li>
+<li><a href="Chapter6.html#와이블분포" id="toc-와이블분포"><span class="toc-section-number">6.3.2</span> 와이블분포<span></span></a></li>
+<li><a href="Chapter6.html#감마분포" id="toc-감마분포"><span class="toc-section-number">6.3.3</span> 감마분포<span></span></a></li>
+<li><a href="Chapter6.html#로그정규분포" id="toc-로그정규분포"><span class="toc-section-number">6.3.4</span> 로그정규분포<span></span></a></li>
+<li><a href="Chapter6.html#로그로지스틱분포" id="toc-로그로지스틱분포"><span class="toc-section-number">6.3.5</span> 로그로지스틱분포<span></span></a></li>
+<li><a href="Chapter6.html#곰페르츠분포" id="toc-곰페르츠분포"><span class="toc-section-number">6.3.6</span> 곰페르츠분포<span></span></a></li>
+<li><a href="Chapter6.html#회귀모형aft" id="toc-회귀모형aft"><span class="toc-section-number">6.3.7</span> 회귀모형(AFT)<span></span></a></li>
+</ul></li>
+<li><a href="Chapter6.html#cox-비례위험모형" id="toc-cox-비례위험모형"><span class="toc-section-number">6.4</span> Cox 비례위험모형<span></span></a>
+<ul>
+<li><a href="Chapter6.html#시간에-따라-변화하는-공변량이-있을-경우" id="toc-시간에-따라-변화하는-공변량이-있을-경우"><span class="toc-section-number">6.4.1</span> 시간에 따라 변화하는 공변량이 있을 경우<span></span></a></li>
+</ul></li>
+<li><a href="Chapter6.html#경쟁위험모형" id="toc-경쟁위험모형"><span class="toc-section-number">6.5</span> 경쟁위험모형<span></span></a>
+<ul>
+<li><a href="Chapter6.html#원인별-누적발생함수" id="toc-원인별-누적발생함수"><span class="toc-section-number">6.5.1</span> 원인별 누적발생함수<span></span></a></li>
+<li><a href="Chapter6.html#원인별-위험함수" id="toc-원인별-위험함수"><span class="toc-section-number">6.5.2</span> 원인별 위험함수<span></span></a></li>
+<li><a href="Chapter6.html#누적발생함수에-대한-회귀분석" id="toc-누적발생함수에-대한-회귀분석"><span class="toc-section-number">6.5.3</span> 누적발생함수에 대한 회귀분석<span></span></a></li>
+</ul></li>
+<li><a href="Chapter6.html#sas-실습" id="toc-sas-실습"><span class="toc-section-number">6.6</span> SAS 실습<span></span></a>
+<ul>
+<li><a href="Chapter6.html#생명표-방법-1" id="toc-생명표-방법-1"><span class="toc-section-number">6.6.1</span> 생명표 방법<span></span></a></li>
+<li><a href="Chapter6.html#누적한계추정법-1" id="toc-누적한계추정법-1"><span class="toc-section-number">6.6.2</span> 누적한계추정법<span></span></a></li>
+<li><a href="Chapter6.html#생존분포-비교-1" id="toc-생존분포-비교-1"><span class="toc-section-number">6.6.3</span> 생존분포 비교<span></span></a></li>
+<li><a href="Chapter6.html#parametric-model" id="toc-parametric-model"><span class="toc-section-number">6.6.4</span> Parametric Model<span></span></a></li>
+<li><a href="Chapter6.html#aft-model" id="toc-aft-model"><span class="toc-section-number">6.6.5</span> AFT model<span></span></a></li>
+<li><a href="Chapter6.html#cox-비례위험모형-1" id="toc-cox-비례위험모형-1"><span class="toc-section-number">6.6.6</span> Cox 비례위험모형<span></span></a></li>
+<li><a href="Chapter6.html#cox-비례위험모형---time-dependent-covariate" id="toc-cox-비례위험모형---time-dependent-covariate"><span class="toc-section-number">6.6.7</span> Cox 비례위험모형 - time dependent covariate<span></span></a></li>
+<li><a href="Chapter6.html#competing-risks" id="toc-competing-risks"><span class="toc-section-number">6.6.8</span> Competing Risks<span></span></a></li>
+</ul></li>
+</ul></li>
+<li><a href="Chapter7.html#Chapter7" id="toc-Chapter7"><span class="toc-section-number">7</span> propensity score Methods<span></span></a>
+<ul>
+<li><a href="Chapter7.html#observational-study" id="toc-observational-study"><span class="toc-section-number">7.1</span> Observational Study?<span></span></a></li>
+<li><a href="Chapter7.html#propensity-score" id="toc-propensity-score"><span class="toc-section-number">7.2</span> Propensity Score?<span></span></a></li>
+<li><a href="Chapter7.html#propensity-score-methods" id="toc-propensity-score-methods"><span class="toc-section-number">7.3</span> Propensity Score Methods<span></span></a>
+<ul>
+<li><a href="Chapter7.html#propensity-score-matching" id="toc-propensity-score-matching"><span class="toc-section-number">7.3.1</span> Propensity Score Matching<span></span></a></li>
+<li><a href="Chapter7.html#stratification-using-propensity-score" id="toc-stratification-using-propensity-score"><span class="toc-section-number">7.3.2</span> Stratification using Propensity Score<span></span></a></li>
+<li><a href="Chapter7.html#inverse-probability-of-treatment-weighting" id="toc-inverse-probability-of-treatment-weighting"><span class="toc-section-number">7.3.3</span> Inverse Probability of Treatment Weighting<span></span></a></li>
+<li><a href="Chapter7.html#propensity-score-adjustment-as-covariate" id="toc-propensity-score-adjustment-as-covariate"><span class="toc-section-number">7.3.4</span> Propensity Score Adjustment as Covariate<span></span></a></li>
+<li><a href="Chapter7.html#property-of-propensity-score" id="toc-property-of-propensity-score"><span class="toc-section-number">7.3.5</span> Property of Propensity Score<span></span></a></li>
+</ul></li>
+<li><a href="Chapter7.html#practice---sas" id="toc-practice---sas"><span class="toc-section-number">7.4</span> Practice - SAS<span></span></a>
+<ul>
+<li><a href="Chapter7.html#greedy-nearest-neighbor-matching" id="toc-greedy-nearest-neighbor-matching"><span class="toc-section-number">7.4.1</span> Greedy Nearest Neighbor Matching<span></span></a></li>
+<li><a href="Chapter7.html#propensity-score-stratification" id="toc-propensity-score-stratification"><span class="toc-section-number">7.4.2</span> Propensity Score Stratification<span></span></a></li>
+<li><a href="Chapter7.html#inverse-probability-treatment-weighting" id="toc-inverse-probability-treatment-weighting"><span class="toc-section-number">7.4.3</span> Inverse Probability Treatment Weighting<span></span></a></li>
+<li><a href="Chapter7.html#matching-with-existing-propensity-scores" id="toc-matching-with-existing-propensity-scores"><span class="toc-section-number">7.4.4</span> Matching with Existing propensity scores<span></span></a></li>
+<li><a href="Chapter7.html#matching-with-existing-propensity-scores-1" id="toc-matching-with-existing-propensity-scores-1"><span class="toc-section-number">7.4.5</span> Matching with Existing propensity scores<span></span></a></li>
+</ul></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Bio-Health Data Analysis</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="Chapter7" class="section level1 hasAnchor" number="7">
+<h1><span class="header-section-number">Chapter 7</span> propensity score Methods<a href="Chapter7.html#Chapter7" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="observational-study" class="section level2 hasAnchor" number="7.1">
+<h2><span class="header-section-number">7.1</span> Observational Study?<a href="Chapter7.html#observational-study" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="randomized-controlled-trials-gold-standard" class="section level4 unnumbered hasAnchor">
+<h4>Randomized Controlled Trials ("gold standard")<a href="Chapter7.html#randomized-controlled-trials-gold-standard" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p><img src="psm/f0.jpg" style="width:85.0%" /></p>
+</div>
+<div id="characteristics-of-rcts" class="section level4 unnumbered hasAnchor">
+<h4>Characteristics of RCTs<a href="Chapter7.html#characteristics-of-rcts" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><p>Randomization ensures subjects in both treatment groups are equally
+matched on all factors.</p></li>
+<li><p>Allow causal inference.</p></li>
+<li><p>High cost</p></li>
+<li><p>Often short duration and/or underpowered.</p></li>
+<li><p>Problems with generalizability:</p>
+<ul>
+<li><p>Treatment is "ideal" (high compliance, careful follow-up means
+that any problems may be caught early).</p></li>
+<li><p>Many people who are given the treatments in "real life" are
+excluded from the trials.</p></li>
+</ul></li>
+<li><p>Some situations cannot be randomized.</p></li>
+</ul>
+</div>
+<div id="what-is-observational-data" class="section level4 unnumbered hasAnchor">
+<h4>What is Observational Data?<a href="Chapter7.html#what-is-observational-data" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>The choice of treatment is not under the control of the researcher - the
+researcher can only ‘observe’ what treatment was given.<br />
+Examples:</p>
+<ul>
+<li><p>Data obtained using chart review</p></li>
+<li><p>Electronic medical records</p></li>
+<li><p>Survey data or health study data</p></li>
+<li><p>Administrative data</p></li>
+<li><p>Insurance claims data</p></li>
+</ul>
+</div>
+<div id="confounding-due-to-selection-bias" class="section level4 unnumbered hasAnchor">
+<h4>Confounding due to Selection Bias<a href="Chapter7.html#confounding-due-to-selection-bias" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p><img src="psm/f1.jpg" style="width:100.0%" /></p>
+</div>
+<div id="impact-of-selection-bias-on-analytic-inferences" class="section level4 unnumbered hasAnchor">
+<h4>Impact of Selection Bias on Analytic Inferences<a href="Chapter7.html#impact-of-selection-bias-on-analytic-inferences" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p><img src="psm/f2.jpg" style="width:100.0%" /></p>
+</div>
+<div id="statistical-adjustment-for-observational-data" class="section level4 unnumbered hasAnchor">
+<h4>Statistical Adjustment for Observational Data<a href="Chapter7.html#statistical-adjustment-for-observational-data" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><p>Conventional multivariate analysis<br />
+</p>
+<ul>
+<li>Multivariate regression analysis<br />
+</li>
+<li>Generalized linear model<br />
+</li>
+<li>Cox’s proportional hazards model<br />
+</li>
+<li>Conditional logistic regression<br />
+</li>
+<li>Generalize estimating equation</li>
+</ul></li>
+<li><p>Exact matching</p></li>
+<li><p>Propensity score methods</p></li>
+<li><p>And others</p></li>
+</ul>
+</div>
+<div id="addressing-selection-bias-with-exact-matching" class="section level4 unnumbered hasAnchor">
+<h4>Addressing Selection Bias with Exact Matching<a href="Chapter7.html#addressing-selection-bias-with-exact-matching" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><p>Goal: Match patients so well that you could imagine that they were
+randomly assigned to each group.</p></li>
+<li><p>For each patient in the treatment group, find at least one untreated
+patient from the comparison group who is identical or as similar as
+possible on all baseline characteristics.</p></li>
+<li><p>By matching patients at the individual level, the treatment and
+comparison groups will be matched at the group level.</p></li>
+</ul>
+</div>
+<div id="matching-on-specific-variables" class="section level4 unnumbered hasAnchor">
+<h4>Matching on Specific Variables<a href="Chapter7.html#matching-on-specific-variables" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p><img src="psm/f3.jpg" style="width:100.0%" /></p>
+</div>
+<div id="matching-on-specific-variables-1" class="section level4 unnumbered hasAnchor">
+<h4>Matching on Specific Variables<a href="Chapter7.html#matching-on-specific-variables-1" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p><img src="psm/f4.jpg" style="width:100.0%" /></p>
+</div>
+</div>
+<div id="propensity-score" class="section level2 hasAnchor" number="7.2">
+<h2><span class="header-section-number">7.2</span> Propensity Score?<a href="Chapter7.html#propensity-score" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ul>
+<li><p>Isn’t there an easier way?<br />
+<span class="math inline">\(\rightarrow\)</span> Propensity score methods</p></li>
+<li><p>Rosenbaum and Rubin (1983) realized the bias from covariates can be
+eliminated by controlling for a scalar-valued funtion (a "balancing
+score") calculated from the baseline covariates, i.e., the
+propensity score.</p></li>
+<li><p>The propensity score is a way of summarizing the information in all
+the prognostic variables.</p></li>
+<li><p>Create a single composite score of all observed, measured potential
+confounders of the association between treatment and outcome</p></li>
+<li><p>Propensity score is the conditional probability of treatment given
+the observed covariates <span class="math inline">\(X\)</span> <span class="math display">\[PS = P(Z=1 | X)\]</span></p></li>
+<li><p>Match or weight on this one-dimensional score alone.</p></li>
+<li><p>Do this without knowledge of the outcome variable</p></li>
+<li><p>Propensity score assumption</p></li>
+<li><p>Given a set of covariates:<br />
+</p>
+<ul>
+<li>Treatment assignment and outcome are independent<br />
+</li>
+<li>Everyone has a nonzero chance of receiving the treatment</li>
+</ul></li>
+<li><p>Propensity scores can:<br />
+</p>
+<ul>
+<li>Help find matches from comparison group so that <strong>measured</strong>
+confounders are equally distributed between treatment <span class="math inline">\(\&amp;\)</span>
+comparison groups<br />
+</li>
+<li>Improve precision of treatment effect estimates</li>
+</ul></li>
+<li><p>Propensity scores cannot:<br />
+</p>
+<ul>
+<li>Account for <strong>unmeasured</strong> and <strong>unmeasurable</strong> confounders</li>
+</ul></li>
+</ul>
+<div id="general-procedure" class="section level4 unnumbered hasAnchor">
+<h4>General Procedure<a href="Chapter7.html#general-procedure" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ol style="list-style-type: decimal">
+<li><p>Choose variables to include in propensity score</p></li>
+<li><p>Ensure that propensity score is balanced across treatment and
+comparison groups</p></li>
+<li><p>Ensure that covariates are balanced across treatment and comparison
+groups within blocks of the propensity score</p></li>
+<li><p>Choose a matching or weighting strategy</p></li>
+<li><p>Ensure that covariates are balanced across treatment and comparison
+groups in sample matched or weighted by propensity score</p></li>
+<li><p>Proceed with analyses based on sample matched or weighted by
+propensity score</p></li>
+</ol>
+</div>
+<div id="choosing-variables-for-propensity-scores" class="section level4 unnumbered hasAnchor">
+<h4>Choosing Variables for Propensity Scores<a href="Chapter7.html#choosing-variables-for-propensity-scores" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li>Include:<br />
+
+<ul>
+<li>Theoretically related to treatment and outcome<br />
+</li>
+<li>Available <span class="math inline">\(\&amp;\)</span> easy/reliable to collect on everyone<br />
+</li>
+<li>Correlated with unmeasured confounders<br />
+</li>
+</ul></li>
+<li>Do not include:<br />
+
+<ul>
+<li>Variables hypothesized to be associated with treatment but not
+with outcome<br />
+</li>
+<li>Variables that may be affected by the treatment<br />
+</li>
+<li>Variables that predict treatment status perfectly</li>
+</ul></li>
+</ul>
+</div>
+<div id="calculate-propensity-score" class="section level4 unnumbered hasAnchor">
+<h4>Calculate Propensity Score<a href="Chapter7.html#calculate-propensity-score" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li>Maximum likelihood estimation<br />
+
+<ul>
+<li>Logistic regression<br />
+</li>
+<li>Probit regression<br />
+</li>
+<li>Discriminant analysis<br />
+</li>
+</ul></li>
+<li>Generalized boosting methods<br />
+
+<ul>
+<li>Classification and regression trees (CART)<br />
+</li>
+<li>Neural networks</li>
+</ul></li>
+<li>Generalized method of moments (covariate balancing propensity score
+(CBPS))</li>
+</ul>
+</div>
+<div id="initial-checks-balance-across-groups" class="section level4 unnumbered hasAnchor">
+<h4>Initial Checks: Balance across Groups<a href="Chapter7.html#initial-checks-balance-across-groups" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p><img src="psm/f5.jpg" style="width:100.0%" /></p>
+</div>
+<div id="check-balance-of-covariates" class="section level4 unnumbered hasAnchor">
+<h4>Check Balance of Covariates<a href="Chapter7.html#check-balance-of-covariates" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><p>Ideally, for each unique value of the propensity score, the
+distribution of <span class="math inline">\(X\)</span> (composite of all covariates) is the same for
+the treatment and comparison groups.</p></li>
+<li><p>This is practically impossible, so we check the balance of each
+observed covariate within blocks of the propensity score.</p></li>
+<li><p>Some imbalance between the groups is usually expected.</p></li>
+<li><p>Focus on balance of covariates that are more theoretically
+important.</p></li>
+<li><p>Consider interactions/correlations between covariates.</p></li>
+<li><p>Drop 1 or 2 covariates that are less important.</p></li>
+<li><p>Re-categorize variables.</p></li>
+<li><p>Include higher order terms or splines of variables.</p></li>
+</ul>
+</div>
+<div id="assess-balance-with-standardized-differences" class="section level4 unnumbered hasAnchor">
+<h4>Assess Balance with Standardized Differences<a href="Chapter7.html#assess-balance-with-standardized-differences" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><p>Account for means and variances</p></li>
+<li><p>Not sensitive to sample size</p></li>
+<li><p>Do not use statistical test such as t-test.</p></li>
+</ul>
+<p><img src="psm/f6.jpg" style="width:100.0%" /></p>
+</div>
+<div id="balance-of-covariates-caution" class="section level4 unnumbered hasAnchor">
+<h4>Balance of Covariates: Caution<a href="Chapter7.html#balance-of-covariates-caution" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><p>Propensity scores only balance measured confounders.</p></li>
+<li><p>Balance in measured variables does not indicate balance in
+unmeasured variables.</p></li>
+<li><p>Unmeasured confounders will bias treatment effect estimates.</p></li>
+<li><p>Do not use c-statistics, area under the curve, or any other model
+fit statistics to measure propensity score performance.<br />
+</p>
+<ul>
+<li>They do not measure reduction in confounding.</li>
+</ul></li>
+</ul>
+</div>
+<div id="matching-and-weighting-strategies" class="section level4 unnumbered hasAnchor">
+<h4>Matching and Weighting Strategies<a href="Chapter7.html#matching-and-weighting-strategies" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p><img src="psm/f7.jpg" style="width:100.0%" /></p>
+</div>
+<div id="choices-when-matching-sample-by-propensity-score" class="section level4 unnumbered hasAnchor">
+<h4>Choices When Matching Sample by Propensity Score<a href="Chapter7.html#choices-when-matching-sample-by-propensity-score" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><p>How close of a match is acceptable?</p></li>
+<li><p>Should every treated individual have one or many matches in the
+comparison group?</p></li>
+<li><p>Should treated individuals be matched with or without replacement?</p></li>
+<li><p>Should matching be greedy or optimal?</p></li>
+</ul>
+</div>
+<div id="which-strategy-to-chooose" class="section level4 unnumbered hasAnchor">
+<h4>Which Strategy to Chooose?<a href="Chapter7.html#which-strategy-to-chooose" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><p>No best method</p></li>
+<li><p>Without examining outcome, evaluate covariate balance in several
+strategies.</p></li>
+<li><p>Choose the method that has the best balance and still meets the
+analytic goal.</p></li>
+</ul>
+</div>
+<div id="evaluate-balance-in-sample-matched-or-weighted" class="section level4 unnumbered hasAnchor">
+<h4>Evaluate Balance in Sample Matched or Weighted<a href="Chapter7.html#evaluate-balance-in-sample-matched-or-weighted" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><p>Standardized differences</p></li>
+<li><p>Graphs<br />
+</p>
+<ul>
+<li>Quantile-quantile plots<br />
+</li>
+<li>Plots of covariates in treated and comparison groups</li>
+</ul></li>
+<li><p>Ratios of variance</p></li>
+</ul>
+</div>
+<div id="visualization-of-standardized-differences" class="section level4 unnumbered hasAnchor">
+<h4>Visualization of Standardized Differences<a href="Chapter7.html#visualization-of-standardized-differences" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p><img src="psm/f8.jpg" style="width:90.0%" /></p>
+</div>
+<div id="plots-of-covariates-between-groups" class="section level4 unnumbered hasAnchor">
+<h4>Plots of Covariates between Groups<a href="Chapter7.html#plots-of-covariates-between-groups" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><p>Plot density of weighted continuous covariate in treated group
+against density in comparison group</p></li>
+<li><p>Subjective comparison</p></li>
+</ul>
+<p><img src="psm/f9.jpg" style="width:60.0%" /></p>
+</div>
+</div>
+<div id="propensity-score-methods" class="section level2 hasAnchor" number="7.3">
+<h2><span class="header-section-number">7.3</span> Propensity Score Methods<a href="Chapter7.html#propensity-score-methods" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="propensity-score-matching" class="section level3 hasAnchor" number="7.3.1">
+<h3><span class="header-section-number">7.3.1</span> Propensity Score Matching<a href="Chapter7.html#propensity-score-matching" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ol style="list-style-type: decimal">
+<li><p>Create a matched sample based on logit(PS)</p></li>
+<li><p>Assess balance between treated and untreated subjects in the matched
+sample.<br />
+</p>
+<ul>
+<li>The test of a good propensity score model is how well it balances
+the measured variables between treated and untreated subjects.</li>
+</ul></li>
+<li><p>For unbalanced variables, add interactions or higher order terms to
+the propensity score logistic regression, recalculate the propensity
+score and repeat the process.</p></li>
+</ol>
+<div id="general-procedure-for-propensity-score-matching" class="section level4 unnumbered hasAnchor">
+<h4>General Procedure for Propensity Score Matching<a href="Chapter7.html#general-procedure-for-propensity-score-matching" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p><img src="psm/f10.jpg" style="width:100.0%" /></p>
+</div>
+<div id="greedy-matching" class="section level4 unnumbered hasAnchor">
+<h4>Greedy Matching<a href="Chapter7.html#greedy-matching" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><p>Nearest neighbor: <span class="math inline">\(C(P_i)=min_j |P_i-P_j|, \,\,\, j\in I_0\)</span><br />
+</p>
+<ul>
+<li>The nonparticipant with the value of <span class="math inline">\(P_j\)</span> that is closest to
+<span class="math inline">\(P_i\)</span> is selected as the match.</li>
+</ul></li>
+<li><p>Caliper: A variation of nearest neighbor: A match for persion <span class="math inline">\(i\)</span> is
+selected only if <span class="math inline">\(|P_i-P_j|&lt;\epsilon, \,\,\, j\in I_0\)</span> where
+<span class="math inline">\(\epsilon\)</span> is a pre-specified tolerance. Recommended caliper size:
+<span class="math inline">\(0.25\sigma_p\)</span>.</p></li>
+<li><p>1-to-1 Nearest neighbor within caliper (common practice)</p></li>
+<li><p>1-to-n Nearest neighbor within caliper</p></li>
+</ul>
+</div>
+<div id="mahalanobis-metric-matching" class="section level4 unnumbered hasAnchor">
+<h4>Mahalanobis Metric Matching<a href="Chapter7.html#mahalanobis-metric-matching" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><p>Mahalanobis without PS: Randomly ordering subjects, calculate the
+distance between the first participant and all nonparticipants. The
+distance, <span class="math inline">\(d(i,j)\)</span> can be defined by the Mahalanobis distance
+<span class="math display">\[d(i,j)=(u-v)^TC^{-1}(u-v)\]</span> where <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> are values of the
+matching variables for participant <span class="math inline">\(i\)</span> and nonparticipant <span class="math inline">\(j\)</span>, and
+<span class="math inline">\(C\)</span> is the sample covariance matrix of the matching variables from
+the full set of nonparticipants.</p></li>
+<li><p>Mahalanobis metric matching with PS added (to <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span>).</p></li>
+<li><p>Nearest available Mahalanobis metric matching within calipers
+defined by the prepensity score.</p></li>
+</ul>
+</div>
+</div>
+<div id="stratification-using-propensity-score" class="section level3 hasAnchor" number="7.3.2">
+<h3><span class="header-section-number">7.3.2</span> Stratification using Propensity Score<a href="Chapter7.html#stratification-using-propensity-score" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>PS stratification splits the dataset into several strata on the
+basis of the individual’s PS alone, without reference to treatment
+(exposure) group.</p></li>
+<li><p>A treatment effect is then estimated within each stratum, and an
+overall estimated treatment effect is calculated by taking a
+(weighted) average across strata.</p></li>
+<li><p>Equal number of individuals in each stratum (5 or 10 strata).</p></li>
+<li><p>Alternatively, split the range of possible PS into equal parts -
+fewer individuals in the more extreme strata.</p></li>
+<li><p>Advantage: potential heterogeneity of "treatment" effects across
+strata.</p></li>
+</ul>
+</div>
+<div id="inverse-probability-of-treatment-weighting" class="section level3 hasAnchor" number="7.3.3">
+<h3><span class="header-section-number">7.3.3</span> Inverse Probability of Treatment Weighting<a href="Chapter7.html#inverse-probability-of-treatment-weighting" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>Uses the whole dataset but reweights individuals to increase the
+weights of those who received unexpected exposures.</p></li>
+<li><p>This procedure can be thought of as producing additional
+observations for those parts of the target population from which
+there were few observations.</p></li>
+<li><p>It effectively generates a pseudopopulation with near-perfect
+covariate balance between treatment groups.</p></li>
+<li><p>Propensity score close to 0 (for the treated) or 1 (for the control)
+may be problematic for IPTW - trimming or truncating large weights.</p></li>
+<li><p>The weights:<br />
+<span class="math display">\[W = \frac{Z}{PS} + \frac{1-Z}{1-PS}\]</span> where <span class="math inline">\(Z=1\)</span> for the
+treatment group and 0 for the control group.<br />
+</p></li>
+<li><p>Treatment group:<br />
+<span class="math display">\[W = \frac{1}{PS}\]</span> weight = 1/(probability of receiving
+treatment)<br />
+</p></li>
+<li><p>Control group:<br />
+<span class="math display">\[W = \frac{1}{1-PS}\]</span> weight = 1/(1-probability of receiving
+treatment)</p></li>
+</ul>
+</div>
+<div id="propensity-score-adjustment-as-covariate" class="section level3 hasAnchor" number="7.3.4">
+<h3><span class="header-section-number">7.3.4</span> Propensity Score Adjustment as Covariate<a href="Chapter7.html#propensity-score-adjustment-as-covariate" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>Including the PS as an additional covariate in the regression model.</p></li>
+<li><p>Alternatively, one could have only the PS and treatment in a model
+of the outcome of interest.</p></li>
+<li><p>Showed excellent agreement across all PS methods and covariate
+adjustment.</p></li>
+</ul>
+<p><img src="psm/f11.jpg" style="width:60.0%" /></p>
+<ul>
+<li><p>Covariate adjustment, matching, IPTW, and use of the PS as a
+covariate all showed similar results.</p></li>
+<li><p>Stratification showed a wider CI with 5 strata and an unstable
+results with 10 strata.</p></li>
+</ul>
+<p><img src="psm/f12.jpg" style="width:50.0%" /></p>
+<ul>
+<li><p>Different PS methods and covariate adjustment mostly produced
+similar results.</p></li>
+<li><p>IPTW: smaller treatment effect with a wider CI - trimming,
+truncating, doubly robust</p></li>
+</ul>
+<p><img src="psm/f13.jpg" style="width:50.0%" /></p>
+<ul>
+<li>Showed substantial disagreement between the methods, although the
+results were nonsignificant for almost all methods.</li>
+</ul>
+<p><img src="psm/f14.jpg" style="width:50.0%" /></p>
+<ul>
+<li><p>PS matching appears to be a reliable method, in that it provides
+excellent covariate balance in most circumstances.</p></li>
+<li><p>PS stratification tends to work well when covariate imbalance is not
+very marked.</p></li>
+<li><p>Inverse probability weighting offers a conceptually simple method
+that is easy to implement in practice and retains all study
+participants.</p></li>
+<li><p>Covariate adjustment is the conventional method for correcting for
+covariate imbalance, selection bias, and potential confounding and
+provided reliable and statistically efficient estimates. Adding the
+PS as an additional covariate produces results very similar to
+covariate adjustment.</p></li>
+</ul>
+</div>
+<div id="property-of-propensity-score" class="section level3 hasAnchor" number="7.3.5">
+<h3><span class="header-section-number">7.3.5</span> Property of Propensity Score<a href="Chapter7.html#property-of-propensity-score" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>Available data is probably missing key covariates (e.g., living
+arrangements, smoling history)</p></li>
+<li><p>Definition of the baseline time may be difficult (it suhould be the
+time at which the decision about treatment was made).</p></li>
+<li><p>Reduced dimensionality of covariates (important for rare outcomes)</p></li>
+<li><p>Can demonstrate that the two groups are similar on all measured
+covariates</p></li>
+</ul>
+<div id="property-of-observational-studies" class="section level4 unnumbered hasAnchor">
+<h4>Property of Observational Studies<a href="Chapter7.html#property-of-observational-studies" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><p>Researcher has no control over assignment of subjects to treatments.</p></li>
+<li><p>Researcher often has no control over what covariates are available,
+their definitions, or the quality of their measurement.</p></li>
+<li><p>Useful when it is not feasible to use an RCT<br />
+</p>
+<ul>
+<li>Unethical to withhold treatment<br />
+</li>
+<li>Exposure believed to be harmful<br />
+</li>
+<li>Patients will not agree to be randomized<br />
+</li>
+<li>RCT too expensive</li>
+</ul></li>
+<li><p>Generalizable (all patients, all providers)</p></li>
+<li><p>Allows studies of rare events, and studies with long follow-up times</p></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="practice---sas" class="section level2 hasAnchor" number="7.4">
+<h2><span class="header-section-number">7.4</span> Practice - SAS<a href="Chapter7.html#practice---sas" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="greedy-nearest-neighbor-matching" class="section level3 hasAnchor" number="7.4.1">
+<h3><span class="header-section-number">7.4.1</span> Greedy Nearest Neighbor Matching<a href="Chapter7.html#greedy-nearest-neighbor-matching" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<pre><code>ods graphics on;\
+proc psmatch data=bb.School region=treated;\
+class Music Gender;\
+psmodel Music(Treated=&#39;Yes&#39;)= Gender Absence;\
+match method=greedy(k=2) caliper=0.25;\
+assess ps var=(Gender Absence) / plots=all weight=none;\
+output out(obs=match)=matchdata matchid=MatchID;\
+run;\
+
+proc sort data=matchdata;\
+by matchid;\
+run;</code></pre>
+<p>Examples: PSMATCH Procedure<br />
+"<a href="https://documentation.sas.com/?docsetId=statug&amp;docsetVersion=14.2\" class="uri">https://documentation.sas.com/?docsetId=statug&amp;docsetVersion=14.2\</a>
+&amp;docsetTarget=statug_psmatch_examples.htm&amp;locale=ko"</p>
+<p><img src="psm/p1.jpg" style="width:80.0%" /></p>
+</div>
+<div id="propensity-score-stratification" class="section level3 hasAnchor" number="7.4.2">
+<h3><span class="header-section-number">7.4.2</span> Propensity Score Stratification<a href="Chapter7.html#propensity-score-stratification" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<pre><code>proc psmatch data=bb.drugs region=allobs;\
+class Drug Gender;\
+psmodel Drug(Treated=&#39;Drug\_X&#39;)= Gender Age Bmi;\
+strata nstrata=5;\
+assess ps var=(Gender Age Bmi) / varinfo plots=(boxplot barchart);\
+output out(obs=all)=OutEx2;\
+run;</code></pre>
+<p><img src="psm/p2.jpg" style="width:80.0%" /></p>
+</div>
+<div id="inverse-probability-treatment-weighting" class="section level3 hasAnchor" number="7.4.3">
+<h3><span class="header-section-number">7.4.3</span> Inverse Probability Treatment Weighting<a href="Chapter7.html#inverse-probability-treatment-weighting" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<pre><code>proc psmatch data=bb.drugs region=allobs;\
+class Drug Gender;\
+psmodel Drug(Treated=&#39;Drug\_X&#39;)= Gender Age Bmi;\
+assess lps var=(Gender Age Bmi) / varinfo plots=(boxplot barchart)
+weight=atewgt;\
+output out(obs=all)=OutEx1 atewgt=atewgt;\
+run;</code></pre>
+<p><img src="psm/p3.jpg" style="width:80.0%" /></p>
+</div>
+<div id="matching-with-existing-propensity-scores" class="section level3 hasAnchor" number="7.4.4">
+<h3><span class="header-section-number">7.4.4</span> Matching with Existing propensity scores<a href="Chapter7.html#matching-with-existing-propensity-scores" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<pre><code>ods select none;\
+proc logistic data=bb.drugs;\
+class Drug Gender;\
+model Drug(Event=&#39;Drug\_X&#39;)= Gender Age Bmi / link=cloglog;\
+output out=drug1 p=pscore;\
+run;\</code></pre>
+<pre><code>ods select all;\
+proc psmatch data=Drug1 region=cs;\
+class Drug Gender;\
+psdata treatvar=Drug(Treated=&#39;Drug\_X&#39;) ps=pscore;\
+match method=optimal(k=1) exact=Gender stat=lps caliper=0.5;\
+assess lps var=(Gender Age Bmi) / weight=none;\
+output out(obs=match)=OutEx7 lps=\_Lps matchid=\_MatchID;\
+run;</code></pre>
+</div>
+<div id="matching-with-existing-propensity-scores-1" class="section level3 hasAnchor" number="7.4.5">
+<h3><span class="header-section-number">7.4.5</span> Matching with Existing propensity scores<a href="Chapter7.html#matching-with-existing-propensity-scores-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><img src="psm/p4.jpg" style="width:80.0%" /></p>
+<p><br></p>
+<p><br></p>
+<!-------------------------------------->
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="Chapter6.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["Bio-Health Data Analysis.pdf", "Bio-Health Data Analysis.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
