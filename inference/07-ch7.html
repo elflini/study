@@ -1,0 +1,2451 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>7&nbsp; 점추정 – Statistical Inference</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./08-ch8.html" rel="next">
+<link href="./06-ch6.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-832e3d7b6b94ddcc90a000f8fabe51a9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./07-ch7.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">점추정</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Statistical Inference</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Contents</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-ch1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">확률이론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-ch2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">변환과 기댓값</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-ch3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">자주 쓰이는 분포족</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-ch4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">여러 확률변수</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-ch5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">확률표본의 성질</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-ch6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">자료 축약의 원리</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-ch7.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">점추정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-ch8.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">가설검정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-ch9.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">구간추정</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-7-1" id="toc-sec-7-1" class="nav-link active" data-scroll-target="#sec-7-1"><span class="header-section-number">7.1</span> 도입</a>
+  <ul class="collapse">
+  <li><a href="#점추정의-목적" id="toc-점추정의-목적" class="nav-link" data-scroll-target="#점추정의-목적"><span class="header-section-number">7.1.1</span> 점추정의 목적</a></li>
+  <li><a href="#정의-점추정량" id="toc-정의-점추정량" class="nav-link" data-scroll-target="#정의-점추정량"><span class="header-section-number">7.1.2</span> 정의: 점추정량</a></li>
+  <li><a href="#추정량과-추정값" id="toc-추정량과-추정값" class="nav-link" data-scroll-target="#추정량과-추정값"><span class="header-section-number">7.1.3</span> 추정량과 추정값</a></li>
+  </ul></li>
+  <li><a href="#sec-7-2" id="toc-sec-7-2" class="nav-link" data-scroll-target="#sec-7-2"><span class="header-section-number">7.2</span> 추정량을 찾는 방법</a>
+  <ul class="collapse">
+  <li><a href="#sec-7-2-1" id="toc-sec-7-2-1" class="nav-link" data-scroll-target="#sec-7-2-1"><span class="header-section-number">7.2.1</span> 적률법</a></li>
+  <li><a href="#예제-정규분포의-적률법" id="toc-예제-정규분포의-적률법" class="nav-link" data-scroll-target="#예제-정규분포의-적률법"><span class="header-section-number">7.2.2</span> 예제: 정규분포의 적률법</a></li>
+  <li><a href="#예제-이항분포에서-시행-횟수와-성공확률-추정" id="toc-예제-이항분포에서-시행-횟수와-성공확률-추정" class="nav-link" data-scroll-target="#예제-이항분포에서-시행-횟수와-성공확률-추정"><span class="header-section-number">7.2.3</span> 예제: 이항분포에서 시행 횟수와 성공확률 추정</a></li>
+  <li><a href="#예제-satterthwaite-근사" id="toc-예제-satterthwaite-근사" class="nav-link" data-scroll-target="#예제-satterthwaite-근사"><span class="header-section-number">7.2.4</span> 예제: Satterthwaite 근사</a></li>
+  </ul></li>
+  <li><a href="#sec-7-2-2" id="toc-sec-7-2-2" class="nav-link" data-scroll-target="#sec-7-2-2"><span class="header-section-number">7.3</span> 최대가능도추정량</a>
+  <ul class="collapse">
+  <li><a href="#정의-mle" id="toc-정의-mle" class="nav-link" data-scroll-target="#정의-mle"><span class="header-section-number">7.3.1</span> 정의: MLE</a></li>
+  <li><a href="#mle를-찾을-때의-기본-절차" id="toc-mle를-찾을-때의-기본-절차" class="nav-link" data-scroll-target="#mle를-찾을-때의-기본-절차"><span class="header-section-number">7.3.2</span> MLE를 찾을 때의 기본 절차</a></li>
+  <li><a href="#예제-정규-평균의-mle" id="toc-예제-정규-평균의-mle" class="nav-link" data-scroll-target="#예제-정규-평균의-mle"><span class="header-section-number">7.3.3</span> 예제: 정규 평균의 MLE</a></li>
+  <li><a href="#예제-직접-최대화" id="toc-예제-직접-최대화" class="nav-link" data-scroll-target="#예제-직접-최대화"><span class="header-section-number">7.3.4</span> 예제: 직접 최대화</a></li>
+  <li><a href="#예제-베르누이-mle" id="toc-예제-베르누이-mle" class="nav-link" data-scroll-target="#예제-베르누이-mle"><span class="header-section-number">7.3.5</span> 예제: 베르누이 MLE</a></li>
+  <li><a href="#예제-제한된-모수공간에서의-mle" id="toc-예제-제한된-모수공간에서의-mle" class="nav-link" data-scroll-target="#예제-제한된-모수공간에서의-mle"><span class="header-section-number">7.3.6</span> 예제: 제한된 모수공간에서의 MLE</a></li>
+  <li><a href="#예제-이항분포에서-시행-횟수-k의-mle" id="toc-예제-이항분포에서-시행-횟수-k의-mle" class="nav-link" data-scroll-target="#예제-이항분포에서-시행-횟수-k의-mle"><span class="header-section-number">7.3.7</span> 예제: 이항분포에서 시행 횟수 <span class="math inline">\(k\)</span>의 MLE</a></li>
+  <li><a href="#mle의-불변성" id="toc-mle의-불변성" class="nav-link" data-scroll-target="#mle의-불변성"><span class="header-section-number">7.3.8</span> MLE의 불변성</a></li>
+  <li><a href="#예제-정규분포에서-musigma2-모두-미지" id="toc-예제-정규분포에서-musigma2-모두-미지" class="nav-link" data-scroll-target="#예제-정규분포에서-musigma2-모두-미지"><span class="header-section-number">7.3.9</span> 예제: 정규분포에서 <span class="math inline">\(\mu,\sigma^2\)</span> 모두 미지</a></li>
+  <li><a href="#예제-mle의-수치적-불안정성" id="toc-예제-mle의-수치적-불안정성" class="nav-link" data-scroll-target="#예제-mle의-수치적-불안정성"><span class="header-section-number">7.3.10</span> 예제: MLE의 수치적 불안정성</a></li>
+  </ul></li>
+  <li><a href="#sec-7-2-3" id="toc-sec-7-2-3" class="nav-link" data-scroll-target="#sec-7-2-3"><span class="header-section-number">7.4</span> 베이즈 추정량</a>
+  <ul class="collapse">
+  <li><a href="#사후분포" id="toc-사후분포" class="nav-link" data-scroll-target="#사후분포"><span class="header-section-number">7.4.1</span> 사후분포</a></li>
+  <li><a href="#예제-이항-베이즈-추정" id="toc-예제-이항-베이즈-추정" class="nav-link" data-scroll-target="#예제-이항-베이즈-추정"><span class="header-section-number">7.4.2</span> 예제: 이항 베이즈 추정</a></li>
+  <li><a href="#정의-켤레사전분포" id="toc-정의-켤레사전분포" class="nav-link" data-scroll-target="#정의-켤레사전분포"><span class="header-section-number">7.4.3</span> 정의: 켤레사전분포</a></li>
+  <li><a href="#예제-정규-베이즈-추정량" id="toc-예제-정규-베이즈-추정량" class="nav-link" data-scroll-target="#예제-정규-베이즈-추정량"><span class="header-section-number">7.4.4</span> 예제: 정규 베이즈 추정량</a></li>
+  </ul></li>
+  <li><a href="#sec-7-2-4" id="toc-sec-7-2-4" class="nav-link" data-scroll-target="#sec-7-2-4"><span class="header-section-number">7.5</span> EM 알고리즘</a>
+  <ul class="collapse">
+  <li><a href="#완전자료와-불완전자료" id="toc-완전자료와-불완전자료" class="nav-link" data-scroll-target="#완전자료와-불완전자료"><span class="header-section-number">7.5.1</span> 완전자료와 불완전자료</a></li>
+  <li><a href="#em의-기본-항등식" id="toc-em의-기본-항등식" class="nav-link" data-scroll-target="#em의-기본-항등식"><span class="header-section-number">7.5.2</span> EM의 기본 항등식</a></li>
+  <li><a href="#em-반복식" id="toc-em-반복식" class="nav-link" data-scroll-target="#em-반복식"><span class="header-section-number">7.5.3</span> EM 반복식</a></li>
+  <li><a href="#예제-여러-포아송-비율-모형" id="toc-예제-여러-포아송-비율-모형" class="nav-link" data-scroll-target="#예제-여러-포아송-비율-모형"><span class="header-section-number">7.5.4</span> 예제: 여러 포아송 비율 모형</a></li>
+  <li><a href="#정리-em-가능도의-단조성" id="toc-정리-em-가능도의-단조성" class="nav-link" data-scroll-target="#정리-em-가능도의-단조성"><span class="header-section-number">7.5.5</span> 정리: EM 가능도의 단조성</a></li>
+  </ul></li>
+  <li><a href="#sec-7-3" id="toc-sec-7-3" class="nav-link" data-scroll-target="#sec-7-3"><span class="header-section-number">7.6</span> 추정량을 평가하는 방법</a></li>
+  <li><a href="#sec-7-3-1" id="toc-sec-7-3-1" class="nav-link" data-scroll-target="#sec-7-3-1"><span class="header-section-number">7.7</span> 평균제곱오차</a>
+  <ul class="collapse">
+  <li><a href="#정의-mse" id="toc-정의-mse" class="nav-link" data-scroll-target="#정의-mse"><span class="header-section-number">7.7.1</span> 정의: MSE</a></li>
+  <li><a href="#정의-편향" id="toc-정의-편향" class="nav-link" data-scroll-target="#정의-편향"><span class="header-section-number">7.7.2</span> 정의: 편향</a></li>
+  <li><a href="#mse-분해" id="toc-mse-분해" class="nav-link" data-scroll-target="#mse-분해"><span class="header-section-number">7.7.3</span> MSE 분해</a></li>
+  <li><a href="#예제-정규분포에서-mse" id="toc-예제-정규분포에서-mse" class="nav-link" data-scroll-target="#예제-정규분포에서-mse"><span class="header-section-number">7.7.4</span> 예제: 정규분포에서 MSE</a></li>
+  <li><a href="#예제-분산-mle와-불편표본분산-비교" id="toc-예제-분산-mle와-불편표본분산-비교" class="nav-link" data-scroll-target="#예제-분산-mle와-불편표본분산-비교"><span class="header-section-number">7.7.5</span> 예제: 분산 MLE와 불편표본분산 비교</a></li>
+  <li><a href="#예제-이항-베이즈-추정량의-mse" id="toc-예제-이항-베이즈-추정량의-mse" class="nav-link" data-scroll-target="#예제-이항-베이즈-추정량의-mse"><span class="header-section-number">7.7.6</span> 예제: 이항 베이즈 추정량의 MSE</a></li>
+  <li><a href="#예제-등변추정량의-mse" id="toc-예제-등변추정량의-mse" class="nav-link" data-scroll-target="#예제-등변추정량의-mse"><span class="header-section-number">7.7.7</span> 예제: 등변추정량의 MSE</a></li>
+  </ul></li>
+  <li><a href="#sec-7-3-2" id="toc-sec-7-3-2" class="nav-link" data-scroll-target="#sec-7-3-2"><span class="header-section-number">7.8</span> 최량불편추정량</a>
+  <ul class="collapse">
+  <li><a href="#정의-최량불편추정량" id="toc-정의-최량불편추정량" class="nav-link" data-scroll-target="#정의-최량불편추정량"><span class="header-section-number">7.8.1</span> 정의: 최량불편추정량</a></li>
+  <li><a href="#예제-포아송에서-불편추정량-비교" id="toc-예제-포아송에서-불편추정량-비교" class="nav-link" data-scroll-target="#예제-포아송에서-불편추정량-비교"><span class="header-section-number">7.8.2</span> 예제: 포아송에서 불편추정량 비교</a></li>
+  <li><a href="#cramerrao-부등식" id="toc-cramerrao-부등식" class="nav-link" data-scroll-target="#cramerrao-부등식"><span class="header-section-number">7.8.3</span> Cramer–Rao 부등식</a></li>
+  <li><a href="#예제-포아송에서-cramerrao-하한" id="toc-예제-포아송에서-cramerrao-하한" class="nav-link" data-scroll-target="#예제-포아송에서-cramerrao-하한"><span class="header-section-number">7.8.4</span> 예제: 포아송에서 Cramer–Rao 하한</a></li>
+  <li><a href="#예제-균등분포의-스케일-모수" id="toc-예제-균등분포의-스케일-모수" class="nav-link" data-scroll-target="#예제-균등분포의-스케일-모수"><span class="header-section-number">7.8.5</span> 예제: 균등분포의 스케일 모수</a></li>
+  <li><a href="#예제-정규분산의-하한과-달성" id="toc-예제-정규분산의-하한과-달성" class="nav-link" data-scroll-target="#예제-정규분산의-하한과-달성"><span class="header-section-number">7.8.6</span> 예제: 정규분산의 하한과 달성</a></li>
+  </ul></li>
+  <li><a href="#sec-7-3-3" id="toc-sec-7-3-3" class="nav-link" data-scroll-target="#sec-7-3-3"><span class="header-section-number">7.9</span> 충분성과 불편성</a>
+  <ul class="collapse">
+  <li><a href="#정리-raoblackwell-정리" id="toc-정리-raoblackwell-정리" class="nav-link" data-scroll-target="#정리-raoblackwell-정리"><span class="header-section-number">7.9.1</span> 정리: Rao–Blackwell 정리</a></li>
+  <li><a href="#raoblackwell-정리의-의미" id="toc-raoblackwell-정리의-의미" class="nav-link" data-scroll-target="#raoblackwell-정리의-의미"><span class="header-section-number">7.9.2</span> Rao–Blackwell 정리의 의미</a></li>
+  <li><a href="#정리-최량불편추정량의-유일성" id="toc-정리-최량불편추정량의-유일성" class="nav-link" data-scroll-target="#정리-최량불편추정량의-유일성"><span class="header-section-number">7.9.3</span> 정리: 최량불편추정량의 유일성</a></li>
+  <li><a href="#정리-최량불편추정량의-특징" id="toc-정리-최량불편추정량의-특징" class="nav-link" data-scroll-target="#정리-최량불편추정량의-특징"><span class="header-section-number">7.9.4</span> 정리: 최량불편추정량의 특징</a></li>
+  <li><a href="#예제-0의-불편추정량" id="toc-예제-0의-불편추정량" class="nav-link" data-scroll-target="#예제-0의-불편추정량"><span class="header-section-number">7.9.5</span> 예제: 0의 불편추정량</a></li>
+  <li><a href="#예제-균등분포-최대값-추정량의-최량성" id="toc-예제-균등분포-최대값-추정량의-최량성" class="nav-link" data-scroll-target="#예제-균등분포-최대값-추정량의-최량성"><span class="header-section-number">7.9.6</span> 예제: 균등분포 최대값 추정량의 최량성</a></li>
+  <li><a href="#정리-완비충분통계량과-umvue" id="toc-정리-완비충분통계량과-umvue" class="nav-link" data-scroll-target="#정리-완비충분통계량과-umvue"><span class="header-section-number">7.9.7</span> 정리: 완비충분통계량과 UMVUE</a></li>
+  <li><a href="#예제-이항분포에서-정확히-한-번-성공할-확률의-umvue" id="toc-예제-이항분포에서-정확히-한-번-성공할-확률의-umvue" class="nav-link" data-scroll-target="#예제-이항분포에서-정확히-한-번-성공할-확률의-umvue"><span class="header-section-number">7.9.8</span> 예제: 이항분포에서 정확히 한 번 성공할 확률의 UMVUE</a></li>
+  </ul></li>
+  <li><a href="#sec-7-3-4" id="toc-sec-7-3-4" class="nav-link" data-scroll-target="#sec-7-3-4"><span class="header-section-number">7.10</span> 손실함수 최적성</a>
+  <ul class="collapse">
+  <li><a href="#손실함수" id="toc-손실함수" class="nav-link" data-scroll-target="#손실함수"><span class="header-section-number">7.10.1</span> 손실함수</a></li>
+  <li><a href="#위험함수" id="toc-위험함수" class="nav-link" data-scroll-target="#위험함수"><span class="header-section-number">7.10.2</span> 위험함수</a></li>
+  <li><a href="#예제-이항-추정량의-위험함수" id="toc-예제-이항-추정량의-위험함수" class="nav-link" data-scroll-target="#예제-이항-추정량의-위험함수"><span class="header-section-number">7.10.3</span> 예제: 이항 추정량의 위험함수</a></li>
+  <li><a href="#예제-정규분산-추정의-위험함수" id="toc-예제-정규분산-추정의-위험함수" class="nav-link" data-scroll-target="#예제-정규분산-추정의-위험함수"><span class="header-section-number">7.10.4</span> 예제: 정규분산 추정의 위험함수</a></li>
+  <li><a href="#예제-stein-손실을-사용한-분산추정" id="toc-예제-stein-손실을-사용한-분산추정" class="nav-link" data-scroll-target="#예제-stein-손실을-사용한-분산추정"><span class="header-section-number">7.10.5</span> 예제: Stein 손실을 사용한 분산추정</a></li>
+  <li><a href="#베이즈-위험과-베이즈-규칙" id="toc-베이즈-위험과-베이즈-규칙" class="nav-link" data-scroll-target="#베이즈-위험과-베이즈-규칙"><span class="header-section-number">7.10.6</span> 베이즈 위험과 베이즈 규칙</a></li>
+  <li><a href="#사후기대손실" id="toc-사후기대손실" class="nav-link" data-scroll-target="#사후기대손실"><span class="header-section-number">7.10.7</span> 사후기대손실</a></li>
+  <li><a href="#예제-두-가지-베이즈-규칙" id="toc-예제-두-가지-베이즈-규칙" class="nav-link" data-scroll-target="#예제-두-가지-베이즈-규칙"><span class="header-section-number">7.10.8</span> 예제: 두 가지 베이즈 규칙</a></li>
+  <li><a href="#예제-정규-베이즈-추정" id="toc-예제-정규-베이즈-추정" class="nav-link" data-scroll-target="#예제-정규-베이즈-추정"><span class="header-section-number">7.10.9</span> 예제: 정규 베이즈 추정</a></li>
+  <li><a href="#예제-이항-베이즈-추정-1" id="toc-예제-이항-베이즈-추정-1" class="nav-link" data-scroll-target="#예제-이항-베이즈-추정-1"><span class="header-section-number">7.10.10</span> 예제: 이항 베이즈 추정</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="chapter7" class="quarto-section-identifier"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">점추정</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<blockquote class="blockquote">
+<p>“What! you have solved it already?”<br>
+“Well, that would be too much to say. I have discovered a suggestive fact, that is all.”<br>
+— Dr.&nbsp;Watson and Sherlock Holmes, <em>The Sign of Four</em></p>
+</blockquote>
+<ul>
+<li>이 장의 주제는 <strong>점추정(point estimation)</strong>이다.</li>
+<li>모집단이 pdf 또는 pmf <span class="math inline">\(f(x\mid\theta)\)</span>로 주어질 때, 모수 <span class="math inline">\(\theta\)</span>를 알면 모집단 전체의 확률구조를 알 수 있다.</li>
+<li>실제로는 <span class="math inline">\(\theta\)</span>를 모르므로, 표본 <span class="math inline">\(X_1,\ldots,X_n\)</span>을 이용하여 <span class="math inline">\(\theta\)</span> 또는 <span class="math inline">\(\tau(\theta)\)</span>를 하나의 값으로 추정한다.</li>
+<li>이 장은 크게 두 부분으로 나뉜다.
+<ul>
+<li><strong>추정량을 찾는 방법</strong>: 적률법, 최대가능도법, 베이즈 추정량, EM 알고리즘</li>
+<li><strong>추정량을 평가하는 방법</strong>: 평균제곱오차, 최량불편추정량, Rao–Blackwell, 완비충분통계량, 손실함수와 위험함수</li>
+</ul></li>
+<li>여기서 중요한 관점은 다음이다.
+<ul>
+<li>추정량을 만드는 방법은 후보를 제공할 뿐이다.</li>
+<li>좋은 추정량인지 여부는 별도의 평가 기준으로 판단해야 한다.</li>
+</ul></li>
+</ul>
+<section id="sec-7-1" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="sec-7-1"><span class="header-section-number">7.1</span> 도입</h2>
+<section id="점추정의-목적" class="level3" data-number="7.1.1">
+<h3 data-number="7.1.1" class="anchored" data-anchor-id="점추정의-목적"><span class="header-section-number">7.1.1</span> 점추정의 목적</h3>
+<ul>
+<li>표본이 모집단 <span class="math inline">\(f(x\mid\theta)\)</span>에서 나왔다고 하자.</li>
+<li><span class="math inline">\(\theta\)</span>가 알려지면 모집단의 분포가 완전히 결정되는 경우가 많다.</li>
+<li>그러므로 표본으로부터 <span class="math inline">\(\theta\)</span>를 잘 추정하는 것은 통계추론의 핵심이다.</li>
+<li>어떤 경우에는 <span class="math inline">\(\theta\)</span> 자체보다 함수</li>
+</ul>
+<p><span class="math display">\[
+\tau(\theta)
+\]</span></p>
+<p>에 관심이 있을 수도 있다. - 예: - 정규분포에서 평균 <span class="math inline">\(\mu\)</span> - 베르누이분포에서 성공확률 <span class="math inline">\(p\)</span> - 분산 <span class="math inline">\(\sigma^2\)</span> - 오즈 <span class="math inline">\(p/(1-p)\)</span> - 성공확률의 함수 <span class="math inline">\(p(1-p)\)</span></p>
+</section>
+<section id="정의-점추정량" class="level3" data-number="7.1.2">
+<h3 data-number="7.1.2" class="anchored" data-anchor-id="정의-점추정량"><span class="header-section-number">7.1.2</span> 정의: 점추정량</h3>
+<ul>
+<li>표본 <span class="math inline">\(X_1,\ldots,X_n\)</span>의 임의의 함수</li>
+</ul>
+<p><span class="math display">\[
+W(X_1,\ldots,X_n)
+\]</span></p>
+<p>를 <strong>점추정량(point estimator)</strong>이라고 한다. - 즉, 모든 통계량은 점추정량의 후보가 될 수 있다. - 이 정의에는 두 가지 의도적인 느슨함이 있다. - <span class="math inline">\(W\)</span>가 어떤 모수를 추정하는지 명시하지 않는다. - <span class="math inline">\(W\)</span>의 값의 범위가 모수공간과 반드시 같아야 한다고 요구하지 않는다.</p>
+</section>
+<section id="추정량과-추정값" class="level3" data-number="7.1.3">
+<h3 data-number="7.1.3" class="anchored" data-anchor-id="추정량과-추정값"><span class="header-section-number">7.1.3</span> 추정량과 추정값</h3>
+<ul>
+<li><strong>추정량(estimator)</strong>은 표본 확률변수의 함수이다.</li>
+</ul>
+<p><span class="math display">\[
+W(X_1,\ldots,X_n)
+\]</span></p>
+<ul>
+<li><strong>추정값(estimate)</strong>은 실제 관측값 <span class="math inline">\(x_1,\ldots,x_n\)</span>을 대입한 숫자이다.</li>
+</ul>
+<p><span class="math display">\[
+W(x_1,\ldots,x_n)
+\]</span></p>
+<ul>
+<li>예를 들어 표본평균 <span class="math inline">\(\bar X\)</span>는 추정량이고, 실제 자료에서 계산된 <span class="math inline">\(\bar x\)</span>는 추정값이다.</li>
+</ul>
+</section>
+</section>
+<section id="sec-7-2" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="sec-7-2"><span class="header-section-number">7.2</span> 추정량을 찾는 방법</h2>
+<ul>
+<li>단순한 경우에는 직관만으로도 좋은 추정량을 찾을 수 있다.</li>
+<li>예를 들어 모집단 평균을 추정할 때 표본평균 <span class="math inline">\(\bar X\)</span>는 자연스러운 후보이다.</li>
+<li>그러나 복잡한 모형에서는 직관이 불충분하거나 잘못된 방향으로 이끌 수 있다.</li>
+<li>이 절에서는 네 가지 추정량 구성 방법을 다룬다.
+<ul>
+<li>적률법</li>
+<li>최대가능도법</li>
+<li>베이즈 추정량</li>
+<li>EM 알고리즘</li>
+</ul></li>
+</ul>
+<section id="sec-7-2-1" class="level3" data-number="7.2.1">
+<h3 data-number="7.2.1" class="anchored" data-anchor-id="sec-7-2-1"><span class="header-section-number">7.2.1</span> 적률법</h3>
+<ul>
+<li><strong>적률법(method of moments)</strong>은 가장 오래된 점추정법 중 하나이다.</li>
+<li>기본 아이디어는 단순하다.
+<ul>
+<li>표본적률을 모집단 적률과 같다고 놓는다.</li>
+<li>그 방정식을 풀어 모수의 추정량을 얻는다.</li>
+</ul></li>
+<li>장점:
+<ul>
+<li>계산이 비교적 쉽다.</li>
+<li>거의 항상 어떤 형태의 추정량을 제공한다.</li>
+</ul></li>
+<li>단점:
+<ul>
+<li>항상 좋은 추정량을 주는 것은 아니다.</li>
+<li>추정량의 범위가 모수공간과 맞지 않을 수 있다.</li>
+</ul></li>
+</ul>
+<section id="적률법의-일반형" class="level4" data-number="7.2.1.1">
+<h4 data-number="7.2.1.1" class="anchored" data-anchor-id="적률법의-일반형"><span class="header-section-number">7.2.1.1</span> 적률법의 일반형</h4>
+<ul>
+<li><span class="math inline">\(X_1,\ldots,X_n\)</span>이 <span class="math inline">\(f(x\mid\theta_1,\ldots,\theta_k)\)</span>에서 나온 표본이라고 하자.</li>
+<li>첫 <span class="math inline">\(k\)</span>개의 표본적률을 다음과 같이 정의한다.</li>
+</ul>
+<p><span class="math display">\[
+m_1=\frac1n\sum_{i=1}^{n}X_i,
+\qquad
+\mu'_1=EX,
+\]</span></p>
+<p><span class="math display">\[
+m_2=\frac1n\sum_{i=1}^{n}X_i^2,
+\qquad
+\mu'_2=EX^2,
+\]</span></p>
+<p><span class="math display">\[
+\vdots
+\]</span></p>
+<p><span class="math display">\[
+m_k=\frac1n\sum_{i=1}^{n}X_i^k,
+\qquad
+\mu'_k=EX^k.
+\tag{7.2.1}
+\]</span></p>
+<ul>
+<li>모집단 적률은 보통 모수의 함수이다.</li>
+</ul>
+<p><span class="math display">\[
+\mu'_j=\mu'_j(\theta_1,\ldots,\theta_k).
+\]</span></p>
+<ul>
+<li>적률법 추정량 <span class="math inline">\((\tilde\theta_1,\ldots,\tilde\theta_k)\)</span>는 다음 연립방정식을 풀어 얻는다.</li>
+</ul>
+<p><span class="math display">\[
+m_1=\mu'_1(\theta_1,\ldots,\theta_k),
+\]</span></p>
+<p><span class="math display">\[
+m_2=\mu'_2(\theta_1,\ldots,\theta_k),
+\]</span></p>
+<p><span class="math display">\[
+\vdots
+\]</span></p>
+<p><span class="math display">\[
+m_k=\mu'_k(\theta_1,\ldots,\theta_k).
+\tag{7.2.2}
+\]</span></p>
+</section>
+</section>
+<section id="예제-정규분포의-적률법" class="level3" data-number="7.2.2">
+<h3 data-number="7.2.2" class="anchored" data-anchor-id="예제-정규분포의-적률법"><span class="header-section-number">7.2.2</span> 예제: 정규분포의 적률법</h3>
+<ul>
+<li><span class="math inline">\(X_1,\ldots,X_n\)</span>이 iid <span class="math inline">\(N(\theta,\sigma^2)\)</span>라고 하자.</li>
+<li>모수는</li>
+</ul>
+<p><span class="math display">\[
+\theta_1=\theta,
+\qquad
+\theta_2=\sigma^2
+\]</span></p>
+<p>이다. - 첫 두 모집단 적률은</p>
+<p><span class="math display">\[
+\mu'_1=EX=\theta,
+\]</span></p>
+<p><span class="math display">\[
+\mu'_2=EX^2=\theta^2+\sigma^2.
+\]</span></p>
+<ul>
+<li>표본적률은</li>
+</ul>
+<p><span class="math display">\[
+m_1=\bar X,
+\qquad
+m_2=\frac1n\sum_{i=1}^{n}X_i^2.
+\]</span></p>
+<ul>
+<li>적률방정식은</li>
+</ul>
+<p><span class="math display">\[
+\bar X=\theta,
+\]</span></p>
+<p><span class="math display">\[
+\frac1n\sum_{i=1}^{n}X_i^2=\theta^2+\sigma^2.
+\]</span></p>
+<ul>
+<li>따라서 적률법 추정량은</li>
+</ul>
+<p><span class="math display">\[
+\tilde\theta=\bar X,
+\]</span></p>
+<p><span class="math display">\[
+\tilde\sigma^2
+=
+\frac1n\sum_{i=1}^{n}X_i^2-\bar X^2
+=
+\frac1n\sum_{i=1}^{n}(X_i-\bar X)^2.
+\]</span></p>
+<ul>
+<li>이 예제에서는 적률법이 직관과 잘 맞는다.</li>
+<li>단, 분산 추정량의 분모가 <span class="math inline">\(n-1\)</span>이 아니라 <span class="math inline">\(n\)</span>이라는 점에 유의한다.</li>
+</ul>
+</section>
+<section id="예제-이항분포에서-시행-횟수와-성공확률-추정" class="level3" data-number="7.2.3">
+<h3 data-number="7.2.3" class="anchored" data-anchor-id="예제-이항분포에서-시행-횟수와-성공확률-추정"><span class="header-section-number">7.2.3</span> 예제: 이항분포에서 시행 횟수와 성공확률 추정</h3>
+<ul>
+<li><span class="math inline">\(X_1,\ldots,X_n\)</span>이 iid <span class="math inline">\(Binomial(k,p)\)</span>라고 하자.</li>
+<li>여기서는 <span class="math inline">\(k\)</span>와 <span class="math inline">\(p\)</span>가 모두 미지라고 가정한다.</li>
+<li>pmf는</li>
+</ul>
+<p><span class="math display">\[
+P(X_i=x\mid k,p)
+=
+\binom{k}{x}p^x(1-p)^{k-x},
+\qquad x=0,1,\ldots,k.
+\]</span></p>
+<ul>
+<li>이 문제는 범죄 발생건수처럼 실제 발생 횟수 <span class="math inline">\(k\)</span>와 보고확률 <span class="math inline">\(p\)</span>가 모두 불확실한 상황에서 나타날 수 있다.</li>
+<li>모집단 평균과 분산은</li>
+</ul>
+<p><span class="math display">\[
+EX=kp,
+\qquad
+Var(X)=kp(1-p).
+\]</span></p>
+<ul>
+<li>두 번째 모멘트는</li>
+</ul>
+<p><span class="math display">\[
+EX^2=Var(X)+(EX)^2=kp(1-p)+k^2p^2.
+\]</span></p>
+<ul>
+<li>적률방정식은</li>
+</ul>
+<p><span class="math display">\[
+\bar X=kp,
+\]</span></p>
+<p><span class="math display">\[
+\frac1n\sum_{i=1}^{n}X_i^2=kp(1-p)+k^2p^2.
+\]</span></p>
+<ul>
+<li>정리하면</li>
+</ul>
+<p><span class="math display">\[
+\tilde k
+=
+\frac{\bar X^2}{\bar X-\frac1n\sum_{i=1}^{n}(X_i-\bar X)^2},
+\]</span></p>
+<p><span class="math display">\[
+\tilde p
+=
+\frac{\bar X}{\tilde k}.
+\]</span></p>
+<ul>
+<li>이 추정량은 항상 합리적인 값을 주지는 않는다.</li>
+<li>예를 들어 표본분산이 표본평균보다 크면 <span class="math inline">\(\tilde k\)</span>가 음수가 될 수 있다.</li>
+<li>이 점은 적률법의 한계를 보여준다.</li>
+</ul>
+</section>
+<section id="예제-satterthwaite-근사" class="level3" data-number="7.2.4">
+<h3 data-number="7.2.4" class="anchored" data-anchor-id="예제-satterthwaite-근사"><span class="header-section-number">7.2.4</span> 예제: Satterthwaite 근사</h3>
+<ul>
+<li>적률법은 추정량 자체뿐 아니라 분포근사에도 사용된다.</li>
+<li><span class="math inline">\(Y_i\sim\chi^2_{r_i}\)</span>가 서로 독립이라고 하자.</li>
+<li>관심은 다음 형태의 합이다.</li>
+</ul>
+<p><span class="math display">\[
+\sum_{i=1}^{k}a_iY_i.
+\]</span></p>
+<ul>
+<li>일반적으로 이 합의 정확한 분포는 다루기 어렵다.</li>
+<li>Satterthwaite 근사는 이를 적절한 자유도 <span class="math inline">\(\nu\)</span>를 가진 카이제곱형 분포로 맞춘다.</li>
+<li>단순한 적률맞춤은 음의 자유도 추정량을 만들 수 있으므로, Satterthwaite는 더 안정적인 형태를 사용하였다.</li>
+<li>그 결과 자유도 추정량은</li>
+</ul>
+<p><span class="math display">\[
+\hat\nu
+=
+\frac{\left(\sum_i a_iY_i\right)^2}
+{\sum_i \frac{a_i^2}{r_i}Y_i^2}.
+\]</span></p>
+<ul>
+<li>이 근사는 실제 응용에서 여전히 널리 쓰인다.</li>
+<li>중요한 교훈은 다음이다.
+<ul>
+<li>단순 적률법은 출발점이다.</li>
+<li>문제 구조에 맞추어 적률법을 조정하면 훨씬 좋은 근사를 얻을 수 있다.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="sec-7-2-2" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="sec-7-2-2"><span class="header-section-number">7.3</span> 최대가능도추정량</h2>
+<ul>
+<li><strong>최대가능도법(maximum likelihood)</strong>은 추정량을 찾는 가장 널리 쓰이는 방법이다.</li>
+<li>표본이 <span class="math inline">\(f(x\mid\theta_1,\ldots,\theta_k)\)</span>에서 iid로 나왔다면 가능도함수는</li>
+</ul>
+<p><span class="math display">\[
+L(\theta\mid x)
+=
+L(\theta_1,\ldots,\theta_k\mid x_1,\ldots,x_n)
+=
+\prod_{i=1}^{n}f(x_i\mid\theta_1,\ldots,\theta_k).
+\tag{7.2.3}
+\]</span></p>
+<section id="정의-mle" class="level3" data-number="7.3.1">
+<h3 data-number="7.3.1" class="anchored" data-anchor-id="정의-mle"><span class="header-section-number">7.3.1</span> 정의: MLE</h3>
+<ul>
+<li>각 표본점 <span class="math inline">\(x\)</span>에 대해 <span class="math inline">\(L(\theta\mid x)\)</span>를 <span class="math inline">\(\theta\)</span>의 함수로 보고 최대화하는 값 <span class="math inline">\(\hat\theta(x)\)</span>를 찾는다.</li>
+<li>이때 <span class="math inline">\(\hat\theta(X)\)</span>를 <span class="math inline">\(\theta\)</span>의 <strong>최대가능도추정량(MLE)</strong>이라고 한다.</li>
+<li>직관적으로 MLE는 “관측된 표본이 가장 그럴듯해지는 모수값”이다.</li>
+</ul>
+</section>
+<section id="mle를-찾을-때의-기본-절차" class="level3" data-number="7.3.2">
+<h3 data-number="7.3.2" class="anchored" data-anchor-id="mle를-찾을-때의-기본-절차"><span class="header-section-number">7.3.2</span> MLE를 찾을 때의 기본 절차</h3>
+<ul>
+<li>가능도함수가 미분가능하면 내부 극값 후보는 다음 방정식을 만족한다.</li>
+</ul>
+<p><span class="math display">\[
+\frac{\partial}{\partial\theta_i}L(\theta\mid x)=0,
+\qquad i=1,\ldots,k.
+\tag{7.2.4}
+\]</span></p>
+<ul>
+<li>실제 계산에서는 보통 로그가능도</li>
+</ul>
+<p><span class="math display">\[
+\ell(\theta\mid x)=\log L(\theta\mid x)
+\]</span></p>
+<p>를 사용한다. - 로그함수는 증가함수이므로 <span class="math inline">\(L\)</span>과 <span class="math inline">\(\log L\)</span>의 최대점은 같다. - 그러나 1차 미분이 0이라는 조건은 필요조건일 뿐이다. - 다음을 별도로 확인해야 한다. - 그 점이 최대인지 최소인지 - 지역최대인지 전역최대인지 - 경계점에서 더 큰 값이 나오는지 - 수치적으로 안정적인지</p>
+</section>
+<section id="예제-정규-평균의-mle" class="level3" data-number="7.3.3">
+<h3 data-number="7.3.3" class="anchored" data-anchor-id="예제-정규-평균의-mle"><span class="header-section-number">7.3.3</span> 예제: 정규 평균의 MLE</h3>
+<ul>
+<li><span class="math inline">\(X_1,\ldots,X_n\)</span>이 iid <span class="math inline">\(N(\theta,1)\)</span>이라고 하자.</li>
+<li>가능도함수는</li>
+</ul>
+<p><span class="math display">\[
+L(\theta\mid x)
+=
+\prod_{i=1}^{n}\frac{1}{\sqrt{2\pi}}e^{-(x_i-\theta)^2/2}
+=
+\frac{1}{(2\pi)^{n/2}}
+\exp\left[-\frac12\sum_{i=1}^{n}(x_i-\theta)^2\right].
+\]</span></p>
+<ul>
+<li>미분방정식은</li>
+</ul>
+<p><span class="math display">\[
+\sum_{i=1}^{n}(x_i-\theta)=0
+\]</span></p>
+<p>이며 해는</p>
+<p><span class="math display">\[
+\hat\theta=\bar x.
+\]</span></p>
+<ul>
+<li>따라서</li>
+</ul>
+<p><span class="math display">\[
+\hat\theta=\bar X
+\]</span></p>
+<p>가 MLE이다.</p>
+</section>
+<section id="예제-직접-최대화" class="level3" data-number="7.3.4">
+<h3 data-number="7.3.4" class="anchored" data-anchor-id="예제-직접-최대화"><span class="header-section-number">7.3.4</span> 예제: 직접 최대화</h3>
+<ul>
+<li>정규 평균 예제에서 다음 항등식을 사용할 수 있다.</li>
+</ul>
+<p><span class="math display">\[
+\sum_{i=1}^{n}(x_i-a)^2
+\ge
+\sum_{i=1}^{n}(x_i-\bar x)^2,
+\]</span></p>
+<ul>
+<li>등호는 <span class="math inline">\(a=\bar x\)</span>일 때만 성립한다.</li>
+<li>따라서 지수항</li>
+</ul>
+<p><span class="math display">\[
+\exp\left[-\frac12\sum_{i=1}^{n}(x_i-\theta)^2\right]
+\]</span></p>
+<p>은 <span class="math inline">\(\theta=\bar x\)</span>에서 최대가 된다. - 이 방식은 미분보다 더 간결할 수 있다.</p>
+</section>
+<section id="예제-베르누이-mle" class="level3" data-number="7.3.5">
+<h3 data-number="7.3.5" class="anchored" data-anchor-id="예제-베르누이-mle"><span class="header-section-number">7.3.5</span> 예제: 베르누이 MLE</h3>
+<ul>
+<li><span class="math inline">\(X_1,\ldots,X_n\)</span>이 iid Bernoulli<span class="math inline">\((p)\)</span>라고 하자.</li>
+<li><span class="math inline">\(y=\sum_i x_i\)</span>라고 하면 가능도는</li>
+</ul>
+<p><span class="math display">\[
+L(p\mid x)=p^y(1-p)^{n-y}.
+\]</span></p>
+<ul>
+<li>로그가능도는</li>
+</ul>
+<p><span class="math display">\[
+\ell(p\mid x)=y\log p+(n-y)\log(1-p).
+\]</span></p>
+<ul>
+<li><span class="math inline">\(0&lt;y&lt;n\)</span>일 때 미분하여 풀면</li>
+</ul>
+<p><span class="math display">\[
+\hat p=\frac{y}{n}=\bar x.
+\]</span></p>
+<ul>
+<li><span class="math inline">\(y=0\)</span> 또는 <span class="math inline">\(y=n\)</span>인 경계 경우에도 같은 형태가 성립한다.</li>
+<li>따라서</li>
+</ul>
+<p><span class="math display">\[
+\hat p=\bar X
+\]</span></p>
+<p>가 MLE이다.</p>
+</section>
+<section id="예제-제한된-모수공간에서의-mle" class="level3" data-number="7.3.6">
+<h3 data-number="7.3.6" class="anchored" data-anchor-id="예제-제한된-모수공간에서의-mle"><span class="header-section-number">7.3.6</span> 예제: 제한된 모수공간에서의 MLE</h3>
+<ul>
+<li><span class="math inline">\(X_1,\ldots,X_n\)</span>이 iid <span class="math inline">\(N(\theta,1)\)</span>이고 <span class="math inline">\(\theta\ge0\)</span>임을 알고 있다고 하자.</li>
+<li>제한이 없다면 MLE는 <span class="math inline">\(\bar X\)</span>이다.</li>
+<li>그러나 <span class="math inline">\(\bar X&lt;0\)</span>이면 모수공간 밖에 있다.</li>
+<li>이 경우 <span class="math inline">\(\theta\ge0\)</span>에서 가능도는 <span class="math inline">\(\theta=0\)</span>에서 최대가 된다.</li>
+<li>따라서 MLE는</li>
+</ul>
+<p><span class="math display">\[
+\hat\theta=
+\begin{cases}
+\bar X, &amp; \bar X\ge0,\\
+0, &amp; \bar X&lt;0.
+\end{cases}
+\]</span></p>
+<ul>
+<li>일반적으로 MLE는 항상 <strong>허용된 모수공간 안에서</strong> 최대화해야 한다.</li>
+</ul>
+</section>
+<section id="예제-이항분포에서-시행-횟수-k의-mle" class="level3" data-number="7.3.7">
+<h3 data-number="7.3.7" class="anchored" data-anchor-id="예제-이항분포에서-시행-횟수-k의-mle"><span class="header-section-number">7.3.7</span> 예제: 이항분포에서 시행 횟수 <span class="math inline">\(k\)</span>의 MLE</h3>
+<ul>
+<li><span class="math inline">\(X_1,\ldots,X_n\)</span>이 <span class="math inline">\(Binomial(k,p)\)</span>에서 나온 표본이고 <span class="math inline">\(p\)</span>는 알려져 있지만 <span class="math inline">\(k\)</span>는 미지라고 하자.</li>
+<li>가능도는</li>
+</ul>
+<p><span class="math display">\[
+L(k\mid x,p)
+=
+\prod_{i=1}^{n}\binom{k}{x_i}p^{x_i}(1-p)^{k-x_i}.
+\]</span></p>
+<ul>
+<li>여기서 <span class="math inline">\(k\)</span>는 정수이며 <span class="math inline">\(k\ge\max_i x_i\)</span>이어야 한다.</li>
+<li>factorial 때문에 미분으로 직접 풀기 어렵다.</li>
+<li>따라서 likelihood ratio</li>
+</ul>
+<p><span class="math display">\[
+\frac{L(k\mid x,p)}{L(k-1\mid x,p)}
+=
+\frac{[k(1-p)]^n}{\prod_{i=1}^{n}(k-x_i)}
+\]</span></p>
+<p>를 이용한다. - 최대점은 다음 부등식을 만족하는 정수 <span class="math inline">\(k\)</span>이다.</p>
+<p><span class="math display">\[
+[k(1-p)]^n\ge\prod_{i=1}^{n}(k-x_i),
+\]</span></p>
+<p><span class="math display">\[
+[(k+1)(1-p)]^n&lt;\prod_{i=1}^{n}(k+1-x_i).
+\]</span></p>
+<ul>
+<li>적절한 변환 <span class="math inline">\(z=1/k\)</span>를 쓰면 하나의 다항방정식으로 환원된다.</li>
+<li>이 예제는 MLE가 수치해석적으로 민감할 수 있음을 보여주는 중요한 사례이다.</li>
+</ul>
+</section>
+<section id="mle의-불변성" class="level3" data-number="7.3.8">
+<h3 data-number="7.3.8" class="anchored" data-anchor-id="mle의-불변성"><span class="header-section-number">7.3.8</span> MLE의 불변성</h3>
+<ul>
+<li>관심 모수가 <span class="math inline">\(\theta\)</span>가 아니라 <span class="math inline">\(\tau(\theta)\)</span>일 수 있다.</li>
+<li>MLE의 중요한 성질은 다음이다.
+<ul>
+<li><span class="math inline">\(\hat\theta\)</span>가 <span class="math inline">\(\theta\)</span>의 MLE이면</li>
+<li><span class="math inline">\(\tau(\hat\theta)\)</span>가 <span class="math inline">\(\tau(\theta)\)</span>의 MLE이다.</li>
+</ul></li>
+</ul>
+<section id="유도-가능도의-정의" class="level4" data-number="7.3.8.1">
+<h4 data-number="7.3.8.1" class="anchored" data-anchor-id="유도-가능도의-정의"><span class="header-section-number">7.3.8.1</span> 유도 가능도의 정의</h4>
+<ul>
+<li><span class="math inline">\(\tau\)</span>가 일대일이 아니면 <span class="math inline">\(\tau(\theta)=\eta\)</span>를 만족하는 <span class="math inline">\(\theta\)</span>가 여러 개 있을 수 있다.</li>
+<li>이 경우 <span class="math inline">\(\eta=\tau(\theta)\)</span>의 유도 가능도는</li>
+</ul>
+<p><span class="math display">\[
+L^*(\eta\mid x)
+=
+\sup_{\{\theta:\tau(\theta)=\eta\}}L(\theta\mid x).
+\tag{7.2.5}
+\]</span></p>
+</section>
+<section id="정리-mle의-불변성" class="level4" data-number="7.3.8.2">
+<h4 data-number="7.3.8.2" class="anchored" data-anchor-id="정리-mle의-불변성"><span class="header-section-number">7.3.8.2</span> 정리: MLE의 불변성</h4>
+<ul>
+<li><span class="math inline">\(\hat\theta\)</span>가 <span class="math inline">\(\theta\)</span>의 MLE이면, 임의의 함수 <span class="math inline">\(\tau(\theta)\)</span>에 대해 <span class="math inline">\(\tau(\hat\theta)\)</span>가 <span class="math inline">\(\tau(\theta)\)</span>의 MLE이다.</li>
+<li>예:
+<ul>
+<li>정규 평균 <span class="math inline">\(\theta\)</span>의 MLE가 <span class="math inline">\(\bar X\)</span>이면 <span class="math inline">\(\theta^2\)</span>의 MLE는 <span class="math inline">\(\bar X^2\)</span>이다.</li>
+<li>베르누이 <span class="math inline">\(p\)</span>의 MLE가 <span class="math inline">\(\hat p\)</span>이면 <span class="math inline">\(p(1-p)\)</span>의 MLE는 <span class="math inline">\(\hat p(1-\hat p)\)</span>이다.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="예제-정규분포에서-musigma2-모두-미지" class="level3" data-number="7.3.9">
+<h3 data-number="7.3.9" class="anchored" data-anchor-id="예제-정규분포에서-musigma2-모두-미지"><span class="header-section-number">7.3.9</span> 예제: 정규분포에서 <span class="math inline">\(\mu,\sigma^2\)</span> 모두 미지</h3>
+<ul>
+<li><span class="math inline">\(X_1,\ldots,X_n\)</span>이 iid <span class="math inline">\(N(\theta,\sigma^2)\)</span>라고 하자.</li>
+<li>가능도는</li>
+</ul>
+<p><span class="math display">\[
+L(\theta,\sigma^2\mid x)
+=
+\frac{1}{(2\pi\sigma^2)^{n/2}}
+\exp\left[-\frac{1}{2\sigma^2}\sum_{i=1}^{n}(x_i-\theta)^2\right].
+\]</span></p>
+<ul>
+<li>로그가능도는</li>
+</ul>
+<p><span class="math display">\[
+\ell(\theta,\sigma^2\mid x)
+=
+-\frac n2\log(2\pi)-\frac n2\log\sigma^2
+-
+\frac{1}{2\sigma^2}\sum_{i=1}^{n}(x_i-\theta)^2.
+\]</span></p>
+<ul>
+<li>미분방정식을 풀면</li>
+</ul>
+<p><span class="math display">\[
+\hat\theta=\bar x,
+\]</span></p>
+<p><span class="math display">\[
+\hat\sigma^2
+=
+\frac1n\sum_{i=1}^{n}(x_i-\bar x)^2.
+\]</span></p>
+<ul>
+<li>즉, 정규분포에서 분산의 MLE는 불편표본분산 <span class="math inline">\(S^2\)</span>가 아니라 분모가 <span class="math inline">\(n\)</span>인 추정량이다.</li>
+</ul>
+</section>
+<section id="예제-mle의-수치적-불안정성" class="level3" data-number="7.3.10">
+<h3 data-number="7.3.10" class="anchored" data-anchor-id="예제-mle의-수치적-불안정성"><span class="header-section-number">7.3.10</span> 예제: MLE의 수치적 불안정성</h3>
+<ul>
+<li>Olkin, Petkau, Zidek의 예에서 이항분포의 <span class="math inline">\(k\)</span>를 추정할 때 다음 두 자료를 비교한다.</li>
+</ul>
+<p><span class="math display">\[
+(16,18,22,25,27)
+\]</span></p>
+<p>와</p>
+<p><span class="math display">\[
+(16,18,22,25,28).
+\]</span></p>
+<ul>
+<li>두 번째 자료는 마지막 값이 27에서 28로 1만 증가했을 뿐이다.</li>
+<li>그러나 <span class="math inline">\(k\)</span>의 MLE는 크게 변할 수 있다.</li>
+<li>이 현상은 likelihood가 최대점 근처에서 매우 평평하거나 유한한 최대점이 약할 때 발생한다.</li>
+<li>수치적으로 MLE를 구할 때는 안정성을 반드시 점검해야 한다.</li>
+</ul>
+</section>
+</section>
+<section id="sec-7-2-3" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="sec-7-2-3"><span class="header-section-number">7.4</span> 베이즈 추정량</h2>
+<ul>
+<li>고전적 접근에서는 <span class="math inline">\(\theta\)</span>를 미지이지만 고정된 값으로 본다.</li>
+<li>베이즈 접근에서는 <span class="math inline">\(\theta\)</span>를 확률분포를 갖는 양으로 본다.</li>
+<li>이때 자료를 보기 전 <span class="math inline">\(\theta\)</span>에 대한 믿음을 나타내는 분포를 <strong>사전분포(prior distribution)</strong>라고 한다.</li>
+<li>자료를 본 뒤 사전분포를 갱신한 분포를 <strong>사후분포(posterior distribution)</strong>라고 한다.</li>
+</ul>
+<section id="사후분포" class="level3" data-number="7.4.1">
+<h3 data-number="7.4.1" class="anchored" data-anchor-id="사후분포"><span class="header-section-number">7.4.1</span> 사후분포</h3>
+<ul>
+<li>사전분포를 <span class="math inline">\(\pi(\theta)\)</span>, 표본분포를 <span class="math inline">\(f(x\mid\theta)\)</span>라고 하자.</li>
+<li>사후분포는 Bayes 규칙으로</li>
+</ul>
+<p><span class="math display">\[
+\pi(\theta\mid x)
+=
+\frac{f(x\mid\theta)\pi(\theta)}{m(x)},
+\tag{7.2.7}
+\]</span></p>
+<p>여기서</p>
+<p><span class="math display">\[
+m(x)=\int f(x\mid\theta)\pi(\theta)\,d\theta
+\tag{7.2.8}
+\]</span></p>
+<p>는 <span class="math inline">\(X\)</span>의 주변분포이다. - 사후분포는 관측된 표본 <span class="math inline">\(x\)</span>에 조건을 건 <span class="math inline">\(\theta\)</span>의 조건부분포이다. - 사후평균 <span class="math inline">\(E(\theta\mid x)\)</span>는 대표적인 베이즈 점추정량이다.</p>
+</section>
+<section id="예제-이항-베이즈-추정" class="level3" data-number="7.4.2">
+<h3 data-number="7.4.2" class="anchored" data-anchor-id="예제-이항-베이즈-추정"><span class="header-section-number">7.4.2</span> 예제: 이항 베이즈 추정</h3>
+<ul>
+<li><span class="math inline">\(X_1,\ldots,X_n\)</span>이 iid Bernoulli<span class="math inline">\((p)\)</span>이고 <span class="math inline">\(Y=\sum_iX_i\)</span>라 하자.</li>
+<li>표본분포는</li>
+</ul>
+<p><span class="math display">\[
+Y\mid p\sim Binomial(n,p).
+\]</span></p>
+<ul>
+<li>사전분포를</li>
+</ul>
+<p><span class="math display">\[
+p\sim Beta(\alpha,\beta)
+\]</span></p>
+<p>로 둔다. - 결합밀도 또는 결합질량은</p>
+<p><span class="math display">\[
+f(y,p)
+=
+\binom{n}{y}p^y(1-p)^{n-y}
+\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}
+p^{\alpha-1}(1-p)^{\beta-1}.
+\]</span></p>
+<ul>
+<li><span class="math inline">\(Y\)</span>의 주변분포는 beta-binomial 형태이다.</li>
+</ul>
+<p><span class="math display">\[
+f(y)
+=
+\binom{n}{y}
+\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}
+\frac{\Gamma(y+\alpha)\Gamma(n-y+\beta)}{\Gamma(n+\alpha+\beta)}.
+\tag{7.2.9}
+\]</span></p>
+<ul>
+<li>사후분포는</li>
+</ul>
+<p><span class="math display">\[
+p\mid y\sim Beta(y+\alpha,n-y+\beta).
+\]</span></p>
+<ul>
+<li>사후평균을 베이즈 추정량으로 쓰면</li>
+</ul>
+<p><span class="math display">\[
+\hat p_B
+=
+\frac{y+\alpha}{\alpha+\beta+n}.
+\]</span></p>
+<ul>
+<li>이를 다음과 같이 해석할 수 있다.</li>
+</ul>
+<p><span class="math display">\[
+\hat p_B
+=
+\left(\frac{n}{\alpha+\beta+n}\right)\left(\frac yn\right)
++
+\left(\frac{\alpha+\beta}{\alpha+\beta+n}\right)
+\left(\frac{\alpha}{\alpha+\beta}\right).
+\]</span></p>
+<ul>
+<li>즉, 베이즈 추정량은 표본비율과 사전평균의 가중평균이다.</li>
+<li>표본크기 <span class="math inline">\(n\)</span>이 커질수록 표본정보의 가중치가 커진다.</li>
+</ul>
+</section>
+<section id="정의-켤레사전분포" class="level3" data-number="7.4.3">
+<h3 data-number="7.4.3" class="anchored" data-anchor-id="정의-켤레사전분포"><span class="header-section-number">7.4.3</span> 정의: 켤레사전분포</h3>
+<ul>
+<li>분포족 <span class="math inline">\(F=\{f(x\mid\theta)\}\)</span>에 대해 사전분포족 <span class="math inline">\(\Pi\)</span>가 다음 성질을 가지면 켤레사전분포족이라고 한다.
+<ul>
+<li><span class="math inline">\(\Pi\)</span>의 사전분포와 <span class="math inline">\(F\)</span>의 표본분포를 결합했을 때,</li>
+<li>모든 자료 <span class="math inline">\(x\)</span>에 대해 사후분포가 다시 <span class="math inline">\(\Pi\)</span>에 속한다.</li>
+</ul></li>
+<li>베타분포족은 이항분포족에 대한 켤레사전분포족이다.</li>
+<li>켤레성은 계산을 단순하게 해주지만, 실제 사전지식을 잘 반영하는지는 별도의 문제이다.</li>
+</ul>
+</section>
+<section id="예제-정규-베이즈-추정량" class="level3" data-number="7.4.4">
+<h3 data-number="7.4.4" class="anchored" data-anchor-id="예제-정규-베이즈-추정량"><span class="header-section-number">7.4.4</span> 예제: 정규 베이즈 추정량</h3>
+<ul>
+<li><span class="math inline">\(X\sim N(\theta,\sigma^2)\)</span>이고 <span class="math inline">\(\theta\)</span>의 사전분포가</li>
+</ul>
+<p><span class="math display">\[
+\theta\sim N(\mu,\tau^2)
+\]</span></p>
+<p>라고 하자. - 여기서 <span class="math inline">\(\sigma^2,\mu,\tau^2\)</span>는 알려져 있다고 가정한다. - 사후분포도 정규분포이며</p>
+<p><span class="math display">\[
+E(\theta\mid x)
+=
+\frac{\tau^2}{\tau^2+\sigma^2}x
++
+\frac{\sigma^2}{\sigma^2+\tau^2}\mu,
+\tag{7.2.10}
+\]</span></p>
+<p><span class="math display">\[
+Var(\theta\mid x)
+=
+\frac{\sigma^2\tau^2}{\sigma^2+\tau^2}.
+\]</span></p>
+<ul>
+<li>사후평균은 자료 <span class="math inline">\(x\)</span>와 사전평균 <span class="math inline">\(\mu\)</span>의 가중평균이다.</li>
+<li>사전분산 <span class="math inline">\(\tau^2\)</span>가 매우 크면 사전정보가 흐려지고, 베이즈 추정량은 표본정보 <span class="math inline">\(x\)</span>에 가까워진다.</li>
+<li>사전분산이 작으면 사전평균에 더 큰 가중치가 부여된다.</li>
+</ul>
+</section>
+</section>
+<section id="sec-7-2-4" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="sec-7-2-4"><span class="header-section-number">7.5</span> EM 알고리즘</h2>
+<ul>
+<li>EM 알고리즘은 MLE를 찾기 위한 반복 알고리즘이다.</li>
+<li>특히 <strong>결측자료(missing data)</strong> 또는 <strong>잠재변수(latent variable)</strong>가 있는 문제에 적합하다.</li>
+<li>핵심 아이디어는 다음이다.
+<ul>
+<li>직접 최대화하기 어려운 불완전자료 가능도 대신,</li>
+<li>완전자료 로그가능도의 조건부기댓값을 반복적으로 최대화한다.</li>
+</ul></li>
+</ul>
+<section id="완전자료와-불완전자료" class="level3" data-number="7.5.1">
+<h3 data-number="7.5.1" class="anchored" data-anchor-id="완전자료와-불완전자료"><span class="header-section-number">7.5.1</span> 완전자료와 불완전자료</h3>
+<ul>
+<li>관측된 자료를 <span class="math inline">\(Y\)</span>라고 하고, 관측되지 않은 보강자료를 <span class="math inline">\(X\)</span>라고 하자.</li>
+<li>완전자료는 <span class="math inline">\((Y,X)\)</span>이다.</li>
+<li>완전자료 밀도 또는 질량함수를 <span class="math inline">\(f(y,x\mid\theta)\)</span>, 불완전자료 밀도 또는 질량함수를 <span class="math inline">\(g(y\mid\theta)\)</span>라고 하면</li>
+</ul>
+<p><span class="math display">\[
+g(y\mid\theta)=\int f(y,x\mid\theta)\,dx.
+\tag{7.2.14}
+\]</span></p>
+<ul>
+<li>이산형에서는 적분 대신 합을 사용한다.</li>
+</ul>
+</section>
+<section id="em의-기본-항등식" class="level3" data-number="7.5.2">
+<h3 data-number="7.5.2" class="anchored" data-anchor-id="em의-기본-항등식"><span class="header-section-number">7.5.2</span> EM의 기본 항등식</h3>
+<ul>
+<li>완전자료 가능도, 불완전자료 가능도, 결측자료의 조건부분포를 각각</li>
+</ul>
+<p><span class="math display">\[
+L(\theta\mid y,x)=f(y,x\mid\theta),
+\]</span></p>
+<p><span class="math display">\[
+L(\theta\mid y)=g(y\mid\theta),
+\]</span></p>
+<p><span class="math display">\[
+k(x\mid\theta,y)=\frac{f(y,x\mid\theta)}{g(y\mid\theta)}
+\tag{7.2.17}
+\]</span></p>
+<p>로 둔다. - 그러면</p>
+<p><span class="math display">\[
+\log L(\theta\mid y)
+=
+\log L(\theta\mid y,x)-\log k(x\mid\theta,y).
+\tag{7.2.18}
+\]</span></p>
+<ul>
+<li>관측되지 않은 <span class="math inline">\(x\)</span>를 현재 모수값 <span class="math inline">\(\theta'\)</span>에서의 조건부분포로 평균내면</li>
+</ul>
+<p><span class="math display">\[
+\log L(\theta\mid y)
+=
+E[\log L(\theta\mid y,X)\mid\theta',y]
+-
+E[\log k(X\mid\theta,y)\mid\theta',y].
+\tag{7.2.19}
+\]</span></p>
+</section>
+<section id="em-반복식" class="level3" data-number="7.5.3">
+<h3 data-number="7.5.3" class="anchored" data-anchor-id="em-반복식"><span class="header-section-number">7.5.3</span> EM 반복식</h3>
+<ul>
+<li>초기값 <span class="math inline">\(\theta^{(0)}\)</span>에서 시작한다.</li>
+<li>반복 <span class="math inline">\(r\)</span>에서 다음 값을 계산한다.</li>
+</ul>
+<p><span class="math display">\[
+\theta^{(r+1)}
+=
+\arg\max_{\theta}
+E[\log L(\theta\mid y,X)\mid\theta^{(r)},y].
+\tag{7.2.20}
+\]</span></p>
+<ul>
+<li>E-step:
+<ul>
+<li>현재 추정값으로 완전자료 로그가능도의 조건부기댓값을 계산한다.</li>
+</ul></li>
+<li>M-step:
+<ul>
+<li>그 조건부기댓값을 <span class="math inline">\(\theta\)</span>에 대해 최대화한다.</li>
+</ul></li>
+</ul>
+</section>
+<section id="예제-여러-포아송-비율-모형" class="level3" data-number="7.5.4">
+<h3 data-number="7.5.4" class="anchored" data-anchor-id="예제-여러-포아송-비율-모형"><span class="header-section-number">7.5.4</span> 예제: 여러 포아송 비율 모형</h3>
+<ul>
+<li>서로 독립인 자료가 다음과 같이 주어진다고 하자.</li>
+</ul>
+<p><span class="math display">\[
+Y_i\sim Poisson(\beta\tau_i),
+\qquad
+X_i\sim Poisson(\tau_i).
+\]</span></p>
+<ul>
+<li><span class="math inline">\(Y_i\)</span>는 질병 발생 수, <span class="math inline">\(X_i\)</span>는 노출량 또는 인구밀도에 대한 보조정보로 해석할 수 있다.</li>
+<li>완전자료 가능도는</li>
+</ul>
+<p><span class="math display">\[
+f((x_1,y_1),\ldots,(x_n,y_n)\mid\beta,\tau_1,\ldots,\tau_n)
+=
+\prod_{i=1}^{n}
+\frac{e^{-\beta\tau_i}(\beta\tau_i)^{y_i}}{y_i!}
+\frac{e^{-\tau_i}\tau_i^{x_i}}{x_i!}.
+\tag{7.2.11}
+\]</span></p>
+<ul>
+<li>완전자료가 모두 관측되면 MLE는</li>
+</ul>
+<p><span class="math display">\[
+\hat\beta
+=
+\frac{\sum_{i=1}^{n}y_i}{\sum_{i=1}^{n}x_i},
+\]</span></p>
+<p><span class="math display">\[
+\hat\tau_j
+=
+\frac{x_j+y_j}{\hat\beta+1},
+\qquad j=1,\ldots,n.
+\tag{7.2.12}
+\]</span></p>
+<ul>
+<li>만약 <span class="math inline">\(x_1\)</span>이 결측이면, EM에서 <span class="math inline">\(x_1\)</span>의 조건부 기대값이 현재 <span class="math inline">\(\hat\tau_1^{(r)}\)</span>로 대체된다.</li>
+<li>반복식은</li>
+</ul>
+<p><span class="math display">\[
+\hat\beta^{(r+1)}
+=
+\frac{\sum_{i=1}^{n}y_i}{\hat\tau_1^{(r)}+\sum_{i=2}^{n}x_i},
+\]</span></p>
+<p><span class="math display">\[
+\hat\tau_1^{(r+1)}
+=
+\frac{\hat\tau_1^{(r)}+y_1}{\hat\beta^{(r+1)}+1},
+\]</span></p>
+<p><span class="math display">\[
+\hat\tau_j^{(r+1)}
+=
+\frac{x_j+y_j}{\hat\beta^{(r+1)}+1},
+\qquad j=2,\ldots,n.
+\tag{7.2.23}
+\]</span></p>
+</section>
+<section id="정리-em-가능도의-단조성" class="level3" data-number="7.5.5">
+<h3 data-number="7.5.5" class="anchored" data-anchor-id="정리-em-가능도의-단조성"><span class="header-section-number">7.5.5</span> 정리: EM 가능도의 단조성</h3>
+<ul>
+<li>EM 반복열 <span class="math inline">\(\{\hat\theta^{(r)}\}\)</span>는 불완전자료 가능도를 감소시키지 않는다.</li>
+</ul>
+<p><span class="math display">\[
+L(\hat\theta^{(r+1)}\mid y)
+\ge
+L(\hat\theta^{(r)}\mid y).
+\tag{7.2.24}
+\]</span></p>
+<ul>
+<li>이 성질은 EM 알고리즘의 핵심이다.</li>
+<li>다만 가능도가 증가한다고 해서 항상 전역최대점으로 수렴한다는 뜻은 아니다.</li>
+<li>초기값, 다봉 가능도, saddle point 가능성 등을 고려해야 한다.</li>
+</ul>
+</section>
+</section>
+<section id="sec-7-3" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="sec-7-3"><span class="header-section-number">7.6</span> 추정량을 평가하는 방법</h2>
+<ul>
+<li>앞 절의 방법들은 추정량 후보를 만든다.</li>
+<li>이제 필요한 것은 후보들을 비교하고 평가하는 기준이다.</li>
+<li>이 절에서는 다음 기준을 다룬다.
+<ul>
+<li>평균제곱오차</li>
+<li>최량불편추정량</li>
+<li>충분성과 불편성</li>
+<li>손실함수와 위험함수</li>
+</ul></li>
+</ul>
+</section>
+<section id="sec-7-3-1" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="sec-7-3-1"><span class="header-section-number">7.7</span> 평균제곱오차</h2>
+<section id="정의-mse" class="level3" data-number="7.7.1">
+<h3 data-number="7.7.1" class="anchored" data-anchor-id="정의-mse"><span class="header-section-number">7.7.1</span> 정의: MSE</h3>
+<ul>
+<li>추정량 <span class="math inline">\(W\)</span>의 <span class="math inline">\(\theta\)</span>에 대한 평균제곱오차는</li>
+</ul>
+<p><span class="math display">\[
+MSE_\theta(W)=E_\theta(W-\theta)^2
+\]</span></p>
+<p>이다. - MSE는 추정량이 평균적으로 모수에서 얼마나 멀리 떨어지는지 제곱거리로 측정한다.</p>
+</section>
+<section id="정의-편향" class="level3" data-number="7.7.2">
+<h3 data-number="7.7.2" class="anchored" data-anchor-id="정의-편향"><span class="header-section-number">7.7.2</span> 정의: 편향</h3>
+<ul>
+<li>추정량 <span class="math inline">\(W\)</span>의 편향은</li>
+</ul>
+<p><span class="math display">\[
+Bias_\theta(W)=E_\theta W-\theta
+\]</span></p>
+<p>이다. - <span class="math inline">\(Bias_\theta(W)=0\)</span>이 모든 <span class="math inline">\(\theta\)</span>에서 성립하면 <span class="math inline">\(W\)</span>는 불편추정량이다.</p>
+</section>
+<section id="mse-분해" class="level3" data-number="7.7.3">
+<h3 data-number="7.7.3" class="anchored" data-anchor-id="mse-분해"><span class="header-section-number">7.7.3</span> MSE 분해</h3>
+<ul>
+<li>MSE는 분산과 편향의 제곱으로 분해된다.</li>
+</ul>
+<p><span class="math display">\[
+E_\theta(W-\theta)^2
+=
+Var_\theta(W)+[E_\theta W-\theta]^2
+=
+Var_\theta(W)+[Bias_\theta(W)]^2.
+\tag{7.3.1}
+\]</span></p>
+<ul>
+<li>해석:
+<ul>
+<li>분산은 추정량의 정밀도와 관련된다.</li>
+<li>편향은 추정량의 정확도와 관련된다.</li>
+<li>좋은 추정량은 두 요소를 함께 작게 만들어야 한다.</li>
+</ul></li>
+</ul>
+</section>
+<section id="예제-정규분포에서-mse" class="level3" data-number="7.7.4">
+<h3 data-number="7.7.4" class="anchored" data-anchor-id="예제-정규분포에서-mse"><span class="header-section-number">7.7.4</span> 예제: 정규분포에서 MSE</h3>
+<ul>
+<li><span class="math inline">\(X_1,\ldots,X_n\)</span>이 iid <span class="math inline">\(N(\mu,\sigma^2)\)</span>라고 하자.</li>
+<li><span class="math inline">\(\bar X\)</span>와 <span class="math inline">\(S^2\)</span>는 각각 <span class="math inline">\(\mu\)</span>와 <span class="math inline">\(\sigma^2\)</span>의 불편추정량이다.</li>
+</ul>
+<p><span class="math display">\[
+E\bar X=\mu,
+\qquad
+ES^2=\sigma^2.
+\]</span></p>
+<ul>
+<li>따라서 MSE는 각각 분산과 같다.</li>
+</ul>
+<p><span class="math display">\[
+E(\bar X-\mu)^2=Var(\bar X)=\frac{\sigma^2}{n}.
+\]</span></p>
+<ul>
+<li>정규성 하에서</li>
+</ul>
+<p><span class="math display">\[
+E(S^2-\sigma^2)^2=Var(S^2)=\frac{2\sigma^4}{n-1}.
+\]</span></p>
+</section>
+<section id="예제-분산-mle와-불편표본분산-비교" class="level3" data-number="7.7.5">
+<h3 data-number="7.7.5" class="anchored" data-anchor-id="예제-분산-mle와-불편표본분산-비교"><span class="header-section-number">7.7.5</span> 예제: 분산 MLE와 불편표본분산 비교</h3>
+<ul>
+<li>정규분포에서 <span class="math inline">\(\sigma^2\)</span>의 MLE는</li>
+</ul>
+<p><span class="math display">\[
+\hat\sigma^2
+=
+\frac1n\sum_{i=1}^{n}(X_i-\bar X)^2
+=
+\frac{n-1}{n}S^2.
+\]</span></p>
+<ul>
+<li>이 추정량은 편향되어 있다.</li>
+</ul>
+<p><span class="math display">\[
+E\hat\sigma^2
+=
+\frac{n-1}{n}\sigma^2.
+\]</span></p>
+<ul>
+<li>분산은</li>
+</ul>
+<p><span class="math display">\[
+Var(\hat\sigma^2)
+=
+\left(\frac{n-1}{n}\right)^2Var(S^2)
+=
+\frac{2(n-1)\sigma^4}{n^2}.
+\]</span></p>
+<ul>
+<li>MSE는</li>
+</ul>
+<p><span class="math display">\[
+E(\hat\sigma^2-\sigma^2)^2
+=
+\left(\frac{2n-1}{n^2}\right)\sigma^4.
+\]</span></p>
+<ul>
+<li>이는</li>
+</ul>
+<p><span class="math display">\[
+\left(\frac{2n-1}{n^2}\right)\sigma^4
+&lt;
+\frac{2\sigma^4}{n-1}
+\]</span></p>
+<p>이므로 <span class="math inline">\(\hat\sigma^2\)</span>가 <span class="math inline">\(S^2\)</span>보다 작은 MSE를 갖는다. - 그러나 <span class="math inline">\(\hat\sigma^2\)</span>는 평균적으로 <span class="math inline">\(\sigma^2\)</span>를 과소추정한다. - MSE만으로 추정량의 모든 성질을 판단할 수는 없다.</p>
+</section>
+<section id="예제-이항-베이즈-추정량의-mse" class="level3" data-number="7.7.6">
+<h3 data-number="7.7.6" class="anchored" data-anchor-id="예제-이항-베이즈-추정량의-mse"><span class="header-section-number">7.7.6</span> 예제: 이항 베이즈 추정량의 MSE</h3>
+<ul>
+<li><span class="math inline">\(X_1,\ldots,X_n\)</span>이 iid Bernoulli<span class="math inline">\((p)\)</span>이고 <span class="math inline">\(Y=\sum_iX_i\)</span>라 하자.</li>
+<li>MLE는</li>
+</ul>
+<p><span class="math display">\[
+\hat p=\frac Yn.
+\]</span></p>
+<ul>
+<li>MSE는</li>
+</ul>
+<p><span class="math display">\[
+E_p(\hat p-p)^2
+=
+Var_p(\bar X)
+=
+\frac{p(1-p)}{n}.
+\]</span></p>
+<ul>
+<li>베이즈 추정량</li>
+</ul>
+<p><span class="math display">\[
+\hat p_B
+=
+\frac{Y+\alpha}{\alpha+\beta+n}
+\]</span></p>
+<p>의 MSE는</p>
+<p><span class="math display">\[
+E_p(\hat p_B-p)^2
+=
+\frac{np(1-p)}{(\alpha+\beta+n)^2}
++
+\left(\frac{np+\alpha}{\alpha+\beta+n}-p\right)^2.
+\]</span></p>
+<ul>
+<li>특별히 <span class="math inline">\(\alpha=\beta=\sqrt n/4\)</span>를 선택하면 MSE를 상수에 가깝게 만들 수 있다.</li>
+<li>이때</li>
+</ul>
+<p><span class="math display">\[
+\hat p_B
+=
+\frac{Y+\sqrt n/4}{n+\sqrt n},
+\]</span></p>
+<p><span class="math display">\[
+E(\hat p_B-p)^2
+=
+\frac{n}{4(n+\sqrt n)^2}.
+\]</span></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ch7_textbook_assets/fig_7_3_1_mse_comparison.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 7.3.1. <span class="math inline">\(n=4\)</span>와 <span class="math inline">\(n=400\)</span>에서 <span class="math inline">\(\hat p\)</span>와 <span class="math inline">\(\hat p_B\)</span>의 MSE 비교</figcaption>
+</figure>
+</div>
+<ul>
+<li>작은 표본에서는 <span class="math inline">\(\hat p_B\)</span>가 안정적일 수 있다.</li>
+<li>큰 표본에서는 <span class="math inline">\(\hat p\)</span>가 대체로 더 좋은 선택이 된다.</li>
+<li>이 예제는 MSE가 모수값에 따라 달라지며, 하나의 추정량이 모든 곳에서 항상 최선이 아닐 수 있음을 보여준다.</li>
+</ul>
+</section>
+<section id="예제-등변추정량의-mse" class="level3" data-number="7.7.7">
+<h3 data-number="7.7.7" class="anchored" data-anchor-id="예제-등변추정량의-mse"><span class="header-section-number">7.7.7</span> 예제: 등변추정량의 MSE</h3>
+<ul>
+<li>위치모수 모형에서 <span class="math inline">\(X_i\sim f(x_i-\theta)\)</span>라고 하자.</li>
+<li>등변추정량은 자료를 모두 <span class="math inline">\(a\)</span>만큼 이동시키면 추정량도 <span class="math inline">\(a\)</span>만큼 이동해야 한다.</li>
+<li>즉,</li>
+</ul>
+<p><span class="math display">\[
+W(x_1+a,\ldots,x_n+a)=W(x_1,\ldots,x_n)+a.
+\tag{7.3.2}
+\]</span></p>
+<ul>
+<li>이 성질을 만족하는 경우 MSE가 <span class="math inline">\(\theta\)</span>에 의존하지 않을 수 있다.</li>
+<li>따라서 등변추정량의 클래스 안에서는 MSE로 추정량을 비교하기가 쉬워진다.</li>
+</ul>
+</section>
+</section>
+<section id="sec-7-3-2" class="level2" data-number="7.8">
+<h2 data-number="7.8" class="anchored" data-anchor-id="sec-7-3-2"><span class="header-section-number">7.8</span> 최량불편추정량</h2>
+<ul>
+<li>전체 추정량 클래스에서 MSE가 가장 작은 추정량을 찾는 것은 일반적으로 불가능하거나 의미가 약할 수 있다.</li>
+<li>예를 들어 상수 추정량 <span class="math inline">\(\hat\theta=17\)</span>은 <span class="math inline">\(\theta=17\)</span> 근처에서는 매우 좋지만 다른 곳에서는 나쁘다.</li>
+<li>그래서 추정량의 범위를 제한한다.</li>
+<li>대표적인 제한이 <strong>불편성(unbiasedness)</strong>이다.</li>
+</ul>
+<section id="정의-최량불편추정량" class="level3" data-number="7.8.1">
+<h3 data-number="7.8.1" class="anchored" data-anchor-id="정의-최량불편추정량"><span class="header-section-number">7.8.1</span> 정의: 최량불편추정량</h3>
+<ul>
+<li><span class="math inline">\(W^*\)</span>가 <span class="math inline">\(\tau(\theta)\)</span>의 불편추정량이고</li>
+</ul>
+<p><span class="math display">\[
+E_\theta W^*=\tau(\theta)
+\quad\text{for all }\theta
+\]</span></p>
+<p>이며, 임의의 다른 불편추정량 <span class="math inline">\(W\)</span>에 대해</p>
+<p><span class="math display">\[
+Var_\theta(W^*)\le Var_\theta(W)
+\quad\text{for all }\theta
+\]</span></p>
+<p>이면 <span class="math inline">\(W^*\)</span>를 <span class="math inline">\(\tau(\theta)\)</span>의 <strong>최량불편추정량(best unbiased estimator)</strong>이라고 한다. - 같은 개념을 <strong>UMVUE(uniform minimum variance unbiased estimator)</strong>라고도 한다.</p>
+</section>
+<section id="예제-포아송에서-불편추정량-비교" class="level3" data-number="7.8.2">
+<h3 data-number="7.8.2" class="anchored" data-anchor-id="예제-포아송에서-불편추정량-비교"><span class="header-section-number">7.8.2</span> 예제: 포아송에서 불편추정량 비교</h3>
+<ul>
+<li><span class="math inline">\(X_1,\ldots,X_n\)</span>이 iid Poisson<span class="math inline">\((\lambda)\)</span>라고 하자.</li>
+<li>포아송분포에서는 평균과 분산이 모두 <span class="math inline">\(\lambda\)</span>이다.</li>
+<li>따라서</li>
+</ul>
+<p><span class="math display">\[
+E_\lambda\bar X=\lambda,
+\qquad
+E_\lambda S^2=\lambda.
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\bar X\)</span>와 <span class="math inline">\(S^2\)</span>는 모두 <span class="math inline">\(\lambda\)</span>의 불편추정량이다.</li>
+<li>그러나 둘 중 어느 것이 더 좋은지 판단하려면 분산을 비교해야 한다.</li>
+<li>실제로는 <span class="math inline">\(\bar X\)</span>가 최량불편추정량이 된다.</li>
+</ul>
+</section>
+<section id="cramerrao-부등식" class="level3" data-number="7.8.3">
+<h3 data-number="7.8.3" class="anchored" data-anchor-id="cramerrao-부등식"><span class="header-section-number">7.8.3</span> Cramer–Rao 부등식</h3>
+<ul>
+<li>최량불편추정량을 찾기 위한 중요한 도구는 분산의 하한이다.</li>
+<li>어떤 불편추정량도 가질 수 없는 분산의 하한을 알면, 그 하한을 달성하는 추정량이 최량불편추정량이다.</li>
+</ul>
+<section id="정리-cramerrao-부등식" class="level4" data-number="7.8.3.1">
+<h4 data-number="7.8.3.1" class="anchored" data-anchor-id="정리-cramerrao-부등식"><span class="header-section-number">7.8.3.1</span> 정리: Cramer–Rao 부등식</h4>
+<ul>
+<li><span class="math inline">\(X\)</span>가 pdf 또는 pmf <span class="math inline">\(f(x\mid\theta)\)</span>를 갖고, 적절한 미분과 적분 교환 조건이 성립한다고 하자.</li>
+<li><span class="math inline">\(W(X)\)</span>가 <span class="math inline">\(\tau(\theta)\)</span>의 불편추정량이면</li>
+</ul>
+<p><span class="math display">\[
+Var_\theta W(X)
+\ge
+\frac{[\tau'(\theta)]^2}{E_\theta\left[\left(\frac{\partial}{\partial\theta}\log f(X\mid\theta)\right)^2\right]}.
+\tag{7.3.6}
+\]</span></p>
+<ul>
+<li>분모는 Fisher information이다.</li>
+</ul>
+<p><span class="math display">\[
+I(\theta)
+=
+E_\theta\left[\left(\frac{\partial}{\partial\theta}\log f(X\mid\theta)\right)^2\right].
+\]</span></p>
+<ul>
+<li>iid 표본에서는 정보가 더해지므로 하한이 다음처럼 된다.</li>
+</ul>
+<p><span class="math display">\[
+Var_\theta W(X)
+\ge
+\frac{[\tau'(\theta)]^2}{nI_1(\theta)}.
+\]</span></p>
+</section>
+</section>
+<section id="예제-포아송에서-cramerrao-하한" class="level3" data-number="7.8.4">
+<h3 data-number="7.8.4" class="anchored" data-anchor-id="예제-포아송에서-cramerrao-하한"><span class="header-section-number">7.8.4</span> 예제: 포아송에서 Cramer–Rao 하한</h3>
+<ul>
+<li><span class="math inline">\(X_i\sim Poisson(\lambda)\)</span>에서 하나의 관측값에 대한 정보량은</li>
+</ul>
+<p><span class="math display">\[
+I_1(\lambda)=\frac1\lambda.
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\tau(\lambda)=\lambda\)</span>이면 <span class="math inline">\(\tau'(\lambda)=1\)</span>이다.</li>
+<li>따라서 iid 표본에서 불편추정량의 분산 하한은</li>
+</ul>
+<p><span class="math display">\[
+\frac{1}{n/\lambda}=\frac{\lambda}{n}.
+\]</span></p>
+<ul>
+<li>그런데</li>
+</ul>
+<p><span class="math display">\[
+Var(\bar X)=\frac{\lambda}{n}.
+\]</span></p>
+<ul>
+<li>그러므로 <span class="math inline">\(\bar X\)</span>는 <span class="math inline">\(\lambda\)</span>의 최량불편추정량이다.</li>
+</ul>
+</section>
+<section id="예제-균등분포의-스케일-모수" class="level3" data-number="7.8.5">
+<h3 data-number="7.8.5" class="anchored" data-anchor-id="예제-균등분포의-스케일-모수"><span class="header-section-number">7.8.5</span> 예제: 균등분포의 스케일 모수</h3>
+<ul>
+<li><span class="math inline">\(X_1,\ldots,X_n\)</span>이 iid Uniform<span class="math inline">\((0,\theta)\)</span>라고 하자.</li>
+<li>이 모형은 지지집합이 <span class="math inline">\(\theta\)</span>에 의존하므로 Cramer–Rao 정리의 조건이 성립하지 않는다.</li>
+<li>최대값</li>
+</ul>
+<p><span class="math display">\[
+Y=X_{(n)}=\max_iX_i
+\]</span></p>
+<p>의 pdf는</p>
+<p><span class="math display">\[
+f_Y(y\mid\theta)=
+\frac{n y^{n-1}}{\theta^n},
+\qquad 0&lt;y&lt;\theta.
+\]</span></p>
+<ul>
+<li>평균은</li>
+</ul>
+<p><span class="math display">\[
+EY=\frac{n}{n+1}\theta.
+\]</span></p>
+<ul>
+<li>따라서</li>
+</ul>
+<p><span class="math display">\[
+\frac{n+1}{n}Y
+\]</span></p>
+<p>는 <span class="math inline">\(\theta\)</span>의 불편추정량이다.</p>
+</section>
+<section id="예제-정규분산의-하한과-달성" class="level3" data-number="7.8.6">
+<h3 data-number="7.8.6" class="anchored" data-anchor-id="예제-정규분산의-하한과-달성"><span class="header-section-number">7.8.6</span> 예제: 정규분산의 하한과 달성</h3>
+<ul>
+<li><span class="math inline">\(X_1,\ldots,X_n\)</span>이 iid <span class="math inline">\(N(\mu,\sigma^2)\)</span>라고 하자.</li>
+<li><span class="math inline">\(\sigma^2\)</span>를 추정할 때 <span class="math inline">\(\mu\)</span>가 알려져 있으면</li>
+</ul>
+<p><span class="math display">\[
+\frac1n\sum_{i=1}^{n}(X_i-\mu)^2
+\]</span></p>
+<p>가 <span class="math inline">\(\sigma^2\)</span>의 최량불편추정량이 될 수 있다. - 하지만 <span class="math inline">\(\mu\)</span>가 미지이면 이 추정량은 계산할 수 없다. - 이 경우 불편표본분산 <span class="math inline">\(S^2\)</span>는 Cramer–Rao 하한을 달성하지 못한다. - 따라서 Cramer–Rao 하한만으로 <span class="math inline">\(S^2\)</span>가 최량불편인지 판단할 수 없다.</p>
+</section>
+</section>
+<section id="sec-7-3-3" class="level2" data-number="7.9">
+<h2 data-number="7.9" class="anchored" data-anchor-id="sec-7-3-3"><span class="header-section-number">7.9</span> 충분성과 불편성</h2>
+<ul>
+<li>Cramer–Rao 하한은 강력하지만 적용 조건이 제한적이다.</li>
+<li>더 넓은 상황에서는 충분통계량과 조건부기댓값을 사용한다.</li>
+</ul>
+<section id="정리-raoblackwell-정리" class="level3" data-number="7.9.1">
+<h3 data-number="7.9.1" class="anchored" data-anchor-id="정리-raoblackwell-정리"><span class="header-section-number">7.9.1</span> 정리: Rao–Blackwell 정리</h3>
+<ul>
+<li><span class="math inline">\(W\)</span>가 <span class="math inline">\(\tau(\theta)\)</span>의 불편추정량이고, <span class="math inline">\(T\)</span>가 <span class="math inline">\(\theta\)</span>에 대한 충분통계량이라고 하자.</li>
+<li>그러면</li>
+</ul>
+<p><span class="math display">\[
+\phi(T)=E[W\mid T]
+\]</span></p>
+<p>도 <span class="math inline">\(\tau(\theta)\)</span>의 불편추정량이며,</p>
+<p><span class="math display">\[
+Var_\theta(\phi(T))\le Var_\theta(W)
+\]</span></p>
+<p>가 모든 <span class="math inline">\(\theta\)</span>에서 성립한다. - 즉, 충분통계량에 조건화하면 불편성을 유지하면서 분산을 줄일 수 있다.</p>
+</section>
+<section id="raoblackwell-정리의-의미" class="level3" data-number="7.9.2">
+<h3 data-number="7.9.2" class="anchored" data-anchor-id="raoblackwell-정리의-의미"><span class="header-section-number">7.9.2</span> Rao–Blackwell 정리의 의미</h3>
+<ul>
+<li>충분통계량 <span class="math inline">\(T\)</span>는 <span class="math inline">\(\theta\)</span>에 대한 모든 정보를 담는다.</li>
+<li><span class="math inline">\(W\)</span>가 <span class="math inline">\(T\)</span> 외의 불필요한 잡음을 포함하고 있다면, <span class="math inline">\(E(W\mid T)\)</span>는 그 잡음을 평균내어 제거한다.</li>
+<li>따라서 추정량이 개선된다.</li>
+<li>이 정리는 “좋은 불편추정량은 충분통계량의 함수로 생각해도 된다”는 메시지를 준다.</li>
+</ul>
+</section>
+<section id="정리-최량불편추정량의-유일성" class="level3" data-number="7.9.3">
+<h3 data-number="7.9.3" class="anchored" data-anchor-id="정리-최량불편추정량의-유일성"><span class="header-section-number">7.9.3</span> 정리: 최량불편추정량의 유일성</h3>
+<ul>
+<li>최량불편추정량이 존재하면 거의 확실하게 유일하다.</li>
+<li>두 최량불편추정량이 서로 다르면 평균을 취해 더 작은 분산을 만들 수 있기 때문이다.</li>
+</ul>
+</section>
+<section id="정리-최량불편추정량의-특징" class="level3" data-number="7.9.4">
+<h3 data-number="7.9.4" class="anchored" data-anchor-id="정리-최량불편추정량의-특징"><span class="header-section-number">7.9.4</span> 정리: 최량불편추정량의 특징</h3>
+<ul>
+<li><span class="math inline">\(W\)</span>가 <span class="math inline">\(\tau(\theta)\)</span>의 불편추정량이라고 하자.</li>
+<li><span class="math inline">\(W\)</span>가 최량불편추정량일 필요충분조건은 모든 0의 불편추정량 <span class="math inline">\(U\)</span>에 대해</li>
+</ul>
+<p><span class="math display">\[
+Cov_\theta(W,U)=0
+\quad\text{for all }\theta
+\]</span></p>
+<p>인 것이다. - 여기서 <span class="math inline">\(U\)</span>는</p>
+<p><span class="math display">\[
+E_\theta U=0
+\]</span></p>
+<p>을 만족하는 추정량이다. - 직관적으로 0의 불편추정량은 순수한 랜덤 잡음이다. - 좋은 추정량은 이런 잡음과 상관되어 있지 않아야 한다.</p>
+</section>
+<section id="예제-0의-불편추정량" class="level3" data-number="7.9.5">
+<h3 data-number="7.9.5" class="anchored" data-anchor-id="예제-0의-불편추정량"><span class="header-section-number">7.9.5</span> 예제: 0의 불편추정량</h3>
+<ul>
+<li><span class="math inline">\(X\sim Uniform(\theta,\theta+1)\)</span>라고 하자.</li>
+<li>그러면</li>
+</ul>
+<p><span class="math display">\[
+EX=\theta+\frac12.
+\]</span></p>
+<ul>
+<li>따라서</li>
+</ul>
+<p><span class="math display">\[
+X-\frac12
+\]</span></p>
+<p>는 <span class="math inline">\(\theta\)</span>의 불편추정량이다. - 이 모형에서는 주기 1을 갖고 평균이 0이 되는 함수들이 0의 불편추정량을 만든다. - 예를 들어</p>
+<p><span class="math display">\[
+h(x)=\sin(2\pi x)
+\]</span></p>
+<p>는 0의 불편추정량이다. - 그런데 <span class="math inline">\(X-1/2\)</span>는 이러한 0의 불편추정량과 상관될 수 있으므로 최량불편추정량이 아니다.</p>
+</section>
+<section id="예제-균등분포-최대값-추정량의-최량성" class="level3" data-number="7.9.6">
+<h3 data-number="7.9.6" class="anchored" data-anchor-id="예제-균등분포-최대값-추정량의-최량성"><span class="header-section-number">7.9.6</span> 예제: 균등분포 최대값 추정량의 최량성</h3>
+<ul>
+<li><span class="math inline">\(X_1,\ldots,X_n\)</span>이 iid Uniform<span class="math inline">\((0,\theta)\)</span>라고 하자.</li>
+<li>앞에서</li>
+</ul>
+<p><span class="math display">\[
+\frac{n+1}{n}X_{(n)}
+\]</span></p>
+<p>가 <span class="math inline">\(\theta\)</span>의 불편추정량임을 보았다. - <span class="math inline">\(X_{(n)}\)</span>는 완비충분통계량이다. - 그러므로 완비성 때문에 <span class="math inline">\(X_{(n)}\)</span>의 함수인 0의 불편추정량은 0뿐이다. - 따라서</p>
+<p><span class="math display">\[
+\frac{n+1}{n}X_{(n)}
+\]</span></p>
+<p>는 <span class="math inline">\(\theta\)</span>의 최량불편추정량이다.</p>
+</section>
+<section id="정리-완비충분통계량과-umvue" class="level3" data-number="7.9.7">
+<h3 data-number="7.9.7" class="anchored" data-anchor-id="정리-완비충분통계량과-umvue"><span class="header-section-number">7.9.7</span> 정리: 완비충분통계량과 UMVUE</h3>
+<ul>
+<li><span class="math inline">\(T\)</span>가 <span class="math inline">\(\theta\)</span>에 대한 완비충분통계량이라고 하자.</li>
+<li><span class="math inline">\(\phi(T)\)</span>가 <span class="math inline">\(T\)</span>에만 의존하는 추정량이면, <span class="math inline">\(\phi(T)\)</span>는 자신의 기댓값</li>
+</ul>
+<p><span class="math display">\[
+E_\theta[\phi(T)]
+\]</span></p>
+<p>에 대한 유일한 최량불편추정량이다. - 실전 규칙: - 어떤 함수 <span class="math inline">\(\tau(\theta)\)</span>의 불편추정량 <span class="math inline">\(h(X)\)</span>를 찾는다. - 완비충분통계량 <span class="math inline">\(T\)</span>에 대해 조건화한다.</p>
+<p><span class="math display">\[
+\phi(T)=E[h(X)\mid T].
+\]</span></p>
+<ul>
+<li>그러면 <span class="math inline">\(\phi(T)\)</span>가 <span class="math inline">\(\tau(\theta)\)</span>의 UMVUE이다.</li>
+</ul>
+</section>
+<section id="예제-이항분포에서-정확히-한-번-성공할-확률의-umvue" class="level3" data-number="7.9.8">
+<h3 data-number="7.9.8" class="anchored" data-anchor-id="예제-이항분포에서-정확히-한-번-성공할-확률의-umvue"><span class="header-section-number">7.9.8</span> 예제: 이항분포에서 정확히 한 번 성공할 확률의 UMVUE</h3>
+<ul>
+<li><span class="math inline">\(X_1,\ldots,X_n\)</span>이 iid <span class="math inline">\(Binomial(k,\theta)\)</span>라고 하자.</li>
+<li>추정하려는 양은 단일 관측 <span class="math inline">\(X\)</span>에서 정확히 한 번 성공할 확률이다.</li>
+</ul>
+<p><span class="math display">\[
+\tau(\theta)=P_\theta(X=1)=k\theta(1-\theta)^{k-1}.
+\]</span></p>
+<ul>
+<li>충분완비통계량은</li>
+</ul>
+<p><span class="math display">\[
+T=\sum_{i=1}^{n}X_i\sim Binomial(kn,\theta).
+\]</span></p>
+<ul>
+<li>단순한 불편추정량은</li>
+</ul>
+<p><span class="math display">\[
+h(X_1)=
+\begin{cases}
+1, &amp; X_1=1,\\
+0, &amp; \text{otherwise}.
+\end{cases}
+\]</span></p>
+<ul>
+<li>왜냐하면</li>
+</ul>
+<p><span class="math display">\[
+E_\theta h(X_1)=P_\theta(X_1=1)=k\theta(1-\theta)^{k-1}.
+\]</span></p>
+<ul>
+<li>Rao–Blackwell화하면 UMVUE는</li>
+</ul>
+<p><span class="math display">\[
+\phi(T)=E[h(X_1)\mid T].
+\]</span></p>
+<ul>
+<li><span class="math inline">\(T=t\)</span>가 관측되었을 때 계산하면</li>
+</ul>
+<p><span class="math display">\[
+\phi(t)
+=
+\frac{k\binom{k(n-1)}{t-1}}{\binom{kn}{t}}.
+\]</span></p>
+<ul>
+<li>따라서 UMVUE는</li>
+</ul>
+<p><span class="math display">\[
+\phi\left(\sum_{i=1}^{n}X_i\right)
+=
+\frac{k\binom{k(n-1)}{\sum_iX_i-1}}
+{\binom{kn}{\sum_iX_i}}.
+\]</span></p>
+</section>
+</section>
+<section id="sec-7-3-4" class="level2" data-number="7.10">
+<h2 data-number="7.10" class="anchored" data-anchor-id="sec-7-3-4"><span class="header-section-number">7.10</span> 손실함수 최적성</h2>
+<ul>
+<li>지금까지 MSE를 중심으로 추정량을 평가했다.</li>
+<li>MSE는 손실함수의 특수한 경우이다.</li>
+<li>손실함수 기반의 추정량 평가와 최적화는 의사결정이론의 핵심이다.</li>
+</ul>
+<section id="손실함수" class="level3" data-number="7.10.1">
+<h3 data-number="7.10.1" class="anchored" data-anchor-id="손실함수"><span class="header-section-number">7.10.1</span> 손실함수</h3>
+<ul>
+<li>관측자료 <span class="math inline">\(X=x\)</span>를 본 뒤 <span class="math inline">\(\theta\)</span>에 대한 행동 또는 결정 <span class="math inline">\(a\)</span>를 선택한다고 하자.</li>
+<li>행동공간을 <span class="math inline">\(\mathcal A\)</span>라고 한다.</li>
+<li>점추정 문제에서는 보통 <span class="math inline">\(\mathcal A=\Theta\)</span>이다.</li>
+<li>손실함수 <span class="math inline">\(L(\theta,a)\)</span>는 참값이 <span class="math inline">\(\theta\)</span>일 때 행동 <span class="math inline">\(a\)</span>를 선택해서 입는 손실이다.</li>
+<li>대표적인 손실함수는 다음과 같다.</li>
+</ul>
+<section id="절대오차-손실" class="level4" data-number="7.10.1.1">
+<h4 data-number="7.10.1.1" class="anchored" data-anchor-id="절대오차-손실"><span class="header-section-number">7.10.1.1</span> 절대오차 손실</h4>
+<p><span class="math display">\[
+L(\theta,a)=|a-\theta|.
+\]</span></p>
+</section>
+<section id="제곱오차-손실" class="level4" data-number="7.10.1.2">
+<h4 data-number="7.10.1.2" class="anchored" data-anchor-id="제곱오차-손실"><span class="header-section-number">7.10.1.2</span> 제곱오차 손실</h4>
+<p><span class="math display">\[
+L(\theta,a)=(a-\theta)^2.
+\]</span></p>
+</section>
+<section id="비대칭-제곱오차-손실" class="level4" data-number="7.10.1.3">
+<h4 data-number="7.10.1.3" class="anchored" data-anchor-id="비대칭-제곱오차-손실"><span class="header-section-number">7.10.1.3</span> 비대칭 제곱오차 손실</h4>
+<p><span class="math display">\[
+L(\theta,a)=
+\begin{cases}
+(a-\theta)^2, &amp; a&lt;\theta,\\
+10(a-\theta)^2, &amp; a\ge\theta.
+\end{cases}
+\]</span></p>
+</section>
+<section id="상대-제곱오차-손실" class="level4" data-number="7.10.1.4">
+<h4 data-number="7.10.1.4" class="anchored" data-anchor-id="상대-제곱오차-손실"><span class="header-section-number">7.10.1.4</span> 상대 제곱오차 손실</h4>
+<p><span class="math display">\[
+L(\theta,a)=\frac{(a-\theta)^2}{|\theta|+1}.
+\]</span></p>
+<ul>
+<li>손실함수는 실제 문제에서 과대추정과 과소추정의 비용, 모수값에 따른 손실 크기 등을 반영해야 한다.</li>
+</ul>
+</section>
+</section>
+<section id="위험함수" class="level3" data-number="7.10.2">
+<h3 data-number="7.10.2" class="anchored" data-anchor-id="위험함수"><span class="header-section-number">7.10.2</span> 위험함수</h3>
+<ul>
+<li>추정량 <span class="math inline">\(\delta(X)\)</span>의 위험함수는</li>
+</ul>
+<p><span class="math display">\[
+R(\theta,\delta)
+=
+E_\theta[L(\theta,\delta(X))].
+\tag{7.3.16}
+\]</span></p>
+<ul>
+<li>참값 <span class="math inline">\(\theta\)</span>에서 평균적으로 입는 손실이다.</li>
+<li>제곱오차 손실에서는 위험함수가 MSE와 같다.</li>
+</ul>
+<p><span class="math display">\[
+R(\theta,\delta)
+=Var_\theta[\delta(X)]+[Bias_\theta\delta(X)]^2.
+\tag{7.3.17}
+\]</span></p>
+</section>
+<section id="예제-이항-추정량의-위험함수" class="level3" data-number="7.10.3">
+<h3 data-number="7.10.3" class="anchored" data-anchor-id="예제-이항-추정량의-위험함수"><span class="header-section-number">7.10.3</span> 예제: 이항 추정량의 위험함수</h3>
+<ul>
+<li>Bernoulli<span class="math inline">\((p)\)</span> 표본에서 두 추정량을 비교한다.</li>
+</ul>
+<p><span class="math display">\[
+\hat p=\bar X,
+\]</span></p>
+<p><span class="math display">\[
+\hat p_B=
+\frac{\sum_iX_i+\sqrt n/4}{n+\sqrt n}.
+\]</span></p>
+<ul>
+<li>제곱오차 손실에서는 위험함수가 MSE이다.</li>
+<li>앞의 Figure 7.3.1은 <span class="math inline">\(n=4\)</span>와 <span class="math inline">\(n=400\)</span>에서 두 위험함수를 비교한다.</li>
+<li>작은 표본에서는 베이즈형 shrinkage 추정량이 유리할 수 있고, 큰 표본에서는 표본비율이 유리해진다.</li>
+</ul>
+</section>
+<section id="예제-정규분산-추정의-위험함수" class="level3" data-number="7.10.4">
+<h3 data-number="7.10.4" class="anchored" data-anchor-id="예제-정규분산-추정의-위험함수"><span class="header-section-number">7.10.4</span> 예제: 정규분산 추정의 위험함수</h3>
+<ul>
+<li><span class="math inline">\(X_1,\ldots,X_n\)</span>이 iid <span class="math inline">\(N(\mu,\sigma^2)\)</span>이고, <span class="math inline">\(\sigma^2\)</span>를 추정한다고 하자.</li>
+<li>추정량을</li>
+</ul>
+<p><span class="math display">\[
+\delta_b(X)=bS^2
+\]</span></p>
+<p>의 형태로 제한한다. - 제곱오차 손실에서 위험함수는</p>
+<p><span class="math display">\[
+R((\mu,\sigma^2),\delta_b)
+=
+\left[\frac{2b^2}{n-1}+(b-1)^2\right]\sigma^4.
+\]</span></p>
+<ul>
+<li>괄호 안의 상수</li>
+</ul>
+<p><span class="math display">\[
+c_b=\frac{2b^2}{n-1}+(b-1)^2
+\tag{7.3.18}
+\]</span></p>
+<p>를 최소화하면</p>
+<p><span class="math display">\[
+b=\frac{n-1}{n+1}.
+\]</span></p>
+<ul>
+<li>따라서 이 클래스 안에서 위험을 최소화하는 추정량은</li>
+</ul>
+<p><span class="math display">\[
+\tilde S^2
+=
+\frac{n-1}{n+1}S^2
+=
+\frac1{n+1}\sum_{i=1}^{n}(X_i-\bar X)^2.
+\]</span></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ch7_textbook_assets/fig_7_3_2_variance_risk.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 7.3.2. 예제 7.3.26의 세 분산추정량 위험함수</figcaption>
+</figure>
+</div>
+</section>
+<section id="예제-stein-손실을-사용한-분산추정" class="level3" data-number="7.10.5">
+<h3 data-number="7.10.5" class="anchored" data-anchor-id="예제-stein-손실을-사용한-분산추정"><span class="header-section-number">7.10.5</span> 예제: Stein 손실을 사용한 분산추정</h3>
+<ul>
+<li>분산추정에서는 제곱오차 손실이 항상 적절하지 않을 수 있다.</li>
+<li>Stein 손실은 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+L(\sigma^2,a)
+=
+\frac{a}{\sigma^2}-1-\log\left(\frac{a}{\sigma^2}\right).
+\]</span></p>
+<ul>
+<li><span class="math inline">\(a=\sigma^2\)</span>이면 손실은 0이다.</li>
+<li><span class="math inline">\(a\to0\)</span> 또는 <span class="math inline">\(a\to\infty\)</span>이면 손실은 무한대로 간다.</li>
+<li><span class="math inline">\(\delta_b=bS^2\)</span>에 대한 위험은</li>
+</ul>
+<p><span class="math display">\[
+R(\sigma^2,\delta_b)
+=b-\log b-1-E\log\left(\frac{S^2}{\sigma^2}\right).
+\]</span></p>
+<ul>
+<li><span class="math inline">\(b\)</span>에 의존하는 부분은 <span class="math inline">\(b-\log b\)</span>이므로 최소값은 <span class="math inline">\(b=1\)</span>에서 얻는다.</li>
+<li>따라서 Stein 손실에서는 <span class="math inline">\(S^2\)</span>가 <span class="math inline">\(bS^2\)</span> 클래스 안에서 최적이다.</li>
+<li>이 예제는 “좋은 추정량”이 손실함수 선택에 따라 달라짐을 보여준다.</li>
+</ul>
+</section>
+<section id="베이즈-위험과-베이즈-규칙" class="level3" data-number="7.10.6">
+<h3 data-number="7.10.6" class="anchored" data-anchor-id="베이즈-위험과-베이즈-규칙"><span class="header-section-number">7.10.6</span> 베이즈 위험과 베이즈 규칙</h3>
+<ul>
+<li>사전분포 <span class="math inline">\(\pi(\theta)\)</span>가 있으면 위험함수를 평균낼 수 있다.</li>
+</ul>
+<p><span class="math display">\[
+\int_\Theta R(\theta,\delta)\pi(\theta)\,d\theta.
+\]</span></p>
+<ul>
+<li>이를 <strong>베이즈 위험(Bayes risk)</strong>이라고 한다.</li>
+<li>베이즈 위험을 최소화하는 결정규칙을 <strong>베이즈 규칙(Bayes rule)</strong>이라고 한다.</li>
+</ul>
+</section>
+<section id="사후기대손실" class="level3" data-number="7.10.7">
+<h3 data-number="7.10.7" class="anchored" data-anchor-id="사후기대손실"><span class="header-section-number">7.10.7</span> 사후기대손실</h3>
+<ul>
+<li>베이즈 위험은 다음과 같이 쓸 수 있다.</li>
+</ul>
+<p><span class="math display">\[
+\int_\Theta R(\theta,\delta)\pi(\theta)d\theta
+=
+\int_\mathcal X
+\left[
+\int_\Theta L(\theta,\delta(x))\pi(\theta\mid x)d\theta
+\right]
+m(x)dx.
+\tag{7.3.19}
+\]</span></p>
+<ul>
+<li>대괄호 안은 관측 <span class="math inline">\(x\)</span>가 주어졌을 때의 <strong>사후기대손실(posterior expected loss)</strong>이다.</li>
+<li>따라서 각 <span class="math inline">\(x\)</span>에서 사후기대손실을 최소화하는 <span class="math inline">\(\delta(x)\)</span>를 선택하면 베이즈 위험이 최소화된다.</li>
+</ul>
+</section>
+<section id="예제-두-가지-베이즈-규칙" class="level3" data-number="7.10.8">
+<h3 data-number="7.10.8" class="anchored" data-anchor-id="예제-두-가지-베이즈-규칙"><span class="header-section-number">7.10.8</span> 예제: 두 가지 베이즈 규칙</h3>
+<ul>
+<li>제곱오차 손실에서 사후기대손실은</li>
+</ul>
+<p><span class="math display">\[
+E[(\theta-a)^2\mid X=x]
+\]</span></p>
+<p>이며, 이는 <span class="math inline">\(a=E(\theta\mid x)\)</span>에서 최소가 된다. - 따라서 제곱오차 손실의 베이즈 추정량은 사후평균이다. - 절대오차 손실에서는</p>
+<p><span class="math display">\[
+E[|\theta-a|\mid X=x]
+\]</span></p>
+<p>을 최소화하는 값이 사후중앙값이다. - 따라서 절대오차 손실의 베이즈 추정량은 사후중앙값이다.</p>
+</section>
+<section id="예제-정규-베이즈-추정" class="level3" data-number="7.10.9">
+<h3 data-number="7.10.9" class="anchored" data-anchor-id="예제-정규-베이즈-추정"><span class="header-section-number">7.10.9</span> 예제: 정규 베이즈 추정</h3>
+<ul>
+<li><span class="math inline">\(X_1,\ldots,X_n\)</span>이 iid <span class="math inline">\(N(\theta,\sigma^2)\)</span>이고 <span class="math inline">\(\theta\sim N(\mu,\tau^2)\)</span>라고 하자.</li>
+<li>사후분포는 정규분포이며</li>
+</ul>
+<p><span class="math display">\[
+E(\theta\mid\bar x)
+=
+\frac{\tau^2}{\tau^2+\sigma^2/n}\bar x
++
+\frac{\sigma^2/n}{\tau^2+\sigma^2/n}\mu.
+\]</span></p>
+<ul>
+<li>사후분산은</li>
+</ul>
+<p><span class="math display">\[
+Var(\theta\mid\bar x)
+=
+\frac{\tau^2\sigma^2/n}{\tau^2+\sigma^2/n}.
+\]</span></p>
+<ul>
+<li>사후분포가 대칭 정규분포이므로 사후평균과 사후중앙값이 같다.</li>
+<li>따라서 제곱오차 손실과 절대오차 손실에서 같은 베이즈 추정량이 나온다.</li>
+</ul>
+</section>
+<section id="예제-이항-베이즈-추정-1" class="level3" data-number="7.10.10">
+<h3 data-number="7.10.10" class="anchored" data-anchor-id="예제-이항-베이즈-추정-1"><span class="header-section-number">7.10.10</span> 예제: 이항 베이즈 추정</h3>
+<ul>
+<li><span class="math inline">\(Y=\sum_iX_i\)</span>이고 <span class="math inline">\(p\sim Beta(\alpha,\beta)\)</span>이면</li>
+</ul>
+<p><span class="math display">\[
+p\mid y\sim Beta(y+\alpha,n-y+\beta).
+\]</span></p>
+<ul>
+<li>제곱오차 손실에서 베이즈 추정량은 사후평균이다.</li>
+</ul>
+<p><span class="math display">\[
+\delta_\pi(y)=E(p\mid y)
+=
+\frac{y+\alpha}{\alpha+\beta+n}.
+\]</span></p>
+<ul>
+<li>절대오차 손실에서는 사후중앙값이 필요하다.</li>
+<li>베타분포의 중앙값은 일반적으로 닫힌 형태가 없으므로 다음 방정식을 수치적으로 풀어야 한다.</li>
+</ul>
+<p><span class="math display">\[
+\int_0^m
+\frac{\Gamma(\alpha+\beta+n)}{\Gamma(y+\alpha)\Gamma(n-y+\beta)}
+p^{y+\alpha-1}(1-p)^{n-y+\beta-1}\,dp
+=
+\frac12.
+\]</span></p>
+<section id="table-n10-uniform01-prior에서-세-추정량-비교" class="level4" data-number="7.10.10.1">
+<h4 data-number="7.10.10.1" class="anchored" data-anchor-id="table-n10-uniform01-prior에서-세-추정량-비교"><span class="header-section-number">7.10.10.1</span> Table: <span class="math inline">\(n=10\)</span>, uniform<span class="math inline">\((0,1)\)</span> prior에서 세 추정량 비교</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;"><span class="math inline">\(y\)</span></th>
+<th style="text-align: right;">MLE <span class="math inline">\(y/n\)</span></th>
+<th style="text-align: right;">절대오차 Bayes</th>
+<th style="text-align: right;">제곱오차 Bayes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0611</td>
+<td style="text-align: right;">0.0833</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.1000</td>
+<td style="text-align: right;">0.1480</td>
+<td style="text-align: right;">0.1667</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.2000</td>
+<td style="text-align: right;">0.2358</td>
+<td style="text-align: right;">0.2500</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0.3000</td>
+<td style="text-align: right;">0.3238</td>
+<td style="text-align: right;">0.3333</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.4000</td>
+<td style="text-align: right;">0.4119</td>
+<td style="text-align: right;">0.4167</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0.5000</td>
+<td style="text-align: right;">0.5000</td>
+<td style="text-align: right;">0.5000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.6000</td>
+<td style="text-align: right;">0.5881</td>
+<td style="text-align: right;">0.5833</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">0.7000</td>
+<td style="text-align: right;">0.6762</td>
+<td style="text-align: right;">0.6667</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0.8000</td>
+<td style="text-align: right;">0.7642</td>
+<td style="text-align: right;">0.7500</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">0.9000</td>
+<td style="text-align: right;">0.8520</td>
+<td style="text-align: right;">0.8333</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">1.0000</td>
+<td style="text-align: right;">0.9389</td>
+<td style="text-align: right;">0.9137</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Bayes 추정량은 <span class="math inline">\(y=0\)</span> 또는 <span class="math inline">\(y=n\)</span>이어도 정확히 0 또는 1을 주지 않는다.</li>
+<li>사전분포가 극단값을 완화하여 추정량을 내부로 끌어당기기 때문이다.</li>
+</ul>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./06-ch6.html" class="pagination-link" aria-label="자료 축약의 원리">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">자료 축약의 원리</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./08-ch8.html" class="pagination-link" aria-label="가설검정">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">가설검정</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
