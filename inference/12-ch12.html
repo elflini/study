@@ -1,0 +1,2319 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>12&nbsp; 회귀모형 – Statistical Inference</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./13-ch13.html" rel="next">
+<link href="./11-ch11.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-832e3d7b6b94ddcc90a000f8fabe51a9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./12-ch12.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">회귀모형</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Statistical Inference</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Contents</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-ch1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">확률이론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-ch2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">변환과 기댓값</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-ch3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">자주 쓰이는 분포족</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-ch4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">여러 확률변수</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-ch5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">확률표본의 성질</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-ch6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">자료 축약의 원리</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-ch7.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">점추정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-ch8.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">가설검정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-ch9.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">구간추정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-ch10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">점근적 평가</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-ch11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">분산분석과 회귀</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-ch12.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">회귀모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-ch13.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Appendix</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-12-1" id="toc-sec-12-1" class="nav-link active" data-scroll-target="#sec-12-1"><span class="header-section-number">12.1</span> 도입</a>
+  <ul class="collapse">
+  <li><a href="#문제의식" id="toc-문제의식" class="nav-link" data-scroll-target="#문제의식"><span class="header-section-number">12.1.1</span> 문제의식</a></li>
+  <li><a href="#일반화된-선형모형-관점" id="toc-일반화된-선형모형-관점" class="nav-link" data-scroll-target="#일반화된-선형모형-관점"><span class="header-section-number">12.1.2</span> 일반화된 선형모형 관점</a></li>
+  <li><a href="#로버스트-회귀의-필요성" id="toc-로버스트-회귀의-필요성" class="nav-link" data-scroll-target="#로버스트-회귀의-필요성"><span class="header-section-number">12.1.3</span> 로버스트 회귀의 필요성</a></li>
+  </ul></li>
+  <li><a href="#sec-12-2" id="toc-sec-12-2" class="nav-link" data-scroll-target="#sec-12-2"><span class="header-section-number">12.2</span> 설명변수 오차 회귀</a>
+  <ul class="collapse">
+  <li><a href="#eiv-모형의-기본-생각" id="toc-eiv-모형의-기본-생각" class="nav-link" data-scroll-target="#eiv-모형의-기본-생각"><span class="header-section-number">12.2.1</span> EIV 모형의 기본 생각</a></li>
+  <li><a href="#측정오차-모형" id="toc-측정오차-모형" class="nav-link" data-scroll-target="#측정오차-모형"><span class="header-section-number">12.2.2</span> 측정오차 모형</a></li>
+  <li><a href="#예제-기압-추정" id="toc-예제-기압-추정" class="nav-link" data-scroll-target="#예제-기압-추정"><span class="header-section-number">12.2.3</span> 예제: 기압 추정</a></li>
+  </ul></li>
+  <li><a href="#sec-12-2-1" id="toc-sec-12-2-1" class="nav-link" data-scroll-target="#sec-12-2-1"><span class="header-section-number">12.3</span> 함수적 관계와 구조적 관계</a>
+  <ul class="collapse">
+  <li><a href="#왜-두-관계를-구분하는가" id="toc-왜-두-관계를-구분하는가" class="nav-link" data-scroll-target="#왜-두-관계를-구분하는가"><span class="header-section-number">12.3.1</span> 왜 두 관계를 구분하는가?</a></li>
+  <li><a href="#선형-함수적-관계-모형" id="toc-선형-함수적-관계-모형" class="nav-link" data-scroll-target="#선형-함수적-관계-모형"><span class="header-section-number">12.3.2</span> 선형 함수적 관계 모형</a></li>
+  <li><a href="#선형-구조적-관계-모형" id="toc-선형-구조적-관계-모형" class="nav-link" data-scroll-target="#선형-구조적-관계-모형"><span class="header-section-number">12.3.3</span> 선형 구조적 관계 모형</a></li>
+  <li><a href="#두-모형의-관계" id="toc-두-모형의-관계" class="nav-link" data-scroll-target="#두-모형의-관계"><span class="header-section-number">12.3.4</span> 두 모형의 관계</a></li>
+  </ul></li>
+  <li><a href="#sec-12-2-2" id="toc-sec-12-2-2" class="nav-link" data-scroll-target="#sec-12-2-2"><span class="header-section-number">12.4</span> 최소제곱 해법</a>
+  <ul class="collapse">
+  <li><a href="#왜-보통-최소제곱이-부적절한가" id="toc-왜-보통-최소제곱이-부적절한가" class="nav-link" data-scroll-target="#왜-보통-최소제곱이-부적절한가"><span class="header-section-number">12.4.1</span> 왜 보통 최소제곱이 부적절한가?</a></li>
+  <li><a href="#직선에-가장-가까운-점" id="toc-직선에-가장-가까운-점" class="nav-link" data-scroll-target="#직선에-가장-가까운-점"><span class="header-section-number">12.4.2</span> 직선에 가장 가까운 점</a></li>
+  <li><a href="#직교거리-제곱합" id="toc-직교거리-제곱합" class="nav-link" data-scroll-target="#직교거리-제곱합"><span class="header-section-number">12.4.3</span> 직교거리 제곱합</a></li>
+  <li><a href="#기울기-추정량" id="toc-기울기-추정량" class="nav-link" data-scroll-target="#기울기-추정량"><span class="header-section-number">12.4.4</span> 기울기 추정량</a></li>
+  <li><a href="#세-회귀직선-비교" id="toc-세-회귀직선-비교" class="nav-link" data-scroll-target="#세-회귀직선-비교"><span class="header-section-number">12.4.5</span> 세 회귀직선 비교</a></li>
+  </ul></li>
+  <li><a href="#sec-12-2-3" id="toc-sec-12-2-3" class="nav-link" data-scroll-target="#sec-12-2-3"><span class="header-section-number">12.5</span> 최대가능도추정</a>
+  <ul class="collapse">
+  <li><a href="#functional-model의-likelihood" id="toc-functional-model의-likelihood" class="nav-link" data-scroll-target="#functional-model의-likelihood"><span class="header-section-number">12.5.1</span> functional model의 likelihood</a></li>
+  <li><a href="#finite-maximum이-없는-문제" id="toc-finite-maximum이-없는-문제" class="nav-link" data-scroll-target="#finite-maximum이-없는-문제"><span class="header-section-number">12.5.2</span> finite maximum이 없는 문제</a></li>
+  <li><a href="#분산비를-알고-있다고-가정" id="toc-분산비를-알고-있다고-가정" class="nav-link" data-scroll-target="#분산비를-알고-있다고-가정"><span class="header-section-number">12.5.3</span> 분산비를 알고 있다고 가정</a></li>
+  <li><a href="#제한된-likelihood" id="toc-제한된-likelihood" class="nav-link" data-scroll-target="#제한된-likelihood"><span class="header-section-number">12.5.4</span> 제한된 likelihood</a></li>
+  <li><a href="#xi_i에-대한-최대화" id="toc-xi_i에-대한-최대화" class="nav-link" data-scroll-target="#xi_i에-대한-최대화"><span class="header-section-number">12.5.5</span> <span class="math inline">\(\xi_i\)</span>에 대한 최대화</a></li>
+  <li><a href="#alphabeta의-mle" id="toc-alphabeta의-mle" class="nav-link" data-scroll-target="#alphabeta의-mle"><span class="header-section-number">12.5.6</span> <span class="math inline">\(\alpha,\beta\)</span>의 MLE</a></li>
+  <li><a href="#sigma_delta2의-mle" id="toc-sigma_delta2의-mle" class="nav-link" data-scroll-target="#sigma_delta2의-mle"><span class="header-section-number">12.5.7</span> <span class="math inline">\(\sigma_\delta^2\)</span>의 MLE</a></li>
+  <li><a href="#structural-model의-marginal-distribution" id="toc-structural-model의-marginal-distribution" class="nav-link" data-scroll-target="#structural-model의-marginal-distribution"><span class="header-section-number">12.5.8</span> structural model의 marginal distribution</a></li>
+  <li><a href="#structural-model의-분산-추정량" id="toc-structural-model의-분산-추정량" class="nav-link" data-scroll-target="#structural-model의-분산-추정량"><span class="header-section-number">12.5.9</span> structural model의 분산 추정량</a></li>
+  </ul></li>
+  <li><a href="#sec-12-2-4" id="toc-sec-12-2-4" class="nav-link" data-scroll-target="#sec-12-2-4"><span class="header-section-number">12.6</span> 신뢰집합</a>
+  <ul class="collapse">
+  <li><a href="#왜-eiv-신뢰구간은-어렵나" id="toc-왜-eiv-신뢰구간은-어렵나" class="nav-link" data-scroll-target="#왜-eiv-신뢰구간은-어렵나"><span class="header-section-number">12.6.1</span> 왜 EIV 신뢰구간은 어렵나?</a></li>
+  <li><a href="#정보량을-결정하는-모수" id="toc-정보량을-결정하는-모수" class="nav-link" data-scroll-target="#정보량을-결정하는-모수"><span class="header-section-number">12.6.2</span> 정보량을 결정하는 모수</a></li>
+  <li><a href="#근사-신뢰구간" id="toc-근사-신뢰구간" class="nav-link" data-scroll-target="#근사-신뢰구간"><span class="header-section-number">12.6.3</span> 근사 신뢰구간</a></li>
+  <li><a href="#creasywilliams-신뢰집합" id="toc-creasywilliams-신뢰집합" class="nav-link" data-scroll-target="#creasywilliams-신뢰집합"><span class="header-section-number">12.6.4</span> Creasy–Williams 신뢰집합</a></li>
+  <li><a href="#creasywilliams-집합의-특징" id="toc-creasywilliams-집합의-특징" class="nav-link" data-scroll-target="#creasywilliams-집합의-특징"><span class="header-section-number">12.6.5</span> Creasy–Williams 집합의 특징</a></li>
+  </ul></li>
+  <li><a href="#sec-12-3" id="toc-sec-12-3" class="nav-link" data-scroll-target="#sec-12-3"><span class="header-section-number">12.7</span> 로지스틱 회귀</a>
+  <ul class="collapse">
+  <li><a href="#glm의-세-구성요소" id="toc-glm의-세-구성요소" class="nav-link" data-scroll-target="#glm의-세-구성요소"><span class="header-section-number">12.7.1</span> GLM의 세 구성요소</a></li>
+  <li><a href="#로지스틱-회귀-모형" id="toc-로지스틱-회귀-모형" class="nav-link" data-scroll-target="#로지스틱-회귀-모형"><span class="header-section-number">12.7.2</span> 로지스틱 회귀 모형</a></li>
+  <li><a href="#확률-함수-형태" id="toc-확률-함수-형태" class="nav-link" data-scroll-target="#확률-함수-형태"><span class="header-section-number">12.7.3</span> 확률 함수 형태</a></li>
+  <li><a href="#로지스틱-함수의-기울기" id="toc-로지스틱-함수의-기울기" class="nav-link" data-scroll-target="#로지스틱-함수의-기울기"><span class="header-section-number">12.7.4</span> 로지스틱 함수의 기울기</a></li>
+  <li><a href="#alpha와-beta의-해석" id="toc-alpha와-beta의-해석" class="nav-link" data-scroll-target="#alpha와-beta의-해석"><span class="header-section-number">12.7.5</span> <span class="math inline">\(\alpha\)</span>와 <span class="math inline">\(\beta\)</span>의 해석</a></li>
+  <li><a href="#다른-link-함수" id="toc-다른-link-함수" class="nav-link" data-scroll-target="#다른-link-함수"><span class="header-section-number">12.7.6</span> 다른 link 함수</a></li>
+  </ul></li>
+  <li><a href="#sec-12-3-2" id="toc-sec-12-3-2" class="nav-link" data-scroll-target="#sec-12-3-2"><span class="header-section-number">12.8</span> 로지스틱 회귀의 추정</a>
+  <ul class="collapse">
+  <li><a href="#왜-최소제곱이-아닌가" id="toc-왜-최소제곱이-아닌가" class="nav-link" data-scroll-target="#왜-최소제곱이-아닌가"><span class="header-section-number">12.8.1</span> 왜 최소제곱이 아닌가?</a></li>
+  <li><a href="#일반-bernoulli-glm-likelihood" id="toc-일반-bernoulli-glm-likelihood" class="nav-link" data-scroll-target="#일반-bernoulli-glm-likelihood"><span class="header-section-number">12.8.2</span> 일반 Bernoulli GLM likelihood</a></li>
+  <li><a href="#likelihood-equation" id="toc-likelihood-equation" class="nav-link" data-scroll-target="#likelihood-equation"><span class="header-section-number">12.8.3</span> likelihood equation</a></li>
+  <li><a href="#logistic-likelihood-equation" id="toc-logistic-likelihood-equation" class="nav-link" data-scroll-target="#logistic-likelihood-equation"><span class="header-section-number">12.8.4</span> logistic likelihood equation</a></li>
+  <li><a href="#mle가-존재하지-않는-경우" id="toc-mle가-존재하지-않는-경우" class="nav-link" data-scroll-target="#mle가-존재하지-않는-경우"><span class="header-section-number">12.8.5</span> MLE가 존재하지 않는 경우</a></li>
+  <li><a href="#예제-challenger-o-ring-자료" id="toc-예제-challenger-o-ring-자료" class="nav-link" data-scroll-target="#예제-challenger-o-ring-자료"><span class="header-section-number">12.8.6</span> 예제: Challenger O-ring 자료</a></li>
+  <li><a href="#같은-x에서-여러-bernoulli-관측이-있는-경우" id="toc-같은-x에서-여러-bernoulli-관측이-있는-경우" class="nav-link" data-scroll-target="#같은-x에서-여러-bernoulli-관측이-있는-경우"><span class="header-section-number">12.8.7</span> 같은 <span class="math inline">\(x\)</span>에서 여러 Bernoulli 관측이 있는 경우</a></li>
+  <li><a href="#정보행렬" id="toc-정보행렬" class="nav-link" data-scroll-target="#정보행렬"><span class="header-section-number">12.8.8</span> 정보행렬</a></li>
+  <li><a href="#예제-challenger-자료-계속" id="toc-예제-challenger-자료-계속" class="nav-link" data-scroll-target="#예제-challenger-자료-계속"><span class="header-section-number">12.8.9</span> 예제: Challenger 자료 계속</a></li>
+  <li><a href="#beta0-검정" id="toc-beta0-검정" class="nav-link" data-scroll-target="#beta0-검정"><span class="header-section-number">12.8.10</span> <span class="math inline">\(\beta=0\)</span> 검정</a></li>
+  </ul></li>
+  <li><a href="#sec-12-4" id="toc-sec-12-4" class="nav-link" data-scroll-target="#sec-12-4"><span class="header-section-number">12.9</span> 로버스트 회귀</a>
+  <ul class="collapse">
+  <li><a href="#최소제곱과-lad의-대응" id="toc-최소제곱과-lad의-대응" class="nav-link" data-scroll-target="#최소제곱과-lad의-대응"><span class="header-section-number">12.9.1</span> 최소제곱과 LAD의 대응</a></li>
+  <li><a href="#예제-최소제곱-추정량의-로버스트성" id="toc-예제-최소제곱-추정량의-로버스트성" class="nav-link" data-scroll-target="#예제-최소제곱-추정량의-로버스트성"><span class="header-section-number">12.9.2</span> 예제: 최소제곱 추정량의 로버스트성</a></li>
+  <li><a href="#예제-catastrophic-observation" id="toc-예제-catastrophic-observation" class="nav-link" data-scroll-target="#예제-catastrophic-observation"><span class="header-section-number">12.9.3</span> 예제: catastrophic observation</a></li>
+  <li><a href="#lad의-점근정규성" id="toc-lad의-점근정규성" class="nav-link" data-scroll-target="#lad의-점근정규성"><span class="header-section-number">12.9.4</span> LAD의 점근정규성</a></li>
+  <li><a href="#lad와-최소제곱의-효율" id="toc-lad와-최소제곱의-효율" class="nav-link" data-scroll-target="#lad와-최소제곱의-효율"><span class="header-section-number">12.9.5</span> LAD와 최소제곱의 효율</a></li>
+  <li><a href="#회귀-m-estimator" id="toc-회귀-m-estimator" class="nav-link" data-scroll-target="#회귀-m-estimator"><span class="header-section-number">12.9.6</span> 회귀 M-estimator</a></li>
+  <li><a href="#예제-회귀-m-estimator" id="toc-예제-회귀-m-estimator" class="nav-link" data-scroll-target="#예제-회귀-m-estimator"><span class="header-section-number">12.9.7</span> 예제: 회귀 M-estimator</a></li>
+  <li><a href="#예제-회귀-m-estimator의-are-시뮬레이션" id="toc-예제-회귀-m-estimator의-are-시뮬레이션" class="nav-link" data-scroll-target="#예제-회귀-m-estimator의-are-시뮬레이션"><span class="header-section-number">12.9.8</span> 예제: 회귀 M-estimator의 ARE 시뮬레이션</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="chapter12" class="quarto-section-identifier"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">회귀모형</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<blockquote class="blockquote">
+<p>“So startling would his results appear to the uninitiated that until they learned the processes by which he had arrived at them they might well consider him as a necromancer.”<br>
+— Dr.&nbsp;Watson, speaking about Sherlock Holmes, <em>A Study in Scarlet</em></p>
+</blockquote>
+<ul>
+<li>11장에서는 고전적 선형모형(classic linear models)을 다루었다.</li>
+<li>특히 ANOVA와 단순선형회귀는 모두 정규오차를 갖는 선형모형에 기반한다.</li>
+<li>12장에서는 이 선형모형을 실제 문제에 맞게 확장한다.</li>
+<li>주요 확장은 세 가지이다.
+<ul>
+<li><strong>설명변수에도 오차가 있는 회귀(regression with errors in variables, EIV)</strong></li>
+<li><strong>이항 반응변수를 다루는 로지스틱 회귀(logistic regression)</strong></li>
+<li><strong>이상치와 모형 위반에 덜 민감한 로버스트 회귀(robust regression)</strong></li>
+</ul></li>
+</ul>
+<section id="sec-12-1" class="level2" data-number="12.1">
+<h2 data-number="12.1" class="anchored" data-anchor-id="sec-12-1"><span class="header-section-number">12.1</span> 도입</h2>
+<section id="문제의식" class="level3" data-number="12.1.1">
+<h3 data-number="12.1.1" class="anchored" data-anchor-id="문제의식"><span class="header-section-number">12.1.1</span> 문제의식</h3>
+<ul>
+<li>11장의 단순선형회귀에서는 설명변수 <span class="math inline">\(x_i\)</span>가 오차 없이 관측되는 고정값이라고 보았다.</li>
+<li>하지만 실제 자료에서는 설명변수 자체도 측정오차를 가질 수 있다.</li>
+<li>예를 들어 온도계, 기압계, 생물학적 측정 장비 등은 모두 측정오차를 포함한다.</li>
+<li>이런 경우 단순선형회귀와는 전혀 다른 문제가 발생한다.</li>
+</ul>
+</section>
+<section id="일반화된-선형모형-관점" class="level3" data-number="12.1.2">
+<h3 data-number="12.1.2" class="anchored" data-anchor-id="일반화된-선형모형-관점"><span class="header-section-number">12.1.2</span> 일반화된 선형모형 관점</h3>
+<ul>
+<li>11장의 선형회귀에서는</li>
+</ul>
+<p><span class="math display">\[
+E(Y_i\mid x_i)=\alpha+\beta x_i
+\]</span></p>
+<p>를 가정했다. - 하지만 반응변수가 Bernoulli처럼 0과 1 사이의 평균만 가질 수 있는 경우, 평균을 직접 선형함수로 두면 문제가 생긴다. - 예를 들어 <span class="math inline">\(\alpha+\beta x\)</span>는 0보다 작거나 1보다 클 수 있지만 Bernoulli 평균은 확률이므로 반드시 <span class="math inline">\([0,1]\)</span> 안에 있어야 한다. - 이런 문제를 해결하기 위해 평균 자체가 아니라 평균의 변환, 특히 logit을 선형모형으로 둔다. - 이것이 로지스틱 회귀의 기본 아이디어이다.</p>
+</section>
+<section id="로버스트-회귀의-필요성" class="level3" data-number="12.1.3">
+<h3 data-number="12.1.3" class="anchored" data-anchor-id="로버스트-회귀의-필요성"><span class="header-section-number">12.1.3</span> 로버스트 회귀의 필요성</h3>
+<ul>
+<li>선형모형을 유지하더라도, 최소제곱 기준은 이상치에 매우 민감하다.</li>
+<li>10장에서 평균 대신 중앙값, M-estimator 등을 고려했던 것처럼, 회귀에서도 최소제곱 대신 절댓값 손실 또는 Huber형 손실을 사용할 수 있다.</li>
+<li>이 장의 후반부는 회귀에서의 로버스트 추정을 다룬다.</li>
+</ul>
+</section>
+</section>
+<section id="sec-12-2" class="level2" data-number="12.2">
+<h2 data-number="12.2" class="anchored" data-anchor-id="sec-12-2"><span class="header-section-number">12.2</span> 설명변수 오차 회귀</h2>
+<section id="eiv-모형의-기본-생각" class="level3" data-number="12.2.1">
+<h3 data-number="12.2.1" class="anchored" data-anchor-id="eiv-모형의-기본-생각"><span class="header-section-number">12.2.1</span> EIV 모형의 기본 생각</h3>
+<ul>
+<li>EIV는 <strong>errors in variables</strong>의 약자이다.</li>
+<li>measurement error model이라고도 한다.</li>
+<li>일반 단순선형회귀에서는</li>
+</ul>
+<p><span class="math display">\[
+Y_i=\alpha+\beta x_i+\epsilon_i
+\tag{12.2.1}
+\]</span></p>
+<p>에서 <span class="math inline">\(x_i\)</span>를 오차 없이 알려진 값으로 본다. - 그러나 EIV에서는 <span class="math inline">\(x_i\)</span> 자체를 직접 관측하지 못하고, 오차가 섞인 <span class="math inline">\(X_i\)</span>를 관측한다. - 일반적으로 관측쌍 <span class="math inline">\((X_i,Y_i)\)</span>의 평균이 다음 선형관계를 만족한다고 본다.</p>
+<p><span class="math display">\[
+EY_i=\alpha+\beta(EX_i).
+\tag{12.2.2}
+\]</span></p>
+<ul>
+<li>다음과 같이 쓰면</li>
+</ul>
+<p><span class="math display">\[
+EY_i=\eta_i,
+\qquad
+EX_i=\xi_i,
+\]</span></p>
+<p>평균들 사이의 관계는</p>
+<p><span class="math display">\[
+\eta_i=\alpha+\beta\xi_i.
+\tag{12.2.3}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\xi_i\)</span>와 <span class="math inline">\(\eta_i\)</span>는 직접 측정되지 않는 latent variables로 볼 수 있다.</li>
+</ul>
+</section>
+<section id="측정오차-모형" class="level3" data-number="12.2.2">
+<h3 data-number="12.2.2" class="anchored" data-anchor-id="측정오차-모형"><span class="header-section-number">12.2.2</span> 측정오차 모형</h3>
+<ul>
+<li>관측쌍 <span class="math inline">\((X_i,Y_i)\)</span>가 독립이고 다음을 따른다고 하자.</li>
+</ul>
+<p><span class="math display">\[
+Y_i=\alpha+\beta\xi_i+\epsilon_i,
+\qquad
+\epsilon_i\sim N(0,\sigma_\epsilon^2),
+\]</span></p>
+<p><span class="math display">\[
+X_i=\xi_i+\delta_i,
+\qquad
+\delta_i\sim N(0,\sigma_\delta^2).
+\tag{12.2.4}
+\]</span></p>
+<ul>
+<li>여기서
+<ul>
+<li><span class="math inline">\(\xi_i\)</span>는 진짜 설명변수 값 또는 latent predictor이다.</li>
+<li><span class="math inline">\(X_i\)</span>는 <span class="math inline">\(\xi_i\)</span>를 오차와 함께 측정한 값이다.</li>
+<li><span class="math inline">\(Y_i\)</span>도 선형관계 주변에서 오차를 갖는다.</li>
+<li><span class="math inline">\(\epsilon_i\)</span>와 <span class="math inline">\(\delta_i\)</span>는 서로 독립이라고 가정한다.</li>
+</ul></li>
+<li>정규성은 흔히 사용되지만 반드시 필요한 것은 아니다.</li>
+<li>다만 정규성을 가정하면 likelihood 분석이 가능해진다.</li>
+<li>그러나 EIV 모형에서는 정규성 때문에 오히려 예기치 않은 어려움이 생기기도 한다.</li>
+</ul>
+</section>
+<section id="예제-기압-추정" class="level3" data-number="12.2.3">
+<h3 data-number="12.2.3" class="anchored" data-anchor-id="예제-기압-추정"><span class="header-section-number">12.2.3</span> 예제: 기압 추정</h3>
+<ul>
+<li>1800년대 스코틀랜드 물리학자 J. D. Forbes는 물의 끓는점으로부터 고도를 추정하려 했다.</li>
+<li>고도는 기압과 관련되어 있으며, 당시 기압계는 깨지기 쉬웠다.</li>
+<li>따라서 끓는점으로부터 <span class="math inline">\(\log(\text{pressure})\)</span>를 추정하는 것이 유용했다.</li>
+<li>자료는 다음과 같다.</li>
+</ul>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;">Boiling point <span class="math inline">\((^\circ F)\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(\log(\text{pressure})\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">194.5</td>
+<td style="text-align: right;">1.3179</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">197.9</td>
+<td style="text-align: right;">1.3502</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">199.4</td>
+<td style="text-align: right;">1.3646</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">200.9</td>
+<td style="text-align: right;">1.3782</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">201.4</td>
+<td style="text-align: right;">1.3806</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">203.6</td>
+<td style="text-align: right;">1.4004</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">209.5</td>
+<td style="text-align: right;">1.4547</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">210.7</td>
+<td style="text-align: right;">1.4630</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">212.2</td>
+<td style="text-align: right;">1.4780</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>끓는점과 기압 모두 측정오차를 가질 수 있으므로 EIV 모형이 자연스럽다.</li>
+</ul>
+</section>
+</section>
+<section id="sec-12-2-1" class="level2" data-number="12.3">
+<h2 data-number="12.3" class="anchored" data-anchor-id="sec-12-2-1"><span class="header-section-number">12.3</span> 함수적 관계와 구조적 관계</h2>
+<section id="왜-두-관계를-구분하는가" class="level3" data-number="12.3.1">
+<h3 data-number="12.3.1" class="anchored" data-anchor-id="왜-두-관계를-구분하는가"><span class="header-section-number">12.3.1</span> 왜 두 관계를 구분하는가?</h3>
+<ul>
+<li>EIV 모형에는 두 가지 해석이 있다.
+<ul>
+<li><strong>linear functional relationship model</strong></li>
+<li><strong>linear structural relationship model</strong></li>
+</ul></li>
+<li>이름은 혼란스럽지만, 중요한 차이는 <span class="math inline">\(\xi_i\)</span>를 어떻게 다루는가이다.</li>
+<li>functional model에서는 <span class="math inline">\(\xi_i\)</span>를 고정된 미지 모수로 본다.</li>
+<li>structural model에서는 <span class="math inline">\(\xi_i\)</span> 자체가 어떤 분포에서 나온 확률변수라고 본다.</li>
+</ul>
+</section>
+<section id="선형-함수적-관계-모형" class="level3" data-number="12.3.2">
+<h3 data-number="12.3.2" class="anchored" data-anchor-id="선형-함수적-관계-모형"><span class="header-section-number">12.3.2</span> 선형 함수적 관계 모형</h3>
+<ul>
+<li>다음 모형을 생각한다.</li>
+</ul>
+<p><span class="math display">\[
+Y_i=\alpha+\beta\xi_i+\epsilon_i,
+\qquad
+\epsilon_i\sim N(0,\sigma_\epsilon^2),
+\]</span></p>
+<p><span class="math display">\[
+X_i=\xi_i+\delta_i,
+\qquad
+\delta_i\sim N(0,\sigma_\delta^2).
+\tag{12.2.5}
+\]</span></p>
+<ul>
+<li>여기서 <span class="math inline">\(\xi_1,\ldots,\xi_n\)</span>은 고정된 미지 모수이다.</li>
+<li><span class="math inline">\(\epsilon_i\)</span>와 <span class="math inline">\(\delta_i\)</span>는 독립이다.</li>
+<li>주요 관심 모수는 <span class="math inline">\(\alpha,\beta\)</span>이다.</li>
+<li>추론은 <span class="math inline">\(\xi_1,\ldots,\xi_n\)</span>에 조건을 둔 결합분포를 사용한다.</li>
+</ul>
+</section>
+<section id="선형-구조적-관계-모형" class="level3" data-number="12.3.3">
+<h3 data-number="12.3.3" class="anchored" data-anchor-id="선형-구조적-관계-모형"><span class="header-section-number">12.3.3</span> 선형 구조적 관계 모형</h3>
+<ul>
+<li>structural model에서는 위 모형에 추가로 <span class="math inline">\(\xi_i\)</span>가 확률변수라고 가정한다.</li>
+</ul>
+<p><span class="math display">\[
+Y_i=\alpha+\beta\xi_i+\epsilon_i,
+\qquad
+\epsilon_i\sim N(0,\sigma_\epsilon^2),
+\]</span></p>
+<p><span class="math display">\[
+X_i=\xi_i+\delta_i,
+\qquad
+\delta_i\sim N(0,\sigma_\delta^2),
+\]</span></p>
+<p><span class="math display">\[
+\xi_i\stackrel{iid}{\sim}N(\xi,\sigma_\xi^2).
+\tag{12.2.6}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\epsilon_i\)</span>, <span class="math inline">\(\delta_i\)</span>, <span class="math inline">\(\xi_i\)</span>들은 서로 독립이라고 가정한다.</li>
+<li>이 경우 추론은 <span class="math inline">\(\xi_i\)</span>들을 적분하여 제거한 marginal distribution을 사용한다.</li>
+</ul>
+</section>
+<section id="두-모형의-관계" class="level3" data-number="12.3.4">
+<h3 data-number="12.3.4" class="anchored" data-anchor-id="두-모형의-관계"><span class="header-section-number">12.3.4</span> 두 모형의 관계</h3>
+<ul>
+<li>functional model은 structural model의 조건부 버전처럼 볼 수 있다.</li>
+<li>functional model에서 일치성을 갖는 추정량은 structural model에서도 보통 일치성을 갖는다.</li>
+<li>하지만 structural model에서 일치적인 추정량이 functional model에서도 항상 일치적인 것은 아니다.</li>
+<li>structural model에서 모수가 식별 불가능하면 functional model에서도 식별 불가능하다.</li>
+</ul>
+</section>
+</section>
+<section id="sec-12-2-2" class="level2" data-number="12.4">
+<h2 data-number="12.4" class="anchored" data-anchor-id="sec-12-2-2"><span class="header-section-number">12.4</span> 최소제곱 해법</h2>
+<section id="왜-보통-최소제곱이-부적절한가" class="level3" data-number="12.4.1">
+<h3 data-number="12.4.1" class="anchored" data-anchor-id="왜-보통-최소제곱이-부적절한가"><span class="header-section-number">12.4.1</span> 왜 보통 최소제곱이 부적절한가?</h3>
+<ul>
+<li>일반 단순선형회귀에서는 <span class="math inline">\(x_i\)</span>가 정확히 관측되므로 수직거리(vertical distance)를 최소화하는 것이 자연스럽다.</li>
+<li>하지만 EIV에서는 <span class="math inline">\(x_i\)</span>에도 오차가 있으므로 수직거리만 고려하면 <span class="math inline">\(x\)</span>축 방향의 오차를 무시하게 된다.</li>
+<li>따라서 EIV에서는 직선까지의 수직거리가 아니라 직선에 수직인 거리, 즉 <strong>직교거리(orthogonal distance)</strong>를 고려하는 것이 자연스럽다.</li>
+<li>이 방법을 <strong>orthogonal least squares</strong> 또는 <strong>total least squares</strong>라고 한다.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ch12_textbook_assets/fig_ch12_p05_figure_12_2_1.png" class="img-fluid figure-img"></p>
+<figcaption>직교 최소제곱이 최소화하는 거리</figcaption>
+</figure>
+</div>
+</section>
+<section id="직선에-가장-가까운-점" class="level3" data-number="12.4.2">
+<h3 data-number="12.4.2" class="anchored" data-anchor-id="직선에-가장-가까운-점"><span class="header-section-number">12.4.2</span> 직선에 가장 가까운 점</h3>
+<ul>
+<li>한 관측점 <span class="math inline">\((x',y')\)</span>가 있고 직선이</li>
+</ul>
+<p><span class="math display">\[
+y=a+bx
+\]</span></p>
+<p>라고 하자. - 이 점에서 직선에 내린 수선의 발을 <span class="math inline">\((\hat x,\hat y)\)</span>라고 하면</p>
+<p><span class="math display">\[
+\hat x=
+\frac{by'+x'-ab}{1+b^2},
+\]</span></p>
+<p><span class="math display">\[
+\hat y=
+a+
+\frac{b}{1+b^2}(by'+x'-ab).
+\tag{12.2.7}
+\]</span></p>
+</section>
+<section id="직교거리-제곱합" class="level3" data-number="12.4.3">
+<h3 data-number="12.4.3" class="anchored" data-anchor-id="직교거리-제곱합"><span class="header-section-number">12.4.3</span> 직교거리 제곱합</h3>
+<ul>
+<li>관측자료 <span class="math inline">\((x_i,y_i)\)</span>에 대해 직교거리 제곱합은</li>
+</ul>
+<p><span class="math display">\[
+\sum_{i=1}^{n}
+\left[
+(x_i-\hat x_i)^2+
+(y_i-\hat y_i)^2
+\right].
+\]</span></p>
+<ul>
+<li>계산하면 이는 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+\sum_{i=1}^{n}
+\left[
+(x_i-\hat x_i)^2+
+(y_i-\hat y_i)^2
+\right]
+=
+\frac1{1+b^2}
+\sum_{i=1}^{n}
+\{y_i-(a+bx_i)\}^2.
+\tag{12.2.8}
+\]</span></p>
+</section>
+<section id="기울기-추정량" class="level3" data-number="12.4.4">
+<h3 data-number="12.4.4" class="anchored" data-anchor-id="기울기-추정량"><span class="header-section-number">12.4.4</span> 기울기 추정량</h3>
+<ul>
+<li>고정된 <span class="math inline">\(b\)</span>에서 <span class="math inline">\(a\)</span>를 최소화하면 이전 회귀와 같이</li>
+</ul>
+<p><span class="math display">\[
+a=\bar y-b\bar x
+\]</span></p>
+<p>이다. - 따라서 <span class="math inline">\(b\)</span>는 다음을 최소화한다.</p>
+<p><span class="math display">\[
+\frac1{1+b^2}
+\sum_{i=1}^{n}
+\{(y_i-\bar y)-b(x_i-\bar x)\}^2.
+\tag{12.2.9}
+\]</span></p>
+<ul>
+<li>다음 표기법을 사용한다.</li>
+</ul>
+<p><span class="math display">\[
+S_{xx}=\sum_{i=1}^{n}(x_i-\bar x)^2,
+\quad
+S_{yy}=\sum_{i=1}^{n}(y_i-\bar y)^2,
+\]</span></p>
+<p><span class="math display">\[
+S_{xy}=\sum_{i=1}^{n}(x_i-\bar x)(y_i-\bar y).
+\tag{12.2.10}
+\]</span></p>
+<ul>
+<li>직교 최소제곱 직선은</li>
+</ul>
+<p><span class="math display">\[
+a=\bar y-b\bar x
+\]</span></p>
+<p>와</p>
+<p><span class="math display">\[
+b=
+\frac{
+-(S_{xx}-S_{yy})
++
+\sqrt{(S_{xx}-S_{yy})^2+4S_{xy}^2}
+}{
+2S_{xy}
+}
+\tag{12.2.11}
+\]</span></p>
+<p>로 주어진다.</p>
+</section>
+<section id="세-회귀직선-비교" class="level3" data-number="12.4.5">
+<h3 data-number="12.4.5" class="anchored" data-anchor-id="세-회귀직선-비교"><span class="header-section-number">12.4.5</span> 세 회귀직선 비교</h3>
+<ul>
+<li>직교 최소제곱선은 보통 최소제곱선과 다르다.</li>
+<li>보통 최소제곱에서 <span class="math inline">\(y\)</span>를 <span class="math inline">\(x\)</span>에 회귀하면 수직거리를 최소화한다.</li>
+<li><span class="math inline">\(x\)</span>를 <span class="math inline">\(y\)</span>에 회귀한 뒤 식을 <span class="math inline">\(y\)</span>에 대해 풀면 또 다른 직선이 나온다.</li>
+<li>직교 최소제곱선은 이 두 직선 사이에 위치한다.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ch12_textbook_assets/fig_ch12_p07_figure_12_2_2.png" class="img-fluid figure-img"></p>
+<figcaption>자료에 대한 세 회귀직선</figcaption>
+</figure>
+</div>
+<ul>
+<li>Table 11.3.1 자료에서는 다음 직선들이 비교된다.
+<ul>
+<li><span class="math inline">\(y\)</span> on <span class="math inline">\(x\)</span> 회귀: <span class="math inline">\(\hat y=1.86+0.68x\)</span></li>
+<li><span class="math inline">\(x\)</span> on <span class="math inline">\(y\)</span> 회귀를 변환한 직선: <span class="math inline">\(\hat y=-2.31+2.82x\)</span></li>
+<li>직교 회귀: <span class="math inline">\(\hat y=-0.49+1.88x\)</span></li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="sec-12-2-3" class="level2" data-number="12.5">
+<h2 data-number="12.5" class="anchored" data-anchor-id="sec-12-2-3"><span class="header-section-number">12.5</span> 최대가능도추정</h2>
+<section id="functional-model의-likelihood" class="level3" data-number="12.5.1">
+<h3 data-number="12.5.1" class="anchored" data-anchor-id="functional-model의-likelihood"><span class="header-section-number">12.5.1</span> functional model의 likelihood</h3>
+<ul>
+<li>정규 functional relationship model에서</li>
+</ul>
+<p><span class="math display">\[
+Y_i\sim N(\alpha+\beta\xi_i,\sigma_\epsilon^2),
+\qquad
+X_i\sim N(\xi_i,\sigma_\delta^2)
+\]</span></p>
+<p>이고 서로 독립이라고 하자. - 관측값을 <span class="math inline">\((x,y)=((x_1,y_1),\ldots,(x_n,y_n))\)</span>라고 하면 likelihood는</p>
+<p><span class="math display">\[
+L(\alpha,\beta,\xi_1,\ldots,\xi_n,\sigma_\delta^2,\sigma_\epsilon^2\mid x,y)
+\]</span></p>
+<p><span class="math display">\[
+=
+\frac1{(2\pi)^n}
+\frac1{(\sigma_\delta^2\sigma_\epsilon^2)^{n/2}}
+\exp\left[
+-\frac{\sum_{i=1}^{n}(x_i-\xi_i)^2}{2\sigma_\delta^2}
+\right]
+\exp\left[
+-\frac{\sum_{i=1}^{n}(y_i-(\alpha+\beta\xi_i))^2}{2\sigma_\epsilon^2}
+\right].
+\tag{12.2.12}
+\]</span></p>
+</section>
+<section id="finite-maximum이-없는-문제" class="level3" data-number="12.5.2">
+<h3 data-number="12.5.2" class="anchored" data-anchor-id="finite-maximum이-없는-문제"><span class="header-section-number">12.5.2</span> finite maximum이 없는 문제</h3>
+<ul>
+<li>이 likelihood는 finite maximum을 갖지 않는다.</li>
+<li>예를 들어 <span class="math inline">\(\xi_i=x_i\)</span>로 두고 <span class="math inline">\(\sigma_\delta^2\to0\)</span>로 보내면 likelihood 값이 무한대로 간다.</li>
+<li>따라서 제한 없이 MLE를 구할 수 없다.</li>
+<li>이는 EIV 모형의 중요한 난점이다.</li>
+</ul>
+</section>
+<section id="분산비를-알고-있다고-가정" class="level3" data-number="12.5.3">
+<h3 data-number="12.5.3" class="anchored" data-anchor-id="분산비를-알고-있다고-가정"><span class="header-section-number">12.5.3</span> 분산비를 알고 있다고 가정</h3>
+<ul>
+<li>흔한 해결책은 다음을 가정하는 것이다.</li>
+</ul>
+<p><span class="math display">\[
+\sigma_\delta^2=\lambda\sigma_\epsilon^2,
+\qquad
+\lambda&gt;0\ \text{known}.
+\]</span></p>
+<ul>
+<li>즉, 두 오차분산의 비율은 알고 있다고 본다.</li>
+<li>이 가정은 비교적 약하면서도 모형을 잘 작동하게 만든다.</li>
+</ul>
+</section>
+<section id="제한된-likelihood" class="level3" data-number="12.5.4">
+<h3 data-number="12.5.4" class="anchored" data-anchor-id="제한된-likelihood"><span class="header-section-number">12.5.4</span> 제한된 likelihood</h3>
+<ul>
+<li>위 가정 아래 likelihood는 다음과 같이 쓸 수 있다.</li>
+</ul>
+<p><span class="math display">\[
+L(\alpha,\beta,\xi_1,\ldots,\xi_n,\sigma_\delta^2\mid x,y)
+=
+\frac1{(2\pi)^n}
+\frac{\lambda^{n/2}}{(\sigma_\delta^2)^n}
+\]</span></p>
+<p><span class="math display">\[
+\times
+\exp\left[
+-\frac{
+\sum_{i=1}^{n}
+\{(x_i-\xi_i)^2+\lambda(y_i-(\alpha+\beta\xi_i))^2\}
+}{2\sigma_\delta^2}
+\right].
+\tag{12.2.13}
+\]</span></p>
+</section>
+<section id="xi_i에-대한-최대화" class="level3" data-number="12.5.5">
+<h3 data-number="12.5.5" class="anchored" data-anchor-id="xi_i에-대한-최대화"><span class="header-section-number">12.5.5</span> <span class="math inline">\(\xi_i\)</span>에 대한 최대화</h3>
+<ul>
+<li><span class="math inline">\(\alpha,\beta,\sigma_\delta^2\)</span>가 고정되었을 때 <span class="math inline">\(\xi_i\)</span>를 최대화하려면</li>
+</ul>
+<p><span class="math display">\[
+\sum_{i=1}^{n}
+\{(x_i-\xi_i)^2+\lambda(y_i-(\alpha+\beta\xi_i))^2\}
+\]</span></p>
+<p>를 최소화하면 된다. - 각 <span class="math inline">\(i\)</span>에 대해 최소점은</p>
+<p><span class="math display">\[
+\xi_i^*
+=
+\frac{x_i+\lambda\beta(y_i-\alpha)}{1+\lambda\beta^2}.
+\]</span></p>
+<ul>
+<li>대입하면</li>
+</ul>
+<p><span class="math display">\[
+\sum_{i=1}^{n}
+\{(x_i-\xi_i^*)^2+\lambda(y_i-(\alpha+\beta\xi_i^*))^2\}
+=
+\frac{\lambda}{1+\lambda\beta^2}
+\sum_{i=1}^{n}
+\{y_i-(\alpha+\beta x_i)\}^2.
+\]</span></p>
+</section>
+<section id="alphabeta의-mle" class="level3" data-number="12.5.6">
+<h3 data-number="12.5.6" class="anchored" data-anchor-id="alphabeta의-mle"><span class="header-section-number">12.5.6</span> <span class="math inline">\(\alpha,\beta\)</span>의 MLE</h3>
+<ul>
+<li>변환을</li>
+</ul>
+<p><span class="math display">\[
+\alpha^*=\sqrt\lambda\,\alpha,
+\qquad
+\beta^*=\sqrt\lambda\,\beta,
+\qquad
+y_i^*=\sqrt\lambda\,y_i
+\tag{12.2.15}
+\]</span></p>
+<p>라고 두면 직교 최소제곱 문제와 동일한 형태가 된다. - 따라서</p>
+<p><span class="math display">\[
+\hat\alpha=\bar y-\hat\beta\bar x
+\]</span></p>
+<p>이고</p>
+<p><span class="math display">\[
+\hat\beta
+=
+\frac{
+-(S_{xx}-\lambda S_{yy})
++
+\sqrt{(S_{xx}-\lambda S_{yy})^2+4\lambda S_{xy}^2}
+}{
+2\lambda S_{xy}
+}.
+\tag{12.2.16}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\lambda=1\)</span>이면 직교 최소제곱 해와 같다.</li>
+<li><span class="math inline">\(\lambda\to0\)</span>이면 보통 최소제곱의 <span class="math inline">\(y\)</span> on <span class="math inline">\(x\)</span> 기울기 <span class="math inline">\(S_{xy}/S_{xx}\)</span>로 수렴한다.</li>
+<li><span class="math inline">\(\lambda\to\infty\)</span>이면 <span class="math inline">\(x\)</span> on <span class="math inline">\(y\)</span> 회귀를 뒤집은 기울기 <span class="math inline">\(S_{yy}/S_{xy}\)</span>로 수렴한다.</li>
+</ul>
+</section>
+<section id="sigma_delta2의-mle" class="level3" data-number="12.5.7">
+<h3 data-number="12.5.7" class="anchored" data-anchor-id="sigma_delta2의-mle"><span class="header-section-number">12.5.7</span> <span class="math inline">\(\sigma_\delta^2\)</span>의 MLE</h3>
+<ul>
+<li><span class="math inline">\(\hat\alpha,\hat\beta\)</span>를 대입한 뒤 <span class="math inline">\(\sigma_\delta^2\)</span>에 대해 최대화하면</li>
+</ul>
+<p><span class="math display">\[
+\hat\sigma_\delta^2
+=
+\frac1{2n}
+\frac{\lambda}{1+\lambda\hat\beta^2}
+\sum_{i=1}^{n}
+\{y_i-(\hat\alpha+\hat\beta x_i)\}^2.
+\tag{12.2.18}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\hat\sigma_\epsilon^2=\hat\sigma_\delta^2/\lambda\)</span>이다.</li>
+<li>주의할 점:
+<ul>
+<li><span class="math inline">\(\hat\alpha\)</span>와 <span class="math inline">\(\hat\beta\)</span>는 일치추정량이다.</li>
+<li>하지만 functional model에서 <span class="math inline">\(\hat\sigma_\delta^2\)</span>는 일치추정량이 아니며, 극한적으로 <span class="math inline">\(\sigma_\delta^2/2\)</span>로 수렴한다.</li>
+</ul></li>
+</ul>
+</section>
+<section id="structural-model의-marginal-distribution" class="level3" data-number="12.5.8">
+<h3 data-number="12.5.8" class="anchored" data-anchor-id="structural-model의-marginal-distribution"><span class="header-section-number">12.5.8</span> structural model의 marginal distribution</h3>
+<ul>
+<li>structural model에서 <span class="math inline">\(\xi_i\)</span>를 적분하면 <span class="math inline">\((X_i,Y_i)\)</span>는 이변량 정규분포를 따른다.</li>
+</ul>
+<p><span class="math display">\[
+(X_i,Y_i)
+\sim
+\text{bivariate normal}
+\left(
+\xi,\,
+\alpha+\beta\xi,\,
+\sigma_\delta^2+\sigma_\xi^2,\,
+\sigma_\epsilon^2+\beta^2\sigma_\xi^2,\,
+\beta\sigma_\xi^2
+\right).
+\tag{12.2.19}
+\]</span></p>
+<ul>
+<li>likelihood 방정식은 표본평균, 표본분산, 표본공분산을 모집단 대응량과 맞추는 형태로 나온다.</li>
+</ul>
+<p><span class="math display">\[
+\bar y=\hat\alpha+\hat\beta\hat\xi,
+\qquad
+\bar x=\hat\xi,
+\]</span></p>
+<p><span class="math display">\[
+\frac1nS_{yy}=\hat\sigma_\epsilon^2+\hat\beta^2\hat\sigma_\xi^2,
+\]</span></p>
+<p><span class="math display">\[
+\frac1nS_{xx}=\hat\sigma_\delta^2+\hat\sigma_\xi^2,
+\]</span></p>
+<p><span class="math display">\[
+\frac1nS_{xy}=\hat\beta\hat\sigma_\xi^2.
+\tag{12.2.20}
+\]</span></p>
+<ul>
+<li>방정식은 5개인데 미지수가 6개이므로 제한이 없으면 식별 가능하지 않다.</li>
+<li>여기서도</li>
+</ul>
+<p><span class="math display">\[
+\sigma_\delta^2=\lambda\sigma_\epsilon^2
+\]</span></p>
+<p>를 가정하면 모형이 식별 가능해진다.</p>
+</section>
+<section id="structural-model의-분산-추정량" class="level3" data-number="12.5.9">
+<h3 data-number="12.5.9" class="anchored" data-anchor-id="structural-model의-분산-추정량"><span class="header-section-number">12.5.9</span> structural model의 분산 추정량</h3>
+<ul>
+<li><span class="math inline">\(\sigma_\delta^2=\lambda\sigma_\epsilon^2\)</span> 아래에서 <span class="math inline">\(\hat\alpha,\hat\beta\)</span>는 functional model과 같은 식 (12.2.16)을 갖는다.</li>
+<li>그러나 분산 추정량은 다르다.</li>
+</ul>
+<p><span class="math display">\[
+\hat\sigma_\delta^2
+=
+\frac1n\left(
+S_{xx}-\frac{S_{xy}}{\hat\beta}
+\right),
+\]</span></p>
+<p><span class="math display">\[
+\hat\sigma_\epsilon^2
+=
+\frac{\hat\sigma_\delta^2}{\lambda}
+=
+\frac1n(S_{yy}-\hat\beta S_{xy}),
+\]</span></p>
+<p><span class="math display">\[
+\hat\sigma_\xi^2
+=
+\frac1n\frac{S_{xy}}{\hat\beta}.
+\tag{12.2.21}
+\]</span></p>
+<ul>
+<li>structural model에서는 이 분산 추정량들이 일치추정량이다.</li>
+</ul>
+</section>
+</section>
+<section id="sec-12-2-4" class="level2" data-number="12.6">
+<h2 data-number="12.6" class="anchored" data-anchor-id="sec-12-2-4"><span class="header-section-number">12.6</span> 신뢰집합</h2>
+<section id="왜-eiv-신뢰구간은-어렵나" class="level3" data-number="12.6.1">
+<h3 data-number="12.6.1" class="anchored" data-anchor-id="왜-eiv-신뢰구간은-어렵나"><span class="header-section-number">12.6.1</span> 왜 EIV 신뢰구간은 어렵나?</h3>
+<ul>
+<li>EIV 모형에서 <span class="math inline">\(\beta\)</span>의 신뢰집합 구성은 매우 어렵다.</li>
+<li>근사 likelihood 방법을 사용하여 유한 길이의 근사구간을 만들 수는 있다.</li>
+<li>그러나 모든 모수값에서 명목 신뢰수준을 유지하는 유한 길이 구간은 존재하기 어렵다.</li>
+<li>Gleser와 Hwang의 결과에 따르면, 항상 finite length인 slope 구간추정량은 confidence coefficient가 0이 될 수 있다.</li>
+</ul>
+</section>
+<section id="정보량을-결정하는-모수" class="level3" data-number="12.6.2">
+<h3 data-number="12.6.2" class="anchored" data-anchor-id="정보량을-결정하는-모수"><span class="header-section-number">12.6.2</span> 정보량을 결정하는 모수</h3>
+<ul>
+<li>다음 비율을 생각한다.</li>
+</ul>
+<p><span class="math display">\[
+\tau^2=\frac{\sigma_\xi^2}{\sigma_\delta^2}.
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\tau^2\)</span>는 자료가 slope <span class="math inline">\(\beta\)</span>를 얼마나 잘 결정할 수 있는지를 나타낸다.</li>
+<li><span class="math inline">\(\tau^2\to0\)</span>이면 latent predictor <span class="math inline">\(\xi_i\)</span>들의 변동이 거의 없어진다.</li>
+<li>그러면 사실상 직선을 고유하게 맞출 정보가 사라진다.</li>
+</ul>
+</section>
+<section id="근사-신뢰구간" class="level3" data-number="12.6.3">
+<h3 data-number="12.6.3" class="anchored" data-anchor-id="근사-신뢰구간"><span class="header-section-number">12.6.3</span> 근사 신뢰구간</h3>
+<ul>
+<li><span class="math inline">\(\hat\beta\)</span>의 근사분산 추정량을 <span class="math inline">\(\hat\sigma_\beta^2\)</span>라고 하면 CLT와 Slutsky 정리에 의해 다음이 근사 신뢰구간이다.</li>
+</ul>
+<p><span class="math display">\[
+\hat\beta
+-
+z_{\alpha/2}\frac{\hat\sigma_\beta}{\sqrt n}
+\le
+\beta
+\le
+\hat\beta
++
+z_{\alpha/2}\frac{\hat\sigma_\beta}{\sqrt n}.
+\]</span></p>
+<ul>
+<li>Gleser의 수정형은 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+\hat\beta
+-
+t_{n-2,\alpha/2}
+\frac{\hat\sigma_\beta}{\sqrt{n-2}}
+\le
+\beta
+\le
+\hat\beta
++
+t_{n-2,\alpha/2}
+\frac{\hat\sigma_\beta}{\sqrt{n-2}}.
+\tag{12.2.22}
+\]</span></p>
+<ul>
+<li>이는 근사적으로는 좋을 수 있지만 finite length이므로 모든 모수값에서 정확한 coverage를 보장하지 못한다.</li>
+</ul>
+</section>
+<section id="creasywilliams-신뢰집합" class="level3" data-number="12.6.4">
+<h3 data-number="12.6.4" class="anchored" data-anchor-id="creasywilliams-신뢰집합"><span class="header-section-number">12.6.4</span> Creasy–Williams 신뢰집합</h3>
+<ul>
+<li>정확한 신뢰집합은 infinite length를 가질 수밖에 없다.</li>
+<li>Creasy–Williams 신뢰집합은 다음 성질에 기반한다.</li>
+</ul>
+<p><span class="math display">\[
+Cov(\beta\lambda Y_i+X_i,\;Y_i-\beta X_i)=0.
+\]</span></p>
+<ul>
+<li>표본상관계수 <span class="math inline">\(r_\lambda(\beta)\)</span>를 다음처럼 정의한다.</li>
+</ul>
+<p><span class="math display">\[
+r_\lambda(\beta)
+=
+\frac{
+\beta\lambda S_{yy}
++
+(1-\beta^2\lambda)S_{xy}
+-
+\beta S_{xx}
+}{
+\sqrt{
+(\beta^2\lambda^2S_{yy}+2\beta\lambda S_{xy}+S_{xx})
+(S_{yy}-2\beta S_{xy}+\beta^2S_{xx})
+}
+}.
+\tag{12.2.23}
+\]</span></p>
+<ul>
+<li>그러면</li>
+</ul>
+<p><span class="math display">\[
+\frac{\sqrt{n-2}\,r_\lambda(\beta)}
+{\sqrt{1-r_\lambda^2(\beta)}}
+\sim
+t_{n-2}.
+\]</span></p>
+<ul>
+<li>따라서 다음 집합은 <span class="math inline">\(1-\alpha\)</span> 신뢰집합이다.</li>
+</ul>
+<p><span class="math display">\[
+\left\{
+\beta:
+\frac{(n-2)r_\lambda^2(\beta)}
+{1-r_\lambda^2(\beta)}
+\le
+F_{1,n-2,\alpha}
+\right\}.
+\tag{12.2.24}
+\]</span></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ch12_textbook_assets/fig_ch12_p14_figure_12_2_3.png" class="img-fluid figure-img"></p>
+<figcaption>Creasy–Williams 신뢰집합을 정의하는 F 통계량, <span class="math inline">\(\lambda=1\)</span></figcaption>
+</figure>
+</div>
+</section>
+<section id="creasywilliams-집합의-특징" class="level3" data-number="12.6.5">
+<h3 data-number="12.6.5" class="anchored" data-anchor-id="creasywilliams-집합의-특징"><span class="header-section-number">12.6.5</span> Creasy–Williams 집합의 특징</h3>
+<ul>
+<li>이 신뢰집합은 다음 형태 중 하나가 될 수 있다.
+<ul>
+<li>두 개의 유한한 서로소 구간</li>
+<li>하나의 유한 구간과 두 개의 무한 구간</li>
+<li>전체 실수선</li>
+</ul></li>
+<li>또한 모든 <span class="math inline">\(\beta\)</span>에 대해</li>
+</ul>
+<p><span class="math display">\[
+-r_\lambda(\beta)
+=
+r_\lambda\left(-\frac1{\lambda\beta}\right)
+\]</span></p>
+<p>이므로, <span class="math inline">\(\beta\)</span>가 집합에 있으면 <span class="math inline">\(-1/(\lambda\beta)\)</span>도 집합에 있다. - 따라서 이 집합만으로는 slope의 부호를 확정하지 못한다. - 이는 EIV에서 slope 추론이 일반 회귀보다 훨씬 어렵다는 것을 보여준다.</p>
+</section>
+</section>
+<section id="sec-12-3" class="level2" data-number="12.7">
+<h2 data-number="12.7" class="anchored" data-anchor-id="sec-12-3"><span class="header-section-number">12.7</span> 로지스틱 회귀</h2>
+<section id="glm의-세-구성요소" class="level3" data-number="12.7.1">
+<h3 data-number="12.7.1" class="anchored" data-anchor-id="glm의-세-구성요소"><span class="header-section-number">12.7.1</span> GLM의 세 구성요소</h3>
+<ul>
+<li>일반화 선형모형(GLM)은 세 요소로 구성된다.</li>
+</ul>
+<ol type="1">
+<li><strong>Random component</strong>
+<ul>
+<li>반응변수 <span class="math inline">\(Y_1,\ldots,Y_n\)</span>이다.</li>
+<li>서로 독립이며, 같은 exponential family에 속하는 분포를 가진다.</li>
+<li>예: normal, binomial, Poisson 등.</li>
+</ul></li>
+<li><strong>Systematic component</strong>
+<ul>
+<li>예측변수의 함수이며 모수에 대해 선형이다.</li>
+<li>이 장에서는 주로 <span class="math inline">\(\alpha+\beta x_i\)</span>를 사용한다.</li>
+</ul></li>
+<li><strong>Link function</strong>
+<ul>
+<li>평균 <span class="math inline">\(\mu_i=EY_i\)</span>와 systematic component를 연결한다.</li>
+</ul></li>
+</ol>
+<p><span class="math display">\[
+g(\mu_i)=\alpha+\beta x_i.
+\]</span></p>
+</section>
+<section id="로지스틱-회귀-모형" class="level3" data-number="12.7.2">
+<h3 data-number="12.7.2" class="anchored" data-anchor-id="로지스틱-회귀-모형"><span class="header-section-number">12.7.2</span> 로지스틱 회귀 모형</h3>
+<ul>
+<li>반응변수가 Bernoulli라고 하자.</li>
+</ul>
+<p><span class="math display">\[
+Y_i\sim Bernoulli(\pi_i),
+\qquad
+E(Y_i)=\pi_i=P(Y_i=1).
+\]</span></p>
+<ul>
+<li>로지스틱 회귀에서는 성공확률의 log-odds가 <span class="math inline">\(x_i\)</span>의 선형함수라고 가정한다.</li>
+</ul>
+<p><span class="math display">\[
+\log\left(\frac{\pi_i}{1-\pi_i}\right)
+=
+\alpha+\beta x_i.
+\tag{12.3.1}
+\]</span></p>
+<ul>
+<li>왼쪽은 logit 또는 log-odds이다.</li>
+<li>Bernoulli 분포의 자연모수가 logit이므로, logistic regression은 canonical link를 사용하는 GLM이다.</li>
+</ul>
+</section>
+<section id="확률-함수-형태" class="level3" data-number="12.7.3">
+<h3 data-number="12.7.3" class="anchored" data-anchor-id="확률-함수-형태"><span class="header-section-number">12.7.3</span> 확률 함수 형태</h3>
+<ul>
+<li>식 (12.3.1)을 풀면</li>
+</ul>
+<p><span class="math display">\[
+\pi_i=
+\frac{e^{\alpha+\beta x_i}}
+{1+e^{\alpha+\beta x_i}}.
+\]</span></p>
+<ul>
+<li>일반적으로</li>
+</ul>
+<p><span class="math display">\[
+\pi(x)
+=
+\frac{e^{\alpha+\beta x}}
+{1+e^{\alpha+\beta x}}.
+\tag{12.3.2}
+\]</span></p>
+<ul>
+<li>항상</li>
+</ul>
+<p><span class="math display">\[
+0&lt;\pi(x)&lt;1
+\]</span></p>
+<p>이므로 확률모형으로 적절하다.</p>
+</section>
+<section id="로지스틱-함수의-기울기" class="level3" data-number="12.7.4">
+<h3 data-number="12.7.4" class="anchored" data-anchor-id="로지스틱-함수의-기울기"><span class="header-section-number">12.7.4</span> 로지스틱 함수의 기울기</h3>
+<ul>
+<li>미분하면</li>
+</ul>
+<p><span class="math display">\[
+\frac{d\pi(x)}{dx}
+=
+\beta\pi(x)\{1-\pi(x)\}.
+\tag{12.3.3}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\pi(x)\{1-\pi(x)\}&gt;0\)</span>이므로
+<ul>
+<li><span class="math inline">\(\beta&gt;0\)</span>이면 <span class="math inline">\(\pi(x)\)</span>는 증가한다.</li>
+<li><span class="math inline">\(\beta&lt;0\)</span>이면 <span class="math inline">\(\pi(x)\)</span>는 감소한다.</li>
+<li><span class="math inline">\(\beta=0\)</span>이면 <span class="math inline">\(\pi(x)\)</span>는 상수이다.</li>
+</ul></li>
+<li>또한</li>
+</ul>
+<p><span class="math display">\[
+\pi\left(-\frac{\alpha}{\beta}\right)=\frac12.
+\]</span></p>
+</section>
+<section id="alpha와-beta의-해석" class="level3" data-number="12.7.5">
+<h3 data-number="12.7.5" class="anchored" data-anchor-id="alpha와-beta의-해석"><span class="header-section-number">12.7.5</span> <span class="math inline">\(\alpha\)</span>와 <span class="math inline">\(\beta\)</span>의 해석</h3>
+<ul>
+<li><span class="math inline">\(x=0\)</span>일 때</li>
+</ul>
+<p><span class="math display">\[
+\alpha=\log\left(\frac{\pi(0)}{1-\pi(0)}\right)
+\]</span></p>
+<p>이다. - 따라서 <span class="math inline">\(\alpha\)</span>는 <span class="math inline">\(x=0\)</span>에서의 log-odds이다. - <span class="math inline">\(x\)</span>가 한 단위 증가할 때 log-odds 변화량은</p>
+<p><span class="math display">\[
+\beta.
+\]</span></p>
+<ul>
+<li>실제 odds ratio는</li>
+</ul>
+<p><span class="math display">\[
+e^\beta
+=
+\frac{\pi(x+1)/(1-\pi(x+1))}
+{\pi(x)/(1-\pi(x))}.
+\tag{12.3.4}
+\]</span></p>
+<ul>
+<li>따라서 <span class="math inline">\(e^\beta\)</span>는 <span class="math inline">\(x\)</span>가 한 단위 증가할 때 odds가 몇 배가 되는지를 나타낸다.</li>
+</ul>
+<p><span class="math display">\[
+\frac{\pi(x+1)}{1-\pi(x+1)}
+=
+e^\beta
+\frac{\pi(x)}{1-\pi(x)}.
+\tag{12.3.5}
+\]</span></p>
+</section>
+<section id="다른-link-함수" class="level3" data-number="12.7.6">
+<h3 data-number="12.7.6" class="anchored" data-anchor-id="다른-link-함수"><span class="header-section-number">12.7.6</span> 다른 link 함수</h3>
+<ul>
+<li>로지스틱 회귀는 <span class="math inline">\(\pi(x)=F(\alpha+\beta x)\)</span>에서 <span class="math inline">\(F\)</span>가 logistic cdf인 경우이다.</li>
+<li><span class="math inline">\(F\)</span>가 표준정규 cdf이면 probit regression이다.</li>
+<li>Gumbel cdf를 사용하면 log-log link가 나온다.</li>
+</ul>
+</section>
+</section>
+<section id="sec-12-3-2" class="level2" data-number="12.8">
+<h2 data-number="12.8" class="anchored" data-anchor-id="sec-12-3-2"><span class="header-section-number">12.8</span> 로지스틱 회귀의 추정</h2>
+<section id="왜-최소제곱이-아닌가" class="level3" data-number="12.8.1">
+<h3 data-number="12.8.1" class="anchored" data-anchor-id="왜-최소제곱이-아닌가"><span class="header-section-number">12.8.1</span> 왜 최소제곱이 아닌가?</h3>
+<ul>
+<li>선형회귀에서는 <span class="math inline">\(Y_i\)</span>가 <span class="math inline">\(\alpha+\beta x_i\)</span>와 직접 연결되어 있어서 RSS를 최소화할 수 있었다.</li>
+<li>로지스틱 회귀에서는</li>
+</ul>
+<p><span class="math display">\[
+E(Y_i)=\pi_i
+\]</span></p>
+<p>이고</p>
+<p><span class="math display">\[
+\log\left(\frac{\pi_i}{1-\pi_i}\right)=\alpha+\beta x_i
+\]</span></p>
+<p>이다. - 즉 <span class="math inline">\(Y_i\)</span>와 <span class="math inline">\(\alpha+\beta x_i\)</span>가 직접 선형으로 연결되지 않는다. - 따라서 표준적인 추정법은 최대가능도추정이다.</p>
+</section>
+<section id="일반-bernoulli-glm-likelihood" class="level3" data-number="12.8.2">
+<h3 data-number="12.8.2" class="anchored" data-anchor-id="일반-bernoulli-glm-likelihood"><span class="header-section-number">12.8.2</span> 일반 Bernoulli GLM likelihood</h3>
+<ul>
+<li><span class="math inline">\(Y_i\sim Bernoulli(\pi_i)\)</span>이고</li>
+</ul>
+<p><span class="math display">\[
+\pi(x_i)=F(\alpha+\beta x_i)
+\]</span></p>
+<p>라고 하자. - <span class="math inline">\(F_i=F(\alpha+\beta x_i)\)</span>라고 쓰면 likelihood는</p>
+<p><span class="math display">\[
+L(\alpha,\beta\mid y)
+=
+\prod_{i=1}^{n}
+F_i^{y_i}(1-F_i)^{1-y_i}.
+\]</span></p>
+<ul>
+<li>로그가능도는</li>
+</ul>
+<p><span class="math display">\[
+\log L(\alpha,\beta\mid y)
+=
+\sum_{i=1}^{n}
+\left[
+\log(1-F_i)
++
+y_i\log\left(\frac{F_i}{1-F_i}\right)
+\right].
+\]</span></p>
+</section>
+<section id="likelihood-equation" class="level3" data-number="12.8.3">
+<h3 data-number="12.8.3" class="anchored" data-anchor-id="likelihood-equation"><span class="header-section-number">12.8.3</span> likelihood equation</h3>
+<ul>
+<li><span class="math inline">\(f(w)=dF(w)/dw\)</span>이고 <span class="math inline">\(f_i=f(\alpha+\beta x_i)\)</span>라고 하자.</li>
+<li>그러면</li>
+</ul>
+<p><span class="math display">\[
+\frac{\partial}{\partial\alpha}
+\log L(\alpha,\beta\mid y)
+=
+\sum_{i=1}^{n}
+(y_i-F_i)
+\frac{f_i}{F_i(1-F_i)}.
+\tag{12.3.7}
+\]</span></p>
+<ul>
+<li>그리고</li>
+</ul>
+<p><span class="math display">\[
+\frac{\partial}{\partial\beta}
+\log L(\alpha,\beta\mid y)
+=
+\sum_{i=1}^{n}
+(y_i-F_i)
+\frac{f_i}{F_i(1-F_i)}
+x_i.
+\tag{12.3.8}
+\]</span></p>
+<ul>
+<li>logistic regression에서는</li>
+</ul>
+<p><span class="math display">\[
+\frac{f_i}{F_i(1-F_i)}=1
+\]</span></p>
+<p>이므로 방정식이 단순해진다.</p>
+</section>
+<section id="logistic-likelihood-equation" class="level3" data-number="12.8.4">
+<h3 data-number="12.8.4" class="anchored" data-anchor-id="logistic-likelihood-equation"><span class="header-section-number">12.8.4</span> logistic likelihood equation</h3>
+<ul>
+<li>logistic model에서는 MLE가 다음 연립방정식의 해이다.</li>
+</ul>
+<p><span class="math display">\[
+\sum_{i=1}^{n}(y_i-\pi_i)=0,
+\]</span></p>
+<p><span class="math display">\[
+\sum_{i=1}^{n}(y_i-\pi_i)x_i=0.
+\]</span></p>
+<ul>
+<li>이 방정식은 <span class="math inline">\(\alpha,\beta\)</span>에 대해 비선형이다.</li>
+<li>따라서 수치적으로 풀어야 한다.</li>
+<li>보통 Newton–Raphson 또는 iteratively reweighted least squares를 사용한다.</li>
+</ul>
+</section>
+<section id="mle가-존재하지-않는-경우" class="level3" data-number="12.8.5">
+<h3 data-number="12.8.5" class="anchored" data-anchor-id="mle가-존재하지-않는-경우"><span class="header-section-number">12.8.5</span> MLE가 존재하지 않는 경우</h3>
+<ul>
+<li>logistic/probit 회귀의 로그가능도는 엄격한 concave 함수이므로, likelihood equation에 해가 있으면 그 해는 유일한 MLE이다.</li>
+<li>하지만 극단적인 자료에서는 해가 존재하지 않을 수 있다.</li>
+<li>이때 likelihood의 최대는 <span class="math inline">\(\alpha,\beta\)</span>가 무한대로 가는 극한에서 얻어진다.</li>
+<li>이는 logistic model이 <span class="math inline">\(0&lt;\pi(x)&lt;1\)</span>을 가정하기 때문이다.</li>
+<li>어떤 자료에서는 확률 0 또는 1이 극한적으로 맞아야 likelihood가 최대가 된다.</li>
+</ul>
+</section>
+<section id="예제-challenger-o-ring-자료" class="level3" data-number="12.8.6">
+<h3 data-number="12.8.6" class="anchored" data-anchor-id="예제-challenger-o-ring-자료"><span class="header-section-number">12.8.6</span> 예제: Challenger O-ring 자료</h3>
+<ul>
+<li>우주왕복선 O-ring failure는 온도와 관련된 유명한 자료이다.</li>
+<li>발사 시 온도와 O-ring failure 여부가 다음과 같이 주어졌다.</li>
+</ul>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;">Flight no.</th>
+<th style="text-align: right;">14</th>
+<th style="text-align: right;">9</th>
+<th style="text-align: right;">23</th>
+<th style="text-align: right;">10</th>
+<th style="text-align: right;">1</th>
+<th style="text-align: right;">5</th>
+<th style="text-align: right;">13</th>
+<th style="text-align: right;">15</th>
+<th style="text-align: right;">4</th>
+<th style="text-align: right;">3</th>
+<th style="text-align: right;">8</th>
+<th style="text-align: right;">17</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">Failure</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">Temp.</td>
+<td style="text-align: right;">53</td>
+<td style="text-align: right;">57</td>
+<td style="text-align: right;">58</td>
+<td style="text-align: right;">63</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">67</td>
+<td style="text-align: right;">67</td>
+<td style="text-align: right;">67</td>
+<td style="text-align: right;">68</td>
+<td style="text-align: right;">69</td>
+<td style="text-align: right;">70</td>
+<td style="text-align: right;">70</td>
+</tr>
+</tbody>
+</table>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;">Flight no.</th>
+<th style="text-align: right;">2</th>
+<th style="text-align: right;">11</th>
+<th style="text-align: right;">6</th>
+<th style="text-align: right;">7</th>
+<th style="text-align: right;">16</th>
+<th style="text-align: right;">21</th>
+<th style="text-align: right;">19</th>
+<th style="text-align: right;">22</th>
+<th style="text-align: right;">12</th>
+<th style="text-align: right;">20</th>
+<th style="text-align: right;">18</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">Failure</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">Temp.</td>
+<td style="text-align: right;">70</td>
+<td style="text-align: right;">70</td>
+<td style="text-align: right;">72</td>
+<td style="text-align: right;">73</td>
+<td style="text-align: right;">75</td>
+<td style="text-align: right;">75</td>
+<td style="text-align: right;">76</td>
+<td style="text-align: right;">76</td>
+<td style="text-align: right;">78</td>
+<td style="text-align: right;">79</td>
+<td style="text-align: right;">81</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>logistic regression을 적합하면</li>
+</ul>
+<p><span class="math display">\[
+\hat\alpha=15.043,
+\qquad
+\hat\beta=-0.232.
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\hat\beta&lt;0\)</span>이므로 온도가 낮을수록 O-ring failure 확률이 커진다.</li>
+<li>Challenger 발사 당시 온도는 <span class="math inline">\(31^\circ F\)</span>였고, 이 온도에서 failure 확률의 MLE는 약 0.9996이다.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ch12_textbook_assets/fig_ch12_p19_figure_12_3_1.png" class="img-fluid figure-img"></p>
+<figcaption>Challenger O-ring 자료와 적합된 로지스틱 곡선</figcaption>
+</figure>
+</div>
+</section>
+<section id="같은-x에서-여러-bernoulli-관측이-있는-경우" class="level3" data-number="12.8.7">
+<h3 data-number="12.8.7" class="anchored" data-anchor-id="같은-x에서-여러-bernoulli-관측이-있는-경우"><span class="header-section-number">12.8.7</span> 같은 <span class="math inline">\(x\)</span>에서 여러 Bernoulli 관측이 있는 경우</h3>
+<ul>
+<li><span class="math inline">\(J\)</span>개의 서로 다른 predictor 값 <span class="math inline">\(x_1,\ldots,x_J\)</span>가 있다고 하자.</li>
+<li><span class="math inline">\(x_j\)</span>에서 <span class="math inline">\(n_j\)</span>번의 Bernoulli 시행이 관측되고, 성공횟수를 <span class="math inline">\(Y_j^*\)</span>라고 하자.</li>
+<li>그러면</li>
+</ul>
+<p><span class="math display">\[
+Y_j^*\sim Binomial(n_j,\pi(x_j)).
+\]</span></p>
+<ul>
+<li>likelihood는</li>
+</ul>
+<p><span class="math display">\[
+L(\alpha,\beta\mid y^*)
+=
+\prod_{j=1}^{J}
+F_j^{y_j^*}(1-F_j)^{n_j-y_j^*}.
+\]</span></p>
+<ul>
+<li>likelihood equation은</li>
+</ul>
+<p><span class="math display">\[
+0=
+\sum_{j=1}^{J}
+(y_j^*-n_jF_j)
+\frac{f_j}{F_j(1-F_j)},
+\]</span></p>
+<p><span class="math display">\[
+0=
+\sum_{j=1}^{J}
+(y_j^*-n_jF_j)
+\frac{f_j}{F_j(1-F_j)}
+x_j.
+\]</span></p>
+</section>
+<section id="정보행렬" class="level3" data-number="12.8.8">
+<h3 data-number="12.8.8" class="anchored" data-anchor-id="정보행렬"><span class="header-section-number">12.8.8</span> 정보행렬</h3>
+<ul>
+<li>두 모수 <span class="math inline">\(\alpha,\beta\)</span>에 대해 정보행렬은</li>
+</ul>
+<p><span class="math display">\[
+I(\theta_1,\theta_2)
+=
+\begin{pmatrix}
+-\dfrac{\partial^2}{\partial\theta_1^2}\log L
+&amp;
+-\dfrac{\partial^2}{\partial\theta_1\partial\theta_2}\log L
+\\[6pt]
+-\dfrac{\partial^2}{\partial\theta_1\partial\theta_2}\log L
+&amp;
+-\dfrac{\partial^2}{\partial\theta_2^2}\log L
+\end{pmatrix}.
+\tag{12.3.9}
+\]</span></p>
+<ul>
+<li>logistic regression에서는</li>
+</ul>
+<p><span class="math display">\[
+I(\alpha,\beta)
+=
+\begin{pmatrix}
+\sum_{j=1}^{J}n_jF_j(1-F_j)
+&amp;
+\sum_{j=1}^{J}x_jn_jF_j(1-F_j)
+\\[6pt]
+\sum_{j=1}^{J}x_jn_jF_j(1-F_j)
+&amp;
+\sum_{j=1}^{J}x_j^2n_jF_j(1-F_j)
+\end{pmatrix}.
+\tag{12.3.10}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(F_j\)</span>에 MLE를 대입한 뒤 정보행렬의 역행렬을 사용하면 <span class="math inline">\(\hat\alpha,\hat\beta\)</span>의 근사분산을 얻는다.</li>
+<li><span class="math inline">\(\hat\beta\)</span>의 표준오차는 역정보행렬의 <span class="math inline">\((2,2)\)</span> 원소의 제곱근이다.</li>
+</ul>
+</section>
+<section id="예제-challenger-자료-계속" class="level3" data-number="12.8.9">
+<h3 data-number="12.8.9" class="anchored" data-anchor-id="예제-challenger-자료-계속"><span class="header-section-number">12.8.9</span> 예제: Challenger 자료 계속</h3>
+<ul>
+<li>Challenger 자료에서 estimated information matrix는</li>
+</ul>
+<p><span class="math display">\[
+I(\hat\alpha,\hat\beta)
+=
+\begin{pmatrix}
+3.15 &amp; 214.75\\
+214.75 &amp; 14728.5
+\end{pmatrix}
+\]</span></p>
+<p>이고 역행렬은</p>
+<p><span class="math display">\[
+I(\hat\alpha,\hat\beta)^{-1}
+=
+\begin{pmatrix}
+54.44 &amp; -0.80\\
+-0.80 &amp; 0.012
+\end{pmatrix}.
+\]</span></p>
+<ul>
+<li>따라서 <span class="math inline">\(\hat\beta\)</span>의 근사 표준오차는</li>
+</ul>
+<p><span class="math display">\[
+se(\hat\beta)=\sqrt{0.012}.
+\]</span></p>
+<ul>
+<li>95% 근사 신뢰구간은</li>
+</ul>
+<p><span class="math display">\[
+\beta
+\in
+-0.232\pm1.96\sqrt{0.012}
+\]</span></p>
+<p>즉,</p>
+<p><span class="math display">\[
+-0.447\le \beta\le -0.017.
+\]</span></p>
+<ul>
+<li>이 구간은 <span class="math inline">\(\beta&lt;0\)</span>이라는 결론을 지지한다.</li>
+</ul>
+</section>
+<section id="beta0-검정" class="level3" data-number="12.8.10">
+<h3 data-number="12.8.10" class="anchored" data-anchor-id="beta0-검정"><span class="header-section-number">12.8.10</span> <span class="math inline">\(\beta=0\)</span> 검정</h3>
+<ul>
+<li>logistic regression에서도 가장 흔한 가설은</li>
+</ul>
+<p><span class="math display">\[
+H_0:\beta=0
+\]</span></p>
+<p>이다. - 이는 성공확률이 predictor와 관련이 없다는 뜻이다. - Wald 검정통계량은</p>
+<p><span class="math display">\[
+Z=\frac{\hat\beta}{se(\hat\beta)}
+\]</span></p>
+<p>이고, 큰 표본에서 표준정규분포로 근사된다. - 또는 log likelihood ratio test를 사용할 수 있다.</p>
+<p><span class="math display">\[
+-2\log\lambda(y^*)
+=
+2\left[
+\log L(\hat\alpha,\hat\beta\mid y^*)
+-
+\log L(\hat\alpha_0,0\mid y^*)
+\right].
+\]</span></p>
+<ul>
+<li>귀무가설 아래에서 이는 근사적으로</li>
+</ul>
+<p><span class="math display">\[
+\chi^2_1
+\]</span></p>
+<p>분포를 따른다.</p>
+</section>
+</section>
+<section id="sec-12-4" class="level2" data-number="12.9">
+<h2 data-number="12.9" class="anchored" data-anchor-id="sec-12-4"><span class="header-section-number">12.9</span> 로버스트 회귀</h2>
+<section id="최소제곱과-lad의-대응" class="level3" data-number="12.9.1">
+<h3 data-number="12.9.1" class="anchored" data-anchor-id="최소제곱과-lad의-대응"><span class="header-section-number">12.9.1</span> 최소제곱과 LAD의 대응</h3>
+<ul>
+<li>하나의 위치모수 <span class="math inline">\(m\)</span>을 추정할 때 평균과 중앙값은 다음 최적화 문제로 해석된다.</li>
+</ul>
+<p><span class="math display">\[
+\text{mean:}\quad
+\min_m
+\sum_{i=1}^{n}(x_i-m)^2,
+\]</span></p>
+<p><span class="math display">\[
+\text{median:}\quad
+\min_m
+\sum_{i=1}^{n}|x_i-m|.
+\]</span></p>
+<ul>
+<li>회귀에서도 같은 대응이 있다.</li>
+<li>최소제곱 회귀는</li>
+</ul>
+<p><span class="math display">\[
+\min_{a,b}
+\sum_{i=1}^{n}
+[y_i-(a+bx_i)]^2
+\]</span></p>
+<p>를 푼다. - least absolute deviation, LAD 회귀는</p>
+<p><span class="math display">\[
+\min_{a,b}
+\sum_{i=1}^{n}
+|y_i-(a+bx_i)|
+\]</span></p>
+<p>를 푼다. - 따라서 least squares는 평균의 회귀판이고, LAD는 중앙값의 회귀판으로 볼 수 있다.</p>
+</section>
+<section id="예제-최소제곱-추정량의-로버스트성" class="level3" data-number="12.9.2">
+<h3 data-number="12.9.2" class="anchored" data-anchor-id="예제-최소제곱-추정량의-로버스트성"><span class="header-section-number">12.9.2</span> 예제: 최소제곱 추정량의 로버스트성</h3>
+<ul>
+<li>모형</li>
+</ul>
+<p><span class="math display">\[
+Y_i=\alpha+\beta x_i+\epsilon_i
+\]</span></p>
+<p>에서 <span class="math inline">\(\epsilon_i\)</span>들이 서로 상관이 없고</p>
+<p><span class="math display">\[
+E\epsilon_i=0,
+\qquad
+Var(\epsilon_i)=\sigma^2
+\]</span></p>
+<p>라고 하자. - 최소제곱 기울기 추정량은 BLUE이며</p>
+<p><span class="math display">\[
+Var(b)=
+\frac{\sigma^2}
+{\sum_{i=1}^{n}(x_i-\bar x)^2}.
+\]</span></p>
+<ul>
+<li>작은 오염을 생각하자.</li>
+</ul>
+<p><span class="math display">\[
+Var(\epsilon_i)
+=
+\begin{cases}
+\sigma^2, &amp; \text{with probability }1-\delta,\\
+\tau^2, &amp; \text{with probability }\delta.
+\end{cases}
+\]</span></p>
+<ul>
+<li>그러면</li>
+</ul>
+<p><span class="math display">\[
+Var(b)
+=
+\frac{(1-\delta)\sigma^2+\delta\tau^2}
+{\sum_{i=1}^{n}(x_i-\bar x)^2}.
+\]</span></p>
+<ul>
+<li>작은 오염에서는 성능이 크게 나빠지지 않을 수 있다.</li>
+<li>하지만 Cauchy와 같은 heavy-tailed 오염이나 catastrophic outlier가 있으면 최소제곱은 심하게 흔들릴 수 있다.</li>
+</ul>
+</section>
+<section id="예제-catastrophic-observation" class="level3" data-number="12.9.3">
+<h3 data-number="12.9.3" class="anchored" data-anchor-id="예제-catastrophic-observation"><span class="header-section-number">12.9.3</span> 예제: catastrophic observation</h3>
+<ul>
+<li>McPherson의 potoroo 자료에서 CO2와 O2의 회귀를 생각한다.</li>
+<li>원자료 23개에서는 다음 두 직선이 매우 비슷하다.</li>
+</ul>
+<p><span class="math display">\[
+\text{least squares:}\quad y=18.67-0.89x,
+\]</span></p>
+<p><span class="math display">\[
+\text{LAD:}\quad y=18.59-0.89x.
+\]</span></p>
+<ul>
+<li>하지만 Animal 15의 O2 값 18이 10으로 잘못 입력되었다고 하자.</li>
+<li>그러면</li>
+</ul>
+<p><span class="math display">\[
+\text{least squares:}\quad y=6.41-0.23x,
+\]</span></p>
+<p><span class="math display">\[
+\text{LAD:}\quad y=15.95-0.75x.
+\]</span></p>
+<ul>
+<li>최소제곱선은 크게 흔들리지만 LAD는 상대적으로 덜 흔들린다.</li>
+<li>이는 LAD가 이상치에 더 resistant하다는 것을 보여준다.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ch12_textbook_assets/fig_ch12_p23_figure_12_4_1.png" class="img-fluid figure-img"></p>
+<figcaption>원자료와 오입력 자료에서 least squares, LAD, M-estimate 비교</figcaption>
+</figure>
+</div>
+</section>
+<section id="lad의-점근정규성" class="level3" data-number="12.9.4">
+<h3 data-number="12.9.4" class="anchored" data-anchor-id="lad의-점근정규성"><span class="header-section-number">12.9.4</span> LAD의 점근정규성</h3>
+<ul>
+<li>단순화를 위해 절편이 없는 모형을 생각하자.</li>
+</ul>
+<p><span class="math display">\[
+Y_i=\beta x_i+\epsilon_i.
+\]</span></p>
+<ul>
+<li>LAD 추정량은 다음을 최소화한다.</li>
+</ul>
+<p><span class="math display">\[
+\sum_{i=1}^{n}|y_i-\beta x_i|.
+\tag{12.4.1}
+\]</span></p>
+<ul>
+<li>M-estimator 관점에서</li>
+</ul>
+<p><span class="math display">\[
+\rho(u)=|u|,
+\qquad
+\psi(u)=\rho'(u)
+\]</span></p>
+<p>로 볼 수 있다. - 적절한 조건 아래에서</p>
+<p><span class="math display">\[
+\sqrt n(\hat\beta_L-\beta)
+\Rightarrow
+N\left(
+0,
+\frac1{4f(0)^2\sigma_x^2}
+\right),
+\tag{12.4.5}
+\]</span></p>
+<p>여기서</p>
+<p><span class="math display">\[
+\sigma_x^2=
+\lim_{n\to\infty}\frac1n\sum_{i=1}^{n}x_i^2
+\]</span></p>
+<p>이고 <span class="math inline">\(f(0)\)</span>은 오차분포의 밀도함수 값이다.</p>
+</section>
+<section id="lad와-최소제곱의-효율" class="level3" data-number="12.9.5">
+<h3 data-number="12.9.5" class="anchored" data-anchor-id="lad와-최소제곱의-효율"><span class="header-section-number">12.9.5</span> LAD와 최소제곱의 효율</h3>
+<ul>
+<li>절편 없는 최소제곱 추정량은</li>
+</ul>
+<p><span class="math display">\[
+\hat\beta
+=
+\frac{\sum_{i=1}^{n}x_iy_i}
+{\sum_{i=1}^{n}x_i^2}
+\]</span></p>
+<p>이고</p>
+<p><span class="math display">\[
+\sqrt n(\hat\beta-\beta)
+\Rightarrow
+N\left(0,\frac1{\sigma_x^2}\right)
+\]</span></p>
+<p>와 같은 형태를 갖는다. - LAD와 최소제곱의 asymptotic relative efficiency는</p>
+<p><span class="math display">\[
+ARE(\hat\beta_L,\hat\beta)=4f(0)^2.
+\]</span></p>
+<ul>
+<li>정규오차에서는 LAD가 최소제곱에 비해 약 64% 효율에 그친다.</li>
+<li>따라서 LAD는 매우 robust하지만 정규모형이 맞을 때 효율 손실이 크다.</li>
+</ul>
+</section>
+<section id="회귀-m-estimator" class="level3" data-number="12.9.6">
+<h3 data-number="12.9.6" class="anchored" data-anchor-id="회귀-m-estimator"><span class="header-section-number">12.9.6</span> 회귀 M-estimator</h3>
+<ul>
+<li>평균과 중앙값 사이의 절충으로 Huber형 M-estimator를 만들 수 있다.</li>
+<li>회귀에서는 다음 <span class="math inline">\(\rho\)</span> 함수를 사용한다.</li>
+</ul>
+<p><span class="math display">\[
+\rho_i(\alpha,\beta)
+=
+\begin{cases}
+\dfrac12(y_i-\alpha-\beta x_i)^2,
+&amp;
+|y_i-\alpha-\beta x_i|\le k,\\[6pt]
+k|y_i-\alpha-\beta x_i|-\dfrac12k^2,
+&amp;
+|y_i-\alpha-\beta x_i|&gt;k.
+\end{cases}
+\tag{12.4.6}
+\]</span></p>
+<ul>
+<li>작은 잔차에는 제곱손실을 사용한다.</li>
+<li>큰 잔차에는 절댓값에 가까운 선형손실을 사용한다.</li>
+<li>따라서 정상적인 자료에서는 최소제곱처럼 효율적이고, 큰 이상치에는 덜 민감하다.</li>
+</ul>
+</section>
+<section id="예제-회귀-m-estimator" class="level3" data-number="12.9.7">
+<h3 data-number="12.9.7" class="anchored" data-anchor-id="예제-회귀-m-estimator"><span class="header-section-number">12.9.7</span> 예제: 회귀 M-estimator</h3>
+<ul>
+<li>potoroo 자료에서 <span class="math inline">\(k=1.5\sigma\)</span>를 사용한 M-estimator를 적합하면 다음 결과가 나온다.</li>
+</ul>
+<p><span class="math display">\[
+\text{original data:}\quad y=18.5-0.89x,
+\]</span></p>
+<p><span class="math display">\[
+\text{mistyped data:}\quad y=14.67-0.68x.
+\]</span></p>
+<ul>
+<li>M-estimator는 최소제곱보다 훨씬 안정적이고, LAD와 비슷한 방향으로 동작한다.</li>
+<li>하지만 LAD보다 효율이 좋은 경우가 많다.</li>
+</ul>
+</section>
+<section id="예제-회귀-m-estimator의-are-시뮬레이션" class="level3" data-number="12.9.8">
+<h3 data-number="12.9.8" class="anchored" data-anchor-id="예제-회귀-m-estimator의-are-시뮬레이션"><span class="header-section-number">12.9.8</span> 예제: 회귀 M-estimator의 ARE 시뮬레이션</h3>
+<ul>
+<li>모형은</li>
+</ul>
+<p><span class="math display">\[
+Y_i=\alpha+\beta x_i+\epsilon_i,
+\qquad i=1,\ldots,5
+\]</span></p>
+<p>이고</p>
+<p><span class="math display">\[
+x=(-2,-1,0,1,2),
+\qquad
+\alpha=0,
+\qquad
+\beta=1.
+\]</span></p>
+<ul>
+<li>오차분포를 normal, logistic, double exponential로 바꿔가며 least squares, LAD, M-estimator의 분산을 비교한다.</li>
+<li><span class="math inline">\(k=1.5\)</span>인 M-estimator의 ARE는 다음과 같다.</li>
+</ul>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Comparison</th>
+<th style="text-align: right;">Normal</th>
+<th style="text-align: right;">Logistic</th>
+<th style="text-align: right;">Double exponential</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>vs.&nbsp;least squares</td>
+<td style="text-align: right;">0.98</td>
+<td style="text-align: right;">1.03</td>
+<td style="text-align: right;">1.07</td>
+</tr>
+<tr class="even">
+<td>vs.&nbsp;LAD</td>
+<td style="text-align: right;">1.39</td>
+<td style="text-align: right;">1.27</td>
+<td style="text-align: right;">1.14</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>M-estimator는 세 분포 모두에서 least squares와 비슷한 성능을 보인다.</li>
+<li>동시에 LAD보다 일관되게 더 좋은 효율을 보인다.</li>
+<li>즉 M-estimator는 robustness와 efficiency 사이의 좋은 절충안이다.</li>
+</ul>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./11-ch11.html" class="pagination-link" aria-label="분산분석과 회귀">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">분산분석과 회귀</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./13-ch13.html" class="pagination-link" aria-label="Appendix">
+        <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Appendix</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
