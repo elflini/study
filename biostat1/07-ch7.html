@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>7&nbsp; 가설검정과 p-value – 바이오통계 입문</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./08-ch8.html" rel="next">
+<link href="./06-ch6.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-832e3d7b6b94ddcc90a000f8fabe51a9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./07-ch7.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">가설검정과 p-value</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">바이오통계 입문</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Contents</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-ch1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">왜 바이오통계가 필요한가?</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-ch2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">기술통계와 데이터 요약</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-ch3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">확률의 기초와 진단검사</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-ch4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">확률분포와 정규분포</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-ch5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">표본분포와 표준오차</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-ch6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">신뢰구간</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-ch7.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">가설검정과 p-value</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-ch8.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Chapter 8. t-test와 평균 비교</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-ch9.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">분산분석: ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-ch10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Chapter 9. 범주형 자료 분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-ch11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Chapter 10. 상관분석과 단순선형회귀</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-ch12.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Chapter 11. 다중선형회귀</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-ch13.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Chapter 12. 로지스틱 회귀</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#수업-개요" id="toc-수업-개요" class="nav-link active" data-scroll-target="#수업-개요"><span class="header-section-number">7.1</span> 수업 개요</a></li>
+  <li><a href="#핵심-질문" id="toc-핵심-질문" class="nav-link" data-scroll-target="#핵심-질문"><span class="header-section-number">7.2</span> 핵심 질문</a></li>
+  <li><a href="#학습목표" id="toc-학습목표" class="nav-link" data-scroll-target="#학습목표"><span class="header-section-number">7.3</span> 학습목표</a></li>
+  <li><a href="#수업을-관통하는-예제" id="toc-수업을-관통하는-예제" class="nav-link" data-scroll-target="#수업을-관통하는-예제"><span class="header-section-number">7.4</span> 수업을 관통하는 예제</a></li>
+  <li><a href="#가설검정이란" id="toc-가설검정이란" class="nav-link" data-scroll-target="#가설검정이란"><span class="header-section-number">7.5</span> 가설검정이란?</a></li>
+  <li><a href="#귀무가설과-대립가설" id="toc-귀무가설과-대립가설" class="nav-link" data-scroll-target="#귀무가설과-대립가설"><span class="header-section-number">7.6</span> 귀무가설과 대립가설</a>
+  <ul class="collapse">
+  <li><a href="#귀무가설" id="toc-귀무가설" class="nav-link" data-scroll-target="#귀무가설"><span class="header-section-number">7.6.1</span> 귀무가설</a></li>
+  <li><a href="#대립가설" id="toc-대립가설" class="nav-link" data-scroll-target="#대립가설"><span class="header-section-number">7.6.2</span> 대립가설</a></li>
+  </ul></li>
+  <li><a href="#가설-설정-예제" id="toc-가설-설정-예제" class="nav-link" data-scroll-target="#가설-설정-예제"><span class="header-section-number">7.7</span> 가설 설정 예제</a></li>
+  <li><a href="#양측검정과-단측검정" id="toc-양측검정과-단측검정" class="nav-link" data-scroll-target="#양측검정과-단측검정"><span class="header-section-number">7.8</span> 양측검정과 단측검정</a>
+  <ul class="collapse">
+  <li><a href="#양측검정" id="toc-양측검정" class="nav-link" data-scroll-target="#양측검정"><span class="header-section-number">7.8.1</span> 양측검정</a></li>
+  <li><a href="#단측검정" id="toc-단측검정" class="nav-link" data-scroll-target="#단측검정"><span class="header-section-number">7.8.2</span> 단측검정</a></li>
+  </ul></li>
+  <li><a href="#가설검정의-기본-절차" id="toc-가설검정의-기본-절차" class="nav-link" data-scroll-target="#가설검정의-기본-절차"><span class="header-section-number">7.9</span> 가설검정의 기본 절차</a></li>
+  <li><a href="#검정통계량" id="toc-검정통계량" class="nav-link" data-scroll-target="#검정통계량"><span class="header-section-number">7.10</span> 검정통계량</a></li>
+  <li><a href="#p-value의-정의" id="toc-p-value의-정의" class="nav-link" data-scroll-target="#p-value의-정의"><span class="header-section-number">7.11</span> p-value의 정의</a></li>
+  <li><a href="#p-value-예제" id="toc-p-value-예제" class="nav-link" data-scroll-target="#p-value-예제"><span class="header-section-number">7.12</span> p-value 예제</a></li>
+  <li><a href="#유의수준" id="toc-유의수준" class="nav-link" data-scroll-target="#유의수준"><span class="header-section-number">7.13</span> 유의수준</a></li>
+  <li><a href="#p-value와-유의수준-비교" id="toc-p-value와-유의수준-비교" class="nav-link" data-scroll-target="#p-value와-유의수준-비교"><span class="header-section-number">7.14</span> p-value와 유의수준 비교</a></li>
+  <li><a href="#p-value의-흔한-오해" id="toc-p-value의-흔한-오해" class="nav-link" data-scroll-target="#p-value의-흔한-오해"><span class="header-section-number">7.15</span> p-value의 흔한 오해</a></li>
+  <li><a href="#통계적-유의성과-임상적-중요성" id="toc-통계적-유의성과-임상적-중요성" class="nav-link" data-scroll-target="#통계적-유의성과-임상적-중요성"><span class="header-section-number">7.16</span> 통계적 유의성과 임상적 중요성</a></li>
+  <li><a href="#신뢰구간과-가설검정의-관계" id="toc-신뢰구간과-가설검정의-관계" class="nav-link" data-scroll-target="#신뢰구간과-가설검정의-관계"><span class="header-section-number">7.17</span> 신뢰구간과 가설검정의 관계</a></li>
+  <li><a href="#종-오류" id="toc-종-오류" class="nav-link" data-scroll-target="#종-오류"><span class="header-section-number">7.18</span> 1종 오류</a></li>
+  <li><a href="#종-오류-1" id="toc-종-오류-1" class="nav-link" data-scroll-target="#종-오류-1"><span class="header-section-number">7.19</span> 2종 오류</a></li>
+  <li><a href="#검정력" id="toc-검정력" class="nav-link" data-scroll-target="#검정력"><span class="header-section-number">7.20</span> 검정력</a></li>
+  <li><a href="#검정력에-영향을-주는-요소" id="toc-검정력에-영향을-주는-요소" class="nav-link" data-scroll-target="#검정력에-영향을-주는-요소"><span class="header-section-number">7.21</span> 검정력에 영향을 주는 요소</a>
+  <ul class="collapse">
+  <li><a href="#표본-크기" id="toc-표본-크기" class="nav-link" data-scroll-target="#표본-크기"><span class="header-section-number">7.21.1</span> 표본 크기</a></li>
+  <li><a href="#효과크기" id="toc-효과크기" class="nav-link" data-scroll-target="#효과크기"><span class="header-section-number">7.21.2</span> 효과크기</a></li>
+  <li><a href="#변동성" id="toc-변동성" class="nav-link" data-scroll-target="#변동성"><span class="header-section-number">7.21.3</span> 변동성</a></li>
+  </ul></li>
+  <li><a href="#표본-크기와-p-value" id="toc-표본-크기와-p-value" class="nav-link" data-scroll-target="#표본-크기와-p-value"><span class="header-section-number">7.22</span> 표본 크기와 p-value</a></li>
+  <li><a href="#다중비교-문제" id="toc-다중비교-문제" class="nav-link" data-scroll-target="#다중비교-문제"><span class="header-section-number">7.23</span> 다중비교 문제</a></li>
+  <li><a href="#p-hacking과-선택적-보고" id="toc-p-hacking과-선택적-보고" class="nav-link" data-scroll-target="#p-hacking과-선택적-보고"><span class="header-section-number">7.24</span> p-hacking과 선택적 보고</a></li>
+  <li><a href="#가설검정-방법-선택" id="toc-가설검정-방법-선택" class="nav-link" data-scroll-target="#가설검정-방법-선택"><span class="header-section-number">7.25</span> 가설검정 방법 선택</a></li>
+  <li><a href="#r-실습-준비" id="toc-r-실습-준비" class="nav-link" data-scroll-target="#r-실습-준비"><span class="header-section-number">7.26</span> R 실습 준비</a></li>
+  <li><a href="#r-실습-기술통계-확인" id="toc-r-실습-기술통계-확인" class="nav-link" data-scroll-target="#r-실습-기술통계-확인"><span class="header-section-number">7.27</span> R 실습: 기술통계 확인</a></li>
+  <li><a href="#r-실습-시각화" id="toc-r-실습-시각화" class="nav-link" data-scroll-target="#r-실습-시각화"><span class="header-section-number">7.28</span> R 실습: 시각화</a></li>
+  <li><a href="#r-실습-독립표본-t-test" id="toc-r-실습-독립표본-t-test" class="nav-link" data-scroll-target="#r-실습-독립표본-t-test"><span class="header-section-number">7.29</span> R 실습: 독립표본 t-test</a></li>
+  <li><a href="#r-실습-p-value와-신뢰구간-추출" id="toc-r-실습-p-value와-신뢰구간-추출" class="nav-link" data-scroll-target="#r-실습-p-value와-신뢰구간-추출"><span class="header-section-number">7.30</span> R 실습: p-value와 신뢰구간 추출</a></li>
+  <li><a href="#r-실습-표본-크기에-따른-p-value-변화" id="toc-r-실습-표본-크기에-따른-p-value-변화" class="nav-link" data-scroll-target="#r-실습-표본-크기에-따른-p-value-변화"><span class="header-section-number">7.31</span> R 실습: 표본 크기에 따른 p-value 변화</a></li>
+  <li><a href="#r-실습-1종-오류-시뮬레이션" id="toc-r-실습-1종-오류-시뮬레이션" class="nav-link" data-scroll-target="#r-실습-1종-오류-시뮬레이션"><span class="header-section-number">7.32</span> R 실습: 1종 오류 시뮬레이션</a></li>
+  <li><a href="#r-실습-검정력-시뮬레이션" id="toc-r-실습-검정력-시뮬레이션" class="nav-link" data-scroll-target="#r-실습-검정력-시뮬레이션"><span class="header-section-number">7.33</span> R 실습: 검정력 시뮬레이션</a></li>
+  <li><a href="#r-실습-다중비교-시뮬레이션" id="toc-r-실습-다중비교-시뮬레이션" class="nav-link" data-scroll-target="#r-실습-다중비교-시뮬레이션"><span class="header-section-number">7.34</span> R 실습: 다중비교 시뮬레이션</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">가설검정과 p-value</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="수업-개요" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="수업-개요"><span class="header-section-number">7.1</span> 수업 개요</h2>
+<p>이번 장에서는 통계적 추론의 핵심 도구인 <strong>가설검정(hypothesis testing)</strong>을 학습한다.<br>
+앞 장에서 신뢰구간을 통해 모수의 가능한 범위를 추정했다면, 이번 장에서는 표본자료가 어떤 주장과 얼마나 양립 가능한지를 평가한다.</p>
+<p>의학 연구에서 연구자는 다음과 같은 질문을 자주 만난다.</p>
+<ul>
+<li>신약은 기존 치료보다 혈압을 더 낮추는가?</li>
+<li>새로운 검사법의 양성률은 기존 검사법과 다른가?</li>
+<li>흡연군과 비흡연군의 폐암 발생률은 차이가 있는가?</li>
+<li>치료 전후 평균 검사 수치가 실제로 변했는가?</li>
+<li>관찰된 평균 차이가 우연으로 설명될 수 있는가?</li>
+</ul>
+<p>이 질문들에는 공통점이 있다.<br>
+우리는 모집단 전체를 직접 관찰하지 못하고, 표본에서 얻은 자료를 바탕으로 결론을 내려야 한다.<br>
+그런데 표본은 항상 우연 변동을 가진다. 따라서 표본에서 차이가 관찰되었다고 해서 곧바로 “실제 차이가 있다”고 결론 내릴 수는 없다.</p>
+<p>가설검정은 바로 이 문제를 다룬다.</p>
+<blockquote class="blockquote">
+<p>가설검정은 표본에서 관찰된 차이나 관련성이 우연한 표본변동만으로 설명될 수 있는지 평가하는 절차이다.</p>
+</blockquote>
+<p><img src="fig7/f1.png" class="img-fluid"></p>
+<hr>
+</section>
+<section id="핵심-질문" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="핵심-질문"><span class="header-section-number">7.2</span> 핵심 질문</h2>
+<p>이번 수업은 다음 질문을 중심으로 진행된다.</p>
+<ol type="1">
+<li>귀무가설과 대립가설은 무엇인가?</li>
+<li>p-value는 정확히 무엇을 의미하는가?</li>
+<li>p-value가 작다는 것은 어떤 의미인가?</li>
+<li>p-value가 크면 “효과가 없다”고 말해도 되는가?</li>
+<li>유의수준 <span class="math inline">\(\alpha\)</span>는 무엇을 의미하는가?</li>
+<li>1종 오류와 2종 오류는 어떻게 다른가?</li>
+<li>검정력은 왜 중요한가?</li>
+<li>표본 크기가 커지면 p-value는 왜 작아질 수 있는가?</li>
+<li>통계적 유의성과 임상적 중요성은 왜 구분해야 하는가?</li>
+<li>다중비교와 p-hacking은 왜 위험한가?</li>
+</ol>
+<hr>
+</section>
+<section id="학습목표" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="학습목표"><span class="header-section-number">7.3</span> 학습목표</h2>
+<p>이번 장을 마치면 학생들은 다음을 할 수 있어야 한다.</p>
+<ol type="1">
+<li>가설검정의 목적과 기본 논리를 설명할 수 있다.</li>
+<li>귀무가설과 대립가설을 연구질문에 맞게 설정할 수 있다.</li>
+<li>양측검정과 단측검정을 구분할 수 있다.</li>
+<li>검정통계량의 의미를 설명할 수 있다.</li>
+<li>p-value를 올바르게 해석할 수 있다.</li>
+<li>p-value의 흔한 오해를 피할 수 있다.</li>
+<li>유의수준, 기각역, 통계적 유의성을 설명할 수 있다.</li>
+<li>1종 오류, 2종 오류, 검정력의 관계를 설명할 수 있다.</li>
+<li>효과크기와 신뢰구간을 함께 해석할 수 있다.</li>
+<li>R을 이용하여 기본적인 t-test를 수행하고 결과를 해석할 수 있다.</li>
+</ol>
+<hr>
+</section>
+<section id="수업을-관통하는-예제" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="수업을-관통하는-예제"><span class="header-section-number">7.4</span> 수업을 관통하는 예제</h2>
+<p>이번 장에서는 다음 예제를 반복적으로 사용한다.</p>
+<p>어떤 연구자가 새로운 항고혈압제가 기존 치료보다 수축기 혈압을 더 낮추는지 평가하고자 한다.<br>
+치료군과 대조군에서 각각 환자를 모집하여 치료 후 수축기 혈압을 측정하였다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>집단</th>
+<th style="text-align: right;">평균 수축기 혈압</th>
+<th style="text-align: right;">표준편차</th>
+<th style="text-align: right;">표본 크기</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>대조군</td>
+<td style="text-align: right;">126 mmHg</td>
+<td style="text-align: right;">10 mmHg</td>
+<td style="text-align: right;">30</td>
+</tr>
+<tr class="even">
+<td>치료군</td>
+<td style="text-align: right;">120 mmHg</td>
+<td style="text-align: right;">10 mmHg</td>
+<td style="text-align: right;">30</td>
+</tr>
+</tbody>
+</table>
+<p>표본에서는 치료군의 평균 혈압이 대조군보다 6 mmHg 낮다.<br>
+하지만 이 차이는 실제 치료 효과일 수도 있고, 우연한 표본변동일 수도 있다.</p>
+<p>가설검정은 다음 질문에 답하고자 한다.</p>
+<blockquote class="blockquote">
+<p>실제로 두 치료의 평균 효과가 같다고 가정할 때, 이 정도 또는 더 큰 평균 차이가 우연히 관찰될 가능성은 얼마나 되는가?</p>
+</blockquote>
+<hr>
+</section>
+<section id="가설검정이란" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="가설검정이란"><span class="header-section-number">7.5</span> 가설검정이란?</h2>
+<p>가설검정은 표본자료를 이용하여 모집단에 대한 주장을 평가하는 방법이다.<br>
+여기서 “주장”은 수학적으로 가설(hypothesis)로 표현된다.</p>
+<p>예를 들어 두 치료군의 평균 혈압을 비교할 때 관심 있는 모수는 두 집단의 모평균이다.</p>
+<p><span class="math display">\[\mu_1 = \text{대조군의 평균 혈압}\]</span></p>
+<p><span class="math display">\[\mu_2 = \text{치료군의 평균 혈압}\]</span></p>
+<p>연구자는 보통 다음과 같은 질문을 한다.</p>
+<p><span class="math display">\[\mu_1 = \mu_2 \quad \text{인가?}\]</span></p>
+<p>또는</p>
+<p><span class="math display">\[\mu_1 \neq \mu_2 \quad \text{인가?}\]</span></p>
+<p>표본에서 두 평균이 다르게 나왔다고 해서 곧바로 모집단 평균도 다르다고 말할 수는 없다.<br>
+표본평균은 표본추출에 따라 달라지는 확률변수이기 때문이다.</p>
+<p>따라서 가설검정의 핵심 질문은 다음과 같다.</p>
+<blockquote class="blockquote">
+<p>귀무가설이 참이라고 가정했을 때, 현재 표본에서 관찰된 결과가 얼마나 드문가?</p>
+</blockquote>
+<p>이 질문에 대한 수치적 답이 p-value이다.</p>
+<hr>
+</section>
+<section id="귀무가설과-대립가설" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="귀무가설과-대립가설"><span class="header-section-number">7.6</span> 귀무가설과 대립가설</h2>
+<section id="귀무가설" class="level3" data-number="7.6.1">
+<h3 data-number="7.6.1" class="anchored" data-anchor-id="귀무가설"><span class="header-section-number">7.6.1</span> 귀무가설</h3>
+<p>귀무가설(null hypothesis)은 보통 “차이가 없다”, “효과가 없다”, “관련성이 없다”는 가설이다.<br>
+기호로는 <span class="math inline">\(H_0\)</span>라고 쓴다.</p>
+<p>두 집단 평균 비교에서 귀무가설은 다음과 같다.</p>
+<p><span class="math display">\[H_0: \mu_1 = \mu_2\]</span></p>
+<p>또는 평균 차이를 이용하여 다음과 같이 쓸 수도 있다.</p>
+<p><span class="math display">\[H_0: \mu_1 - \mu_2 = 0\]</span></p>
+<p>귀무가설은 연구자가 반드시 믿고 싶은 가설이라기보다, 통계검정에서 기준점으로 삼는 가설이다.</p>
+<blockquote class="blockquote">
+<p>가설검정은 일단 귀무가설이 참이라고 가정한 뒤, 관찰된 자료가 그 가정과 얼마나 양립 가능한지 평가한다.</p>
+</blockquote>
+<hr>
+</section>
+<section id="대립가설" class="level3" data-number="7.6.2">
+<h3 data-number="7.6.2" class="anchored" data-anchor-id="대립가설"><span class="header-section-number">7.6.2</span> 대립가설</h3>
+<p>대립가설(alternative hypothesis)은 귀무가설과 반대되는 가설이며, 연구자가 증거를 찾고자 하는 방향을 표현한다.<br>
+기호로는 <span class="math inline">\(H_1\)</span> 또는 <span class="math inline">\(H_A\)</span>라고 쓴다.</p>
+<p>두 집단 평균이 다르다는 양측 대립가설은 다음과 같다.</p>
+<p><span class="math display">\[H_1: \mu_1 \neq \mu_2\]</span></p>
+<p>치료군 평균 혈압이 대조군보다 낮다는 단측 대립가설은 다음과 같이 쓸 수 있다.</p>
+<p><span class="math display">\[H_1: \mu_2 &lt; \mu_1\]</span></p>
+<p>가설은 자료를 본 뒤 정하는 것이 아니라, 연구 질문과 연구 설계 단계에서 미리 정해야 한다.</p>
+<hr>
+</section>
+</section>
+<section id="가설-설정-예제" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="가설-설정-예제"><span class="header-section-number">7.7</span> 가설 설정 예제</h2>
+<p>연구질문에 따라 귀무가설과 대립가설은 달라진다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>연구질문</th>
+<th>귀무가설 <span class="math inline">\(H_0\)</span></th>
+<th>대립가설 <span class="math inline">\(H_1\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>두 약의 평균 혈압 강하 효과가 다른가?</td>
+<td><span class="math inline">\(\mu_1=\mu_2\)</span></td>
+<td><span class="math inline">\(\mu_1 \neq \mu_2\)</span></td>
+</tr>
+<tr class="even">
+<td>신약이 기존 약보다 평균 혈압을 더 낮추는가?</td>
+<td><span class="math inline">\(\mu_{\text{new}} \geq \mu_{\text{old}}\)</span></td>
+<td><span class="math inline">\(\mu_{\text{new}} &lt; \mu_{\text{old}}\)</span></td>
+</tr>
+<tr class="odd">
+<td>흡연 여부와 폐암 발생이 관련 있는가?</td>
+<td>두 변수는 독립이다</td>
+<td>두 변수는 관련 있다</td>
+</tr>
+<tr class="even">
+<td>치료 전후 평균 혈당이 변했는가?</td>
+<td><span class="math inline">\(\mu_d=0\)</span></td>
+<td><span class="math inline">\(\mu_d \neq 0\)</span></td>
+</tr>
+<tr class="odd">
+<td>새로운 검사법의 민감도가 90%보다 높은가?</td>
+<td><span class="math inline">\(p \leq 0.90\)</span></td>
+<td><span class="math inline">\(p &gt; 0.90\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>여기서 <span class="math inline">\(\mu_d\)</span>는 치료 후 값에서 치료 전 값을 뺀 차이의 평균이다.</p>
+<hr>
+</section>
+<section id="양측검정과-단측검정" class="level2" data-number="7.8">
+<h2 data-number="7.8" class="anchored" data-anchor-id="양측검정과-단측검정"><span class="header-section-number">7.8</span> 양측검정과 단측검정</h2>
+<section id="양측검정" class="level3" data-number="7.8.1">
+<h3 data-number="7.8.1" class="anchored" data-anchor-id="양측검정"><span class="header-section-number">7.8.1</span> 양측검정</h3>
+<p>양측검정(two-sided test)은 차이가 어느 방향으로든 존재할 가능성을 고려한다.</p>
+<p><span class="math display">\[H_1: \mu_1 \neq \mu_2\]</span></p>
+<p>예를 들어 신약이 기존 치료보다 좋을 수도 있고 나쁠 수도 있다면 양측검정을 사용한다.</p>
+<p>양측검정은 다음 상황에서 적절하다.</p>
+<ul>
+<li>효과의 방향을 사전에 확신하기 어렵다.</li>
+<li>어느 방향의 차이든 임상적으로 중요하다.</li>
+<li>논문 보고에서 보수적인 접근을 취하고 싶다.</li>
+<li>대부분의 의학 연구에서 기본 선택으로 사용된다.</li>
+</ul>
+<hr>
+</section>
+<section id="단측검정" class="level3" data-number="7.8.2">
+<h3 data-number="7.8.2" class="anchored" data-anchor-id="단측검정"><span class="header-section-number">7.8.2</span> 단측검정</h3>
+<p>단측검정(one-sided test)은 특정 방향의 차이만 고려한다.</p>
+<p>예를 들어 신약이 기존 치료보다 혈압을 더 낮추는지만 관심이 있다면 다음과 같이 설정할 수 있다.</p>
+<p><span class="math display">\[H_1: \mu_{\text{new}} &lt; \mu_{\text{old}}\]</span></p>
+<p>단측검정은 양측검정보다 같은 자료에서 p-value가 작아질 수 있다.<br>
+따라서 단측검정은 매우 신중하게 사용해야 한다.</p>
+<p>단측검정을 사용하려면 다음 조건이 필요하다.</p>
+<ol type="1">
+<li>연구 시작 전 방향이 명확히 정해져 있어야 한다.</li>
+<li>반대 방향의 결과는 과학적으로 또는 임상적으로 관심이 없어야 한다.</li>
+<li>분석 후 유의성을 얻기 위해 방향을 바꾸면 안 된다.</li>
+</ol>
+<p>의학 연구에서는 대체로 양측검정을 기본으로 사용하는 것이 안전하다.</p>
+<hr>
+</section>
+</section>
+<section id="가설검정의-기본-절차" class="level2" data-number="7.9">
+<h2 data-number="7.9" class="anchored" data-anchor-id="가설검정의-기본-절차"><span class="header-section-number">7.9</span> 가설검정의 기본 절차</h2>
+<p>가설검정은 보통 다음 순서로 진행된다.</p>
+<ol type="1">
+<li>연구질문을 명확히 한다.</li>
+<li>귀무가설과 대립가설을 설정한다.</li>
+<li>유의수준 <span class="math inline">\(\alpha\)</span>를 정한다.</li>
+<li>자료 유형과 연구설계에 맞는 검정 방법을 선택한다.</li>
+<li>검정통계량을 계산한다.</li>
+<li>p-value를 계산한다.</li>
+<li>p-value와 유의수준을 비교한다.</li>
+<li>효과크기와 신뢰구간을 함께 해석한다.</li>
+<li>통계적 결론과 임상적 결론을 구분하여 보고한다.</li>
+</ol>
+<p>실제 연구에서는 p-value 하나만 보고 결론을 내리지 않는다.<br>
+p-value는 신뢰구간, 효과크기, 연구설계, 표본 크기, 임상적 맥락과 함께 해석해야 한다.</p>
+<hr>
+</section>
+<section id="검정통계량" class="level2" data-number="7.10">
+<h2 data-number="7.10" class="anchored" data-anchor-id="검정통계량"><span class="header-section-number">7.10</span> 검정통계량</h2>
+<p>검정통계량(test statistic)은 관찰된 자료가 귀무가설에서 기대되는 값으로부터 얼마나 떨어져 있는지를 수치화한 값이다.</p>
+<p>대부분의 검정통계량은 다음 구조를 가진다.</p>
+<p><span class="math display">\[\text{검정통계량}
+=
+\frac{
+\text{관찰된 값} - \text{귀무가설에서 기대되는 값}
+}{
+\text{표준오차}
+}\]</span></p>
+<p>두 집단 평균 차이를 비교할 때는 다음과 같은 형태가 된다.</p>
+<p><span class="math display">\[t
+=
+\frac{
+(\bar{X}_1-\bar{X}_2)-0
+}{
+SE(\bar{X}_1-\bar{X}_2)
+}\]</span></p>
+<p>여기서 0은 귀무가설에서 기대되는 평균 차이이다.</p>
+<p>검정통계량의 절댓값이 클수록 관찰된 자료가 귀무가설과 멀리 떨어져 있다는 의미이다.<br>
+하지만 “얼마나 큰 값이면 충분히 큰가?”를 판단하려면 해당 검정통계량의 분포가 필요하다.</p>
+<hr>
+</section>
+<section id="p-value의-정의" class="level2" data-number="7.11">
+<h2 data-number="7.11" class="anchored" data-anchor-id="p-value의-정의"><span class="header-section-number">7.11</span> p-value의 정의</h2>
+<p>p-value는 다음과 같이 정의된다.</p>
+<blockquote class="blockquote">
+<p>귀무가설이 참이라고 가정했을 때, 현재 관찰된 결과 또는 그보다 더 극단적인 결과가 나올 확률.</p>
+</blockquote>
+<p>수식으로는 양측검정에서 다음과 같이 표현할 수 있다.</p>
+<p><span class="math display">\[p\text{-value}
+=
+P(|T| \geq |t_{\text{obs}}| \mid H_0)\]</span></p>
+<p>여기서</p>
+<ul>
+<li><span class="math inline">\(T\)</span>는 귀무가설 하에서의 검정통계량이다.</li>
+<li><span class="math inline">\(t_{\text{obs}}\)</span>는 실제 자료에서 관찰된 검정통계량이다.</li>
+<li><span class="math inline">\(|T| \geq |t_{\text{obs}}|\)</span>는 현재 관찰값만큼 또는 그보다 더 극단적인 결과를 의미한다.</li>
+</ul>
+<p><img src="fig7/f2.png" class="img-fluid"></p>
+<p>p-value가 작다는 것은 귀무가설이 참이라는 가정 아래에서 현재 자료가 드물게 관찰된다는 뜻이다.<br>
+따라서 p-value가 충분히 작으면 귀무가설을 기각한다.</p>
+<hr>
+</section>
+<section id="p-value-예제" class="level2" data-number="7.12">
+<h2 data-number="7.12" class="anchored" data-anchor-id="p-value-예제"><span class="header-section-number">7.12</span> p-value 예제</h2>
+<p>두 치료법의 평균 혈압을 비교한 결과 다음이 나왔다고 하자.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>결과</th>
+<th style="text-align: right;">값</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>평균 차이</td>
+<td style="text-align: right;">5.2 mmHg</td>
+</tr>
+<tr class="even">
+<td>95% 신뢰구간</td>
+<td style="text-align: right;">2.1 to 8.3 mmHg</td>
+</tr>
+<tr class="odd">
+<td>p-value</td>
+<td style="text-align: right;">0.002</td>
+</tr>
+</tbody>
+</table>
+<p>이 결과는 다음과 같이 해석한다.</p>
+<blockquote class="blockquote">
+<p>실제로 두 치료법의 평균 효과가 같다고 가정하면, 현재 관찰된 정도 또는 그보다 더 큰 평균 차이가 우연히 관찰될 확률은 약 0.2%이다.</p>
+</blockquote>
+<p>따라서 일반적인 유의수준 0.05에서는 귀무가설을 기각한다.<br>
+하지만 여기서 끝나면 안 된다. 평균 차이가 5.2 mmHg라는 효과크기와 95% 신뢰구간 2.1에서 8.3 mmHg가 임상적으로 중요한지 함께 평가해야 한다.</p>
+<hr>
+</section>
+<section id="유의수준" class="level2" data-number="7.13">
+<h2 data-number="7.13" class="anchored" data-anchor-id="유의수준"><span class="header-section-number">7.13</span> 유의수준</h2>
+<p>유의수준(significance level)은 귀무가설이 참일 때 귀무가설을 잘못 기각할 최대 허용 확률이다.<br>
+기호로는 <span class="math inline">\(\alpha\)</span>를 사용한다.</p>
+<p>의학 연구에서는 흔히 다음 값을 사용한다.</p>
+<p><span class="math display">\[\alpha = 0.05\]</span></p>
+<p>이는 “귀무가설이 참인데도 우연히 유의하다고 판단할 확률을 5%로 제한하겠다”는 의미이다.</p>
+<p>유의수준은 자료를 본 뒤 정하는 값이 아니다.<br>
+연구 설계 단계에서 미리 정해야 한다.</p>
+<hr>
+</section>
+<section id="p-value와-유의수준-비교" class="level2" data-number="7.14">
+<h2 data-number="7.14" class="anchored" data-anchor-id="p-value와-유의수준-비교"><span class="header-section-number">7.14</span> p-value와 유의수준 비교</h2>
+<p>p-value와 유의수준을 비교하여 통계적 결론을 내린다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 24%">
+<col style="width: 37%">
+<col style="width: 37%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>조건</th>
+<th>결정</th>
+<th>표현</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(p &lt; \alpha\)</span></td>
+<td>귀무가설 기각</td>
+<td>통계적으로 유의함</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(p \geq \alpha\)</span></td>
+<td>귀무가설을 기각하지 못함</td>
+<td>통계적으로 유의하지 않음</td>
+</tr>
+</tbody>
+</table>
+<p>주의할 점은 “귀무가설을 기각하지 못함”이 “귀무가설이 참임을 증명함”과 다르다는 것이다.</p>
+<p>예를 들어 <span class="math inline">\(p=0.12\)</span>라면 다음과 같이 말해야 한다.</p>
+<blockquote class="blockquote">
+<p>유의수준 0.05에서 통계적으로 유의한 차이를 보이지 않았다.</p>
+</blockquote>
+<p>다음과 같이 말하면 안 된다.</p>
+<blockquote class="blockquote">
+<p>두 집단은 동일하다.</p>
+</blockquote>
+<p>유의하지 않은 결과는 효과가 없기 때문일 수도 있지만, 표본 크기가 작거나 변동성이 커서 효과를 발견할 힘이 부족했기 때문일 수도 있다.</p>
+<hr>
+</section>
+<section id="p-value의-흔한-오해" class="level2" data-number="7.15">
+<h2 data-number="7.15" class="anchored" data-anchor-id="p-value의-흔한-오해"><span class="header-section-number">7.15</span> p-value의 흔한 오해</h2>
+<p>p-value는 매우 자주 오해된다. 다음 해석은 모두 잘못된 해석이다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>잘못된 해석</th>
+<th>왜 틀렸는가</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>p-value는 귀무가설이 참일 확률이다</td>
+<td>p-value는 <span class="math inline">\(P(H_0 \mid data)\)</span>가 아니라 <span class="math inline">\(P(data \mid H_0)\)</span>이다</td>
+</tr>
+<tr class="even">
+<td>p-value가 작을수록 효과크기가 크다</td>
+<td>표본 크기가 크면 작은 효과도 작은 p-value를 가질 수 있다</td>
+</tr>
+<tr class="odd">
+<td>p=0.049는 효과가 있고 p=0.051은 효과가 없다</td>
+<td>두 값은 실질적으로 거의 비슷하다</td>
+</tr>
+<tr class="even">
+<td>p&lt;0.05이면 임상적으로 중요하다</td>
+<td>통계적 유의성과 임상적 중요성은 다르다</td>
+</tr>
+<tr class="odd">
+<td>p≥0.05이면 효과가 없다</td>
+<td>효과가 없다는 증거가 아니라, 충분한 증거를 찾지 못했다는 의미일 수 있다</td>
+</tr>
+<tr class="even">
+<td>p-value는 결과가 우연일 확률이다</td>
+<td>정확히는 귀무가설 하에서 현재 또는 더 극단적 자료가 나올 확률이다</td>
+</tr>
+</tbody>
+</table>
+<p>특히 다음 차이는 매우 중요하다.</p>
+<p><span class="math display">\[P(\text{data} \mid H_0)
+\neq
+P(H_0 \mid \text{data})\]</span></p>
+<p>p-value는 왼쪽의 확률과 관련되어 있다.<br>
+우리가 흔히 알고 싶어하는 “귀무가설이 참일 확률”은 오른쪽의 확률에 가깝지만, p-value는 그것을 직접 제공하지 않는다.</p>
+<hr>
+</section>
+<section id="통계적-유의성과-임상적-중요성" class="level2" data-number="7.16">
+<h2 data-number="7.16" class="anchored" data-anchor-id="통계적-유의성과-임상적-중요성"><span class="header-section-number">7.16</span> 통계적 유의성과 임상적 중요성</h2>
+<p>통계적으로 유의하다는 것은 귀무가설과 자료 사이의 불일치가 충분히 크다는 뜻이다.<br>
+하지만 그것이 곧 임상적으로 중요하다는 뜻은 아니다.</p>
+<p>예를 들어 표본 크기가 매우 큰 연구에서 다음 결과가 나왔다고 하자.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>결과</th>
+<th style="text-align: right;">값</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>평균 혈압 차이</td>
+<td style="text-align: right;">0.5 mmHg</td>
+</tr>
+<tr class="even">
+<td>p-value</td>
+<td style="text-align: right;">&lt; 0.001</td>
+</tr>
+</tbody>
+</table>
+<p>이 결과는 통계적으로 유의할 수 있다.<br>
+하지만 0.5 mmHg 차이가 환자 치료 방침을 바꿀 만큼 중요한지는 별도의 임상적 판단이 필요하다.</p>
+<p>반대로 다음 결과를 보자.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>결과</th>
+<th style="text-align: right;">값</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>평균 생존기간 차이</td>
+<td style="text-align: right;">6개월</td>
+</tr>
+<tr class="even">
+<td>p-value</td>
+<td style="text-align: right;">0.07</td>
+</tr>
+</tbody>
+</table>
+<p>이 결과는 유의수준 0.05에서는 통계적으로 유의하지 않다.<br>
+하지만 생존기간 6개월 차이는 임상적으로 매우 중요할 수 있다.<br>
+따라서 p-value만으로 연구 결과의 가치를 판단해서는 안 된다.</p>
+<p><img src="fig7/f7.png" class="img-fluid"></p>
+<hr>
+</section>
+<section id="신뢰구간과-가설검정의-관계" class="level2" data-number="7.17">
+<h2 data-number="7.17" class="anchored" data-anchor-id="신뢰구간과-가설검정의-관계"><span class="header-section-number">7.17</span> 신뢰구간과 가설검정의 관계</h2>
+<p>신뢰구간과 가설검정은 서로 밀접하게 연결되어 있다.</p>
+<p>두 집단 평균 차이에 대한 95% 신뢰구간이 귀무값 0을 포함하지 않으면, 대개 양측검정에서 <span class="math inline">\(p&lt;0.05\)</span>가 된다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>95% 신뢰구간</th>
+<th>귀무값 0 포함 여부</th>
+<th>해석</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2.1 to 8.3</td>
+<td>포함하지 않음</td>
+<td>통계적으로 유의</td>
+</tr>
+<tr class="even">
+<td>-1.2 to 6.4</td>
+<td>포함함</td>
+<td>통계적으로 유의하지 않음</td>
+</tr>
+</tbody>
+</table>
+<p>예를 들어 평균 차이의 95% 신뢰구간이 다음과 같다면,</p>
+<p><span class="math display">\[2.1 \leq \mu_1-\mu_2 \leq 8.3\]</span></p>
+<p>이 구간은 0을 포함하지 않는다.<br>
+따라서 “차이가 없다”는 귀무가설과 양립하기 어렵다.</p>
+<p>반대로 신뢰구간이 다음과 같다면,</p>
+<p><span class="math display">\[-1.2 \leq \mu_1-\mu_2 \leq 6.4\]</span></p>
+<p>0을 포함하므로 차이가 없다는 가능성을 배제하기 어렵다.</p>
+<p>신뢰구간은 p-value보다 더 많은 정보를 제공한다.<br>
+왜냐하면 신뢰구간은 효과의 방향, 크기, 불확실성을 함께 보여주기 때문이다.</p>
+<hr>
+</section>
+<section id="종-오류" class="level2" data-number="7.18">
+<h2 data-number="7.18" class="anchored" data-anchor-id="종-오류"><span class="header-section-number">7.18</span> 1종 오류</h2>
+<p>1종 오류(Type I error)는 실제로 귀무가설이 참인데 귀무가설을 기각하는 오류이다.</p>
+<p>즉 실제로 효과가 없는데 효과가 있다고 결론 내리는 오류이다.</p>
+<p>예를 들어 실제로 효과가 없는 약을 효과 있다고 판단하면 1종 오류이다.</p>
+<p>1종 오류의 확률은 유의수준 <span class="math inline">\(\alpha\)</span>와 같다.</p>
+<p><span class="math display">\[P(\text{1종 오류}) = \alpha\]</span></p>
+<p>보통 <span class="math inline">\(\alpha=0.05\)</span>를 사용한다면, 귀무가설이 참일 때 약 5%의 확률로 잘못 기각할 수 있음을 허용하는 것이다.</p>
+<hr>
+</section>
+<section id="종-오류-1" class="level2" data-number="7.19">
+<h2 data-number="7.19" class="anchored" data-anchor-id="종-오류-1"><span class="header-section-number">7.19</span> 2종 오류</h2>
+<p>2종 오류(Type II error)는 실제로 귀무가설이 거짓인데 귀무가설을 기각하지 못하는 오류이다.</p>
+<p>즉 실제로 효과가 있는데 효과를 발견하지 못하는 오류이다.</p>
+<p>예를 들어 실제로 효과가 있는 약을 효과 없다고 판단하면 2종 오류이다.</p>
+<p>2종 오류의 확률은 <span class="math inline">\(\beta\)</span>로 표시한다.</p>
+<p><span class="math display">\[P(\text{2종 오류}) = \beta\]</span></p>
+<p>1종 오류와 2종 오류는 서로 다른 방향의 오류이다.</p>
+<p><img src="fig7/f3.png" class="img-fluid"></p>
+<hr>
+</section>
+<section id="검정력" class="level2" data-number="7.20">
+<h2 data-number="7.20" class="anchored" data-anchor-id="검정력"><span class="header-section-number">7.20</span> 검정력</h2>
+<p>검정력(power)은 실제 효과가 있을 때 귀무가설을 기각할 확률이다.</p>
+<p><span class="math display">\[\text{Power}=1-\beta\]</span></p>
+<p>검정력이 높다는 것은 실제 효과가 있을 때 그 효과를 발견할 가능성이 높다는 뜻이다.<br>
+의학 연구에서는 흔히 80% 또는 90%의 검정력을 목표로 표본 크기를 설계한다.</p>
+<p><span class="math display">\[\text{Power}=0.80\]</span></p>
+<p>라는 것은 실제로 연구자가 관심 있는 크기의 효과가 존재할 때, 그 효과를 통계적으로 유의하게 발견할 확률이 80%라는 뜻이다.</p>
+<p><img src="fig7/f4.png" class="img-fluid"></p>
+<hr>
+</section>
+<section id="검정력에-영향을-주는-요소" class="level2" data-number="7.21">
+<h2 data-number="7.21" class="anchored" data-anchor-id="검정력에-영향을-주는-요소"><span class="header-section-number">7.21</span> 검정력에 영향을 주는 요소</h2>
+<p>검정력은 여러 요소의 영향을 받는다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>요소</th>
+<th>검정력에 미치는 영향</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>표본 크기 증가</td>
+<td>검정력 증가</td>
+</tr>
+<tr class="even">
+<td>효과크기 증가</td>
+<td>검정력 증가</td>
+</tr>
+<tr class="odd">
+<td>자료의 변동성 감소</td>
+<td>검정력 증가</td>
+</tr>
+<tr class="even">
+<td>유의수준 <span class="math inline">\(\alpha\)</span> 증가</td>
+<td>검정력 증가하지만 1종 오류 증가</td>
+</tr>
+<tr class="odd">
+<td>측정오차 감소</td>
+<td>검정력 증가</td>
+</tr>
+<tr class="even">
+<td>적절한 연구설계</td>
+<td>검정력 증가</td>
+</tr>
+</tbody>
+</table>
+<section id="표본-크기" class="level3" data-number="7.21.1">
+<h3 data-number="7.21.1" class="anchored" data-anchor-id="표본-크기"><span class="header-section-number">7.21.1</span> 표본 크기</h3>
+<p>표본 크기가 커지면 표준오차가 작아진다.</p>
+<p>두 독립집단 평균 차이의 표준오차는 대략 다음과 같다.</p>
+<p><span class="math display">\[SE(\bar{X}_1-\bar{X}_2)
+=
+\sqrt{
+\frac{\sigma_1^2}{n_1}
++
+\frac{\sigma_2^2}{n_2}
+}\]</span></p>
+<p>표본 크기 <span class="math inline">\(n_1\)</span>, <span class="math inline">\(n_2\)</span>가 커질수록 표준오차가 작아지고, 같은 평균 차이라도 검정통계량은 커질 수 있다.</p>
+</section>
+<section id="효과크기" class="level3" data-number="7.21.2">
+<h3 data-number="7.21.2" class="anchored" data-anchor-id="효과크기"><span class="header-section-number">7.21.2</span> 효과크기</h3>
+<p>효과가 클수록 귀무가설과 실제 분포 사이의 간격이 커진다.<br>
+따라서 같은 표본 크기에서도 효과가 큰 연구는 검정력이 높다.</p>
+</section>
+<section id="변동성" class="level3" data-number="7.21.3">
+<h3 data-number="7.21.3" class="anchored" data-anchor-id="변동성"><span class="header-section-number">7.21.3</span> 변동성</h3>
+<p>자료의 변동성이 크면 같은 평균 차이를 관찰해도 표준오차가 커진다.<br>
+표준오차가 커지면 검정통계량이 작아지고 p-value가 커질 수 있다.</p>
+<hr>
+</section>
+</section>
+<section id="표본-크기와-p-value" class="level2" data-number="7.22">
+<h2 data-number="7.22" class="anchored" data-anchor-id="표본-크기와-p-value"><span class="header-section-number">7.22</span> 표본 크기와 p-value</h2>
+<p>p-value는 효과크기뿐 아니라 표본 크기의 영향을 강하게 받는다.</p>
+<p>같은 평균 차이가 있더라도 표본 크기가 커지면 표준오차가 작아진다.<br>
+검정통계량은 대략 다음 구조를 가지므로,</p>
+<p><span class="math display">\[t
+=
+\frac{\text{평균 차이}}{\text{표준오차}}\]</span></p>
+<p>표준오차가 작아지면 <span class="math inline">\(t\)</span> 값이 커지고 p-value는 작아진다.</p>
+<p>따라서 큰 표본에서는 임상적으로 매우 작은 차이도 통계적으로 유의할 수 있다.<br>
+반대로 작은 표본에서는 임상적으로 큰 차이가 있어도 통계적으로 유의하지 않을 수 있다.</p>
+<p><img src="fig7/f5.png" class="img-fluid"></p>
+<hr>
+</section>
+<section id="다중비교-문제" class="level2" data-number="7.23">
+<h2 data-number="7.23" class="anchored" data-anchor-id="다중비교-문제"><span class="header-section-number">7.23</span> 다중비교 문제</h2>
+<p>여러 가설검정을 동시에 수행하면 우연히 유의한 결과가 나올 가능성이 증가한다.</p>
+<p>각 검정에서 유의수준을 0.05로 설정했다고 하자.<br>
+귀무가설이 모두 참이고 검정들이 독립이라고 단순화하면, 한 번의 검정에서 유의하지 않을 확률은 다음과 같다.</p>
+<p><span class="math display">\[1-0.05 = 0.95\]</span></p>
+<p><span class="math inline">\(m\)</span>번의 검정에서 모두 유의하지 않을 확률은 다음과 같다.</p>
+<p><span class="math display">\[0.95^m\]</span></p>
+<p>따라서 적어도 하나가 우연히 유의할 확률은 다음과 같다.</p>
+<p><span class="math display">\[1-0.95^m\]</span></p>
+<p>예를 들어 20개의 가설검정을 수행하면,</p>
+<p><span class="math display">\[1-0.95^{20}
+\approx 0.64\]</span></p>
+<p>즉 실제 효과가 전혀 없어도 적어도 하나가 유의하게 나올 확률은 약 64%가 된다.</p>
+<p><img src="fig7/f6.png" class="img-fluid"></p>
+<p>이 때문에 여러 검정을 수행하는 연구에서는 다중비교 보정이 필요할 수 있다.<br>
+대표적인 방법으로는 Bonferroni 보정, Holm 방법, false discovery rate 조절 등이 있다.</p>
+<hr>
+</section>
+<section id="p-hacking과-선택적-보고" class="level2" data-number="7.24">
+<h2 data-number="7.24" class="anchored" data-anchor-id="p-hacking과-선택적-보고"><span class="header-section-number">7.24</span> p-hacking과 선택적 보고</h2>
+<p>p-hacking은 원하는 p-value가 나올 때까지 분석 방법을 반복적으로 바꾸거나 결과를 선택적으로 보고하는 행위이다.</p>
+<p>예를 들어 다음과 같은 행동이 p-hacking에 해당할 수 있다.</p>
+<ul>
+<li>여러 변수 중 유의한 변수만 보고한다.</li>
+<li>여러 하위집단 분석 중 유의한 결과만 보고한다.</li>
+<li>유의한 결과가 나올 때까지 공변량을 바꿔가며 분석한다.</li>
+<li>결과를 본 뒤 단측검정으로 바꾼다.</li>
+<li>중간분석을 반복하면서 유의한 순간 연구를 중단한다.</li>
+<li>이상치 제거 기준을 결과에 맞추어 바꾼다.</li>
+</ul>
+<p>p-hacking은 재현성 위기의 중요한 원인이다.<br>
+이를 줄이기 위해서는 연구계획 사전등록, 주 분석과 탐색 분석의 구분, 모든 분석 결과의 투명한 보고가 필요하다.</p>
+<hr>
+</section>
+<section id="가설검정-방법-선택" class="level2" data-number="7.25">
+<h2 data-number="7.25" class="anchored" data-anchor-id="가설검정-방법-선택"><span class="header-section-number">7.25</span> 가설검정 방법 선택</h2>
+<p>가설검정 방법은 자료 유형과 연구설계에 따라 달라진다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>연구 상황</th>
+<th>결과 변수</th>
+<th>설계</th>
+<th>대표 검정</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>한 집단 평균이 기준값과 다른가?</td>
+<td>연속형</td>
+<td>한 표본</td>
+<td>one-sample t-test</td>
+</tr>
+<tr class="even">
+<td>두 독립집단 평균 비교</td>
+<td>연속형</td>
+<td>독립집단</td>
+<td>independent t-test</td>
+</tr>
+<tr class="odd">
+<td>치료 전후 평균 비교</td>
+<td>연속형</td>
+<td>짝지어진 자료</td>
+<td>paired t-test</td>
+</tr>
+<tr class="even">
+<td>세 집단 이상 평균 비교</td>
+<td>연속형</td>
+<td>독립집단</td>
+<td>ANOVA</td>
+</tr>
+<tr class="odd">
+<td>두 범주형 변수 관련성</td>
+<td>범주형</td>
+<td>독립 표본</td>
+<td>chi-square test</td>
+</tr>
+<tr class="even">
+<td>작은 표본의 2×2 표</td>
+<td>범주형</td>
+<td>독립 표본</td>
+<td>Fisher’s exact test</td>
+</tr>
+<tr class="odd">
+<td>두 비율 비교</td>
+<td>이항형</td>
+<td>독립집단</td>
+<td>two-proportion test</td>
+</tr>
+<tr class="even">
+<td>정규성 가정이 어려운 두 집단 비교</td>
+<td>순위/비정규 연속형</td>
+<td>독립집단</td>
+<td>Wilcoxon rank-sum test</td>
+</tr>
+</tbody>
+</table>
+<p>검정 방법을 선택할 때는 “어떤 p-value를 얻을까?”보다 다음 질문이 먼저이다.</p>
+<ol type="1">
+<li>연구질문은 무엇인가?</li>
+<li>결과 변수의 유형은 무엇인가?</li>
+<li>비교하는 집단은 독립인가, 짝지어진 자료인가?</li>
+<li>표본 크기는 충분한가?</li>
+<li>검정의 가정은 어느 정도 만족되는가?</li>
+</ol>
+<hr>
+</section>
+<section id="r-실습-준비" class="level2" data-number="7.26">
+<h2 data-number="7.26" class="anchored" data-anchor-id="r-실습-준비"><span class="header-section-number">7.26</span> R 실습 준비</h2>
+<p>이번 실습에서는 두 집단의 평균 혈압을 비교한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>control <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="at">mean =</span> <span class="dv">126</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>treatment <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="at">mean =</span> <span class="dv">120</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>bp_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">group =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"Control"</span>, <span class="st">"Treatment"</span>), <span class="at">each =</span> <span class="dv">30</span>),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">sbp =</span> <span class="fu">c</span>(control, treatment)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(bp_data)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    group      sbp
+1 Control 120.3952
+2 Control 123.6982
+3 Control 141.5871
+4 Control 126.7051
+5 Control 127.2929
+6 Control 143.1506</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="r-실습-기술통계-확인" class="level2" data-number="7.27">
+<h2 data-number="7.27" class="anchored" data-anchor-id="r-실습-기술통계-확인"><span class="header-section-number">7.27</span> R 실습: 기술통계 확인</h2>
+<p>가설검정을 하기 전에 먼저 자료를 요약한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tapply</span>(bp_data<span class="sc">$</span>sbp, bp_data<span class="sc">$</span>group, mean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Control Treatment 
+ 125.5290  121.7834 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tapply</span>(bp_data<span class="sc">$</span>sbp, bp_data<span class="sc">$</span>group, sd)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Control Treatment 
+ 9.810307  8.351279 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tapply</span>(bp_data<span class="sc">$</span>sbp, bp_data<span class="sc">$</span>group, length)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Control Treatment 
+       30        30 </code></pre>
+</div>
+</div>
+<p>평균 차이를 직접 계산할 수도 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(control) <span class="sc">-</span> <span class="fu">mean</span>(treatment)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.745579</code></pre>
+</div>
+</div>
+<p>검정 전에 평균, 표준편차, 표본 크기, 이상치, 분포 형태를 확인하는 습관이 중요하다.</p>
+<hr>
+</section>
+<section id="r-실습-시각화" class="level2" data-number="7.28">
+<h2 data-number="7.28" class="anchored" data-anchor-id="r-실습-시각화"><span class="header-section-number">7.28</span> R 실습: 시각화</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  sbp <span class="sc">~</span> group,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> bp_data,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Group"</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Systolic blood pressure"</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Blood pressure comparison"</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-ch7_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>시각화는 p-value만으로는 알 수 없는 정보를 제공한다.</p>
+<ul>
+<li>집단 간 차이의 방향</li>
+<li>자료의 변동성</li>
+<li>이상치 여부</li>
+<li>분포의 대략적인 형태</li>
+</ul>
+<hr>
+</section>
+<section id="r-실습-독립표본-t-test" class="level2" data-number="7.29">
+<h2 data-number="7.29" class="anchored" data-anchor-id="r-실습-독립표본-t-test"><span class="header-section-number">7.29</span> R 실습: 독립표본 t-test</h2>
+<p>두 독립집단의 평균을 비교하기 위해 <code>t.test()</code>를 사용한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>t_result <span class="ot">&lt;-</span> <span class="fu">t.test</span>(sbp <span class="sc">~</span> group, <span class="at">data =</span> bp_data)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>t_result</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Welch Two Sample t-test
+
+data:  sbp by group
+t = 1.5924, df = 56.559, p-value = 0.1169
+alternative hypothesis: true difference in means between group Control and group Treatment is not equal to 0
+95 percent confidence interval:
+ -0.9654261  8.4565843
+sample estimates:
+  mean in group Control mean in group Treatment 
+               125.5290                121.7834 </code></pre>
+</div>
+</div>
+<p>출력에서 확인해야 할 핵심 항목은 다음과 같다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 29%">
+<col style="width: 70%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>항목</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>t</td>
+<td>검정통계량</td>
+</tr>
+<tr class="even">
+<td>df</td>
+<td>자유도</td>
+</tr>
+<tr class="odd">
+<td>p-value</td>
+<td>귀무가설 하에서 현재 또는 더 극단적인 결과의 확률</td>
+</tr>
+<tr class="even">
+<td>confidence interval</td>
+<td>평균 차이에 대한 신뢰구간</td>
+</tr>
+<tr class="odd">
+<td>sample estimates</td>
+<td>각 집단의 표본평균</td>
+</tr>
+</tbody>
+</table>
+<p>p-value만 보지 말고 신뢰구간과 표본평균도 함께 확인해야 한다.</p>
+<hr>
+</section>
+<section id="r-실습-p-value와-신뢰구간-추출" class="level2" data-number="7.30">
+<h2 data-number="7.30" class="anchored" data-anchor-id="r-실습-p-value와-신뢰구간-추출"><span class="header-section-number">7.30</span> R 실습: p-value와 신뢰구간 추출</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>t_result<span class="sc">$</span>p.value</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1168758</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>t_result<span class="sc">$</span>conf.int</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -0.9654261  8.4565843
+attr(,"conf.level")
+[1] 0.95</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>t_result<span class="sc">$</span>estimate</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  mean in group Control mean in group Treatment 
+               125.5290                121.7834 </code></pre>
+</div>
+</div>
+<p>결과 보고는 다음과 같이 할 수 있다.</p>
+<blockquote class="blockquote">
+<p>두 집단의 평균 수축기 혈압을 비교한 결과, 평균 차이는 약 -3.75 mmHg였으며, p-value는 0.117이었다.</p>
+</blockquote>
+<p>단, 실제 논문에서는 집단 순서와 차이의 방향을 명확히 확인한 뒤 문장을 작성해야 한다.</p>
+<hr>
+</section>
+<section id="r-실습-표본-크기에-따른-p-value-변화" class="level2" data-number="7.31">
+<h2 data-number="7.31" class="anchored" data-anchor-id="r-실습-표본-크기에-따른-p-value-변화"><span class="header-section-number">7.31</span> R 실습: 표본 크기에 따른 p-value 변화</h2>
+<p>같은 평균 차이라도 표본 크기가 달라지면 p-value가 달라질 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>small_control <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">10</span>, <span class="at">mean =</span> <span class="dv">126</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>small_treatment <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">10</span>, <span class="at">mean =</span> <span class="dv">120</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>large_control <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">200</span>, <span class="at">mean =</span> <span class="dv">126</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>large_treatment <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">200</span>, <span class="at">mean =</span> <span class="dv">120</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(small_control, small_treatment)<span class="sc">$</span>p.value</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.3097989</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(large_control, large_treatment)<span class="sc">$</span>p.value</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 8.43164e-09</code></pre>
+</div>
+</div>
+<p>이 실습은 p-value가 효과크기만의 함수가 아니라 표본 크기와 변동성에도 영향을 받는다는 점을 보여준다.</p>
+<hr>
+</section>
+<section id="r-실습-1종-오류-시뮬레이션" class="level2" data-number="7.32">
+<h2 data-number="7.32" class="anchored" data-anchor-id="r-실습-1종-오류-시뮬레이션"><span class="header-section-number">7.32</span> R 실습: 1종 오류 시뮬레이션</h2>
+<p>이번에는 실제로 두 집단 평균이 같은 상황을 시뮬레이션한다.<br>
+즉 귀무가설이 참인 상황이다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>n_sim <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span> <span class="fu">replicate</span>(</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  n_sim,</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="at">mean =</span> <span class="dv">100</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="at">mean =</span> <span class="dv">100</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">t.test</span>(x, y)<span class="sc">$</span>p.value</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(p_values <span class="sc">&lt;</span> <span class="fl">0.05</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.042</code></pre>
+</div>
+</div>
+<p>두 집단의 실제 평균이 같더라도, 유의수준 0.05를 사용하면 약 5% 정도는 우연히 유의한 결과가 나온다.<br>
+이것이 1종 오류의 의미이다.</p>
+<p>p-value의 분포를 히스토그램으로 확인할 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  p_values,</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="dv">20</span>,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"P-values under the null hypothesis"</span>,</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"p-value"</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="fl">0.05</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-ch7_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>귀무가설이 참이면 p-value는 대체로 0과 1 사이에 고르게 분포한다.</p>
+<hr>
+</section>
+<section id="r-실습-검정력-시뮬레이션" class="level2" data-number="7.33">
+<h2 data-number="7.33" class="anchored" data-anchor-id="r-실습-검정력-시뮬레이션"><span class="header-section-number">7.33</span> R 실습: 검정력 시뮬레이션</h2>
+<p>이번에는 실제 평균 차이가 존재하는 상황을 시뮬레이션한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>n_sim <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>p_values_alt <span class="ot">&lt;-</span> <span class="fu">replicate</span>(</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  n_sim,</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="at">mean =</span> <span class="dv">100</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="at">mean =</span> <span class="dv">106</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">t.test</span>(x, y)<span class="sc">$</span>p.value</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(p_values_alt <span class="sc">&lt;</span> <span class="fl">0.05</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.635</code></pre>
+</div>
+</div>
+<p>이 값은 표본 크기 30명씩, 평균 차이 6, 표준편차 10인 상황에서의 경험적 검정력에 해당한다.</p>
+<p>표본 크기를 늘려 비교해 보자.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>power_by_n <span class="ot">&lt;-</span> <span class="fu">sapply</span>(</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">50</span>, <span class="dv">100</span>),</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(n) {</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    p_values <span class="ot">&lt;-</span> <span class="fu">replicate</span>(</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>      <span class="dv">1000</span>,</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>      {</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>        x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">100</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>        y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">106</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>        <span class="fu">t.test</span>(x, y)<span class="sc">$</span>p.value</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mean</span>(p_values <span class="sc">&lt;</span> <span class="fl">0.05</span>)</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>power_by_n</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.239 0.439 0.635 0.843 0.987</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">50</span>, <span class="dv">100</span>),</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  power_by_n,</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"b"</span>,</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Sample size per group"</span>,</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Empirical power"</span>,</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Power increases with sample size"</span>,</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fl">0.8</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-ch7_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="r-실습-다중비교-시뮬레이션" class="level2" data-number="7.34">
+<h2 data-number="7.34" class="anchored" data-anchor-id="r-실습-다중비교-시뮬레이션"><span class="header-section-number">7.34</span> R 실습: 다중비교 시뮬레이션</h2>
+<p>실제 효과가 전혀 없는 20개의 검정을 반복하면 어떻게 될까?</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>n_sim <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>any_significant <span class="ot">&lt;-</span> <span class="fu">replicate</span>(</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  n_sim,</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    p_values <span class="ot">&lt;-</span> <span class="fu">replicate</span>(</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>      <span class="dv">20</span>,</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>      {</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>        x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="at">mean =</span> <span class="dv">100</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>        y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">30</span>, <span class="at">mean =</span> <span class="dv">100</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>        <span class="fu">t.test</span>(x, y)<span class="sc">$</span>p.value</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">any</span>(p_values <span class="sc">&lt;</span> <span class="fl">0.05</span>)</span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(any_significant)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.626</code></pre>
+</div>
+</div>
+<p>실제 차이가 없어도 여러 번 검정하면 적어도 하나는 유의하게 나올 가능성이 상당히 커진다.</p>
+<hr>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./06-ch6.html" class="pagination-link" aria-label="신뢰구간">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">신뢰구간</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./08-ch8.html" class="pagination-link" aria-label="Chapter 8. t-test와 평균 비교">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Chapter 8. t-test와 평균 비교</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

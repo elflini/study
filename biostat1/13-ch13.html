@@ -1,0 +1,1973 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>13&nbsp; 로지스틱 회귀 – 바이오통계 입문</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./12-ch12.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-832e3d7b6b94ddcc90a000f8fabe51a9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./13-ch13.html"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">로지스틱 회귀</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">바이오통계 입문</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Contents</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-ch1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">왜 바이오통계가 필요한가?</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-ch2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">기술통계와 데이터 요약</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-ch3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">확률의 기초와 진단검사</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-ch4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">확률분포와 정규분포</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-ch5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">표본분포와 표준오차</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-ch6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">신뢰구간</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-ch7.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">가설검정과 p-value</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-ch8.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">t-test와 평균 비교</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-ch9.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">분산분석(ANOVA)</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-ch10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">범주형 자료 분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-ch11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">상관분석과 단순선형회귀</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-ch12.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">다중선형회귀</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-ch13.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">로지스틱 회귀</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#수업-개요" id="toc-수업-개요" class="nav-link active" data-scroll-target="#수업-개요"><span class="header-section-number">13.1</span> 수업 개요</a></li>
+  <li><a href="#핵심-질문" id="toc-핵심-질문" class="nav-link" data-scroll-target="#핵심-질문"><span class="header-section-number">13.2</span> 핵심 질문</a></li>
+  <li><a href="#학습목표" id="toc-학습목표" class="nav-link" data-scroll-target="#학습목표"><span class="header-section-number">13.3</span> 학습목표</a></li>
+  <li><a href="#이진-결과변수" id="toc-이진-결과변수" class="nav-link" data-scroll-target="#이진-결과변수"><span class="header-section-number">13.4</span> 이진 결과변수</a></li>
+  <li><a href="#이진-결과변수에-선형회귀를-쓰기-어려운-이유" id="toc-이진-결과변수에-선형회귀를-쓰기-어려운-이유" class="nav-link" data-scroll-target="#이진-결과변수에-선형회귀를-쓰기-어려운-이유"><span class="header-section-number">13.5</span> 이진 결과변수에 선형회귀를 쓰기 어려운 이유</a>
+  <ul class="collapse">
+  <li><a href="#문제-1-예측확률이-0보다-작거나-1보다-클-수-있다" id="toc-문제-1-예측확률이-0보다-작거나-1보다-클-수-있다" class="nav-link" data-scroll-target="#문제-1-예측확률이-0보다-작거나-1보다-클-수-있다"><span class="header-section-number">13.5.1</span> 문제 1: 예측확률이 0보다 작거나 1보다 클 수 있다</a></li>
+  <li><a href="#문제-2-오차항의-등분산성이-성립하기-어렵다" id="toc-문제-2-오차항의-등분산성이-성립하기-어렵다" class="nav-link" data-scroll-target="#문제-2-오차항의-등분산성이-성립하기-어렵다"><span class="header-section-number">13.5.2</span> 문제 2: 오차항의 등분산성이 성립하기 어렵다</a></li>
+  <li><a href="#문제-3-확률과-설명변수의-관계가-선형일-필요가-없다" id="toc-문제-3-확률과-설명변수의-관계가-선형일-필요가-없다" class="nav-link" data-scroll-target="#문제-3-확률과-설명변수의-관계가-선형일-필요가-없다"><span class="header-section-number">13.5.3</span> 문제 3: 확률과 설명변수의 관계가 선형일 필요가 없다</a></li>
+  </ul></li>
+  <li><a href="#확률-odds-log-odds" id="toc-확률-odds-log-odds" class="nav-link" data-scroll-target="#확률-odds-log-odds"><span class="header-section-number">13.6</span> 확률, odds, log odds</a>
+  <ul class="collapse">
+  <li><a href="#확률" id="toc-확률" class="nav-link" data-scroll-target="#확률"><span class="header-section-number">13.6.1</span> 확률</a></li>
+  <li><a href="#odds" id="toc-odds" class="nav-link" data-scroll-target="#odds"><span class="header-section-number">13.6.2</span> Odds</a></li>
+  <li><a href="#log-odds와-logit" id="toc-log-odds와-logit" class="nav-link" data-scroll-target="#log-odds와-logit"><span class="header-section-number">13.6.3</span> Log odds와 logit</a></li>
+  </ul></li>
+  <li><a href="#로지스틱-함수와-inverse-logit" id="toc-로지스틱-함수와-inverse-logit" class="nav-link" data-scroll-target="#로지스틱-함수와-inverse-logit"><span class="header-section-number">13.7</span> 로지스틱 함수와 inverse logit</a>
+  <ul class="collapse">
+  <li><a href="#inverse-logit-유도" id="toc-inverse-logit-유도" class="nav-link" data-scroll-target="#inverse-logit-유도"><span class="header-section-number">13.7.1</span> inverse logit 유도</a></li>
+  </ul></li>
+  <li><a href="#로지스틱-회귀모형" id="toc-로지스틱-회귀모형" class="nav-link" data-scroll-target="#로지스틱-회귀모형"><span class="header-section-number">13.8</span> 로지스틱 회귀모형</a></li>
+  <li><a href="#회귀계수와-odds-ratio" id="toc-회귀계수와-odds-ratio" class="nav-link" data-scroll-target="#회귀계수와-odds-ratio"><span class="header-section-number">13.9</span> 회귀계수와 odds ratio</a>
+  <ul class="collapse">
+  <li><a href="#왜-ebeta가-or인가" id="toc-왜-ebeta가-or인가" class="nav-link" data-scroll-target="#왜-ebeta가-or인가"><span class="header-section-number">13.9.1</span> 왜 <span class="math inline">\(e^\beta\)</span>가 OR인가?</a></li>
+  </ul></li>
+  <li><a href="#설명변수-유형별-or-해석" id="toc-설명변수-유형별-or-해석" class="nav-link" data-scroll-target="#설명변수-유형별-or-해석"><span class="header-section-number">13.10</span> 설명변수 유형별 OR 해석</a>
+  <ul class="collapse">
+  <li><a href="#이진-설명변수" id="toc-이진-설명변수" class="nav-link" data-scroll-target="#이진-설명변수"><span class="header-section-number">13.10.1</span> 이진 설명변수</a></li>
+  <li><a href="#연속형-설명변수" id="toc-연속형-설명변수" class="nav-link" data-scroll-target="#연속형-설명변수"><span class="header-section-number">13.10.2</span> 연속형 설명변수</a></li>
+  <li><a href="#범주형-설명변수" id="toc-범주형-설명변수" class="nav-link" data-scroll-target="#범주형-설명변수"><span class="header-section-number">13.10.3</span> 범주형 설명변수</a></li>
+  </ul></li>
+  <li><a href="#crude-or과-adjusted-or" id="toc-crude-or과-adjusted-or" class="nav-link" data-scroll-target="#crude-or과-adjusted-or"><span class="header-section-number">13.11</span> Crude OR과 adjusted OR</a>
+  <ul class="collapse">
+  <li><a href="#crude-or" id="toc-crude-or" class="nav-link" data-scroll-target="#crude-or"><span class="header-section-number">13.11.1</span> Crude OR</a></li>
+  <li><a href="#adjusted-or" id="toc-adjusted-or" class="nav-link" data-scroll-target="#adjusted-or"><span class="header-section-number">13.11.2</span> Adjusted OR</a></li>
+  </ul></li>
+  <li><a href="#or과-rr의-차이" id="toc-or과-rr의-차이" class="nav-link" data-scroll-target="#or과-rr의-차이"><span class="header-section-number">13.12</span> OR과 RR의 차이</a>
+  <ul class="collapse">
+  <li><a href="#사건이-드문-경우" id="toc-사건이-드문-경우" class="nav-link" data-scroll-target="#사건이-드문-경우"><span class="header-section-number">13.12.1</span> 사건이 드문 경우</a></li>
+  <li><a href="#사건이-흔한-경우" id="toc-사건이-흔한-경우" class="nav-link" data-scroll-target="#사건이-흔한-경우"><span class="header-section-number">13.12.2</span> 사건이 흔한 경우</a></li>
+  </ul></li>
+  <li><a href="#로지스틱-회귀의-추정-최대우도법-개요" id="toc-로지스틱-회귀의-추정-최대우도법-개요" class="nav-link" data-scroll-target="#로지스틱-회귀의-추정-최대우도법-개요"><span class="header-section-number">13.13</span> 로지스틱 회귀의 추정: 최대우도법 개요</a></li>
+  <li><a href="#회귀계수의-신뢰구간과-가설검정" id="toc-회귀계수의-신뢰구간과-가설검정" class="nav-link" data-scroll-target="#회귀계수의-신뢰구간과-가설검정"><span class="header-section-number">13.14</span> 회귀계수의 신뢰구간과 가설검정</a></li>
+  <li><a href="#예측확률" id="toc-예측확률" class="nav-link" data-scroll-target="#예측확률"><span class="header-section-number">13.15</span> 예측확률</a></li>
+  <li><a href="#상호작용이-있는-로지스틱-회귀" id="toc-상호작용이-있는-로지스틱-회귀" class="nav-link" data-scroll-target="#상호작용이-있는-로지스틱-회귀"><span class="header-section-number">13.16</span> 상호작용이 있는 로지스틱 회귀</a></li>
+  <li><a href="#로지스틱-회귀의-가정과-확인사항" id="toc-로지스틱-회귀의-가정과-확인사항" class="nav-link" data-scroll-target="#로지스틱-회귀의-가정과-확인사항"><span class="header-section-number">13.17</span> 로지스틱 회귀의 가정과 확인사항</a>
+  <ul class="collapse">
+  <li><a href="#logit-선형성" id="toc-logit-선형성" class="nav-link" data-scroll-target="#logit-선형성"><span class="header-section-number">13.17.1</span> Logit 선형성</a></li>
+  <li><a href="#완전분리" id="toc-완전분리" class="nav-link" data-scroll-target="#완전분리"><span class="header-section-number">13.17.2</span> 완전분리</a></li>
+  </ul></li>
+  <li><a href="#사건-수와-변수-개수" id="toc-사건-수와-변수-개수" class="nav-link" data-scroll-target="#사건-수와-변수-개수"><span class="header-section-number">13.18</span> 사건 수와 변수 개수</a></li>
+  <li><a href="#예측모형-평가-discrimination과-calibration" id="toc-예측모형-평가-discrimination과-calibration" class="nav-link" data-scroll-target="#예측모형-평가-discrimination과-calibration"><span class="header-section-number">13.19</span> 예측모형 평가: discrimination과 calibration</a>
+  <ul class="collapse">
+  <li><a href="#discrimination" id="toc-discrimination" class="nav-link" data-scroll-target="#discrimination"><span class="header-section-number">13.19.1</span> Discrimination</a></li>
+  <li><a href="#calibration" id="toc-calibration" class="nav-link" data-scroll-target="#calibration"><span class="header-section-number">13.19.2</span> Calibration</a></li>
+  </ul></li>
+  <li><a href="#r-실습" id="toc-r-실습" class="nav-link" data-scroll-target="#r-실습"><span class="header-section-number">13.20</span> R 실습</a>
+  <ul class="collapse">
+  <li><a href="#예제-데이터-생성" id="toc-예제-데이터-생성" class="nav-link" data-scroll-target="#예제-데이터-생성"><span class="header-section-number">13.20.1</span> 예제 데이터 생성</a></li>
+  <li><a href="#사건-발생률-확인" id="toc-사건-발생률-확인" class="nav-link" data-scroll-target="#사건-발생률-확인"><span class="header-section-number">13.20.2</span> 사건 발생률 확인</a></li>
+  <li><a href="#표와-crude-or" id="toc-표와-crude-or" class="nav-link" data-scroll-target="#표와-crude-or"><span class="header-section-number">13.20.3</span> 2×2 표와 crude OR</a></li>
+  <li><a href="#단변량-로지스틱-회귀" id="toc-단변량-로지스틱-회귀" class="nav-link" data-scroll-target="#단변량-로지스틱-회귀"><span class="header-section-number">13.20.4</span> 단변량 로지스틱 회귀</a></li>
+  <li><a href="#다변량-로지스틱-회귀" id="toc-다변량-로지스틱-회귀" class="nav-link" data-scroll-target="#다변량-로지스틱-회귀"><span class="header-section-number">13.20.5</span> 다변량 로지스틱 회귀</a></li>
+  <li><a href="#adjusted-or-결과표-만들기" id="toc-adjusted-or-결과표-만들기" class="nav-link" data-scroll-target="#adjusted-or-결과표-만들기"><span class="header-section-number">13.20.6</span> Adjusted OR 결과표 만들기</a></li>
+  <li><a href="#세-증가에-대한-나이-or-계산" id="toc-세-증가에-대한-나이-or-계산" class="nav-link" data-scroll-target="#세-증가에-대한-나이-or-계산"><span class="header-section-number">13.20.7</span> 10세 증가에 대한 나이 OR 계산</a></li>
+  <li><a href="#예측확률-계산" id="toc-예측확률-계산" class="nav-link" data-scroll-target="#예측확률-계산"><span class="header-section-number">13.20.8</span> 예측확률 계산</a></li>
+  <li><a href="#여러-환자-프로파일의-예측확률-비교" id="toc-여러-환자-프로파일의-예측확률-비교" class="nav-link" data-scroll-target="#여러-환자-프로파일의-예측확률-비교"><span class="header-section-number">13.20.9</span> 여러 환자 프로파일의 예측확률 비교</a></li>
+  <li><a href="#예측확률-분포" id="toc-예측확률-분포" class="nav-link" data-scroll-target="#예측확률-분포"><span class="header-section-number">13.20.10</span> 예측확률 분포</a></li>
+  <li><a href="#예측확률-곡선-그리기" id="toc-예측확률-곡선-그리기" class="nav-link" data-scroll-target="#예측확률-곡선-그리기"><span class="header-section-number">13.20.11</span> 예측확률 곡선 그리기</a></li>
+  <li><a href="#범주형-변수-factor-처리" id="toc-범주형-변수-factor-처리" class="nav-link" data-scroll-target="#범주형-변수-factor-처리"><span class="header-section-number">13.20.12</span> 범주형 변수 factor 처리</a></li>
+  <li><a href="#상호작용-모형" id="toc-상호작용-모형" class="nav-link" data-scroll-target="#상호작용-모형"><span class="header-section-number">13.20.13</span> 상호작용 모형</a></li>
+  <li><a href="#roc-curve와-auc" id="toc-roc-curve와-auc" class="nav-link" data-scroll-target="#roc-curve와-auc"><span class="header-section-number">13.20.14</span> ROC curve와 AUC</a></li>
+  <li><a href="#confusion-matrix와-threshold" id="toc-confusion-matrix와-threshold" class="nav-link" data-scroll-target="#confusion-matrix와-threshold"><span class="header-section-number">13.20.15</span> Confusion matrix와 threshold</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">로지스틱 회귀</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="수업-개요" class="level2" data-number="13.1">
+<h2 data-number="13.1" class="anchored" data-anchor-id="수업-개요"><span class="header-section-number">13.1</span> 수업 개요</h2>
+<p>이번 장에서는 <strong>로지스틱 회귀(logistic regression)</strong>를 다룬다. 앞 장들에서 우리는 연속형 결과변수의 평균을 설명하는 선형회귀를 배웠다. 그러나 의학·보건 연구에서는 결과변수가 연속형이 아니라 <strong>두 가지 상태</strong>로 관찰되는 경우가 매우 많다.</p>
+<p>예를 들어 연구 질문이 다음과 같다면 결과변수는 이진형이다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 30%">
+<col style="width: 30%">
+<col style="width: 38%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>연구 질문</th>
+<th>결과변수</th>
+<th style="text-align: right;">사건 코딩 예</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>흡연이 폐질환 발생과 관련이 있는가?</td>
+<td>폐질환 있음 / 없음</td>
+<td style="text-align: right;">있음 = 1</td>
+</tr>
+<tr class="even">
+<td>치료 전 바이오마커가 치료 반응을 예측하는가?</td>
+<td>반응 / 무반응</td>
+<td style="text-align: right;">반응 = 1</td>
+</tr>
+<tr class="odd">
+<td>수술 후 30일 내 재입원이 발생하는가?</td>
+<td>재입원 / 비재입원</td>
+<td style="text-align: right;">재입원 = 1</td>
+</tr>
+<tr class="even">
+<td>중환자실 환자의 사망 위험을 예측할 수 있는가?</td>
+<td>사망 / 생존</td>
+<td style="text-align: right;">사망 = 1</td>
+</tr>
+<tr class="odd">
+<td>선별검사 양성 여부는 어떤 요인과 관련되는가?</td>
+<td>양성 / 음성</td>
+<td style="text-align: right;">양성 = 1</td>
+</tr>
+</tbody>
+</table>
+<p>이처럼 결과가 0 또는 1로 표현되는 경우에는 선형회귀를 그대로 적용하기 어렵다. 로지스틱 회귀는 사건 발생확률을 직접 0과 1 사이에 머물도록 하면서, 설명변수와 사건 발생 사이의 관련성을 <strong>오즈비(odds ratio)</strong>로 해석할 수 있게 해 주는 대표적인 회귀모형이다.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>이번 장의 핵심 메시지
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>로지스틱 회귀는 이진 결과변수의 <strong>확률</strong>을 직접 선형모형으로 적합하는 것이 아니라, 확률을 <strong>log odds</strong>로 변환한 뒤 그 값을 설명변수의 선형결합으로 모델링한다. 회귀계수를 지수화하면 오즈비로 해석할 수 있다.</p>
+</div>
+</div>
+</section>
+<section id="핵심-질문" class="level2" data-number="13.2">
+<h2 data-number="13.2" class="anchored" data-anchor-id="핵심-질문"><span class="header-section-number">13.2</span> 핵심 질문</h2>
+<p>이번 장에서는 다음 질문에 답한다.</p>
+<ol type="1">
+<li>이진 결과변수에는 왜 선형회귀를 그대로 쓰기 어려운가?</li>
+<li>확률, odds, odds ratio는 어떻게 다른가?</li>
+<li>logit 변환은 왜 필요한가?</li>
+<li>로지스틱 회귀모형의 수식은 어떻게 생겼는가?</li>
+<li>회귀계수와 odds ratio는 어떤 관계가 있는가?</li>
+<li>crude OR과 adjusted OR은 어떻게 다른가?</li>
+<li>OR을 risk ratio처럼 해석하면 왜 문제가 되는가?</li>
+<li>로지스틱 회귀로부터 예측확률은 어떻게 계산하는가?</li>
+<li>ROC curve, AUC, calibration은 각각 무엇을 평가하는가?</li>
+<li>R에서 로지스틱 회귀분석 결과를 어떻게 해석하고 보고하는가?</li>
+</ol>
+</section>
+<section id="학습목표" class="level2" data-number="13.3">
+<h2 data-number="13.3" class="anchored" data-anchor-id="학습목표"><span class="header-section-number">13.3</span> 학습목표</h2>
+<p>이번 장이 끝나면 학생들은 다음을 할 수 있어야 한다.</p>
+<ol type="1">
+<li>이진 결과변수의 특징과 0/1 코딩의 의미를 설명할 수 있다.</li>
+<li>확률, odds, log odds의 차이를 설명할 수 있다.</li>
+<li>로지스틱 함수가 예측확률을 0과 1 사이로 제한한다는 점을 설명할 수 있다.</li>
+<li>로지스틱 회귀모형의 기본 수식을 쓸 수 있다.</li>
+<li>회귀계수 <span class="math inline">\(\beta\)</span>와 odds ratio <span class="math inline">\(e^\beta\)</span>의 관계를 설명할 수 있다.</li>
+<li>연속형 설명변수, 이진 설명변수, 범주형 설명변수의 OR을 올바르게 해석할 수 있다.</li>
+<li>adjusted odds ratio를 교란변수 조정 관점에서 해석할 수 있다.</li>
+<li>사건이 흔할 때 OR과 RR의 차이를 설명할 수 있다.</li>
+<li>R의 <code>glm(..., family = binomial)</code>을 사용하여 로지스틱 회귀분석을 수행할 수 있다.</li>
+<li>논문에 제시된 로지스틱 회귀 결과표를 비판적으로 읽을 수 있다.</li>
+</ol>
+</section>
+<section id="이진-결과변수" class="level2" data-number="13.4">
+<h2 data-number="13.4" class="anchored" data-anchor-id="이진-결과변수"><span class="header-section-number">13.4</span> 이진 결과변수</h2>
+<p>이진 결과변수(binary outcome)는 가능한 값이 두 가지뿐인 결과변수이다. 통계분석에서는 보통 사건이 없으면 0, 사건이 있으면 1로 코딩한다.</p>
+<p><span class="math display">\[Y_i =
+\begin{cases}
+1, &amp; \text{사건 발생} \\
+0, &amp; \text{사건 비발생}
+\end{cases}\]</span></p>
+<p>예를 들어 질병 발생 여부를 분석한다면 다음과 같이 코딩할 수 있다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>실제 상태</th>
+<th style="text-align: right;">코딩값</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>질병 없음</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td>질병 있음</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+<p>이때 <span class="math inline">\(Y_i\)</span>는 베르누이 확률변수로 볼 수 있다.</p>
+<p><span class="math display">\[Y_i \sim Bernoulli(p_i)\]</span></p>
+<p>여기서 <span class="math inline">\(p_i\)</span>는 i번째 대상자의 사건 발생확률이다.</p>
+<p><span class="math display">\[p_i = P(Y_i = 1)\]</span></p>
+<p>따라서 이진 결과변수 분석의 핵심은 각 대상자의 <span class="math inline">\(p_i\)</span>가 설명변수에 따라 어떻게 달라지는지를 모델링하는 것이다.</p>
+</section>
+<section id="이진-결과변수에-선형회귀를-쓰기-어려운-이유" class="level2" data-number="13.5">
+<h2 data-number="13.5" class="anchored" data-anchor-id="이진-결과변수에-선형회귀를-쓰기-어려운-이유"><span class="header-section-number">13.5</span> 이진 결과변수에 선형회귀를 쓰기 어려운 이유</h2>
+<p>선형회귀는 결과변수의 조건부 평균을 설명변수의 선형결합으로 모델링한다.</p>
+<p><span class="math display">\[E(Y_i \mid X_i) = \beta_0 + \beta_1 X_i\]</span></p>
+<p>이진 결과변수에서는 <span class="math inline">\(Y_i\)</span>가 0 또는 1이므로 조건부 평균은 사건 발생확률과 같다.</p>
+<p><span class="math display">\[E(Y_i \mid X_i) = P(Y_i=1 \mid X_i) = p_i\]</span></p>
+<p>따라서 이진 결과변수에 선형회귀를 적용하면 사실상 다음과 같은 모형이 된다.</p>
+<p><span class="math display">\[p_i = \beta_0 + \beta_1 X_i\]</span></p>
+<p>이를 <strong>선형확률모형(linear probability model)</strong>이라고 부를 수 있다. 하지만 이 접근에는 중요한 문제가 있다.</p>
+<section id="문제-1-예측확률이-0보다-작거나-1보다-클-수-있다" class="level3" data-number="13.5.1">
+<h3 data-number="13.5.1" class="anchored" data-anchor-id="문제-1-예측확률이-0보다-작거나-1보다-클-수-있다"><span class="header-section-number">13.5.1</span> 문제 1: 예측확률이 0보다 작거나 1보다 클 수 있다</h3>
+<p>확률은 반드시 다음 범위 안에 있어야 한다.</p>
+<p><span class="math display">\[0 \leq p_i \leq 1\]</span></p>
+<p>그러나 선형식 <span class="math inline">\(\beta_0 + \beta_1 X_i\)</span>는 이론적으로 <span class="math inline">\(-\infty\)</span>부터 <span class="math inline">\(+\infty\)</span>까지 값을 가질 수 있다. 따라서 예측확률이 -0.2 또는 1.3처럼 해석 불가능한 값이 될 수 있다.</p>
+</section>
+<section id="문제-2-오차항의-등분산성이-성립하기-어렵다" class="level3" data-number="13.5.2">
+<h3 data-number="13.5.2" class="anchored" data-anchor-id="문제-2-오차항의-등분산성이-성립하기-어렵다"><span class="header-section-number">13.5.2</span> 문제 2: 오차항의 등분산성이 성립하기 어렵다</h3>
+<p>이진 결과변수는 베르누이 분포를 따르므로 분산은 다음과 같다.</p>
+<p><span class="math display">\[Var(Y_i \mid X_i) = p_i(1-p_i)\]</span></p>
+<p>이 분산은 <span class="math inline">\(p_i\)</span>에 따라 달라진다. 즉 확률이 0.5에 가까우면 분산이 크고, 0이나 1에 가까우면 분산이 작다. 선형회귀의 기본 가정인 등분산성과 잘 맞지 않는다.</p>
+</section>
+<section id="문제-3-확률과-설명변수의-관계가-선형일-필요가-없다" class="level3" data-number="13.5.3">
+<h3 data-number="13.5.3" class="anchored" data-anchor-id="문제-3-확률과-설명변수의-관계가-선형일-필요가-없다"><span class="header-section-number">13.5.3</span> 문제 3: 확률과 설명변수의 관계가 선형일 필요가 없다</h3>
+<p>실제 위험은 설명변수가 증가할수록 처음에는 천천히 증가하다가 중간에서 빠르게 증가하고, 확률이 1에 가까워지면 다시 완만해지는 S자 형태를 보일 수 있다. 로지스틱 회귀는 이러한 형태를 자연스럽게 표현한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig13/f2.png" class="img-fluid figure-img" style="width:86.0%"></p>
+<figcaption>이진 결과변수에서 선형확률모형과 로지스틱 모형의 차이. 선형모형은 예측값이 0과 1을 벗어날 수 있지만, 로지스틱 모형은 항상 0과 1 사이의 확률을 제공한다.</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="확률-odds-log-odds" class="level2" data-number="13.6">
+<h2 data-number="13.6" class="anchored" data-anchor-id="확률-odds-log-odds"><span class="header-section-number">13.6</span> 확률, odds, log odds</h2>
+<p>로지스틱 회귀를 이해하려면 확률(probability), odds, log odds를 구분해야 한다.</p>
+<section id="확률" class="level3" data-number="13.6.1">
+<h3 data-number="13.6.1" class="anchored" data-anchor-id="확률"><span class="header-section-number">13.6.1</span> 확률</h3>
+<p>확률은 사건이 발생할 가능성이다.</p>
+<p><span class="math display">\[p = P(Y=1)\]</span></p>
+<p>예를 들어 어떤 질병의 발생확률이 0.20이면, 100명 중 평균적으로 약 20명에게 사건이 발생한다는 뜻이다.</p>
+</section>
+<section id="odds" class="level3" data-number="13.6.2">
+<h3 data-number="13.6.2" class="anchored" data-anchor-id="odds"><span class="header-section-number">13.6.2</span> Odds</h3>
+<p>Odds는 사건이 발생할 확률을 사건이 발생하지 않을 확률로 나눈 값이다.</p>
+<p><span class="math display">\[Odds = \frac{p}{1-p}\]</span></p>
+<p>예를 들어 <span class="math inline">\(p=0.20\)</span>이면,</p>
+<p><span class="math display">\[Odds = \frac{0.20}{0.80} = 0.25\]</span></p>
+<p>이는 사건 발생 odds가 0.25라는 뜻이다. 말로 표현하면 “사건 발생 가능성이 사건 비발생 가능성의 0.25배”이다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 24%">
+<col style="width: 21%">
+<col style="width: 41%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">확률 <span class="math inline">\(p\)</span></th>
+<th style="text-align: right;">비발생확률 <span class="math inline">\(1-p\)</span></th>
+<th style="text-align: right;">odds <span class="math inline">\(p/(1-p)\)</span></th>
+<th>해석</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.10</td>
+<td style="text-align: right;">0.90</td>
+<td style="text-align: right;">0.111</td>
+<td>사건이 비발생보다 훨씬 드묾</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.20</td>
+<td style="text-align: right;">0.80</td>
+<td style="text-align: right;">0.250</td>
+<td>사건 발생 odds는 0.25</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">1.000</td>
+<td>발생과 비발생 odds가 같음</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.80</td>
+<td style="text-align: right;">0.20</td>
+<td style="text-align: right;">4.000</td>
+<td>사건 발생 odds는 비발생의 4배</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="log-odds와-logit" class="level3" data-number="13.6.3">
+<h3 data-number="13.6.3" class="anchored" data-anchor-id="log-odds와-logit"><span class="header-section-number">13.6.3</span> Log odds와 logit</h3>
+<p>Odds는 0보다 큰 값만 가진다. 로지스틱 회귀에서는 odds에 로그를 취한 값을 모델링한다.</p>
+<p><span class="math display">\[logit(p) = \log\left(\frac{p}{1-p}\right)\]</span></p>
+<p>이를 <strong>logit 변환</strong>이라고 한다. logit은 <span class="math inline">\(-\infty\)</span>부터 <span class="math inline">\(+\infty\)</span>까지 모든 실수값을 가질 수 있다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;">확률 <span class="math inline">\(p\)</span></th>
+<th style="text-align: right;">odds</th>
+<th style="text-align: right;">logit<span class="math inline">\((p)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.10</td>
+<td style="text-align: right;">0.111</td>
+<td style="text-align: right;">-2.197</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.20</td>
+<td style="text-align: right;">0.250</td>
+<td style="text-align: right;">-1.386</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.80</td>
+<td style="text-align: right;">4.000</td>
+<td style="text-align: right;">1.386</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.90</td>
+<td style="text-align: right;">9.000</td>
+<td style="text-align: right;">2.197</td>
+</tr>
+</tbody>
+</table>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig13/f3.png" class="img-fluid figure-img" style="width:90.0%"></p>
+<figcaption>확률, odds, logit의 관계. 확률은 0과 1 사이, odds는 0보다 큰 값, logit은 모든 실수값을 가질 수 있다.</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="로지스틱-함수와-inverse-logit" class="level2" data-number="13.7">
+<h2 data-number="13.7" class="anchored" data-anchor-id="로지스틱-함수와-inverse-logit"><span class="header-section-number">13.7</span> 로지스틱 함수와 inverse logit</h2>
+<p>로지스틱 회귀에서는 logit을 설명변수의 선형결합으로 모델링한다.</p>
+<p><span class="math display">\[\eta_i = \beta_0 + \beta_1X_{1i}+\cdots+\beta_pX_{pi}\]</span></p>
+<p>여기서 <span class="math inline">\(\eta_i\)</span>를 선형예측자(linear predictor)라고 한다. 이 값은 어떤 실수값도 가질 수 있다. 그러나 우리가 최종적으로 원하는 것은 확률 <span class="math inline">\(p_i\)</span>이다. logit 식을 확률로 되돌리면 다음과 같다.</p>
+<p><span class="math display">\[p_i = \frac{e^{\eta_i}}{1+e^{\eta_i}}\]</span></p>
+<p>동일하게 다음과 같이 쓸 수도 있다.</p>
+<p><span class="math display">\[p_i = \frac{1}{1+e^{-\eta_i}}\]</span></p>
+<p>이 함수를 <strong>로지스틱 함수(logistic function)</strong> 또는 <strong>inverse logit</strong>이라고 한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig13/f1.png" class="img-fluid figure-img" style="width:82.0%"></p>
+<figcaption>로지스틱 함수는 선형예측자 <span class="math inline">\(\eta\)</span>가 어떤 값을 가져도 예측확률을 0과 1 사이로 변환한다.</figcaption>
+</figure>
+</div>
+<section id="inverse-logit-유도" class="level3" data-number="13.7.1">
+<h3 data-number="13.7.1" class="anchored" data-anchor-id="inverse-logit-유도"><span class="header-section-number">13.7.1</span> inverse logit 유도</h3>
+<p>logit 정의에서 출발하자.</p>
+<p><span class="math display">\[\log\left(\frac{p}{1-p}\right)=\eta\]</span></p>
+<p>양변에 지수함수를 취하면,</p>
+<p><span class="math display">\[\frac{p}{1-p}=e^\eta\]</span></p>
+<p>양변에 <span class="math inline">\(1-p\)</span>를 곱하면,</p>
+<p><span class="math display">\[p=e^\eta(1-p)\]</span></p>
+<p>전개하면,</p>
+<p><span class="math display">\[p=e^\eta-e^\eta p\]</span></p>
+<p><span class="math inline">\(p\)</span>가 있는 항을 한쪽으로 모으면,</p>
+<p><span class="math display">\[p+e^\eta p=e^\eta\]</span></p>
+<p><span class="math display">\[p(1+e^\eta)=e^\eta\]</span></p>
+<p>따라서,</p>
+<p><span class="math display">\[p=\frac{e^\eta}{1+e^\eta}\]</span></p>
+<p>이다. 이 식 때문에 로지스틱 회귀의 예측확률은 항상 0과 1 사이에 위치한다.</p>
+</section>
+</section>
+<section id="로지스틱-회귀모형" class="level2" data-number="13.8">
+<h2 data-number="13.8" class="anchored" data-anchor-id="로지스틱-회귀모형"><span class="header-section-number">13.8</span> 로지스틱 회귀모형</h2>
+<p>이진 결과변수 <span class="math inline">\(Y_i\)</span>가 있다고 하자.</p>
+<p><span class="math display">\[Y_i \sim Bernoulli(p_i)\]</span></p>
+<p>로지스틱 회귀모형은 사건 발생확률 <span class="math inline">\(p_i\)</span>의 logit을 설명변수들의 선형결합으로 표현한다.</p>
+<p><span class="math display">\[logit(p_i) = \log\left(\frac{p_i}{1-p_i}\right)
+= \beta_0 + \beta_1X_{1i}+\beta_2X_{2i}+\cdots+\beta_pX_{pi}\]</span></p>
+<p>여기서 각 기호의 의미는 다음과 같다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>기호</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(Y_i\)</span></td>
+<td>i번째 대상자의 이진 결과변수</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(p_i\)</span></td>
+<td>i번째 대상자의 사건 발생확률</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(X_{1i},\ldots,X_{pi}\)</span></td>
+<td>설명변수 또는 공변량</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\beta_0\)</span></td>
+<td>절편</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\beta_j\)</span></td>
+<td>j번째 설명변수의 회귀계수</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(e^{\beta_j}\)</span></td>
+<td>j번째 설명변수의 odds ratio</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="회귀계수와-odds-ratio" class="level2" data-number="13.9">
+<h2 data-number="13.9" class="anchored" data-anchor-id="회귀계수와-odds-ratio"><span class="header-section-number">13.9</span> 회귀계수와 odds ratio</h2>
+<p>로지스틱 회귀에서 <span class="math inline">\(\beta_j\)</span>는 설명변수 <span class="math inline">\(X_j\)</span>가 1 증가할 때 log odds가 얼마나 변하는지를 나타낸다.</p>
+<p><span class="math display">\[\beta_j = \Delta \log(Odds)\]</span></p>
+<p>하지만 log odds는 직관적으로 해석하기 어렵다. 따라서 회귀계수에 지수함수를 취해 odds ratio로 해석한다.</p>
+<p><span class="math display">\[OR_j = e^{\beta_j}\]</span></p>
+<section id="왜-ebeta가-or인가" class="level3" data-number="13.9.1">
+<h3 data-number="13.9.1" class="anchored" data-anchor-id="왜-ebeta가-or인가"><span class="header-section-number">13.9.1</span> 왜 <span class="math inline">\(e^\beta\)</span>가 OR인가?</h3>
+<p>설명변수가 하나인 모형을 생각하자.</p>
+<p><span class="math display">\[logit(p) = \beta_0 + \beta_1X\]</span></p>
+<p><span class="math inline">\(X=0\)</span>일 때 log odds는 다음과 같다.</p>
+<p><span class="math display">\[\log(Odds_0)=\beta_0\]</span></p>
+<p><span class="math inline">\(X=1\)</span>일 때 log odds는 다음과 같다.</p>
+<p><span class="math display">\[\log(Odds_1)=\beta_0+\beta_1\]</span></p>
+<p>두 log odds의 차이는,</p>
+<p><span class="math display">\[\log(Odds_1)-\log(Odds_0)=\beta_1\]</span></p>
+<p>로그의 성질을 이용하면,</p>
+<p><span class="math display">\[\log\left(\frac{Odds_1}{Odds_0}\right)=\beta_1\]</span></p>
+<p>양변에 지수함수를 취하면,</p>
+<p><span class="math display">\[\frac{Odds_1}{Odds_0}=e^{\beta_1}\]</span></p>
+<p>따라서 <span class="math inline">\(e^{\beta_1}\)</span>은 두 집단의 odds ratio이다.</p>
+</section>
+</section>
+<section id="설명변수-유형별-or-해석" class="level2" data-number="13.10">
+<h2 data-number="13.10" class="anchored" data-anchor-id="설명변수-유형별-or-해석"><span class="header-section-number">13.10</span> 설명변수 유형별 OR 해석</h2>
+<section id="이진-설명변수" class="level3" data-number="13.10.1">
+<h3 data-number="13.10.1" class="anchored" data-anchor-id="이진-설명변수"><span class="header-section-number">13.10.1</span> 이진 설명변수</h3>
+<p>흡연 여부를 설명변수로 하는 모형을 생각하자.</p>
+<p><span class="math display">\[logit(p_i)=\beta_0+\beta_1Smoking_i\]</span></p>
+<p>여기서 <span class="math inline">\(Smoking=0\)</span>은 비흡연자, <span class="math inline">\(Smoking=1\)</span>은 흡연자라고 하자. 이때 <span class="math inline">\(e^{\beta_1}\)</span>은 흡연자의 사건 발생 odds가 비흡연자에 비해 몇 배인지를 나타낸다.</p>
+<p>예를 들어 <span class="math inline">\(e^{\beta_1}=2.10\)</span>이면 다음과 같이 해석한다.</p>
+<blockquote class="blockquote">
+<p>흡연자의 질병 발생 odds는 비흡연자에 비해 2.10배 높다.</p>
+</blockquote>
+</section>
+<section id="연속형-설명변수" class="level3" data-number="13.10.2">
+<h3 data-number="13.10.2" class="anchored" data-anchor-id="연속형-설명변수"><span class="header-section-number">13.10.2</span> 연속형 설명변수</h3>
+<p>나이를 설명변수로 하는 모형을 생각하자.</p>
+<p><span class="math display">\[logit(p_i)=\beta_0+\beta_1Age_i\]</span></p>
+<p>이때 <span class="math inline">\(e^{\beta_1}\)</span>은 나이가 1세 증가할 때 사건 발생 odds가 몇 배가 되는지를 나타낸다.</p>
+<p>예를 들어 <span class="math inline">\(e^{\beta_1}=1.05\)</span>이면 다음과 같이 해석한다.</p>
+<blockquote class="blockquote">
+<p>나이가 1세 증가할 때 질병 발생 odds는 1.05배, 즉 약 5% 증가한다.</p>
+</blockquote>
+<p>만약 10세 증가에 대한 OR을 보고 싶다면 다음과 같이 계산한다.</p>
+<p><span class="math display">\[OR_{10\text{ years}} = e^{10\beta_1}\]</span></p>
+<p>예를 들어 1세 증가 OR이 1.05라면 10세 증가 OR은 다음과 같다.</p>
+<p><span class="math display">\[1.05^{10} \approx 1.63\]</span></p>
+<p>즉 나이가 10세 증가할 때 odds는 약 1.63배가 된다.</p>
+</section>
+<section id="범주형-설명변수" class="level3" data-number="13.10.3">
+<h3 data-number="13.10.3" class="anchored" data-anchor-id="범주형-설명변수"><span class="header-section-number">13.10.3</span> 범주형 설명변수</h3>
+<p>혈액형, 병기, 치료군처럼 범주가 여러 개인 변수는 기준범주(reference category)를 정하고 더미변수로 모형에 포함한다.</p>
+<p>예를 들어 병기를 I, II, III으로 구분하고 I을 기준범주로 설정하면 다음과 같이 해석한다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>변수</th>
+<th style="text-align: right;">OR</th>
+<th>해석</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Stage II vs I</td>
+<td style="text-align: right;">1.80</td>
+<td>병기 II의 odds는 병기 I에 비해 1.80배</td>
+</tr>
+<tr class="even">
+<td>Stage III vs I</td>
+<td style="text-align: right;">3.20</td>
+<td>병기 III의 odds는 병기 I에 비해 3.20배</td>
+</tr>
+</tbody>
+</table>
+<p>기준범주가 무엇인지 확인하지 않으면 OR 해석이 완전히 달라질 수 있다.</p>
+</section>
+</section>
+<section id="crude-or과-adjusted-or" class="level2" data-number="13.11">
+<h2 data-number="13.11" class="anchored" data-anchor-id="crude-or과-adjusted-or"><span class="header-section-number">13.11</span> Crude OR과 adjusted OR</h2>
+<section id="crude-or" class="level3" data-number="13.11.1">
+<h3 data-number="13.11.1" class="anchored" data-anchor-id="crude-or"><span class="header-section-number">13.11.1</span> Crude OR</h3>
+<p>Crude OR은 관심 노출변수 하나만 포함하거나 2×2 표에서 계산한 조정하지 않은 오즈비이다.</p>
+<p><span class="math display">\[logit(p_i)=\beta_0+\beta_1Exposure_i\]</span></p>
+<p>이때 <span class="math inline">\(e^{\beta_1}\)</span>은 crude OR이다.</p>
+</section>
+<section id="adjusted-or" class="level3" data-number="13.11.2">
+<h3 data-number="13.11.2" class="anchored" data-anchor-id="adjusted-or"><span class="header-section-number">13.11.2</span> Adjusted OR</h3>
+<p>Adjusted OR은 나이, 성별, BMI, 동반질환 등 다른 변수를 함께 모형에 넣어 조정한 후의 오즈비이다.</p>
+<p><span class="math display">\[logit(p_i)=\beta_0+\beta_1Exposure_i+\beta_2Age_i+\beta_3BMI_i+\beta_4Sex_i\]</span></p>
+<p>이때 <span class="math inline">\(e^{\beta_1}\)</span>은 나이, BMI, 성별을 조정한 후의 exposure에 대한 adjusted OR이다.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Adjusted OR 해석의 핵심
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Adjusted OR은 “다른 변수가 같은 사람들끼리 비교했을 때”의 odds ratio로 해석한다. 예를 들어 흡연의 adjusted OR은 나이, BMI, 성별이 같은 사람들 사이에서 흡연자와 비흡연자의 사건 발생 odds를 비교한 것이다.</p>
+</div>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig13/f5.png" class="img-fluid figure-img" style="width:82.0%"></p>
+<figcaption>교란변수는 노출과 결과 모두와 관련되어 crude association을 왜곡할 수 있다. 로지스틱 회귀에서 공변량을 함께 포함하면 측정된 교란변수를 조정한 OR을 추정할 수 있다.</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="or과-rr의-차이" class="level2" data-number="13.12">
+<h2 data-number="13.12" class="anchored" data-anchor-id="or과-rr의-차이"><span class="header-section-number">13.12</span> OR과 RR의 차이</h2>
+<p>오즈비(OR)는 위험비(RR)와 다르다.</p>
+<p>위험비는 두 집단의 사건 발생확률을 비교한다.</p>
+<p><span class="math display">\[RR=\frac{p_1}{p_0}\]</span></p>
+<p>오즈비는 두 집단의 odds를 비교한다.</p>
+<p><span class="math display">\[OR=\frac{p_1/(1-p_1)}{p_0/(1-p_0)}\]</span></p>
+<section id="사건이-드문-경우" class="level3" data-number="13.12.1">
+<h3 data-number="13.12.1" class="anchored" data-anchor-id="사건이-드문-경우"><span class="header-section-number">13.12.1</span> 사건이 드문 경우</h3>
+<p>사건 발생확률이 매우 작으면 <span class="math inline">\(1-p \approx 1\)</span>이므로 odds는 확률과 비슷해진다.</p>
+<p><span class="math display">\[Odds=\frac{p}{1-p}\approx p\]</span></p>
+<p>따라서 사건이 드문 경우에는 OR이 RR과 비슷하다.</p>
+</section>
+<section id="사건이-흔한-경우" class="level3" data-number="13.12.2">
+<h3 data-number="13.12.2" class="anchored" data-anchor-id="사건이-흔한-경우"><span class="header-section-number">13.12.2</span> 사건이 흔한 경우</h3>
+<p>사건이 흔하면 odds와 probability의 차이가 커진다. 이때 OR은 RR보다 1에서 더 멀리 떨어지는 경향이 있다.</p>
+<p>예를 들어 기준군 위험이 0.40이고 노출군 위험이 0.60이면,</p>
+<p><span class="math display">\[RR=\frac{0.60}{0.40}=1.50\]</span></p>
+<p>하지만 OR은 다음과 같다.</p>
+<p><span class="math display">\[OR=\frac{0.60/0.40}{0.40/0.60}=\frac{1.50}{0.667}=2.25\]</span></p>
+<p>같은 자료에서도 OR은 2.25, RR은 1.50이다. 따라서 OR=2.25를 “위험이 2.25배”라고 말하면 과장된 해석이 될 수 있다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig13/f4.png" class="img-fluid figure-img" style="width:82.0%"></p>
+<figcaption>사건이 흔해질수록 OR은 RR보다 1에서 더 멀어진다. 따라서 OR을 RR처럼 해석하면 효과를 과장할 수 있다.</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="로지스틱-회귀의-추정-최대우도법-개요" class="level2" data-number="13.13">
+<h2 data-number="13.13" class="anchored" data-anchor-id="로지스틱-회귀의-추정-최대우도법-개요"><span class="header-section-number">13.13</span> 로지스틱 회귀의 추정: 최대우도법 개요</h2>
+<p>선형회귀에서는 잔차제곱합을 최소화하는 최소제곱법을 사용했다. 로지스틱 회귀에서는 결과변수가 0 또는 1이므로 일반적으로 <strong>최대우도법(maximum likelihood estimation, MLE)</strong>을 사용한다.</p>
+<p>각 대상자의 사건 발생확률이 <span class="math inline">\(p_i\)</span>라고 하자. 실제 관찰값 <span class="math inline">\(Y_i\)</span>는 0 또는 1이다. 베르누이 분포의 확률질량함수는 다음과 같이 쓸 수 있다.</p>
+<p><span class="math display">\[P(Y_i=y_i)=p_i^{y_i}(1-p_i)^{1-y_i}\]</span></p>
+<p>전체 자료가 독립이라고 가정하면 우도는 각 대상자의 확률을 곱한 값이다.</p>
+<p><span class="math display">\[L(\beta)=\prod_{i=1}^{n}p_i^{y_i}(1-p_i)^{1-y_i}\]</span></p>
+<p>로그우도는 다음과 같다.</p>
+<p><span class="math display">\[\ell(\beta)=\sum_{i=1}^{n}\left[y_i\log(p_i)+(1-y_i)\log(1-p_i)\right]\]</span></p>
+<p>로지스틱 회귀는 이 로그우도를 가장 크게 만드는 <span class="math inline">\(\beta\)</span>를 찾는다. 즉 관찰된 0/1 결과가 가장 그럴듯하게 나타나도록 회귀계수를 추정한다.</p>
+</section>
+<section id="회귀계수의-신뢰구간과-가설검정" class="level2" data-number="13.14">
+<h2 data-number="13.14" class="anchored" data-anchor-id="회귀계수의-신뢰구간과-가설검정"><span class="header-section-number">13.14</span> 회귀계수의 신뢰구간과 가설검정</h2>
+<p>로지스틱 회귀에서 회귀계수 <span class="math inline">\(\hat\beta_j\)</span>의 표준오차를 <span class="math inline">\(SE(\hat\beta_j)\)</span>라고 하자. Wald 방식의 95% 신뢰구간은 log odds scale에서 다음과 같다.</p>
+<p><span class="math display">\[\hat\beta_j \pm 1.96SE(\hat\beta_j)\]</span></p>
+<p>이를 OR scale로 바꾸려면 양 끝값을 지수화한다.</p>
+<p><span class="math display">\[\left(
+\exp(\hat\beta_j-1.96SE),
+\exp(\hat\beta_j+1.96SE)
+\right)\]</span></p>
+<p>가설검정은 보통 다음 귀무가설을 검정한다.</p>
+<p><span class="math display">\[H_0: \beta_j=0\]</span></p>
+<p>이는 OR scale에서는 다음과 같다.</p>
+<p><span class="math display">\[H_0: OR_j=1\]</span></p>
+<p>따라서 95% 신뢰구간이 1을 포함하지 않으면 보통 유의수준 0.05에서 통계적으로 유의하다고 해석할 수 있다.</p>
+</section>
+<section id="예측확률" class="level2" data-number="13.15">
+<h2 data-number="13.15" class="anchored" data-anchor-id="예측확률"><span class="header-section-number">13.15</span> 예측확률</h2>
+<p>로지스틱 회귀의 장점 중 하나는 각 대상자의 사건 발생확률을 예측할 수 있다는 점이다.</p>
+<p>선형예측자를 다음과 같이 계산한다.</p>
+<p><span class="math display">\[\eta_i=\beta_0+\beta_1X_{1i}+\cdots+\beta_pX_{pi}\]</span></p>
+<p>그 다음 inverse logit을 적용한다.</p>
+<p><span class="math display">\[\hat p_i=\frac{e^{\eta_i}}{1+e^{\eta_i}}\]</span></p>
+<p>예를 들어 다음 모형을 생각하자.</p>
+<p><span class="math display">\[logit(p)=-8+0.06Age+0.10BMI+0.80Smoking\]</span></p>
+<p>60세, BMI 28, 흡연자인 사람의 선형예측자는 다음과 같다.</p>
+<p><span class="math display">\[\eta=-8+0.06(60)+0.10(28)+0.80(1)\]</span></p>
+<p><span class="math display">\[\eta=-8+3.6+2.8+0.8=-0.8\]</span></p>
+<p>예측확률은 다음과 같다.</p>
+<p><span class="math display">\[p=\frac{e^{-0.8}}{1+e^{-0.8}}\approx 0.31\]</span></p>
+<p>즉 이 대상자의 예측 사건 발생확률은 약 31%이다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig13/f6.png" class="img-fluid figure-img" style="width:82.0%"></p>
+<figcaption>로지스틱 회귀 결과는 OR뿐 아니라 대상자 특성에 따른 예측확률 곡선으로도 해석할 수 있다.</figcaption>
+</figure>
+</div>
+</section>
+<section id="상호작용이-있는-로지스틱-회귀" class="level2" data-number="13.16">
+<h2 data-number="13.16" class="anchored" data-anchor-id="상호작용이-있는-로지스틱-회귀"><span class="header-section-number">13.16</span> 상호작용이 있는 로지스틱 회귀</h2>
+<p>로지스틱 회귀에서도 상호작용을 포함할 수 있다. 예를 들어 흡연의 효과가 성별에 따라 다를 수 있다고 생각해 보자.</p>
+<p><span class="math display">\[logit(p_i)=\beta_0+\beta_1Smoking_i+\beta_2Female_i+\beta_3(Smoking_i\times Female_i)\]</span></p>
+<p>이 모형에서 흡연의 log odds 효과는 성별에 따라 달라진다.</p>
+<p>남성(<span class="math inline">\(Female=0\)</span>)에서 흡연의 log odds 효과는 다음과 같다.</p>
+<p><span class="math display">\[\beta_1\]</span></p>
+<p>여성(<span class="math inline">\(Female=1\)</span>)에서 흡연의 log odds 효과는 다음과 같다.</p>
+<p><span class="math display">\[\beta_1+\beta_3\]</span></p>
+<p>따라서 남성에서 흡연 OR은 <span class="math inline">\(e^{\beta_1}\)</span>이고, 여성에서 흡연 OR은 <span class="math inline">\(e^{\beta_1+\beta_3}\)</span>이다.</p>
+<p>상호작용이 있는 경우에는 단일 OR 하나만 보고 전체 집단에 동일한 효과가 있다고 해석하면 안 된다.</p>
+</section>
+<section id="로지스틱-회귀의-가정과-확인사항" class="level2" data-number="13.17">
+<h2 data-number="13.17" class="anchored" data-anchor-id="로지스틱-회귀의-가정과-확인사항"><span class="header-section-number">13.17</span> 로지스틱 회귀의 가정과 확인사항</h2>
+<p>로지스틱 회귀는 선형회귀와 다른 가정을 가진다. 중요한 확인사항은 다음과 같다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>확인사항</th>
+<th>설명</th>
+<th>점검 방법</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>이진 결과변수</td>
+<td>결과가 0/1로 정의되어야 함</td>
+<td>사건 코딩 확인</td>
+</tr>
+<tr class="even">
+<td>독립성</td>
+<td>각 관측값이 독립이어야 함</td>
+<td>연구설계 확인</td>
+</tr>
+<tr class="odd">
+<td>logit 선형성</td>
+<td>연속형 설명변수와 log odds의 관계가 선형</td>
+<td>spline, 구간화, 진단그림</td>
+</tr>
+<tr class="even">
+<td>다중공선성</td>
+<td>설명변수끼리 너무 강하게 관련되면 불안정</td>
+<td>VIF 확인</td>
+</tr>
+<tr class="odd">
+<td>충분한 사건 수</td>
+<td>사건 수가 너무 적으면 추정 불안정</td>
+<td>사건 수와 변수 수 확인</td>
+</tr>
+<tr class="even">
+<td>완전분리</td>
+<td>어떤 변수 조합이 결과를 완벽히 예측하면 추정 실패</td>
+<td>경고 메시지, 큰 표준오차</td>
+</tr>
+<tr class="odd">
+<td>영향점</td>
+<td>특정 관측값이 추정에 과도한 영향</td>
+<td>진단통계량 확인</td>
+</tr>
+</tbody>
+</table>
+<section id="logit-선형성" class="level3" data-number="13.17.1">
+<h3 data-number="13.17.1" class="anchored" data-anchor-id="logit-선형성"><span class="header-section-number">13.17.1</span> Logit 선형성</h3>
+<p>로지스틱 회귀는 확률 <span class="math inline">\(p\)</span>와 연속형 설명변수 사이의 선형성을 가정하지 않는다. 대신 <strong>logit(p)</strong>와 연속형 설명변수 사이의 선형성을 가정한다.</p>
+<p>즉 다음 관계가 적절해야 한다.</p>
+<p><span class="math display">\[logit(p)=\beta_0+\beta_1X\]</span></p>
+<p>나이와 위험의 관계가 비선형이라면 나이를 그대로 선형항으로 넣는 것이 부적절할 수 있다. 이 경우 다음 대안을 고려할 수 있다.</p>
+<ul>
+<li>나이를 범주화한다.</li>
+<li><span class="math inline">\(Age^2\)</span> 같은 다항항을 추가한다.</li>
+<li>restricted cubic spline을 사용한다.</li>
+<li>임상적으로 의미 있는 절단값을 사용한다.</li>
+</ul>
+</section>
+<section id="완전분리" class="level3" data-number="13.17.2">
+<h3 data-number="13.17.2" class="anchored" data-anchor-id="완전분리"><span class="header-section-number">13.17.2</span> 완전분리</h3>
+<p>완전분리(complete separation)는 어떤 설명변수 또는 설명변수 조합이 결과를 완벽하게 구분하는 상황이다.</p>
+<p>예를 들어 작은 자료에서 특정 유전자 변이가 있는 사람은 모두 질병이 있고, 없는 사람은 모두 질병이 없다면 로지스틱 회귀계수가 무한대로 발산할 수 있다. R에서는 다음과 같은 경고가 나타날 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>glm.fit<span class="sc">:</span> fitted probabilities numerically <span class="dv">0</span> or <span class="dv">1</span> occurred</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>이 경우 표준 로지스틱 회귀 결과를 그대로 해석하기 어렵고, Firth 보정 로지스틱 회귀나 penalized logistic regression 등을 고려할 수 있다.</p>
+</section>
+</section>
+<section id="사건-수와-변수-개수" class="level2" data-number="13.18">
+<h2 data-number="13.18" class="anchored" data-anchor-id="사건-수와-변수-개수"><span class="header-section-number">13.18</span> 사건 수와 변수 개수</h2>
+<p>로지스틱 회귀에서는 사건 수가 충분해야 한다. 과거에는 “변수 1개당 사건 수 10개(events per variable, EPV 10)”라는 경험적 기준이 널리 사용되었다.</p>
+<p>예를 들어 사건 수가 50개라면 설명변수는 대략 5개 이하가 적절하다는 식이다. 하지만 이는 절대 규칙이 아니다. 실제 필요한 사건 수는 다음에 따라 달라진다.</p>
+<ul>
+<li>전체 표본 크기</li>
+<li>사건 비율</li>
+<li>설명변수 수</li>
+<li>설명변수의 분포</li>
+<li>효과크기</li>
+<li>예측모형인지 설명모형인지</li>
+<li>변수 선택을 하는지 여부</li>
+<li>상호작용항 포함 여부</li>
+</ul>
+<p>중요한 원칙은 다음과 같다.</p>
+<blockquote class="blockquote">
+<p>사건 수가 적은데 너무 많은 변수를 넣으면 모형은 자료에 과적합되고, OR 추정치와 예측확률이 불안정해질 수 있다.</p>
+</blockquote>
+</section>
+<section id="예측모형-평가-discrimination과-calibration" class="level2" data-number="13.19">
+<h2 data-number="13.19" class="anchored" data-anchor-id="예측모형-평가-discrimination과-calibration"><span class="header-section-number">13.19</span> 예측모형 평가: discrimination과 calibration</h2>
+<p>로지스틱 회귀는 관련성 분석에도 쓰이지만 예측모형으로도 자주 사용된다. 예측모형으로 사용할 때는 최소한 두 가지 성능을 구분해야 한다.</p>
+<section id="discrimination" class="level3" data-number="13.19.1">
+<h3 data-number="13.19.1" class="anchored" data-anchor-id="discrimination"><span class="header-section-number">13.19.1</span> Discrimination</h3>
+<p>Discrimination은 사건이 발생한 사람과 발생하지 않은 사람을 모형이 얼마나 잘 구분하는지를 의미한다. 대표적인 지표가 ROC curve와 AUC이다.</p>
+<p>ROC curve는 여러 예측확률 절단값에서 민감도와 1-특이도를 그린 곡선이다.</p>
+<ul>
+<li>x축: <span class="math inline">\(1-\text{specificity}\)</span></li>
+<li>y축: sensitivity</li>
+</ul>
+<p>AUC는 ROC curve 아래 면적이다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;">AUC</th>
+<th>대략적 해석</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.5</td>
+<td>무작위 예측 수준</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.6–0.7</td>
+<td>낮은 구분능</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.7–0.8</td>
+<td>보통 구분능</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.8–0.9</td>
+<td>좋은 구분능</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.9 이상</td>
+<td>매우 높은 구분능</td>
+</tr>
+</tbody>
+</table>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig13/f7.png" class="img-fluid figure-img" style="width:70.0%"></p>
+<figcaption>ROC curve는 민감도와 1-특이도의 관계를 보여주며, AUC는 사건 발생자와 비발생자를 구분하는 능력을 요약한다.</figcaption>
+</figure>
+</div>
+</section>
+<section id="calibration" class="level3" data-number="13.19.2">
+<h3 data-number="13.19.2" class="anchored" data-anchor-id="calibration"><span class="header-section-number">13.19.2</span> Calibration</h3>
+<p>Calibration은 예측확률이 실제 사건 발생률과 얼마나 잘 맞는지를 의미한다.</p>
+<p>예를 들어 어떤 모형이 여러 환자에게 20% 위험을 예측했다면, 그 환자들 중 실제로 약 20%에서 사건이 발생해야 잘 보정된 모형이라고 할 수 있다.</p>
+<p>AUC가 높다고 calibration이 반드시 좋은 것은 아니다. 예측모형을 사용할 때는 구분능과 보정도를 함께 평가해야 한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig13/f8.png" class="img-fluid figure-img" style="width:70.0%"></p>
+<figcaption>Calibration plot은 예측확률과 실제 사건 발생률이 얼마나 일치하는지 보여준다. 대각선에 가까울수록 보정도가 좋다.</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="r-실습" class="level2" data-number="13.20">
+<h2 data-number="13.20" class="anchored" data-anchor-id="r-실습"><span class="header-section-number">13.20</span> R 실습</h2>
+<p>이번 실습에서는 가상 의학 자료를 생성하여 로지스틱 회귀분석을 수행한다. 결과변수는 질병 발생 여부이며, 설명변수는 나이, BMI, 흡연, 성별이다.</p>
+<section id="예제-데이터-생성" class="level3" data-number="13.20.1">
+<h3 data-number="13.20.1" class="anchored" data-anchor-id="예제-데이터-생성"><span class="header-section-number">13.20.1</span> 예제 데이터 생성</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>age <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">55</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>bmi <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">25</span>, <span class="at">sd =</span> <span class="dv">4</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>smoking <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="fl">0.3</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>female <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="fl">0.5</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>linear_predictor <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">8</span> <span class="sc">+</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.06</span> <span class="sc">*</span> age <span class="sc">+</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.10</span> <span class="sc">*</span> bmi <span class="sc">+</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.80</span> <span class="sc">*</span> smoking <span class="sc">-</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.20</span> <span class="sc">*</span> female</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>prob_disease <span class="ot">&lt;-</span> <span class="fu">exp</span>(linear_predictor) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(linear_predictor))</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>disease <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> prob_disease)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">disease =</span> disease,</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">age =</span> age,</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">bmi =</span> bmi,</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">smoking =</span> smoking,</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">female =</span> female</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  disease      age      bmi smoking female
+1       0 49.39524 22.59243       0      1
+2       0 52.69823 21.02521       0      1
+3       0 70.58708 29.10714       0      1
+4       0 55.70508 28.00425       0      0
+5       0 56.29288 18.96333       0      1
+6       0 72.15065 24.61941       0      0</code></pre>
+</div>
+</div>
+</section>
+<section id="사건-발생률-확인" class="level3" data-number="13.20.2">
+<h3 data-number="13.20.2" class="anchored" data-anchor-id="사건-발생률-확인"><span class="header-section-number">13.20.2</span> 사건 발생률 확인</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(data<span class="sc">$</span>disease)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  0   1 
+430  70 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.table</span>(<span class="fu">table</span>(data<span class="sc">$</span>disease))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+   0    1 
+0.86 0.14 </code></pre>
+</div>
+</div>
+<p>사건 발생률은 로지스틱 회귀 해석에서 중요하다. 사건이 매우 흔하면 OR과 RR의 차이가 커질 수 있고, 사건이 너무 적으면 모형 추정이 불안정할 수 있다.</p>
+</section>
+<section id="표와-crude-or" class="level3" data-number="13.20.3">
+<h3 data-number="13.20.3" class="anchored" data-anchor-id="표와-crude-or"><span class="header-section-number">13.20.3</span> 2×2 표와 crude OR</h3>
+<p>먼저 흡연과 질병 발생의 관계를 2×2 표로 확인한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>tab_smoking <span class="ot">&lt;-</span> <span class="fu">table</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Smoking =</span> data<span class="sc">$</span>smoking,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Disease =</span> data<span class="sc">$</span>disease</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>tab_smoking</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       Disease
+Smoking   0   1
+      0 314  39
+      1 116  31</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.table</span>(tab_smoking, <span class="at">margin =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       Disease
+Smoking         0         1
+      0 0.8895184 0.1104816
+      1 0.7891156 0.2108844</code></pre>
+</div>
+</div>
+<p>2×2 표에서 직접 crude OR을 계산할 수도 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> tab_smoking[<span class="st">"1"</span>, <span class="st">"1"</span>]</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> tab_smoking[<span class="st">"1"</span>, <span class="st">"0"</span>]</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> tab_smoking[<span class="st">"0"</span>, <span class="st">"1"</span>]</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> tab_smoking[<span class="st">"0"</span>, <span class="st">"0"</span>]</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>crude_or_table <span class="ot">&lt;-</span> (a <span class="sc">/</span> b) <span class="sc">/</span> (c <span class="sc">/</span> d)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>crude_or_table</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2.151636</code></pre>
+</div>
+</div>
+</section>
+<section id="단변량-로지스틱-회귀" class="level3" data-number="13.20.4">
+<h3 data-number="13.20.4" class="anchored" data-anchor-id="단변량-로지스틱-회귀"><span class="header-section-number">13.20.4</span> 단변량 로지스틱 회귀</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>model_smoking <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  disease <span class="sc">~</span> smoking,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> data,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> binomial</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_smoking)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = disease ~ smoking, family = binomial, data = data)
+
+Coefficients:
+            Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)  -2.0858     0.1698 -12.286  &lt; 2e-16 ***
+smoking       0.7662     0.2640   2.902  0.00371 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 404.96  on 499  degrees of freedom
+Residual deviance: 396.80  on 498  degrees of freedom
+AIC: 400.8
+
+Number of Fisher Scoring iterations: 4</code></pre>
+</div>
+</div>
+<p>회귀계수는 log odds scale에 있다. OR로 해석하려면 지수화한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(model_smoking))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept)     smoking 
+  0.1242038   2.1516357 </code></pre>
+</div>
+</div>
+<p>95% 신뢰구간도 지수화하여 OR scale로 바꾼다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">confint</span>(model_smoking))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                 2.5 %    97.5 %
+(Intercept) 0.08769083 0.1709195
+smoking     1.27643296 3.6054248</code></pre>
+</div>
+</div>
+</section>
+<section id="다변량-로지스틱-회귀" class="level3" data-number="13.20.5">
+<h3 data-number="13.20.5" class="anchored" data-anchor-id="다변량-로지스틱-회귀"><span class="header-section-number">13.20.5</span> 다변량 로지스틱 회귀</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>model_multi <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  disease <span class="sc">~</span> smoking <span class="sc">+</span> age <span class="sc">+</span> bmi <span class="sc">+</span> female,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> data,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> binomial</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_multi)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = disease ~ smoking + age + bmi + female, family = binomial, 
+    data = data)
+
+Coefficients:
+            Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept) -9.61563    1.36048  -7.068 1.57e-12 ***
+smoking      0.65920    0.28311   2.328  0.01989 *  
+age          0.08949    0.01532   5.840 5.22e-09 ***
+bmi          0.09565    0.03434   2.785  0.00535 ** 
+female      -0.12477    0.27781  -0.449  0.65334    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 404.96  on 499  degrees of freedom
+Residual deviance: 351.53  on 495  degrees of freedom
+AIC: 361.53
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+</div>
+</section>
+<section id="adjusted-or-결과표-만들기" class="level3" data-number="13.20.6">
+<h3 data-number="13.20.6" class="anchored" data-anchor-id="adjusted-or-결과표-만들기"><span class="header-section-number">13.20.6</span> Adjusted OR 결과표 만들기</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>or <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fu">coef</span>(model_multi))</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>ci <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fu">confint</span>(model_multi))</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>p_value <span class="ot">&lt;-</span> <span class="fu">summary</span>(model_multi)<span class="sc">$</span>coefficients[, <span class="dv">4</span>]</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>result_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">Variable =</span> <span class="fu">names</span>(or),</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">OR =</span> <span class="fu">round</span>(or, <span class="dv">3</span>),</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">CI_lower =</span> <span class="fu">round</span>(ci[, <span class="dv">1</span>], <span class="dv">3</span>),</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">CI_upper =</span> <span class="fu">round</span>(ci[, <span class="dv">2</span>], <span class="dv">3</span>),</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">p_value =</span> <span class="fu">signif</span>(p_value, <span class="dv">3</span>),</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">row.names =</span> <span class="cn">NULL</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>result_table</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     Variable    OR CI_lower CI_upper  p_value
+1 (Intercept) 0.000    0.000    0.001 1.57e-12
+2     smoking 1.933    1.104    3.362 1.99e-02
+3         age 1.094    1.062    1.128 5.22e-09
+4         bmi 1.100    1.030    1.178 5.35e-03
+5      female 0.883    0.510    1.522 6.53e-01</code></pre>
+</div>
+</div>
+</section>
+<section id="세-증가에-대한-나이-or-계산" class="level3" data-number="13.20.7">
+<h3 data-number="13.20.7" class="anchored" data-anchor-id="세-증가에-대한-나이-or-계산"><span class="header-section-number">13.20.7</span> 10세 증가에 대한 나이 OR 계산</h3>
+<p>나이의 회귀계수는 1세 증가에 대한 log OR이다. 10세 증가에 대한 OR은 다음과 같이 계산한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>beta_age <span class="ot">&lt;-</span> <span class="fu">coef</span>(model_multi)[<span class="st">"age"</span>]</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="dv">10</span> <span class="sc">*</span> beta_age)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     age 
+2.447093 </code></pre>
+</div>
+</div>
+</section>
+<section id="예측확률-계산" class="level3" data-number="13.20.8">
+<h3 data-number="13.20.8" class="anchored" data-anchor-id="예측확률-계산"><span class="header-section-number">13.20.8</span> 예측확률 계산</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>new_patient <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">smoking =</span> <span class="dv">1</span>,</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">age =</span> <span class="dv">60</span>,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">bmi =</span> <span class="dv">28</span>,</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">female =</span> <span class="dv">0</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  model_multi,</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">newdata =</span> new_patient,</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"response"</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       1 
+0.287258 </code></pre>
+</div>
+</div>
+<p><code>type = "response"</code>를 사용하면 logit scale이 아니라 예측확률이 출력된다.</p>
+</section>
+<section id="여러-환자-프로파일의-예측확률-비교" class="level3" data-number="13.20.9">
+<h3 data-number="13.20.9" class="anchored" data-anchor-id="여러-환자-프로파일의-예측확률-비교"><span class="header-section-number">13.20.9</span> 여러 환자 프로파일의 예측확률 비교</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>new_profiles <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">smoking =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">age =</span> <span class="fu">c</span>(<span class="dv">50</span>, <span class="dv">50</span>, <span class="dv">70</span>, <span class="dv">70</span>),</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">bmi =</span> <span class="fu">c</span>(<span class="dv">24</span>, <span class="dv">24</span>, <span class="dv">30</span>, <span class="dv">30</span>),</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">female =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>new_profiles<span class="sc">$</span>predicted_probability <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>  model_multi,</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">newdata =</span> new_profiles,</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"response"</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>new_profiles</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  smoking age bmi female predicted_probability
+1       0  50  24      0            0.05491673
+2       1  50  24      0            0.10099187
+3       0  70  30      0            0.38184267
+4       1  70  30      0            0.54425104</code></pre>
+</div>
+</div>
+</section>
+<section id="예측확률-분포" class="level3" data-number="13.20.10">
+<h3 data-number="13.20.10" class="anchored" data-anchor-id="예측확률-분포"><span class="header-section-number">13.20.10</span> 예측확률 분포</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>predicted_prob <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  model_multi,</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"response"</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  data<span class="sc">$</span>predicted_prob,</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="dv">30</span>,</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Predicted Disease Probability"</span>,</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Predicted probability"</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="13-ch13_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="예측확률-곡선-그리기" class="level3" data-number="13.20.11">
+<h3 data-number="13.20.11" class="anchored" data-anchor-id="예측확률-곡선-그리기"><span class="header-section-number">13.20.11</span> 예측확률 곡선 그리기</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>age_grid <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">80</span>, <span class="at">by =</span> <span class="dv">1</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>plot_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">age =</span> <span class="fu">rep</span>(age_grid, <span class="dv">2</span>),</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">bmi =</span> <span class="dv">26</span>,</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">female =</span> <span class="dv">0</span>,</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">smoking =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">each =</span> <span class="fu">length</span>(age_grid))</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>plot_data<span class="sc">$</span>pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>  model_multi,</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">newdata =</span> plot_data,</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"response"</span></span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>  age_grid,</span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>  plot_data<span class="sc">$</span>pred[plot_data<span class="sc">$</span>smoking <span class="sc">==</span> <span class="dv">0</span>],</span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"l"</span>,</span>
+<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Age"</span>,</span>
+<span id="cb31-23"><a href="#cb31-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Predicted probability"</span>,</span>
+<span id="cb31-24"><a href="#cb31-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Predicted probability by age and smoking"</span></span>
+<span id="cb31-25"><a href="#cb31-25" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-26"><a href="#cb31-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-27"><a href="#cb31-27" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(</span>
+<span id="cb31-28"><a href="#cb31-28" aria-hidden="true" tabindex="-1"></a>  age_grid,</span>
+<span id="cb31-29"><a href="#cb31-29" aria-hidden="true" tabindex="-1"></a>  plot_data<span class="sc">$</span>pred[plot_data<span class="sc">$</span>smoking <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb31-30"><a href="#cb31-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb31-31"><a href="#cb31-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">lty =</span> <span class="dv">2</span></span>
+<span id="cb31-32"><a href="#cb31-32" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-33"><a href="#cb31-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-34"><a href="#cb31-34" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(</span>
+<span id="cb31-35"><a href="#cb31-35" aria-hidden="true" tabindex="-1"></a>  <span class="st">"topleft"</span>,</span>
+<span id="cb31-36"><a href="#cb31-36" aria-hidden="true" tabindex="-1"></a>  <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"Non-smoker"</span>, <span class="st">"Smoker"</span>),</span>
+<span id="cb31-37"><a href="#cb31-37" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb31-38"><a href="#cb31-38" aria-hidden="true" tabindex="-1"></a>  <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="cb31-39"><a href="#cb31-39" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="13-ch13_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="범주형-변수-factor-처리" class="level3" data-number="13.20.12">
+<h3 data-number="13.20.12" class="anchored" data-anchor-id="범주형-변수-factor-처리"><span class="header-section-number">13.20.12</span> 범주형 변수 factor 처리</h3>
+<p>흡연 여부를 factor로 바꾸면 결과표에서 기준범주가 더 명확해진다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>smoking_factor <span class="ot">&lt;-</span> <span class="fu">factor</span>(</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  data<span class="sc">$</span>smoking,</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Non-smoker"</span>, <span class="st">"Smoker"</span>)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>female_factor <span class="ot">&lt;-</span> <span class="fu">factor</span>(</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>  data<span class="sc">$</span>female,</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Male"</span>, <span class="st">"Female"</span>)</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>model_factor <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>  disease <span class="sc">~</span> smoking_factor <span class="sc">+</span> age <span class="sc">+</span> bmi <span class="sc">+</span> female_factor,</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> data,</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> binomial</span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_factor)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = disease ~ smoking_factor + age + bmi + female_factor, 
+    family = binomial, data = data)
+
+Coefficients:
+                     Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)          -9.61563    1.36048  -7.068 1.57e-12 ***
+smoking_factorSmoker  0.65920    0.28311   2.328  0.01989 *  
+age                   0.08949    0.01532   5.840 5.22e-09 ***
+bmi                   0.09565    0.03434   2.785  0.00535 ** 
+female_factorFemale  -0.12477    0.27781  -0.449  0.65334    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 404.96  on 499  degrees of freedom
+Residual deviance: 351.53  on 495  degrees of freedom
+AIC: 361.53
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(model_factor))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         (Intercept) smoking_factorSmoker                  age 
+        6.667808e-05         1.933251e+00         1.093617e+00 
+                 bmi  female_factorFemale 
+        1.100377e+00         8.827006e-01 </code></pre>
+</div>
+</div>
+</section>
+<section id="상호작용-모형" class="level3" data-number="13.20.13">
+<h3 data-number="13.20.13" class="anchored" data-anchor-id="상호작용-모형"><span class="header-section-number">13.20.13</span> 상호작용 모형</h3>
+<p>흡연 효과가 성별에 따라 다른지 확인하려면 상호작용항을 포함한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>model_interaction <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  disease <span class="sc">~</span> smoking <span class="sc">*</span> female <span class="sc">+</span> age <span class="sc">+</span> bmi,</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> data,</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> binomial</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_interaction)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = disease ~ smoking * female + age + bmi, family = binomial, 
+    data = data)
+
+Coefficients:
+               Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)    -9.57609    1.36273  -7.027 2.11e-12 ***
+smoking         0.41513    0.42137   0.985  0.32453    
+female         -0.30449    0.35986  -0.846  0.39749    
+age             0.09010    0.01536   5.866 4.48e-09 ***
+bmi             0.09582    0.03435   2.789  0.00528 ** 
+smoking:female  0.45532    0.57370   0.794  0.42739    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 404.96  on 499  degrees of freedom
+Residual deviance: 350.90  on 494  degrees of freedom
+AIC: 362.9
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(model_interaction))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   (Intercept)        smoking         female            age            bmi 
+  6.936746e-05   1.514571e+00   7.375026e-01   1.094285e+00   1.100565e+00 
+smoking:female 
+  1.576684e+00 </code></pre>
+</div>
+</div>
+<p>상호작용항이 포함된 모형에서는 주효과 OR을 단순하게 전체 평균 효과로 해석하면 안 된다. 기준범주에서의 효과와 상호작용에 따른 효과 변화를 함께 해석해야 한다.</p>
+</section>
+<section id="roc-curve와-auc" class="level3" data-number="13.20.14">
+<h3 data-number="13.20.14" class="anchored" data-anchor-id="roc-curve와-auc"><span class="header-section-number">13.20.14</span> ROC curve와 AUC</h3>
+<p>아래 코드는 <code>pROC</code> 패키지가 설치되어 있을 때 실행한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"pROC"</span>)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pROC)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>roc_obj <span class="ot">&lt;-</span> <span class="fu">roc</span>(data<span class="sc">$</span>disease, data<span class="sc">$</span>predicted_prob)</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(roc_obj)</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a><span class="fu">auc</span>(roc_obj)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>패키지 설치가 어려운 수업 환경에서는 ROC curve와 AUC 개념을 그림으로 설명하고, 코드는 참고용으로 제시해도 된다.</p>
+</section>
+<section id="confusion-matrix와-threshold" class="level3" data-number="13.20.15">
+<h3 data-number="13.20.15" class="anchored" data-anchor-id="confusion-matrix와-threshold"><span class="header-section-number">13.20.15</span> Confusion matrix와 threshold</h3>
+<p>예측확률을 이용하여 분류를 하려면 절단값(threshold)을 정해야 한다. 예를 들어 0.5 이상이면 질병 예측 양성으로 분류할 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>threshold <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>pred_class <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(data<span class="sc">$</span>predicted_prob <span class="sc">&gt;=</span> threshold, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">Predicted =</span> pred_class,</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">Observed =</span> data<span class="sc">$</span>disease</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         Observed
+Predicted   0   1
+        0 425  66
+        1   5   4</code></pre>
+</div>
+</div>
+<p>절단값을 바꾸면 민감도와 특이도가 달라진다. 따라서 threshold는 연구 목적, 질병의 중증도, 위양성·위음성 비용을 고려하여 정해야 한다.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./12-ch12.html" class="pagination-link" aria-label="다중선형회귀">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">다중선형회귀</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

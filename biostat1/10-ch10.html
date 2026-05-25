@@ -1,0 +1,2327 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>10&nbsp; 범주형 자료 분석 – 바이오통계 입문</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./11-ch11.html" rel="next">
+<link href="./09-ch9.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-832e3d7b6b94ddcc90a000f8fabe51a9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./10-ch10.html"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">범주형 자료 분석</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">바이오통계 입문</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Contents</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-ch1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">왜 바이오통계가 필요한가?</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-ch2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">기술통계와 데이터 요약</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-ch3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">확률의 기초와 진단검사</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-ch4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">확률분포와 정규분포</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-ch5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">표본분포와 표준오차</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-ch6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">신뢰구간</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-ch7.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">가설검정과 p-value</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-ch8.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">t-test와 평균 비교</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-ch9.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">분산분석(ANOVA)</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-ch10.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">범주형 자료 분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-ch11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Chapter 10. 상관분석과 단순선형회귀</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-ch12.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Chapter 11. 다중선형회귀</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-ch13.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Chapter 12. 로지스틱 회귀</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#수업-개요" id="toc-수업-개요" class="nav-link active" data-scroll-target="#수업-개요"><span class="header-section-number">10.1</span> 수업 개요</a></li>
+  <li><a href="#핵심-질문" id="toc-핵심-질문" class="nav-link" data-scroll-target="#핵심-질문"><span class="header-section-number">10.2</span> 핵심 질문</a></li>
+  <li><a href="#학습목표" id="toc-학습목표" class="nav-link" data-scroll-target="#학습목표"><span class="header-section-number">10.3</span> 학습목표</a></li>
+  <li><a href="#범주형-변수란" id="toc-범주형-변수란" class="nav-link" data-scroll-target="#범주형-변수란"><span class="header-section-number">10.4</span> 범주형 변수란?</a></li>
+  <li><a href="#명목형-변수와-순서형-변수" id="toc-명목형-변수와-순서형-변수" class="nav-link" data-scroll-target="#명목형-변수와-순서형-변수"><span class="header-section-number">10.5</span> 명목형 변수와 순서형 변수</a>
+  <ul class="collapse">
+  <li><a href="#명목형-변수" id="toc-명목형-변수" class="nav-link" data-scroll-target="#명목형-변수"><span class="header-section-number">10.5.1</span> 명목형 변수</a></li>
+  <li><a href="#순서형-변수" id="toc-순서형-변수" class="nav-link" data-scroll-target="#순서형-변수"><span class="header-section-number">10.5.2</span> 순서형 변수</a></li>
+  </ul></li>
+  <li><a href="#이분형-변수" id="toc-이분형-변수" class="nav-link" data-scroll-target="#이분형-변수"><span class="header-section-number">10.6</span> 이분형 변수</a></li>
+  <li><a href="#범주형-자료의-요약" id="toc-범주형-자료의-요약" class="nav-link" data-scroll-target="#범주형-자료의-요약"><span class="header-section-number">10.7</span> 범주형 자료의 요약</a></li>
+  <li><a href="#교차표" id="toc-교차표" class="nav-link" data-scroll-target="#교차표"><span class="header-section-number">10.8</span> 교차표</a></li>
+  <li><a href="#행-비율-열-비율-전체-비율" id="toc-행-비율-열-비율-전체-비율" class="nav-link" data-scroll-target="#행-비율-열-비율-전체-비율"><span class="header-section-number">10.9</span> 행 비율, 열 비율, 전체 비율</a>
+  <ul class="collapse">
+  <li><a href="#행-비율" id="toc-행-비율" class="nav-link" data-scroll-target="#행-비율"><span class="header-section-number">10.9.1</span> 행 비율</a></li>
+  <li><a href="#열-비율" id="toc-열-비율" class="nav-link" data-scroll-target="#열-비율"><span class="header-section-number">10.9.2</span> 열 비율</a></li>
+  <li><a href="#전체-비율" id="toc-전체-비율" class="nav-link" data-scroll-target="#전체-비율"><span class="header-section-number">10.9.3</span> 전체 비율</a></li>
+  </ul></li>
+  <li><a href="#표의-구조" id="toc-표의-구조" class="nav-link" data-scroll-target="#표의-구조"><span class="header-section-number">10.10</span> 2×2 표의 구조</a></li>
+  <li><a href="#위험" id="toc-위험" class="nav-link" data-scroll-target="#위험"><span class="header-section-number">10.11</span> 위험</a></li>
+  <li><a href="#위험차" id="toc-위험차" class="nav-link" data-scroll-target="#위험차"><span class="header-section-number">10.12</span> 위험차</a></li>
+  <li><a href="#위험비" id="toc-위험비" class="nav-link" data-scroll-target="#위험비"><span class="header-section-number">10.13</span> 위험비</a></li>
+  <li><a href="#오즈" id="toc-오즈" class="nav-link" data-scroll-target="#오즈"><span class="header-section-number">10.14</span> 오즈</a></li>
+  <li><a href="#오즈비" id="toc-오즈비" class="nav-link" data-scroll-target="#오즈비"><span class="header-section-number">10.15</span> 오즈비</a></li>
+  <li><a href="#위험비와-오즈비의-차이" id="toc-위험비와-오즈비의-차이" class="nav-link" data-scroll-target="#위험비와-오즈비의-차이"><span class="header-section-number">10.16</span> 위험비와 오즈비의 차이</a></li>
+  <li><a href="#위험비와-오즈비의-신뢰구간" id="toc-위험비와-오즈비의-신뢰구간" class="nav-link" data-scroll-target="#위험비와-오즈비의-신뢰구간"><span class="header-section-number">10.17</span> 위험비와 오즈비의 신뢰구간</a>
+  <ul class="collapse">
+  <li><a href="#위험비의-로그-신뢰구간" id="toc-위험비의-로그-신뢰구간" class="nav-link" data-scroll-target="#위험비의-로그-신뢰구간"><span class="header-section-number">10.17.1</span> 위험비의 로그 신뢰구간</a></li>
+  <li><a href="#오즈비의-로그-신뢰구간" id="toc-오즈비의-로그-신뢰구간" class="nav-link" data-scroll-target="#오즈비의-로그-신뢰구간"><span class="header-section-number">10.17.2</span> 오즈비의 로그 신뢰구간</a></li>
+  <li><a href="#해석" id="toc-해석" class="nav-link" data-scroll-target="#해석"><span class="header-section-number">10.17.3</span> 해석</a></li>
+  </ul></li>
+  <li><a href="#카이제곱검정" id="toc-카이제곱검정" class="nav-link" data-scroll-target="#카이제곱검정"><span class="header-section-number">10.18</span> 카이제곱검정</a></li>
+  <li><a href="#카이제곱검정의-아이디어" id="toc-카이제곱검정의-아이디어" class="nav-link" data-scroll-target="#카이제곱검정의-아이디어"><span class="header-section-number">10.19</span> 카이제곱검정의 아이디어</a></li>
+  <li><a href="#기대빈도" id="toc-기대빈도" class="nav-link" data-scroll-target="#기대빈도"><span class="header-section-number">10.20</span> 기대빈도</a></li>
+  <li><a href="#카이제곱-통계량-계산-예제" id="toc-카이제곱-통계량-계산-예제" class="nav-link" data-scroll-target="#카이제곱-통계량-계산-예제"><span class="header-section-number">10.21</span> 카이제곱 통계량 계산 예제</a></li>
+  <li><a href="#카이제곱검정의-가정" id="toc-카이제곱검정의-가정" class="nav-link" data-scroll-target="#카이제곱검정의-가정"><span class="header-section-number">10.22</span> 카이제곱검정의 가정</a></li>
+  <li><a href="#fisher의-정확검정" id="toc-fisher의-정확검정" class="nav-link" data-scroll-target="#fisher의-정확검정"><span class="header-section-number">10.23</span> Fisher의 정확검정</a></li>
+  <li><a href="#카이제곱검정과-fisher-검정-선택" id="toc-카이제곱검정과-fisher-검정-선택" class="nav-link" data-scroll-target="#카이제곱검정과-fisher-검정-선택"><span class="header-section-number">10.24</span> 카이제곱검정과 Fisher 검정 선택</a></li>
+  <li><a href="#독립사건-검정과-동질성-검정" id="toc-독립사건-검정과-동질성-검정" class="nav-link" data-scroll-target="#독립사건-검정과-동질성-검정"><span class="header-section-number">10.25</span> 독립사건 검정과 동질성 검정</a>
+  <ul class="collapse">
+  <li><a href="#독립성-검정" id="toc-독립성-검정" class="nav-link" data-scroll-target="#독립성-검정"><span class="header-section-number">10.25.1</span> 독립성 검정</a></li>
+  <li><a href="#동질성-검정" id="toc-동질성-검정" class="nav-link" data-scroll-target="#동질성-검정"><span class="header-section-number">10.25.2</span> 동질성 검정</a></li>
+  </ul></li>
+  <li><a href="#mcnemar-검정" id="toc-mcnemar-검정" class="nav-link" data-scroll-target="#mcnemar-검정"><span class="header-section-number">10.26</span> McNemar 검정</a></li>
+  <li><a href="#진단검사와-22-표" id="toc-진단검사와-22-표" class="nav-link" data-scroll-target="#진단검사와-22-표"><span class="header-section-number">10.27</span> 진단검사와 2×2 표</a></li>
+  <li><a href="#r-실습-준비" id="toc-r-실습-준비" class="nav-link" data-scroll-target="#r-실습-준비"><span class="header-section-number">10.28</span> R 실습 준비</a></li>
+  <li><a href="#r-실습-빈도와-비율" id="toc-r-실습-빈도와-비율" class="nav-link" data-scroll-target="#r-실습-빈도와-비율"><span class="header-section-number">10.29</span> R 실습: 빈도와 비율</a></li>
+  <li><a href="#r-실습-카이제곱검정" id="toc-r-실습-카이제곱검정" class="nav-link" data-scroll-target="#r-실습-카이제곱검정"><span class="header-section-number">10.30</span> R 실습: 카이제곱검정</a></li>
+  <li><a href="#r-실습-fisher의-정확검정" id="toc-r-실습-fisher의-정확검정" class="nav-link" data-scroll-target="#r-실습-fisher의-정확검정"><span class="header-section-number">10.31</span> R 실습: Fisher의 정확검정</a></li>
+  <li><a href="#r-실습-위험비와-오즈비-계산" id="toc-r-실습-위험비와-오즈비-계산" class="nav-link" data-scroll-target="#r-실습-위험비와-오즈비-계산"><span class="header-section-number">10.32</span> R 실습: 위험비와 오즈비 계산</a></li>
+  <li><a href="#r-실습-위험비와-오즈비의-신뢰구간" id="toc-r-실습-위험비와-오즈비의-신뢰구간" class="nav-link" data-scroll-target="#r-실습-위험비와-오즈비의-신뢰구간"><span class="header-section-number">10.33</span> R 실습: 위험비와 오즈비의 신뢰구간</a></li>
+  <li><a href="#r-실습-막대그래프" id="toc-r-실습-막대그래프" class="nav-link" data-scroll-target="#r-실습-막대그래프"><span class="header-section-number">10.34</span> R 실습: 막대그래프</a></li>
+  <li><a href="#r-실습-mosaic-plot" id="toc-r-실습-mosaic-plot" class="nav-link" data-scroll-target="#r-실습-mosaic-plot"><span class="header-section-number">10.35</span> R 실습: Mosaic plot</a></li>
+  <li><a href="#r-실습-mcnemar-검정" id="toc-r-실습-mcnemar-검정" class="nav-link" data-scroll-target="#r-실습-mcnemar-검정"><span class="header-section-number">10.36</span> R 실습: McNemar 검정</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">범주형 자료 분석</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="수업-개요" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="수업-개요"><span class="header-section-number">10.1</span> 수업 개요</h2>
+<p>이번 장에서는 <strong>범주형 자료(categorical data)</strong>를 분석하는 방법을 학습한다. 지금까지는 평균, 표준편차, 정규분포, 신뢰구간, t-test를 통해 주로 연속형 결과변수를 다루었다. 그러나 실제 의학 연구에서는 결과가 숫자로 연속적으로 측정되는 경우만큼이나, 몇 개의 범주로 나뉘는 경우가 매우 많다.</p>
+<p>예를 들어 다음과 같은 결과는 모두 범주형 자료이다.</p>
+<ul>
+<li>질병 있음 / 질병 없음</li>
+<li>사망 / 생존</li>
+<li>치료 반응 있음 / 없음</li>
+<li>검사 양성 / 음성</li>
+<li>부작용 발생 / 미발생</li>
+<li>흡연자 / 비흡연자</li>
+<li>암 병기 I / II / III / IV</li>
+<li>증상 정도: 경증 / 중등도 / 중증</li>
+</ul>
+<p>이러한 자료는 평균과 표준편차로 요약하기 어렵다. 예를 들어 치료 반응 여부가 “반응” 또는 “무반응”으로 기록되어 있다면, 이 자료의 핵심은 평균이 아니라 <strong>몇 명이 반응했는가</strong>, <strong>몇 퍼센트가 반응했는가</strong>, <strong>두 집단의 반응률이 다른가</strong>이다.</p>
+<p>따라서 범주형 자료 분석에서는 다음 도구들이 중요하다.</p>
+<ul>
+<li>빈도와 비율</li>
+<li>교차표</li>
+<li>행 비율과 열 비율</li>
+<li>위험, 오즈, 위험비, 오즈비</li>
+<li>카이제곱검정</li>
+<li>Fisher의 정확검정</li>
+<li>민감도, 특이도, 양성예측도, 음성예측도</li>
+<li>범주형 결과의 신뢰구간과 p-value 해석</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig10/f1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%" alt="범주형 자료 분석의 전체 흐름"></p>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p>범주형 자료 분석의 출발점은 “몇 명인가?”와 “몇 퍼센트인가?”이다. 그 다음 질문은 “그 차이가 우연으로 설명 가능한가?”와 “그 차이가 얼마나 큰가?”이다.</p>
+</blockquote>
+<hr>
+</section>
+<section id="핵심-질문" class="level2" data-number="10.2">
+<h2 data-number="10.2" class="anchored" data-anchor-id="핵심-질문"><span class="header-section-number">10.2</span> 핵심 질문</h2>
+<p>이번 장에서는 다음 질문에 답한다.</p>
+<ol type="1">
+<li>범주형 변수는 연속형 변수와 어떻게 다른가?</li>
+<li>명목형 변수와 순서형 변수는 어떻게 구분하는가?</li>
+<li>범주형 자료는 왜 평균이 아니라 빈도와 비율로 요약하는가?</li>
+<li>교차표에서 행 비율과 열 비율은 각각 언제 해석하는가?</li>
+<li>위험과 오즈는 어떻게 다른가?</li>
+<li>위험비와 오즈비는 어떻게 계산하고 해석하는가?</li>
+<li>사건이 흔할 때 오즈비를 위험비처럼 해석하면 왜 문제가 되는가?</li>
+<li>카이제곱검정은 어떤 원리로 두 범주형 변수의 관련성을 평가하는가?</li>
+<li>Fisher의 정확검정은 언제 필요한가?</li>
+<li>범주형 자료 분석 결과를 논문에서는 어떻게 보고해야 하는가?</li>
+</ol>
+<hr>
+</section>
+<section id="학습목표" class="level2" data-number="10.3">
+<h2 data-number="10.3" class="anchored" data-anchor-id="학습목표"><span class="header-section-number">10.3</span> 학습목표</h2>
+<p>이번 수업이 끝나면 학생들은 다음을 할 수 있어야 한다.</p>
+<ol type="1">
+<li>범주형 변수의 종류를 명목형과 순서형으로 구분할 수 있다.</li>
+<li>빈도와 비율을 이용해 범주형 자료를 요약할 수 있다.</li>
+<li>2×2 표를 구성하고 각 셀의 의미를 설명할 수 있다.</li>
+<li>행 비율, 열 비율, 전체 비율을 구분하여 해석할 수 있다.</li>
+<li>위험, 오즈, 위험비, 오즈비를 계산할 수 있다.</li>
+<li>위험비와 오즈비의 차이를 설명할 수 있다.</li>
+<li>카이제곱검정의 귀무가설, 기대빈도, 검정통계량을 설명할 수 있다.</li>
+<li>Fisher의 정확검정이 필요한 상황을 판단할 수 있다.</li>
+<li>R을 이용해 범주형 자료 분석을 수행할 수 있다.</li>
+<li>의학 논문에서 범주형 결과표를 읽고 효과크기와 p-value를 해석할 수 있다.</li>
+</ol>
+<hr>
+</section>
+<section id="범주형-변수란" class="level2" data-number="10.4">
+<h2 data-number="10.4" class="anchored" data-anchor-id="범주형-변수란"><span class="header-section-number">10.4</span> 범주형 변수란?</h2>
+<p>범주형 변수는 관찰값이 몇 개의 범주(category) 중 하나로 기록되는 변수이다. 범주형 자료에서는 숫자 자체보다 <strong>분류된 상태</strong>가 중요하다.</p>
+<p>예를 들어 성별을 1과 2로 코딩했다고 하자.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;">코딩값</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td>남성</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td>여성</td>
+</tr>
+</tbody>
+</table>
+<p>여기서 2가 1보다 “두 배 크다”는 의미는 없다. 숫자는 단지 범주를 표시하기 위한 코드일 뿐이다. 따라서 범주형 변수를 분석할 때는 숫자 크기가 아니라 각 범주의 빈도와 비율을 해석해야 한다.</p>
+<p>의학 연구에서 자주 등장하는 범주형 변수는 다음과 같다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>변수</th>
+<th>가능한 범주</th>
+<th>연구 질문 예</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>질병 여부</td>
+<td>있음 / 없음</td>
+<td>노출군과 비노출군의 질병 발생률이 다른가?</td>
+</tr>
+<tr class="even">
+<td>치료 반응</td>
+<td>반응 / 무반응</td>
+<td>신약군의 반응률이 위약군보다 높은가?</td>
+</tr>
+<tr class="odd">
+<td>사망 여부</td>
+<td>사망 / 생존</td>
+<td>치료군 간 사망률이 다른가?</td>
+</tr>
+<tr class="even">
+<td>검사 결과</td>
+<td>양성 / 음성</td>
+<td>검사 결과가 실제 질병 상태와 얼마나 일치하는가?</td>
+</tr>
+<tr class="odd">
+<td>흡연 상태</td>
+<td>흡연 / 비흡연 / 과거흡연</td>
+<td>흡연 상태와 질병 위험이 관련되는가?</td>
+</tr>
+<tr class="even">
+<td>암 병기</td>
+<td>I / II / III / IV</td>
+<td>병기가 높을수록 사망률이 증가하는가?</td>
+</tr>
+</tbody>
+</table>
+<p>범주형 변수는 보통 <strong>명목형 변수</strong>와 <strong>순서형 변수</strong>로 나뉜다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig10/f2.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%" alt="명목형 변수와 순서형 변수의 차이"></p>
+</figure>
+</div>
+<hr>
+</section>
+<section id="명목형-변수와-순서형-변수" class="level2" data-number="10.5">
+<h2 data-number="10.5" class="anchored" data-anchor-id="명목형-변수와-순서형-변수"><span class="header-section-number">10.5</span> 명목형 변수와 순서형 변수</h2>
+<section id="명목형-변수" class="level3" data-number="10.5.1">
+<h3 data-number="10.5.1" class="anchored" data-anchor-id="명목형-변수"><span class="header-section-number">10.5.1</span> 명목형 변수</h3>
+<p>명목형 변수(nominal variable)는 범주 사이에 자연스러운 순서가 없는 변수이다.</p>
+<p>예를 들어 혈액형은 A, B, AB, O로 구분되지만, A가 B보다 크거나 작다고 말할 수 없다. 치료군도 신약군과 위약군으로 나뉘지만, 두 범주 사이에 크기 순서가 있는 것은 아니다.</p>
+<p>명목형 변수의 예는 다음과 같다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>변수</th>
+<th>범주</th>
+<th>특징</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>혈액형</td>
+<td>A, B, AB, O</td>
+<td>순서 없음</td>
+</tr>
+<tr class="even">
+<td>치료군</td>
+<td>신약군, 위약군</td>
+<td>순서 없음</td>
+</tr>
+<tr class="odd">
+<td>질병 여부</td>
+<td>있음, 없음</td>
+<td>이분형 명목 변수</td>
+</tr>
+<tr class="even">
+<td>검사 결과</td>
+<td>양성, 음성</td>
+<td>이분형 명목 변수</td>
+</tr>
+<tr class="odd">
+<td>병원 종류</td>
+<td>상급종합, 종합, 의원</td>
+<td>분석 목적에 따라 명목형 또는 순서형 가능</td>
+</tr>
+</tbody>
+</table>
+<p>명목형 변수는 주로 빈도, 비율, 교차표로 요약한다.</p>
+</section>
+<section id="순서형-변수" class="level3" data-number="10.5.2">
+<h3 data-number="10.5.2" class="anchored" data-anchor-id="순서형-변수"><span class="header-section-number">10.5.2</span> 순서형 변수</h3>
+<p>순서형 변수(ordinal variable)는 범주 사이에 순서가 있는 변수이다. 그러나 범주 간 간격이 반드시 같다고 볼 수는 없다.</p>
+<p>예를 들어 통증 정도가 경증, 중등도, 중증으로 기록되어 있다면 중증이 중등도보다 심하다는 순서는 있다. 하지만 경증에서 중등도로 증가하는 정도와 중등도에서 중증으로 증가하는 정도가 같은 간격이라고 단정할 수는 없다.</p>
+<p>순서형 변수의 예는 다음과 같다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 36%">
+<col style="width: 28%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>변수</th>
+<th>범주</th>
+<th>순서</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>암 병기</td>
+<td>I, II, III, IV</td>
+<td>I &lt; II &lt; III &lt; IV</td>
+</tr>
+<tr class="even">
+<td>통증 정도</td>
+<td>경증, 중등도, 중증</td>
+<td>경증 &lt; 중등도 &lt; 중증</td>
+</tr>
+<tr class="odd">
+<td>만족도</td>
+<td>낮음, 보통, 높음</td>
+<td>낮음 &lt; 보통 &lt; 높음</td>
+</tr>
+<tr class="even">
+<td>ECOG performance status</td>
+<td>0, 1, 2, 3, 4</td>
+<td>0이 가장 양호</td>
+</tr>
+<tr class="odd">
+<td>부작용 등급</td>
+<td>Grade 1–5</td>
+<td>등급이 높을수록 중증</td>
+</tr>
+</tbody>
+</table>
+<p>순서형 변수는 단순히 명목형처럼 분석할 수도 있지만, 순서 정보를 활용하면 더 효율적인 분석이 가능할 수 있다. 다만 입문 수준에서는 우선 빈도표와 교차표로 요약하는 방법을 익히는 것이 중요하다.</p>
+<hr>
+</section>
+</section>
+<section id="이분형-변수" class="level2" data-number="10.6">
+<h2 data-number="10.6" class="anchored" data-anchor-id="이분형-변수"><span class="header-section-number">10.6</span> 이분형 변수</h2>
+<p>의학 연구에서 특히 중요한 범주형 변수는 <strong>이분형 변수(binary variable)</strong>이다. 이분형 변수는 가능한 값이 두 개인 변수이다.</p>
+<p>예를 들어 다음 변수들이 이분형 변수이다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>변수</th>
+<th>값 1</th>
+<th>값 0</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>질병 여부</td>
+<td>질병 있음</td>
+<td>질병 없음</td>
+</tr>
+<tr class="even">
+<td>사망 여부</td>
+<td>사망</td>
+<td>생존</td>
+</tr>
+<tr class="odd">
+<td>치료 반응</td>
+<td>반응</td>
+<td>무반응</td>
+</tr>
+<tr class="even">
+<td>검사 결과</td>
+<td>양성</td>
+<td>음성</td>
+</tr>
+<tr class="odd">
+<td>부작용 발생</td>
+<td>발생</td>
+<td>미발생</td>
+</tr>
+</tbody>
+</table>
+<p>이분형 변수는 0과 1로 코딩할 수 있다.</p>
+<p><span class="math display">\[Y =
+\begin{cases}
+1, &amp; \text{사건 발생} \\
+0, &amp; \text{사건 미발생}
+\end{cases}\]</span></p>
+<p>이때 <span class="math inline">\(Y\)</span>의 평균은 사건 발생 비율이 된다. 예를 들어 10명 중 3명에게 사건이 발생했다면 자료는 다음과 같이 기록할 수 있다.</p>
+<p><span class="math display">\[1, 1, 1, 0, 0, 0, 0, 0, 0, 0\]</span></p>
+<p>이 자료의 평균은 다음과 같다.</p>
+<p><span class="math display">\[\bar{Y}=\frac{1+1+1+0+0+0+0+0+0+0}{10}=\frac{3}{10}=0.30\]</span></p>
+<p>즉 0/1 변수의 평균은 비율이다. 이 사실은 비율의 신뢰구간, 로지스틱 회귀, 위험도 분석을 이해하는 데 중요하다.</p>
+<hr>
+</section>
+<section id="범주형-자료의-요약" class="level2" data-number="10.7">
+<h2 data-number="10.7" class="anchored" data-anchor-id="범주형-자료의-요약"><span class="header-section-number">10.7</span> 범주형 자료의 요약</h2>
+<p>범주형 자료는 빈도와 비율로 요약한다.</p>
+<p>예를 들어 100명의 연구 대상자에서 흡연 여부를 조사했더니 흡연자가 40명, 비흡연자가 60명이었다고 하자.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>흡연 여부</th>
+<th style="text-align: right;">빈도</th>
+<th style="text-align: right;">비율</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>흡연</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">40%</td>
+</tr>
+<tr class="even">
+<td>비흡연</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">60%</td>
+</tr>
+<tr class="odd">
+<td>합계</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">100%</td>
+</tr>
+</tbody>
+</table>
+<p>빈도는 각 범주에 속한 사람의 수이다. 비율은 전체 중 해당 범주가 차지하는 비중이다.</p>
+<p><span class="math display">\[\text{비율} = \frac{\text{해당 범주의 빈도}}{\text{전체 관찰 수}}\]</span></p>
+<p>위 예에서 흡연자의 비율은 다음과 같다.</p>
+<p><span class="math display">\[\frac{40}{100}=0.40=40\%\]</span></p>
+<p>논문에서는 보통 다음과 같이 보고한다.</p>
+<blockquote class="blockquote">
+<p>전체 100명 중 흡연자는 40명(40.0%)이었다.</p>
+</blockquote>
+<p>범주형 자료를 보고할 때는 빈도와 비율을 함께 제시하는 것이 좋다. 비율만 제시하면 실제 표본 크기를 알기 어렵고, 빈도만 제시하면 집단 크기가 다를 때 비교하기 어렵다.</p>
+<hr>
+</section>
+<section id="교차표" class="level2" data-number="10.8">
+<h2 data-number="10.8" class="anchored" data-anchor-id="교차표"><span class="header-section-number">10.8</span> 교차표</h2>
+<p>두 범주형 변수의 관계를 살펴볼 때는 <strong>교차표(contingency table)</strong>를 사용한다. 교차표는 한 변수의 범주를 행에, 다른 변수의 범주를 열에 배치하여 각 조합의 빈도를 보여주는 표이다.</p>
+<p>예를 들어 흡연 여부와 폐암 발생 여부를 함께 본다고 하자.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">폐암 있음</th>
+<th style="text-align: right;">폐암 없음</th>
+<th style="text-align: right;">합계</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>흡연자</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">70</td>
+<td style="text-align: right;">100</td>
+</tr>
+<tr class="even">
+<td>비흡연자</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">100</td>
+</tr>
+<tr class="odd">
+<td>합계</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">160</td>
+<td style="text-align: right;">200</td>
+</tr>
+</tbody>
+</table>
+<p>이 표에서 알 수 있는 것은 단순히 폐암 환자가 40명이라는 사실만이 아니다. 더 중요한 것은 흡연자와 비흡연자에서 폐암 발생 비율이 다르다는 점이다.</p>
+<p>흡연자의 폐암 위험은 다음과 같다.</p>
+<p><span class="math display">\[\frac{30}{100}=0.30\]</span></p>
+<p>비흡연자의 폐암 위험은 다음과 같다.</p>
+<p><span class="math display">\[\frac{10}{100}=0.10\]</span></p>
+<p>따라서 흡연자에서 폐암 발생 비율이 더 높다.</p>
+<hr>
+</section>
+<section id="행-비율-열-비율-전체-비율" class="level2" data-number="10.9">
+<h2 data-number="10.9" class="anchored" data-anchor-id="행-비율-열-비율-전체-비율"><span class="header-section-number">10.9</span> 행 비율, 열 비율, 전체 비율</h2>
+<p>교차표를 해석할 때는 어떤 비율을 계산하고 있는지 명확히 해야 한다.</p>
+<section id="행-비율" class="level3" data-number="10.9.1">
+<h3 data-number="10.9.1" class="anchored" data-anchor-id="행-비율"><span class="header-section-number">10.9.1</span> 행 비율</h3>
+<p>행 비율(row percentage)은 각 행을 100%로 두고 열 범주의 비율을 계산한다.</p>
+<p>흡연 여부에 따라 폐암 발생률을 비교하려면 행 비율을 보는 것이 자연스럽다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">폐암 있음</th>
+<th style="text-align: right;">폐암 없음</th>
+<th style="text-align: right;">합계</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>흡연자</td>
+<td style="text-align: right;">30%</td>
+<td style="text-align: right;">70%</td>
+<td style="text-align: right;">100%</td>
+</tr>
+<tr class="even">
+<td>비흡연자</td>
+<td style="text-align: right;">10%</td>
+<td style="text-align: right;">90%</td>
+<td style="text-align: right;">100%</td>
+</tr>
+</tbody>
+</table>
+<p>이 표는 “흡연자 중 몇 퍼센트가 폐암인가?”와 “비흡연자 중 몇 퍼센트가 폐암인가?”를 보여준다.</p>
+</section>
+<section id="열-비율" class="level3" data-number="10.9.2">
+<h3 data-number="10.9.2" class="anchored" data-anchor-id="열-비율"><span class="header-section-number">10.9.2</span> 열 비율</h3>
+<p>열 비율(column percentage)은 각 열을 100%로 두고 행 범주의 비율을 계산한다.</p>
+<p>예를 들어 폐암 환자 중 흡연자가 몇 퍼센트인지 알고 싶다면 열 비율을 볼 수 있다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">폐암 있음</th>
+<th style="text-align: right;">폐암 없음</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>흡연자</td>
+<td style="text-align: right;">75%</td>
+<td style="text-align: right;">43.75%</td>
+</tr>
+<tr class="even">
+<td>비흡연자</td>
+<td style="text-align: right;">25%</td>
+<td style="text-align: right;">56.25%</td>
+</tr>
+</tbody>
+</table>
+<p>열 비율은 질병이 있는 사람 중 노출자의 비율을 볼 때 유용하지만, 위험을 직접 나타내지는 않는다.</p>
+</section>
+<section id="전체-비율" class="level3" data-number="10.9.3">
+<h3 data-number="10.9.3" class="anchored" data-anchor-id="전체-비율"><span class="header-section-number">10.9.3</span> 전체 비율</h3>
+<p>전체 비율은 전체 표본 수를 분모로 하여 각 셀의 비율을 계산한다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">폐암 있음</th>
+<th style="text-align: right;">폐암 없음</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>흡연자</td>
+<td style="text-align: right;">15%</td>
+<td style="text-align: right;">35%</td>
+</tr>
+<tr class="even">
+<td>비흡연자</td>
+<td style="text-align: right;">5%</td>
+<td style="text-align: right;">45%</td>
+</tr>
+</tbody>
+</table>
+<p>전체 비율은 표본의 전체 구성을 이해할 때 유용하다.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>해석의 핵심
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>노출군과 비노출군의 질병 위험을 비교하려면 보통 <strong>행 비율</strong>을 본다. 행과 열의 배치가 바뀌면 어떤 비율을 해석해야 하는지도 달라질 수 있으므로, 항상 분모가 무엇인지 확인해야 한다.</p>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="표의-구조" class="level2" data-number="10.10">
+<h2 data-number="10.10" class="anchored" data-anchor-id="표의-구조"><span class="header-section-number">10.10</span> 2×2 표의 구조</h2>
+<p>의학 연구에서 가장 자주 등장하는 범주형 자료 구조는 2×2 표이다. 2×2 표는 행이 두 범주, 열이 두 범주인 교차표이다.</p>
+<p>일반적으로 노출 여부와 질병 여부를 다음과 같이 배치할 수 있다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">질병 있음</th>
+<th style="text-align: right;">질병 없음</th>
+<th style="text-align: right;">합계</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>노출 있음</td>
+<td style="text-align: right;"><span class="math inline">\(a\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(b\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(a+b\)</span></td>
+</tr>
+<tr class="even">
+<td>노출 없음</td>
+<td style="text-align: right;"><span class="math inline">\(c\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(d\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(c+d\)</span></td>
+</tr>
+<tr class="odd">
+<td>합계</td>
+<td style="text-align: right;"><span class="math inline">\(a+c\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(b+d\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(n\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>여기서 각 셀의 의미는 다음과 같다.</p>
+<ul>
+<li><span class="math inline">\(a\)</span>: 노출이 있고 질병도 있는 사람</li>
+<li><span class="math inline">\(b\)</span>: 노출은 있지만 질병은 없는 사람</li>
+<li><span class="math inline">\(c\)</span>: 노출은 없지만 질병은 있는 사람</li>
+<li><span class="math inline">\(d\)</span>: 노출도 없고 질병도 없는 사람</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig10/f3.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:82.0%" alt="2×2 표의 구조"></p>
+</figure>
+</div>
+<p>2×2 표는 위험비, 오즈비, 카이제곱검정, Fisher의 정확검정의 기본 구조가 된다.</p>
+<hr>
+</section>
+<section id="위험" class="level2" data-number="10.11">
+<h2 data-number="10.11" class="anchored" data-anchor-id="위험"><span class="header-section-number">10.11</span> 위험</h2>
+<p>위험(risk)은 특정 기간 또는 특정 조건에서 사건이 발생할 확률이다. 의학 연구에서는 발생률 또는 사건 발생 비율이라는 의미로 자주 사용한다.</p>
+<p>노출군의 위험은 다음과 같다.</p>
+<p><span class="math display">\[Risk_{exposed}
+=
+\frac{a}{a+b}\]</span></p>
+<p>비노출군의 위험은 다음과 같다.</p>
+<p><span class="math display">\[Risk_{unexposed}
+=
+\frac{c}{c+d}\]</span></p>
+<p>예를 들어 흡연자 100명 중 30명이 폐암에 걸렸다면 흡연자의 폐암 위험은 다음과 같다.</p>
+<p><span class="math display">\[Risk_{smoker}=\frac{30}{100}=0.30\]</span></p>
+<p>즉 흡연자의 폐암 위험은 30%이다.</p>
+<p>위험은 직관적이다. “100명 중 몇 명에게 사건이 발생했는가?”라고 해석할 수 있기 때문이다.</p>
+<hr>
+</section>
+<section id="위험차" class="level2" data-number="10.12">
+<h2 data-number="10.12" class="anchored" data-anchor-id="위험차"><span class="header-section-number">10.12</span> 위험차</h2>
+<p>두 집단의 위험을 비교하는 가장 직관적인 방법은 위험의 차이를 계산하는 것이다. 이를 <strong>위험차(risk difference, RD)</strong>라고 한다.</p>
+<p><span class="math display">\[RD = Risk_{exposed} - Risk_{unexposed}\]</span></p>
+<p>흡연자의 폐암 위험이 0.30이고 비흡연자의 폐암 위험이 0.10이면 위험차는 다음과 같다.</p>
+<p><span class="math display">\[RD = 0.30 - 0.10 = 0.20\]</span></p>
+<p>이는 다음과 같이 해석한다.</p>
+<blockquote class="blockquote">
+<p>흡연자는 비흡연자보다 폐암 발생 위험이 20%p 높다.</p>
+</blockquote>
+<p>위험차는 절대적 차이를 나타낸다. 임상적 의사결정에서는 상대적 효과크기뿐 아니라 절대적 효과크기도 중요하다.</p>
+<hr>
+</section>
+<section id="위험비" class="level2" data-number="10.13">
+<h2 data-number="10.13" class="anchored" data-anchor-id="위험비"><span class="header-section-number">10.13</span> 위험비</h2>
+<p>위험비(relative risk, risk ratio, RR)는 노출군의 위험을 비노출군의 위험으로 나눈 값이다.</p>
+<p><span class="math display">\[RR
+=
+\frac{Risk_{exposed}}{Risk_{unexposed}}\]</span></p>
+<p>2×2 표에서는 다음과 같이 쓸 수 있다.</p>
+<p><span class="math display">\[RR
+=
+\frac{a/(a+b)}{c/(c+d)}\]</span></p>
+<p>위험비의 해석은 다음과 같다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;">값</th>
+<th>해석</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;"><span class="math inline">\(RR=1\)</span></td>
+<td>두 집단의 위험이 같다</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;"><span class="math inline">\(RR&gt;1\)</span></td>
+<td>노출군의 위험이 더 높다</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;"><span class="math inline">\(RR&lt;1\)</span></td>
+<td>노출군의 위험이 더 낮다</td>
+</tr>
+</tbody>
+</table>
+<p>흡연자 100명 중 30명이 폐암에 걸리고, 비흡연자 100명 중 10명이 폐암에 걸렸다고 하자.</p>
+<p>흡연자의 위험은 다음과 같다.</p>
+<p><span class="math display">\[\frac{30}{100}=0.30\]</span></p>
+<p>비흡연자의 위험은 다음과 같다.</p>
+<p><span class="math display">\[\frac{10}{100}=0.10\]</span></p>
+<p>위험비는 다음과 같다.</p>
+<p><span class="math display">\[RR=\frac{0.30}{0.10}=3\]</span></p>
+<p>따라서 다음과 같이 해석한다.</p>
+<blockquote class="blockquote">
+<p>흡연자의 폐암 위험은 비흡연자의 3배이다.</p>
+</blockquote>
+<hr>
+</section>
+<section id="오즈" class="level2" data-number="10.14">
+<h2 data-number="10.14" class="anchored" data-anchor-id="오즈"><span class="header-section-number">10.14</span> 오즈</h2>
+<p>오즈(odds)는 사건이 발생할 확률을 사건이 발생하지 않을 확률로 나눈 값이다.</p>
+<p><span class="math display">\[Odds=\frac{P(event)}{1-P(event)}\]</span></p>
+<p>위험이 0.30이면 오즈는 다음과 같다.</p>
+<p><span class="math display">\[Odds=\frac{0.30}{1-0.30}=\frac{0.30}{0.70}=0.429\]</span></p>
+<p>즉 사건 30명, 비사건 70명이라면 오즈는 다음과 같이도 계산할 수 있다.</p>
+<p><span class="math display">\[Odds=\frac{30}{70}=0.429\]</span></p>
+<p>2×2 표에서 노출군의 오즈는 다음과 같다.</p>
+<p><span class="math display">\[Odds_{exposed}=\frac{a}{b}\]</span></p>
+<p>비노출군의 오즈는 다음과 같다.</p>
+<p><span class="math display">\[Odds_{unexposed}=\frac{c}{d}\]</span></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig10/f4.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:86.0%" alt="위험과 오즈의 차이"></p>
+</figure>
+</div>
+<p>위험은 전체 중 사건이 차지하는 비율이고, 오즈는 사건과 비사건의 비이다. 두 개념은 비슷해 보이지만 분모가 다르다.</p>
+<hr>
+</section>
+<section id="오즈비" class="level2" data-number="10.15">
+<h2 data-number="10.15" class="anchored" data-anchor-id="오즈비"><span class="header-section-number">10.15</span> 오즈비</h2>
+<p>오즈비(odds ratio, OR)는 노출군의 오즈를 비노출군의 오즈로 나눈 값이다.</p>
+<p><span class="math display">\[OR
+=
+\frac{Odds_{exposed}}{Odds_{unexposed}}\]</span></p>
+<p>2×2 표에서는 다음과 같이 계산된다.</p>
+<p><span class="math display">\[OR
+=
+\frac{a/b}{c/d}
+=
+\frac{ad}{bc}\]</span></p>
+<p>오즈비의 해석은 다음과 같다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;">값</th>
+<th>해석</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;"><span class="math inline">\(OR=1\)</span></td>
+<td>두 집단의 사건 오즈가 같다</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;"><span class="math inline">\(OR&gt;1\)</span></td>
+<td>노출군에서 사건 오즈가 더 높다</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;"><span class="math inline">\(OR&lt;1\)</span></td>
+<td>노출군에서 사건 오즈가 더 낮다</td>
+</tr>
+</tbody>
+</table>
+<p>흡연 예제에서 2×2 표는 다음과 같다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">폐암 있음</th>
+<th style="text-align: right;">폐암 없음</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>흡연자</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">70</td>
+</tr>
+<tr class="even">
+<td>비흡연자</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">90</td>
+</tr>
+</tbody>
+</table>
+<p>오즈비는 다음과 같다.</p>
+<p><span class="math display">\[OR=\frac{30\times90}{70\times10}=\frac{2700}{700}=3.86\]</span></p>
+<p>따라서 다음과 같이 해석한다.</p>
+<blockquote class="blockquote">
+<p>흡연자의 폐암 오즈는 비흡연자의 약 3.86배이다.</p>
+</blockquote>
+<p>여기서 중요한 점은 “위험이 3.86배”라고 말하면 안 된다는 것이다. 오즈비는 위험의 비가 아니라 오즈의 비이다.</p>
+<hr>
+</section>
+<section id="위험비와-오즈비의-차이" class="level2" data-number="10.16">
+<h2 data-number="10.16" class="anchored" data-anchor-id="위험비와-오즈비의-차이"><span class="header-section-number">10.16</span> 위험비와 오즈비의 차이</h2>
+<p>위험비와 오즈비는 모두 두 집단의 사건 발생을 비교하는 효과크기이다. 그러나 분모와 해석이 다르다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 40%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>구분</th>
+<th>위험비 RR</th>
+<th>오즈비 OR</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>비교 대상</td>
+<td>위험</td>
+<td>오즈</td>
+</tr>
+<tr class="even">
+<td>계산</td>
+<td><span class="math inline">\(\frac{a/(a+b)}{c/(c+d)}\)</span></td>
+<td><span class="math inline">\(\frac{ad}{bc}\)</span></td>
+</tr>
+<tr class="odd">
+<td>해석</td>
+<td>위험이 몇 배인가</td>
+<td>오즈가 몇 배인가</td>
+</tr>
+<tr class="even">
+<td>직관성</td>
+<td>높음</td>
+<td>상대적으로 낮음</td>
+</tr>
+<tr class="odd">
+<td>주로 사용</td>
+<td>코호트 연구, 임상시험</td>
+<td>환자-대조군 연구, 로지스틱 회귀</td>
+</tr>
+<tr class="even">
+<td>사건이 드물 때</td>
+<td>OR과 비슷</td>
+<td>RR에 근사</td>
+</tr>
+<tr class="odd">
+<td>사건이 흔할 때</td>
+<td>직접적 해석 가능</td>
+<td>RR보다 더 극단적일 수 있음</td>
+</tr>
+</tbody>
+</table>
+<p>사건이 드물면 오즈와 위험이 거의 비슷해진다. 예를 들어 사건 확률이 1%이면 위험은 0.01이고 오즈는 다음과 같다.</p>
+<p><span class="math display">\[Odds=\frac{0.01}{0.99}=0.0101\]</span></p>
+<p>거의 비슷하다.</p>
+<p>하지만 사건 확률이 50%이면 위험은 0.50이고 오즈는 다음과 같다.</p>
+<p><span class="math display">\[Odds=\frac{0.50}{0.50}=1\]</span></p>
+<p>이 경우 오즈와 위험은 매우 다르다. 따라서 사건이 흔할 때 OR을 RR처럼 해석하면 효과가 과장되어 보일 수 있다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig10/f5.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:86.0%" alt="사건이 흔할수록 오즈비가 위험비보다 커지는 현상"></p>
+</figure>
+</div>
+<hr>
+</section>
+<section id="위험비와-오즈비의-신뢰구간" class="level2" data-number="10.17">
+<h2 data-number="10.17" class="anchored" data-anchor-id="위험비와-오즈비의-신뢰구간"><span class="header-section-number">10.17</span> 위험비와 오즈비의 신뢰구간</h2>
+<p>효과크기를 제시할 때는 점추정값만 제시하지 말고 95% 신뢰구간도 함께 제시해야 한다. 위험비와 오즈비는 양수 값만 가지므로 보통 로그 변환 후 신뢰구간을 계산한다.</p>
+<section id="위험비의-로그-신뢰구간" class="level3" data-number="10.17.1">
+<h3 data-number="10.17.1" class="anchored" data-anchor-id="위험비의-로그-신뢰구간"><span class="header-section-number">10.17.1</span> 위험비의 로그 신뢰구간</h3>
+<p>위험비의 로그 표준오차는 근사적으로 다음과 같다.</p>
+<p><span class="math display">\[SE\{\log(RR)\}
+=
+\sqrt{
+\frac{1}{a}-\frac{1}{a+b}
++
+\frac{1}{c}-\frac{1}{c+d}
+}\]</span></p>
+<p>따라서 로그 위험비의 95% 신뢰구간은 다음과 같다.</p>
+<p><span class="math display">\[\log(RR) \pm 1.96 \times SE\{\log(RR)\}\]</span></p>
+<p>마지막으로 지수함수를 취하면 위험비의 신뢰구간이 된다.</p>
+<p><span class="math display">\[\left[
+\exp(L), \exp(U)
+\right]\]</span></p>
+</section>
+<section id="오즈비의-로그-신뢰구간" class="level3" data-number="10.17.2">
+<h3 data-number="10.17.2" class="anchored" data-anchor-id="오즈비의-로그-신뢰구간"><span class="header-section-number">10.17.2</span> 오즈비의 로그 신뢰구간</h3>
+<p>오즈비의 로그 표준오차는 다음과 같다.</p>
+<p><span class="math display">\[SE\{\log(OR)\}
+=
+\sqrt{
+\frac{1}{a}+\frac{1}{b}+\frac{1}{c}+\frac{1}{d}
+}\]</span></p>
+<p>로그 오즈비의 95% 신뢰구간은 다음과 같다.</p>
+<p><span class="math display">\[\log(OR) \pm 1.96 \times SE\{\log(OR)\}\]</span></p>
+<p>이후 지수함수를 취하면 OR의 95% 신뢰구간을 얻는다.</p>
+</section>
+<section id="해석" class="level3" data-number="10.17.3">
+<h3 data-number="10.17.3" class="anchored" data-anchor-id="해석"><span class="header-section-number">10.17.3</span> 해석</h3>
+<p>RR 또는 OR의 귀무값은 1이다. 따라서 95% 신뢰구간이 1을 포함하면 일반적으로 5% 유의수준에서 통계적으로 유의하지 않다고 해석한다. 반대로 신뢰구간이 1을 포함하지 않으면 통계적으로 유의하다고 볼 수 있다.</p>
+<hr>
+</section>
+</section>
+<section id="카이제곱검정" class="level2" data-number="10.18">
+<h2 data-number="10.18" class="anchored" data-anchor-id="카이제곱검정"><span class="header-section-number">10.18</span> 카이제곱검정</h2>
+<p>카이제곱검정(chi-square test)은 두 범주형 변수 사이에 관련성이 있는지 평가하는 대표적인 검정이다.</p>
+<p>예를 들어 다음 질문에 답할 때 사용할 수 있다.</p>
+<ul>
+<li>흡연 여부와 폐암 발생은 관련이 있는가?</li>
+<li>치료군과 치료 반응 여부는 관련이 있는가?</li>
+<li>성별과 질병 발생 여부는 관련이 있는가?</li>
+<li>혈액형과 특정 질환 발생이 관련되는가?</li>
+</ul>
+<p>카이제곱검정의 귀무가설은 다음과 같다.</p>
+<p><span class="math display">\[H_0: \text{두 범주형 변수는 서로 독립이다.}\]</span></p>
+<p>대립가설은 다음과 같다.</p>
+<p><span class="math display">\[H_1: \text{두 범주형 변수는 서로 관련이 있다.}\]</span></p>
+<p>즉 카이제곱검정은 “두 비율이 정확히 얼마나 다른가?”보다는 “관찰된 차이가 독립이라는 가정과 얼마나 맞지 않는가?”를 평가한다.</p>
+<hr>
+</section>
+<section id="카이제곱검정의-아이디어" class="level2" data-number="10.19">
+<h2 data-number="10.19" class="anchored" data-anchor-id="카이제곱검정의-아이디어"><span class="header-section-number">10.19</span> 카이제곱검정의 아이디어</h2>
+<p>카이제곱검정은 <strong>관찰빈도(observed count)</strong>와 <strong>기대빈도(expected count)</strong>를 비교한다.</p>
+<p>관찰빈도는 실제 자료에서 관찰된 셀 빈도이다. 기대빈도는 두 변수가 독립이라고 가정했을 때 각 셀에 기대되는 빈도이다.</p>
+<p>검정통계량은 다음과 같다.</p>
+<p><span class="math display">\[\chi^2
+=
+\sum
+\frac{(O-E)^2}{E}\]</span></p>
+<p>여기서</p>
+<ul>
+<li><span class="math inline">\(O\)</span>: 관찰빈도</li>
+<li><span class="math inline">\(E\)</span>: 기대빈도</li>
+</ul>
+<p>이다.</p>
+<p>관찰빈도와 기대빈도의 차이가 작으면 <span class="math inline">\(\chi^2\)</span> 값은 작다. 이는 자료가 독립이라는 가정과 잘 맞는다는 뜻이다. 반대로 차이가 크면 <span class="math inline">\(\chi^2\)</span> 값이 커지고, 이는 두 변수가 독립이라는 가정과 잘 맞지 않는다는 뜻이다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig10/f6.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:88.0%" alt="카이제곱검정의 관찰빈도와 기대빈도 비교"></p>
+</figure>
+</div>
+<hr>
+</section>
+<section id="기대빈도" class="level2" data-number="10.20">
+<h2 data-number="10.20" class="anchored" data-anchor-id="기대빈도"><span class="header-section-number">10.20</span> 기대빈도</h2>
+<p>기대빈도(expected count)는 두 변수가 독립이라고 가정했을 때 각 셀에 기대되는 빈도이다.</p>
+<p>각 셀의 기대빈도는 다음과 같이 계산한다.</p>
+<p><span class="math display">\[E
+=
+\frac{\text{Row total} \times \text{Column total}}{\text{Grand total}}\]</span></p>
+<p>예를 들어 다음 표를 보자.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">폐암 있음</th>
+<th style="text-align: right;">폐암 없음</th>
+<th style="text-align: right;">합계</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>흡연자</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">70</td>
+<td style="text-align: right;">100</td>
+</tr>
+<tr class="even">
+<td>비흡연자</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">100</td>
+</tr>
+<tr class="odd">
+<td>합계</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">160</td>
+<td style="text-align: right;">200</td>
+</tr>
+</tbody>
+</table>
+<p>흡연자이면서 폐암 있음 셀의 기대빈도는 다음과 같다.</p>
+<p><span class="math display">\[E_{11}
+=
+\frac{100 \times 40}{200}
+=20\]</span></p>
+<p>흡연자이면서 폐암 없음 셀의 기대빈도는 다음과 같다.</p>
+<p><span class="math display">\[E_{12}
+=
+\frac{100 \times 160}{200}
+=80\]</span></p>
+<p>비흡연자이면서 폐암 있음 셀의 기대빈도는 다음과 같다.</p>
+<p><span class="math display">\[E_{21}
+=
+\frac{100 \times 40}{200}
+=20\]</span></p>
+<p>비흡연자이면서 폐암 없음 셀의 기대빈도는 다음과 같다.</p>
+<p><span class="math display">\[E_{22}
+=
+\frac{100 \times 160}{200}
+=80\]</span></p>
+<p>따라서 관찰빈도와 기대빈도는 다음과 같다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">관찰빈도 <span class="math inline">\(O\)</span></th>
+<th style="text-align: right;">기대빈도 <span class="math inline">\(E\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>흡연자 &amp; 폐암 있음</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr class="even">
+<td>흡연자 &amp; 폐암 없음</td>
+<td style="text-align: right;">70</td>
+<td style="text-align: right;">80</td>
+</tr>
+<tr class="odd">
+<td>비흡연자 &amp; 폐암 있음</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr class="even">
+<td>비흡연자 &amp; 폐암 없음</td>
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">80</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="카이제곱-통계량-계산-예제" class="level2" data-number="10.21">
+<h2 data-number="10.21" class="anchored" data-anchor-id="카이제곱-통계량-계산-예제"><span class="header-section-number">10.21</span> 카이제곱 통계량 계산 예제</h2>
+<p>앞의 예제에서 카이제곱 통계량은 다음과 같이 계산된다.</p>
+<p><span class="math display">\[\chi^2
+=
+\frac{(30-20)^2}{20}
++
+\frac{(70-80)^2}{80}
++
+\frac{(10-20)^2}{20}
++
+\frac{(90-80)^2}{80}\]</span></p>
+<p>각 항을 계산하면 다음과 같다.</p>
+<p><span class="math display">\[\chi^2
+=
+\frac{100}{20}
++
+\frac{100}{80}
++
+\frac{100}{20}
++
+\frac{100}{80}\]</span></p>
+<p><span class="math display">\[\chi^2=5+1.25+5+1.25=12.5\]</span></p>
+<p>이 값이 충분히 크면 귀무가설을 기각한다.</p>
+<p>2×2 표에서 자유도는 다음과 같다.</p>
+<p><span class="math display">\[df=(r-1)(c-1)=(2-1)(2-1)=1\]</span></p>
+<p>여기서 <span class="math inline">\(r\)</span>은 행의 수, <span class="math inline">\(c\)</span>는 열의 수이다.</p>
+<hr>
+</section>
+<section id="카이제곱검정의-가정" class="level2" data-number="10.22">
+<h2 data-number="10.22" class="anchored" data-anchor-id="카이제곱검정의-가정"><span class="header-section-number">10.22</span> 카이제곱검정의 가정</h2>
+<p>카이제곱검정을 사용할 때는 다음 조건을 확인해야 한다.</p>
+<ol type="1">
+<li>관찰값은 독립이어야 한다.</li>
+<li>각 대상자는 하나의 셀에만 속해야 한다.</li>
+<li>범주가 서로 배타적이어야 한다.</li>
+<li>기대빈도가 너무 작지 않아야 한다.</li>
+</ol>
+<p>기대빈도에 대한 실무적 기준은 교재나 분야에 따라 조금 다르지만, 입문 수준에서는 다음처럼 기억하면 충분하다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>상황</th>
+<th>권장 접근</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>모든 기대빈도가 충분히 큼</td>
+<td>카이제곱검정 사용 가능</td>
+</tr>
+<tr class="even">
+<td>일부 기대빈도가 작음</td>
+<td>Fisher의 정확검정 고려</td>
+</tr>
+<tr class="odd">
+<td>표본 크기가 매우 작음</td>
+<td>Fisher의 정확검정 우선 고려</td>
+</tr>
+<tr class="even">
+<td>같은 대상자를 반복 측정함</td>
+<td>독립성 위반, McNemar 검정 등 고려</td>
+</tr>
+</tbody>
+</table>
+<p>카이제곱검정은 근사검정이다. 표본 크기가 충분할 때 카이제곱분포 근사가 잘 작동한다.</p>
+<hr>
+</section>
+<section id="fisher의-정확검정" class="level2" data-number="10.23">
+<h2 data-number="10.23" class="anchored" data-anchor-id="fisher의-정확검정"><span class="header-section-number">10.23</span> Fisher의 정확검정</h2>
+<p>Fisher의 정확검정(Fisher’s exact test)은 표본 크기가 작거나 기대빈도가 작을 때 사용하는 검정이다.</p>
+<p>예를 들어 다음 표를 보자.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">사건 있음</th>
+<th style="text-align: right;">사건 없음</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>치료군</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="even">
+<td>대조군</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">2</td>
+</tr>
+</tbody>
+</table>
+<p>이 표는 셀 빈도가 작다. 이런 경우 카이제곱검정의 근사 p-value가 부정확할 수 있다. Fisher의 정확검정은 가능한 표들의 확률을 정확히 계산하여 p-value를 구한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig10/f7.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:86.0%" alt="Fisher의 정확검정 직관"></p>
+</figure>
+</div>
+<p>Fisher의 정확검정은 특히 다음 상황에서 유용하다.</p>
+<ul>
+<li>전체 표본 크기가 작다.</li>
+<li>2×2 표의 셀 빈도가 작다.</li>
+<li>기대빈도가 5보다 작은 셀이 있다.</li>
+<li>희귀 사건을 다룬다.</li>
+</ul>
+<hr>
+</section>
+<section id="카이제곱검정과-fisher-검정-선택" class="level2" data-number="10.24">
+<h2 data-number="10.24" class="anchored" data-anchor-id="카이제곱검정과-fisher-검정-선택"><span class="header-section-number">10.24</span> 카이제곱검정과 Fisher 검정 선택</h2>
+<p>실무에서는 다음과 같이 선택할 수 있다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 60%">
+<col style="width: 39%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>자료 상황</th>
+<th>권장 검정</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>표본 크기가 충분히 크고 기대빈도가 충분함</td>
+<td>카이제곱검정</td>
+</tr>
+<tr class="even">
+<td>2×2 표에서 셀 빈도 또는 기대빈도가 작음</td>
+<td>Fisher의 정확검정</td>
+</tr>
+<tr class="odd">
+<td>범주가 3개 이상이고 표본이 충분함</td>
+<td>카이제곱검정</td>
+</tr>
+<tr class="even">
+<td>같은 대상자의 전후 이분형 결과</td>
+<td>McNemar 검정</td>
+</tr>
+<tr class="odd">
+<td>순서형 범주의 선형 추세를 보고 싶음</td>
+<td>추세 검정 또는 순서형 방법</td>
+</tr>
+</tbody>
+</table>
+<p>중요한 것은 어떤 검정을 쓰든 p-value만 보고 끝내지 않는 것이다. 반드시 빈도, 비율, 효과크기, 신뢰구간을 함께 제시해야 한다.</p>
+<hr>
+</section>
+<section id="독립사건-검정과-동질성-검정" class="level2" data-number="10.25">
+<h2 data-number="10.25" class="anchored" data-anchor-id="독립사건-검정과-동질성-검정"><span class="header-section-number">10.25</span> 독립사건 검정과 동질성 검정</h2>
+<p>카이제곱검정은 상황에 따라 두 가지 방식으로 설명된다.</p>
+<section id="독립성-검정" class="level3" data-number="10.25.1">
+<h3 data-number="10.25.1" class="anchored" data-anchor-id="독립성-검정"><span class="header-section-number">10.25.1</span> 독립성 검정</h3>
+<p>하나의 표본에서 두 범주형 변수가 서로 관련되는지 평가한다.</p>
+<p>예:</p>
+<blockquote class="blockquote">
+<p>흡연 여부와 폐암 발생 여부는 관련이 있는가?</p>
+</blockquote>
+<p>이때 귀무가설은 두 변수가 독립이라는 것이다.</p>
+</section>
+<section id="동질성-검정" class="level3" data-number="10.25.2">
+<h3 data-number="10.25.2" class="anchored" data-anchor-id="동질성-검정"><span class="header-section-number">10.25.2</span> 동질성 검정</h3>
+<p>여러 집단에서 범주의 분포가 같은지 비교한다.</p>
+<p>예:</p>
+<blockquote class="blockquote">
+<p>치료군과 대조군의 반응률 분포가 같은가?</p>
+</blockquote>
+<p>수학적으로는 같은 카이제곱검정이 사용되지만, 연구 설계와 해석이 조금 다르다. 실제 논문에서는 “그룹 간 비율 차이를 카이제곱검정으로 비교했다”라고 표현하는 경우가 많다.</p>
+<hr>
+</section>
+</section>
+<section id="mcnemar-검정" class="level2" data-number="10.26">
+<h2 data-number="10.26" class="anchored" data-anchor-id="mcnemar-검정"><span class="header-section-number">10.26</span> McNemar 검정</h2>
+<p>지금까지의 카이제곱검정과 Fisher의 정확검정은 두 집단이 서로 독립이라고 가정한다. 그러나 같은 대상자에게 치료 전후로 이분형 결과를 측정하거나, 짝지어진 자료를 비교하는 경우에는 독립성이 성립하지 않는다.</p>
+<p>예를 들어 같은 환자 100명에게 치료 전후 검사 결과를 측정했다고 하자.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">치료 후 양성</th>
+<th style="text-align: right;">치료 후 음성</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>치료 전 양성</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">30</td>
+</tr>
+<tr class="even">
+<td>치료 전 음성</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">40</td>
+</tr>
+</tbody>
+</table>
+<p>이 표에서 관심은 일치한 셀인 20과 40이 아니라, 결과가 바뀐 셀인 30과 10이다. McNemar 검정은 이 두 불일치 셀을 이용하여 전후 변화가 대칭적인지 평가한다.</p>
+<p>귀무가설은 다음과 같다.</p>
+<p><span class="math display">\[H_0: \text{양성에서 음성으로 바뀔 확률과 음성에서 양성으로 바뀔 확률이 같다.}\]</span></p>
+<p>McNemar 검정은 다음 상황에서 사용한다.</p>
+<ul>
+<li>같은 대상자의 전후 양성/음성 비교</li>
+<li>짝지어진 환자-대조군 자료</li>
+<li>두 검사법을 같은 사람에게 적용한 결과 비교</li>
+</ul>
+<hr>
+</section>
+<section id="진단검사와-22-표" class="level2" data-number="10.27">
+<h2 data-number="10.27" class="anchored" data-anchor-id="진단검사와-22-표"><span class="header-section-number">10.27</span> 진단검사와 2×2 표</h2>
+<p>범주형 자료 분석은 진단검사 평가에서도 중요하다. 진단검사에서는 검사 결과와 실제 질병 상태를 2×2 표로 정리한다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">질병 있음</th>
+<th style="text-align: right;">질병 없음</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>검사 양성</td>
+<td style="text-align: right;">True Positive (TP)</td>
+<td style="text-align: right;">False Positive (FP)</td>
+</tr>
+<tr class="even">
+<td>검사 음성</td>
+<td style="text-align: right;">False Negative (FN)</td>
+<td style="text-align: right;">True Negative (TN)</td>
+</tr>
+</tbody>
+</table>
+<p>여기서 다음 지표를 계산할 수 있다.</p>
+<p><span class="math display">\[Sensitivity = \frac{TP}{TP+FN}\]</span></p>
+<p><span class="math display">\[Specificity = \frac{TN}{FP+TN}\]</span></p>
+<p><span class="math display">\[PPV = \frac{TP}{TP+FP}\]</span></p>
+<p><span class="math display">\[NPV = \frac{TN}{FN+TN}\]</span></p>
+<p>민감도와 특이도는 질병 상태를 기준으로 검사 결과를 평가한다. 양성예측도와 음성예측도는 검사 결과를 기준으로 실제 질병 가능성을 평가한다.</p>
+<p>이 내용은 Chapter 3의 조건부 확률 및 베이즈 정리와 연결된다.</p>
+<hr>
+</section>
+<section id="r-실습-준비" class="level2" data-number="10.28">
+<h2 data-number="10.28" class="anchored" data-anchor-id="r-실습-준비"><span class="header-section-number">10.28</span> R 실습 준비</h2>
+<p>이번 장에서는 다음 예제를 사용한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 흡연 여부와 폐암 발생 예시</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>tab <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">70</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">10</span>, <span class="dv">90</span>),</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">nrow =</span> <span class="dv">2</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">byrow =</span> <span class="cn">TRUE</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(tab) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Smoker"</span>, <span class="st">"Non-smoker"</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(tab) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Lung cancer"</span>, <span class="st">"No lung cancer"</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>tab</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           Lung cancer No lung cancer
+Smoker              30             70
+Non-smoker          10             90</code></pre>
+</div>
+</div>
+<p>이 표는 다음 상황을 나타낸다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">폐암 있음</th>
+<th style="text-align: right;">폐암 없음</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>흡연자</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">70</td>
+</tr>
+<tr class="even">
+<td>비흡연자</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">90</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="r-실습-빈도와-비율" class="level2" data-number="10.29">
+<h2 data-number="10.29" class="anchored" data-anchor-id="r-실습-빈도와-비율"><span class="header-section-number">10.29</span> R 실습: 빈도와 비율</h2>
+<p>전체 비율은 다음과 같이 계산한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.table</span>(tab)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           Lung cancer No lung cancer
+Smoker            0.15           0.35
+Non-smoker        0.05           0.45</code></pre>
+</div>
+</div>
+<p>행 비율은 다음과 같이 계산한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.table</span>(tab, <span class="at">margin =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           Lung cancer No lung cancer
+Smoker             0.3            0.7
+Non-smoker         0.1            0.9</code></pre>
+</div>
+</div>
+<p>열 비율은 다음과 같이 계산한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.table</span>(tab, <span class="at">margin =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           Lung cancer No lung cancer
+Smoker            0.75         0.4375
+Non-smoker        0.25         0.5625</code></pre>
+</div>
+</div>
+<p>행 비율은 각 노출군에서 폐암 발생 비율을 보여준다. 따라서 위험비를 해석할 때는 행 비율이 중요하다.</p>
+<hr>
+</section>
+<section id="r-실습-카이제곱검정" class="level2" data-number="10.30">
+<h2 data-number="10.30" class="anchored" data-anchor-id="r-실습-카이제곱검정"><span class="header-section-number">10.30</span> R 실습: 카이제곱검정</h2>
+<p>카이제곱검정은 다음과 같이 수행한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>chisq_result <span class="ot">&lt;-</span> <span class="fu">chisq.test</span>(tab)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>chisq_result</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's Chi-squared test with Yates' continuity correction
+
+data:  tab
+X-squared = 11.281, df = 1, p-value = 0.0007829</code></pre>
+</div>
+</div>
+<p>기대빈도는 다음과 같이 확인할 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>chisq_result<span class="sc">$</span>expected</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           Lung cancer No lung cancer
+Smoker              20             80
+Non-smoker          20             80</code></pre>
+</div>
+</div>
+<p>관찰빈도와 기대빈도를 비교하면 어떤 셀이 카이제곱 통계량에 많이 기여했는지 이해할 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>chisq_result<span class="sc">$</span>observed</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           Lung cancer No lung cancer
+Smoker              30             70
+Non-smoker          10             90</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>chisq_result<span class="sc">$</span>expected</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           Lung cancer No lung cancer
+Smoker              20             80
+Non-smoker          20             80</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>chisq_result<span class="sc">$</span>residuals</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           Lung cancer No lung cancer
+Smoker        2.236068      -1.118034
+Non-smoker   -2.236068       1.118034</code></pre>
+</div>
+</div>
+<p><code>residuals</code>는 관찰빈도와 기대빈도의 차이를 표준화한 값이다. 절댓값이 큰 셀일수록 독립성 가정에서 더 많이 벗어난 셀이다.</p>
+<hr>
+</section>
+<section id="r-실습-fisher의-정확검정" class="level2" data-number="10.31">
+<h2 data-number="10.31" class="anchored" data-anchor-id="r-실습-fisher의-정확검정"><span class="header-section-number">10.31</span> R 실습: Fisher의 정확검정</h2>
+<p>같은 표에 Fisher의 정확검정을 적용할 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fisher.test</span>(tab)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Fisher's Exact Test for Count Data
+
+data:  tab
+p-value = 0.0006504
+alternative hypothesis: true odds ratio is not equal to 1
+95 percent confidence interval:
+ 1.684537 9.405984
+sample estimates:
+odds ratio 
+  3.831525 </code></pre>
+</div>
+</div>
+<p>표본 크기가 충분히 크면 카이제곱검정과 Fisher의 정확검정 결과가 비슷할 수 있다. 그러나 작은 표본에서는 Fisher의 정확검정이 더 안정적이다.</p>
+<p>작은 표본 예제를 만들어 보자.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>small_tab <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">9</span>,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">8</span>, <span class="dv">2</span>),</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">nrow =</span> <span class="dv">2</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">byrow =</span> <span class="cn">TRUE</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(small_tab) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Treatment"</span>, <span class="st">"Control"</span>)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(small_tab) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Event"</span>, <span class="st">"No event"</span>)</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>small_tab</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          Event No event
+Treatment     1        9
+Control       8        2</code></pre>
+</div>
+</div>
+<p>카이제곱검정을 수행하면 경고가 나올 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chisq.test</span>(small_tab)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's Chi-squared test with Yates' continuity correction
+
+data:  small_tab
+X-squared = 7.2727, df = 1, p-value = 0.007001</code></pre>
+</div>
+</div>
+<p>이 경우 Fisher의 정확검정을 확인한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fisher.test</span>(small_tab)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Fisher's Exact Test for Count Data
+
+data:  small_tab
+p-value = 0.005477
+alternative hypothesis: true odds ratio is not equal to 1
+95 percent confidence interval:
+ 0.0005746857 0.4859089384
+sample estimates:
+odds ratio 
+0.03659475 </code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="r-실습-위험비와-오즈비-계산" class="level2" data-number="10.32">
+<h2 data-number="10.32" class="anchored" data-anchor-id="r-실습-위험비와-오즈비-계산"><span class="header-section-number">10.32</span> R 실습: 위험비와 오즈비 계산</h2>
+<p>직접 계산해 보자.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> tab[<span class="dv">1</span>, <span class="dv">1</span>]</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> tab[<span class="dv">1</span>, <span class="dv">2</span>]</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> tab[<span class="dv">2</span>, <span class="dv">1</span>]</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> tab[<span class="dv">2</span>, <span class="dv">2</span>]</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>risk_exposed <span class="ot">&lt;-</span> a <span class="sc">/</span> (a <span class="sc">+</span> b)</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>risk_unexposed <span class="ot">&lt;-</span> c <span class="sc">/</span> (c <span class="sc">+</span> d)</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>rr <span class="ot">&lt;-</span> risk_exposed <span class="sc">/</span> risk_unexposed</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>rd <span class="ot">&lt;-</span> risk_exposed <span class="sc">-</span> risk_unexposed</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>or <span class="ot">&lt;-</span> (a <span class="sc">*</span> d) <span class="sc">/</span> (b <span class="sc">*</span> c)</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>risk_exposed</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.3</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>risk_unexposed</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>rd</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.2</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>rr</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>or</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.857143</code></pre>
+</div>
+</div>
+<p>해석은 다음과 같다.</p>
+<ul>
+<li>흡연자의 폐암 위험은 30%이다.</li>
+<li>비흡연자의 폐암 위험은 10%이다.</li>
+<li>위험차는 20%p이다.</li>
+<li>위험비는 3이다.</li>
+<li>오즈비는 약 3.86이다.</li>
+</ul>
+<hr>
+</section>
+<section id="r-실습-위험비와-오즈비의-신뢰구간" class="level2" data-number="10.33">
+<h2 data-number="10.33" class="anchored" data-anchor-id="r-실습-위험비와-오즈비의-신뢰구간"><span class="header-section-number">10.33</span> R 실습: 위험비와 오즈비의 신뢰구간</h2>
+<p>위험비의 95% 신뢰구간을 직접 계산해 보자.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>se_log_rr <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span><span class="sc">/</span>a <span class="sc">-</span> <span class="dv">1</span><span class="sc">/</span>(a<span class="sc">+</span>b) <span class="sc">+</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span><span class="sc">/</span>c <span class="sc">-</span> <span class="dv">1</span><span class="sc">/</span>(c<span class="sc">+</span>d)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>log_rr <span class="ot">&lt;-</span> <span class="fu">log</span>(rr)</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>ci_log_rr <span class="ot">&lt;-</span> log_rr <span class="sc">+</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>) <span class="sc">*</span> <span class="fl">1.96</span> <span class="sc">*</span> se_log_rr</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>ci_rr <span class="ot">&lt;-</span> <span class="fu">exp</span>(ci_log_rr)</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>rr</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>ci_rr</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.550811 5.803415</code></pre>
+</div>
+</div>
+<p>오즈비의 95% 신뢰구간은 다음과 같이 계산한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>se_log_or <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="dv">1</span><span class="sc">/</span>a <span class="sc">+</span> <span class="dv">1</span><span class="sc">/</span>b <span class="sc">+</span> <span class="dv">1</span><span class="sc">/</span>c <span class="sc">+</span> <span class="dv">1</span><span class="sc">/</span>d)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>log_or <span class="ot">&lt;-</span> <span class="fu">log</span>(or)</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>ci_log_or <span class="ot">&lt;-</span> log_or <span class="sc">+</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>) <span class="sc">*</span> <span class="fl">1.96</span> <span class="sc">*</span> se_log_or</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>ci_or <span class="ot">&lt;-</span> <span class="fu">exp</span>(ci_log_or)</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>or</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.857143</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>ci_or</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.766577 8.421681</code></pre>
+</div>
+</div>
+<p>신뢰구간이 1을 포함하는지 확인한다. RR 또는 OR의 신뢰구간이 1을 포함하지 않으면 일반적으로 두 집단의 차이가 통계적으로 유의하다고 해석할 수 있다.</p>
+<hr>
+</section>
+<section id="r-실습-막대그래프" class="level2" data-number="10.34">
+<h2 data-number="10.34" class="anchored" data-anchor-id="r-실습-막대그래프"><span class="header-section-number">10.34</span> R 실습: 막대그래프</h2>
+<p>범주형 자료는 막대그래프로 시각화할 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">t</span>(tab),</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">beside =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">legend.text =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Smoking and Lung Cancer"</span>,</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Count"</span>,</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Smoking status"</span></span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="10-ch10_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>비율을 비교하려면 행 비율을 그리는 것이 더 적절할 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>row_prop <span class="ot">&lt;-</span> <span class="fu">prop.table</span>(tab, <span class="at">margin =</span> <span class="dv">1</span>)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">t</span>(row_prop),</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">beside =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">legend.text =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Row percentages"</span>,</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Proportion"</span>,</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Smoking status"</span></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="10-ch10_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="r-실습-mosaic-plot" class="level2" data-number="10.35">
+<h2 data-number="10.35" class="anchored" data-anchor-id="r-실습-mosaic-plot"><span class="header-section-number">10.35</span> R 실습: Mosaic plot</h2>
+<p>Mosaic plot은 두 범주형 변수의 관계를 시각적으로 보여준다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mosaicplot</span>(</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  tab,</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Mosaic Plot: Smoking and Lung Cancer"</span>,</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">color =</span> <span class="cn">TRUE</span></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="10-ch10_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>각 사각형의 면적은 해당 셀의 빈도에 비례한다. 두 변수가 독립이면 각 행에서 열의 분포가 비슷하게 보인다. 반대로 관련성이 있으면 행별 열 비율이 달라진다.</p>
+<hr>
+</section>
+<section id="r-실습-mcnemar-검정" class="level2" data-number="10.36">
+<h2 data-number="10.36" class="anchored" data-anchor-id="r-실습-mcnemar-검정"><span class="header-section-number">10.36</span> R 실습: McNemar 검정</h2>
+<p>전후 양성/음성 결과 자료를 만들어 보자.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>paired_tab <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="dv">20</span>, <span class="dv">30</span>,</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">10</span>, <span class="dv">40</span>),</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">nrow =</span> <span class="dv">2</span>,</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">byrow =</span> <span class="cn">TRUE</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(paired_tab) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Before positive"</span>, <span class="st">"Before negative"</span>)</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(paired_tab) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"After positive"</span>, <span class="st">"After negative"</span>)</span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>paired_tab</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                After positive After negative
+Before positive             20             30
+Before negative             10             40</code></pre>
+</div>
+</div>
+<p>McNemar 검정은 다음과 같이 수행한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcnemar.test</span>(paired_tab)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    McNemar's Chi-squared test with continuity correction
+
+data:  paired_tab
+McNemar's chi-squared = 9.025, df = 1, p-value = 0.002663</code></pre>
+</div>
+</div>
+<p>이 검정은 같은 대상자에서 전후 변화가 있는지 평가한다.</p>
+<hr>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./09-ch9.html" class="pagination-link" aria-label="분산분석(ANOVA)">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">분산분석(ANOVA)</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./11-ch11.html" class="pagination-link" aria-label="Chapter 10. 상관분석과 단순선형회귀">
+        <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Chapter 10. 상관분석과 단순선형회귀</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
