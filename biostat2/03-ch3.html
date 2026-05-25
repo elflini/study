@@ -1,0 +1,2098 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>3&nbsp; 다중비교와 오류율 보정 – 바이오통계 심화</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./04-ch4.html" rel="next">
+<link href="./02-ch2.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-832e3d7b6b94ddcc90a000f8fabe51a9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-ch3.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">다중비교와 오류율 보정</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">바이오통계 심화</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Contents</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-ch1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">선형모형의 재정리</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-ch2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">ANOVA: 분산분석과 선형모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-ch3.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">다중비교와 오류율 보정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-ch4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">로지스틱 회귀 심화</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-ch5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Poisson Regression과 발생률 분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-ch6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">GLM: 일반화선형모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-ch7.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">ANCOVA: 공분산 분석과 기저값 조정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-ch8.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">바이오통계심화 Chapter 11</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-ch9.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">생존자료와 Kaplan-Meier 방법</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-ch10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Cox proportional hazards model</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-ch11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">임상시험 설계와 분석 원칙</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-ch12.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Propensity Score: 관찰연구에서의 교란 조정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-ch13.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Causal Inference</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#수업-개요" id="toc-수업-개요" class="nav-link active" data-scroll-target="#수업-개요"><span class="header-section-number">3.1</span> 수업 개요</a></li>
+  <li><a href="#핵심-질문" id="toc-핵심-질문" class="nav-link" data-scroll-target="#핵심-질문"><span class="header-section-number">3.2</span> 핵심 질문</a></li>
+  <li><a href="#학습목표" id="toc-학습목표" class="nav-link" data-scroll-target="#학습목표"><span class="header-section-number">3.3</span> 학습목표</a></li>
+  <li><a href="#다중비교-문제의-본질" id="toc-다중비교-문제의-본질" class="nav-link" data-scroll-target="#다중비교-문제의-본질"><span class="header-section-number">4</span> 다중비교 문제의 본질</a>
+  <ul class="collapse">
+  <li><a href="#하나의-검정과-여러-검정" id="toc-하나의-검정과-여러-검정" class="nav-link" data-scroll-target="#하나의-검정과-여러-검정"><span class="header-section-number">4.1</span> 하나의 검정과 여러 검정</a></li>
+  <li><a href="#오류율의-두-수준" id="toc-오류율의-두-수준" class="nav-link" data-scroll-target="#오류율의-두-수준"><span class="header-section-number">4.2</span> 오류율의 두 수준</a>
+  <ul class="collapse">
+  <li><a href="#comparison-wise-error-rate" id="toc-comparison-wise-error-rate" class="nav-link" data-scroll-target="#comparison-wise-error-rate"><span class="header-section-number">4.2.1</span> Comparison-wise error rate</a></li>
+  <li><a href="#family-wise-error-rate" id="toc-family-wise-error-rate" class="nav-link" data-scroll-target="#family-wise-error-rate"><span class="header-section-number">4.2.2</span> Family-wise error rate</a></li>
+  </ul></li>
+  <li><a href="#family의-정의" id="toc-family의-정의" class="nav-link" data-scroll-target="#family의-정의"><span class="header-section-number">4.3</span> Family의 정의</a></li>
+  </ul></li>
+  <li><a href="#여러-검정에서-fwer-계산" id="toc-여러-검정에서-fwer-계산" class="nav-link" data-scroll-target="#여러-검정에서-fwer-계산"><span class="header-section-number">5</span> 여러 검정에서 FWER 계산</a>
+  <ul class="collapse">
+  <li><a href="#독립-검정에서의-fwer" id="toc-독립-검정에서의-fwer" class="nav-link" data-scroll-target="#독립-검정에서의-fwer"><span class="header-section-number">5.1</span> 독립 검정에서의 FWER</a></li>
+  <li><a href="#검정-수가-많을-때" id="toc-검정-수가-많을-때" class="nav-link" data-scroll-target="#검정-수가-많을-때"><span class="header-section-number">5.2</span> 검정 수가 많을 때</a></li>
+  <li><a href="#모든-쌍별-비교의-개수" id="toc-모든-쌍별-비교의-개수" class="nav-link" data-scroll-target="#모든-쌍별-비교의-개수"><span class="header-section-number">5.3</span> 모든 쌍별 비교의 개수</a></li>
+  </ul></li>
+  <li><a href="#bonferroni-correction" id="toc-bonferroni-correction" class="nav-link" data-scroll-target="#bonferroni-correction"><span class="header-section-number">6</span> Bonferroni correction</a>
+  <ul class="collapse">
+  <li><a href="#기본-원리" id="toc-기본-원리" class="nav-link" data-scroll-target="#기본-원리"><span class="header-section-number">6.1</span> 기본 원리</a></li>
+  <li><a href="#bonferroni가-fwer를-통제하는-이유" id="toc-bonferroni가-fwer를-통제하는-이유" class="nav-link" data-scroll-target="#bonferroni가-fwer를-통제하는-이유"><span class="header-section-number">6.2</span> Bonferroni가 FWER를 통제하는 이유</a></li>
+  <li><a href="#조정-p-value-방식" id="toc-조정-p-value-방식" class="nav-link" data-scroll-target="#조정-p-value-방식"><span class="header-section-number">6.3</span> 조정 p-value 방식</a></li>
+  <li><a href="#장점과-단점" id="toc-장점과-단점" class="nav-link" data-scroll-target="#장점과-단점"><span class="header-section-number">6.4</span> 장점과 단점</a></li>
+  </ul></li>
+  <li><a href="#holm-method" id="toc-holm-method" class="nav-link" data-scroll-target="#holm-method"><span class="header-section-number">7</span> Holm method</a>
+  <ul class="collapse">
+  <li><a href="#step-down-procedure" id="toc-step-down-procedure" class="nav-link" data-scroll-target="#step-down-procedure"><span class="header-section-number">7.1</span> Step-down procedure</a></li>
+  <li><a href="#예제" id="toc-예제" class="nav-link" data-scroll-target="#예제"><span class="header-section-number">7.2</span> 예제</a></li>
+  <li><a href="#holm과-bonferroni-비교" id="toc-holm과-bonferroni-비교" class="nav-link" data-scroll-target="#holm과-bonferroni-비교"><span class="header-section-number">7.3</span> Holm과 Bonferroni 비교</a></li>
+  </ul></li>
+  <li><a href="#anova-이후-사후분석" id="toc-anova-이후-사후분석" class="nav-link" data-scroll-target="#anova-이후-사후분석"><span class="header-section-number">8</span> ANOVA 이후 사후분석</a>
+  <ul class="collapse">
+  <li><a href="#tukey-hsd" id="toc-tukey-hsd" class="nav-link" data-scroll-target="#tukey-hsd"><span class="header-section-number">8.1</span> Tukey HSD</a></li>
+  <li><a href="#dunnett-test" id="toc-dunnett-test" class="nav-link" data-scroll-target="#dunnett-test"><span class="header-section-number">8.2</span> Dunnett test</a></li>
+  <li><a href="#tukey와-dunnett-비교" id="toc-tukey와-dunnett-비교" class="nav-link" data-scroll-target="#tukey와-dunnett-비교"><span class="header-section-number">8.3</span> Tukey와 Dunnett 비교</a></li>
+  </ul></li>
+  <li><a href="#false-discovery-rate" id="toc-false-discovery-rate" class="nav-link" data-scroll-target="#false-discovery-rate"><span class="header-section-number">9</span> False discovery rate</a>
+  <ul class="collapse">
+  <li><a href="#fdr의-개념" id="toc-fdr의-개념" class="nav-link" data-scroll-target="#fdr의-개념"><span class="header-section-number">9.1</span> FDR의 개념</a></li>
+  <li><a href="#fwer와-fdr의-차이" id="toc-fwer와-fdr의-차이" class="nav-link" data-scroll-target="#fwer와-fdr의-차이"><span class="header-section-number">9.2</span> FWER와 FDR의 차이</a></li>
+  <li><a href="#benjamini-hochberg-procedure" id="toc-benjamini-hochberg-procedure" class="nav-link" data-scroll-target="#benjamini-hochberg-procedure"><span class="header-section-number">9.3</span> Benjamini-Hochberg procedure</a></li>
+  <li><a href="#bh-예제" id="toc-bh-예제" class="nav-link" data-scroll-target="#bh-예제"><span class="header-section-number">9.4</span> BH 예제</a></li>
+  </ul></li>
+  <li><a href="#다중비교가-발생하는-연구-상황" id="toc-다중비교가-발생하는-연구-상황" class="nav-link" data-scroll-target="#다중비교가-발생하는-연구-상황"><span class="header-section-number">10</span> 다중비교가 발생하는 연구 상황</a>
+  <ul class="collapse">
+  <li><a href="#여러-치료군" id="toc-여러-치료군" class="nav-link" data-scroll-target="#여러-치료군"><span class="header-section-number">10.1</span> 여러 치료군</a></li>
+  <li><a href="#여러-결과변수" id="toc-여러-결과변수" class="nav-link" data-scroll-target="#여러-결과변수"><span class="header-section-number">10.2</span> 여러 결과변수</a></li>
+  <li><a href="#여러-시점" id="toc-여러-시점" class="nav-link" data-scroll-target="#여러-시점"><span class="header-section-number">10.3</span> 여러 시점</a></li>
+  <li><a href="#하위군-분석" id="toc-하위군-분석" class="nav-link" data-scroll-target="#하위군-분석"><span class="header-section-number">10.4</span> 하위군 분석</a></li>
+  </ul></li>
+  <li><a href="#임상시험에서의-다중성" id="toc-임상시험에서의-다중성" class="nav-link" data-scroll-target="#임상시험에서의-다중성"><span class="header-section-number">11</span> 임상시험에서의 다중성</a>
+  <ul class="collapse">
+  <li><a href="#primary-endpoint와-secondary-endpoint" id="toc-primary-endpoint와-secondary-endpoint" class="nav-link" data-scroll-target="#primary-endpoint와-secondary-endpoint"><span class="header-section-number">11.1</span> Primary endpoint와 secondary endpoint</a></li>
+  <li><a href="#계층적-검정" id="toc-계층적-검정" class="nav-link" data-scroll-target="#계층적-검정"><span class="header-section-number">11.2</span> 계층적 검정</a></li>
+  <li><a href="#gatekeeping-strategy" id="toc-gatekeeping-strategy" class="nav-link" data-scroll-target="#gatekeeping-strategy"><span class="header-section-number">11.3</span> Gatekeeping strategy</a></li>
+  </ul></li>
+  <li><a href="#r-실습" id="toc-r-실습" class="nav-link" data-scroll-target="#r-실습"><span class="header-section-number">12</span> R 실습</a>
+  <ul class="collapse">
+  <li><a href="#예제-데이터-생성" id="toc-예제-데이터-생성" class="nav-link" data-scroll-target="#예제-데이터-생성"><span class="header-section-number">12.1</span> 예제 데이터 생성</a></li>
+  <li><a href="#집단별-요약과-시각화" id="toc-집단별-요약과-시각화" class="nav-link" data-scroll-target="#집단별-요약과-시각화"><span class="header-section-number">12.2</span> 집단별 요약과 시각화</a></li>
+  <li><a href="#anova와-tukey-hsd" id="toc-anova와-tukey-hsd" class="nav-link" data-scroll-target="#anova와-tukey-hsd"><span class="header-section-number">12.3</span> ANOVA와 Tukey HSD</a></li>
+  <li><a href="#선형모형으로-쌍별-비교-이해" id="toc-선형모형으로-쌍별-비교-이해" class="nav-link" data-scroll-target="#선형모형으로-쌍별-비교-이해"><span class="header-section-number">12.4</span> 선형모형으로 쌍별 비교 이해</a></li>
+  <li><a href="#p-value-보정" id="toc-p-value-보정" class="nav-link" data-scroll-target="#p-value-보정"><span class="header-section-number">12.5</span> p-value 보정</a></li>
+  <li><a href="#모든-쌍별-t-test" id="toc-모든-쌍별-t-test" class="nav-link" data-scroll-target="#모든-쌍별-t-test"><span class="header-section-number">12.6</span> 모든 쌍별 t-test</a></li>
+  <li><a href="#dunnett-test-개념적-구현" id="toc-dunnett-test-개념적-구현" class="nav-link" data-scroll-target="#dunnett-test-개념적-구현"><span class="header-section-number">12.7</span> Dunnett test 개념적 구현</a></li>
+  <li><a href="#fdr-보정-예제" id="toc-fdr-보정-예제" class="nav-link" data-scroll-target="#fdr-보정-예제"><span class="header-section-number">12.8</span> FDR 보정 예제</a></li>
+  <li><a href="#false-positive-시뮬레이션" id="toc-false-positive-시뮬레이션" class="nav-link" data-scroll-target="#false-positive-시뮬레이션"><span class="header-section-number">12.9</span> False positive 시뮬레이션</a></li>
+  <li><a href="#하위군-분석-예제" id="toc-하위군-분석-예제" class="nav-link" data-scroll-target="#하위군-분석-예제"><span class="header-section-number">12.10</span> 하위군 분석 예제</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">다중비교와 오류율 보정</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="수업-개요" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="수업-개요"><span class="header-section-number">3.1</span> 수업 개요</h2>
+<p>이번 장에서는 <strong>다중비교(multiple comparisons)</strong>와 <strong>오류율 보정(error rate control)</strong>을 다룬다. 입문 과정과 심화 2장에서는 ANOVA를 통해 여러 집단 평균을 한 번에 비교하는 방법을 배웠다. 그러나 ANOVA가 유의하다는 사실만으로는 “어느 집단과 어느 집단이 다른가?”를 알 수 없다. 이를 확인하려면 여러 쌍별 비교를 수행해야 한다.</p>
+<p>문제는 검정을 많이 할수록 우연히 유의한 결과가 나올 가능성이 증가한다는 점이다. 하나의 검정에서 유의수준을 0.05로 설정하면 귀무가설이 참일 때 잘못 유의하다고 결론 내릴 확률은 5%이다. 그러나 10번, 100번, 10,000번의 검정을 수행하면 전체 연구에서 적어도 하나의 false positive가 나올 가능성은 훨씬 커진다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv3/f1_fwer_growth.png" class="img-fluid figure-img" style="width:86.0%"></p>
+<figcaption>검정 수가 증가하면 전체 1종 오류율이 빠르게 증가한다.</figcaption>
+</figure>
+</div>
+<p>다중비교 문제는 단순히 통계적 기술 문제가 아니다. 의학 연구에서는 다음과 같은 실제 판단에 영향을 미친다.</p>
+<ul>
+<li>어떤 치료군이 효과적인가?</li>
+<li>어떤 용량군이 대조군보다 우월한가?</li>
+<li>어떤 하위군에서 치료효과가 나타나는가?</li>
+<li>어떤 바이오마커가 질병과 관련되는가?</li>
+<li>여러 결과변수 중 어떤 결과를 강조할 것인가?</li>
+</ul>
+<p>따라서 다중비교 보정은 “p-value를 기계적으로 조정하는 절차”가 아니라, 연구 질문의 구조와 오류 허용 수준을 명확히 하는 과정이다.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>핵심 메시지
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>다중비교 보정의 핵심은 “검정을 여러 번 했다는 사실”을 통계적 결론에 반영하여, false positive를 과도하게 주장하지 않도록 하는 것이다.</p>
+</div>
+</div>
+<hr>
+</section>
+<section id="핵심-질문" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="핵심-질문"><span class="header-section-number">3.2</span> 핵심 질문</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>질문</th>
+<th>연결되는 개념</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>검정을 반복하면 왜 오류율이 증가하는가?</td>
+<td>family-wise error rate</td>
+</tr>
+<tr class="even">
+<td>comparison-wise error rate와 FWER는 어떻게 다른가?</td>
+<td>개별 검정 vs 검정 묶음</td>
+</tr>
+<tr class="odd">
+<td>Bonferroni 보정은 왜 FWER를 통제하는가?</td>
+<td>Boole’s inequality</td>
+</tr>
+<tr class="even">
+<td>Holm 방법은 Bonferroni보다 왜 덜 보수적인가?</td>
+<td>step-down procedure</td>
+</tr>
+<tr class="odd">
+<td>Tukey HSD는 언제 사용하는가?</td>
+<td>모든 쌍별 평균 비교</td>
+</tr>
+<tr class="even">
+<td>Dunnett test는 언제 사용하는가?</td>
+<td>여러 처리군 vs 하나의 대조군</td>
+</tr>
+<tr class="odd">
+<td>FDR은 FWER와 어떻게 다른가?</td>
+<td>발견 중 false positive 비율</td>
+</tr>
+<tr class="even">
+<td>Benjamini-Hochberg 절차는 어떻게 작동하는가?</td>
+<td>ordered p-values</td>
+</tr>
+<tr class="odd">
+<td>하위군 분석은 왜 다중비교 문제를 만든다?</td>
+<td>subgroup multiplicity</td>
+</tr>
+<tr class="even">
+<td>임상논문에서 다중비교 결과를 어떻게 읽어야 하는가?</td>
+<td>분석계획, 보정방법, 해석 강도</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="학습목표" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="학습목표"><span class="header-section-number">3.3</span> 학습목표</h2>
+<p>이번 장이 끝나면 학생들은 다음을 할 수 있어야 한다.</p>
+<ol type="1">
+<li>다중비교 문제가 발생하는 상황을 설명할 수 있다.</li>
+<li>개별 1종 오류율과 전체 1종 오류율을 구분할 수 있다.</li>
+<li>검정 수에 따른 FWER 증가를 계산할 수 있다.</li>
+<li>Bonferroni correction의 원리와 장단점을 설명할 수 있다.</li>
+<li>Holm method의 step-down 절차를 설명할 수 있다.</li>
+<li>Tukey HSD와 Dunnett test의 사용 상황을 구분할 수 있다.</li>
+<li>FWER와 FDR의 차이를 설명할 수 있다.</li>
+<li>Benjamini-Hochberg 절차를 수작업과 R로 적용할 수 있다.</li>
+<li>하위군 분석, 여러 결과변수, 여러 시점 분석에서 다중성 문제를 식별할 수 있다.</li>
+<li>R에서 p-value 보정과 사후분석을 수행하고 결과를 해석할 수 있다.</li>
+<li>논문에서 다중비교 보정이 적절히 이루어졌는지 비판적으로 평가할 수 있다.</li>
+</ol>
+<hr>
+</section>
+<section id="다중비교-문제의-본질" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> 다중비교 문제의 본질</h1>
+<section id="하나의-검정과-여러-검정" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="하나의-검정과-여러-검정"><span class="header-section-number">4.1</span> 하나의 검정과 여러 검정</h2>
+<p>하나의 가설검정에서 유의수준을 <span class="math inline">\(\alpha=0.05\)</span>로 설정하면, 귀무가설이 참일 때 잘못 기각할 확률은 다음과 같다.</p>
+<p><span class="math display">\[P(\text{reject } H_0 \mid H_0 \text{ true}) = 0.05\]</span></p>
+<p>이는 <strong>개별 검정 하나</strong>에 대한 오류율이다. 그러나 실제 연구에서는 하나의 검정만 수행하는 경우보다 여러 검정을 수행하는 경우가 많다.</p>
+<p>예를 들어 다음과 같은 상황을 생각해 보자.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>연구 상황</th>
+<th style="text-align: right;">가능한 검정 수</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>세 치료군 모든 쌍 비교</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td>네 치료군 모든 쌍 비교</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td>다섯 치료군 모든 쌍 비교</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td>20개 바이오마커</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr class="odd">
+<td>1,000개 유전자</td>
+<td style="text-align: right;">1,000</td>
+</tr>
+<tr class="even">
+<td>10개 결과변수 × 5개 하위군</td>
+<td style="text-align: right;">50</td>
+</tr>
+</tbody>
+</table>
+<p>검정 하나하나의 오류율은 5%일 수 있지만, 전체 연구에서 “적어도 하나의 잘못된 유의 결과”가 나올 확률은 훨씬 커질 수 있다.</p>
+<hr>
+</section>
+<section id="오류율의-두-수준" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="오류율의-두-수준"><span class="header-section-number">4.2</span> 오류율의 두 수준</h2>
+<p>다중비교를 이해하려면 오류율을 두 수준에서 구분해야 한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv3/f2_error_rates.png" class="img-fluid figure-img" style="width:88.0%"></p>
+<figcaption>Comparison-wise error rate와 Family-wise error rate.</figcaption>
+</figure>
+</div>
+<section id="comparison-wise-error-rate" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="comparison-wise-error-rate"><span class="header-section-number">4.2.1</span> Comparison-wise error rate</h3>
+<p>Comparison-wise error rate는 개별 비교 하나에서의 1종 오류율이다.</p>
+<p>예를 들어 각 t-test를 <span class="math inline">\(\alpha=0.05\)</span>로 수행하면 각 비교의 comparison-wise error rate는 0.05이다.</p>
+</section>
+<section id="family-wise-error-rate" class="level3" data-number="4.2.2">
+<h3 data-number="4.2.2" class="anchored" data-anchor-id="family-wise-error-rate"><span class="header-section-number">4.2.2</span> Family-wise error rate</h3>
+<p>Family-wise error rate, FWER는 하나의 family 안에서 적어도 하나의 1종 오류가 발생할 확률이다.</p>
+<p><span class="math display">\[FWER
+=
+P(V \geq 1)\]</span></p>
+<p>여기서 <span class="math inline">\(V\)</span>는 false positive의 개수이다.</p>
+<p>즉 FWER는 다음 질문에 답한다.</p>
+<blockquote class="blockquote">
+<p>이 연구에서 수행한 관련 검정 묶음 안에서 잘못된 유의 결과가 하나라도 나올 확률은 얼마인가?</p>
+</blockquote>
+<hr>
+</section>
+</section>
+<section id="family의-정의" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="family의-정의"><span class="header-section-number">4.3</span> Family의 정의</h2>
+<p>다중비교에서 family는 함께 오류율을 통제해야 하는 가설들의 묶음이다. family를 어떻게 정의할 것인지는 통계적 문제이면서 연구설계 문제이기도 하다.</p>
+<p>예를 들어 다음이 하나의 family가 될 수 있다.</p>
+<ul>
+<li>한 ANOVA 이후 수행하는 모든 쌍별 비교</li>
+<li>한 임상시험의 primary endpoint 관련 모든 비교</li>
+<li>한 논문의 여러 secondary endpoint 검정</li>
+<li>한 유전체 연구에서 수행하는 모든 유전자 검정</li>
+<li>한 모형에서 사전에 정의된 모든 하위군 분석</li>
+</ul>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Family는 자동으로 정해지지 않는다
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>어떤 검정들을 하나의 family로 볼 것인지는 연구질문, 분석계획, 결과 해석의 범위에 따라 결정된다. 따라서 다중비교 보정은 분석 후 기계적으로 적용하기보다 연구계획 단계에서 정의하는 것이 바람직하다.</p>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="여러-검정에서-fwer-계산" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> 여러 검정에서 FWER 계산</h1>
+<section id="독립-검정에서의-fwer" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="독립-검정에서의-fwer"><span class="header-section-number">5.1</span> 독립 검정에서의 FWER</h2>
+<p>검정을 <span class="math inline">\(m\)</span>번 독립적으로 수행한다고 하자. 각 검정의 유의수준이 <span class="math inline">\(\alpha\)</span>라면, 각 검정에서 1종 오류가 발생하지 않을 확률은 다음과 같다.</p>
+<p><span class="math display">\[1-\alpha\]</span></p>
+<p>모든 검정에서 1종 오류가 발생하지 않을 확률은 독립성 가정하에 다음과 같다.</p>
+<p><span class="math display">\[(1-\alpha)^m\]</span></p>
+<p>따라서 적어도 한 번 이상 1종 오류가 발생할 확률은 다음과 같다.</p>
+<p><span class="math display">\[FWER
+=
+1-(1-\alpha)^m\]</span></p>
+<p>예를 들어 <span class="math inline">\(\alpha=0.05\)</span>, <span class="math inline">\(m=3\)</span>이면,</p>
+<p><span class="math display">\[FWER
+=
+1-0.95^3
+=
+0.142625\]</span></p>
+<p>즉 약 14.3%이다.</p>
+<hr>
+</section>
+<section id="검정-수가-많을-때" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="검정-수가-많을-때"><span class="header-section-number">5.2</span> 검정 수가 많을 때</h2>
+<p>검정이 10번이면 다음과 같다.</p>
+<p><span class="math display">\[FWER
+=
+1-0.95^{10}
+\approx
+0.401\]</span></p>
+<p>즉 약 40.1%이다.</p>
+<p>검정이 100번이면 다음과 같다.</p>
+<p><span class="math display">\[FWER
+=
+1-0.95^{100}
+\approx
+0.994\]</span></p>
+<p>즉 거의 반드시 적어도 하나의 false positive가 발생한다.</p>
+<p>이 계산은 모든 귀무가설이 참이고 검정들이 독립이라는 단순화된 상황을 가정한다. 실제 연구에서는 검정들이 서로 상관되어 있을 수 있지만, 검정 수가 많아질수록 false positive 위험이 증가한다는 핵심은 변하지 않는다.</p>
+<hr>
+</section>
+<section id="모든-쌍별-비교의-개수" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="모든-쌍별-비교의-개수"><span class="header-section-number">5.3</span> 모든 쌍별 비교의 개수</h2>
+<p>집단 수가 <span class="math inline">\(k\)</span>개일 때 모든 쌍별 비교의 개수는 다음과 같다.</p>
+<p><span class="math display">\[m
+=
+\binom{k}{2}
+=
+\frac{k(k-1)}{2}\]</span></p>
+<p>예를 들어</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;">집단 수 <span class="math inline">\(k\)</span></th>
+<th style="text-align: right;">쌍별 비교 수 <span class="math inline">\(m\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">15</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">45</td>
+</tr>
+</tbody>
+</table>
+<p>집단 수가 늘어나면 쌍별 비교 수는 빠르게 증가한다. 따라서 여러 집단 비교에서는 사후분석 방법과 다중비교 보정 방법을 명확히 선택해야 한다.</p>
+<hr>
+</section>
+</section>
+<section id="bonferroni-correction" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Bonferroni correction</h1>
+<section id="기본-원리" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="기본-원리"><span class="header-section-number">6.1</span> 기본 원리</h2>
+<p>Bonferroni correction은 가장 단순하고 널리 알려진 FWER 통제 방법이다. 전체 유의수준을 <span class="math inline">\(\alpha\)</span>로 유지하고 <span class="math inline">\(m\)</span>개의 검정을 수행할 때, 각 검정의 유의수준을 다음처럼 설정한다.</p>
+<p><span class="math display">\[\alpha^\ast
+=
+\frac{\alpha}{m}\]</span></p>
+<p>즉 각 검정에서 p-value가 <span class="math inline">\(\alpha/m\)</span>보다 작을 때 유의하다고 판단한다.</p>
+<p>예를 들어 전체 유의수준을 0.05로 통제하고 검정 수가 5개이면,</p>
+<p><span class="math display">\[\alpha^\ast
+=
+\frac{0.05}{5}
+=
+0.01\]</span></p>
+<p>각 검정은 p-value가 0.01보다 작아야 유의하다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv3/f3_bonferroni_threshold.png" class="img-fluid figure-img" style="width:82.0%"></p>
+<figcaption>Bonferroni 보정: 검정 수가 많을수록 기준은 엄격해진다.</figcaption>
+</figure>
+</div>
+<hr>
+</section>
+<section id="bonferroni가-fwer를-통제하는-이유" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="bonferroni가-fwer를-통제하는-이유"><span class="header-section-number">6.2</span> Bonferroni가 FWER를 통제하는 이유</h2>
+<p>Bonferroni 보정은 Boole’s inequality를 이용한다.</p>
+<p>각 검정에서 false positive가 발생하는 사건을 <span class="math inline">\(A_1,A_2,\ldots,A_m\)</span>이라고 하자. 그러면 적어도 하나의 false positive가 발생할 사건은 다음이다.</p>
+<p><span class="math display">\[A_1 \cup A_2 \cup \cdots \cup A_m\]</span></p>
+<p>Boole’s inequality에 의해,</p>
+<p><span class="math display">\[P(A_1 \cup A_2 \cup \cdots \cup A_m)
+\leq
+\sum_{i=1}^{m}P(A_i)\]</span></p>
+<p>각 검정의 유의수준을 <span class="math inline">\(\alpha/m\)</span>으로 설정하면,</p>
+<p><span class="math display">\[P(A_i)
+\leq
+\frac{\alpha}{m}\]</span></p>
+<p>따라서</p>
+<p><span class="math display">\[FWER
+=
+P\left(\bigcup_{i=1}^{m} A_i\right)
+\leq
+\sum_{i=1}^{m}
+\frac{\alpha}{m}
+=
+\alpha\]</span></p>
+<p>즉 Bonferroni 보정은 검정들이 서로 독립이 아니어도 FWER를 <span class="math inline">\(\alpha\)</span> 이하로 통제한다.</p>
+<hr>
+</section>
+<section id="조정-p-value-방식" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="조정-p-value-방식"><span class="header-section-number">6.3</span> 조정 p-value 방식</h2>
+<p>Bonferroni 보정은 유의수준을 나누는 방식 대신 p-value를 조정하는 방식으로도 표현할 수 있다.</p>
+<p><span class="math display">\[p_{adj}
+=
+\min(mp,1)\]</span></p>
+<p>예를 들어 원래 p-value가 0.008이고 검정 수가 5개라면,</p>
+<p><span class="math display">\[p_{adj}
+=
+5 \times 0.008
+=
+0.04\]</span></p>
+<p>따라서 조정 p-value는 0.04이다. 이 값이 0.05보다 작으므로 Bonferroni 보정 후에도 유의하다.</p>
+<hr>
+</section>
+<section id="장점과-단점" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="장점과-단점"><span class="header-section-number">6.4</span> 장점과 단점</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>장점</th>
+<th>단점</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>이해하기 쉽다</td>
+<td>보수적이다</td>
+</tr>
+<tr class="even">
+<td>계산이 간단하다</td>
+<td>검정 수가 많으면 기준이 너무 엄격해진다</td>
+</tr>
+<tr class="odd">
+<td>어떤 검정에도 적용 가능하다</td>
+<td>검정력이 감소한다</td>
+</tr>
+<tr class="even">
+<td>검정 간 독립성이 없어도 FWER 통제 가능</td>
+<td>실제 효과를 놓칠 수 있다</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Bonferroni의 대가
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Bonferroni 보정은 false positive를 줄이는 대신 false negative를 증가시킬 수 있다. 따라서 발견이 중요한 탐색 연구에서는 지나치게 보수적일 수 있다.</p>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="holm-method" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Holm method</h1>
+<section id="step-down-procedure" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="step-down-procedure"><span class="header-section-number">7.1</span> Step-down procedure</h2>
+<p>Holm method는 Bonferroni보다 덜 보수적인 FWER 통제 방법이다. p-value를 작은 순서대로 정렬한 뒤 순차적으로 판단한다.</p>
+<p><span class="math inline">\(p_{(1)} \leq p_{(2)} \leq \cdots \leq p_{(m)}\)</span>이라고 하자.</p>
+<p>Holm 절차는 다음과 같다.</p>
+<ol type="1">
+<li>가장 작은 p-value <span class="math inline">\(p_{(1)}\)</span>을 <span class="math inline">\(\alpha/m\)</span>과 비교한다.</li>
+<li>유의하면 다음 p-value <span class="math inline">\(p_{(2)}\)</span>를 <span class="math inline">\(\alpha/(m-1)\)</span>과 비교한다.</li>
+<li>다시 유의하면 <span class="math inline">\(p_{(3)}\)</span>를 <span class="math inline">\(\alpha/(m-2)\)</span>와 비교한다.</li>
+<li>처음으로 기준을 만족하지 못하는 순간, 그 p-value와 이후 p-value는 모두 유의하지 않다고 판단한다.</li>
+</ol>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv3/f4_holm_stepdown.png" class="img-fluid figure-img" style="width:82.0%"></p>
+<figcaption>Holm 방법은 작은 p-value부터 순차적으로 평가한다.</figcaption>
+</figure>
+</div>
+<hr>
+</section>
+<section id="예제" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="예제"><span class="header-section-number">7.2</span> 예제</h2>
+<p>p-value가 다음과 같다고 하자.</p>
+<p><span class="math display">\[0.003,\quad 0.011,\quad 0.018,\quad 0.041,\quad 0.090\]</span></p>
+<p>검정 수는 <span class="math inline">\(m=5\)</span>이고 전체 유의수준은 <span class="math inline">\(\alpha=0.05\)</span>이다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;">순서</th>
+<th style="text-align: right;">p-value</th>
+<th style="text-align: right;">Holm 기준</th>
+<th>판단</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.003</td>
+<td style="text-align: right;">0.05/5 = 0.010</td>
+<td>유의</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.011</td>
+<td style="text-align: right;">0.05/4 = 0.0125</td>
+<td>유의</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0.018</td>
+<td style="text-align: right;">0.05/3 = 0.0167</td>
+<td>유의하지 않음</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.041</td>
+<td style="text-align: right;">0.05/2 = 0.025</td>
+<td>유의하지 않음</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0.090</td>
+<td style="text-align: right;">0.05/1 = 0.050</td>
+<td>유의하지 않음</td>
+</tr>
+</tbody>
+</table>
+<p>처음 두 개만 유의하다고 판단한다. 세 번째에서 기준을 만족하지 못했으므로 이후는 더 보지 않고 유의하지 않다고 판단한다.</p>
+<hr>
+</section>
+<section id="holm과-bonferroni-비교" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="holm과-bonferroni-비교"><span class="header-section-number">7.3</span> Holm과 Bonferroni 비교</h2>
+<p>Holm method는 Bonferroni보다 항상 같거나 더 많은 발견을 허용한다. 즉 Bonferroni보다 덜 보수적이지만 여전히 FWER를 통제한다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>방법</th>
+<th>오류율</th>
+<th>특징</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Bonferroni</td>
+<td>FWER</td>
+<td>단순, 보수적</td>
+</tr>
+<tr class="even">
+<td>Holm</td>
+<td>FWER</td>
+<td>순차적, Bonferroni보다 검정력 높음</td>
+</tr>
+</tbody>
+</table>
+<p>실무에서는 단순 보정이 필요할 때 Bonferroni보다 Holm을 우선 고려할 수 있다.</p>
+<hr>
+</section>
+</section>
+<section id="anova-이후-사후분석" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> ANOVA 이후 사후분석</h1>
+<section id="tukey-hsd" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="tukey-hsd"><span class="header-section-number">8.1</span> Tukey HSD</h2>
+<p>Tukey HSD는 ANOVA 이후 모든 집단 쌍을 비교할 때 자주 사용하는 방법이다. HSD는 Honestly Significant Difference의 약자이다.</p>
+<p>사용 상황은 다음과 같다.</p>
+<ul>
+<li>one-way ANOVA 이후</li>
+<li>모든 쌍별 평균 비교가 관심일 때</li>
+<li>집단 수가 여러 개일 때</li>
+<li>FWER를 통제하고 싶을 때</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv3/f5_tukey_forest.png" class="img-fluid figure-img" style="width:88.0%"></p>
+<figcaption>Tukey HSD: 모든 쌍별 비교를 동시에 보정한다.</figcaption>
+</figure>
+</div>
+<p>Tukey 결과에서 확인할 것은 다음이다.</p>
+<ol type="1">
+<li>비교한 집단 쌍</li>
+<li>평균 차이</li>
+<li>동시 신뢰구간</li>
+<li>보정 p-value</li>
+<li>신뢰구간이 0을 포함하는지 여부</li>
+</ol>
+<hr>
+</section>
+<section id="dunnett-test" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="dunnett-test"><span class="header-section-number">8.2</span> Dunnett test</h2>
+<p>Dunnett test는 여러 처리군을 하나의 대조군과 비교할 때 사용하는 방법이다.</p>
+<p>예를 들어 용량 연구에서 다음 비교만 관심일 수 있다.</p>
+<ul>
+<li>Low dose vs Control</li>
+<li>Medium dose vs Control</li>
+<li>High dose vs Control</li>
+</ul>
+<p>처리군끼리의 비교, 예를 들어 Low dose vs Medium dose는 주요 관심이 아닐 수 있다. 이때 모든 쌍을 비교하는 Tukey HSD보다 Dunnett test가 더 적절하고 효율적이다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv3/f6_dunnett_control.png" class="img-fluid figure-img" style="width:82.0%"></p>
+<figcaption>Dunnett test: 대조군 중심 비교.</figcaption>
+</figure>
+</div>
+<hr>
+</section>
+<section id="tukey와-dunnett-비교" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="tukey와-dunnett-비교"><span class="header-section-number">8.3</span> Tukey와 Dunnett 비교</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>상황</th>
+<th>권장 방법</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>모든 집단 쌍 비교</td>
+<td>Tukey HSD</td>
+</tr>
+<tr class="even">
+<td>여러 처리군을 하나의 대조군과 비교</td>
+<td>Dunnett test</td>
+</tr>
+<tr class="odd">
+<td>사전에 특정 비교만 계획</td>
+<td>Planned contrast</td>
+</tr>
+<tr class="even">
+<td>비교 수가 적고 일반적 보정 필요</td>
+<td>Holm 또는 Bonferroni</td>
+</tr>
+<tr class="odd">
+<td>매우 많은 탐색적 검정</td>
+<td>FDR 방법</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="false-discovery-rate" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> False discovery rate</h1>
+<section id="fdr의-개념" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="fdr의-개념"><span class="header-section-number">9.1</span> FDR의 개념</h2>
+<p>FWER는 false positive가 하나라도 나올 확률을 통제한다. 이는 확증적 임상시험처럼 false positive를 강하게 억제해야 하는 상황에서 유용하다. 그러나 유전체 연구처럼 수천, 수만 개 검정을 수행하는 탐색 연구에서는 FWER 통제가 지나치게 보수적일 수 있다.</p>
+<p>이때 사용하는 개념이 false discovery rate, FDR이다.</p>
+<p>FDR은 유의하다고 발견한 결과들 중 false positive가 차지하는 비율의 기대값이다.</p>
+<p><span class="math display">\[FDR
+=
+E\left[
+\frac{V}{R}
+\right]\]</span></p>
+<p>여기서</p>
+<ul>
+<li><span class="math inline">\(V\)</span>: false positive 수</li>
+<li><span class="math inline">\(R\)</span>: 유의하다고 발견한 전체 결과 수</li>
+</ul>
+<p>이다. 단, <span class="math inline">\(R=0\)</span>일 때는 이 비율을 0으로 정의한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv3/f7_fdr_concept.png" class="img-fluid figure-img" style="width:78.0%"></p>
+<figcaption>FDR은 발견한 결과 중 false positive의 비율을 다룬다.</figcaption>
+</figure>
+</div>
+<hr>
+</section>
+<section id="fwer와-fdr의-차이" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="fwer와-fdr의-차이"><span class="header-section-number">9.2</span> FWER와 FDR의 차이</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>구분</th>
+<th>FWER</th>
+<th>FDR</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>통제 대상</td>
+<td>false positive가 하나라도 나올 확률</td>
+<td>발견 중 false positive 비율</td>
+</tr>
+<tr class="even">
+<td>보수성</td>
+<td>더 보수적</td>
+<td>덜 보수적</td>
+</tr>
+<tr class="odd">
+<td>적합한 상황</td>
+<td>확증적 연구, 주요 endpoint</td>
+<td>탐색적 연구, 고차원 자료</td>
+</tr>
+<tr class="even">
+<td>대표 방법</td>
+<td>Bonferroni, Holm, Tukey, Dunnett</td>
+<td>Benjamini-Hochberg</td>
+</tr>
+<tr class="odd">
+<td>해석</td>
+<td>오류 하나도 엄격히 제한</td>
+<td>일부 false discovery를 허용</td>
+</tr>
+</tbody>
+</table>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv3/f9_fwer_fdr_tradeoff.png" class="img-fluid figure-img" style="width:82.0%"></p>
+<figcaption>FWER 통제와 FDR 통제의 실무적 균형.</figcaption>
+</figure>
+</div>
+<hr>
+</section>
+<section id="benjamini-hochberg-procedure" class="level2" data-number="9.3">
+<h2 data-number="9.3" class="anchored" data-anchor-id="benjamini-hochberg-procedure"><span class="header-section-number">9.3</span> Benjamini-Hochberg procedure</h2>
+<p>Benjamini-Hochberg procedure는 가장 널리 쓰이는 FDR 통제 방법이다. 목표 FDR 수준을 <span class="math inline">\(q\)</span>라고 하자. p-value를 작은 순서대로 정렬한다.</p>
+<p><span class="math display">\[p_{(1)} \leq p_{(2)} \leq \cdots \leq p_{(m)}\]</span></p>
+<p>각 순위 <span class="math inline">\(i\)</span>에 대해 기준값은 다음과 같다.</p>
+<p><span class="math display">\[\frac{i}{m}q\]</span></p>
+<p>절차는 다음과 같다.</p>
+<ol type="1">
+<li>p-value를 작은 순서로 정렬한다.</li>
+<li>각 p-value를 <span class="math inline">\((i/m)q\)</span>와 비교한다.</li>
+<li>조건 <span class="math inline">\(p_{(i)} \leq (i/m)q\)</span>를 만족하는 가장 큰 <span class="math inline">\(i\)</span>를 찾는다.</li>
+<li>그 순위까지의 p-value를 유의하다고 판단한다.</li>
+</ol>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv3/f8_bh_procedure.png" class="img-fluid figure-img" style="width:82.0%"></p>
+<figcaption>Benjamini-Hochberg 절차의 직관.</figcaption>
+</figure>
+</div>
+<hr>
+</section>
+<section id="bh-예제" class="level2" data-number="9.4">
+<h2 data-number="9.4" class="anchored" data-anchor-id="bh-예제"><span class="header-section-number">9.4</span> BH 예제</h2>
+<p>검정 수가 <span class="math inline">\(m=6\)</span>이고, 목표 FDR이 <span class="math inline">\(q=0.05\)</span>라고 하자. 정렬된 p-value가 다음과 같다고 하자.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;">순위 <span class="math inline">\(i\)</span></th>
+<th style="text-align: right;">p-value <span class="math inline">\(p_{(i)}\)</span></th>
+<th style="text-align: right;">BH 기준 <span class="math inline">\((i/m)q\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.002</td>
+<td style="text-align: right;">0.0083</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.009</td>
+<td style="text-align: right;">0.0167</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0.017</td>
+<td style="text-align: right;">0.0250</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.041</td>
+<td style="text-align: right;">0.0333</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0.060</td>
+<td style="text-align: right;">0.0417</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.120</td>
+<td style="text-align: right;">0.0500</td>
+</tr>
+</tbody>
+</table>
+<p>조건을 만족하는 가장 큰 순위는 <span class="math inline">\(i=3\)</span>이다. 따라서 처음 세 개의 p-value를 유의하다고 판단한다.</p>
+<hr>
+</section>
+</section>
+<section id="다중비교가-발생하는-연구-상황" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> 다중비교가 발생하는 연구 상황</h1>
+<section id="여러-치료군" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="여러-치료군"><span class="header-section-number">10.1</span> 여러 치료군</h2>
+<p>가장 전형적인 상황은 여러 치료군이 있는 임상시험이다.</p>
+<p>예를 들어 네 집단이 있다고 하자.</p>
+<ul>
+<li>Placebo</li>
+<li>Low dose</li>
+<li>Medium dose</li>
+<li>High dose</li>
+</ul>
+<p>이때 가능한 비교는 여러 가지이다.</p>
+<ul>
+<li>모든 쌍별 비교</li>
+<li>각 용량군과 placebo 비교</li>
+<li>용량-반응 추세 검정</li>
+<li>고용량군과 저용량군 비교</li>
+</ul>
+<p>연구질문에 따라 적절한 비교 방법이 달라진다.</p>
+<hr>
+</section>
+<section id="여러-결과변수" class="level2" data-number="10.2">
+<h2 data-number="10.2" class="anchored" data-anchor-id="여러-결과변수"><span class="header-section-number">10.2</span> 여러 결과변수</h2>
+<p>의학 연구에서는 하나의 연구에서 여러 결과변수를 평가할 수 있다.</p>
+<p>예를 들어 당뇨병 중재 연구에서 다음을 모두 평가할 수 있다.</p>
+<ul>
+<li>HbA1c</li>
+<li>공복혈당</li>
+<li>체중</li>
+<li>혈압</li>
+<li>LDL cholesterol</li>
+<li>삶의 질 점수</li>
+</ul>
+<p>여러 결과변수를 모두 primary endpoint처럼 해석하면 false positive 위험이 증가한다. 따라서 primary endpoint, secondary endpoint, exploratory endpoint를 사전에 구분해야 한다.</p>
+<hr>
+</section>
+<section id="여러-시점" class="level2" data-number="10.3">
+<h2 data-number="10.3" class="anchored" data-anchor-id="여러-시점"><span class="header-section-number">10.3</span> 여러 시점</h2>
+<p>반복 측정 연구에서 여러 시점의 결과를 각각 검정하면 다중비교 문제가 생긴다.</p>
+<p>예를 들어 치료 후 1개월, 3개월, 6개월, 12개월 시점에서 각각 군간 차이를 검정하면 네 번의 검정을 수행하게 된다. 시간에 따른 변화를 모델링하는 혼합모형 또는 반복측정 모형을 사용하는 것이 더 적절할 수 있다.</p>
+<hr>
+</section>
+<section id="하위군-분석" class="level2" data-number="10.4">
+<h2 data-number="10.4" class="anchored" data-anchor-id="하위군-분석"><span class="header-section-number">10.4</span> 하위군 분석</h2>
+<p>하위군 분석(subgroup analysis)은 특히 조심해야 한다.</p>
+<p>예를 들어 전체 치료효과가 유의하지 않았지만 다음 하위군 중 하나에서 유의한 효과가 나타났다고 하자.</p>
+<ul>
+<li>남성</li>
+<li>여성</li>
+<li>65세 미만</li>
+<li>65세 이상</li>
+<li>당뇨병 있음</li>
+<li>당뇨병 없음</li>
+<li>흡연자</li>
+<li>비흡연자</li>
+</ul>
+<p>많은 하위군을 탐색하면 우연히 유의한 결과가 나올 수 있다. 하위군 분석은 사전에 정의되어야 하며, 상호작용 검정을 함께 고려해야 한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv3/f10_multiplicity_sources.png" class="img-fluid figure-img" style="width:92.0%"></p>
+<figcaption>다중성은 쌍별 평균 비교뿐 아니라 연구 전반에서 발생한다.</figcaption>
+</figure>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>하위군 분석 주의
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>하위군 안에서만 p-value가 유의하다는 사실만으로 “하위군 효과”를 주장해서는 안 된다. 하위군 간 효과 차이를 주장하려면 interaction test가 필요하다.</p>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="임상시험에서의-다중성" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> 임상시험에서의 다중성</h1>
+<section id="primary-endpoint와-secondary-endpoint" class="level2" data-number="11.1">
+<h2 data-number="11.1" class="anchored" data-anchor-id="primary-endpoint와-secondary-endpoint"><span class="header-section-number">11.1</span> Primary endpoint와 secondary endpoint</h2>
+<p>임상시험에서는 primary endpoint를 사전에 명확히 정의한다. 이는 연구의 주요 결론을 결정하는 결과변수이다. Secondary endpoint는 보조적 결과이며, exploratory endpoint는 가설 생성 목적일 수 있다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Endpoint 유형</th>
+<th>해석 강도</th>
+<th>다중성 고려</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Primary endpoint</td>
+<td>가장 강함</td>
+<td>엄격히 통제 필요</td>
+</tr>
+<tr class="even">
+<td>Key secondary endpoint</td>
+<td>비교적 강함</td>
+<td>계층적 검정 등 고려</td>
+</tr>
+<tr class="odd">
+<td>Secondary endpoint</td>
+<td>보조적</td>
+<td>보정 또는 신중한 해석</td>
+</tr>
+<tr class="even">
+<td>Exploratory endpoint</td>
+<td>가설 생성</td>
+<td>FDR 또는 기술적 해석</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="계층적-검정" class="level2" data-number="11.2">
+<h2 data-number="11.2" class="anchored" data-anchor-id="계층적-검정"><span class="header-section-number">11.2</span> 계층적 검정</h2>
+<p>계층적 검정(hierarchical testing)은 endpoint 또는 가설의 순서를 사전에 정해 두고 순서대로 검정하는 방법이다.</p>
+<p>예를 들어 다음 순서를 정할 수 있다.</p>
+<ol type="1">
+<li>Primary endpoint</li>
+<li>Key secondary endpoint 1</li>
+<li>Key secondary endpoint 2</li>
+<li>Key secondary endpoint 3</li>
+</ol>
+<p>앞선 검정이 유의할 때만 다음 검정으로 넘어간다. 중간에 유의하지 않으면 이후 결과는 명목상 p-value로만 해석한다.</p>
+<p>계층적 검정은 전체 1종 오류율을 통제하면서 주요 endpoint의 검정력을 유지하는 데 도움이 된다.</p>
+<hr>
+</section>
+<section id="gatekeeping-strategy" class="level2" data-number="11.3">
+<h2 data-number="11.3" class="anchored" data-anchor-id="gatekeeping-strategy"><span class="header-section-number">11.3</span> Gatekeeping strategy</h2>
+<p>복잡한 임상시험에서는 여러 endpoint와 여러 용량군이 있을 수 있다. 이때 gatekeeping strategy를 사용하여 어떤 가설 묶음을 어떤 순서로 검정할지 사전에 정의한다.</p>
+<p>예를 들어</p>
+<ol type="1">
+<li>전체 치료효과 검정</li>
+<li>고용량군 vs 대조군 검정</li>
+<li>저용량군 vs 대조군 검정</li>
+<li>key secondary endpoint 검정</li>
+</ol>
+<p>처럼 사전에 정해진 순서를 사용한다.</p>
+<p>핵심은 사후적으로 유리한 결과만 선택하지 않도록 분석계획서에 명시하는 것이다.</p>
+<hr>
+</section>
+</section>
+<section id="r-실습" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> R 실습</h1>
+<section id="예제-데이터-생성" class="level2" data-number="12.1">
+<h2 data-number="12.1" class="anchored" data-anchor-id="예제-데이터-생성"><span class="header-section-number">12.1</span> 예제 데이터 생성</h2>
+<p>세 치료군의 혈압 감소량을 비교하는 자료를 생성한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3030</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>n_per_group <span class="ot">&lt;-</span> <span class="dv">35</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>group <span class="ot">&lt;-</span> <span class="fu">factor</span>(</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"Control"</span>, <span class="st">"DrugA"</span>, <span class="st">"DrugB"</span>, <span class="st">"DrugC"</span>), <span class="at">each =</span> n_per_group),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Control"</span>, <span class="st">"DrugA"</span>, <span class="st">"DrugB"</span>, <span class="st">"DrugC"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>reduction <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rnorm</span>(n_per_group, <span class="at">mean =</span> <span class="dv">5</span>, <span class="at">sd =</span> <span class="dv">6</span>),</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rnorm</span>(n_per_group, <span class="at">mean =</span> <span class="dv">9</span>, <span class="at">sd =</span> <span class="dv">6</span>),</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rnorm</span>(n_per_group, <span class="at">mean =</span> <span class="dv">12</span>, <span class="at">sd =</span> <span class="dv">6</span>),</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rnorm</span>(n_per_group, <span class="at">mean =</span> <span class="dv">13</span>, <span class="at">sd =</span> <span class="dv">6</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">group =</span> group,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">reduction =</span> reduction</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    group  reduction
+1 Control  0.1557208
+2 Control -1.6146349
+3 Control  6.5014987
+4 Control 14.4138626
+5 Control  5.2779295
+6 Control  9.7301848</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="집단별-요약과-시각화" class="level2" data-number="12.2">
+<h2 data-number="12.2" class="anchored" data-anchor-id="집단별-요약과-시각화"><span class="header-section-number">12.2</span> 집단별 요약과 시각화</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">aggregate</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  reduction <span class="sc">~</span> group,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">FUN =</span> <span class="cf">function</span>(x) <span class="fu">c</span>(<span class="at">n =</span> <span class="fu">length</span>(x), <span class="at">mean =</span> <span class="fu">mean</span>(x), <span class="at">sd =</span> <span class="fu">sd</span>(x))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    group reduction.n reduction.mean reduction.sd
+1 Control   35.000000       4.929335     5.043246
+2   DrugA   35.000000      10.362347     5.619688
+3   DrugB   35.000000      14.332839     4.727956
+4   DrugC   35.000000      12.677712     5.969147</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  reduction <span class="sc">~</span> group,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Treatment group"</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Blood pressure reduction"</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Blood pressure reduction by group"</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-ch3_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="anova와-tukey-hsd" class="level2" data-number="12.3">
+<h2 data-number="12.3" class="anchored" data-anchor-id="anova와-tukey-hsd"><span class="header-section-number">12.3</span> ANOVA와 Tukey HSD</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fit_aov <span class="ot">&lt;-</span> <span class="fu">aov</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  reduction <span class="sc">~</span> group,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_aov)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>             Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+group         3   1766   588.7   20.48 5.21e-11 ***
+Residuals   136   3910    28.7                     
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>ANOVA가 유의하면 Tukey HSD로 모든 쌍별 비교를 수행할 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>tukey_result <span class="ot">&lt;-</span> <span class="fu">TukeyHSD</span>(fit_aov)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>tukey_result</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = reduction ~ group, data = dat)
+
+$group
+                   diff       lwr       upr     p adj
+DrugA-Control  5.433012  2.099111  8.766913 0.0002391
+DrugB-Control  9.403504  6.069603 12.737405 0.0000000
+DrugC-Control  7.748378  4.414477 11.082279 0.0000001
+DrugB-DrugA    3.970492  0.636591  7.304393 0.0125328
+DrugC-DrugA    2.315365 -1.018536  5.649266 0.2747853
+DrugC-DrugB   -1.655127 -4.989028  1.678774 0.5700311</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(tukey_result)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-ch3_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="선형모형으로-쌍별-비교-이해" class="level2" data-number="12.4">
+<h2 data-number="12.4" class="anchored" data-anchor-id="선형모형으로-쌍별-비교-이해"><span class="header-section-number">12.4</span> 선형모형으로 쌍별 비교 이해</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fit_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  reduction <span class="sc">~</span> group,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_lm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = reduction ~ group, data = dat)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-13.1269  -3.7180   0.5374   3.7677  13.5668 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   4.9293     0.9063   5.439 2.41e-07 ***
+groupDrugA    5.4330     1.2817   4.239 4.12e-05 ***
+groupDrugB    9.4035     1.2817   7.337 1.79e-11 ***
+groupDrugC    7.7484     1.2817   6.045 1.35e-08 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 5.362 on 136 degrees of freedom
+Multiple R-squared:  0.3112,    Adjusted R-squared:  0.296 
+F-statistic: 20.48 on 3 and 136 DF,  p-value: 5.208e-11</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(fit_lm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               2.5 %    97.5 %
+(Intercept) 3.137022  6.721648
+groupDrugA  2.898299  7.967725
+groupDrugB  6.868791 11.938217
+groupDrugC  5.213665 10.283091</code></pre>
+</div>
+</div>
+<p>기준범주가 Control이면 <code>groupDrugA</code>, <code>groupDrugB</code>, <code>groupDrugC</code>는 각각 Control과의 차이이다.</p>
+<p>기준범주를 DrugA로 바꾸면 DrugB와 DrugA, DrugC와 DrugA의 차이를 직접 볼 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>group_A <span class="ot">&lt;-</span> <span class="fu">relevel</span>(dat<span class="sc">$</span>group, <span class="at">ref =</span> <span class="st">"DrugA"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>fit_lm_A <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  reduction <span class="sc">~</span> group_A,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_lm_A)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = reduction ~ group_A, data = dat)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-13.1269  -3.7180   0.5374   3.7677  13.5668 
+
+Coefficients:
+               Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)     10.3623     0.9063  11.433  &lt; 2e-16 ***
+group_AControl  -5.4330     1.2817  -4.239 4.12e-05 ***
+group_ADrugB     3.9705     1.2817   3.098  0.00237 ** 
+group_ADrugC     2.3154     1.2817   1.806  0.07306 .  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 5.362 on 136 degrees of freedom
+Multiple R-squared:  0.3112,    Adjusted R-squared:  0.296 
+F-statistic: 20.48 on 3 and 136 DF,  p-value: 5.208e-11</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="p-value-보정" class="level2" data-number="12.5">
+<h2 data-number="12.5" class="anchored" data-anchor-id="p-value-보정"><span class="header-section-number">12.5</span> p-value 보정</h2>
+<p>가상의 p-value 벡터를 만들어 보정 방법별 결과를 비교한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>p_raw <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.003</span>, <span class="fl">0.011</span>, <span class="fl">0.018</span>, <span class="fl">0.041</span>, <span class="fl">0.090</span>, <span class="fl">0.210</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">p.adjust</span>(p_raw, <span class="at">method =</span> <span class="st">"bonferroni"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.018 0.066 0.108 0.246 0.540 1.000</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">p.adjust</span>(p_raw, <span class="at">method =</span> <span class="st">"holm"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.018 0.055 0.072 0.123 0.180 0.210</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">p.adjust</span>(p_raw, <span class="at">method =</span> <span class="st">"BH"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.0180 0.0330 0.0360 0.0615 0.1080 0.2100</code></pre>
+</div>
+</div>
+<p>결과를 표로 정리한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>p_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">raw =</span> p_raw,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">bonferroni =</span> <span class="fu">p.adjust</span>(p_raw, <span class="at">method =</span> <span class="st">"bonferroni"</span>),</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">holm =</span> <span class="fu">p.adjust</span>(p_raw, <span class="at">method =</span> <span class="st">"holm"</span>),</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">BH =</span> <span class="fu">p.adjust</span>(p_raw, <span class="at">method =</span> <span class="st">"BH"</span>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>p_table</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    raw bonferroni  holm     BH
+1 0.003      0.018 0.018 0.0180
+2 0.011      0.066 0.055 0.0330
+3 0.018      0.108 0.072 0.0360
+4 0.041      0.246 0.123 0.0615
+5 0.090      0.540 0.180 0.1080
+6 0.210      1.000 0.210 0.2100</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="모든-쌍별-t-test" class="level2" data-number="12.6">
+<h2 data-number="12.6" class="anchored" data-anchor-id="모든-쌍별-t-test"><span class="header-section-number">12.6</span> 모든 쌍별 t-test</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pairwise.t.test</span>(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>reduction,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>group,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">p.adjust.method =</span> <span class="st">"none"</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pairwise comparisons using t tests with pooled SD 
+
+data:  dat$reduction and dat$group 
+
+      Control DrugA  DrugB 
+DrugA 4.1e-05 -      -     
+DrugB 1.8e-11 0.0024 -     
+DrugC 1.4e-08 0.0731 0.1988
+
+P value adjustment method: none </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pairwise.t.test</span>(</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>reduction,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>group,</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">p.adjust.method =</span> <span class="st">"bonferroni"</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pairwise comparisons using t tests with pooled SD 
+
+data:  dat$reduction and dat$group 
+
+      Control DrugA   DrugB  
+DrugA 0.00025 -       -      
+DrugB 1.1e-10 0.01422 -      
+DrugC 8.1e-08 0.43838 1.00000
+
+P value adjustment method: bonferroni </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pairwise.t.test</span>(</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>reduction,</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>group,</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">p.adjust.method =</span> <span class="st">"holm"</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pairwise comparisons using t tests with pooled SD 
+
+data:  dat$reduction and dat$group 
+
+      Control DrugA   DrugB  
+DrugA 0.00016 -       -      
+DrugB 1.1e-10 0.00711 -      
+DrugC 6.8e-08 0.14613 0.19878
+
+P value adjustment method: holm </code></pre>
+</div>
+</div>
+<p>보정하지 않은 결과와 보정한 결과를 비교한다.</p>
+<hr>
+</section>
+<section id="dunnett-test-개념적-구현" class="level2" data-number="12.7">
+<h2 data-number="12.7" class="anchored" data-anchor-id="dunnett-test-개념적-구현"><span class="header-section-number">12.7</span> Dunnett test 개념적 구현</h2>
+<p>기본 R에는 Dunnett test가 내장되어 있지 않다. 여러 처리군을 Control과만 비교하고 p-value를 Holm 방식으로 보정하는 간단한 예를 보자.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>p_control <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">t.test</span>(reduction <span class="sc">~</span> group, <span class="at">data =</span> <span class="fu">subset</span>(dat, group <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Control"</span>, <span class="st">"DrugA"</span>)))<span class="sc">$</span>p.value,</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">t.test</span>(reduction <span class="sc">~</span> group, <span class="at">data =</span> <span class="fu">subset</span>(dat, group <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Control"</span>, <span class="st">"DrugB"</span>)))<span class="sc">$</span>p.value,</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">t.test</span>(reduction <span class="sc">~</span> group, <span class="at">data =</span> <span class="fu">subset</span>(dat, group <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Control"</span>, <span class="st">"DrugC"</span>)))<span class="sc">$</span>p.value</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(p_control) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"DrugA-Control"</span>, <span class="st">"DrugB-Control"</span>, <span class="st">"DrugC-Control"</span>)</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>p_control</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>DrugA-Control DrugB-Control DrugC-Control 
+ 6.583195e-05  1.844380e-11  1.566622e-07 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">p.adjust</span>(p_control, <span class="at">method =</span> <span class="st">"holm"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>DrugA-Control DrugB-Control DrugC-Control 
+ 6.583195e-05  5.533139e-11  3.133244e-07 </code></pre>
+</div>
+</div>
+<p>실제 Dunnett test는 <code>multcomp</code> 패키지 등으로 수행할 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(multcomp)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">aov</span>(reduction <span class="sc">~</span> group, <span class="at">data =</span> dat)</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glht</span>(fit, <span class="at">linfct =</span> <span class="fu">mcp</span>(<span class="at">group =</span> <span class="st">"Dunnett"</span>))</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
+</section>
+<section id="fdr-보정-예제" class="level2" data-number="12.8">
+<h2 data-number="12.8" class="anchored" data-anchor-id="fdr-보정-예제"><span class="header-section-number">12.8</span> FDR 보정 예제</h2>
+<p>유전체 또는 바이오마커 연구를 가정하여 많은 p-value를 생성한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3031</span>)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>p_many <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">runif</span>(<span class="dv">950</span>, <span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">runif</span>(<span class="dv">50</span>, <span class="dv">0</span>, <span class="fl">0.01</span>)</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>p_bonf <span class="ot">&lt;-</span> <span class="fu">p.adjust</span>(p_many, <span class="at">method =</span> <span class="st">"bonferroni"</span>)</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>p_bh <span class="ot">&lt;-</span> <span class="fu">p.adjust</span>(p_many, <span class="at">method =</span> <span class="st">"BH"</span>)</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(p_many <span class="sc">&lt;</span> <span class="fl">0.05</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 96</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(p_bonf <span class="sc">&lt;</span> <span class="fl">0.05</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(p_bh <span class="sc">&lt;</span> <span class="fl">0.05</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<p>보정하지 않은 경우, Bonferroni 보정, BH 보정의 발견 수가 어떻게 다른지 비교한다.</p>
+<hr>
+</section>
+<section id="false-positive-시뮬레이션" class="level2" data-number="12.9">
+<h2 data-number="12.9" class="anchored" data-anchor-id="false-positive-시뮬레이션"><span class="header-section-number">12.9</span> False positive 시뮬레이션</h2>
+<p>모든 귀무가설이 참인 상황에서 검정을 많이 하면 false positive가 얼마나 발생하는지 시뮬레이션한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3032</span>)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>n_sim <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="dv">20</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>alpha <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>false_any <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n_sim)</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>false_any_bonf <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n_sim)</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a> <span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sim) {</span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>  pvals <span class="ot">&lt;-</span> <span class="fu">runif</span>(m, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>  false_any[s] <span class="ot">&lt;-</span> <span class="fu">any</span>(pvals <span class="sc">&lt;</span> alpha)</span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>  false_any_bonf[s] <span class="ot">&lt;-</span> <span class="fu">any</span>(<span class="fu">p.adjust</span>(pvals, <span class="at">method =</span> <span class="st">"bonferroni"</span>) <span class="sc">&lt;</span> alpha)</span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(false_any)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.644</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(false_any_bonf)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.051</code></pre>
+</div>
+</div>
+<p>이 시뮬레이션에서는 모든 p-value가 귀무가설하에서 생성되었으므로 유의한 결과는 모두 false positive이다.</p>
+<hr>
+</section>
+<section id="하위군-분석-예제" class="level2" data-number="12.10">
+<h2 data-number="12.10" class="anchored" data-anchor-id="하위군-분석-예제"><span class="header-section-number">12.10</span> 하위군 분석 예제</h2>
+<p>하위군이 많으면 우연히 유의한 결과가 나올 수 있다. 다음은 단순한 시뮬레이션이다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3033</span>)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">400</span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>treatment <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.5</span>)</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>outcome <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>subgroups <span class="ot">&lt;-</span> <span class="fu">replicate</span>(</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>  <span class="dv">12</span>,</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.5</span>)</span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>p_sub <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="dv">12</span>)</span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {</span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a>  idx <span class="ot">&lt;-</span> subgroups[, j] <span class="sc">==</span> <span class="dv">1</span></span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a>  p_sub[j] <span class="ot">&lt;-</span> <span class="fu">t.test</span>(outcome[idx] <span class="sc">~</span> treatment[idx])<span class="sc">$</span>p.value</span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a>p_sub</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 0.238557317 0.178761309 0.097098081 0.054565808 0.296439138 0.242015420
+ [7] 0.429276889 0.044832907 0.388972349 0.066974009 0.198877532 0.008299058</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">p.adjust</span>(p_sub, <span class="at">method =</span> <span class="st">"holm"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 1.00000000 1.00000000 0.77678465 0.54565808 1.00000000 1.00000000
+ [7] 1.00000000 0.49316198 1.00000000 0.60276608 1.00000000 0.09958869</code></pre>
+</div>
+</div>
+<p>전체적으로 실제 치료효과가 없더라도 여러 하위군을 탐색하면 작은 p-value가 나올 수 있다.</p>
+<hr>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./02-ch2.html" class="pagination-link" aria-label="ANOVA: 분산분석과 선형모형">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">ANOVA: 분산분석과 선형모형</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./04-ch4.html" class="pagination-link" aria-label="로지스틱 회귀 심화">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">로지스틱 회귀 심화</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

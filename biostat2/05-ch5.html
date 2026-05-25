@@ -1,0 +1,2155 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>5&nbsp; Poisson Regression과 발생률 분석 – 바이오통계 심화</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./06-ch6.html" rel="next">
+<link href="./04-ch4.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-832e3d7b6b94ddcc90a000f8fabe51a9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./05-ch5.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Poisson Regression과 발생률 분석</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">바이오통계 심화</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Contents</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-ch1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">선형모형의 재정리</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-ch2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">ANOVA: 분산분석과 선형모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-ch3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">다중비교와 오류율 보정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-ch4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">로지스틱 회귀 심화</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-ch5.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Poisson Regression과 발생률 분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-ch6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">GLM: 일반화선형모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-ch7.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">ANCOVA: 공분산 분석과 기저값 조정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-ch8.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">바이오통계심화 Chapter 11</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-ch9.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">생존자료와 Kaplan-Meier 방법</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-ch10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Cox proportional hazards model</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-ch11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">임상시험 설계와 분석 원칙</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-ch12.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Propensity Score: 관찰연구에서의 교란 조정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-ch13.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Causal Inference</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#수업-개요" id="toc-수업-개요" class="nav-link active" data-scroll-target="#수업-개요"><span class="header-section-number">5.1</span> 수업 개요</a></li>
+  <li><a href="#핵심-질문" id="toc-핵심-질문" class="nav-link" data-scroll-target="#핵심-질문"><span class="header-section-number">5.2</span> 핵심 질문</a></li>
+  <li><a href="#학습목표" id="toc-학습목표" class="nav-link" data-scroll-target="#학습목표"><span class="header-section-number">5.3</span> 학습목표</a></li>
+  <li><a href="#count-outcome의-이해" id="toc-count-outcome의-이해" class="nav-link" data-scroll-target="#count-outcome의-이해"><span class="header-section-number">6</span> Count outcome의 이해</a>
+  <ul class="collapse">
+  <li><a href="#count-outcome이란" id="toc-count-outcome이란" class="nav-link" data-scroll-target="#count-outcome이란"><span class="header-section-number">6.1</span> Count outcome이란?</a></li>
+  <li><a href="#count-rate-risk의-차이" id="toc-count-rate-risk의-차이" class="nav-link" data-scroll-target="#count-rate-risk의-차이"><span class="header-section-number">6.2</span> Count, rate, risk의 차이</a></li>
+  </ul></li>
+  <li><a href="#poisson-distribution" id="toc-poisson-distribution" class="nav-link" data-scroll-target="#poisson-distribution"><span class="header-section-number">7</span> Poisson distribution</a>
+  <ul class="collapse">
+  <li><a href="#확률질량함수" id="toc-확률질량함수" class="nav-link" data-scroll-target="#확률질량함수"><span class="header-section-number">7.1</span> 확률질량함수</a></li>
+  <li><a href="#평균과-분산" id="toc-평균과-분산" class="nav-link" data-scroll-target="#평균과-분산"><span class="header-section-number">7.2</span> 평균과 분산</a></li>
+  <li><a href="#poisson-분포가-적절한-상황" id="toc-poisson-분포가-적절한-상황" class="nav-link" data-scroll-target="#poisson-분포가-적절한-상황"><span class="header-section-number">7.3</span> Poisson 분포가 적절한 상황</a></li>
+  </ul></li>
+  <li><a href="#발생률과-person-time" id="toc-발생률과-person-time" class="nav-link" data-scroll-target="#발생률과-person-time"><span class="header-section-number">8</span> 발생률과 person-time</a>
+  <ul class="collapse">
+  <li><a href="#발생률" id="toc-발생률" class="nav-link" data-scroll-target="#발생률"><span class="header-section-number">8.1</span> 발생률</a></li>
+  <li><a href="#person-time" id="toc-person-time" class="nav-link" data-scroll-target="#person-time"><span class="header-section-number">8.2</span> Person-time</a></li>
+  <li><a href="#person-time이-필요한-이유" id="toc-person-time이-필요한-이유" class="nav-link" data-scroll-target="#person-time이-필요한-이유"><span class="header-section-number">8.3</span> Person-time이 필요한 이유</a></li>
+  </ul></li>
+  <li><a href="#poisson-regression" id="toc-poisson-regression" class="nav-link" data-scroll-target="#poisson-regression"><span class="header-section-number">9</span> Poisson regression</a>
+  <ul class="collapse">
+  <li><a href="#기본-모형" id="toc-기본-모형" class="nav-link" data-scroll-target="#기본-모형"><span class="header-section-number">9.1</span> 기본 모형</a></li>
+  <li><a href="#회귀계수와-irr" id="toc-회귀계수와-irr" class="nav-link" data-scroll-target="#회귀계수와-irr"><span class="header-section-number">9.2</span> 회귀계수와 IRR</a></li>
+  <li><a href="#이진-설명변수의-irr-해석" id="toc-이진-설명변수의-irr-해석" class="nav-link" data-scroll-target="#이진-설명변수의-irr-해석"><span class="header-section-number">9.3</span> 이진 설명변수의 IRR 해석</a></li>
+  <li><a href="#연속형-설명변수의-irr-해석" id="toc-연속형-설명변수의-irr-해석" class="nav-link" data-scroll-target="#연속형-설명변수의-irr-해석"><span class="header-section-number">9.4</span> 연속형 설명변수의 IRR 해석</a></li>
+  </ul></li>
+  <li><a href="#offset을-포함한-poisson-regression" id="toc-offset을-포함한-poisson-regression" class="nav-link" data-scroll-target="#offset을-포함한-poisson-regression"><span class="header-section-number">10</span> Offset을 포함한 Poisson regression</a>
+  <ul class="collapse">
+  <li><a href="#offset이-필요한-이유" id="toc-offset이-필요한-이유" class="nav-link" data-scroll-target="#offset이-필요한-이유"><span class="header-section-number">10.1</span> Offset이 필요한 이유</a></li>
+  <li><a href="#offset의-수학적-유도" id="toc-offset의-수학적-유도" class="nav-link" data-scroll-target="#offset의-수학적-유도"><span class="header-section-number">10.2</span> Offset의 수학적 유도</a></li>
+  <li><a href="#offset의-해석" id="toc-offset의-해석" class="nav-link" data-scroll-target="#offset의-해석"><span class="header-section-number">10.3</span> Offset의 해석</a></li>
+  </ul></li>
+  <li><a href="#poisson-regression과-logistic-regression-비교" id="toc-poisson-regression과-logistic-regression-비교" class="nav-link" data-scroll-target="#poisson-regression과-logistic-regression-비교"><span class="header-section-number">11</span> Poisson regression과 logistic regression 비교</a></li>
+  <li><a href="#overdispersion" id="toc-overdispersion" class="nav-link" data-scroll-target="#overdispersion"><span class="header-section-number">12</span> Overdispersion</a>
+  <ul class="collapse">
+  <li><a href="#overdispersion이란" id="toc-overdispersion이란" class="nav-link" data-scroll-target="#overdispersion이란"><span class="header-section-number">12.1</span> Overdispersion이란?</a></li>
+  <li><a href="#overdispersion의-원인" id="toc-overdispersion의-원인" class="nav-link" data-scroll-target="#overdispersion의-원인"><span class="header-section-number">12.2</span> Overdispersion의 원인</a></li>
+  <li><a href="#overdispersion이-문제인-이유" id="toc-overdispersion이-문제인-이유" class="nav-link" data-scroll-target="#overdispersion이-문제인-이유"><span class="header-section-number">12.3</span> Overdispersion이 문제인 이유</a></li>
+  <li><a href="#overdispersion-확인" id="toc-overdispersion-확인" class="nav-link" data-scroll-target="#overdispersion-확인"><span class="header-section-number">12.4</span> Overdispersion 확인</a></li>
+  </ul></li>
+  <li><a href="#overdispersion-대안" id="toc-overdispersion-대안" class="nav-link" data-scroll-target="#overdispersion-대안"><span class="header-section-number">13</span> Overdispersion 대안</a>
+  <ul class="collapse">
+  <li><a href="#quasi-poisson-regression" id="toc-quasi-poisson-regression" class="nav-link" data-scroll-target="#quasi-poisson-regression"><span class="header-section-number">13.1</span> Quasi-Poisson regression</a></li>
+  <li><a href="#negative-binomial-regression" id="toc-negative-binomial-regression" class="nav-link" data-scroll-target="#negative-binomial-regression"><span class="header-section-number">13.2</span> Negative binomial regression</a></li>
+  <li><a href="#quasi-poisson과-negative-binomial-비교" id="toc-quasi-poisson과-negative-binomial-비교" class="nav-link" data-scroll-target="#quasi-poisson과-negative-binomial-비교"><span class="header-section-number">13.3</span> Quasi-Poisson과 negative binomial 비교</a></li>
+  </ul></li>
+  <li><a href="#zero-inflation" id="toc-zero-inflation" class="nav-link" data-scroll-target="#zero-inflation"><span class="header-section-number">14</span> Zero inflation</a>
+  <ul class="collapse">
+  <li><a href="#zero-inflation이란" id="toc-zero-inflation이란" class="nav-link" data-scroll-target="#zero-inflation이란"><span class="header-section-number">14.1</span> Zero inflation이란?</a></li>
+  <li><a href="#구조적-0과-표본-0" id="toc-구조적-0과-표본-0" class="nav-link" data-scroll-target="#구조적-0과-표본-0"><span class="header-section-number">14.2</span> 구조적 0과 표본 0</a></li>
+  <li><a href="#zero-inflated-model" id="toc-zero-inflated-model" class="nav-link" data-scroll-target="#zero-inflated-model"><span class="header-section-number">14.3</span> Zero-inflated model</a></li>
+  </ul></li>
+  <li><a href="#r-실습" id="toc-r-실습" class="nav-link" data-scroll-target="#r-실습"><span class="header-section-number">15</span> R 실습</a>
+  <ul class="collapse">
+  <li><a href="#예제-데이터-생성" id="toc-예제-데이터-생성" class="nav-link" data-scroll-target="#예제-데이터-생성"><span class="header-section-number">15.1</span> 예제 데이터 생성</a></li>
+  <li><a href="#count-outcome-확인" id="toc-count-outcome-확인" class="nav-link" data-scroll-target="#count-outcome-확인"><span class="header-section-number">15.2</span> Count outcome 확인</a></li>
+  <li><a href="#person-time과-crude-rate" id="toc-person-time과-crude-rate" class="nav-link" data-scroll-target="#person-time과-crude-rate"><span class="header-section-number">15.3</span> Person-time과 crude rate</a></li>
+  <li><a href="#단순-poisson-regression" id="toc-단순-poisson-regression" class="nav-link" data-scroll-target="#단순-poisson-regression"><span class="header-section-number">15.4</span> 단순 Poisson regression</a></li>
+  <li><a href="#offset-포함-poisson-regression" id="toc-offset-포함-poisson-regression" class="nav-link" data-scroll-target="#offset-포함-poisson-regression"><span class="header-section-number">15.5</span> Offset 포함 Poisson regression</a></li>
+  <li><a href="#irr-해석" id="toc-irr-해석" class="nav-link" data-scroll-target="#irr-해석"><span class="header-section-number">15.6</span> IRR 해석</a></li>
+  <li><a href="#예측-사건-수와-예측-발생률" id="toc-예측-사건-수와-예측-발생률" class="nav-link" data-scroll-target="#예측-사건-수와-예측-발생률"><span class="header-section-number">15.7</span> 예측 사건 수와 예측 발생률</a></li>
+  <li><a href="#overdispersion-확인-1" id="toc-overdispersion-확인-1" class="nav-link" data-scroll-target="#overdispersion-확인-1"><span class="header-section-number">15.8</span> Overdispersion 확인</a></li>
+  <li><a href="#quasi-poisson-regression-1" id="toc-quasi-poisson-regression-1" class="nav-link" data-scroll-target="#quasi-poisson-regression-1"><span class="header-section-number">15.9</span> Quasi-Poisson regression</a></li>
+  <li><a href="#negative-binomial-regression-1" id="toc-negative-binomial-regression-1" class="nav-link" data-scroll-target="#negative-binomial-regression-1"><span class="header-section-number">15.10</span> Negative binomial regression</a></li>
+  <li><a href="#과분산이-있는-자료-생성-예시" id="toc-과분산이-있는-자료-생성-예시" class="nav-link" data-scroll-target="#과분산이-있는-자료-생성-예시"><span class="header-section-number">15.11</span> 과분산이 있는 자료 생성 예시</a></li>
+  <li><a href="#zero-inflation-간단-확인" id="toc-zero-inflation-간단-확인" class="nav-link" data-scroll-target="#zero-inflation-간단-확인"><span class="header-section-number">15.12</span> Zero inflation 간단 확인</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Poisson Regression과 발생률 분석</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="수업-개요" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="수업-개요"><span class="header-section-number">5.1</span> 수업 개요</h2>
+<p>이번 장에서는 <strong>Poisson regression</strong>을 심화 수준에서 학습한다. 지난 장에서는 이진 결과변수에 대해 로지스틱 회귀를 다루었다. 이번 장에서는 결과변수가 “사건이 몇 번 발생했는가”를 나타내는 <strong>count outcome</strong>일 때의 분석을 다룬다.</p>
+<p>의학·보건 연구에서 count outcome은 매우 흔하다.</p>
+<ul>
+<li>1년 동안 입원 횟수</li>
+<li>추적기간 중 감염 발생 횟수</li>
+<li>환자당 응급실 방문 횟수</li>
+<li>병원별 수술 후 합병증 발생 건수</li>
+<li>지역별 암 발생 건수</li>
+<li>사람-시간(person-time)당 사건 발생률</li>
+<li>의료기관별 항생제 처방 건수</li>
+<li>추적기간 중 재발 횟수</li>
+</ul>
+<p>이러한 자료는 연속형 결과변수처럼 정규분포를 가정하기 어렵고, 이진 결과변수처럼 사건 발생 여부만 보는 것도 충분하지 않다. 사건이 한 번 발생했는지뿐 아니라 <strong>몇 번 발생했는지</strong>, 그리고 <strong>얼마나 긴 시간 동안 관찰했는지</strong>가 중요하기 때문이다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv5/f1_count_rate_overview.png" class="img-fluid figure-img" style="width:90.0%"></p>
+<figcaption>Count outcome 분석은 사건 수와 관찰시간을 함께 고려한다.</figcaption>
+</figure>
+</div>
+<p>Poisson regression은 count outcome 또는 발생률(rate)을 설명변수와 연결하는 대표적인 일반화선형모형(GLM)이다. 핵심 구조는 다음과 같다.</p>
+<p><span class="math display">\[Y_i \sim Poisson(\mu_i)\]</span></p>
+<p><span class="math display">\[\log(\mu_i)
+=
+\beta_0+\beta_1X_{1i}+\cdots+\beta_pX_{pi}\]</span></p>
+<p>관찰시간이 다르면 offset을 포함한다.</p>
+<p><span class="math display">\[\log(\mu_i)
+=
+\log(Time_i)
++
+\beta_0+\beta_1X_{1i}+\cdots+\beta_pX_{pi}\]</span></p>
+<p>이번 장에서는 Poisson 분포, 발생률, person-time, offset, incidence rate ratio(IRR), overdispersion, negative binomial regression, zero inflation까지 연결하여 학습한다.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>핵심 메시지
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Poisson regression의 핵심은 사건 수를 분석하되, 필요할 때 person-time을 offset으로 포함하여 발생률 차이를 모델링한다는 점이다.</p>
+</div>
+</div>
+<hr>
+</section>
+<section id="핵심-질문" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="핵심-질문"><span class="header-section-number">5.2</span> 핵심 질문</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>질문</th>
+<th>연결되는 개념</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Count outcome은 연속형 결과와 어떻게 다른가?</td>
+<td>0 이상의 정수, 비대칭 분포</td>
+</tr>
+<tr class="even">
+<td>Poisson 분포의 핵심 가정은 무엇인가?</td>
+<td>평균 = 분산</td>
+</tr>
+<tr class="odd">
+<td>사건 수와 발생률은 어떻게 다른가?</td>
+<td>count vs rate</td>
+</tr>
+<tr class="even">
+<td>Person-time은 왜 필요한가?</td>
+<td>관찰기간 차이</td>
+</tr>
+<tr class="odd">
+<td>Offset은 무엇을 보정하는가?</td>
+<td>exposure time</td>
+</tr>
+<tr class="even">
+<td>Poisson 회귀계수는 어떻게 해석하는가?</td>
+<td>log count, log rate</td>
+</tr>
+<tr class="odd">
+<td>IRR은 무엇인가?</td>
+<td>incidence rate ratio</td>
+</tr>
+<tr class="even">
+<td>Overdispersion은 왜 문제인가?</td>
+<td>표준오차 과소추정</td>
+</tr>
+<tr class="odd">
+<td>Negative binomial regression은 언제 쓰는가?</td>
+<td>과분산</td>
+</tr>
+<tr class="even">
+<td>Zero-inflated model은 언제 고려하는가?</td>
+<td>0이 과도하게 많은 자료</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="학습목표" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="학습목표"><span class="header-section-number">5.3</span> 학습목표</h2>
+<p>이번 수업이 끝나면 학생들은 다음을 할 수 있어야 한다.</p>
+<ol type="1">
+<li>Count outcome의 특징을 설명할 수 있다.</li>
+<li>Poisson 분포의 확률질량함수, 평균, 분산을 설명할 수 있다.</li>
+<li>사건 수와 발생률의 차이를 구분할 수 있다.</li>
+<li>Person-time의 의미를 계산 예제로 설명할 수 있다.</li>
+<li>Poisson regression의 log link를 설명할 수 있다.</li>
+<li>Offset을 포함한 Poisson regression의 구조를 유도할 수 있다.</li>
+<li>회귀계수를 지수화하여 IRR로 해석할 수 있다.</li>
+<li>이진, 연속형, 범주형 설명변수의 IRR을 해석할 수 있다.</li>
+<li>Overdispersion의 원인과 진단 방법을 설명할 수 있다.</li>
+<li>Quasi-Poisson과 negative binomial regression의 차이를 설명할 수 있다.</li>
+<li>Zero inflation이 의심되는 상황을 설명할 수 있다.</li>
+<li>R에서 Poisson regression, offset, overdispersion 확인, negative binomial regression을 수행할 수 있다.</li>
+</ol>
+<hr>
+</section>
+<section id="count-outcome의-이해" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Count outcome의 이해</h1>
+<section id="count-outcome이란" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="count-outcome이란"><span class="header-section-number">6.1</span> Count outcome이란?</h2>
+<p>Count outcome은 사건이 몇 번 발생했는지를 나타내는 결과변수이다. 가능한 값은 0, 1, 2, 3과 같은 0 이상의 정수이다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>연구 상황</th>
+<th>Count outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>감염병 연구</td>
+<td>추적기간 중 감염 발생 횟수</td>
+</tr>
+<tr class="even">
+<td>보건의료 이용 연구</td>
+<td>응급실 방문 횟수</td>
+</tr>
+<tr class="odd">
+<td>암 역학</td>
+<td>지역별 암 발생 건수</td>
+</tr>
+<tr class="even">
+<td>임상연구</td>
+<td>재입원 횟수</td>
+</tr>
+<tr class="odd">
+<td>안전성 연구</td>
+<td>이상반응 발생 건수</td>
+</tr>
+<tr class="even">
+<td>치과 연구</td>
+<td>충치 개수</td>
+</tr>
+<tr class="odd">
+<td>정신건강 연구</td>
+<td>자해 시도 횟수</td>
+</tr>
+</tbody>
+</table>
+<p>Count outcome은 다음 특징을 가진다.</p>
+<ol type="1">
+<li>음수가 될 수 없다.</li>
+<li>정수값만 가진다.</li>
+<li>0이 많을 수 있다.</li>
+<li>오른쪽으로 치우친 분포가 흔하다.</li>
+<li>평균과 분산의 관계가 중요하다.</li>
+<li>관찰시간 또는 노출량 차이를 고려해야 할 수 있다.</li>
+</ol>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>일반 선형회귀의 한계
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Count outcome을 일반 선형회귀로 분석하면 예측값이 음수가 될 수 있고, 정규성·등분산성 가정이 잘 맞지 않을 수 있다.</p>
+</div>
+</div>
+<hr>
+</section>
+<section id="count-rate-risk의-차이" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="count-rate-risk의-차이"><span class="header-section-number">6.2</span> Count, rate, risk의 차이</h2>
+<p>Count, rate, risk는 모두 사건을 다루지만 서로 다르다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>개념</th>
+<th>정의</th>
+<th>예</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Count</td>
+<td>사건 발생 횟수</td>
+<td>1년 동안 감염 20건</td>
+</tr>
+<tr class="even">
+<td>Risk</td>
+<td>일정 기간 동안 적어도 한 번 사건이 발생할 확률</td>
+<td>1년 감염위험 10%</td>
+</tr>
+<tr class="odd">
+<td>Rate</td>
+<td>person-time당 사건 발생 속도</td>
+<td>100 person-years당 5건</td>
+</tr>
+</tbody>
+</table>
+<p>예를 들어 한 환자가 1년 동안 두 번 입원했고 다른 환자가 5년 동안 두 번 입원했다면 count는 같지만 rate는 다르다.</p>
+<ul>
+<li>환자 A: 2건 / 1년 = 2건 per person-year</li>
+<li>환자 B: 2건 / 5년 = 0.4건 per person-year</li>
+</ul>
+<p>따라서 추적기간이 다르면 단순한 count 비교보다 rate 비교가 더 적절하다.</p>
+<hr>
+</section>
+</section>
+<section id="poisson-distribution" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Poisson distribution</h1>
+<section id="확률질량함수" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="확률질량함수"><span class="header-section-number">7.1</span> 확률질량함수</h2>
+<p>확률변수 <span class="math inline">\(Y\)</span>가 평균 <span class="math inline">\(\lambda\)</span>인 Poisson 분포를 따른다면 다음과 같이 쓴다.</p>
+<p><span class="math display">\[Y \sim Poisson(\lambda)\]</span></p>
+<p>Poisson 분포의 확률질량함수는 다음과 같다.</p>
+<p><span class="math display">\[P(Y=y)
+=
+\frac{e^{-\lambda}\lambda^y}{y!},
+\quad
+y=0,1,2,\ldots\]</span></p>
+<p>여기서 <span class="math inline">\(\lambda\)</span>는 일정한 시간 또는 공간에서 기대되는 사건 발생 횟수이다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv5/f2_poisson_distribution.png" class="img-fluid figure-img" style="width:82.0%"></p>
+<figcaption>Poisson 분포: 평균 λ가 커질수록 분포가 오른쪽으로 이동한다.</figcaption>
+</figure>
+</div>
+<hr>
+</section>
+<section id="평균과-분산" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="평균과-분산"><span class="header-section-number">7.2</span> 평균과 분산</h2>
+<p>Poisson 분포의 가장 중요한 특징은 평균과 분산이 같다는 것이다.</p>
+<p><span class="math display">\[E(Y)=\lambda\]</span></p>
+<p><span class="math display">\[Var(Y)=\lambda\]</span></p>
+<p>따라서</p>
+<p><span class="math display">\[E(Y)=Var(Y)\]</span></p>
+<p>이다. 이를 equidispersion이라고 한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv5/f3_mean_variance_overdispersion.png" class="img-fluid figure-img" style="width:82.0%"></p>
+<figcaption>Poisson 모형의 핵심 가정: 평균과 분산이 같다.</figcaption>
+</figure>
+</div>
+<p>실제 의학 자료에서는 분산이 평균보다 큰 경우가 흔하다. 이를 overdispersion이라고 한다. Overdispersion이 있으면 일반 Poisson 회귀의 표준오차가 과소추정되어 p-value가 지나치게 작아질 수 있다.</p>
+<hr>
+</section>
+<section id="poisson-분포가-적절한-상황" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="poisson-분포가-적절한-상황"><span class="header-section-number">7.3</span> Poisson 분포가 적절한 상황</h2>
+<p>Poisson 분포는 다음 조건이 대체로 맞을 때 자연스럽다.</p>
+<ol type="1">
+<li>사건이 일정한 시간 또는 공간에서 발생한다.</li>
+<li>사건 수는 0 이상의 정수이다.</li>
+<li>같은 짧은 구간에서 두 사건이 동시에 발생할 가능성은 매우 작다.</li>
+<li>서로 다른 구간의 사건 발생이 독립적이다.</li>
+<li>사건 발생률이 관찰 단위 안에서 대체로 일정하다.</li>
+</ol>
+<p>하지만 실제 자료에서는 환자별 기저 위험이 다르거나, 사건들이 서로 독립이 아니거나, 사건 발생률이 시간에 따라 변하는 경우가 많다. 이런 경우 Poisson 모형이 과도하게 단순할 수 있다.</p>
+<hr>
+</section>
+</section>
+<section id="발생률과-person-time" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> 발생률과 person-time</h1>
+<section id="발생률" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="발생률"><span class="header-section-number">8.1</span> 발생률</h2>
+<p>발생률(rate)은 사건 수를 person-time으로 나눈 값이다.</p>
+<p><span class="math display">\[Rate
+=
+\frac{\text{Number of events}}{\text{Person-time}}\]</span></p>
+<p>예를 들어 감염 20건이 1,000 person-days 동안 발생했다면,</p>
+<p><span class="math display">\[Rate
+=
+\frac{20}{1000}
+=
+0.02
+\text{ per person-day}\]</span></p>
+<p>이는 100 person-days당 2건으로 표현할 수도 있다.</p>
+<p><span class="math display">\[0.02 \times 100 = 2\]</span></p>
+<hr>
+</section>
+<section id="person-time" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="person-time"><span class="header-section-number">8.2</span> Person-time</h2>
+<p>Person-time은 각 개인이 관찰된 시간을 합한 것이다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>환자</th>
+<th style="text-align: right;">추적기간</th>
+<th style="text-align: right;">사건 수</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A</td>
+<td style="text-align: right;">1.0년</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td>B</td>
+<td style="text-align: right;">2.5년</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td>C</td>
+<td style="text-align: right;">0.7년</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td>D</td>
+<td style="text-align: right;">3.0년</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td>E</td>
+<td style="text-align: right;">1.8년</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+<p>총 person-time은 다음과 같다.</p>
+<p><span class="math display">\[1.0+2.5+0.7+3.0+1.8=9.0
+\text{ person-years}\]</span></p>
+<p>총 사건 수는 다음과 같다.</p>
+<p><span class="math display">\[1+0+2+1+0=4\]</span></p>
+<p>발생률은 다음과 같다.</p>
+<p><span class="math display">\[Rate
+=
+\frac{4}{9.0}
+=
+0.444
+\text{ per person-year}\]</span></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv5/f4_person_time.png" class="img-fluid figure-img" style="width:82.0%"></p>
+<figcaption>Person-time: 각 대상자의 관찰시간을 합산한다.</figcaption>
+</figure>
+</div>
+<hr>
+</section>
+<section id="person-time이-필요한-이유" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="person-time이-필요한-이유"><span class="header-section-number">8.3</span> Person-time이 필요한 이유</h2>
+<p>단순 사건 수만 비교하면 노출시간이 긴 집단이 더 위험해 보일 수 있다. 예를 들어 다음 두 병원을 비교해 보자.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>병원</th>
+<th style="text-align: right;">감염 건수</th>
+<th style="text-align: right;">총 person-days</th>
+<th style="text-align: right;">발생률</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">1,000</td>
+<td style="text-align: right;">0.020</td>
+</tr>
+<tr class="even">
+<td>B</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">4,000</td>
+<td style="text-align: right;">0.010</td>
+</tr>
+</tbody>
+</table>
+<p>병원 B는 감염 건수가 더 많지만 person-time도 훨씬 크다. 발생률로 보면 병원 A가 병원 B보다 높다. 따라서 관찰시간 또는 노출량이 다르면 반드시 rate를 고려해야 한다.</p>
+<hr>
+</section>
+</section>
+<section id="poisson-regression" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Poisson regression</h1>
+<section id="기본-모형" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="기본-모형"><span class="header-section-number">9.1</span> 기본 모형</h2>
+<p><span class="math inline">\(i\)</span>번째 대상자의 count outcome을 <span class="math inline">\(Y_i\)</span>라고 하자.</p>
+<p><span class="math display">\[Y_i \sim Poisson(\mu_i)\]</span></p>
+<p>여기서 <span class="math inline">\(\mu_i\)</span>는 <span class="math inline">\(i\)</span>번째 대상자의 기대 사건 수이다. Poisson regression은 log link를 사용한다.</p>
+<p><span class="math display">\[\log(\mu_i)
+=
+\beta_0+\beta_1X_{1i}+\cdots+\beta_pX_{pi}\]</span></p>
+<p>이 식을 다시 쓰면,</p>
+<p><span class="math display">\[\mu_i
+=
+\exp(\beta_0+\beta_1X_{1i}+\cdots+\beta_pX_{pi})\]</span></p>
+<p>이다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv5/f6_log_link_positive.png" class="img-fluid figure-img" style="width:82.0%"></p>
+<figcaption>Log link는 예측 평균을 항상 양수로 만든다.</figcaption>
+</figure>
+</div>
+<p>Log link를 사용하면 기대 사건 수 <span class="math inline">\(\mu_i\)</span>가 항상 양수이다. 이는 count outcome의 특성에 잘 맞는다.</p>
+<hr>
+</section>
+<section id="회귀계수와-irr" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="회귀계수와-irr"><span class="header-section-number">9.2</span> 회귀계수와 IRR</h2>
+<p>Poisson 회귀계수 <span class="math inline">\(\beta_j\)</span>는 log count 또는 log rate의 변화량이다. 해석을 쉽게 하기 위해 지수화한다.</p>
+<p><span class="math display">\[IRR_j
+=
+e^{\beta_j}\]</span></p>
+<p>IRR은 incidence rate ratio 또는 rate ratio라고 부른다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;">IRR</th>
+<th>해석</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td>발생률 차이 없음</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1보다 큼</td>
+<td>발생률 증가</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1보다 작음</td>
+<td>발생률 감소</td>
+</tr>
+</tbody>
+</table>
+<p>예를 들어 <span class="math inline">\(IRR=1.50\)</span>이면 사건 발생률이 1.5배 높다는 뜻이다. 이는 50% 증가로 표현할 수도 있다.</p>
+<p><span class="math display">\[(1.50-1)\times 100\%=50\%\]</span></p>
+<p>반대로 <span class="math inline">\(IRR=0.70\)</span>이면 발생률이 30% 낮다는 뜻이다.</p>
+<p><span class="math display">\[(1-0.70)\times 100\%=30\%\]</span></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv5/f7_irr_forest.png" class="img-fluid figure-img" style="width:82.0%"></p>
+<figcaption>Poisson regression 결과는 IRR과 95% CI로 보고한다.</figcaption>
+</figure>
+</div>
+<hr>
+</section>
+<section id="이진-설명변수의-irr-해석" class="level2" data-number="9.3">
+<h2 data-number="9.3" class="anchored" data-anchor-id="이진-설명변수의-irr-해석"><span class="header-section-number">9.3</span> 이진 설명변수의 IRR 해석</h2>
+<p>흡연 여부가 감염 발생률과 관련 있는지 분석한다고 하자.</p>
+<p><span class="math display">\[\log(\mu)
+=
+\beta_0+\beta_1Smoking\]</span></p>
+<p>여기서</p>
+<p><span class="math display">\[Smoking=
+\begin{cases}
+1, &amp; \text{흡연자}\\
+0, &amp; \text{비흡연자}
+\end{cases}\]</span></p>
+<p>이다. 이때 <span class="math inline">\(e^{\beta_1}\)</span>은 흡연자의 사건 발생률이 비흡연자의 사건 발생률에 비해 몇 배인지 나타낸다.</p>
+<p>예를 들어 <span class="math inline">\(IRR=1.50\)</span>이면 다음처럼 해석한다.</p>
+<blockquote class="blockquote">
+<p>흡연자의 사건 발생률은 비흡연자의 1.50배이다. 즉 흡연자는 비흡연자보다 사건 발생률이 약 50% 높다.</p>
+</blockquote>
+<hr>
+</section>
+<section id="연속형-설명변수의-irr-해석" class="level2" data-number="9.4">
+<h2 data-number="9.4" class="anchored" data-anchor-id="연속형-설명변수의-irr-해석"><span class="header-section-number">9.4</span> 연속형 설명변수의 IRR 해석</h2>
+<p>나이를 설명변수로 포함한 모형을 생각하자.</p>
+<p><span class="math display">\[\log(\mu)
+=
+\beta_0+\beta_1Age\]</span></p>
+<p>이때 <span class="math inline">\(e^{\beta_1}\)</span>은 나이가 1세 증가할 때 사건 발생률이 몇 배로 변하는지를 의미한다.</p>
+<p>예를 들어 <span class="math inline">\(IRR=1.03\)</span>이면 다음처럼 해석한다.</p>
+<blockquote class="blockquote">
+<p>나이가 1세 증가할 때 사건 발생률은 1.03배, 즉 약 3% 증가한다.</p>
+</blockquote>
+<p>10세 증가당 IRR은 다음과 같다.</p>
+<p><span class="math display">\[IRR_{10-year}
+=
+(e^{\beta_1})^{10}\]</span></p>
+<p>만약 1세 증가당 IRR이 1.03이면,</p>
+<p><span class="math display">\[IRR_{10-year}=1.03^{10}=1.34\]</span></p>
+<p>이다.</p>
+<hr>
+</section>
+</section>
+<section id="offset을-포함한-poisson-regression" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Offset을 포함한 Poisson regression</h1>
+<section id="offset이-필요한-이유" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="offset이-필요한-이유"><span class="header-section-number">10.1</span> Offset이 필요한 이유</h2>
+<p>관찰기간이나 노출량이 개인마다 다르면 단순 count를 모형화하면 안 된다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>환자</th>
+<th style="text-align: right;">사건 수</th>
+<th style="text-align: right;">추적기간</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1년</td>
+</tr>
+<tr class="even">
+<td>B</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">5년</td>
+</tr>
+</tbody>
+</table>
+<p>두 환자의 사건 수는 같지만 발생률은 다르다.</p>
+<ul>
+<li>A: 2건/년</li>
+<li>B: 0.4건/년</li>
+</ul>
+<p>따라서 추적기간을 모형에 반영해야 한다.</p>
+<hr>
+</section>
+<section id="offset의-수학적-유도" class="level2" data-number="10.2">
+<h2 data-number="10.2" class="anchored" data-anchor-id="offset의-수학적-유도"><span class="header-section-number">10.2</span> Offset의 수학적 유도</h2>
+<p>기대 사건 수를 다음처럼 생각할 수 있다.</p>
+<p><span class="math display">\[\mu_i
+=
+Rate_i \times Time_i\]</span></p>
+<p>양변에 로그를 취하면,</p>
+<p><span class="math display">\[\log(\mu_i)
+=
+\log(Rate_i)+\log(Time_i)\]</span></p>
+<p>발생률의 로그를 설명변수의 선형결합으로 모델링하면,</p>
+<p><span class="math display">\[\log(Rate_i)
+=
+\beta_0+\beta_1X_{1i}+\cdots+\beta_pX_{pi}\]</span></p>
+<p>따라서,</p>
+<p><span class="math display">\[\log(\mu_i)
+=
+\log(Time_i)
++
+\beta_0+\beta_1X_{1i}+\cdots+\beta_pX_{pi}\]</span></p>
+<p>여기서 <span class="math inline">\(\log(Time_i)\)</span>가 offset이다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv5/f5_offset_derivation.png" class="img-fluid figure-img" style="width:90.0%"></p>
+<figcaption>Offset의 수학적 직관.</figcaption>
+</figure>
+</div>
+<hr>
+</section>
+<section id="offset의-해석" class="level2" data-number="10.3">
+<h2 data-number="10.3" class="anchored" data-anchor-id="offset의-해석"><span class="header-section-number">10.3</span> Offset의 해석</h2>
+<p>Offset은 회귀계수를 추정하지 않는 항이다. 즉 <span class="math inline">\(\log(Time_i)\)</span>의 계수는 1로 고정된다.</p>
+<p><span class="math display">\[\log(\mu_i)
+=
+1 \times \log(Time_i)
++
+\mathbf{x}_i^\top\boldsymbol{\beta}\]</span></p>
+<p>R에서는 다음과 같이 쓴다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glm</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  count <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> <span class="fu">offset</span>(<span class="fu">log</span>(time)),</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> poisson,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Offset 기억하기
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Offset은 “시간이 길수록 사건 수가 더 많아질 수 있다”는 사실을 모형에 반영한다. Offset을 넣으면 count가 아니라 rate를 비교하는 모형이 된다.</p>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="poisson-regression과-logistic-regression-비교" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Poisson regression과 logistic regression 비교</h1>
+<p>Poisson regression과 logistic regression은 모두 GLM이지만 결과변수와 link function이 다르다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>특징</th>
+<th>Logistic regression</th>
+<th>Poisson regression</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>결과변수</td>
+<td>이진 결과</td>
+<td>사건 수</td>
+</tr>
+<tr class="even">
+<td>분포</td>
+<td>Bernoulli/Binomial</td>
+<td>Poisson</td>
+</tr>
+<tr class="odd">
+<td>평균</td>
+<td>사건확률 <span class="math inline">\(p\)</span></td>
+<td>기대 사건 수 <span class="math inline">\(\mu\)</span></td>
+</tr>
+<tr class="even">
+<td>link</td>
+<td>logit</td>
+<td>log</td>
+</tr>
+<tr class="odd">
+<td>지수화 계수</td>
+<td>OR</td>
+<td>IRR</td>
+</tr>
+<tr class="even">
+<td>주 사용 상황</td>
+<td>위험요인, 이진 endpoint</td>
+<td>발생률, count outcome</td>
+</tr>
+<tr class="odd">
+<td>노출시간 반영</td>
+<td>보통 별도 처리</td>
+<td>offset으로 반영</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="overdispersion" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> Overdispersion</h1>
+<section id="overdispersion이란" class="level2" data-number="12.1">
+<h2 data-number="12.1" class="anchored" data-anchor-id="overdispersion이란"><span class="header-section-number">12.1</span> Overdispersion이란?</h2>
+<p>Poisson 분포는 평균과 분산이 같다고 가정한다.</p>
+<p><span class="math display">\[E(Y)=Var(Y)\]</span></p>
+<p>그러나 실제 자료에서는 분산이 평균보다 큰 경우가 많다.</p>
+<p><span class="math display">\[Var(Y)&gt;E(Y)\]</span></p>
+<p>이를 overdispersion이라고 한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv5/f8_overdispersion_residuals.png" class="img-fluid figure-img" style="width:92.0%"></p>
+<figcaption>Overdispersion은 표준오차와 p-value를 왜곡할 수 있다.</figcaption>
+</figure>
+</div>
+<hr>
+</section>
+<section id="overdispersion의-원인" class="level2" data-number="12.2">
+<h2 data-number="12.2" class="anchored" data-anchor-id="overdispersion의-원인"><span class="header-section-number">12.2</span> Overdispersion의 원인</h2>
+<p>Overdispersion은 여러 이유로 발생한다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>원인</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>환자 간 이질성</td>
+<td>개인별 기저위험이 다름</td>
+</tr>
+<tr class="even">
+<td>누락된 설명변수</td>
+<td>중요한 위험요인이 모형에 없음</td>
+</tr>
+<tr class="odd">
+<td>사건 간 상관</td>
+<td>한 번 사건이 발생하면 다음 사건 위험이 달라짐</td>
+</tr>
+<tr class="even">
+<td>군집자료</td>
+<td>같은 병원 또는 지역 내 관측값이 비슷함</td>
+</tr>
+<tr class="odd">
+<td>Zero inflation</td>
+<td>사건이 전혀 발생할 수 없는 구조적 0이 많음</td>
+</tr>
+<tr class="even">
+<td>잘못된 시간 구조</td>
+<td>발생률이 시간에 따라 변함</td>
+</tr>
+</tbody>
+</table>
+<p>예를 들어 응급실 방문 횟수는 환자의 만성질환, 접근성, 사회경제적 요인에 따라 크게 달라진다. 이런 이질성이 충분히 설명되지 않으면 분산이 Poisson 가정보다 커질 수 있다.</p>
+<hr>
+</section>
+<section id="overdispersion이-문제인-이유" class="level2" data-number="12.3">
+<h2 data-number="12.3" class="anchored" data-anchor-id="overdispersion이-문제인-이유"><span class="header-section-number">12.3</span> Overdispersion이 문제인 이유</h2>
+<p>Overdispersion이 있는데 일반 Poisson regression을 사용하면 회귀계수 자체는 비교적 비슷할 수 있지만 표준오차가 과소추정될 수 있다. 그러면 다음 문제가 생긴다.</p>
+<ol type="1">
+<li>p-value가 실제보다 작아질 수 있다.</li>
+<li>신뢰구간이 지나치게 좁아질 수 있다.</li>
+<li>통계적으로 유의하다고 잘못 결론낼 수 있다.</li>
+<li>모형 적합도가 과도하게 좋아 보일 수 있다.</li>
+</ol>
+<hr>
+</section>
+<section id="overdispersion-확인" class="level2" data-number="12.4">
+<h2 data-number="12.4" class="anchored" data-anchor-id="overdispersion-확인"><span class="header-section-number">12.4</span> Overdispersion 확인</h2>
+<p>간단한 진단 지표는 Pearson chi-square를 자유도로 나눈 값이다.</p>
+<p><span class="math display">\[\hat{\phi}
+=
+\frac{
+\sum r_{P,i}^2
+}{
+df
+}\]</span></p>
+<p>여기서 <span class="math inline">\(r_{P,i}\)</span>는 Pearson residual이다.</p>
+<p>대략적으로</p>
+<ul>
+<li><span class="math inline">\(\hat{\phi}\approx 1\)</span>: Poisson dispersion이 적절</li>
+<li><span class="math inline">\(\hat{\phi}&gt;1.5\)</span> 또는 <span class="math inline">\(2\)</span>: overdispersion 의심</li>
+<li><span class="math inline">\(\hat{\phi}&lt;1\)</span>: underdispersion 가능</li>
+</ul>
+<p>이다. 기준은 절대적이지 않으며 연구 상황과 표본 크기를 함께 고려해야 한다.</p>
+<hr>
+</section>
+</section>
+<section id="overdispersion-대안" class="level1" data-number="13">
+<h1 data-number="13"><span class="header-section-number">13</span> Overdispersion 대안</h1>
+<section id="quasi-poisson-regression" class="level2" data-number="13.1">
+<h2 data-number="13.1" class="anchored" data-anchor-id="quasi-poisson-regression"><span class="header-section-number">13.1</span> Quasi-Poisson regression</h2>
+<p>Quasi-Poisson은 평균 구조는 Poisson과 동일하게 유지하되 분산을 다음처럼 허용한다.</p>
+<p><span class="math display">\[Var(Y_i)=\phi \mu_i\]</span></p>
+<p>여기서 <span class="math inline">\(\phi\)</span>는 dispersion parameter이다. <span class="math inline">\(\phi&gt;1\)</span>이면 overdispersion을 의미한다.</p>
+<p>Quasi-Poisson은 회귀계수 추정값은 Poisson과 같지만 표준오차를 조정한다. 따라서 p-value와 신뢰구간이 달라진다.</p>
+<hr>
+</section>
+<section id="negative-binomial-regression" class="level2" data-number="13.2">
+<h2 data-number="13.2" class="anchored" data-anchor-id="negative-binomial-regression"><span class="header-section-number">13.2</span> Negative binomial regression</h2>
+<p>Negative binomial regression은 Poisson보다 더 큰 분산을 허용하는 count model이다. 흔히 다음과 같은 분산 구조를 사용한다.</p>
+<p><span class="math display">\[Var(Y_i)
+=
+\mu_i+\alpha\mu_i^2\]</span></p>
+<p>여기서 <span class="math inline">\(\alpha&gt;0\)</span>이면 overdispersion이 존재한다. Negative binomial은 평균이 커질수록 분산이 더 빠르게 증가할 수 있어 환자 간 이질성이 큰 count 자료에 유용하다.</p>
+<hr>
+</section>
+<section id="quasi-poisson과-negative-binomial-비교" class="level2" data-number="13.3">
+<h2 data-number="13.3" class="anchored" data-anchor-id="quasi-poisson과-negative-binomial-비교"><span class="header-section-number">13.3</span> Quasi-Poisson과 negative binomial 비교</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>구분</th>
+<th>Quasi-Poisson</th>
+<th>Negative binomial</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>평균 구조</td>
+<td>log link</td>
+<td>log link</td>
+</tr>
+<tr class="even">
+<td>분산 구조</td>
+<td><span class="math inline">\(\phi\mu\)</span></td>
+<td><span class="math inline">\(\mu+\alpha\mu^2\)</span></td>
+</tr>
+<tr class="odd">
+<td>likelihood</td>
+<td>명확한 likelihood 없음</td>
+<td>likelihood 기반</td>
+</tr>
+<tr class="even">
+<td>AIC 비교</td>
+<td>일반적으로 적절하지 않음</td>
+<td>가능</td>
+</tr>
+<tr class="odd">
+<td>주 효과</td>
+<td>표준오차 조정</td>
+<td>평균과 분산 구조 모두 반영</td>
+</tr>
+<tr class="even">
+<td>R 함수</td>
+<td><code>glm(..., quasipoisson)</code></td>
+<td><code>MASS::glm.nb()</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="zero-inflation" class="level1" data-number="14">
+<h1 data-number="14"><span class="header-section-number">14</span> Zero inflation</h1>
+<section id="zero-inflation이란" class="level2" data-number="14.1">
+<h2 data-number="14.1" class="anchored" data-anchor-id="zero-inflation이란"><span class="header-section-number">14.1</span> Zero inflation이란?</h2>
+<p>Zero inflation은 관측된 0의 개수가 일반 Poisson 분포가 예측하는 것보다 훨씬 많은 경우를 말한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv5/f9_zero_inflation.png" class="img-fluid figure-img" style="width:82.0%"></p>
+<figcaption>Zero inflation: 0이 Poisson 모형보다 과도하게 많은 경우.</figcaption>
+</figure>
+</div>
+<p>예를 들어 병원 방문 횟수 자료에서 많은 사람들이 구조적으로 병원 방문 가능성이 거의 없고, 일부 사람들만 방문 횟수가 발생한다면 0이 과도하게 많을 수 있다.</p>
+<hr>
+</section>
+<section id="구조적-0과-표본-0" class="level2" data-number="14.2">
+<h2 data-number="14.2" class="anchored" data-anchor-id="구조적-0과-표본-0"><span class="header-section-number">14.2</span> 구조적 0과 표본 0</h2>
+<p>0은 두 종류로 생각할 수 있다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>0의 유형</th>
+<th>의미</th>
+<th>예</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>구조적 0</td>
+<td>사건이 발생할 가능성 자체가 거의 없음</td>
+<td>임신 가능성이 없는 사람의 임신 횟수</td>
+</tr>
+<tr class="even">
+<td>표본 0</td>
+<td>가능성은 있지만 관찰기간에 발생하지 않음</td>
+<td>감염 가능성은 있지만 추적기간 중 감염 없음</td>
+</tr>
+</tbody>
+</table>
+<p>Zero-inflated model은 이 두 과정을 분리해 모델링하려는 접근이다.</p>
+<hr>
+</section>
+<section id="zero-inflated-model" class="level2" data-number="14.3">
+<h2 data-number="14.3" class="anchored" data-anchor-id="zero-inflated-model"><span class="header-section-number">14.3</span> Zero-inflated model</h2>
+<p>Zero-inflated Poisson model은 대략 두 부분으로 구성된다.</p>
+<ol type="1">
+<li>구조적 0이 될 확률을 모델링하는 부분</li>
+<li>사건 수를 Poisson 분포로 모델링하는 부분</li>
+</ol>
+<p>실무에서는 zero inflation이 의심되면 다음을 먼저 확인한다.</p>
+<ul>
+<li>0이 많은 것이 연구 설계상 자연스러운가?</li>
+<li>관찰기간이 너무 짧아 0이 많은가?</li>
+<li>중요한 설명변수를 빠뜨린 것은 아닌가?</li>
+<li>negative binomial으로 충분히 설명되는가?</li>
+<li>zero-inflated model 해석이 연구질문에 맞는가?</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="r-실습" class="level1" data-number="15">
+<h1 data-number="15"><span class="header-section-number">15</span> R 실습</h1>
+<section id="예제-데이터-생성" class="level2" data-number="15.1">
+<h2 data-number="15.1" class="anchored" data-anchor-id="예제-데이터-생성"><span class="header-section-number">15.1</span> 예제 데이터 생성</h2>
+<p>재입원 횟수를 count outcome으로 하는 가상 자료를 생성한다. 대상자마다 추적기간이 다르므로 offset을 사용한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">5050</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">800</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>age <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">62</span>, <span class="at">sd =</span> <span class="dv">12</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>female <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="fl">0.52</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>comorbidity <span class="ot">&lt;-</span> <span class="fu">rpois</span>(n, <span class="at">lambda =</span> <span class="dv">2</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>treatment <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="fl">0.45</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>followup <span class="ot">&lt;-</span> <span class="fu">runif</span>(n, <span class="at">min =</span> <span class="fl">0.3</span>, <span class="at">max =</span> <span class="fl">3.0</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>log_rate <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">1.4</span> <span class="sc">+</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.025</span> <span class="sc">*</span> age <span class="sc">-</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.15</span> <span class="sc">*</span> female <span class="sc">+</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.22</span> <span class="sc">*</span> comorbidity <span class="sc">-</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.35</span> <span class="sc">*</span> treatment</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>rate <span class="ot">&lt;-</span> <span class="fu">exp</span>(log_rate)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">&lt;-</span> rate <span class="sc">*</span> followup</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>readmission <span class="ot">&lt;-</span> <span class="fu">rpois</span>(n, <span class="at">lambda =</span> mu)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">readmission =</span> readmission,</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">followup =</span> followup,</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">age =</span> age,</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">female =</span> female,</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">comorbidity =</span> comorbidity,</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">treatment =</span> treatment</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  readmission  followup      age female comorbidity treatment
+1           5 1.7561074 58.29240      0           2         0
+2           0 1.7473946 59.81508      1           2         1
+3           5 2.4178272 57.93065      0           5         1
+4           0 0.5530772 72.60867      1           4         0
+5           0 2.7395735 75.45116      1           1         1
+6           1 1.0509169 52.76842      0           4         1</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  readmission        followup           age            female      
+ Min.   : 0.000   Min.   :0.3024   Min.   :20.75   Min.   :0.0000  
+ 1st Qu.: 1.000   1st Qu.:1.0177   1st Qu.:53.80   1st Qu.:0.0000  
+ Median : 2.000   Median :1.6527   Median :62.40   Median :1.0000  
+ Mean   : 2.774   Mean   :1.6704   Mean   :62.42   Mean   :0.5225  
+ 3rd Qu.: 4.000   3rd Qu.:2.3790   3rd Qu.:70.61   3rd Qu.:1.0000  
+ Max.   :24.000   Max.   :2.9986   Max.   :95.37   Max.   :1.0000  
+  comorbidity      treatment     
+ Min.   :0.000   Min.   :0.0000  
+ 1st Qu.:1.000   1st Qu.:0.0000  
+ Median :2.000   Median :0.0000  
+ Mean   :1.981   Mean   :0.4587  
+ 3rd Qu.:3.000   3rd Qu.:1.0000  
+ Max.   :7.000   Max.   :1.0000  </code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="count-outcome-확인" class="level2" data-number="15.2">
+<h2 data-number="15.2" class="anchored" data-anchor-id="count-outcome-확인"><span class="header-section-number">15.2</span> Count outcome 확인</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dat<span class="sc">$</span>readmission)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  24 
+137 164 163 115  62  48  38  24  17  13   3   3   6   2   1   1   1   1   1 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(dat<span class="sc">$</span>readmission)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2.77375</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(dat<span class="sc">$</span>readmission)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 7.484416</code></pre>
+</div>
+</div>
+<p>히스토그램을 그린다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>readmission,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="fu">max</span>(dat<span class="sc">$</span>readmission) <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">by =</span> <span class="dv">1</span>),</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Distribution of readmission counts"</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Number of readmissions"</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="05-ch5_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="person-time과-crude-rate" class="level2" data-number="15.3">
+<h2 data-number="15.3" class="anchored" data-anchor-id="person-time과-crude-rate"><span class="header-section-number">15.3</span> Person-time과 crude rate</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>total_events <span class="ot">&lt;-</span> <span class="fu">sum</span>(dat<span class="sc">$</span>readmission)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>total_time <span class="ot">&lt;-</span> <span class="fu">sum</span>(dat<span class="sc">$</span>followup)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>crude_rate <span class="ot">&lt;-</span> total_events <span class="sc">/</span> total_time</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>total_events</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2219</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>total_time</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1336.29</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>crude_rate</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.660568</code></pre>
+</div>
+</div>
+<p>100 person-years당 발생률로 표현한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>crude_rate <span class="sc">*</span> <span class="dv">100</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 166.0568</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="단순-poisson-regression" class="level2" data-number="15.4">
+<h2 data-number="15.4" class="anchored" data-anchor-id="단순-poisson-regression"><span class="header-section-number">15.4</span> 단순 Poisson regression</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>fit_pois_crude <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  readmission <span class="sc">~</span> treatment,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> poisson</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_pois_crude)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = readmission ~ treatment, family = poisson, data = dat)
+
+Coefficients:
+            Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)  1.15838    0.02693  43.016  &lt; 2e-16 ***
+treatment   -0.33034    0.04377  -7.547 4.44e-14 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 1973.4  on 799  degrees of freedom
+Residual deviance: 1915.2  on 798  degrees of freedom
+AIC: 3820.3
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(fit_pois_crude))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept)   treatment 
+  3.1847575   0.7186821 </code></pre>
+</div>
+</div>
+<p>이 모형은 추적기간 차이를 반영하지 않는다. 추적기간이 개인마다 다르면 offset을 포함한 모형이 더 적절하다.</p>
+<hr>
+</section>
+<section id="offset-포함-poisson-regression" class="level2" data-number="15.5">
+<h2 data-number="15.5" class="anchored" data-anchor-id="offset-포함-poisson-regression"><span class="header-section-number">15.5</span> Offset 포함 Poisson regression</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>fit_pois <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  readmission <span class="sc">~</span> treatment <span class="sc">+</span> age <span class="sc">+</span> female <span class="sc">+</span> comorbidity <span class="sc">+</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">offset</span>(<span class="fu">log</span>(followup)),</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> poisson</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_pois)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = readmission ~ treatment + age + female + comorbidity + 
+    offset(log(followup)), family = poisson, data = dat)
+
+Coefficients:
+             Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept) -1.465566   0.122002 -12.013  &lt; 2e-16 ***
+treatment   -0.354203   0.043821  -8.083 6.33e-16 ***
+age          0.026599   0.001675  15.876  &lt; 2e-16 ***
+female      -0.132057   0.042866  -3.081  0.00207 ** 
+comorbidity  0.213067   0.014590  14.603  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 1433.18  on 799  degrees of freedom
+Residual deviance:  851.77  on 795  degrees of freedom
+AIC: 2762.9
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+</div>
+<p>IRR table을 만든다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>irr_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">term =</span> <span class="fu">names</span>(<span class="fu">coef</span>(fit_pois)),</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">IRR =</span> <span class="fu">exp</span>(<span class="fu">coef</span>(fit_pois)),</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">exp</span>(<span class="fu">confint</span>(fit_pois)),</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">row.names =</span> <span class="cn">NULL</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(irr_table) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"term"</span>, <span class="st">"IRR"</span>, <span class="st">"CI_lower"</span>, <span class="st">"CI_upper"</span>)</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>irr_table</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         term       IRR  CI_lower  CI_upper
+1 (Intercept) 0.2309472 0.1816558 0.2930575
+2   treatment 0.7017327 0.6437775 0.7644500
+3         age 1.0269563 1.0235907 1.0303359
+4      female 0.8762915 0.8056379 0.9530718
+5 comorbidity 1.2374670 1.2025014 1.2732837</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="irr-해석" class="level2" data-number="15.6">
+<h2 data-number="15.6" class="anchored" data-anchor-id="irr-해석"><span class="header-section-number">15.6</span> IRR 해석</h2>
+<p><code>treatment</code>의 IRR이 0.70이라고 하면 다음처럼 해석한다.</p>
+<blockquote class="blockquote">
+<p>나이, 성별, 동반질환 수, 추적기간을 고려했을 때 치료군의 재입원 발생률은 대조군의 0.70배였다. 즉 치료군의 재입원 발생률은 약 30% 낮았다.</p>
+</blockquote>
+<p><code>comorbidity</code>의 IRR이 1.25라면 다음처럼 해석한다.</p>
+<blockquote class="blockquote">
+<p>동반질환 수가 1개 증가할 때 재입원 발생률은 약 25% 증가하였다.</p>
+</blockquote>
+<hr>
+</section>
+<section id="예측-사건-수와-예측-발생률" class="level2" data-number="15.7">
+<h2 data-number="15.7" class="anchored" data-anchor-id="예측-사건-수와-예측-발생률"><span class="header-section-number">15.7</span> 예측 사건 수와 예측 발생률</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>pred_count <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  fit_pois,</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"response"</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dat[, <span class="fu">c</span>(<span class="st">"readmission"</span>, <span class="st">"followup"</span>, <span class="st">"pred_count"</span>)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  readmission  followup pred_count
+1           5 1.7561074   2.927667
+2           0 1.7473946   1.865399
+3           5 2.4178272   5.308717
+4           0 0.5530772   1.810727
+5           0 2.7395735   3.582261
+6           1 1.0509169   1.625419</code></pre>
+</div>
+</div>
+<p><code>type="response"</code>는 기대 사건 수를 반환한다. 예측 발생률은 예측 사건 수를 추적기간으로 나누어 계산할 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>pred_rate <span class="ot">&lt;-</span> dat<span class="sc">$</span>pred_count <span class="sc">/</span> dat<span class="sc">$</span>followup</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dat<span class="sc">$</span>pred_rate)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.3682  1.0619  1.4471  1.6577  1.9515  7.5222 </code></pre>
+</div>
+</div>
+<p>특정 환자에 대한 예측을 해보자.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>new_patient <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">treatment =</span> <span class="dv">1</span>,</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">age =</span> <span class="dv">70</span>,</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">female =</span> <span class="dv">0</span>,</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">comorbidity =</span> <span class="dv">3</span>,</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">followup =</span> <span class="dv">2</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>  fit_pois,</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">newdata =</span> new_patient,</span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"response"</span></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       1 
+3.953225 </code></pre>
+</div>
+</div>
+<p>이는 2년 추적기간 동안의 기대 재입원 횟수이다.</p>
+<hr>
+</section>
+<section id="overdispersion-확인-1" class="level2" data-number="15.8">
+<h2 data-number="15.8" class="anchored" data-anchor-id="overdispersion-확인-1"><span class="header-section-number">15.8</span> Overdispersion 확인</h2>
+<p>Pearson residual을 이용한 dispersion ratio를 계산한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>pearson_res <span class="ot">&lt;-</span> <span class="fu">residuals</span>(fit_pois, <span class="at">type =</span> <span class="st">"pearson"</span>)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>dispersion_ratio <span class="ot">&lt;-</span> <span class="fu">sum</span>(pearson_res<span class="sc">^</span><span class="dv">2</span>) <span class="sc">/</span> fit_pois<span class="sc">$</span>df.residual</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>dispersion_ratio</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.9576783</code></pre>
+</div>
+</div>
+<p>값이 1보다 훨씬 크면 overdispersion을 의심한다.</p>
+<hr>
+</section>
+<section id="quasi-poisson-regression-1" class="level2" data-number="15.9">
+<h2 data-number="15.9" class="anchored" data-anchor-id="quasi-poisson-regression-1"><span class="header-section-number">15.9</span> Quasi-Poisson regression</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>fit_quasi <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  readmission <span class="sc">~</span> treatment <span class="sc">+</span> age <span class="sc">+</span> female <span class="sc">+</span> comorbidity <span class="sc">+</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">offset</span>(<span class="fu">log</span>(followup)),</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat,</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> quasipoisson</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_quasi)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = readmission ~ treatment + age + female + comorbidity + 
+    offset(log(followup)), family = quasipoisson, data = dat)
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -1.46557    0.11939 -12.275  &lt; 2e-16 ***
+treatment   -0.35420    0.04288  -8.260 6.08e-16 ***
+age          0.02660    0.00164  16.223  &lt; 2e-16 ***
+female      -0.13206    0.04195  -3.148  0.00171 ** 
+comorbidity  0.21307    0.01428  14.922  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for quasipoisson family taken to be 0.9576783)
+
+    Null deviance: 1433.18  on 799  degrees of freedom
+Residual deviance:  851.77  on 795  degrees of freedom
+AIC: NA
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+</div>
+<p>Poisson과 quasi-Poisson의 계수와 표준오차를 비교한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">summary</span>(fit_pois))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               Estimate  Std. Error    z value     Pr(&gt;|z|)
+(Intercept) -1.46556633 0.122002227 -12.012619 3.050276e-33
+treatment   -0.35420268 0.043821359  -8.082878 6.325609e-16
+age          0.02659934 0.001675489  15.875565 9.356465e-57
+female      -0.13205653 0.042866135  -3.080673 2.065337e-03
+comorbidity  0.21306654 0.014590359  14.603242 2.678004e-48</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">summary</span>(fit_quasi))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               Estimate  Std. Error    t value     Pr(&gt;|t|)
+(Intercept) -1.46556633 0.119392649 -12.275181 7.677801e-32
+treatment   -0.35420268 0.042884038  -8.259546 6.084300e-16
+age          0.02659934 0.001639651  16.222559 2.438153e-51
+female      -0.13205653 0.041949246  -3.148007 1.705250e-03
+comorbidity  0.21306654 0.014278277  14.922427 1.413601e-44</code></pre>
+</div>
+</div>
+<p>Quasi-Poisson은 주로 표준오차를 조정한다.</p>
+<hr>
+</section>
+<section id="negative-binomial-regression-1" class="level2" data-number="15.10">
+<h2 data-number="15.10" class="anchored" data-anchor-id="negative-binomial-regression-1"><span class="header-section-number">15.10</span> Negative binomial regression</h2>
+<p><code>MASS</code> 패키지가 설치되어 있으면 negative binomial regression을 수행할 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MASS)</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>fit_nb <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  readmission <span class="sc">~</span> treatment <span class="sc">+</span> age <span class="sc">+</span> female <span class="sc">+</span> comorbidity <span class="sc">+</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">offset</span>(<span class="fu">log</span>(followup)),</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_nb)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm.nb(formula = readmission ~ treatment + age + female + comorbidity + 
+    offset(log(followup)), data = dat, init.theta = 14819.50969, 
+    link = log)
+
+Coefficients:
+             Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept) -1.465575   0.122022 -12.011  &lt; 2e-16 ***
+treatment   -0.354201   0.043828  -8.082 6.39e-16 ***
+age          0.026600   0.001676  15.873  &lt; 2e-16 ***
+female      -0.132056   0.042872  -3.080  0.00207 ** 
+comorbidity  0.213065   0.014593  14.601  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for Negative Binomial(14819.51) family taken to be 1)
+
+    Null deviance: 1432.88  on 799  degrees of freedom
+Residual deviance:  851.62  on 795  degrees of freedom
+AIC: 2764.9
+
+Number of Fisher Scoring iterations: 1
+
+              Theta:  14820 
+          Std. Err.:  109979 
+Warning while fitting theta: iteration limit reached 
+
+ 2 x log-likelihood:  -2752.869 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(fit_nb))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept)   treatment         age      female comorbidity 
+  0.2309452   0.7017337   1.0269564   0.8762915   1.2374652 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">confint</span>(fit_nb))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                2.5 %    97.5 %
+(Intercept) 0.1816471 0.2930660
+treatment   0.6437706 0.7644604
+age         1.0235903 1.0303367
+female      0.8056283 0.9530834
+comorbidity 1.2024940 1.2732880</code></pre>
+</div>
+</div>
+<p>Poisson과 negative binomial의 AIC를 비교한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(fit_pois, fit_nb)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         df      AIC
+fit_pois  5 2762.864
+fit_nb    6 2764.869</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="과분산이-있는-자료-생성-예시" class="level2" data-number="15.11">
+<h2 data-number="15.11" class="anchored" data-anchor-id="과분산이-있는-자료-생성-예시"><span class="header-section-number">15.11</span> 과분산이 있는 자료 생성 예시</h2>
+<p>negative binomial 자료를 생성해 Poisson과 비교한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">5051</span>)</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>mu_over <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="fl">1.2</span> <span class="sc">+</span> <span class="fl">0.03</span> <span class="sc">*</span> age <span class="sc">+</span> <span class="fl">0.25</span> <span class="sc">*</span> comorbidity) <span class="sc">*</span> followup</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>readmission_over <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">rnegbin</span>(</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> n,</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">mu =</span> mu_over,</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">theta =</span> <span class="fl">1.2</span></span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>dat_over <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">readmission =</span> readmission_over,</span>
+<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">followup =</span> followup,</span>
+<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">age =</span> age,</span>
+<span id="cb51-15"><a href="#cb51-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">female =</span> female,</span>
+<span id="cb51-16"><a href="#cb51-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">comorbidity =</span> comorbidity,</span>
+<span id="cb51-17"><a href="#cb51-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">treatment =</span> treatment</span>
+<span id="cb51-18"><a href="#cb51-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb51-19"><a href="#cb51-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-20"><a href="#cb51-20" aria-hidden="true" tabindex="-1"></a>fit_over_pois <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb51-21"><a href="#cb51-21" aria-hidden="true" tabindex="-1"></a>  readmission <span class="sc">~</span> treatment <span class="sc">+</span> age <span class="sc">+</span> female <span class="sc">+</span> comorbidity <span class="sc">+</span></span>
+<span id="cb51-22"><a href="#cb51-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">offset</span>(<span class="fu">log</span>(followup)),</span>
+<span id="cb51-23"><a href="#cb51-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat_over,</span>
+<span id="cb51-24"><a href="#cb51-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> poisson</span>
+<span id="cb51-25"><a href="#cb51-25" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb51-26"><a href="#cb51-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-27"><a href="#cb51-27" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">residuals</span>(fit_over_pois, <span class="at">type =</span> <span class="st">"pearson"</span>)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">/</span></span>
+<span id="cb51-28"><a href="#cb51-28" aria-hidden="true" tabindex="-1"></a>  fit_over_pois<span class="sc">$</span>df.residual</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 6.487002</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="zero-inflation-간단-확인" class="level2" data-number="15.12">
+<h2 data-number="15.12" class="anchored" data-anchor-id="zero-inflation-간단-확인"><span class="header-section-number">15.12</span> Zero inflation 간단 확인</h2>
+<p>관측된 0의 비율과 Poisson 모형이 예측한 0의 비율을 비교한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>observed_zero <span class="ot">&lt;-</span> <span class="fu">mean</span>(dat<span class="sc">$</span>readmission <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>predicted_zero <span class="ot">&lt;-</span> <span class="fu">mean</span>(</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dpois</span>(<span class="dv">0</span>, <span class="at">lambda =</span> <span class="fu">fitted</span>(fit_pois))</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>observed_zero</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.17125</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>predicted_zero</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1733799</code></pre>
+</div>
+</div>
+<p>관측된 0이 예측된 0보다 훨씬 많으면 zero inflation을 의심할 수 있다. 다만 이 차이만으로 zero-inflated model을 바로 선택해서는 안 된다.</p>
+<hr>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./04-ch4.html" class="pagination-link" aria-label="로지스틱 회귀 심화">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">로지스틱 회귀 심화</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./06-ch6.html" class="pagination-link" aria-label="GLM: 일반화선형모형">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">GLM: 일반화선형모형</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

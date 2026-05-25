@@ -1,0 +1,2099 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>12&nbsp; Propensity Score: 관찰연구에서의 교란 조정 – 바이오통계 심화</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./13-ch13.html" rel="next">
+<link href="./11-ch11.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-832e3d7b6b94ddcc90a000f8fabe51a9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./12-ch12.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Propensity Score: 관찰연구에서의 교란 조정</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">바이오통계 심화</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Contents</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-ch1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">선형모형의 재정리</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-ch2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">ANOVA: 분산분석과 선형모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-ch3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">다중비교와 오류율 보정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-ch4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">로지스틱 회귀 심화</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-ch5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Poisson Regression과 발생률 분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-ch6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">GLM: 일반화선형모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-ch7.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">ANCOVA: 공분산 분석과 기저값 조정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-ch8.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">반복측정 분산분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-ch9.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">생존자료와 Kaplan-Meier 방법</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-ch10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Cox proportional hazards model</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-ch11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">임상시험 설계와 분석 원칙</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-ch12.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Propensity Score: 관찰연구에서의 교란 조정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-ch13.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Causal Inference</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#수업-개요" id="toc-수업-개요" class="nav-link active" data-scroll-target="#수업-개요"><span class="header-section-number">12.1</span> 수업 개요</a></li>
+  <li><a href="#핵심-질문" id="toc-핵심-질문" class="nav-link" data-scroll-target="#핵심-질문"><span class="header-section-number">12.2</span> 핵심 질문</a></li>
+  <li><a href="#학습목표" id="toc-학습목표" class="nav-link" data-scroll-target="#학습목표"><span class="header-section-number">12.3</span> 학습목표</a></li>
+  <li><a href="#관찰연구와-교란" id="toc-관찰연구와-교란" class="nav-link" data-scroll-target="#관찰연구와-교란"><span class="header-section-number">13</span> 관찰연구와 교란</a>
+  <ul class="collapse">
+  <li><a href="#관찰연구에서-치료-배정은-무작위가-아니다" id="toc-관찰연구에서-치료-배정은-무작위가-아니다" class="nav-link" data-scroll-target="#관찰연구에서-치료-배정은-무작위가-아니다"><span class="header-section-number">13.1</span> 관찰연구에서 치료 배정은 무작위가 아니다</a></li>
+  <li><a href="#교란변수의-조건" id="toc-교란변수의-조건" class="nav-link" data-scroll-target="#교란변수의-조건"><span class="header-section-number">13.2</span> 교란변수의 조건</a></li>
+  <li><a href="#무작위배정과-관찰연구의-차이" id="toc-무작위배정과-관찰연구의-차이" class="nav-link" data-scroll-target="#무작위배정과-관찰연구의-차이"><span class="header-section-number">13.3</span> 무작위배정과 관찰연구의 차이</a></li>
+  </ul></li>
+  <li><a href="#propensity-score의-정의와-성질" id="toc-propensity-score의-정의와-성질" class="nav-link" data-scroll-target="#propensity-score의-정의와-성질"><span class="header-section-number">14</span> Propensity score의 정의와 성질</a>
+  <ul class="collapse">
+  <li><a href="#propensity-score의-정의" id="toc-propensity-score의-정의" class="nav-link" data-scroll-target="#propensity-score의-정의"><span class="header-section-number">14.1</span> Propensity score의 정의</a></li>
+  <li><a href="#balancing-score" id="toc-balancing-score" class="nav-link" data-scroll-target="#balancing-score"><span class="header-section-number">14.2</span> Balancing score</a></li>
+  <li><a href="#강한-무교란성-가정" id="toc-강한-무교란성-가정" class="nav-link" data-scroll-target="#강한-무교란성-가정"><span class="header-section-number">14.3</span> 강한 무교란성 가정</a></li>
+  <li><a href="#positivity-가정" id="toc-positivity-가정" class="nav-link" data-scroll-target="#positivity-가정"><span class="header-section-number">14.4</span> Positivity 가정</a></li>
+  </ul></li>
+  <li><a href="#propensity-score-model" id="toc-propensity-score-model" class="nav-link" data-scroll-target="#propensity-score-model"><span class="header-section-number">15</span> Propensity score model</a>
+  <ul class="collapse">
+  <li><a href="#ps-추정" id="toc-ps-추정" class="nav-link" data-scroll-target="#ps-추정"><span class="header-section-number">15.1</span> PS 추정</a></li>
+  <li><a href="#어떤-변수를-넣을-것인가" id="toc-어떤-변수를-넣을-것인가" class="nav-link" data-scroll-target="#어떤-변수를-넣을-것인가"><span class="header-section-number">15.2</span> 어떤 변수를 넣을 것인가?</a></li>
+  <li><a href="#ps-model을-수정하는-기준" id="toc-ps-model을-수정하는-기준" class="nav-link" data-scroll-target="#ps-model을-수정하는-기준"><span class="header-section-number">15.3</span> PS model을 수정하는 기준</a></li>
+  </ul></li>
+  <li><a href="#propensity-score-방법의-종류" id="toc-propensity-score-방법의-종류" class="nav-link" data-scroll-target="#propensity-score-방법의-종류"><span class="header-section-number">16</span> Propensity score 방법의 종류</a>
+  <ul class="collapse">
+  <li><a href="#개요" id="toc-개요" class="nav-link" data-scroll-target="#개요"><span class="header-section-number">16.1</span> 개요</a></li>
+  <li><a href="#ate와-att" id="toc-ate와-att" class="nav-link" data-scroll-target="#ate와-att"><span class="header-section-number">16.2</span> ATE와 ATT</a>
+  <ul class="collapse">
+  <li><a href="#ate" id="toc-ate" class="nav-link" data-scroll-target="#ate"><span class="header-section-number">16.2.1</span> ATE</a></li>
+  <li><a href="#att" id="toc-att" class="nav-link" data-scroll-target="#att"><span class="header-section-number">16.2.2</span> ATT</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#propensity-score-matching" id="toc-propensity-score-matching" class="nav-link" data-scroll-target="#propensity-score-matching"><span class="header-section-number">17</span> Propensity score matching</a>
+  <ul class="collapse">
+  <li><a href="#matching의-기본-아이디어" id="toc-matching의-기본-아이디어" class="nav-link" data-scroll-target="#matching의-기본-아이디어"><span class="header-section-number">17.1</span> Matching의 기본 아이디어</a></li>
+  <li><a href="#nearest-neighbor-matching" id="toc-nearest-neighbor-matching" class="nav-link" data-scroll-target="#nearest-neighbor-matching"><span class="header-section-number">17.2</span> Nearest neighbor matching</a></li>
+  <li><a href="#caliper-matching" id="toc-caliper-matching" class="nav-link" data-scroll-target="#caliper-matching"><span class="header-section-number">17.3</span> Caliper matching</a></li>
+  <li><a href="#matching과-1m-matching" id="toc-matching과-1m-matching" class="nav-link" data-scroll-target="#matching과-1m-matching"><span class="header-section-number">17.4</span> 1:1 matching과 1:M matching</a></li>
+  <li><a href="#matching-with-replacement" id="toc-matching-with-replacement" class="nav-link" data-scroll-target="#matching-with-replacement"><span class="header-section-number">17.5</span> Matching with replacement</a></li>
+  </ul></li>
+  <li><a href="#iptw" id="toc-iptw" class="nav-link" data-scroll-target="#iptw"><span class="header-section-number">18</span> IPTW</a>
+  <ul class="collapse">
+  <li><a href="#iptw의-기본-아이디어" id="toc-iptw의-기본-아이디어" class="nav-link" data-scroll-target="#iptw의-기본-아이디어"><span class="header-section-number">18.1</span> IPTW의 기본 아이디어</a></li>
+  <li><a href="#iptw의-직관" id="toc-iptw의-직관" class="nav-link" data-scroll-target="#iptw의-직관"><span class="header-section-number">18.2</span> IPTW의 직관</a></li>
+  <li><a href="#stabilized-weight" id="toc-stabilized-weight" class="nav-link" data-scroll-target="#stabilized-weight"><span class="header-section-number">18.3</span> Stabilized weight</a></li>
+  <li><a href="#extreme-weights" id="toc-extreme-weights" class="nav-link" data-scroll-target="#extreme-weights"><span class="header-section-number">18.4</span> Extreme weights</a></li>
+  </ul></li>
+  <li><a href="#stratification과-covariate-adjustment" id="toc-stratification과-covariate-adjustment" class="nav-link" data-scroll-target="#stratification과-covariate-adjustment"><span class="header-section-number">19</span> Stratification과 covariate adjustment</a>
+  <ul class="collapse">
+  <li><a href="#ps-stratification" id="toc-ps-stratification" class="nav-link" data-scroll-target="#ps-stratification"><span class="header-section-number">19.1</span> PS stratification</a></li>
+  <li><a href="#ps-covariate-adjustment" id="toc-ps-covariate-adjustment" class="nav-link" data-scroll-target="#ps-covariate-adjustment"><span class="header-section-number">19.2</span> PS covariate adjustment</a></li>
+  </ul></li>
+  <li><a href="#covariate-balance-평가" id="toc-covariate-balance-평가" class="nav-link" data-scroll-target="#covariate-balance-평가"><span class="header-section-number">20</span> Covariate balance 평가</a>
+  <ul class="collapse">
+  <li><a href="#balance가-왜-중요한가" id="toc-balance가-왜-중요한가" class="nav-link" data-scroll-target="#balance가-왜-중요한가"><span class="header-section-number">20.1</span> Balance가 왜 중요한가?</a></li>
+  <li><a href="#standardized-mean-difference" id="toc-standardized-mean-difference" class="nav-link" data-scroll-target="#standardized-mean-difference"><span class="header-section-number">20.2</span> Standardized mean difference</a></li>
+  <li><a href="#smd-해석" id="toc-smd-해석" class="nav-link" data-scroll-target="#smd-해석"><span class="header-section-number">20.3</span> SMD 해석</a></li>
+  <li><a href="#love-plot" id="toc-love-plot" class="nav-link" data-scroll-target="#love-plot"><span class="header-section-number">20.4</span> Love plot</a></li>
+  </ul></li>
+  <li><a href="#overlap과-common-support" id="toc-overlap과-common-support" class="nav-link" data-scroll-target="#overlap과-common-support"><span class="header-section-number">21</span> Overlap과 common support</a>
+  <ul class="collapse">
+  <li><a href="#common-support" id="toc-common-support" class="nav-link" data-scroll-target="#common-support"><span class="header-section-number">21.1</span> Common support</a></li>
+  <li><a href="#positivity-violation" id="toc-positivity-violation" class="nav-link" data-scroll-target="#positivity-violation"><span class="header-section-number">21.2</span> Positivity violation</a></li>
+  </ul></li>
+  <li><a href="#outcome-분석" id="toc-outcome-분석" class="nav-link" data-scroll-target="#outcome-분석"><span class="header-section-number">22</span> Outcome 분석</a>
+  <ul class="collapse">
+  <li><a href="#balance-확인-후-outcome-분석" id="toc-balance-확인-후-outcome-분석" class="nav-link" data-scroll-target="#balance-확인-후-outcome-분석"><span class="header-section-number">22.1</span> Balance 확인 후 outcome 분석</a></li>
+  <li><a href="#matching-후-outcome-분석" id="toc-matching-후-outcome-분석" class="nav-link" data-scroll-target="#matching-후-outcome-분석"><span class="header-section-number">22.2</span> Matching 후 outcome 분석</a></li>
+  <li><a href="#weighting-후-outcome-분석" id="toc-weighting-후-outcome-분석" class="nav-link" data-scroll-target="#weighting-후-outcome-분석"><span class="header-section-number">22.3</span> Weighting 후 outcome 분석</a></li>
+  </ul></li>
+  <li><a href="#r-실습" id="toc-r-실습" class="nav-link" data-scroll-target="#r-실습"><span class="header-section-number">23</span> R 실습</a>
+  <ul class="collapse">
+  <li><a href="#예제-데이터-생성" id="toc-예제-데이터-생성" class="nav-link" data-scroll-target="#예제-데이터-생성"><span class="header-section-number">23.1</span> 예제 데이터 생성</a></li>
+  <li><a href="#baseline-imbalance-확인" id="toc-baseline-imbalance-확인" class="nav-link" data-scroll-target="#baseline-imbalance-확인"><span class="header-section-number">23.2</span> Baseline imbalance 확인</a></li>
+  <li><a href="#단순-outcome-비교" id="toc-단순-outcome-비교" class="nav-link" data-scroll-target="#단순-outcome-비교"><span class="header-section-number">23.3</span> 단순 outcome 비교</a></li>
+  <li><a href="#전통적-다변량-회귀조정" id="toc-전통적-다변량-회귀조정" class="nav-link" data-scroll-target="#전통적-다변량-회귀조정"><span class="header-section-number">23.4</span> 전통적 다변량 회귀조정</a></li>
+  <li><a href="#propensity-score-추정" id="toc-propensity-score-추정" class="nav-link" data-scroll-target="#propensity-score-추정"><span class="header-section-number">23.5</span> Propensity score 추정</a></li>
+  <li><a href="#propensity-score-분포와-overlap" id="toc-propensity-score-분포와-overlap" class="nav-link" data-scroll-target="#propensity-score-분포와-overlap"><span class="header-section-number">23.6</span> Propensity score 분포와 overlap</a></li>
+  <li><a href="#smd-계산-함수" id="toc-smd-계산-함수" class="nav-link" data-scroll-target="#smd-계산-함수"><span class="header-section-number">23.7</span> SMD 계산 함수</a></li>
+  <li><a href="#iptw-계산" id="toc-iptw-계산" class="nav-link" data-scroll-target="#iptw-계산"><span class="header-section-number">23.8</span> IPTW 계산</a></li>
+  <li><a href="#stabilized-weight-계산" id="toc-stabilized-weight-계산" class="nav-link" data-scroll-target="#stabilized-weight-계산"><span class="header-section-number">23.9</span> Stabilized weight 계산</a></li>
+  <li><a href="#weight-distribution-확인" id="toc-weight-distribution-확인" class="nav-link" data-scroll-target="#weight-distribution-확인"><span class="header-section-number">23.10</span> Weight distribution 확인</a></li>
+  <li><a href="#weighted-smd-계산" id="toc-weighted-smd-계산" class="nav-link" data-scroll-target="#weighted-smd-계산"><span class="header-section-number">23.11</span> Weighted SMD 계산</a></li>
+  <li><a href="#love-plot-직접-작성" id="toc-love-plot-직접-작성" class="nav-link" data-scroll-target="#love-plot-직접-작성"><span class="header-section-number">23.12</span> Love plot 직접 작성</a></li>
+  <li><a href="#weighted-outcome-analysis" id="toc-weighted-outcome-analysis" class="nav-link" data-scroll-target="#weighted-outcome-analysis"><span class="header-section-number">23.13</span> Weighted outcome analysis</a></li>
+  <li><a href="#weight-truncation-예시" id="toc-weight-truncation-예시" class="nav-link" data-scroll-target="#weight-truncation-예시"><span class="header-section-number">23.14</span> Weight truncation 예시</a></li>
+  <li><a href="#matching-with-matchit" id="toc-matching-with-matchit" class="nav-link" data-scroll-target="#matching-with-matchit"><span class="header-section-number">23.15</span> Matching with MatchIt</a></li>
+  <li><a href="#matching-후-balance-확인" id="toc-matching-후-balance-확인" class="nav-link" data-scroll-target="#matching-후-balance-확인"><span class="header-section-number">23.16</span> Matching 후 balance 확인</a></li>
+  <li><a href="#matching-후-outcome-분석-1" id="toc-matching-후-outcome-분석-1" class="nav-link" data-scroll-target="#matching-후-outcome-분석-1"><span class="header-section-number">23.17</span> Matching 후 outcome 분석</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Propensity Score: 관찰연구에서의 교란 조정</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="수업-개요" class="level2" data-number="12.1">
+<h2 data-number="12.1" class="anchored" data-anchor-id="수업-개요"><span class="header-section-number">12.1</span> 수업 개요</h2>
+<p>이번 장에서는 <strong>propensity score(성향점수)</strong>를 심화 수준에서 학습한다. 지난 장들에서는 임상시험, ANCOVA, 반복측정 ANOVA를 다루었다. 특히 임상시험에서는 무작위배정이 치료군과 대조군의 비교가능성을 확보하는 핵심 원리임을 배웠다. 그러나 실제 의학 연구에서는 무작위배정이 항상 가능하지 않다.</p>
+<p>예를 들어 다음과 같은 연구 질문은 실제 진료자료나 보험자료, 전자의무기록을 이용한 관찰연구로 수행되는 경우가 많다.</p>
+<ul>
+<li>실제 진료환경에서 신약 A와 기존 약물 B의 효과 비교</li>
+<li>수술 방법 A와 수술 방법 B의 장기 예후 비교</li>
+<li>중환자실에서 특정 치료전략의 사망률 영향 평가</li>
+<li>고령 환자에서 항응고제 사용과 출혈 위험 비교</li>
+<li>건강보험자료를 이용한 약물 안전성 연구</li>
+<li>전자의무기록 기반 치료 패턴과 재입원 위험 분석</li>
+</ul>
+<p>관찰연구에서는 연구자가 치료를 무작위로 배정하지 않는다. 치료 선택은 환자의 나이, 중증도, 동반질환, 의사의 판단, 병원 특성, 이전 치료 반응 등과 관련되어 있다. 따라서 치료군과 대조군은 처음부터 다를 수 있다. 이러한 차이가 outcome과도 관련되어 있으면 단순 비교는 치료효과와 baseline 차이를 혼합하게 된다.</p>
+<p>이를 흔히 <strong>confounding by indication</strong>이라고 한다. 더 중증인 환자에게 적극적 치료가 선택되는 상황을 생각하면 이해하기 쉽다. 치료군의 사망률이 높게 관찰되더라도 그것이 치료가 해로워서인지, 원래 치료군 환자가 더 중증이었기 때문인지 구분하기 어렵다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv12/f1_confounding_structure.png" class="img-fluid figure-img" style="width:88.0%"></p>
+<figcaption>관찰연구에서 confounding by indication의 구조.</figcaption>
+</figure>
+</div>
+<p>Propensity score는 이러한 관찰연구에서 치료군 간 비교가능성을 높이기 위해 사용하는 대표적 방법이다. 핵심 아이디어는 다음과 같다.</p>
+<blockquote class="blockquote">
+<p>관찰된 공변량을 바탕으로 각 대상자가 치료를 받을 확률을 추정하고, 이 확률이 비슷한 대상자들끼리 비교하거나 가중치를 부여하여 치료군과 대조군의 공변량 분포를 균형 있게 만든다.</p>
+</blockquote>
+<p>성향점수의 정의는 다음과 같다.</p>
+<p><span class="math display">\[e(X)=P(T=1|X)\]</span></p>
+<p>여기서 <span class="math inline">\(T\)</span>는 치료 여부이고, <span class="math inline">\(X\)</span>는 치료 전 관찰된 공변량이다.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>핵심 메시지
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Propensity score는 관찰된 baseline 공변량을 이용해 치료를 받을 확률을 추정하고, 그 점수를 이용하여 치료군과 대조군의 비교가능성을 높이는 방법이다.</p>
+</div>
+</div>
+<hr>
+</section>
+<section id="핵심-질문" class="level2" data-number="12.2">
+<h2 data-number="12.2" class="anchored" data-anchor-id="핵심-질문"><span class="header-section-number">12.2</span> 핵심 질문</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>질문</th>
+<th>연결되는 개념</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>관찰연구에서 교란은 왜 발생하는가?</td>
+<td>confounding by indication</td>
+</tr>
+<tr class="even">
+<td>Propensity score는 무엇인가?</td>
+<td><span class="math inline">\(P(T=1|X)\)</span></td>
+</tr>
+<tr class="odd">
+<td>Propensity score가 balancing score라는 말은 무슨 뜻인가?</td>
+<td><span class="math inline">\(T \perp X | e(X)\)</span></td>
+</tr>
+<tr class="even">
+<td>어떤 변수를 PS model에 넣어야 하는가?</td>
+<td>confounder, outcome predictor</td>
+</tr>
+<tr class="odd">
+<td>Matching은 어떤 대상을 비교하는가?</td>
+<td>유사 PS 대상자</td>
+</tr>
+<tr class="even">
+<td>IPTW는 무엇을 만드는가?</td>
+<td>pseudo-population</td>
+</tr>
+<tr class="odd">
+<td>ATT와 ATE는 어떻게 다른가?</td>
+<td>estimand</td>
+</tr>
+<tr class="even">
+<td>Covariate balance는 어떻게 평가하는가?</td>
+<td>SMD, love plot</td>
+</tr>
+<tr class="odd">
+<td>Positivity와 overlap은 왜 중요한가?</td>
+<td>비교가능한 대상자</td>
+</tr>
+<tr class="even">
+<td>Extreme weight는 왜 문제인가?</td>
+<td>불안정한 추정</td>
+</tr>
+<tr class="odd">
+<td>PS 방법의 한계는 무엇인가?</td>
+<td>unmeasured confounding</td>
+</tr>
+<tr class="even">
+<td>Outcome 분석은 언제 수행해야 하는가?</td>
+<td>balance 확인 후</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="학습목표" class="level2" data-number="12.3">
+<h2 data-number="12.3" class="anchored" data-anchor-id="학습목표"><span class="header-section-number">12.3</span> 학습목표</h2>
+<p>이번 수업이 끝나면 학생들은 다음을 할 수 있어야 한다.</p>
+<ol type="1">
+<li>관찰연구에서 confounding by indication이 발생하는 이유를 설명할 수 있다.</li>
+<li>Propensity score의 정의와 직관을 설명할 수 있다.</li>
+<li>Propensity score가 balancing score라는 의미를 설명할 수 있다.</li>
+<li>Propensity score model에 포함할 변수의 원칙을 설명할 수 있다.</li>
+<li>Matching, weighting, stratification, covariate adjustment의 차이를 설명할 수 있다.</li>
+<li>Nearest neighbor matching, caliper matching, 1:M matching의 장단점을 설명할 수 있다.</li>
+<li>IPTW와 stabilized weight를 계산하고 해석할 수 있다.</li>
+<li>ATE, ATT, overlap population 등 estimand의 차이를 설명할 수 있다.</li>
+<li>Standardized mean difference와 love plot을 이용해 balance를 평가할 수 있다.</li>
+<li>Positivity, common support, extreme weights의 의미를 설명할 수 있다.</li>
+<li>R에서 propensity score matching과 IPTW를 수행할 수 있다.</li>
+<li>PS 분석 결과를 논문 형식으로 보고할 수 있다.</li>
+<li>PS 방법의 한계와 민감도 분석 필요성을 설명할 수 있다.</li>
+</ol>
+<hr>
+</section>
+<section id="관찰연구와-교란" class="level1" data-number="13">
+<h1 data-number="13"><span class="header-section-number">13</span> 관찰연구와 교란</h1>
+<section id="관찰연구에서-치료-배정은-무작위가-아니다" class="level2" data-number="13.1">
+<h2 data-number="13.1" class="anchored" data-anchor-id="관찰연구에서-치료-배정은-무작위가-아니다"><span class="header-section-number">13.1</span> 관찰연구에서 치료 배정은 무작위가 아니다</h2>
+<p>관찰연구에서는 치료가 무작위로 배정되지 않는다. 실제 진료에서는 다음과 같은 이유로 치료가 선택된다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>치료 선택에 영향을 주는 요인</th>
+<th>예</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>환자 특성</td>
+<td>나이, 성별, 체중</td>
+</tr>
+<tr class="even">
+<td>질병 특성</td>
+<td>중증도, 병기, 증상</td>
+</tr>
+<tr class="odd">
+<td>동반질환</td>
+<td>당뇨, 신부전, 심부전</td>
+</tr>
+<tr class="even">
+<td>이전 치료</td>
+<td>약물 반응, 부작용</td>
+</tr>
+<tr class="odd">
+<td>의사 판단</td>
+<td>위험도 평가, 경험</td>
+</tr>
+<tr class="even">
+<td>병원 요인</td>
+<td>장비, 전문인력, 진료지침</td>
+</tr>
+<tr class="odd">
+<td>환자 선호</td>
+<td>비용, 편의성, 부작용 우려</td>
+</tr>
+</tbody>
+</table>
+<p>이러한 변수들이 outcome에도 영향을 준다면 교란이 발생한다.</p>
+<p>예를 들어 수술군의 생존율이 더 좋아 보인다고 하자. 이는 수술 자체가 효과적이어서일 수 있지만, 수술을 받을 정도로 건강한 환자들이 선택되었기 때문일 수도 있다. 반대로 중환자에게 더 적극적인 치료가 선택되면 치료군의 결과가 더 나빠 보일 수 있다.</p>
+<hr>
+</section>
+<section id="교란변수의-조건" class="level2" data-number="13.2">
+<h2 data-number="13.2" class="anchored" data-anchor-id="교란변수의-조건"><span class="header-section-number">13.2</span> 교란변수의 조건</h2>
+<p>Confounder는 일반적으로 다음 조건을 만족하는 변수이다.</p>
+<ol type="1">
+<li>치료 또는 노출과 관련이 있다.</li>
+<li>outcome과 관련이 있다.</li>
+<li>치료의 결과가 아니다.</li>
+</ol>
+<p>기호로는 다음처럼 생각할 수 있다.</p>
+<p><span class="math display">\[X \rightarrow T\]</span></p>
+<p><span class="math display">\[X \rightarrow Y\]</span></p>
+<p>여기서 <span class="math inline">\(X\)</span>는 confounder, <span class="math inline">\(T\)</span>는 치료, <span class="math inline">\(Y\)</span>는 outcome이다.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>주의
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>치료 이후에 발생한 변수는 보통 propensity score model에 넣으면 안 된다. 치료효과 경로의 일부를 차단하거나 새로운 bias를 만들 수 있다.</p>
+</div>
+</div>
+<hr>
+</section>
+<section id="무작위배정과-관찰연구의-차이" class="level2" data-number="13.3">
+<h2 data-number="13.3" class="anchored" data-anchor-id="무작위배정과-관찰연구의-차이"><span class="header-section-number">13.3</span> 무작위배정과 관찰연구의 차이</h2>
+<p>무작위배정 임상시험에서는 치료 배정이 관찰된 공변량뿐 아니라 관찰되지 않은 공변량과도 독립이 되도록 설계한다.</p>
+<p><span class="math display">\[T \perp X\]</span></p>
+<p>반면 관찰연구에서는 일반적으로 다음이 성립하지 않는다.</p>
+<p><span class="math display">\[T \not\perp X\]</span></p>
+<p>따라서 관찰연구에서는 통계적 조정이 필요하다. 하지만 통계적 조정은 무작위배정을 완전히 대체하지 못한다. 특히 측정되지 않은 교란변수는 여전히 남을 수 있다.</p>
+<hr>
+</section>
+</section>
+<section id="propensity-score의-정의와-성질" class="level1" data-number="14">
+<h1 data-number="14"><span class="header-section-number">14</span> Propensity score의 정의와 성질</h1>
+<section id="propensity-score의-정의" class="level2" data-number="14.1">
+<h2 data-number="14.1" class="anchored" data-anchor-id="propensity-score의-정의"><span class="header-section-number">14.1</span> Propensity score의 정의</h2>
+<p>Propensity score는 관찰된 공변량 <span class="math inline">\(X\)</span>가 주어졌을 때 치료를 받을 조건부 확률이다.</p>
+<p><span class="math display">\[e(X)=P(T=1|X)\]</span></p>
+<p>여기서</p>
+<ul>
+<li><span class="math inline">\(T=1\)</span>: 치료군</li>
+<li><span class="math inline">\(T=0\)</span>: 대조군</li>
+<li><span class="math inline">\(X\)</span>: 치료 전에 측정된 baseline covariates</li>
+</ul>
+<p>이다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv12/f2_propensity_score_workflow.png" class="img-fluid figure-img" style="width:92.0%"></p>
+<figcaption>Propensity score는 치료를 받을 확률을 하나의 점수로 요약한다.</figcaption>
+</figure>
+</div>
+<p>예를 들어 어떤 환자가 78세이고, 중증도가 높고, 당뇨와 신부전이 있으며, 과거 치료 실패가 있었다고 하자. 이러한 특성 때문에 적극적 치료를 받을 확률이 0.82로 추정되면 이 환자의 PS는 0.82이다.</p>
+<hr>
+</section>
+<section id="balancing-score" class="level2" data-number="14.2">
+<h2 data-number="14.2" class="anchored" data-anchor-id="balancing-score"><span class="header-section-number">14.2</span> Balancing score</h2>
+<p>Propensity score의 중요한 성질은 balancing property이다. 적절히 추정된 propensity score가 주어지면, 같은 PS를 가진 대상자들 안에서 관찰된 공변량의 분포가 치료군과 대조군 사이에서 균형을 이룬다.</p>
+<p>이를 기호로 쓰면 다음과 같다.</p>
+<p><span class="math display">\[T \perp X \mid e(X)\]</span></p>
+<p>즉 같은 propensity score 수준에서 치료 여부는 관찰된 공변량과 독립이 된다.</p>
+<p>이 성질 때문에 여러 공변량 <span class="math inline">\(X_1,\ldots,X_p\)</span>를 모두 직접 맞추는 대신, 하나의 점수 <span class="math inline">\(e(X)\)</span>를 이용해 matching이나 weighting을 수행할 수 있다.</p>
+<hr>
+</section>
+<section id="강한-무교란성-가정" class="level2" data-number="14.3">
+<h2 data-number="14.3" class="anchored" data-anchor-id="강한-무교란성-가정"><span class="header-section-number">14.3</span> 강한 무교란성 가정</h2>
+<p>Propensity score 방법이 인과효과를 추정하려면 관찰된 공변량을 조건으로 치료 배정이 potential outcomes와 독립이라는 가정이 필요하다.</p>
+<p><span class="math display">\[(Y^1,Y^0) \perp T \mid X\]</span></p>
+<p>이를 conditional exchangeability, no unmeasured confounding, strong ignorability 등으로 부른다.</p>
+<p>이 가정은 자료만으로 완전히 증명할 수 없다. 연구자는 임상 지식과 자료의 풍부함을 바탕으로 주요 교란변수가 충분히 측정되었다고 주장해야 한다.</p>
+<hr>
+</section>
+<section id="positivity-가정" class="level2" data-number="14.4">
+<h2 data-number="14.4" class="anchored" data-anchor-id="positivity-가정"><span class="header-section-number">14.4</span> Positivity 가정</h2>
+<p>또 다른 중요한 가정은 positivity이다. 모든 공변량 조합에서 치료와 대조 치료를 받을 가능성이 모두 있어야 한다.</p>
+<p><span class="math display">\[0 &lt; P(T=1|X) &lt; 1\]</span></p>
+<p>만약 특정 중증도 환자는 모두 치료군이고 대조군이 전혀 없다면, 그 환자군에서 치료와 대조를 비교할 수 없다. 이런 경우 모델은 관찰되지 않은 영역으로 extrapolation하게 된다.</p>
+<hr>
+</section>
+</section>
+<section id="propensity-score-model" class="level1" data-number="15">
+<h1 data-number="15"><span class="header-section-number">15</span> Propensity score model</h1>
+<section id="ps-추정" class="level2" data-number="15.1">
+<h2 data-number="15.1" class="anchored" data-anchor-id="ps-추정"><span class="header-section-number">15.1</span> PS 추정</h2>
+<p>가장 흔한 방법은 로지스틱 회귀로 치료 여부를 모델링하는 것이다.</p>
+<p><span class="math display">\[\log
+\left(
+\frac{e(X)}{1-e(X)}
+\right)
+=
+\beta_0+\beta_1X_1+\cdots+\beta_pX_p\]</span></p>
+<p>추정된 예측확률이 propensity score이다.</p>
+<p><span class="math display">\[\hat e(X)=\hat P(T=1|X)\]</span></p>
+<p>하지만 PS model의 목적은 outcome을 예측하는 것이 아니라 치료군과 대조군의 covariate balance를 확보하는 것이다. 따라서 PS model의 성능을 AUC만으로 평가해서는 안 된다. AUC가 높다는 것은 치료군과 대조군이 매우 잘 구분된다는 의미일 수 있고, 오히려 overlap이 부족하다는 신호일 수 있다.</p>
+<hr>
+</section>
+<section id="어떤-변수를-넣을-것인가" class="level2" data-number="15.2">
+<h2 data-number="15.2" class="anchored" data-anchor-id="어떤-변수를-넣을-것인가"><span class="header-section-number">15.2</span> 어떤 변수를 넣을 것인가?</h2>
+<p>PS model에는 치료 전에 측정된 변수 중 confounder 가능성이 있는 변수를 포함한다. 특히 outcome과 관련된 변수는 balance를 맞추는 것이 중요하다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>변수 유형</th>
+<th>포함 여부</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>치료와 outcome 모두 관련</td>
+<td>포함</td>
+<td>confounder</td>
+</tr>
+<tr class="even">
+<td>outcome과 강하게 관련</td>
+<td>대체로 포함</td>
+<td>정밀도와 bias 감소</td>
+</tr>
+<tr class="odd">
+<td>치료와만 관련, outcome과 무관</td>
+<td>포함해도 되나 효율 저하 가능</td>
+<td>balance에는 영향</td>
+</tr>
+<tr class="even">
+<td>치료 후 변수</td>
+<td>제외</td>
+<td>mediator 조정 위험</td>
+</tr>
+<tr class="odd">
+<td>collider</td>
+<td>제외</td>
+<td>collider bias 위험</td>
+</tr>
+<tr class="even">
+<td>instrumental variable 성격 변수</td>
+<td>주의</td>
+<td>분산 증가, bias 가능성 논의</td>
+</tr>
+</tbody>
+</table>
+<p>공변량 선택은 p-value나 자동 변수선택에만 의존하지 말고, 임상적 지식과 causal diagram을 바탕으로 해야 한다.</p>
+<hr>
+</section>
+<section id="ps-model을-수정하는-기준" class="level2" data-number="15.3">
+<h2 data-number="15.3" class="anchored" data-anchor-id="ps-model을-수정하는-기준"><span class="header-section-number">15.3</span> PS model을 수정하는 기준</h2>
+<p>PS model은 outcome model처럼 p-value를 보고 고르는 것이 아니다. PS model을 만든 뒤 반드시 balance를 평가한다. Balance가 좋지 않으면 다음을 고려한다.</p>
+<ol type="1">
+<li>비선형항 추가</li>
+<li>상호작용항 추가</li>
+<li>중요한 공변량 추가</li>
+<li>다른 matching 방법 사용</li>
+<li>caliper 조정</li>
+<li>trimming 또는 restriction</li>
+<li>weighting 방법 변경</li>
+<li>overlap weight 고려</li>
+</ol>
+<p>중요한 원칙은 outcome을 보기 전에 balance를 개선하는 것이다. Outcome 결과를 보면서 PS model을 바꾸면 분석자의 자유도가 증가하고 bias가 생길 수 있다.</p>
+<hr>
+</section>
+</section>
+<section id="propensity-score-방법의-종류" class="level1" data-number="16">
+<h1 data-number="16"><span class="header-section-number">16</span> Propensity score 방법의 종류</h1>
+<section id="개요" class="level2" data-number="16.1">
+<h2 data-number="16.1" class="anchored" data-anchor-id="개요"><span class="header-section-number">16.1</span> 개요</h2>
+<p>Propensity score를 사용하는 대표 방법은 다음과 같다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>방법</th>
+<th>핵심 아이디어</th>
+<th>대표 estimand</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Matching</td>
+<td>비슷한 PS 대상자를 짝짓기</td>
+<td>ATT가 흔함</td>
+</tr>
+<tr class="even">
+<td>IPTW</td>
+<td>PS 기반 가중치로 pseudo-population 생성</td>
+<td>ATE 또는 ATT</td>
+</tr>
+<tr class="odd">
+<td>Stratification</td>
+<td>PS 분위수 또는 층 안에서 비교</td>
+<td>층별 평균</td>
+</tr>
+<tr class="even">
+<td>Covariate adjustment</td>
+<td>outcome model에 PS를 공변량으로 포함</td>
+<td>모형 의존</td>
+</tr>
+<tr class="odd">
+<td>Overlap weighting</td>
+<td>overlap이 좋은 대상자에 큰 가중치</td>
+<td>overlap population</td>
+</tr>
+</tbody>
+</table>
+<p>각 방법은 목표 estimand, 대상자 제외 여부, 가중치 안정성, 해석 가능성이 다르다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv12/f9_estimand_ate_att.png" class="img-fluid figure-img" style="width:90.0%"></p>
+<figcaption>Propensity score 방법은 어떤 estimand를 목표로 하는지 명확히 해야 한다.</figcaption>
+</figure>
+</div>
+<hr>
+</section>
+<section id="ate와-att" class="level2" data-number="16.2">
+<h2 data-number="16.2" class="anchored" data-anchor-id="ate와-att"><span class="header-section-number">16.2</span> ATE와 ATT</h2>
+<p>Propensity score 분석에서 먼저 정해야 할 것은 어떤 causal estimand를 원하는지이다.</p>
+<section id="ate" class="level3" data-number="16.2.1">
+<h3 data-number="16.2.1" class="anchored" data-anchor-id="ate"><span class="header-section-number">16.2.1</span> ATE</h3>
+<p>Average treatment effect, ATE는 전체 대상자 집단에서 모든 사람이 치료를 받았을 때와 모든 사람이 대조 치료를 받았을 때의 평균 outcome 차이이다.</p>
+<p><span class="math display">\[ATE=E(Y^1-Y^0)\]</span></p>
+</section>
+<section id="att" class="level3" data-number="16.2.2">
+<h3 data-number="16.2.2" class="anchored" data-anchor-id="att"><span class="header-section-number">16.2.2</span> ATT</h3>
+<p>Average treatment effect in the treated, ATT는 실제 치료를 받은 대상자 집단에서 치료를 받았을 때와 그들이 대조 치료를 받았더라면의 평균 outcome 차이이다.</p>
+<p><span class="math display">\[ATT=E(Y^1-Y^0|T=1)\]</span></p>
+<p>ATT는 “실제로 치료받은 환자들에게 이 치료가 어떤 효과를 가졌는가?”라는 질문에 가깝다. Matching은 종종 ATT를 목표로 한다.</p>
+<hr>
+</section>
+</section>
+</section>
+<section id="propensity-score-matching" class="level1" data-number="17">
+<h1 data-number="17"><span class="header-section-number">17</span> Propensity score matching</h1>
+<section id="matching의-기본-아이디어" class="level2" data-number="17.1">
+<h2 data-number="17.1" class="anchored" data-anchor-id="matching의-기본-아이디어"><span class="header-section-number">17.1</span> Matching의 기본 아이디어</h2>
+<p>Propensity score matching은 치료군 대상자와 유사한 PS를 가진 대조군 대상자를 짝짓는 방법이다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv12/f4_matching_pairs.png" class="img-fluid figure-img" style="width:86.0%"></p>
+<figcaption>Matching은 유사한 propensity score를 가진 대상자를 짝짓는다.</figcaption>
+</figure>
+</div>
+<p>Matching 후에는 치료군과 대조군의 baseline 공변량 분포가 더 비슷해져야 한다. 이때 중요한 것은 outcome을 보기 전에 balance를 확인하는 것이다.</p>
+<hr>
+</section>
+<section id="nearest-neighbor-matching" class="level2" data-number="17.2">
+<h2 data-number="17.2" class="anchored" data-anchor-id="nearest-neighbor-matching"><span class="header-section-number">17.2</span> Nearest neighbor matching</h2>
+<p>Nearest neighbor matching은 각 치료군 대상자에게 가장 가까운 PS를 가진 대조군을 매칭한다.</p>
+<p>예를 들어 치료군 환자의 PS가 0.72이고 대조군 후보들의 PS가 0.70, 0.55, 0.91이면 0.70인 대조군이 가장 가까운 매칭 대상이다.</p>
+<p>장점은 단순하고 직관적이다. 단점은 가까운 대상자가 없더라도 억지로 매칭될 수 있다는 것이다.</p>
+<hr>
+</section>
+<section id="caliper-matching" class="level2" data-number="17.3">
+<h2 data-number="17.3" class="anchored" data-anchor-id="caliper-matching"><span class="header-section-number">17.3</span> Caliper matching</h2>
+<p>Caliper는 매칭 허용 거리이다. 흔히 logit PS의 표준편차의 0.2배를 caliper로 사용하는 경험적 규칙이 있다.</p>
+<p><span class="math display">\[|logit(e_i)-logit(e_j)| &lt; 0.2 \times SD\{logit(e)\}\]</span></p>
+<p>Caliper가 좁으면 balance가 좋아질 수 있지만 매칭되지 않는 대상자가 늘어난다. Caliper가 넓으면 대상자 손실은 줄지만 balance가 나빠질 수 있다.</p>
+<hr>
+</section>
+<section id="matching과-1m-matching" class="level2" data-number="17.4">
+<h2 data-number="17.4" class="anchored" data-anchor-id="matching과-1m-matching"><span class="header-section-number">17.4</span> 1:1 matching과 1:M matching</h2>
+<p>1:1 matching은 치료군 1명당 대조군 1명을 매칭한다. 해석이 쉽고 balance가 좋을 수 있지만 대조군 정보를 일부 버릴 수 있다.</p>
+<p>1:M matching은 치료군 1명당 여러 대조군을 매칭한다. 예를 들어 1:2 또는 1:3 matching이다. 표본수를 더 많이 사용할 수 있지만 너무 많은 대조군을 붙이면 balance가 나빠질 수 있다.</p>
+<hr>
+</section>
+<section id="matching-with-replacement" class="level2" data-number="17.5">
+<h2 data-number="17.5" class="anchored" data-anchor-id="matching-with-replacement"><span class="header-section-number">17.5</span> Matching with replacement</h2>
+<p>Replacement를 허용하면 같은 대조군 대상자가 여러 치료군 대상자에게 매칭될 수 있다. 이는 좋은 매칭 대상을 반복 사용할 수 있어 bias를 줄일 수 있지만, 분석할 때 중복 사용과 표준오차 계산을 적절히 고려해야 한다.</p>
+<hr>
+</section>
+</section>
+<section id="iptw" class="level1" data-number="18">
+<h1 data-number="18"><span class="header-section-number">18</span> IPTW</h1>
+<section id="iptw의-기본-아이디어" class="level2" data-number="18.1">
+<h2 data-number="18.1" class="anchored" data-anchor-id="iptw의-기본-아이디어"><span class="header-section-number">18.1</span> IPTW의 기본 아이디어</h2>
+<p>IPTW는 inverse probability of treatment weighting의 약자이다. 각 대상자에게 실제 받은 치료의 확률의 역수를 가중치로 부여한다.</p>
+<p>ATE를 목표로 할 때 가중치는 다음과 같다.</p>
+<p>치료군:</p>
+<p><span class="math display">\[w_i=\frac{1}{e(X_i)}\]</span></p>
+<p>대조군:</p>
+<p><span class="math display">\[w_i=\frac{1}{1-e(X_i)}\]</span></p>
+<p>즉 치료받을 가능성이 낮았는데 실제 치료를 받은 대상자, 또는 치료받지 않을 가능성이 낮았는데 실제 대조군에 있었던 대상자에게 큰 가중치가 부여된다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv12/f5_iptw_pseudopopulation.png" class="img-fluid figure-img" style="width:90.0%"></p>
+<figcaption>IPTW는 가중치를 이용해 pseudo-population을 만든다.</figcaption>
+</figure>
+</div>
+<hr>
+</section>
+<section id="iptw의-직관" class="level2" data-number="18.2">
+<h2 data-number="18.2" class="anchored" data-anchor-id="iptw의-직관"><span class="header-section-number">18.2</span> IPTW의 직관</h2>
+<p>IPTW는 관찰자료를 재가중하여 pseudo-population을 만든다. 이 pseudo-population에서는 관찰된 공변량 분포가 치료군과 대조군에서 비슷해지도록 한다.</p>
+<p>즉 원래 자료에서는</p>
+<p><span class="math display">\[T \not\perp X\]</span></p>
+<p>였지만, 가중치를 적용한 pseudo-population에서는 가능한 한</p>
+<p><span class="math display">\[T \perp X\]</span></p>
+<p>에 가깝게 만든다.</p>
+<hr>
+</section>
+<section id="stabilized-weight" class="level2" data-number="18.3">
+<h2 data-number="18.3" class="anchored" data-anchor-id="stabilized-weight"><span class="header-section-number">18.3</span> Stabilized weight</h2>
+<p>일반 IPTW는 extreme weight가 발생하면 추정이 불안정할 수 있다. Stabilized weight는 분자에 marginal treatment probability를 넣어 가중치 변동을 줄인다.</p>
+<p>치료군:</p>
+<p><span class="math display">\[SW_i=
+\frac{P(T=1)}{e(X_i)}\]</span></p>
+<p>대조군:</p>
+<p><span class="math display">\[SW_i=
+\frac{P(T=0)}{1-e(X_i)}\]</span></p>
+<p>Stabilized weight를 사용하면 평균 가중치가 1에 가까워져 추정이 안정될 수 있다.</p>
+<hr>
+</section>
+<section id="extreme-weights" class="level2" data-number="18.4">
+<h2 data-number="18.4" class="anchored" data-anchor-id="extreme-weights"><span class="header-section-number">18.4</span> Extreme weights</h2>
+<p>PS가 0 또는 1에 가까우면 IPTW 가중치가 매우 커진다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv12/f6_extreme_weights.png" class="img-fluid figure-img" style="width:82.0%"></p>
+<figcaption>Propensity score가 0 또는 1에 가까우면 extreme weight가 발생한다.</figcaption>
+</figure>
+</div>
+<p>Extreme weight가 있으면 다음 문제가 생긴다.</p>
+<ol type="1">
+<li>몇 명의 대상자가 결과를 지배할 수 있다.</li>
+<li>표준오차가 커질 수 있다.</li>
+<li>추정값이 매우 불안정해질 수 있다.</li>
+<li>positivity 위반 가능성을 시사한다.</li>
+</ol>
+<p>대응 방법은 다음과 같다.</p>
+<ul>
+<li>overlap 확인</li>
+<li>trimming</li>
+<li>weight truncation</li>
+<li>stabilized weight</li>
+<li>overlap weighting</li>
+<li>연구 대상 population 재정의</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="stratification과-covariate-adjustment" class="level1" data-number="19">
+<h1 data-number="19"><span class="header-section-number">19</span> Stratification과 covariate adjustment</h1>
+<section id="ps-stratification" class="level2" data-number="19.1">
+<h2 data-number="19.1" class="anchored" data-anchor-id="ps-stratification"><span class="header-section-number">19.1</span> PS stratification</h2>
+<p>PS stratification은 propensity score를 여러 층으로 나누고 각 층 안에서 치료군과 대조군을 비교하는 방법이다. 예를 들어 PS quintile을 만들 수 있다.</p>
+<p>각 층 안에서는 치료군과 대조군의 공변량 분포가 더 비슷해야 한다. 이후 층별 효과를 계산하고 가중 평균하여 전체 효과를 추정한다.</p>
+<p>장점은 직관적이고 구현이 쉽다는 것이다. 단점은 층 내 balance가 충분하지 않을 수 있고, PS 분포가 매우 다른 경우 일부 층에서 비교가 어려울 수 있다.</p>
+<hr>
+</section>
+<section id="ps-covariate-adjustment" class="level2" data-number="19.2">
+<h2 data-number="19.2" class="anchored" data-anchor-id="ps-covariate-adjustment"><span class="header-section-number">19.2</span> PS covariate adjustment</h2>
+<p>PS covariate adjustment는 outcome regression model에 propensity score를 공변량으로 포함하는 방법이다.</p>
+<p>예를 들어 이진 outcome이면 다음처럼 쓸 수 있다.</p>
+<p><span class="math display">\[logit\{P(Y=1)\}
+=
+\alpha_0+\alpha_1T+\alpha_2\hat e(X)\]</span></p>
+<p>또는 PS를 spline이나 categorical variable로 포함할 수 있다. 이 방법은 간단하지만 matching이나 weighting보다 모형 의존성이 클 수 있다. 또한 balance 진단 없이 PS를 단순히 outcome model에 넣는 것은 권장되지 않는다.</p>
+<hr>
+</section>
+</section>
+<section id="covariate-balance-평가" class="level1" data-number="20">
+<h1 data-number="20"><span class="header-section-number">20</span> Covariate balance 평가</h1>
+<section id="balance가-왜-중요한가" class="level2" data-number="20.1">
+<h2 data-number="20.1" class="anchored" data-anchor-id="balance가-왜-중요한가"><span class="header-section-number">20.1</span> Balance가 왜 중요한가?</h2>
+<p>Propensity score 분석에서 가장 중요한 진단은 outcome model의 p-value가 아니라 covariate balance이다. PS 방법의 목적은 치료군과 대조군의 baseline covariate distribution을 비슷하게 만드는 것이기 때문이다.</p>
+<p>Balance는 PS 적용 전후를 비교해야 한다.</p>
+<ul>
+<li>matching 전 vs matching 후</li>
+<li>weighting 전 vs weighting 후</li>
+<li>stratification 전 vs 층별 또는 통합 후</li>
+</ul>
+<hr>
+</section>
+<section id="standardized-mean-difference" class="level2" data-number="20.2">
+<h2 data-number="20.2" class="anchored" data-anchor-id="standardized-mean-difference"><span class="header-section-number">20.2</span> Standardized mean difference</h2>
+<p>연속형 변수의 standardized mean difference, SMD는 다음과 같다.</p>
+<p><span class="math display">\[SMD=
+\frac{\bar X_T-\bar X_C}{s_{pooled}}\]</span></p>
+<p>여기서</p>
+<p><span class="math display">\[s_{pooled}=
+\sqrt{
+\frac{s_T^2+s_C^2}{2}
+}\]</span></p>
+<p>이다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv12/f8_smd_formula.png" class="img-fluid figure-img" style="width:82.0%"></p>
+<figcaption>Standardized mean difference의 직관.</figcaption>
+</figure>
+</div>
+<p>이진 변수의 경우 두 군의 비율 차이를 표준화하여 계산할 수 있다.</p>
+<p>SMD의 장점은 표본 크기에 덜 민감하다는 것이다. p-value는 표본 크기가 크면 작은 차이도 유의하게 나오고, 표본 크기가 작으면 큰 차이도 유의하지 않을 수 있다. Balance 평가에는 p-value보다 SMD가 더 적절하다.</p>
+<hr>
+</section>
+<section id="smd-해석" class="level2" data-number="20.3">
+<h2 data-number="20.3" class="anchored" data-anchor-id="smd-해석"><span class="header-section-number">20.3</span> SMD 해석</h2>
+<p>절대 SMD의 해석은 다음과 같이 한다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;">Absolute SMD</th>
+<th>해석</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">&lt; 0.1</td>
+<td>좋은 balance로 자주 간주</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.1–0.2</td>
+<td>약간의 불균형</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">&gt; 0.2</td>
+<td>의미 있는 불균형 가능</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">&gt; 0.5</td>
+<td>큰 불균형</td>
+</tr>
+</tbody>
+</table>
+<p>0.1 기준은 절대적인 법칙은 아니지만, 실무에서 널리 사용되는 경험적 기준이다. 중요한 예후인자는 더 엄격하게 볼 수 있다.</p>
+<hr>
+</section>
+<section id="love-plot" class="level2" data-number="20.4">
+<h2 data-number="20.4" class="anchored" data-anchor-id="love-plot"><span class="header-section-number">20.4</span> Love plot</h2>
+<p>Love plot은 여러 공변량의 SMD를 한 그림에 보여준다. PS 적용 전후의 balance 개선을 직관적으로 확인할 수 있다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv12/f7_love_plot.png" class="img-fluid figure-img" style="width:82.0%"></p>
+<figcaption>Love plot은 공변량 균형 개선을 시각화한다.</figcaption>
+</figure>
+</div>
+<p>Love plot에서는 보통 절대 SMD 0.1 기준선을 표시한다. PS 적용 후 대부분의 공변량이 0.1 이하로 줄어드는 것이 이상적이다.</p>
+<hr>
+</section>
+</section>
+<section id="overlap과-common-support" class="level1" data-number="21">
+<h1 data-number="21"><span class="header-section-number">21</span> Overlap과 common support</h1>
+<section id="common-support" class="level2" data-number="21.1">
+<h2 data-number="21.1" class="anchored" data-anchor-id="common-support"><span class="header-section-number">21.1</span> Common support</h2>
+<p>Common support는 치료군과 대조군이 비교 가능한 PS 영역을 공유하는지를 의미한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv12/f3_ps_overlap.png" class="img-fluid figure-img" style="width:92.0%"></p>
+<figcaption>Propensity score 분석은 치료군과 대조군의 overlap 확인이 출발점이다.</figcaption>
+</figure>
+</div>
+<p>Overlap이 부족한 영역에서는 치료군 또는 대조군 중 하나가 거의 존재하지 않는다. 이 영역에서 치료효과를 추정하면 모형이 extrapolation에 의존하게 된다.</p>
+<hr>
+</section>
+<section id="positivity-violation" class="level2" data-number="21.2">
+<h2 data-number="21.2" class="anchored" data-anchor-id="positivity-violation"><span class="header-section-number">21.2</span> Positivity violation</h2>
+<p>Positivity violation은 특정 공변량 조합에서 한 치료만 관찰되는 상황이다. 예를 들어 아주 중증인 환자는 모두 적극적 치료를 받고, 경증 환자는 모두 대조 치료를 받는다면 중증 환자에서 적극적 치료와 대조 치료를 비교할 수 없다.</p>
+<p>이 경우 연구 질문을 바꾸어야 할 수 있다.</p>
+<ul>
+<li>전체 population이 아니라 overlap population으로 제한</li>
+<li>특정 중증도 범위의 환자만 분석</li>
+<li>trimming 후 해석 대상 변경</li>
+<li>matching 가능한 대상자에 대한 ATT로 해석</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="outcome-분석" class="level1" data-number="22">
+<h1 data-number="22"><span class="header-section-number">22</span> Outcome 분석</h1>
+<section id="balance-확인-후-outcome-분석" class="level2" data-number="22.1">
+<h2 data-number="22.1" class="anchored" data-anchor-id="balance-확인-후-outcome-분석"><span class="header-section-number">22.1</span> Balance 확인 후 outcome 분석</h2>
+<p>Propensity score 분석의 중요한 원칙은 다음 순서이다.</p>
+<ol type="1">
+<li>치료 전 공변량 선정</li>
+<li>PS 추정</li>
+<li>matching 또는 weighting 수행</li>
+<li>overlap 확인</li>
+<li>covariate balance 평가</li>
+<li>balance가 충분하면 outcome 분석</li>
+<li>민감도 분석과 한계 보고</li>
+</ol>
+<p>Outcome을 먼저 보고 PS model을 바꾸면 결과 중심의 모델 선택이 되어 bias가 생길 수 있다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="fig_adv12/f10_ps_workflow.png" class="img-fluid figure-img" style="width:96.0%"></p>
+<figcaption>Propensity score 분석의 실무 흐름.</figcaption>
+</figure>
+</div>
+<hr>
+</section>
+<section id="matching-후-outcome-분석" class="level2" data-number="22.2">
+<h2 data-number="22.2" class="anchored" data-anchor-id="matching-후-outcome-분석"><span class="header-section-number">22.2</span> Matching 후 outcome 분석</h2>
+<p>Matching 후에는 매칭된 자료의 구조를 반영해야 한다. 1:1 matching에서는 짝을 고려한 paired analysis 또는 robust standard error를 사용할 수 있다. 이진 outcome에서는 조건부 로지스틱 회귀 또는 McNemar test가 사용될 수 있고, 생존 outcome에서는 robust sandwich variance를 포함한 Cox model을 고려할 수 있다.</p>
+<p>실무에서는 소프트웨어와 설계에 따라 다음을 명확히 해야 한다.</p>
+<ul>
+<li>matching ratio</li>
+<li>replacement 여부</li>
+<li>matched pair 또는 subclass 반영 여부</li>
+<li>표준오차 계산 방법</li>
+<li>estimand가 ATT인지 여부</li>
+</ul>
+<hr>
+</section>
+<section id="weighting-후-outcome-분석" class="level2" data-number="22.3">
+<h2 data-number="22.3" class="anchored" data-anchor-id="weighting-후-outcome-분석"><span class="header-section-number">22.3</span> Weighting 후 outcome 분석</h2>
+<p>IPTW 후에는 가중 회귀모형을 사용한다. 예를 들어 이진 outcome이면 가중 로지스틱 회귀를 사용할 수 있다.</p>
+<p>하지만 가중치를 사용하면 표준오차 계산이 중요하다. 가능하면 robust standard error를 사용하거나 survey design 기반 분석을 고려한다. Extreme weight가 있으면 결과가 불안정할 수 있으므로 weight distribution을 반드시 보고해야 한다.</p>
+<hr>
+</section>
+</section>
+<section id="r-실습" class="level1" data-number="23">
+<h1 data-number="23"><span class="header-section-number">23</span> R 실습</h1>
+<section id="예제-데이터-생성" class="level2" data-number="23.1">
+<h2 data-number="23.1" class="anchored" data-anchor-id="예제-데이터-생성"><span class="header-section-number">23.1</span> 예제 데이터 생성</h2>
+<p>관찰연구 자료를 생성한다. 중증도가 높은 환자일수록 치료를 받을 가능성이 높고, 중증도는 outcome 위험도 높이는 confounder로 설정한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1212</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1200</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>age <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">65</span>, <span class="at">sd =</span> <span class="dv">12</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>female <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="fl">0.48</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>diabetes <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="fl">0.35</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>ckd <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="fl">0.18</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>severity <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>logit_treat <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.8</span> <span class="sc">+</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.025</span> <span class="sc">*</span> (age <span class="sc">-</span> <span class="dv">65</span>) <span class="sc">-</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.20</span> <span class="sc">*</span> female <span class="sc">+</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.45</span> <span class="sc">*</span> diabetes <span class="sc">+</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.65</span> <span class="sc">*</span> ckd <span class="sc">+</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.95</span> <span class="sc">*</span> severity</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>ps_true <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>logit_treat))</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>treatment <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> ps_true)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>logit_y <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">2.2</span> <span class="sc">-</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.45</span> <span class="sc">*</span> treatment <span class="sc">+</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.035</span> <span class="sc">*</span> (age <span class="sc">-</span> <span class="dv">65</span>) <span class="sc">+</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.25</span> <span class="sc">*</span> diabetes <span class="sc">+</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.55</span> <span class="sc">*</span> ckd <span class="sc">+</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.90</span> <span class="sc">*</span> severity</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>p_y <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>logit_y))</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>outcome <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> p_y)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome =</span> outcome,</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  <span class="at">treatment =</span> treatment,</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>  <span class="at">age =</span> age,</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  <span class="at">female =</span> female,</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>  <span class="at">diabetes =</span> diabetes,</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>  <span class="at">ckd =</span> ckd,</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">severity =</span> severity</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>treat_group <span class="ot">&lt;-</span> <span class="fu">factor</span>(</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>treatment,</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Control"</span>, <span class="st">"Treatment"</span>)</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  outcome treatment      age female diabetes ckd   severity treat_group
+1       0         0 57.45097      0        0   0 -1.7071889     Control
+2       0         0 87.04907      1        0   0 -1.1437489     Control
+3       0         1 69.12418      0        0   0  1.4576943   Treatment
+4       0         1 48.67885      0        0   0  2.1549762   Treatment
+5       0         0 71.42977      1        0   0 -0.5473155     Control
+6       0         1 65.44638      1        0   0  0.7878094   Treatment</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="baseline-imbalance-확인" class="level2" data-number="23.2">
+<h2 data-number="23.2" class="anchored" data-anchor-id="baseline-imbalance-확인"><span class="header-section-number">23.2</span> Baseline imbalance 확인</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">aggregate</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cbind</span>(age, severity) <span class="sc">~</span> treat_group,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">FUN =</span> <span class="cf">function</span>(x) <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(x), <span class="at">sd =</span> <span class="fu">sd</span>(x))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  treat_group age.mean   age.sd severity.mean severity.sd
+1     Control 63.47095 11.84136    -0.3724199   0.9525636
+2   Treatment 67.09244 12.09015     0.5027709   0.8901614</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.table</span>(<span class="fu">table</span>(dat<span class="sc">$</span>treat_group, dat<span class="sc">$</span>diabetes), <span class="at">margin =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           
+                    0         1
+  Control   0.6697128 0.3302872
+  Treatment 0.5944700 0.4055300</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.table</span>(<span class="fu">table</span>(dat<span class="sc">$</span>treat_group, dat<span class="sc">$</span>ckd), <span class="at">margin =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           
+                    0         1
+  Control   0.8485640 0.1514360
+  Treatment 0.7557604 0.2442396</code></pre>
+</div>
+</div>
+<p>치료군과 대조군의 baseline 특성이 다르면 단순 outcome 비교가 교란될 수 있다.</p>
+<hr>
+</section>
+<section id="단순-outcome-비교" class="level2" data-number="23.3">
+<h2 data-number="23.3" class="anchored" data-anchor-id="단순-outcome-비교"><span class="header-section-number">23.3</span> 단순 outcome 비교</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dat<span class="sc">$</span>treat_group, dat<span class="sc">$</span>outcome)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           
+              0   1
+  Control   685  81
+  Treatment 360  74</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.table</span>(<span class="fu">table</span>(dat<span class="sc">$</span>treat_group, dat<span class="sc">$</span>outcome), <span class="at">margin =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           
+                    0         1
+  Control   0.8942559 0.1057441
+  Treatment 0.8294931 0.1705069</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>fit_crude <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  outcome <span class="sc">~</span> treatment,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> binomial</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_crude)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = outcome ~ treatment, family = binomial, data = dat)
+
+Coefficients:
+            Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)  -2.1350     0.1175 -18.171  &lt; 2e-16 ***
+treatment     0.5529     0.1735   3.187  0.00144 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 923.52  on 1199  degrees of freedom
+Residual deviance: 913.49  on 1198  degrees of freedom
+AIC: 917.49
+
+Number of Fisher Scoring iterations: 4</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(fit_crude))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept)   treatment 
+  0.1182482   1.7383402 </code></pre>
+</div>
+</div>
+<p>단순 비교는 치료 선택 과정의 차이를 반영하지 못한다.</p>
+<hr>
+</section>
+<section id="전통적-다변량-회귀조정" class="level2" data-number="23.4">
+<h2 data-number="23.4" class="anchored" data-anchor-id="전통적-다변량-회귀조정"><span class="header-section-number">23.4</span> 전통적 다변량 회귀조정</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>fit_reg <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  outcome <span class="sc">~</span> treatment <span class="sc">+</span> age <span class="sc">+</span> female <span class="sc">+</span> diabetes <span class="sc">+</span> ckd <span class="sc">+</span> severity,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> binomial</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_reg)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = outcome ~ treatment + age + female + diabetes + 
+    ckd + severity, family = binomial, data = dat)
+
+Coefficients:
+             Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept) -4.351876   0.543640  -8.005 1.19e-15 ***
+treatment   -0.295452   0.202354  -1.460    0.144    
+age          0.032968   0.007662   4.303 1.69e-05 ***
+female       0.103340   0.182178   0.567    0.571    
+diabetes     0.124987   0.188339   0.664    0.507    
+ckd          0.351994   0.223739   1.573    0.116    
+severity     0.882160   0.105791   8.339  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 923.52  on 1199  degrees of freedom
+Residual deviance: 818.36  on 1193  degrees of freedom
+AIC: 832.36
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(fit_reg))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept)   treatment         age      female    diabetes         ckd 
+ 0.01288262  0.74419511  1.03351716  1.10886809  1.13313416  1.42189963 
+   severity 
+ 2.41611344 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">confint</span>(fit_reg))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                  2.5 %     97.5 %
+(Intercept) 0.004346256 0.03669404
+treatment   0.498618461 1.10336788
+age         1.018227676 1.04930852
+female      0.775546255 1.58572752
+diabetes    0.780321144 1.63473789
+ckd         0.907773289 2.18701862
+severity    1.970424652 2.98448413</code></pre>
+</div>
+</div>
+<p>이는 outcome regression approach이다. PS 방법과 비교하기 위한 기준으로 볼 수 있다.</p>
+<hr>
+</section>
+<section id="propensity-score-추정" class="level2" data-number="23.5">
+<h2 data-number="23.5" class="anchored" data-anchor-id="propensity-score-추정"><span class="header-section-number">23.5</span> Propensity score 추정</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>fit_ps <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  treatment <span class="sc">~</span> age <span class="sc">+</span> female <span class="sc">+</span> diabetes <span class="sc">+</span> ckd <span class="sc">+</span> severity,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat,</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> binomial</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>ps <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_ps, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dat<span class="sc">$</span>ps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.01519 0.17455 0.32696 0.36167 0.51387 0.94530 </code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="propensity-score-분포와-overlap" class="level2" data-number="23.6">
+<h2 data-number="23.6" class="anchored" data-anchor-id="propensity-score-분포와-overlap"><span class="header-section-number">23.6</span> Propensity score 분포와 overlap</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>ps[dat<span class="sc">$</span>treatment <span class="sc">==</span> <span class="dv">0</span>],</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="dv">30</span>,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Propensity score distribution"</span>,</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Propensity score"</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>ps[dat<span class="sc">$</span>treatment <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="dv">30</span>,</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">add =</span> <span class="cn">TRUE</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="12-ch12_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>실제 분석에서는 두 군의 PS 분포를 겹쳐 그려 overlap을 확인한다.</p>
+<hr>
+</section>
+<section id="smd-계산-함수" class="level2" data-number="23.7">
+<h2 data-number="23.7" class="anchored" data-anchor-id="smd-계산-함수"><span class="header-section-number">23.7</span> SMD 계산 함수</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>smd_cont <span class="ot">&lt;-</span> <span class="cf">function</span>(x, treat) {</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  m1 <span class="ot">&lt;-</span> <span class="fu">mean</span>(x[treat <span class="sc">==</span> <span class="dv">1</span>])</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  m0 <span class="ot">&lt;-</span> <span class="fu">mean</span>(x[treat <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  s1 <span class="ot">&lt;-</span> <span class="fu">var</span>(x[treat <span class="sc">==</span> <span class="dv">1</span>])</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  s0 <span class="ot">&lt;-</span> <span class="fu">var</span>(x[treat <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  sp <span class="ot">&lt;-</span> <span class="fu">sqrt</span>((s1 <span class="sc">+</span> s0) <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  (m1 <span class="sc">-</span> m0) <span class="sc">/</span> sp</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>smd_bin <span class="ot">&lt;-</span> <span class="cf">function</span>(x, treat) {</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>  p1 <span class="ot">&lt;-</span> <span class="fu">mean</span>(x[treat <span class="sc">==</span> <span class="dv">1</span>])</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>  p0 <span class="ot">&lt;-</span> <span class="fu">mean</span>(x[treat <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> (p1 <span class="sc">+</span> p0) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>  (p1 <span class="sc">-</span> p0) <span class="sc">/</span> <span class="fu">sqrt</span>(p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p))</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>smd_before <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">age =</span> <span class="fu">smd_cont</span>(dat<span class="sc">$</span>age, dat<span class="sc">$</span>treatment),</span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">female =</span> <span class="fu">smd_bin</span>(dat<span class="sc">$</span>female, dat<span class="sc">$</span>treatment),</span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">diabetes =</span> <span class="fu">smd_bin</span>(dat<span class="sc">$</span>diabetes, dat<span class="sc">$</span>treatment),</span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">ckd =</span> <span class="fu">smd_bin</span>(dat<span class="sc">$</span>ckd, dat<span class="sc">$</span>treatment),</span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">severity =</span> <span class="fu">smd_cont</span>(dat<span class="sc">$</span>severity, dat<span class="sc">$</span>treatment)</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>smd_before</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        age      female    diabetes         ckd    severity 
+ 0.30263796 -0.03965872  0.15602879  0.23295877  0.94934338 </code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="iptw-계산" class="level2" data-number="23.8">
+<h2 data-number="23.8" class="anchored" data-anchor-id="iptw-계산"><span class="header-section-number">23.8</span> IPTW 계산</h2>
+<p>ATE를 목표로 하는 IPTW를 계산한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>w_ate <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>treatment <span class="sc">==</span> <span class="dv">1</span>,</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span> <span class="sc">/</span> dat<span class="sc">$</span>ps,</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> dat<span class="sc">$</span>ps)</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dat<span class="sc">$</span>w_ate)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  1.015   1.213   1.484   1.988   2.062  21.606 </code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="stabilized-weight-계산" class="level2" data-number="23.9">
+<h2 data-number="23.9" class="anchored" data-anchor-id="stabilized-weight-계산"><span class="header-section-number">23.9</span> Stabilized weight 계산</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>p_treat <span class="ot">&lt;-</span> <span class="fu">mean</span>(dat<span class="sc">$</span>treatment <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>sw_ate <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>treatment <span class="sc">==</span> <span class="dv">1</span>,</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  p_treat <span class="sc">/</span> dat<span class="sc">$</span>ps,</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">1</span> <span class="sc">-</span> p_treat) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> dat<span class="sc">$</span>ps)</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dat<span class="sc">$</span>sw_ate)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.3826  0.7002  0.8115  0.9983  1.0489  7.8141 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(dat<span class="sc">$</span>sw_ate)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.9982738</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="weight-distribution-확인" class="level2" data-number="23.10">
+<h2 data-number="23.10" class="anchored" data-anchor-id="weight-distribution-확인"><span class="header-section-number">23.10</span> Weight distribution 확인</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>sw_ate,</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="dv">40</span>,</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Stabilized IPTW distribution"</span>,</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Stabilized weight"</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="12-ch12_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(dat<span class="sc">$</span>sw_ate, <span class="at">probs =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>, <span class="fl">0.95</span>, <span class="fl">0.99</span>, <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       0%       50%       90%       95%       99%      100% 
+0.3825939 0.8115219 1.5171979 2.1120248 3.6429480 7.8140684 </code></pre>
+</div>
+</div>
+<p>극단적 가중치가 있으면 trimming 또는 truncation을 고려한다.</p>
+<hr>
+</section>
+<section id="weighted-smd-계산" class="level2" data-number="23.11">
+<h2 data-number="23.11" class="anchored" data-anchor-id="weighted-smd-계산"><span class="header-section-number">23.11</span> Weighted SMD 계산</h2>
+<p>가중 평균과 가중 분산을 이용해 간단히 SMD를 계산한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>wmean <span class="ot">&lt;-</span> <span class="cf">function</span>(x, w) {</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(w <span class="sc">*</span> x) <span class="sc">/</span> <span class="fu">sum</span>(w)</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>wvar <span class="ot">&lt;-</span> <span class="cf">function</span>(x, w) {</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">wmean</span>(x, w)</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(w <span class="sc">*</span> (x <span class="sc">-</span> mu)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">/</span> <span class="fu">sum</span>(w)</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>weighted_smd_cont <span class="ot">&lt;-</span> <span class="cf">function</span>(x, treat, w) {</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>  m1 <span class="ot">&lt;-</span> <span class="fu">wmean</span>(x[treat <span class="sc">==</span> <span class="dv">1</span>], w[treat <span class="sc">==</span> <span class="dv">1</span>])</span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>  m0 <span class="ot">&lt;-</span> <span class="fu">wmean</span>(x[treat <span class="sc">==</span> <span class="dv">0</span>], w[treat <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>  v1 <span class="ot">&lt;-</span> <span class="fu">wvar</span>(x[treat <span class="sc">==</span> <span class="dv">1</span>], w[treat <span class="sc">==</span> <span class="dv">1</span>])</span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>  v0 <span class="ot">&lt;-</span> <span class="fu">wvar</span>(x[treat <span class="sc">==</span> <span class="dv">0</span>], w[treat <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>  (m1 <span class="sc">-</span> m0) <span class="sc">/</span> <span class="fu">sqrt</span>((v1 <span class="sc">+</span> v0) <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>weighted_smd_bin <span class="ot">&lt;-</span> <span class="cf">function</span>(x, treat, w) {</span>
+<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a>  p1 <span class="ot">&lt;-</span> <span class="fu">wmean</span>(x[treat <span class="sc">==</span> <span class="dv">1</span>], w[treat <span class="sc">==</span> <span class="dv">1</span>])</span>
+<span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a>  p0 <span class="ot">&lt;-</span> <span class="fu">wmean</span>(x[treat <span class="sc">==</span> <span class="dv">0</span>], w[treat <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb37-21"><a href="#cb37-21" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> (p1 <span class="sc">+</span> p0) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb37-22"><a href="#cb37-22" aria-hidden="true" tabindex="-1"></a>  (p1 <span class="sc">-</span> p0) <span class="sc">/</span> <span class="fu">sqrt</span>(p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p))</span>
+<span id="cb37-23"><a href="#cb37-23" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb37-24"><a href="#cb37-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-25"><a href="#cb37-25" aria-hidden="true" tabindex="-1"></a>smd_after_w <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb37-26"><a href="#cb37-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">age =</span> <span class="fu">weighted_smd_cont</span>(dat<span class="sc">$</span>age, dat<span class="sc">$</span>treatment, dat<span class="sc">$</span>sw_ate),</span>
+<span id="cb37-27"><a href="#cb37-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">female =</span> <span class="fu">weighted_smd_bin</span>(dat<span class="sc">$</span>female, dat<span class="sc">$</span>treatment, dat<span class="sc">$</span>sw_ate),</span>
+<span id="cb37-28"><a href="#cb37-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">diabetes =</span> <span class="fu">weighted_smd_bin</span>(dat<span class="sc">$</span>diabetes, dat<span class="sc">$</span>treatment, dat<span class="sc">$</span>sw_ate),</span>
+<span id="cb37-29"><a href="#cb37-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">ckd =</span> <span class="fu">weighted_smd_bin</span>(dat<span class="sc">$</span>ckd, dat<span class="sc">$</span>treatment, dat<span class="sc">$</span>sw_ate),</span>
+<span id="cb37-30"><a href="#cb37-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">severity =</span> <span class="fu">weighted_smd_cont</span>(dat<span class="sc">$</span>severity, dat<span class="sc">$</span>treatment, dat<span class="sc">$</span>sw_ate)</span>
+<span id="cb37-31"><a href="#cb37-31" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-32"><a href="#cb37-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-33"><a href="#cb37-33" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(</span>
+<span id="cb37-34"><a href="#cb37-34" aria-hidden="true" tabindex="-1"></a>  <span class="at">before =</span> smd_before,</span>
+<span id="cb37-35"><a href="#cb37-35" aria-hidden="true" tabindex="-1"></a>  <span class="at">after_weighting =</span> smd_after_w</span>
+<span id="cb37-36"><a href="#cb37-36" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                       age      female    diabetes         ckd   severity
+before          0.30263796 -0.03965872  0.15602879  0.23295877 0.94934338
+after_weighting 0.07439784  0.03399078 -0.01017922 -0.04551816 0.01696065</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="love-plot-직접-작성" class="level2" data-number="23.12">
+<h2 data-number="23.12" class="anchored" data-anchor-id="love-plot-직접-작성"><span class="header-section-number">23.12</span> Love plot 직접 작성</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>smd_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">covariate =</span> <span class="fu">names</span>(smd_before),</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">before =</span> <span class="fu">abs</span>(<span class="fu">as.numeric</span>(smd_before)),</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">after =</span> <span class="fu">abs</span>(<span class="fu">as.numeric</span>(smd_after_w))</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>  smd_df<span class="sc">$</span>before,</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seq_along</span>(smd_df<span class="sc">$</span>covariate),</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(smd_df<span class="sc">$</span>before, smd_df<span class="sc">$</span>after)),</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">yaxt =</span> <span class="st">"n"</span>,</span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Absolute SMD"</span>,</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">""</span>,</span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Love plot"</span></span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(</span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a>  smd_df<span class="sc">$</span>after,</span>
+<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seq_along</span>(smd_df<span class="sc">$</span>covariate),</span>
+<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">19</span></span>
+<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-23"><a href="#cb39-23" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(</span>
+<span id="cb39-24"><a href="#cb39-24" aria-hidden="true" tabindex="-1"></a>  smd_df<span class="sc">$</span>before,</span>
+<span id="cb39-25"><a href="#cb39-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seq_along</span>(smd_df<span class="sc">$</span>covariate),</span>
+<span id="cb39-26"><a href="#cb39-26" aria-hidden="true" tabindex="-1"></a>  smd_df<span class="sc">$</span>after,</span>
+<span id="cb39-27"><a href="#cb39-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seq_along</span>(smd_df<span class="sc">$</span>covariate)</span>
+<span id="cb39-28"><a href="#cb39-28" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb39-29"><a href="#cb39-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-30"><a href="#cb39-30" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="fl">0.1</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb39-31"><a href="#cb39-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-32"><a href="#cb39-32" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(</span>
+<span id="cb39-33"><a href="#cb39-33" aria-hidden="true" tabindex="-1"></a>  <span class="at">side =</span> <span class="dv">2</span>,</span>
+<span id="cb39-34"><a href="#cb39-34" aria-hidden="true" tabindex="-1"></a>  <span class="at">at =</span> <span class="fu">seq_along</span>(smd_df<span class="sc">$</span>covariate),</span>
+<span id="cb39-35"><a href="#cb39-35" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels =</span> smd_df<span class="sc">$</span>covariate,</span>
+<span id="cb39-36"><a href="#cb39-36" aria-hidden="true" tabindex="-1"></a>  <span class="at">las =</span> <span class="dv">1</span></span>
+<span id="cb39-37"><a href="#cb39-37" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb39-38"><a href="#cb39-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-39"><a href="#cb39-39" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(</span>
+<span id="cb39-40"><a href="#cb39-40" aria-hidden="true" tabindex="-1"></a>  <span class="st">"topright"</span>,</span>
+<span id="cb39-41"><a href="#cb39-41" aria-hidden="true" tabindex="-1"></a>  <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"Before"</span>, <span class="st">"After weighting"</span>),</span>
+<span id="cb39-42"><a href="#cb39-42" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">19</span>)</span>
+<span id="cb39-43"><a href="#cb39-43" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="12-ch12_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="weighted-outcome-analysis" class="level2" data-number="23.13">
+<h2 data-number="23.13" class="anchored" data-anchor-id="weighted-outcome-analysis"><span class="header-section-number">23.13</span> Weighted outcome analysis</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>fit_iptw <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  outcome <span class="sc">~</span> treatment,</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat,</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> binomial,</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">weights =</span> sw_ate</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_iptw)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = outcome ~ treatment, family = binomial, data = dat, 
+    weights = sw_ate)
+
+Coefficients:
+            Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)  -1.7182     0.1001 -17.158   &lt;2e-16 ***
+treatment    -0.3356     0.1827  -1.836   0.0663 .  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 963.61  on 1199  degrees of freedom
+Residual deviance: 960.13  on 1198  degrees of freedom
+AIC: 1004.3
+
+Number of Fisher Scoring iterations: 4</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(fit_iptw))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept)   treatment 
+  0.1793965   0.7148983 </code></pre>
+</div>
+</div>
+<p>가중치를 사용한 분석에서는 robust standard error를 고려하는 것이 좋다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sandwich)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lmtest)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="fu">coeftest</span>(</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>  fit_iptw,</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">vcov =</span> <span class="fu">vcovHC</span>(fit_iptw, <span class="at">type =</span> <span class="st">"HC0"</span>)</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
+</section>
+<section id="weight-truncation-예시" class="level2" data-number="23.14">
+<h2 data-number="23.14" class="anchored" data-anchor-id="weight-truncation-예시"><span class="header-section-number">23.14</span> Weight truncation 예시</h2>
+<p>상위 1%와 하위 1%에서 가중치를 절단해 민감도 분석을 수행한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="fu">quantile</span>(dat<span class="sc">$</span>sw_ate, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.01</span>, <span class="fl">0.99</span>))</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>sw_trunc <span class="ot">&lt;-</span> <span class="fu">pmin</span>(</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pmax</span>(dat<span class="sc">$</span>sw_ate, q[<span class="dv">1</span>]),</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>  q[<span class="dv">2</span>]</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dat<span class="sc">$</span>sw_trunc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.4061  0.7002  0.8115  0.9850  1.0489  3.6429 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>fit_iptw_trunc <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  outcome <span class="sc">~</span> treatment,</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat,</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> binomial,</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">weights =</span> sw_trunc</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(fit_iptw_trunc))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept)   treatment 
+  0.1781718   0.7472124 </code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="matching-with-matchit" class="level2" data-number="23.15">
+<h2 data-number="23.15" class="anchored" data-anchor-id="matching-with-matchit"><span class="header-section-number">23.15</span> Matching with MatchIt</h2>
+<p><code>MatchIt</code> 패키지가 설치되어 있으면 matching을 쉽게 수행할 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MatchIt)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">matchit</span>(</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  treatment <span class="sc">~</span> age <span class="sc">+</span> female <span class="sc">+</span> diabetes <span class="sc">+</span> ckd <span class="sc">+</span> severity,</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat,</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"nearest"</span>,</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">distance =</span> <span class="st">"logit"</span>,</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">ratio =</span> <span class="dv">1</span>,</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">caliper =</span> <span class="fl">0.2</span></span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m1)</span>
+<span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-14"><a href="#cb49-14" aria-hidden="true" tabindex="-1"></a>matched_dat <span class="ot">&lt;-</span> <span class="fu">match.data</span>(m1)</span>
+<span id="cb49-15"><a href="#cb49-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-16"><a href="#cb49-16" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(matched_dat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
+</section>
+<section id="matching-후-balance-확인" class="level2" data-number="23.16">
+<h2 data-number="23.16" class="anchored" data-anchor-id="matching-후-balance-확인"><span class="header-section-number">23.16</span> Matching 후 balance 확인</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cobalt)</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="fu">bal.tab</span>(m1, <span class="at">threshold =</span> <span class="fl">0.1</span>)</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="fu">love.plot</span>(</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>  m1,</span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">threshold =</span> <span class="fl">0.1</span>,</span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">abs =</span> <span class="cn">TRUE</span></span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
+</section>
+<section id="matching-후-outcome-분석-1" class="level2" data-number="23.17">
+<h2 data-number="23.17" class="anchored" data-anchor-id="matching-후-outcome-분석-1"><span class="header-section-number">23.17</span> Matching 후 outcome 분석</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>fit_matched <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  outcome <span class="sc">~</span> treatment,</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> matched_dat,</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> binomial,</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">weights =</span> weights</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_matched)</span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(fit_matched))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>실제 논문 분석에서는 matching 구조를 반영한 표준오차 계산을 명확히 해야 한다.</p>
+<hr>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./11-ch11.html" class="pagination-link" aria-label="임상시험 설계와 분석 원칙">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">임상시험 설계와 분석 원칙</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./13-ch13.html" class="pagination-link" aria-label="Causal Inference">
+        <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Causal Inference</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
