@@ -1,0 +1,2252 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>3&nbsp; 단순선형회귀분석 – Regression Analysis</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./04-chapter4.html" rel="next">
+<link href="./02-chapter2.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-9e3e5b9121e68b3f077afb32f2c64d95.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-chapter3.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">단순선형회귀분석</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Regression Analysis</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">목 차</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-chapter1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">서론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-chapter2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">기초 행렬 이론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-chapter3.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">단순선형회귀분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-chapter4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">다중선형회귀분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-chapter5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">회귀진단 및 보정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-chapter6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">모형비교와 변수선택법</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-chapter7.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">다중회귀분석 예제</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-chapter8.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">일반화 가중회귀모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-chapter9.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">가변수 회귀모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-chapter10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">능형회귀추정량과 LASSO 추정량</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#산점도" id="toc-산점도" class="nav-link active" data-scroll-target="#산점도"><span class="header-section-number">3.1</span> 산점도</a></li>
+  <li><a href="#상관분석" id="toc-상관분석" class="nav-link" data-scroll-target="#상관분석"><span class="header-section-number">3.2</span> 상관분석</a>
+  <ul class="collapse">
+  <li><a href="#표본상관계수" id="toc-표본상관계수" class="nav-link" data-scroll-target="#표본상관계수"><span class="header-section-number">3.2.1</span> 표본상관계수</a></li>
+  <li><a href="#상관분석-1" id="toc-상관분석-1" class="nav-link" data-scroll-target="#상관분석-1"><span class="header-section-number">3.2.2</span> 상관분석</a></li>
+  <li><a href="#표본상관계수-해석시-유의점" id="toc-표본상관계수-해석시-유의점" class="nav-link" data-scroll-target="#표본상관계수-해석시-유의점"><span class="header-section-number">3.2.3</span> 표본상관계수 해석시 유의점</a></li>
+  </ul></li>
+  <li><a href="#단순선형회귀모형" id="toc-단순선형회귀모형" class="nav-link" data-scroll-target="#단순선형회귀모형"><span class="header-section-number">3.3</span> 단순선형회귀모형</a></li>
+  <li><a href="#모수-추정" id="toc-모수-추정" class="nav-link" data-scroll-target="#모수-추정"><span class="header-section-number">3.4</span> 모수 추정</a>
+  <ul class="collapse">
+  <li><a href="#최소제곱법을-이용한-모수-추정" id="toc-최소제곱법을-이용한-모수-추정" class="nav-link" data-scroll-target="#최소제곱법을-이용한-모수-추정"><span class="header-section-number">3.4.1</span> 최소제곱법을 이용한 모수 추정</a></li>
+  <li><a href="#가능도함수를-이용한-모수-추정" id="toc-가능도함수를-이용한-모수-추정" class="nav-link" data-scroll-target="#가능도함수를-이용한-모수-추정"><span class="header-section-number">3.4.2</span> 가능도함수를 이용한 모수 추정</a></li>
+  <li><a href="#추정량의-성질" id="toc-추정량의-성질" class="nav-link" data-scroll-target="#추정량의-성질"><span class="header-section-number">3.4.3</span> 추정량의 성질</a></li>
+  </ul></li>
+  <li><a href="#모형에-대한-적합도-검정" id="toc-모형에-대한-적합도-검정" class="nav-link" data-scroll-target="#모형에-대한-적합도-검정"><span class="header-section-number">3.5</span> 모형에 대한 적합도 검정</a>
+  <ul class="collapse">
+  <li><a href="#결정계수" id="toc-결정계수" class="nav-link" data-scroll-target="#결정계수"><span class="header-section-number">3.5.1</span> 결정계수</a></li>
+  <li><a href="#회귀식에-대한-검정" id="toc-회귀식에-대한-검정" class="nav-link" data-scroll-target="#회귀식에-대한-검정"><span class="header-section-number">3.5.2</span> 회귀식에 대한 검정</a></li>
+  <li><a href="#회귀계수에-대한-검정" id="toc-회귀계수에-대한-검정" class="nav-link" data-scroll-target="#회귀계수에-대한-검정"><span class="header-section-number">3.5.3</span> 회귀계수에 대한 검정</a></li>
+  <li><a href="#회귀계수에-대한-신뢰구간" id="toc-회귀계수에-대한-신뢰구간" class="nav-link" data-scroll-target="#회귀계수에-대한-신뢰구간"><span class="header-section-number">3.5.4</span> 회귀계수에 대한 신뢰구간</a></li>
+  <li><a href="#적합값과-예측값에-대한-신뢰구간" id="toc-적합값과-예측값에-대한-신뢰구간" class="nav-link" data-scroll-target="#적합값과-예측값에-대한-신뢰구간"><span class="header-section-number">3.5.5</span> 적합값과 예측값에 대한 신뢰구간</a></li>
+  </ul></li>
+  <li><a href="#잔차-분석" id="toc-잔차-분석" class="nav-link" data-scroll-target="#잔차-분석"><span class="header-section-number">3.6</span> 잔차 분석</a>
+  <ul class="collapse">
+  <li><a href="#회귀함수의-선형성" id="toc-회귀함수의-선형성" class="nav-link" data-scroll-target="#회귀함수의-선형성"><span class="header-section-number">3.6.1</span> 회귀함수의 선형성</a></li>
+  <li><a href="#오차항의-등분산성과-독립성" id="toc-오차항의-등분산성과-독립성" class="nav-link" data-scroll-target="#오차항의-등분산성과-독립성"><span class="header-section-number">3.6.2</span> 오차항의 등분산성과 독립성</a></li>
+  <li><a href="#오차항의-정규성" id="toc-오차항의-정규성" class="nav-link" data-scroll-target="#오차항의-정규성"><span class="header-section-number">3.6.3</span> 오차항의 정규성</a></li>
+  </ul></li>
+  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example"><span class="header-section-number">3.7</span> Example</a>
+  <ul class="collapse">
+  <li><a href="#example-1" id="toc-example-1" class="nav-link" data-scroll-target="#example-1"><span class="header-section-number">3.7.1</span> Example 1</a></li>
+  <li><a href="#example-2" id="toc-example-2" class="nav-link" data-scroll-target="#example-2"><span class="header-section-number">3.7.2</span> Example 2</a></li>
+  </ul></li>
+  <li><a href="#부분-회귀" id="toc-부분-회귀" class="nav-link" data-scroll-target="#부분-회귀"><span class="header-section-number">3.8</span> 부분 회귀</a>
+  <ul class="collapse">
+  <li><a href="#example-3" id="toc-example-3" class="nav-link" data-scroll-target="#example-3"><span class="header-section-number">3.8.1</span> Example</a></li>
+  </ul></li>
+  <li><a href="#원점을-지나는-회귀모형" id="toc-원점을-지나는-회귀모형" class="nav-link" data-scroll-target="#원점을-지나는-회귀모형"><span class="header-section-number">3.9</span> 원점을 지나는 회귀모형</a></li>
+  <li><a href="#더미변수를-이용한-회귀분석" id="toc-더미변수를-이용한-회귀분석" class="nav-link" data-scroll-target="#더미변수를-이용한-회귀분석"><span class="header-section-number">3.10</span> 더미변수를 이용한 회귀분석</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="chapter3" class="quarto-section-identifier"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">단순선형회귀분석</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<ul>
+<li>회귀분석의 가장 간단한 형태는 한 개의 설명변수와 한 개의 반응변수 간의 관계식을 찾는 문제이며, 이를 단순회귀분석(simple regression analysis)라고 함</li>
+</ul>
+<section id="산점도" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="산점도"><span class="header-section-number">3.1</span> 산점도</h2>
+<ul>
+<li><span class="math inline">\(n\)</span>개의 개체에 대해 이변량 데이터 <span class="math inline">\((X_1,Y_1), (X_2, Y_2), \cdots, (X_n,Y_n)\)</span>를 관측한 경우, 각 개체에 대한 관측값은 2차원 공간에서 한점으로 표시될 수 있음
+<ul>
+<li>이러한 그래프를 산점도(scatter plot 또는 scatter diagram)라 함</li>
+</ul></li>
+<li>Scatter plot with father- and son-height</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("UsingR")</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(UsingR)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(father.son)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><p>만약 산점도에서 두 변수 간의 관계가 선형으로 보인다면 단순선형회귀분석을 통해 적합한 함수식을 구할 수 있음</p></li>
+<li><p>수학적으로, 1차 직선 <span class="math inline">\(y=\beta_0+\beta_1x\)</span>에서 <span class="math inline">\(\beta_0\)</span>는 절편, <span class="math inline">\(\beta_1\)</span>은 기울기를 나타냄</p>
+<ul>
+<li>기울기 <span class="math inline">\(\beta_1\)</span>이 양수이면 <span class="math inline">\(x\)</span>가 증가할 때 <span class="math inline">\(y\)</span>도 증가하며, <span class="math inline">\(\beta_1\)</span>이 음수이면 <span class="math inline">\(x\)</span>가 증가할 때 <span class="math inline">\(y\)</span>는 감소하는 관계를 나타냄</li>
+<li>실제 데이터에서는 완벽한 직선식으로 표현하는 것이 불가능하므로 오차항을 포함하는 통계적 모형을 통해 적절한 관계식을 구해야 함</li>
+</ul></li>
+<li><p>회귀분석은 산점도를 통한 변수간의 관계를 살펴보는 것으로부터 시작함</p></li>
+<li><p>Example: 차량의 속도(speed)와 정차거리(stopping distance)</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(cars, <span class="dv">10</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   speed dist
+1      4    2
+2      4   10
+3      7    4
+4      7   22
+5      8   16
+6      9   10
+7     10   18
+8     10   26
+9     10   34
+10    11   17</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cars)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>Trend</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cars)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="fu">lm</span>(dist<span class="sc">~</span>speed, <span class="at">data=</span>cars), <span class="at">col=</span><span class="st">"red"</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(cars<span class="sc">$</span>speed,<span class="fu">predict</span>(<span class="fu">lm</span>(dist<span class="sc">~</span>speed<span class="sc">+</span><span class="fu">I</span>(speed<span class="sc">^</span><span class="dv">2</span>), <span class="at">data=</span>cars)), <span class="at">col=</span><span class="st">"blue"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><br></p>
+</section>
+<section id="상관분석" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="상관분석"><span class="header-section-number">3.2</span> 상관분석</h2>
+<section id="표본상관계수" class="level3" data-number="3.2.1">
+<h3 data-number="3.2.1" class="anchored" data-anchor-id="표본상관계수"><span class="header-section-number">3.2.1</span> 표본상관계수</h3>
+<ul>
+<li>두 변수 간의 연관성(association)은 두 개의 연속형 변수 간의 상관계수(correlation coefficient)를 구하여 추정할 수 있음
+<ul>
+<li>여기서 상관계수는 상관성(correlation)의 크기를 나타내며, 상관성은 선형성(linearity)을 의미함</li>
+<li>두 변수간 연관성의 방향(direction)과 강도(strength)를 측정</li>
+</ul></li>
+<li>두 확률변수 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>의 상관계수 <span class="math inline">\(\rho\)</span>는
+<ul>
+<li>분산(variance): <span class="math inline">\(Var(X)=E(X-\mu_X)^2\)</span>, <span class="math inline">\(Var(Y)=E(Y-\mu_Y)^2\)</span></li>
+<li>공분산(covariance): <span class="math inline">\(Cov(X,Y)=E(X-\mu_X)(Y-\mu_Y)\)</span></li>
+</ul></li>
+</ul>
+<p><span class="math display">\[
+\rho=cor(X,Y)=\frac{Cov(X,Y)}{\sqrt{Var(X)Var(Y)}}
+\]</span></p>
+<ul>
+<li>두 확률변수 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>의 관측값 <span class="math inline">\((X_1,Y_1), (X_2, Y_2), \cdots, (X_n,Y_n)\)</span>를 관측한 경우 산점도는 다음과 같이 <span class="math inline">\((\bar{X}, \bar{Y})\)</span>를 기준으로 4분할 됨</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("UsingR")</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(UsingR)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(father.son, <span class="at">xlab=</span><span class="st">"X"</span>, <span class="at">ylab=</span><span class="st">"Y"</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DescTools)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">DrawEllipse</span>(<span class="fu">mean</span>(father.son<span class="sc">$</span>fheight),<span class="fu">mean</span>(father.son<span class="sc">$</span>sheight),<span class="at">radius.x=</span><span class="dv">9</span>,<span class="at">radius.y=</span><span class="fl">3.5</span>,<span class="at">rot=</span><span class="fl">10.3</span>,<span class="at">border=</span><span class="st">"red"</span>, <span class="at">lwd=</span><span class="fl">1.5</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">new=</span>T)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(father.son, <span class="at">xlab=</span><span class="st">"X"</span>, <span class="at">ylab=</span><span class="st">"Y"</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v=</span><span class="fu">mean</span>(father.son<span class="sc">$</span>fheight), <span class="at">lty=</span><span class="dv">2</span>, <span class="at">col=</span><span class="st">"red"</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h=</span><span class="fu">mean</span>(father.son<span class="sc">$</span>sheight), <span class="at">lty=</span><span class="dv">2</span>, <span class="at">col=</span><span class="st">"red"</span>)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="fu">mean</span>(father.son<span class="sc">$</span>fheight),<span class="fu">mean</span>(father.son<span class="sc">$</span>sheight), <span class="at">cex=</span><span class="dv">2</span>, <span class="at">col=</span><span class="st">"red"</span>, <span class="at">pch=</span><span class="dv">19</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><span class="math inline">\(\bar{X}\)</span>, <span class="math inline">\(\bar{Y}\)</span>, <span class="math inline">\(\hat{Cov}(X,Y)\)</span>를 각각 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>의 표본평균, 표본공분산이라고 하면</li>
+</ul>
+<p><span class="math display">\[
+\bar{X}=\frac{1}{n}\sum_{i=1}^n X_i, \,\,\, \bar{Y}=\frac{1}{n}\sum_{i=1}^n Y_i, \,\,\, \hat{Cov}(X,Y)=\frac{1}{n-1}\sum_{i=1}^n (X_i-\bar{X})(Y_i-\bar{Y})
+\]</span></p>
+<ul>
+<li>공분산의 부호는 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span> 사이의 선형관계에 대한 방향을 나타냄
+<ul>
+<li><span class="math inline">\(\hat{Cov}(X,Y)&gt;0\)</span>이면, <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span> 사이의 양의 선형관계</li>
+<li><span class="math inline">\(\hat{Cov}(X,Y)&lt;0\)</span>이면, <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span> 사이의 음의 선형관계</li>
+</ul></li>
+<li>공분산은 선형관계의 강도(strength)가 얼마나 되는지 알기 어려움
+<ul>
+<li>측정단위의 변화에 영향을 받음</li>
+<li>예: 동일한 자료에서 원 단위 대신 천원 단위를 사용하면 공분산 값이 달라짐</li>
+</ul></li>
+<li>공분산에서 단위에 따른 변화를 제거하기 위해 공분산을 계산하기 전에 데이터를 표준화(standardization) 할 수 있음
+<ul>
+<li>각 관측값에서 평균을 빼고 표준편차로 나눔</li>
+<li><span class="math inline">\(X\)</span>의 표본분산과 표준편차: <span class="math inline">\(S_X^2=\frac{1}{n-1}\sum_{i=1}^n(X_i-\bar{X})^2\)</span>, <span class="math inline">\(S_X=\sqrt{S_X^2}\)</span></li>
+<li><span class="math inline">\(Y\)</span>의 표본분산과 표준편차: <span class="math inline">\(S_Y^2=\frac{1}{n-1}\sum_{i=1}^n(Y_i-\bar{Y})^2\)</span>, <span class="math inline">\(S_X=\sqrt{S_Y^2}\)</span></li>
+</ul></li>
+</ul>
+<p><span class="math display">\[
+Z_X=\frac{X_i-\bar{X}}{S_X}, \,\,\, Z_Y=\frac{Y_i-\bar{Y}}{S_Y}
+\]</span></p>
+<ul>
+<li><p>표준화된 <span class="math inline">\(Z\)</span>는 평균이 0이고 표준편차가 1이 됨</p></li>
+<li><p>표준화된 <span class="math inline">\(Z_X\)</span>와 <span class="math inline">\(Z_Y\)</span>의 공분산을 상관계수(correlation coefficient)라 함</p></li>
+</ul>
+<p><span class="math display">\[
+\hat{Cov}(Z_X,Z_Y)=\hat{Cor}(Z_X,Z_Y)=\frac{1}{n-1}\sum_{i=1}^n Z_{Xi}Z_{Yi}=\frac{1}{n-1}\sum_{i=1}^n(\frac{X_i-\bar{X}}{S_X})(\frac{Y_i-\bar{Y}}{S_Y})
+\]</span></p>
+<ul>
+<li>피어슨 상관계수(Pearson correlation coefficient) <span class="math inline">\(r\)</span>은 상관계수에 대한 추정량으로 표본상관계수라 하며 다음과 같이 정의함</li>
+</ul>
+<p><span class="math display">\[
+\begin{align}
+r=\hat{Cor}(X,Y)=\frac{\hat{Cov}(X,Y)}{S_XS_Y}&amp;=\frac{1}{n-1}\sum_{i=1}^n(\frac{X_i-\bar{X}}{S_X})(\frac{Y_i-\bar{Y}}{S_Y})\\
+&amp;=\frac{\sum_{i=1}^n(X_i-\bar{X})(Y_i-\bar{Y})}{\sqrt{\sum_{i=1}^n(X_i-\bar{X})^2\sum_{i=1}^n(Y_i-\bar{Y})^2}}
+\end{align}
+\]</span></p>
+<ul>
+<li>상관계수의 범위</li>
+</ul>
+<p><span class="math display">\[
+-1 \le \rho (r) \le 1
+\]</span></p>
+<ul>
+<li>상관성의 강도
+<ul>
+<li>상관계수값이 0에 가까울수록 상관성이 없음</li>
+<li>1에 가까울수록 강한 양의 선형 관계</li>
+<li>-1에 가까울수록 강한 음의 선형 관계</li>
+</ul></li>
+<li>상관계수 <span class="math inline">\(\rho=0.9\)</span></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="fl">0.9</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>,<span class="dv">0</span>,<span class="dv">1</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>,rho<span class="sc">*</span>x, <span class="fu">sqrt</span>(<span class="dv">1</span><span class="sc">-</span>rho<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x,y)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="fu">lm</span>(y<span class="sc">~</span>x))</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>상관계수 <span class="math inline">\(\rho=-0.9\)</span></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.9</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>,<span class="dv">0</span>,<span class="dv">1</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>,rho<span class="sc">*</span>x, <span class="fu">sqrt</span>(<span class="dv">1</span><span class="sc">-</span>rho<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x,y)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="fu">lm</span>(y<span class="sc">~</span>x))</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>상관계수 <span class="math inline">\(\rho=-0.1\)</span></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.1</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>,<span class="dv">0</span>,<span class="dv">1</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>,rho<span class="sc">*</span>x, <span class="fu">sqrt</span>(<span class="dv">1</span><span class="sc">-</span>rho<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x,y)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="fu">lm</span>(y<span class="sc">~</span>x))</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><span class="math inline">\(Y=X^2\)</span>인 경우</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>,<span class="dv">0</span>,<span class="dv">1</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> x<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x,y)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(x<span class="sc">^</span><span class="dv">2</span>, <span class="at">add=</span>T)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(x,y)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1186981</code></pre>
+</div>
+</div>
+<ul>
+<li>상관계수는 오직 선형(linear)관계를 측정함
+<ul>
+<li>비선형적으로 연관이 있을 때에도 상관계수는 0이 될 수 있음</li>
+</ul></li>
+</ul>
+</section>
+<section id="상관분석-1" class="level3" data-number="3.2.2">
+<h3 data-number="3.2.2" class="anchored" data-anchor-id="상관분석-1"><span class="header-section-number">3.2.2</span> 상관분석</h3>
+<ul>
+<li>두 변수 간의 상관관계에 대한 통계적 가설검정을 상관분석(correlation analysis)이라함
+<ul>
+<li>귀무가설을 기각할 수 없는 경우 상관계수를 0으로 받아들임</li>
+</ul></li>
+<li>통계적 가설
+<ul>
+<li><span class="math inline">\(H_0: \rho=0\)</span> (두 변수 간의 상관계수가 0이다)</li>
+<li><span class="math inline">\(H_1: \rho\ne 0\)</span> (두 변수 간의 상관계수가 0이 아니다)</li>
+</ul></li>
+<li>이변량 데이터 <span class="math inline">\(n\)</span>개 쌍의 상관성에 대한 검정은 피어슨 상관계수 <span class="math inline">\(r\)</span>을 이용함</li>
+<li>검정통계량</li>
+</ul>
+<p><span class="math display">\[
+T=\frac{r\sqrt{n-2}}{\sqrt{1-r^2}} \sim t_{n-2}
+\]</span></p>
+<ul>
+<li>유의수준 <span class="math inline">\(\alpha\)</span> 검정</li>
+</ul>
+<p><span class="math display">\[
+|T| \ge t_{n-2}(\alpha/2) \ \text{ then reject null hypothesis}
+\]</span></p>
+<p><img src="fig3/f2.png" class="img-fluid"></p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(cars)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(cars)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  speed dist
+1     4    2
+2     4   10
+3     7    4
+4     7   22
+5     8   16
+6     9   10</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">attach</span>(cars)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(speed, dist)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8068949</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor.test</span>(speed, dist)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's product-moment correlation
+
+data:  speed and dist
+t = 9.464, df = 48, p-value = 1.49e-12
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 0.6816422 0.8862036
+sample estimates:
+      cor 
+0.8068949 </code></pre>
+</div>
+</div>
+<ul>
+<li>결과를 살펴보면 표본상관계수는 0.8069로 양의 상관성이 매우 강한 편이고, 상관성에 대한 검정결과 p-value는 <span class="math inline">\(1.49\times 10^{-12}&lt;0.05\)</span>로 유의수준 <span class="math inline">\(5\%\)</span>에서 귀무가설 <span class="math inline">\(H_0\)</span>를 기각함
+<ul>
+<li>즉, 속도와 거리 간의 상관관계가 통계적으로 매우 유의함</li>
+</ul></li>
+</ul>
+</section>
+<section id="표본상관계수-해석시-유의점" class="level3" data-number="3.2.3">
+<h3 data-number="3.2.3" class="anchored" data-anchor-id="표본상관계수-해석시-유의점"><span class="header-section-number">3.2.3</span> 표본상관계수 해석시 유의점</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>gibbs<span class="ot">&lt;-</span><span class="cf">function</span>(a,b, rho, n){</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>theta1 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>,n,<span class="dv">1</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>theta2 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>,n,<span class="dv">1</span>)</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>theta1[<span class="dv">1</span>]<span class="ot">&lt;-</span>a</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>theta2[<span class="dv">1</span>]<span class="ot">&lt;-</span>b</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n){</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    theta1[i] <span class="ot">&lt;-</span> rho<span class="sc">*</span>theta2[i<span class="dv">-1</span>] <span class="sc">+</span> <span class="fu">sqrt</span>(<span class="dv">1</span><span class="sc">-</span>rho<span class="sc">^</span><span class="dv">2</span>)<span class="sc">*</span><span class="fu">rnorm</span>(<span class="dv">1</span>)</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    theta2[i] <span class="ot">&lt;-</span> rho<span class="sc">*</span>theta1[i] <span class="sc">+</span> <span class="fu">sqrt</span>(<span class="dv">1</span><span class="sc">-</span>rho<span class="sc">^</span><span class="dv">2</span>)<span class="sc">*</span><span class="fu">rnorm</span>(<span class="dv">1</span>)</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cbind</span>(theta1,theta2)</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>gdata<span class="ot">&lt;-</span><span class="fu">gibbs</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="fl">0.05</span>,<span class="dv">100</span>)</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>x<span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(gdata)</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(x)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          V1         V2
+1  0.0000000  0.0000000
+2 -0.6256703  0.1521301
+3 -0.8269769  1.5519366
+4  0.4066925 -0.7991075
+5  0.4468640  0.7597444
+6  0.6130484 -0.2743540</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x<span class="sc">$</span>V1, x<span class="sc">$</span>V2)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="fu">lm</span>(x<span class="sc">$</span>V2<span class="sc">~</span>x<span class="sc">$</span>V1))</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="sc">-</span><span class="fl">1.5</span>,<span class="dv">2</span>,<span class="fu">paste</span>(<span class="st">"r="</span>,<span class="fu">round</span>(<span class="fu">cor</span>(x<span class="sc">$</span>V1, x<span class="sc">$</span>V2),<span class="dv">4</span>),<span class="at">sep=</span><span class="st">""</span>),<span class="at">cex=</span><span class="fl">1.5</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>,<span class="at">by=</span><span class="fl">0.01</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> x<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x,y)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="fu">lm</span>(y<span class="sc">~</span>x))</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="fu">paste</span>(<span class="st">"r="</span>,<span class="fu">round</span>(<span class="fu">cor</span>(x, y),<span class="dv">4</span>),<span class="at">sep=</span><span class="st">""</span>),<span class="at">cex=</span><span class="fl">1.5</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><p>두 경우 모두 표본상관계수는 0에 가깝지만 첫번째 그림은 선형관계가 거의 없는 편임</p></li>
+<li><p>두번째 그림은 곡선 관계가 매우 감함에도 불구하고 표본상관계수는 0임</p></li>
+<li><p>즉, 표본상관계수 <span class="math inline">\(r\)</span>은 직선에 대한 연관성 측도이지, 직선이 아닌 다른 연관성에 대한 측도가 아님</p></li>
+</ul>
+</section>
+</section>
+<section id="단순선형회귀모형" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="단순선형회귀모형"><span class="header-section-number">3.3</span> 단순선형회귀모형</h2>
+<ul>
+<li>한 개의 설명변수(독립변수) <span class="math inline">\(X\)</span>와 한 개의 반응변수(종속변수) <span class="math inline">\(Y\)</span> 간의 일차 선형모형(linear model)</li>
+</ul>
+<p><span class="math display">\[ Y=\beta_0 + \beta_1X
+\]</span></p>
+<ul>
+<li>이변량 관측벡터 <span class="math inline">\((X_1, Y_1), (X_2,Y_2), \ldots, (X_n,Y_n)\)</span>에 대해 단순선형회귀모형(simple lineare regression model)은</li>
+</ul>
+<p><span class="math display">\[
+Y_i=\beta_0+\beta_1X_i+\epsilon_i, \,\,\, i=1,2,\ldots, n
+\]</span></p>
+<ul>
+<li><p>회귀모수(regression parameter)</p>
+<ul>
+<li>절편(intercept): <span class="math inline">\(\beta_0\)</span></li>
+<li>기울기(slope): <span class="math inline">\(\beta_1\)</span></li>
+</ul></li>
+<li><p>오차항(error term) 가정: <span class="math inline">\(\epsilon_i \sim N(0,\sigma^2)\)</span></p></li>
+<li><p>단순선형회귀모형을 벡터와 행렬을 이용해 표현하면,</p></li>
+</ul>
+<p><span class="math display">\[
+\mathbf{Y}=\mathbf{X}\beta+\mathbf{\epsilon}
+\]</span></p>
+<ul>
+<li>여기서 <span class="math inline">\(\mathbf{Y}\)</span>와 <span class="math inline">\(\epsilon\)</span>은 <span class="math inline">\(n\times1\)</span>벡터, <span class="math inline">\(x_i\)</span>와 <span class="math inline">\(\beta\)</span>는 <span class="math inline">\(2\times1\)</span> 벡터이고 <span class="math inline">\(\mathbf{X}\)</span>는 <span class="math inline">\(n\times2\)</span> 행렬</li>
+</ul>
+<p><span class="math display">\[
+\mathbf{Y}=\begin{pmatrix}Y_1\\Y_2\\\vdots\\ Y_n \end{pmatrix}, \,\,\,
+x_i=\begin{pmatrix}1 \\ X_i \end{pmatrix}, \,\,\,
+\mathbf{X}=\begin{pmatrix}x_1' \\ \vdots \\x_n' \end{pmatrix}=\begin{pmatrix}1 &amp; X_1 \\ \vdots &amp;\vdots \\1 &amp; X_n \end{pmatrix}, \,\,\,
+\beta=\begin{pmatrix} \beta_0 \\ \beta_1 \end{pmatrix}, \,\,\,
+\epsilon=\begin{pmatrix} \epsilon_1 \\ \epsilon_2 \\ \vdots \\ \epsilon_n \end{pmatrix}
+\]</span></p>
+<ul>
+<li>회귀모형에서 <span class="math inline">\(X_i\)</span>들은 값이 주어진 상수라고 가정하며, 오차항 <span class="math inline">\(\epsilon_i\)</span>의 평균이 <span class="math inline">\(0\)</span>이라는 가정에 의하여 다음과 같이 표현 가능하다.</li>
+</ul>
+<p><span class="math display">\[
+E(Y_i)=\beta_0+\beta_1X_i
+\]</span></p>
+<ul>
+<li>즉, 선형회귀식은 <span class="math inline">\(Y\)</span>의 기대값을 <span class="math inline">\(X\)</span>의 함수로 나타낸 것으로 볼 수 있으며, <span class="math inline">\(Y\)</span>의 평균값이 <span class="math inline">\(X\)</span> 값에 의존한다는 것을 강조하기 위해 다음과 같이 표현함</li>
+</ul>
+<p><span class="math display">\[
+E(Y_i|X_i)=\beta_0+\beta_1X_i
+\]</span></p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">8</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">*</span>x<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(<span class="fu">seq</span>(<span class="sc">-</span><span class="dv">3</span>,<span class="dv">3</span>,<span class="at">length=</span><span class="dv">100</span>),<span class="dv">0</span>,<span class="fl">0.9</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x,y, <span class="at">type=</span><span class="st">"l"</span>, <span class="at">ylim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">16</span>), <span class="at">xlim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">8</span>), <span class="at">xlab=</span><span class="st">"X"</span>, <span class="at">ylab=</span><span class="st">"Y"</span>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">8</span>, <span class="at">lty=</span><span class="dv">2</span>, <span class="at">col=</span><span class="st">"blue"</span>)</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x1<span class="sc">+</span><span class="dv">2</span>,<span class="fu">seq</span>(<span class="dv">2</span>,<span class="dv">8</span>,<span class="at">length=</span><span class="dv">100</span>),<span class="at">col=</span><span class="st">"blue"</span>)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(<span class="dv">4</span>,<span class="dv">6</span>,<span class="dv">4</span>,<span class="dv">12</span>, <span class="at">lty=</span><span class="dv">2</span>, <span class="at">col=</span><span class="st">"blue"</span>)</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x1<span class="sc">+</span><span class="dv">4</span>,<span class="fu">seq</span>(<span class="dv">6</span>,<span class="dv">12</span>,<span class="at">length=</span><span class="dv">100</span>),<span class="at">col=</span><span class="st">"blue"</span>)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(<span class="dv">6</span>,<span class="dv">10</span>,<span class="dv">6</span>,<span class="dv">16</span>, <span class="at">lty=</span><span class="dv">2</span>, <span class="at">col=</span><span class="st">"blue"</span>)</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x1<span class="sc">+</span><span class="dv">6</span>,<span class="fu">seq</span>(<span class="dv">10</span>,<span class="dv">16</span>,<span class="at">length=</span><span class="dv">100</span>),<span class="at">col=</span><span class="st">"blue"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><span class="math inline">\(X\)</span>의 값에 따라 평균은 달라지지만 분산이 같으므로 각 점에서의 분포모양은 동일함</li>
+</ul>
+<section id="회귀계수-해석" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="회귀계수-해석">회귀계수 해석</h4>
+<ul>
+<li>기울기 <span class="math inline">\(\beta_1\)</span>은 설명변수 <span class="math inline">\(X\)</span>가 한 단위 증가할 때 움직이는 <span class="math inline">\(Y\)</span>의 평균값의 변화량이라고 해석할 수 있음</li>
+</ul>
+</section>
+<section id="일반적인-회귀분석-단계" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="일반적인-회귀분석-단계">일반적인 회귀분석 단계</h4>
+<ol type="1">
+<li><p>산점도를 그려 변수 간의 관계를 살펴보고 예측</p></li>
+<li><p>회귀모형 설정 및 모수추정: 최소제곱법 등을 이용하여 모형에 포함된 모수를 추정</p></li>
+<li><p>회귀계수에 대한 유의성 검정: 각 회귀계수의 유의성 검정</p></li>
+<li><p>모형 적합도: <span class="math inline">\(R^2\)</span>(결정계수), <span class="math inline">\(R_{adj}^2\)</span>(수정된 결정계수) 등 여러 가지 통계량들을 이용하여 모형의 적합성에 대해 판단</p></li>
+<li><p>모형 진단: 추정한 모형의 적합도를 진단하여 적절한 모형 여부를 판단. 잔차그림을 통해 독립성, 등분산성을 검토하고 <span class="math inline">\(Q-Q\)</span> 그림 등을 통해 정규성 판단</p></li>
+</ol>
+<p><br></p>
+</section>
+</section>
+<section id="모수-추정" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="모수-추정"><span class="header-section-number">3.4</span> 모수 추정</h2>
+<ul>
+<li><p>분석하고자 하는 회귀모형을 결정한 후에는 모형에 포함된 모수를 추정해야 함</p></li>
+<li><p>모수 추정량</p>
+<ul>
+<li>오차제곱합을 최소로 하는 최소제곱추정량</li>
+<li>가능도함수를 최대로 하는 최대가능도추정량</li>
+</ul></li>
+</ul>
+<section id="최소제곱법을-이용한-모수-추정" class="level3" data-number="3.4.1">
+<h3 data-number="3.4.1" class="anchored" data-anchor-id="최소제곱법을-이용한-모수-추정"><span class="header-section-number">3.4.1</span> 최소제곱법을 이용한 모수 추정</h3>
+<ul>
+<li><p>최소제곱법(least squares method)은 표본 데이터로부터 회귀계수를 추정하는 방법 중 가장 널리 이용되는 방법으로 오차제곱합을 최소화 하는 방법으로 회귀계수 추정</p></li>
+<li><p>오차제곱합</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>adv <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="at">file =</span> <span class="st">"https://www.statlearning.com/s/Advertising.csv"</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(sales <span class="sc">~</span> TV, <span class="at">data =</span> adv)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="at">x =</span> adv<span class="sc">$</span>TV, <span class="at">y =</span> adv<span class="sc">$</span>sales, <span class="at">pch =</span> <span class="dv">20</span>, <span class="at">xlab =</span> <span class="st">"TV budget (1,000USD)"</span>,</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"Sales (1,000 units)"</span>, <span class="at">col =</span> <span class="st">"steel blue"</span>) <span class="co"># scatter plot</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(fit, <span class="at">col =</span> <span class="st">"dark gray"</span>, <span class="at">lwd =</span> <span class="dv">3</span>) <span class="co"># fitted OLS regression line</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="do">## deviations from the observed values</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(<span class="at">x0 =</span> adv<span class="sc">$</span>TV, <span class="at">y0 =</span> <span class="fu">predict</span>(fit), <span class="at">x1 =</span> adv<span class="sc">$</span>TV, <span class="at">y1 =</span> adv<span class="sc">$</span>sales, <span class="at">col =</span> <span class="st">"light gray"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><span class="math display">\[
+S=S(\beta_0, \beta_1)=\sum_{i=1}^n \epsilon_i^2=\sum_{i=1}^n (Y_i-\beta_0 -\beta_1X_i )^2
+\]</span></p>
+<section id="최소제곱추정량least-squares-estimator" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="최소제곱추정량least-squares-estimator">최소제곱추정량(least squares estimator)</h4>
+<p><span class="math display">\[ \hat{\beta}_1=\frac{S_{XY}}{S_{XX}}=\frac{\sum_{i=1}^n(X_i-\bar{X})(Y_i-\bar{Y})}{\sum_{i=1}^n(X_i-\bar{X})^2}=\frac{\sum_{i=1}^nX_iY_i-n\bar{X}\bar{Y}}{\sum_{i=1}^nX_i^2-n\bar{X}^2}
+\]</span></p>
+<p><span class="math display">\[
+\hat{\beta}_0=\bar{Y}-\hat{\beta}_1\bar{X}
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; 여기서</p>
+<p><span class="math display">\[
+\bar{X}=\frac{1}{n}\sum_{i=1}^n X_i, \,\,\, \bar{Y}=\frac{1}{n}\sum_{i=1}^nY_i
+\]</span></p>
+<ul>
+<li><span class="math inline">\(X\)</span>의 수정제곱합(corrected sum of squares)</li>
+</ul>
+<p><span class="math display">\[
+S_{XX}=\sum_{i=1}^n(X_i-\bar{X})^2
+\]</span></p>
+<ul>
+<li><span class="math inline">\(Y\)</span>의 수정제곱합</li>
+</ul>
+<p><span class="math display">\[
+S_{YY}=\sum_{i=1}^n(Y_i-\bar{Y})^2
+\]</span></p>
+<ul>
+<li><span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>의 교차곱</li>
+</ul>
+<p><span class="math display">\[
+S_{XY}=\sum_{i=1}^n(X_i-\bar{X})(Y_i-\bar{Y})
+\]</span></p>
+</section>
+<section id="회귀모형-추정식" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="회귀모형-추정식">회귀모형 추정식</h4>
+<p><span class="math display">\[
+\hat{Y}=\hat{\beta}_0+\hat{\beta}_1X
+\]</span></p>
+</section>
+<section id="증명" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="증명">증명</h4>
+<ul>
+<li><p>오차제곱 합 <span class="math display">\[
+S=S(\beta_0, \beta_1)=\sum_{i=1}^n \epsilon_i^2=\sum_{i=1}^n (Y_i-\beta_0 -\beta_1X_i )^2
+\]</span></p></li>
+<li><p><span class="math inline">\(\beta_0\)</span>와 <span class="math inline">\(\beta_1\)</span>에 대해 각각 편미분을 하여 0으로 놓으면</p></li>
+</ul>
+<p><span class="math display">\[
+\frac{\partial S}{\partial \beta_0}=-2\sum_{i=1}^n (Y_i-\beta_0-\beta_1X_i)=0
+\]</span></p>
+<p><span class="math display">\[
+\frac{\partial S}{\partial \beta_1}=-2\sum_{i=1}^n X_i(Y_i-\beta_0-\beta_1X_i)=0
+\]</span></p>
+<ul>
+<li>정규방정식(normal equation)</li>
+</ul>
+<p><span class="math display">\[
+\beta_0n+\beta_1\sum_{i=1}^nX_i=\sum_{i=1}^nY_i \,\,\,\,\,\, (1)
+\]</span></p>
+<p><span class="math display">\[
+\beta_0\sum_{i=1}^nX_i+\beta_1\sum_{i=1}^nX_i^2=\sum_{i=1}^nX_iY_i \,\,\,\,\, (2)
+\]</span></p>
+<ul>
+<li>식 (1)을 <span class="math inline">\(\beta_0\)</span>에 대해 정리하면</li>
+</ul>
+<p><span class="math display">\[ \begin{align}
+\beta_0 &amp;=
+\frac{1}{n}(\sum_{i=1}^nY_i-\beta_1\sum_{i=1}^nX_i) \\
+&amp;=\bar{Y}-\beta_1\bar{X}
+\end{align}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\beta_0\)</span>를 식 (2)에 대입하여 정리하면</li>
+</ul>
+<p><span class="math display">\[ \begin{align}
+(\bar{Y}-\beta_1\bar{X})\sum_{i=1}^n X_i+\beta_1\sum_{i=1}^nX_i^2 &amp;=\sum_{i=1}^nX_iY_i\\
+\Rightarrow
+\beta_1(\sum_{i=1}^nX_i^2-\bar{X}\sum_{i=1}^nX_i) &amp;=
+\sum_{i=1}^nX_iY_i-\bar{Y}\sum_{i=1}^nX_i \\
+\Rightarrow \beta_1&amp;=\frac{\sum_{i=1}^nX_i(Y_i-\bar{Y})}{\sum_{i=1}^nX_i^2-n\bar{X}^2} \\
+&amp;=\frac{\sum_{i=1}^n(X_i-\bar{X})(Y_i-\bar{Y})}{\sum_{i=1}^n(X_i-\bar{X})^2}\\
+&amp;=\frac{S_{XY}}{S_{XX}}
+\end{align}
+\]</span></p>
+<ul>
+<li>따라서</li>
+</ul>
+<p><span class="math display">\[ \begin{align}
+\hat{\beta}_1&amp;=\frac{\sum_{i=1}^n(X_i-\bar{X})(Y_i-\bar{Y})}{\sum_{i=1}^n(X_i-\bar{X})^2}\\
+\hat{\beta}_0&amp;=\bar{Y}-\hat{\beta}_1\bar{X}
+\end{align}
+\]</span></p>
+<ul>
+<li>분산모수 <span class="math inline">\(\sigma^2\)</span> 추정량
+<ul>
+<li><span class="math inline">\(\sigma^2\)</span>에 대한 불편추정량은 잔차제곱합(residual sum of squares) <span class="math inline">\(RSS\)</span>를 잔차자유도(관측개체수 - 모형의 모수의 수)로 나눈 추정량</li>
+</ul></li>
+</ul>
+<p><span class="math display">\[
+\hat{\sigma}^2=\frac{RSS}{n-2}
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; 여기서</p>
+<p><span class="math display">\[
+RSS=\sum_{i=1}^n(Y_i-\hat{Y}_i)^2=\sum_{i=1}^n(Y_i-\bar{Y})^2-\hat{\beta}_1^2\sum_{i=1}^n(X_i-\bar{X})^2
+\]</span></p>
+<ul>
+<li>회귀계수 추정량 <span class="math inline">\(\hat{\beta}_1\)</span>과 상관계수 <span class="math inline">\(r\)</span>의 관계</li>
+</ul>
+<p><span class="math display">\[
+r=\frac{S_{XY}}{\sqrt{S_{XX}}\sqrt{S_{YY}}}=\frac{\sqrt{S_{XX}}}{\sqrt{S_{YY}}}\hat{\beta}_1
+\]</span></p>
+<ul>
+<li>따라서 <span class="math inline">\(r&gt;0\)</span>이면 회귀직선식은 양의 기울기를 갖고, <span class="math inline">\(r&lt;0\)</span>이면 음의 기울기를 가짐</li>
+</ul>
+</section>
+</section>
+<section id="가능도함수를-이용한-모수-추정" class="level3" data-number="3.4.2">
+<h3 data-number="3.4.2" class="anchored" data-anchor-id="가능도함수를-이용한-모수-추정"><span class="header-section-number">3.4.2</span> 가능도함수를 이용한 모수 추정</h3>
+<ul>
+<li><p>오차항이 정규분포를 따른다고 가정할 수 있다면 오차항에 대한 가능도함수(likelihood function)를 구할 수 있으므로 가능도함수를 이용한 추정을 할 수 있음</p></li>
+<li><p>이변량 데이터 <span class="math inline">\((X_1,Y_1), (X_2,Y_2), \ldots, (X_n,Y_n)\)</span>에 대한 조건부 가능도함수는</p></li>
+</ul>
+<p><span class="math display">\[ \begin{align}
+L(Y_1,\cdots, Y_n|\beta_0, \beta_1, \sigma^2, X_1,\cdots, X_n) &amp;=\prod_{i=1}^n P(Y_i|\beta_0,\beta_1,\sigma^2, X_i) \\
+&amp;=\prod_{i=1}^n(2\pi\sigma^2)^{-1/2}exp(-\frac{(Y_i-\beta_0-\beta_1X_i)^2}{2\sigma^2}) \\
+&amp;=(2\pi\sigma^2)^{-n/2}exp(-\frac{\sum_{i=1}^n(Y_i-\beta_0-\beta_1X_i)^2}{2\sigma^2})
+\end{align}
+\]</span></p>
+<ul>
+<li><p>가능도함수를 log 변환을 하면 모수 <span class="math inline">\(\beta\)</span>에 영향을 받는 부분은 <span class="math inline">\(-\sum_{i=1}^n(Y_i-\beta_0-\beta_1X_i)^2\)</span> 부분만 남게 됨</p>
+<ul>
+<li>최대가능도 추정량은 가능도 함수를 최대화 하는 모수 값을 찾기 때문에 결국 -부호를 제거하면 <span class="math inline">\(\sum_{i=1}^n(Y_i-\beta_0-\beta_1X_i)^2\)</span>를 최소화 하는 모수 추정량을 찾는 문제가 같아짐</li>
+<li>따라서 최대가능도 추정량은 최소제곱 추정량과 같음</li>
+</ul></li>
+<li><p>결국 가능도함수 추정량은 잔차제곱합을 최소화하는 문제와 동일해짐</p></li>
+<li><p>따라서</p></li>
+</ul>
+<p><span class="math display">\[ \begin{align}
+\hat{\beta}_1&amp;=\frac{\sum_{i=1}^n(X_i-\bar{X})(Y_i-\bar{Y})}{\sum_{i=1}^n(X_i-\bar{X})^2}\\
+\hat{\beta}_0&amp;=\bar{Y}-\hat{\beta}_1\bar{X}
+\end{align}
+\]</span></p>
+<ul>
+<li>가능도함수를 로그변환한 후 <span class="math inline">\(\sigma^2\)</span>에 대한 미분을 통해 구한 <span class="math inline">\(\sigma^2\)</span>에 대한 최대가능도 추정량</li>
+</ul>
+<p><span class="math display">\[
+\hat{\sigma}_{ML}^2=\frac{1}{n}\sum_{i=1}^n (Y_i-\hat{\beta}_0-\hat{\beta}_1X_i)^2
+\]</span></p>
+<ul>
+<li>회귀계수에 대한 최소제곱추정량과 최대가능도추정량은 같으나 분산모수에 대한 최소제곱추정량과 최대가능도추정량은 분모의 자유도에 차이가 있음</li>
+</ul>
+</section>
+<section id="추정량의-성질" class="level3" data-number="3.4.3">
+<h3 data-number="3.4.3" class="anchored" data-anchor-id="추정량의-성질"><span class="header-section-number">3.4.3</span> 추정량의 성질</h3>
+<ul>
+<li>회귀계수의 최소제곱추정량은 불편성(unbiasedness)과 최소분산성(minimum variance)을 만족하므로 가장 우수한 추정량</li>
+</ul>
+<section id="가우스-마코프-정리gauss-markov-theorem" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="가우스-마코프-정리gauss-markov-theorem">가우스-마코프 정리(Gauss-Markov Theorem)</h4>
+<ul>
+<li><p>선형회귀모형에서 오차항의 기대값이 0이고 서로 독립이며 등분산인 경우, 회귀계수에 대한 최적선형불편추정량(best linear unbiased estimator: BLUE)은 최소제곱추정량임</p></li>
+<li><p><span class="math inline">\(\beta_0\)</span>와 <span class="math inline">\(\beta_1\)</span>에 대한 최소제곱추정량 <span class="math inline">\(\hat{\beta}_0\)</span>과 <span class="math inline">\(\hat{\beta}_1\)</span>은 불편추정량(unbiased estimator)</p></li>
+</ul>
+<p><span class="math display">\[
+E(\hat{\beta}_0)=\beta_0, \,\,\, E(\hat{\beta}_1)=\beta_1
+\]</span></p>
+<ul>
+<li>최소제곱추정량 <span class="math inline">\(\hat{\beta}_0\)</span>과 <span class="math inline">\(\hat{\beta}_1\)</span>의 분산</li>
+</ul>
+<p><span class="math display">\[
+Var(\hat{\beta}_0)=\sigma^2\Bigg(\frac{1}{n}+\frac{\bar{X}^2}{\sum_{i=1}^n(X_i-\bar{X})^2} \Bigg), \,\,\, Var(\hat{\beta}_1)=\frac{\sigma^2}{\sum_{i=1}^n(X_i-\bar{X})^2}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\hat{\sigma}^2\)</span>은 <span class="math inline">\(\sigma^2\)</span>에 대한 불편추정량</li>
+</ul>
+<p><span class="math display">\[
+E(\hat{\sigma}^2)=\sigma^2
+\]</span></p>
+<ul>
+<li>따라서 최소제곱추정량 <span class="math inline">\(\hat{\beta}_0\)</span>과 <span class="math inline">\(\hat{\beta}_1\)</span>의 분산 추정량</li>
+</ul>
+<p><span class="math display">\[
+\hat{Var}(\hat{\beta}_0)=\hat{\sigma}^2\Bigg(\frac{1}{n}+\frac{\bar{X}^2}{\sum_{i=1}^n(X_i-\bar{X})^2} \Bigg), \,\,\, \hat{Var}(\hat{\beta}_1)=\frac{\hat{\sigma}^2}{\sum_{i=1}^n(X_i-\bar{X})^2}
+\]</span></p>
+<ul>
+<li>회귀계수추정량의 표준오차(standard error) 추정량</li>
+</ul>
+<p><span class="math display">\[
+\hat{se}(\hat{\beta}_0)=\sqrt{\hat{Var}(\hat{\beta}_0)}, \,\,\, \hat{se}(\hat{\beta}_1)=\sqrt{\hat{Var}(\hat{\beta}_1)}
+\]</span></p>
+<p><br></p>
+</section>
+</section>
+</section>
+<section id="모형에-대한-적합도-검정" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="모형에-대한-적합도-검정"><span class="header-section-number">3.5</span> 모형에 대한 적합도 검정</h2>
+<ul>
+<li><p>회귀모형을 추정한 후에는 그 모형에 대한 적합성 또는 타당성에 대한 평가를 해야 함</p></li>
+<li><p>적합도가 낮다면 적합도가 보다 높은 적절한 회귀모형을 찾을 필요가 있음</p></li>
+</ul>
+<section id="결정계수" class="level3" data-number="3.5.1">
+<h3 data-number="3.5.1" class="anchored" data-anchor-id="결정계수"><span class="header-section-number">3.5.1</span> 결정계수</h3>
+<ul>
+<li>설명변수 <span class="math inline">\(X_i\)</span>에서 반응 적합값(fitted value)</li>
+</ul>
+<p><span class="math display">\[
+\hat{Y}_i=\hat{\beta}_0+\hat{\beta}_1X_i, \,\,\, i=1,2,\ldots, n
+\]</span></p>
+<ul>
+<li>오차의 추정값인 잔차(residual)</li>
+</ul>
+<p><span class="math display">\[
+e_i=Y_i-\hat{Y}_i, \,\,\, i=1,2,\ldots, n
+\]</span></p>
+<ul>
+<li>총변동(<span class="math inline">\(TSS\)</span>)을 회귀식에 의한 변동(<span class="math inline">\(SSR\)</span>)과 오차변동(<span class="math inline">\(SSE\)</span>)으로 분해하면</li>
+</ul>
+<p><span class="math display">\[ \begin{align}
+전체제곱합 &amp;= 회귀제곱합 + 오차제곱합 \\
+TSS &amp;= SSR + SSE \\
+\sum_{i=1}^n (Y_i-\bar{Y})^2 &amp;= \sum_{i=1}^n(\hat{Y}_i-\bar{Y})^2 + \sum_{i=1}^n(Y_i-\hat{Y}_i)^2
+\end{align}
+\]</span></p>
+<ul>
+<li><p>전체평균과의 총변동은 TSS (total sum of squares), 회귀식에 의한 변동은 SSR (sum of squares due to regression), 오차에 의한 변동은 SSE (sum of squares due to error)</p></li>
+<li><p>추정된 회귀식의 설명력에 대한 측도로 결정계수(determination coefficient) <span class="math inline">\(R^2\)</span>을 사용</p></li>
+<li><p><span class="math inline">\(R^2\)</span>은 전체 변동에 대해 추정된 회귀식에 의해 설명되는 양</p></li>
+</ul>
+<p><span class="math display">\[
+R^2=\frac{SSR}{TSS}=\frac{\sum_{i=1}^n (\hat{Y}_i-\bar{Y})^2}{\sum_{i=1}^n(Y_i-\bar{Y})^2}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(0\le R^2 \le 1\)</span>이고 <span class="math inline">\(R^2\)</span>값이 클수록 추정된 회귀식의 설명력이 높다고 할 수 있음</li>
+</ul>
+</section>
+<section id="회귀식에-대한-검정" class="level3" data-number="3.5.2">
+<h3 data-number="3.5.2" class="anchored" data-anchor-id="회귀식에-대한-검정"><span class="header-section-number">3.5.2</span> 회귀식에 대한 검정</h3>
+<ul>
+<li>총변동을 회귀모형에 의한 변동과 오차 요인에 의한 변동으로 분해하여 분산분석을 통해 검정</li>
+</ul>
+<section id="단순회귀모형-분산분석표" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="단순회귀모형-분산분석표">단순회귀모형 분산분석표</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">요인(source)</th>
+<th style="text-align: center;">자유도(df)</th>
+<th style="text-align: center;">제곱합(SS)</th>
+<th style="text-align: center;">평균제곱합(MS)</th>
+<th style="text-align: center;"><span class="math inline">\(F\)</span>-통계량</th>
+<th style="text-align: center;">유의수준 <span class="math inline">\(\alpha\)</span> 기각값</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">모형(model)</td>
+<td style="text-align: center;"><span class="math inline">\(1\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(SSR\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(MSR=\frac{SSR}{1}\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(F=\frac{MSR}{MSE}\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(F_{1,n-2}(\alpha)\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">오차(error)</td>
+<td style="text-align: center;"><span class="math inline">\(n-2\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(SSE\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(MSE=\frac{SSE}{n-2}\)</span></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">총합(total)</td>
+<td style="text-align: center;"><span class="math inline">\(n-1\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(TSS\)</span></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>모형의 유의성에 대한 통계적 가설
+<ul>
+<li><span class="math inline">\(H_0: Y=\beta_0+\epsilon\)</span></li>
+<li><span class="math inline">\(H_1: Y=\beta_0+\beta_1X+\epsilon\)</span></li>
+</ul></li>
+<li>검정통계량</li>
+</ul>
+<p><span class="math display">\[
+F=\frac{(TSS-SSE)/1}{SSE/(n-2)} \sim F_{1,n-2}
+\]</span></p>
+<ul>
+<li>유의수준 <span class="math inline">\(\alpha\)</span> 검정법</li>
+</ul>
+<p><span class="math display">\[
+F \ge F_{1,n-2}(\alpha) \ \text{then reject null hypothesis}
+\]</span></p>
+</section>
+</section>
+<section id="회귀계수에-대한-검정" class="level3" data-number="3.5.3">
+<h3 data-number="3.5.3" class="anchored" data-anchor-id="회귀계수에-대한-검정"><span class="header-section-number">3.5.3</span> 회귀계수에 대한 검정</h3>
+<ul>
+<li>회귀 모형의 타당성이 검정되면, 개별 회귀계수에 대한 검정이 필요함
+<ul>
+<li>즉, 반응변수에 영향을 주는 독립변수의 효과에 대한 검정이 필요</li>
+<li>단순회귀분석에서는 한 개의 독립변수를 이용하기 때문에 모형의 타당성과 개별 회귀계수에 대한 검정 결과가 같게 나타남</li>
+</ul></li>
+</ul>
+<section id="절편에-대한-유의성-검정" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="절편에-대한-유의성-검정">절편에 대한 유의성 검정</h4>
+<ul>
+<li>통계적 가설
+<ul>
+<li><span class="math inline">\(H_0: \beta_0=\beta_0^*\)</span></li>
+<li><span class="math inline">\(H_1: \beta_0 \ne \beta_0^*\)</span></li>
+</ul></li>
+<li>검정통계량</li>
+</ul>
+<p><span class="math display">\[
+t=\frac{\hat{\beta}_0-\beta_0^*}{(\hat{Var}(\hat{\beta}_0))^{1/2}}=\frac{\hat{\beta}_0-\beta_0^*}{(MSE(\frac{1}{n}+\frac{\bar{X}^2}{\sum_{i=1}^n(X_i-\bar{X})^2}))^{1/2}} \sim t_{n-2}
+\]</span></p>
+<ul>
+<li>유의수준 <span class="math inline">\(\alpha\)</span> 검정</li>
+</ul>
+<p><span class="math display">\[
+|t| \ge t_{n-2}(\alpha/2) \ \text{then reject null hypothesis}
+\]</span></p>
+</section>
+<section id="기울기에-대한-유의성-검정" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="기울기에-대한-유의성-검정">기울기에 대한 유의성 검정</h4>
+<ul>
+<li>통계적 가설
+<ul>
+<li><span class="math inline">\(H_0: \beta_1=\beta_1^*\)</span></li>
+<li><span class="math inline">\(H_1: \beta_1 \ne \beta_1^*\)</span></li>
+</ul></li>
+<li>검정통계량</li>
+</ul>
+<p><span class="math display">\[
+t=\frac{\hat{\beta}_1-\beta_1^*}{(\hat{Var}(\hat{\beta}_1))^{1/2}}=\frac{\hat{\beta}_1-\beta_1^*}{(\frac{MSE}{\sum_{i=1}^n(X_i-\bar{X})^2})^{1/2}} \sim t_{n-2}
+\]</span></p>
+<ul>
+<li>유의수준 <span class="math inline">\(\alpha\)</span> 검정</li>
+</ul>
+<p><span class="math display">\[
+|t| \ge t_{n-2}(\alpha/2) \ \text{then reject null hypothesis}
+\]</span></p>
+</section>
+</section>
+<section id="회귀계수에-대한-신뢰구간" class="level3" data-number="3.5.4">
+<h3 data-number="3.5.4" class="anchored" data-anchor-id="회귀계수에-대한-신뢰구간"><span class="header-section-number">3.5.4</span> 회귀계수에 대한 신뢰구간</h3>
+<ul>
+<li><p>회귀계수에 대한 신뢰구간은 회귀계수에 대한 검정과 마찬가지로 <span class="math inline">\(t\)</span> 분포를 이용하여 구할 수 있음</p></li>
+<li><p><span class="math inline">\(\beta_j\)</span>에 대한 <span class="math inline">\(100(1-\alpha)\%\)</span> 신뢰구간(confidence interval)</p></li>
+</ul>
+<p><span class="math display">\[
+\hat{\beta}_j \pm t_{n-2}(\alpha/2)\sqrt{\hat{var}(\hat{\beta}_j)}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\beta_0\)</span>에 대한 신뢰구간</li>
+</ul>
+<p><span class="math display">\[
+\hat{\beta}_0 \pm t_{n-2}(\alpha/2)\sqrt{MSE(\frac{1}{n}+\frac{\bar{X}^2}{\sum_{i=1}^n(X_i-\bar{X})^2})}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\beta_1\)</span>에 대한 신뢰구간</li>
+</ul>
+<p><span class="math display">\[
+\hat{\beta}_1 \pm t_{n-2}(\alpha/2)\sqrt{\frac{MSE}{\sum_{i=1}^n(X_i-\bar{X})^2}}
+\]</span></p>
+</section>
+<section id="적합값과-예측값에-대한-신뢰구간" class="level3" data-number="3.5.5">
+<h3 data-number="3.5.5" class="anchored" data-anchor-id="적합값과-예측값에-대한-신뢰구간"><span class="header-section-number">3.5.5</span> 적합값과 예측값에 대한 신뢰구간</h3>
+<section id="적합값에-대한-신뢰구간" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="적합값에-대한-신뢰구간">적합값에 대한 신뢰구간</h4>
+<ul>
+<li>먼저 최소제곱추정량 <span class="math inline">\(\hat{y}=\hat\beta_0 + \hat\beta_1x\)</span>의 표본분포를 살펴보면,</li>
+</ul>
+<p><span class="math display">\[
+\hat{Y}=\hat\beta_0 + \hat\beta_1X=\bar Y-\hat\beta_1\bar X +\hat\beta_1X=\bar Y +\hat\beta_1 (X-\bar X)
+\]</span></p>
+<ul>
+<li>이를 다시 정리하면</li>
+</ul>
+<p><span class="math display">\[
+\hat Y=\sum_{i=1}^n \frac{1}{n} Y_i +(X-\bar X)\sum_{i=1}^n \frac{(X_i-\bar X)}{S_{XX}}Y_i=\sum_{i=1}^n \{\frac{1}{n} + \frac{(X_i-\bar X)(X-\bar X)}{S_{XX}} \}Y_i
+\]</span></p>
+<ul>
+<li>따라서 적합값 <span class="math inline">\(\hat Y\)</span>의 분산</li>
+</ul>
+<p><span class="math display">\[
+\begin{align}
+Var[(\hat{Y}|X)]&amp;=Var(\bar Y +\hat\beta_1(X-\bar X)) \\
+&amp;=Var(\bar Y) + (X-\bar X)^2Var(\hat\beta_1) \\
+&amp;=\frac{\sigma^2}{n}+(X-\bar X)^2\frac{\sigma^2}{S_{XX}}=\sigma^2 \{\frac{1}{n}+\frac{(X-\bar X)^2}{S_{XX}} \}
+\end{align}
+\]</span></p>
+<ul>
+<li>분산 추정량</li>
+</ul>
+<p><span class="math display">\[
+\hat{Var}(\hat{Y}|X)=\hat{\sigma}^2\Bigg(\frac{1}{n} +\frac{(X-\bar{X})^2}{\sum_{i=1}^n (X_i-\bar{X})^2} \Bigg)
+\]</span></p>
+<ul>
+<li>적합값의 신뢰구간</li>
+</ul>
+<p><span class="math display">\[
+\hat{Y} \pm t_{n-2}(\alpha/2)\times \hat{\sigma} \sqrt{\frac{1}{n} +\frac{(X-\bar{X})^2}{\sum_{i=1}^n (X_i-\bar{X})^2}}
+\]</span></p>
+</section>
+<section id="예측값에-대한-신뢰구간" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="예측값에-대한-신뢰구간">예측값에 대한 신뢰구간</h4>
+<ul>
+<li><p>추정된 회귀식은 다른 설명변수값에 대한 반응변수값을 예측(predict)하는 데 사용됨</p></li>
+<li><p>모수추정에 사용되지 않은 미래 또는 새로운 설명변수값 <span class="math inline">\(X*\)</span>에서 해당되는 새로운 반응변수 예측값(predicted value) <span class="math inline">\(Y*\)</span>를 예측하는 경우 <span class="math inline">\(Y*\)</span>의 점예측량</p></li>
+</ul>
+<p><span class="math display">\[
+\tilde{Y}*=\hat{\beta}_0+\hat{\beta}_1X*
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\tilde{Y}*\)</span>는 아직 관측되지 않은 <span class="math inline">\(Y*\)</span>의 기대값을 예측하는 것이므로 분산은 두 개의 성분 즉 <span class="math inline">\(\hat{\beta}_0\)</span>과 <span class="math inline">\(\hat{\beta}_1\)</span>의 추정값에서의 변동과 <span class="math inline">\(Y*\)</span>가 <span class="math inline">\(E(Y*)\)</span>와 일치하지 않는데 기인한 변동을 가짐</li>
+</ul>
+<p><span class="math display">\[
+\begin{align}
+E[(\tilde{Y}*-Y*)^2]&amp;=E[[\tilde{Y}*-E(Y*)]-[Y*-E(Y*)]]^2 \\
+&amp;=E[\tilde{Y}*-E(Y*)]^2 + E[Y*-E(Y*)]^2-2E[\tilde{Y}*-E(Y*)][Y*-E(Y*)] \\
+&amp;=Var(\tilde{Y})+\sigma^2
+\end{align}
+\]</span></p>
+<ul>
+<li>따라서 예측값 <span class="math inline">\(\tilde{Y}*\)</span>의 분산</li>
+</ul>
+<p><span class="math display">\[
+Var(\tilde{Y}*|X*)=\sigma^2 +\sigma^2 \Bigg(\frac{1}{n} +\frac{(X*-\bar{X})^2}{\sum_{i=1}^n (X_i-\bar{X})^2} \Bigg)
+\]</span></p>
+<ul>
+<li>분산 추정량</li>
+</ul>
+<p><span class="math display">\[
+\hat{Var}(\tilde{Y}*|X*)=\hat{\sigma}^2\Bigg(1+\frac{1}{n} +\frac{(X*-\bar{X})^2}{\sum_{i=1}^n (X_i-\bar{X})^2} \Bigg)
+\]</span></p>
+<ul>
+<li>예측값의 신뢰구간</li>
+</ul>
+<p><span class="math display">\[
+\tilde{Y}* \pm t_{n-2}(\alpha/2)\times \hat{\sigma} \sqrt{1+\frac{1}{n} +\frac{(X*-\bar{X})^2}{\sum_{i=1}^n (X_i-\bar{X})^2}}
+\]</span></p>
+<p><br></p>
+</section>
+</section>
+</section>
+<section id="잔차-분석" class="level2" data-number="3.6">
+<h2 data-number="3.6" class="anchored" data-anchor-id="잔차-분석"><span class="header-section-number">3.6</span> 잔차 분석</h2>
+<ul>
+<li><p>오차에 대한 추정량은 관측값과 추정값의 차이인 잔차(residual)로 표현됨</p></li>
+<li><p>잔차는 회귀모형에 의하여 설명되지 않는 변동의 크기를 나타냄</p></li>
+<li><p>오차항에 대한 가정은 잔차들을 검토해서 알 수 있으므로 잔차분석이 중요함</p></li>
+</ul>
+<section id="선형회귀모형의-오차항-가정" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="선형회귀모형의-오차항-가정">선형회귀모형의 오차항 가정</h4>
+<ol type="1">
+<li><p><span class="math inline">\(E(\epsilon_i)=0\)</span></p></li>
+<li><p><span class="math inline">\(V(\epsilon_i)=\sigma^2\)</span> (등분산성)</p></li>
+<li><p><span class="math inline">\(\epsilon_i\)</span>는 서로 독립임 (독립성)</p></li>
+<li><p><span class="math inline">\(\epsilon_i\)</span>는 모든 <span class="math inline">\(i\)</span>에 대해 정규분포를 따름 (정규성)</p></li>
+</ol>
+</section>
+<section id="회귀함수의-선형성" class="level3" data-number="3.6.1">
+<h3 data-number="3.6.1" class="anchored" data-anchor-id="회귀함수의-선형성"><span class="header-section-number">3.6.1</span> 회귀함수의 선형성</h3>
+<ul>
+<li><p>선형회귀함수가 적합한지 아닌지에 대한 문제는 선형회귀모형을 가정하고 자료의 산점도를 그려 보거나 설명변수에 대한 잔차산점도 또는 반응변수에 대한 잔차산점도를 그려서 짐작할 수 있음</p></li>
+<li><p>회귀모형이 타당하고 오차의 등분산 성이 성립된다면 잔차산점도를 그렸을 때 잔차들이 0을 중심으로 랜덤하게 나타나야 함</p>
+<ul>
+<li>예를 들어, 잔차산점도에서 잔차가 이차곡선이나 삼차곡선의 형태가 나타나면 가정된 선형회귀함수는 적절하지 못하다고 할 수 있음</li>
+</ul></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(UsingR)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(sheight<span class="sc">~</span> fheight, <span class="at">data=</span>father.son)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit<span class="sc">$</span>fitted,fit<span class="sc">$</span>residuals, <span class="at">xlab=</span><span class="st">"Fitted Values"</span>, <span class="at">ylab=</span><span class="st">"Residuals"</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h=</span><span class="dv">0</span>, <span class="at">lty=</span><span class="dv">2</span>, <span class="at">col=</span><span class="st">"red"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="오차항의-등분산성과-독립성" class="level3" data-number="3.6.2">
+<h3 data-number="3.6.2" class="anchored" data-anchor-id="오차항의-등분산성과-독립성"><span class="header-section-number">3.6.2</span> 오차항의 등분산성과 독립성</h3>
+<ul>
+<li>잔차는 회귀직선의 모형이 타당하고 오차의 등분산성이 성립된다면, <span class="math inline">\(X\)</span>에 대해 산점도 또는 <span class="math inline">\(Y\)</span>에 대해 산점도를 그렸을 때 0을 중심으로 랜덤하게 나타나고, <span class="math inline">\(X\)</span>축 변수에 따라 어떤 경향도 나타나지 않아야 함</li>
+</ul>
+<section id="잔차의-특성" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="잔차의-특성">잔차의 특성</h4>
+<ol type="1">
+<li>잔차 <span class="math inline">\(e_i\)</span>의 합은 0임</li>
+</ol>
+<p><span class="math display">\[
+\bar{e}=\frac{1}{n}\sum_{i=1}^ne_i=0
+\]</span></p>
+<ol start="2" type="1">
+<li>단순선형회귀모형에서 잔차의 분산</li>
+</ol>
+<p><span class="math display">\[
+S_e^2=\frac{1}{n-2}\sum_{i=1}^ne_i^2
+\]</span></p>
+<center>
+<img src="fig3/f1.png" class="img-fluid" style="width:80.0%">
+</center>
+<ul>
+<li><p>잔차에 대한 독립성 검정으로 Durbin-Watson 검정을 할 수 있음</p></li>
+<li><p>통계적 가설</p>
+<ul>
+<li><span class="math inline">\(H_0: \rho=0\)</span> (잔차 간의 상관계수는 0이다)</li>
+<li><span class="math inline">\(H_1: \rho \ne 0\)</span> (잔차 간의 상관계수는 0이 아니다)</li>
+</ul></li>
+<li><p>Durbin-Watson 검정통계량</p></li>
+</ul>
+<p><span class="math display">\[
+d=\frac{\sum_{i=2}^n(e_i-e_{i-1})^2}{\sum_{i=1}^ne_i^2}
+\]</span></p>
+<ul>
+<li><p>검정법</p>
+<ul>
+<li>만약 <span class="math inline">\(d&lt;d_L\)</span>이면 <span class="math inline">\(H_0\)</span>를 기각</li>
+<li>만약 <span class="math inline">\(d&gt;d_U\)</span>이면 <span class="math inline">\(H_0\)</span>를 기각하지 못함</li>
+<li>만약 <span class="math inline">\(d_L&lt;d&lt;d_U\)</span>이면 <span class="math inline">\(H_0\)</span> 기각여부를 결정하지 못함</li>
+</ul></li>
+<li><p><span class="math inline">\(d_L\)</span>과 <span class="math inline">\(d_U\)</span>는 설명변수의 개수 <span class="math inline">\(k\)</span>에 의존하여 결정 됨</p></li>
+<li><p><span class="math inline">\(d\)</span> 값의 범위는 0부터 4사이에 나타나며, 2에 가까울수록 독립에 가까움</p></li>
+</ul>
+</section>
+</section>
+<section id="오차항의-정규성" class="level3" data-number="3.6.3">
+<h3 data-number="3.6.3" class="anchored" data-anchor-id="오차항의-정규성"><span class="header-section-number">3.6.3</span> 오차항의 정규성</h3>
+<ul>
+<li><p>오차항의 확률분포가 정규분포에서 많이 벗어나는 경우 정규성을 가정한 가설 검정 등의 추론을 할 수 없음</p></li>
+<li><p>정규성을 만족해야 정규성 가정하에서의 추론이 유효하므로 오차항에 대한 정규성 검토가 필요함</p></li>
+<li><p>오차항의 정규성을 그래프적으로 점검하는 방법으로 잔차들에 대해 분위수 대 분위수 그림(Q-Q plot; Quantile-Quantile plot)을 그려서 판단 할 수 있음</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(UsingR)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(sheight<span class="sc">~</span> fheight, <span class="at">data=</span>father.son)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="fu">qqnorm</span>(fit<span class="sc">$</span>residual)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="fu">qqline</span>(fit<span class="sc">$</span>residual)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><p>잔차의 정규성에 대한 검정으로 Shapiro-Wilks 검정을 이용할 수 있음</p></li>
+<li><p>통계적 가설</p>
+<ul>
+<li><span class="math inline">\(H_0:\)</span> 관측 데이터는 정규분포를 따른다.</li>
+<li><span class="math inline">\(H_1:\)</span> 관측 데이터는 정규분포를 따르지 않는다.</li>
+</ul></li>
+<li><p>Shapiro-Wilks 검정통계량</p></li>
+</ul>
+<p><span class="math display">\[
+W=\frac{(\sum_{i=2}^na_ie_{(i)})^2}{\sum_{i=1}^n (e_i-\bar{e})^2}
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; 여기서 <span class="math inline">\(e_{(i)}\)</span>는 <span class="math inline">\(\{e_1, \cdots, e_n\}\)</span>를 순서대로 재배열한 잔차 순서통계량</p>
+<ul>
+<li><span class="math inline">\(a_i\)</span>는 표본의 크기 <span class="math inline">\(n\)</span>인 정규분포 표본으로부터의 순서통계량이 고려된 상수들로</li>
+</ul>
+<p><span class="math display">\[
+(a_1, \cdots, a_n)=\frac{m'V^{-1}}{m'V^{-1}V^{-1}m}
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; 여기서 <span class="math inline">\(m=(m_1, \cdots, m_n)'\)</span>, <span class="math inline">\(m_1,\cdots, m_n\)</span>은 표준정규분포에서 나온 표본에 대한 순서통계량의 기대값, <span class="math inline">\(V\)</span>는 이러한 순서통계량들의 공분산행렬</p>
+</section>
+</section>
+<section id="example" class="level2" data-number="3.7">
+<h2 data-number="3.7" class="anchored" data-anchor-id="example"><span class="header-section-number">3.7</span> Example</h2>
+<section id="example-1" class="level3" data-number="3.7.1">
+<h3 data-number="3.7.1" class="anchored" data-anchor-id="example-1"><span class="header-section-number">3.7.1</span> Example 1</h3>
+<ul>
+<li>이변량 데이터 <span class="math inline">\((x,y)\)</span>를 포함한 벡터 <span class="math inline">\(x,y\)</span>가 다음과 같다.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">1.9</span>, <span class="fl">0.8</span>, <span class="fl">1.1</span>, <span class="fl">0.1</span>, <span class="sc">-</span><span class="fl">0.1</span>, <span class="fl">4.4</span>, <span class="fl">4.6</span>, <span class="fl">1.6</span>, <span class="fl">5.5</span>, <span class="fl">3.4</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.7</span>, <span class="sc">-</span><span class="fl">1.0</span>, <span class="sc">-</span><span class="fl">0.2</span>, <span class="sc">-</span><span class="fl">1.2</span>, <span class="sc">-</span><span class="fl">0.1</span>, <span class="fl">3.4</span>, <span class="fl">0.0</span>, <span class="fl">0.8</span>, <span class="fl">3.7</span>, <span class="fl">2.0</span>)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x,y)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>out <span class="ot">&lt;-</span> <span class="fu">lm</span>(y<span class="sc">~</span>x)</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(out)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(out)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = y ~ x)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.3651 -0.4036  0.3208  0.6613  1.1720 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)   
+(Intercept)  -0.7861     0.5418  -1.451  0.18485   
+x             0.6850     0.1802   3.801  0.00523 **
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 1.083 on 8 degrees of freedom
+Multiple R-squared:  0.6436,    Adjusted R-squared:  0.599 
+F-statistic: 14.45 on 1 and 8 DF,  p-value: 0.005231</code></pre>
+</div>
+</div>
+<ul>
+<li>주어진 <span class="math inline">\(x\)</span>값에서 추정값을 얻고자 할 경우</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>pred_y <span class="ot">&lt;-</span> <span class="fu">predict</span>(out, <span class="at">newdata=</span><span class="fu">data.frame</span>(<span class="at">x=</span>x))</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(x,pred_y,y)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      x      pred_y    y
+1   1.9  0.51543194  0.7
+2   0.8 -0.23811424 -1.0
+3   1.1 -0.03260165 -0.2
+4   0.1 -0.71764364 -1.2
+5  -0.1 -0.85465203 -0.1
+6   4.4  2.22803692  3.4
+7   4.6  2.36504531  0.0
+8   1.6  0.30991935  0.8
+9   5.5  2.98158310  3.7
+10  3.4  1.54299493  2.0</code></pre>
+</div>
+</div>
+<ul>
+<li>새로운 <span class="math inline">\(x\)</span> 값 2.3에 대해 반응 예측값을 얻고자 할 경우</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>pred_y <span class="ot">&lt;-</span> <span class="fu">predict</span>(out, <span class="at">newdata=</span><span class="fu">data.frame</span>(<span class="at">x=</span><span class="fl">2.3</span>))</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>pred_y</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        1 
+0.7894487 </code></pre>
+</div>
+</div>
+<ul>
+<li><span class="math inline">\(x=1, 2.2, 6.7\)</span>에서 각각 반응 추정값을 얻고자 할 경우</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>pred_y <span class="ot">&lt;-</span> <span class="fu">predict</span>(out, <span class="at">newdata=</span><span class="fu">data.frame</span>(<span class="at">x=</span><span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">2.2</span>, <span class="fl">6.7</span>)))</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>pred_y</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         1          2          3 
+-0.1011058  0.7209445  3.8036335 </code></pre>
+</div>
+</div>
+</section>
+<section id="example-2" class="level3" data-number="3.7.2">
+<h3 data-number="3.7.2" class="anchored" data-anchor-id="example-2"><span class="header-section-number">3.7.2</span> Example 2</h3>
+<ul>
+<li>책의 부피(설명변수, <span class="math inline">\(X\)</span>)와 무게(반응변수, <span class="math inline">\(Y\)</span>)에 대해 회귀분석을 해보자.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>volume <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">412</span>, <span class="dv">953</span>, <span class="dv">929</span>, <span class="dv">1492</span>, <span class="dv">419</span>, <span class="dv">1010</span>, <span class="dv">595</span>, <span class="dv">1034</span>)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>weight <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">250</span>, <span class="dv">700</span>, <span class="dv">650</span>, <span class="dv">975</span>, <span class="dv">350</span>, <span class="dv">950</span>, <span class="dv">425</span>, <span class="dv">725</span>)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>book.lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(weight <span class="sc">~</span> volume)</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(book.lm)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = weight ~ volume)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-89.674 -39.888 -25.005   9.066 215.910 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  41.3725    97.5588   0.424 0.686293    
+volume        0.6859     0.1059   6.475 0.000644 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 102.2 on 6 degrees of freedom
+Multiple R-squared:  0.8748,    Adjusted R-squared:  0.8539 
+F-statistic: 41.92 on 1 and 6 DF,  p-value: 0.0006445</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(book.lm)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_16-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_16-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_16-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>단순선형회귀모형 적합 결과, 추정식</li>
+</ul>
+<p><span class="math display">\[
+\hat{weight}=41.3725+0.6859\times volume
+\]</span></p>
+<ul>
+<li><p><span class="math inline">\(R^2\)</span>는 0.8748로 추정된 회귀식의 설명력이 높은 편</p></li>
+<li><p>모형의 타당성에 대한 <span class="math inline">\(F\)</span> 통계량은 41.92, p-value는 <span class="math inline">\(0.000644 &lt; 0.05\)</span>로 유의수준 <span class="math inline">\(5\%\)</span>에서 모형이 유의한 것으로 나타남</p></li>
+<li><p>기울기 회귀계수에 대한 유의성 검정으로 <span class="math inline">\(H_0:\beta_1=0\)</span>에 대해 <span class="math inline">\(t\)</span> 통계량은 6.475, p-value는 <span class="math inline">\(0.000644 &lt; 0.05\)</span>로 유의수준 <span class="math inline">\(5\%\)</span>에서 귀무가설을 기각하게 되므로 추정된 회귀계수는 유의함</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">attributes</span>(book.lm)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$names
+ [1] "coefficients"  "residuals"     "effects"       "rank"         
+ [5] "fitted.values" "assign"        "qr"            "df.residual"  
+ [9] "xlevels"       "call"          "terms"         "model"        
+
+$class
+[1] "lm"</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>book.lm<span class="sc">$</span>coefficients</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept)      volume 
+ 41.3724757   0.6858592 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>book.lm<span class="sc">$</span>residuals</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        1         2         3         4         5         6         7         8 
+-73.94646   5.00373 -28.53565 -89.67436  21.25253 215.90976 -24.45868 -25.55086 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>book.lm<span class="sc">$</span>fitted.values</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        1         2         3         4         5         6         7         8 
+ 323.9465  694.9963  678.5356 1064.6744  328.7475  734.0902  449.4587  750.5509 </code></pre>
+</div>
+</div>
+<p><br></p>
+</section>
+</section>
+<section id="부분-회귀" class="level2" data-number="3.8">
+<h2 data-number="3.8" class="anchored" data-anchor-id="부분-회귀"><span class="header-section-number">3.8</span> 부분 회귀</h2>
+<ul>
+<li><p>데이터의 부분에 따라 서로 다른 회귀모형을 적합해야 할 경우가 있음</p>
+<ul>
+<li>예를 들어, 데이터 집합이 두 개의 부분집합으로 나뉘며 각 부분에서 회귀모형을 적합할 수 있음</li>
+</ul></li>
+<li><p>여러 개의 부분집합에 대해 선형모형을 적합할 경우는 부분선형모형(piecewise linear model)을 적합할 수 있음</p></li>
+<li><p>한 개의 설명변수(독립변수) <span class="math inline">\(X\)</span>와 한 개의 반응변수(종속변수) <span class="math inline">\(Y\)</span>간의 선형회귀모형</p></li>
+</ul>
+<p><span class="math display">\[
+Y=\begin{cases}
+\beta_0+\beta_1X+\epsilon, \,\,\, X&lt;c\\
+\gamma_0+\gamma_1X+\epsilon, \,\,\, X\ge c
+\end{cases}
+\]</span></p>
+<section id="example-3" class="level3" data-number="3.8.1">
+<h3 data-number="3.8.1" class="anchored" data-anchor-id="example-3"><span class="header-section-number">3.8.1</span> Example</h3>
+<ul>
+<li>A 제조회사에서 전기사용량(<span class="math inline">\(X\)</span>)에 따른 매출액(<span class="math inline">\(Y\)</span>) 데이터이다. <span class="math inline">\(Break=22.4\)</span> 이후로 매출액 증가가 달라지므로 부분회귀모형을 적합하고자 한다.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">362</span>, <span class="dv">357</span>, <span class="dv">111</span>, <span class="dv">703</span>, <span class="dv">494</span>, <span class="dv">410</span>, <span class="dv">63</span>, <span class="dv">616</span>, <span class="dv">468</span>, <span class="dv">973</span>, <span class="dv">235</span>, <span class="dv">180</span>, <span class="dv">69</span>, <span class="dv">305</span>, <span class="dv">106</span>, <span class="dv">155</span>, <span class="dv">422</span>, <span class="dv">44</span>, <span class="dv">1008</span>, <span class="dv">225</span>, <span class="dv">321</span>, <span class="dv">1001</span>, <span class="dv">531</span>, <span class="dv">143</span>, <span class="dv">251</span>, <span class="dv">216</span>, <span class="dv">57</span>, <span class="dv">136</span>, <span class="dv">226</span>, <span class="dv">169</span>, <span class="dv">32</span>, <span class="dv">75</span>, <span class="dv">102</span>, <span class="dv">4</span>, <span class="dv">68</span>, <span class="dv">102</span>, <span class="dv">462</span>, <span class="dv">295</span>, <span class="dv">196</span>, <span class="dv">50</span>, <span class="dv">739</span>, <span class="dv">287</span>, <span class="dv">226</span>, <span class="dv">706</span>, <span class="dv">127</span>, <span class="dv">85</span>, <span class="dv">234</span>, <span class="dv">153</span>, <span class="dv">4</span>, <span class="dv">373</span>, <span class="dv">54</span>, <span class="dv">81</span>)</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">23.5</span>, <span class="fl">22.4</span>, <span class="fl">6.1</span>, <span class="fl">35.9</span>, <span class="fl">35.5</span>, <span class="fl">23.2</span>, <span class="fl">9.1</span>, <span class="fl">27.5</span>, <span class="fl">28.6</span>, <span class="fl">41.3</span>, <span class="fl">16.9</span>, <span class="fl">18.2</span>, <span class="dv">9</span>, <span class="fl">28.6</span>, <span class="fl">12.7</span>, <span class="fl">11.8</span>, <span class="fl">27.9</span>, <span class="fl">21.6</span>, <span class="fl">45.9</span>, <span class="fl">11.4</span>, <span class="fl">16.6</span>, <span class="fl">40.7</span>, <span class="fl">22.4</span>, <span class="fl">17.4</span>, <span class="fl">14.3</span>, <span class="fl">14.6</span>, <span class="fl">6.6</span>, <span class="fl">10.6</span>, <span class="fl">14.3</span>, <span class="fl">3.4</span>, <span class="fl">5.1</span>, <span class="fl">4.1</span>, <span class="fl">4.1</span>, <span class="fl">1.7</span>, <span class="fl">7.5</span>, <span class="fl">7.8</span>, <span class="fl">22.6</span>, <span class="fl">8.6</span>, <span class="fl">7.7</span>, <span class="fl">7.8</span>, <span class="fl">34.7</span>, <span class="fl">15.6</span>, <span class="fl">18.5</span>, <span class="dv">35</span>, <span class="fl">16.5</span>, <span class="fl">11.3</span>, <span class="fl">7.7</span>, <span class="fl">14.8</span>, <span class="dv">2</span>, <span class="fl">12.4</span>, <span class="fl">9.2</span>, <span class="fl">11.8</span>)</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y,x)</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    y    x
+1 362 23.5
+2 357 22.4
+3 111  6.1
+4 703 35.9
+5 494 35.5
+6 410 23.2</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>Break <span class="ot">&lt;-</span> <span class="fl">22.4</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>g1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y<span class="sc">~</span>x, <span class="at">data=</span>data, <span class="at">subset=</span>(x<span class="sc">&lt;</span>Break))</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>g2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y<span class="sc">~</span>x, <span class="at">data=</span>data, <span class="at">subset=</span>(x<span class="sc">&gt;=</span>Break))</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(g1)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = y ~ x, data = data, subset = (x &lt; Break))
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-194.58  -64.23  -15.89   55.98  213.31 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)   
+(Intercept)   53.368     33.365   1.600  0.11896   
+x              8.574      2.803   3.059  0.00431 **
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 84.22 on 34 degrees of freedom
+Multiple R-squared:  0.2159,    Adjusted R-squared:  0.1928 
+F-statistic:  9.36 on 1 and 34 DF,  p-value: 0.004307</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(g2)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = y ~ x, data = data, subset = (x &gt;= Break))
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-227.885  -40.894    3.498   92.715  165.864 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -240.926    128.548  -1.874   0.0819 .  
+x             27.056      4.037   6.702 1.01e-05 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 118.7 on 14 degrees of freedom
+Multiple R-squared:  0.7624,    Adjusted R-squared:  0.7454 
+F-statistic: 44.92 on 1 and 14 DF,  p-value: 1.007e-05</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(y<span class="sc">~</span>x)</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v=</span>Break, <span class="at">lty=</span><span class="dv">5</span>)</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(<span class="fu">min</span>(x), g1<span class="sc">$</span>coef[<span class="dv">1</span>]<span class="sc">+</span>g1<span class="sc">$</span>coef[<span class="dv">2</span>]<span class="sc">*</span><span class="fu">min</span>(x),</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>         Break, g1<span class="sc">$</span>coef[<span class="dv">1</span>]<span class="sc">+</span>g1<span class="sc">$</span>coef[<span class="dv">2</span>]<span class="sc">*</span>Break)</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(Break, g2<span class="sc">$</span>coef[<span class="dv">1</span>]<span class="sc">+</span>g2<span class="sc">$</span>coef[<span class="dv">2</span>]<span class="sc">*</span>Break,</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>         <span class="fu">max</span>(x), g2<span class="sc">$</span>coef[<span class="dv">1</span>]<span class="sc">+</span>g2<span class="sc">$</span>coef[<span class="dv">2</span>]<span class="sc">*</span><span class="fu">max</span>(x))</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-chapter3_files/figure-html/ch3_17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><span class="math inline">\(Break=22.4\)</span> 이전과 이후의 회귀식</li>
+</ul>
+<p><span class="math display">\[
+Y=\begin{cases}
+53.670+8.572X, \,\,\, X&lt;22.4\\
+-240.926+27.056X, \,\,\, X\ge 22.4
+\end{cases}
+\]</span></p>
+<p><br></p>
+</section>
+</section>
+<section id="원점을-지나는-회귀모형" class="level2" data-number="3.9">
+<h2 data-number="3.9" class="anchored" data-anchor-id="원점을-지나는-회귀모형"><span class="header-section-number">3.9</span> 원점을 지나는 회귀모형</h2>
+<ul>
+<li><p>단순선형회귀모형에서 회귀계수 <span class="math inline">\(\beta_0\)</span>는 일차함수에서 절편에 해당함</p></li>
+<li><p>설명변수 값이 0일 때 반응변수가 0이라는 정보를 가지고 있다면 <span class="math inline">\(\beta_0\)</span>는 0이 되고 이를 원점을 지나는 회귀모형이라 함</p>
+<ul>
+<li>예를 들어, 하루 동안의 영업 시간 <span class="math inline">\(X\)</span>에 따른 제품의 판매액 <span class="math inline">\(Y\)</span>에 대한 단순선형회귀모형에서 영업 시간이 0인 경우에 제품의 판매액도 0이 됨</li>
+</ul></li>
+<li><p>원점을 지나는 단순선형회귀모형</p></li>
+</ul>
+<p><span class="math display">\[
+Y_i = \beta_1 X_i +\epsilon_i, \,\,\, \epsilon_i \sim N(0, \sigma^2), \,\,\, i=1,\ldots, n
+\]</span></p>
+<ul>
+<li><p>여기서 오차항 <span class="math inline">\(\epsilon_i\)</span> 들은 서로 독립</p></li>
+<li><p>최소제곱법으로 회귀계수 <span class="math inline">\(\beta_1\)</span>을 구하기 위한 오차의 제곱합과 이를 <span class="math inline">\(\beta_1\)</span>에 대해 미분하면</p></li>
+</ul>
+<p><span class="math display">\[
+S(\beta_1)=\sum_{i=1}^n \epsilon_i^2 =\sum_{i=1}^n (Y_i - \beta_1 X_i )^2
+\]</span></p>
+<p><span class="math display">\[
+\frac{\partial}{\partial \beta_1}S(\beta_1) = -2\sum_{i=1}^n (Y_i-\beta_1X_i)X_i
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\beta_1\)</span>의 최소제곱추정량 <span class="math inline">\(\hat\beta_1\)</span>을 구하기 위한 정규방정식</li>
+</ul>
+<p><span class="math display">\[
+\beta_1\sum_{i=1}^n X_i^2 = \sum_{i=1}^n X_iY_i
+\]</span></p>
+<ul>
+<li>최소제곱추정량</li>
+</ul>
+<p><span class="math display">\[
+\hat\beta_1 = \frac{\sum_{i=1}^n X_iY_i}{\sum_{i=1}^n X_i^2}
+\]</span></p>
+<ul>
+<li>정규방정식에 의해 잔차의 합은 반드시 0이 되지 않으며 다음의 조건을 만족</li>
+</ul>
+<p><span class="math display">\[
+\sum_{i=1}^n e_i X_i =0
+\]</span></p>
+<ul>
+<li>원점을 지난 회귀모형의 제곱합</li>
+</ul>
+<p><span class="math display">\[
+SST =\sum_{i=1}^n Y_i^2, \,\,\, SSR=\sum_{i=1}^n \hat Y_i^2, \,\,\, SSE=\sum_{i=1}^n (Y_i-\hat Y_i)^2
+\]</span></p>
+<ul>
+<li><p>총제곱합 <span class="math inline">\(SST\)</span>의 자유도는 <span class="math inline">\(n\)</span>이며, <span class="math inline">\(SSR\)</span>의 자유도는 <span class="math inline">\(1\)</span>, <span class="math inline">\(SSE\)</span>의 자유도는 <span class="math inline">\(n-1\)</span></p></li>
+<li><p>회귀모형의 유의성 검정에 대한 가설</p></li>
+</ul>
+<p><span class="math display">\[
+H_0 :\beta_1 =0 \,\,\, vs. \,\,\, H_1:\beta_1 \ne 0
+\]</span></p>
+<ul>
+<li>검정통계랑</li>
+</ul>
+<p><span class="math display">\[
+F=\frac{MSR}{MSE}=\frac{SSR/1}{SSE/(n-1)}\sim F(1,n-1)
+\]</span></p>
+<ul>
+<li>원점을 지나는 회귀모형의 유의성 검정을 위한 분산분석표</li>
+</ul>
+<p><img src="fig3/f3.png" class="img-fluid" style="width:80.0%"></p>
+<p><br></p>
+</section>
+<section id="더미변수를-이용한-회귀분석" class="level2" data-number="3.10">
+<h2 data-number="3.10" class="anchored" data-anchor-id="더미변수를-이용한-회귀분석"><span class="header-section-number">3.10</span> 더미변수를 이용한 회귀분석</h2>
+<ul>
+<li><p>회귀분석에 사용되는 독립변수는 기본적으로 연속형 변수여야 함</p></li>
+<li><p>하지만 때에 따라 명목형 변수를 사용할 때가 있는데 그때는 명목형 변수를 더미변수(dummy variable, 가변수)화 하여 사용함</p></li>
+<li><p>더미변수화를 하는 방법은 여러 가지가 존재하나 일반적으로 원래 변수가 지닌 범주의 개수보다 하나 적은 개수의 변수를 생성함</p>
+<ul>
+<li>예를 들어 성별이라는 변수가 독립변수로 될 때 남자와 여자의 두 분류만 있으므로 1개의 더미변수로 나타냄</li>
+<li>일반적으로 두 개의 집단으로 분류된 명목변수는 더미변수를 별도로 만들 필요 없이 그대로 투입해도 좋으나, 회귀식을 해석하는 과정에서 주의를 요함</li>
+</ul></li>
+<li><p>더미변수를 이용한 회귀분석을 위해 아래 예제에 교육수준 변수를 고려하면,</p>
+<ul>
+<li>교육수준은 3개의 값을 가지며, 변수 값 1은 고졸, 2는 전문대졸, 3은 대졸 이상</li>
+</ul></li>
+</ul>
+<p><img src="fig3/f4.png" class="img-fluid"></p>
+<ul>
+<li>간단하게 교육수준을 더미변수로 변환하여, 교육수준이 매출액에 미치는 영향에 대한 회귀모형</li>
+</ul>
+<p><span class="math display">\[
+Y= \beta_0 + \beta_1X_{41} +\beta_2X_{42} + \epsilon
+\]</span></p>
+<ul>
+<li><p>여기서 <span class="math inline">\(X_{41}\)</span>과 <span class="math inline">\(X_{42}\)</span>는 교육수준의 더미변수</p></li>
+<li><p>교육수준의 더미변수를 지정하는 방법</p></li>
+</ul>
+<p><img src="fig3/f5.png" class="img-fluid"></p>
+<ul>
+<li>R 에서는 <span class="math inline">\(X_4\)</span>를 factor로 지정하면 자동으로 더미변수화 시켜서 분석을 하게 됨</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">89</span>, <span class="dv">95</span>, <span class="dv">100</span>, <span class="dv">105</span>, <span class="dv">110</span>, <span class="dv">100</span>, <span class="dv">112</span>, <span class="dv">100</span>, <span class="dv">130</span>, <span class="dv">135</span>)</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>x4 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">3</span>)</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>data1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y,x4)</span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a><span class="do">### 더미변수를 이용한 회귀분석</span></span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(y<span class="sc">~</span><span class="fu">factor</span>(x4),<span class="at">data=</span>data1)</span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = y ~ factor(x4), data = data1)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-15.000  -8.750  -4.375   9.083  21.250 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   98.667      8.601  11.472  8.6e-06 ***
+factor(x4)2   10.083     11.378   0.886    0.405    
+factor(x4)3   16.333     12.163   1.343    0.221    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 14.9 on 7 degrees of freedom
+Multiple R-squared:  0.2084,    Adjusted R-squared:  -0.01776 
+F-statistic: 0.9215 on 2 and 7 DF,  p-value: 0.4413</code></pre>
+</div>
+</div>
+<!-- End -->
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./02-chapter2.html" class="pagination-link" aria-label="기초 행렬 이론">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">기초 행렬 이론</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./04-chapter4.html" class="pagination-link" aria-label="다중선형회귀분석">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">다중선형회귀분석</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

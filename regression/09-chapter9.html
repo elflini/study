@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>9&nbsp; 가변수 회귀모형 – Regression Analysis</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./10-chapter10.html" rel="next">
+<link href="./08-chapter8.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-9e3e5b9121e68b3f077afb32f2c64d95.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./09-chapter9.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">가변수 회귀모형</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Regression Analysis</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">목 차</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-chapter1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">서론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-chapter2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">기초 행렬 이론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-chapter3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">단순선형회귀분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-chapter4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">다중선형회귀분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-chapter5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">회귀진단 및 보정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-chapter6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">모형비교와 변수선택법</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-chapter7.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">다중회귀분석 예제</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-chapter8.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">일반화 가중회귀모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-chapter9.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">가변수 회귀모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-chapter10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">능형회귀추정량과 LASSO 추정량</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#이분-가변수-경우" id="toc-이분-가변수-경우" class="nav-link active" data-scroll-target="#이분-가변수-경우"><span class="header-section-number">9.1</span> 이분 가변수 경우</a></li>
+  <li><a href="#두-개-회귀직선의-비교" id="toc-두-개-회귀직선의-비교" class="nav-link" data-scroll-target="#두-개-회귀직선의-비교"><span class="header-section-number">9.2</span> 두 개 회귀직선의 비교</a>
+  <ul class="collapse">
+  <li><a href="#회귀직선의-평행성-검정---각-모형의-경우" id="toc-회귀직선의-평행성-검정---각-모형의-경우" class="nav-link" data-scroll-target="#회귀직선의-평행성-검정---각-모형의-경우"><span class="header-section-number">9.2.1</span> 회귀직선의 평행성 검정 - 각 모형의 경우</a></li>
+  <li><a href="#회귀직선의-평행성-검정---가변수의-경우" id="toc-회귀직선의-평행성-검정---가변수의-경우" class="nav-link" data-scroll-target="#회귀직선의-평행성-검정---가변수의-경우"><span class="header-section-number">9.2.2</span> 회귀직선의 평행성 검정 - 가변수의 경우</a></li>
+  <li><a href="#회귀직선의-일치성-검정---각-모형의-경우" id="toc-회귀직선의-일치성-검정---각-모형의-경우" class="nav-link" data-scroll-target="#회귀직선의-일치성-검정---각-모형의-경우"><span class="header-section-number">9.2.3</span> 회귀직선의 일치성 검정 - 각 모형의 경우</a></li>
+  <li><a href="#회귀직선의-일치성-검정---가변수의-적용" id="toc-회귀직선의-일치성-검정---가변수의-적용" class="nav-link" data-scroll-target="#회귀직선의-일치성-검정---가변수의-적용"><span class="header-section-number">9.2.4</span> 회귀직선의 일치성 검정 - 가변수의 적용</a></li>
+  </ul></li>
+  <li><a href="#다항-가변수-경우" id="toc-다항-가변수-경우" class="nav-link" data-scroll-target="#다항-가변수-경우"><span class="header-section-number">9.3</span> 다항 가변수 경우</a></li>
+  <li><a href="#r-활용-가변수회귀분석" id="toc-r-활용-가변수회귀분석" class="nav-link" data-scroll-target="#r-활용-가변수회귀분석"><span class="header-section-number">9.4</span> R 활용 가변수회귀분석</a>
+  <ul class="collapse">
+  <li><a href="#구름-데이터" id="toc-구름-데이터" class="nav-link" data-scroll-target="#구름-데이터"><span class="header-section-number">9.4.1</span> 구름 데이터</a></li>
+  <li><a href="#iq-데이터" id="toc-iq-데이터" class="nav-link" data-scroll-target="#iq-데이터"><span class="header-section-number">9.4.2</span> IQ 데이터</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="chapter9" class="quarto-section-identifier"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">가변수 회귀모형</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="이분-가변수-경우" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="이분-가변수-경우"><span class="header-section-number">9.1</span> 이분 가변수 경우</h2>
+<ul>
+<li>설명변수 <span class="math inline">\(X\)</span>와 이분(dichotomous) 가변수 <span class="math inline">\(A\)</span>를 포함한 다음의 회귀모형을 고려해보자.</li>
+</ul>
+<p><span class="math display">\[
+Y=\beta_0+\beta_1A+\beta_2X+\epsilon
+\]</span></p>
+<ul>
+<li><p>여기서 <span class="math inline">\(A=\{0,1\}\)</span>인 이분 붐주형 변수이고 <span class="math inline">\(X\)</span>는 연속형 설명변수임</p></li>
+<li><p>모형을 다시 포현하면</p></li>
+</ul>
+<p><span class="math display">\[
+Y=\begin{cases}
+\beta_0+\beta_2X+\epsilon, \,\,\, A=0 \\
+\beta_0+\beta_1+\beta_2X+\epsilon, \,\,\, A=1
+\end{cases}
+\]</span></p>
+<ul>
+<li>또한 반응변수는</li>
+</ul>
+<p><span class="math display">\[
+E(Y)=\begin{cases}
+\beta_0+\beta_2X, \,\,\, A=0 \\
+\beta_0+\beta_1+\beta_2X, \,\,\, A=1
+\end{cases}
+\]</span></p>
+<ul>
+<li><p>예를 들어 <span class="math inline">\(A=0\)</span>이 남자, <span class="math inline">\(A=1\)</span>이 여자인 경우라면 두 개 회귀직선의 절편의 차는 남녀 간의 차이를 의미함</p></li>
+<li><p>기본적으로 위의 회귀모형은 범주가 다르더라도 설명변수 <span class="math inline">\(X\)</span>에 대한 회귀계수를 같이 추정하고자 할때 의미있는 모형임</p></li>
+<li><p>범주에 따라 설명변수 <span class="math inline">\(X\)</span>에 대한 회귀계수도 변한다면 교호작용 항을 포함한 회귀모형을 활용</p></li>
+</ul>
+<p><span class="math display">\[
+Y=\beta_0 +\beta_1A +\beta_2X + \beta_{12}AX+\epsilon
+\]</span></p>
+<ul>
+<li>이분변수 <span class="math inline">\(A\)</span>에 따라 다시 쓰면</li>
+</ul>
+<p><span class="math display">\[
+Y=\begin{cases}
+\beta_0+\beta_2X+\epsilon, \,\,\, A=0 \\
+\beta_0+\beta_1+(\beta_2+\beta_{12})X+\epsilon, \,\,\, A=1
+\end{cases}
+\]</span></p>
+<ul>
+<li><p>여기서 <span class="math inline">\(\beta_{12}\)</span>는 범주에 따른 <span class="math inline">\(X\)</span>에 대한 회귀계수의 변화량을 의미함</p></li>
+<li><p>반응함수</p></li>
+</ul>
+<p><span class="math display">\[
+E(Y)=\begin{cases}
+\beta_0+\beta_2X, \,\,\, A=0 \\
+\beta_0+\beta_1+(\beta_2+\beta_{12})X, \,\,\, A=1
+\end{cases}
+\]</span></p>
+<ul>
+<li>두 범주 간 차이가 평행인 경우</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>y1 <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">*</span>x</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>y2 <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">*</span>x<span class="sc">+</span><span class="dv">2</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x,y1, <span class="at">type=</span><span class="st">"l"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x,y2, <span class="at">lty=</span><span class="dv">2</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="09-chapter9_files/figure-html/ch9_1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>두 범주 간 차이가 있는 경우</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>y1 <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">*</span>x</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>y2 <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">*</span>x<span class="dv">-6</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x,y1, <span class="at">type=</span><span class="st">"l"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x,y2, <span class="at">lty=</span><span class="dv">2</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="09-chapter9_files/figure-html/ch9_2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><br></p>
+</section>
+<section id="두-개-회귀직선의-비교" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="두-개-회귀직선의-비교"><span class="header-section-number">9.2</span> 두 개 회귀직선의 비교</h2>
+<ul>
+<li>그룹별로 회귀직선을 추정하고 이들이 같다고 할 수 있는지 검정하고자 함. 예를 들어, 남녀별로 각각 다음과 같은 회귀모형을 적합할 경우</li>
+</ul>
+<p><span class="math display">\[
+\begin{cases}
+Y_m=\beta_{0m}+\beta_{1m}X+\epsilon, \,\,\, Male \\
+Y_f=\beta_{0f}+\beta_{1f}X+\epsilon, \,\,\, Female
+\end{cases}
+\]</span></p>
+<ul>
+<li><p>남녀별 회귀직선의 동일성 여부에 대한 검정을 하여 그룹별 특성과 차이에 대한 정보를 얻을 수 있음</p></li>
+<li><p>만약 동일성을 만족한다면 그룹의 구별이 유의하지 않으므로 그룹별 데이터를 통합할 수 있음</p></li>
+<li><p>만약 동일성을 만족하지 않는다면 그룹별 관계식이 다르므로 그룹별 회귀식을 구하고 각 그룹에 대한 특성을 파악해야 함</p></li>
+</ul>
+<section id="회귀직선의-평행성-검정---각-모형의-경우" class="level3" data-number="9.2.1">
+<h3 data-number="9.2.1" class="anchored" data-anchor-id="회귀직선의-평행성-검정---각-모형의-경우"><span class="header-section-number">9.2.1</span> 회귀직선의 평행성 검정 - 각 모형의 경우</h3>
+<ul>
+<li><p>두 회귀직선의 평행성 검정, 즉 두 직선의 기울기에 대한 검정</p></li>
+<li><p>귀무가설</p></li>
+</ul>
+<p><span class="math display">\[
+H_0:\beta_{1m}=\beta_{1f}
+\]</span></p>
+<ul>
+<li>대립가설</li>
+</ul>
+<ol type="1">
+<li><p><span class="math inline">\(H_1:\beta_{1m}&gt;\beta_{1f}\)</span></p></li>
+<li><p><span class="math inline">\(H_1:\beta_{1m}&lt;\beta_{1f}\)</span></p></li>
+<li><p><span class="math inline">\(H_1:\beta_{1m}\ne \beta_{1f}\)</span></p></li>
+</ol>
+<ul>
+<li>검정통계량</li>
+</ul>
+<p><span class="math display">\[
+T=\frac{\hat{\beta}_{1m}-\hat{\beta}_{1f}}{S_{\hat{\beta}_{1m}-\hat{\beta}_{1f}}}
+\]</span></p>
+<ul>
+<li>여기서
+<ul>
+<li><span class="math inline">\(\hat{\beta}_{1m}\)</span>는 남자의 경우 표본크기 <span class="math inline">\(n_m\)</span>을 사용한 <span class="math inline">\(\beta_{1m}\)</span>에 대한 최소재곱추정량</li>
+<li><span class="math inline">\(\hat{\beta}_{1f}\)</span>는 여자의 경우 표본크기 <span class="math inline">\(n_f\)</span>을 사용한 <span class="math inline">\(\beta_{1f}\)</span>에 대한 최소제곱추정량</li>
+<li><span class="math inline">\(S_{\hat{\beta}_{1m}-\hat{\beta}_{1f}}\)</span>는 기울기 추정량 차 <span class="math inline">\(\hat{\beta}_{1m}-\hat{\beta}_{1f}\)</span>의 표준편차 추정량</li>
+<li><span class="math inline">\(S_{\hat{\beta}_{1m}-\hat{\beta}_{1f}}=S_{P,Y|X}^2[1/(n_m-1)S_{X_m}^2+1/(n_f-1)S_{X_f}^2\)</span></li>
+<li><span class="math inline">\(S_{P,Y|X}=\frac{(n_m-2)S_{Y|X_m}^2+(n_f-2)S_{Y|X_f}^2}{n_m+n_f-4}\)</span></li>
+<li><span class="math inline">\(S_{Y|X_m}^2\)</span>은 남자 데이터에 대한 잔차 평균제곱오차</li>
+<li><span class="math inline">\(S_{Y|X_f}^2\)</span>은여자 데이터에 대한 잔차 평균제곱오차</li>
+<li><span class="math inline">\(S_{X_m}^2\)</span>은 남자 데이터에서 <span class="math inline">\(X\)</span>의 표본분산</li>
+<li><span class="math inline">\(S_{X_f}^2\)</span>은 여자 데이터에서 <span class="math inline">\(X\)</span>의 표본분산</li>
+</ul></li>
+<li>유의수준 <span class="math inline">\(\alpha\)</span> 검정</li>
+</ul>
+<ol type="1">
+<li><span class="math inline">\(T\ge t_{n_m+n_f-4}(\alpha)\)</span>이면 <span class="math inline">\(H_0\)</span>를 기각</li>
+<li><span class="math inline">\(T\le t_{n_m+n_f-4}(\alpha)\)</span>이면 <span class="math inline">\(H_0\)</span>를 기각</li>
+<li><span class="math inline">\(|T|\ge t_{n_m+n_f-4}(\alpha/2)\)</span>이면 <span class="math inline">\(H_0\)</span>를 기각</li>
+</ol>
+</section>
+<section id="회귀직선의-평행성-검정---가변수의-경우" class="level3" data-number="9.2.2">
+<h3 data-number="9.2.2" class="anchored" data-anchor-id="회귀직선의-평행성-검정---가변수의-경우"><span class="header-section-number">9.2.2</span> 회귀직선의 평행성 검정 - 가변수의 경우</h3>
+<ul>
+<li>가변수 <span class="math inline">\(Z\)</span>를 이용하여 두 개의 회귀모형을 포함하도록 다음의 회귀모형</li>
+</ul>
+<p><span class="math display">\[
+Y=\beta_0+\beta_1X+\beta_2Z+\beta_3XZ+\epsilon
+\]</span></p>
+<ul>
+<li><span class="math inline">\(Z=0,1\)</span>의 경우에 따라</li>
+</ul>
+<p><span class="math display">\[
+E(Y)=\begin{cases}
+\beta_0+\beta_1X+\epsilon, \,\,\, Z=0 \\
+(\beta_0+\beta_2)+(\beta_1+\beta_3)X+\epsilon, \,\,\, Z=1
+\end{cases}
+\]</span></p>
+<ul>
+<li>두 회귀직선의 기울기에 의한 평행성 검정 귀무가설</li>
+</ul>
+<p><span class="math display">\[
+H_0: \beta_3=0
+\]</span></p>
+<ul>
+<li><p><span class="math inline">\(t\)</span>-검정 또는 부분 <span class="math inline">\(F\)</span>-검정을 통해 가설검정을 할 수 있음</p></li>
+<li><p>대립가설</p></li>
+</ul>
+<ol type="1">
+<li><p><span class="math inline">\(H_1:\beta_3&gt;0\)</span></p></li>
+<li><p><span class="math inline">\(H_1:\beta_3&lt;0\)</span></p></li>
+<li><p><span class="math inline">\(H_1:\beta_3 \ne 0\)</span></p></li>
+</ol>
+<ul>
+<li>검정통계량 (<span class="math inline">\(t\)</span>-검정)</li>
+</ul>
+<p><span class="math display">\[
+T=\frac{\hat{\beta}_3}{S_{\hat{\beta}_3}}
+\]</span></p>
+<ul>
+<li>여기서
+<ul>
+<li><span class="math inline">\(\hat{\beta}_3\)</span>는 표본크기 <span class="math inline">\(n_m+n_f\)</span>를 사용한 <span class="math inline">\(\beta_3\)</span>에 대한 최소제곱추정량</li>
+<li><span class="math inline">\(S_{\hat{\beta}_3}\)</span>추정량 <span class="math inline">\(\hat{\beta}_3\)</span>의 표준편차 추정량</li>
+</ul></li>
+<li>유의수준 <span class="math inline">\(\alpha\)</span> 검정</li>
+</ul>
+<ol type="1">
+<li><span class="math inline">\(T\ge t_{n_m+n_f-4}(\alpha)\)</span>이면 <span class="math inline">\(H_0\)</span>를 기각</li>
+<li><span class="math inline">\(T\le t_{n_m+n_f-4}(\alpha)\)</span>이면 <span class="math inline">\(H_0\)</span>를 기각</li>
+<li><span class="math inline">\(|T|\ge t_{n_m+n_f-4}(\alpha/2)\)</span>이면 <span class="math inline">\(H_0\)</span>를 기각</li>
+</ol>
+<ul>
+<li>부분 <span class="math inline">\(F\)</span>-검정통계량</li>
+</ul>
+<p><span class="math display">\[
+F(XZ|X,Z)=\frac{RSS(X,Z,XZ)-RSS(X,Z)}{MSE(X,Z,XZ)}\sim F_{1,n_m+n_f-4}
+\]</span></p>
+<ul>
+<li>유의수준 <span class="math inline">\(\alpha\)</span> 검정</li>
+</ul>
+<p><span class="math display">\[
+F \ge F_{1,n_m+n_f-4}(\alpha) \text{ then reject } H_0
+\]</span> - 여기서 <span class="math inline">\(SS(X,Z)\)</span>는 설명변수 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Z\)</span>로 설명되는 제곱합, <span class="math inline">\(RSS(X,Z)\)</span>은 설명변수 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Z\)</span>로 설명된 후의 잔차제곱합</p>
+</section>
+<section id="회귀직선의-일치성-검정---각-모형의-경우" class="level3" data-number="9.2.3">
+<h3 data-number="9.2.3" class="anchored" data-anchor-id="회귀직선의-일치성-검정---각-모형의-경우"><span class="header-section-number">9.2.3</span> 회귀직선의 일치성 검정 - 각 모형의 경우</h3>
+<ul>
+<li>두 회귀직선의 절편과 기울기가 같으면 두 직선이 일치하므로 이러한 상황에 대한 검정이 필요함. 즉 절편과 기울기에 대한 동시 검정을 살펴보자.</li>
+</ul>
+<p><span class="math display">\[
+H_0:\beta_{0m}=\beta_{0f}=\beta_0 \,\,\, \&amp;\,\,\, \beta_{1m}=\beta_{1f}=\beta_1 \,\,\, vs. \,\,\, H_1: not \,\,\, H_0
+\]</span></p>
+<ul>
+<li>부분 <span class="math inline">\(F\)</span>-검정통계량</li>
+</ul>
+<p><span class="math display">\[
+F(XZ|X,Z)=\frac{(RSS(X,Z,XZ)-RSS(X,Z))/2}{MSE(X,Z,XZ)}\sim F_{2,n_m+n_f-4}
+\]</span></p>
+<ul>
+<li>유의수준 <span class="math inline">\(\alpha\)</span> 검정</li>
+</ul>
+<p><span class="math display">\[
+F \ge F_{2,n_m+n_f-4}(\alpha) \text{ then reject } H_0
+\]</span></p>
+</section>
+<section id="회귀직선의-일치성-검정---가변수의-적용" class="level3" data-number="9.2.4">
+<h3 data-number="9.2.4" class="anchored" data-anchor-id="회귀직선의-일치성-검정---가변수의-적용"><span class="header-section-number">9.2.4</span> 회귀직선의 일치성 검정 - 가변수의 적용</h3>
+<ul>
+<li><p>모형비교를 통해 두 회귀직선의 일치성 여부에 대한 검정을 할 수 있음</p></li>
+<li><p>두 회귀직선이 일치할 경우 <span class="math inline">\(Y=\beta_0+\beta_1X+\beta_2Z+\beta_3XZ+\epsilon\)</span>과 <span class="math inline">\(Y=\beta_0+\beta_1X+\epsilon\)</span>이 같게 되므로 이들 모형에 대한 부분 <span class="math inline">\(F\)</span>-검정을 수행함</p></li>
+</ul>
+<p><span class="math display">\[
+F(XZ,Z|X)=\frac{(RSS(X,Z,XZ)-RSS(X))/2}{MSE(X,Z,XZ)}\sim F_{2,n_m+n_f-4}
+\]</span></p>
+<ul>
+<li>유의수준 <span class="math inline">\(\alpha\)</span> 검정</li>
+</ul>
+<p><span class="math display">\[
+F \ge F_{2,n_m+n_f-4}(\alpha) \text{ then reject } H_0
+\]</span></p>
+<p><br></p>
+</section>
+</section>
+<section id="다항-가변수-경우" class="level2" data-number="9.3">
+<h2 data-number="9.3" class="anchored" data-anchor-id="다항-가변수-경우"><span class="header-section-number">9.3</span> 다항 가변수 경우</h2>
+<ul>
+<li>다항(polytomous) 가변수를 포함한 회귀모형</li>
+</ul>
+<p><span class="math display">\[
+Y=\beta_0+\beta_1A_1+\beta_2A_2+\beta_3A_3+\gamma X+\epsilon
+\]</span></p>
+<ul>
+<li><p>여기서 <span class="math inline">\(A_1=\{0,1\}\)</span>, <span class="math inline">\(A_2=\{0,1\}\)</span>, <span class="math inline">\(A_3=\{0,1\}\)</span>인 이분 범주형 변수이고 <span class="math inline">\(X\)</span>는 연속형 설명변수</p></li>
+<li><p>예를 들어, 6개체에 대해 <span class="math inline">\(\mathbf{X}\)</span> 행렬이 다음과 같을 때, 즉 <span class="math inline">\(A=\{1, 2, 3\}\)</span> 3개의 값을 가질 때</p></li>
+</ul>
+<p><span class="math display">\[
+\mathbf{Y}=\begin{pmatrix}
+Y_1\\ Y_2\\ Y_3\\ Y_4\\ Y_5\\ Y_6
+\end{pmatrix},
+\,\,\,
+\mathbf{X}=\begin{pmatrix}
+1&amp;1&amp;0&amp;0&amp;X_1\\
+1&amp;1&amp;0&amp;0&amp;X_2\\
+1&amp;0&amp;1&amp;0&amp;X_3\\
+1&amp;0&amp;1&amp;0&amp;X_4\\
+1&amp;0&amp;0&amp;1&amp;X_5\\
+1&amp;0&amp;0&amp;1&amp;X_6
+\end{pmatrix}, \,\,\,
+\beta=\begin{pmatrix}
+\beta_0\\
+\beta_1\\
+\beta_2\\
+\beta_3\\
+\gamma
+\end{pmatrix}
+\]</span></p>
+<ul>
+<li><p>최소제곱추정량 <span class="math inline">\(\hat{\beta}=(\mathbf{X}'\mathbf{X})^{-1}\mathbf{X}'\mathbf{Y}\)</span> 계산에서 <span class="math inline">\(A_1\)</span>열+<span class="math inline">\(A_2\)</span>열+<span class="math inline">\(A_3\)</span>열=첫 번째 열이므로 열간 완전한 종속관계가 존재하고, <span class="math inline">\(\mathbf{X}'\mathbf{X}\)</span>는 정칙행렬이 아니므로 최소제곱추정량을 구할 수 없게 됨</p></li>
+<li><p>이러한 문제를 해결하기 위하여 <span class="math inline">\(A_3\)</span>를 <span class="math inline">\(A_1\)</span>과 <span class="math inline">\(A_2\)</span>를 사용하여 표현하여 <span class="math inline">\(\mathbf{X}\)</span> 행렬이 정칙행렬이 되도록 함</p></li>
+<li><p>위 모형은 <span class="math inline">\(A_1=A_2=0\)</span>인 경우 <span class="math inline">\(A_3\)</span>로 표현할 수 있으므로</p></li>
+</ul>
+<p><span class="math display">\[
+Y=\beta_0+\beta_1A_1+\beta_2A_2+\gamma X +\epsilon
+\]</span></p>
+<ul>
+<li>즉, <span class="math inline">\(\mathbf{X}\)</span> 행렬은 다음과 같이 바뀌어 최소제곱추정량을 구할 수 있음</li>
+</ul>
+<p><span class="math display">\[
+\mathbf{X}=\begin{pmatrix}
+1&amp;1&amp;0&amp;0&amp;X_1\\
+1&amp;1&amp;0&amp;0&amp;X_2\\
+1&amp;0&amp;1&amp;0&amp;X_3\\
+1&amp;0&amp;1&amp;0&amp;X_4\\
+1&amp;0&amp;0&amp;0&amp;X_5\\
+1&amp;0&amp;0&amp;0&amp;X_6
+\end{pmatrix}
+\]</span></p>
+<ul>
+<li>반응함수를 구해 보면</li>
+</ul>
+<p><span class="math display">\[
+E(Y)=\begin{cases}
+\beta_0+\beta_1+\gamma X, \,\,\, A=1 \\
+\beta_0+\beta_2+\gamma X, \,\,\, A=2 \\
+\beta_0+\gamma X, A=3
+\end{cases}
+\]</span></p>
+<ul>
+<li><p>이 경우는 설명변수 <span class="math inline">\(X\)</span>에 대해 같은 기울기를 가진 경우이며 반응함수들의 차이는 절편의 차이로 나타남</p></li>
+<li><p>설명변수 <span class="math inline">\(\mathbf{X}\)</span>에 대해 기울기가 같다고 할 수 없다면 다음과 같이 교호작용 항을 포함한 모형을 고려해야 함</p></li>
+</ul>
+<p><span class="math display">\[
+Y=\beta_0+\beta_1A_1+\beta_2A_2+\gamma X + \beta_3A_1X + \beta_4A_2X+\epsilon
+\]</span></p>
+<ul>
+<li>반응함수를 구해 보면</li>
+</ul>
+<p><span class="math display">\[
+E(Y)=\begin{cases}
+\beta_0+\beta_1+(\gamma+\beta_3) X, \,\,\, A=1 \\
+\beta_0+\beta_2+(\gamma+\beta_4) X, \,\,\, A=2 \\
+\beta_0+\gamma X, A=3
+\end{cases}
+\]</span> - 이와 같이 일반적으로 <span class="math inline">\(q\)</span>개의 질적(qualitative) 변수가 있을 경우에는 <span class="math inline">\(q-1\)</span>개의 가변수를 사용하여 표현하면 최소제곱추정량을 구할 수 있음</p>
+<p><br></p>
+</section>
+<section id="r-활용-가변수회귀분석" class="level2" data-number="9.4">
+<h2 data-number="9.4" class="anchored" data-anchor-id="r-활용-가변수회귀분석"><span class="header-section-number">9.4</span> R 활용 가변수회귀분석</h2>
+<section id="구름-데이터" class="level3" data-number="9.4.1">
+<h3 data-number="9.4.1" class="anchored" data-anchor-id="구름-데이터"><span class="header-section-number">9.4.1</span> 구름 데이터</h3>
+<ul>
+<li>1975년 미국 플로리다 주에서 구름에 silver iodide 씨앗을 100g부터 1000g까지 뿌린 후 강수량 증가 실험을 하였다.</li>
+</ul>
+<ol type="1">
+<li><p>seeding: 구름에 씨앗을 준 여부(yes, no)</p></li>
+<li><p>time: 실험 첫날 이후 비온 날(1975년 6월 16일=0)</p></li>
+<li><p>sne: 구름 씨앗 주기에 대한 적정성(suitability criterion)</p></li>
+<li><p>cloudcover: 실험 지역의 구름 퍼센트</p></li>
+<li><p>prewetness: <span class="math inline">\(10^7 m^3\)</span> 면적당 구름씨앗을 주기 전 강수량</p></li>
+<li><p>echomotion: 구름 종류(stationary, moving)</p></li>
+<li><p>rainfall: 일정 시간 후 강수량</p></li>
+</ol>
+<ul>
+<li>데이터</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(HSAUR)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>clouds</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   seeding time  sne cloudcover prewetness echomotion rainfall
+1       no    0 1.75       13.4      0.274 stationary    12.85
+2      yes    1 2.70       37.9      1.267     moving     5.52
+3      yes    3 4.10        3.9      0.198 stationary     6.29
+4       no    4 2.35        5.3      0.526     moving     6.11
+5      yes    6 4.25        7.1      0.250     moving     2.45
+6       no    9 1.60        6.9      0.018 stationary     3.61
+7       no   18 1.30        4.6      0.307     moving     0.47
+8       no   25 3.35        4.9      0.194     moving     4.56
+9       no   27 2.85       12.1      0.751     moving     6.35
+10     yes   28 2.20        5.2      0.084     moving     5.06
+11     yes   29 4.40        4.1      0.236     moving     2.76
+12     yes   32 3.10        2.8      0.214     moving     4.05
+13      no   33 3.95        6.8      0.796     moving     5.74
+14     yes   35 2.90        3.0      0.124     moving     4.84
+15     yes   38 2.05        7.0      0.144     moving    11.86
+16      no   39 4.00       11.3      0.398     moving     4.45
+17      no   53 3.35        4.2      0.237 stationary     3.66
+18     yes   55 3.70        3.3      0.960     moving     4.22
+19      no   56 3.80        2.2      0.230     moving     1.16
+20     yes   59 3.40        6.5      0.142 stationary     5.45
+21     yes   65 3.15        3.1      0.073     moving     2.02
+22      no   68 3.15        2.6      0.136     moving     0.82
+23     yes   82 4.01        8.3      0.123     moving     1.09
+24      no   83 4.65        7.4      0.168     moving     0.28</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(HSAUR)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"clouds"</span>, <span class="at">package =</span> <span class="st">"HSAUR"</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">attach</span>(clouds)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>seeding<span class="ot">&lt;-</span><span class="fu">as.numeric</span>(clouds<span class="sc">$</span>seeding)<span class="sc">-</span><span class="dv">1</span>              <span class="co"># yes=1  no=0  가변수 생성</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>echomotion<span class="ot">&lt;-</span><span class="fu">as.numeric</span>(clouds<span class="sc">$</span>echomotion)<span class="sc">-</span><span class="dv">1</span>      <span class="co"># stationary=1  moving=0  </span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>ra<span class="ot">&lt;-</span> <span class="fu">lm</span>(rainfall<span class="sc">~</span> seeding  <span class="sc">+</span> sne  )           <span class="co"># 가변수 seeding 포함</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ra)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = rainfall ~ seeding + sne)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-6.1965 -1.5845 -0.1729  1.1643  6.8406 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   8.5651     2.1835   3.923 0.000782 ***
+seeding       0.9323     1.2151   0.767 0.451470    
+sne          -1.4604     0.6692  -2.182 0.040586 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 2.929 on 21 degrees of freedom
+Multiple R-squared:  0.1896,    Adjusted R-squared:  0.1124 
+F-statistic: 2.456 on 2 and 21 DF,  p-value: 0.11</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>grid<span class="ot">&lt;-</span><span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">5</span>, <span class="at">by=</span><span class="fl">0.5</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>seed1<span class="ot">&lt;-</span> ra<span class="sc">$</span>coefficients[[<span class="dv">1</span>]]<span class="sc">+</span>ra<span class="sc">$</span>coefficients[[<span class="dv">2</span>]] <span class="sc">+</span>ra<span class="sc">$</span>coefficients[[<span class="dv">3</span>]]<span class="sc">*</span>grid</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>seed0<span class="ot">&lt;-</span> ra<span class="sc">$</span>coefficients[[<span class="dv">1</span>]]<span class="sc">+</span>ra<span class="sc">$</span>coefficients[[<span class="dv">3</span>]]<span class="sc">*</span>grid</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sne, rainfall, <span class="at">pch=</span>seeding, <span class="at">sub=</span><span class="st">"seeding : yes or no"</span>)   <span class="co">#그림 9.2(a)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="fl">2.7</span>,<span class="dv">11</span>, <span class="fu">c</span>(<span class="st">"seeding=yes"</span> ,<span class="st">"seeding=no"</span>), <span class="at">pch=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">0</span>))          </span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(grid, seed1, <span class="at">lty=</span><span class="dv">1</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(grid, seed0, <span class="at">lty=</span><span class="dv">2</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="09-chapter9_files/figure-html/ch9_3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>ra<span class="ot">&lt;-</span> <span class="fu">lm</span>(rainfall<span class="sc">~</span> echomotion   <span class="sc">+</span> sne  )       <span class="co"># 가변수 echomotion 포함</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ra)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = rainfall ~ echomotion + sne)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-5.7698 -1.9424  0.1154  1.2097  6.5233 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)   
+(Intercept)   7.8052     2.2190   3.517  0.00205 **
+echomotion    1.9866     1.4561   1.364  0.18692   
+sne          -1.2042     0.6514  -1.849  0.07864 . 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 2.847 on 21 degrees of freedom
+Multiple R-squared:  0.2347,    Adjusted R-squared:  0.1618 
+F-statistic:  3.22 on 2 and 21 DF,  p-value: 0.0603</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>grid<span class="ot">&lt;-</span><span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">5</span>, <span class="at">by=</span><span class="fl">0.5</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>echo1<span class="ot">&lt;-</span> ra<span class="sc">$</span>coefficients[[<span class="dv">1</span>]]<span class="sc">+</span>ra<span class="sc">$</span>coefficients[[<span class="dv">2</span>]] <span class="sc">+</span>ra<span class="sc">$</span>coefficients[[<span class="dv">3</span>]]<span class="sc">*</span>grid</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>echo0<span class="ot">&lt;-</span> ra<span class="sc">$</span>coefficients[[<span class="dv">1</span>]]<span class="sc">+</span>ra<span class="sc">$</span>coefficients[[<span class="dv">3</span>]]<span class="sc">*</span>grid</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sne,rainfall, <span class="at">pch=</span><span class="fu">as.numeric</span>(echomotion)<span class="sc">+</span><span class="dv">2</span>, <span class="at">sub=</span><span class="st">"echomotion : 1(st) or 0(mov)"</span>) </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="fl">2.7</span>,<span class="dv">11</span>, <span class="fu">c</span>(<span class="st">"echo=stationary"</span>, <span class="st">"echo=moving"</span>), <span class="at">pch=</span><span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">2</span>))          </span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(grid, echo1, <span class="at">lty=</span><span class="dv">1</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(grid, echo0, <span class="at">lty=</span><span class="dv">2</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="09-chapter9_files/figure-html/ch9_3-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>interaction term of seeding</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ra <span class="ot">&lt;-</span> <span class="fu">lm</span>(rainfall<span class="sc">~</span> seeding  <span class="sc">+</span> sne  <span class="sc">+</span> seeding<span class="sc">:</span>sne)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ra)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = rainfall ~ seeding + sne + seeding:sne)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-5.4892 -2.0471 -0.1489  1.2661  7.3616 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)  
+(Intercept)   7.3195     2.6622   2.749   0.0124 *
+seeding       4.7007     4.6985   1.000   0.3290  
+sne          -1.0464     0.8384  -1.248   0.2264  
+seeding:sne  -1.1717     1.4104  -0.831   0.4159  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 2.951 on 20 degrees of freedom
+Multiple R-squared:  0.2166,    Adjusted R-squared:  0.09909 
+F-statistic: 1.843 on 3 and 20 DF,  p-value: 0.1718</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>grid<span class="ot">&lt;-</span><span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">5</span>, <span class="at">by=</span><span class="fl">0.5</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>seed1<span class="ot">&lt;-</span>ra<span class="sc">$</span>coefficients[[<span class="dv">1</span>]]<span class="sc">+</span>ra<span class="sc">$</span>coefficients[[<span class="dv">2</span>]]<span class="sc">+</span>ra<span class="sc">$</span>coefficients[[<span class="dv">3</span>]]<span class="sc">*</span>grid<span class="sc">+</span>ra<span class="sc">$</span>coefficients[[<span class="dv">4</span>]]<span class="sc">*</span>grid</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>seed0<span class="ot">&lt;-</span> ra<span class="sc">$</span>coefficients[[<span class="dv">1</span>]]<span class="sc">+</span>ra<span class="sc">$</span>coefficients[[<span class="dv">3</span>]]<span class="sc">*</span>grid</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sne, rainfall, <span class="at">pch=</span><span class="fu">as.numeric</span>(seeding), <span class="at">sub=</span><span class="st">"suitability for seeding"</span>)   </span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="fl">2.7</span>,<span class="dv">11</span>, <span class="fu">c</span>(<span class="st">"seeding=yes"</span> ,<span class="st">"seeding=no"</span>), <span class="at">pch=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">0</span>), <span class="at">lty=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))          </span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(grid, seed1, <span class="at">lty=</span><span class="dv">1</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(grid, seed0, <span class="at">lty=</span><span class="dv">2</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="09-chapter9_files/figure-html/ch9_4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="iq-데이터" class="level3" data-number="9.4.2">
+<h3 data-number="9.4.2" class="anchored" data-anchor-id="iq-데이터"><span class="header-section-number">9.4.2</span> IQ 데이터</h3>
+<ul>
+<li>Burt (1966)는 일란성 쌍둥이에 대해 한 명은 친부모가 키우고 다른 한 명은 보육기관에서 일정 기간 돌본 후 IQ 검사를 하여 데이터를 얻었다. 자란 환경에 따른 차이와 IQ 관계식을 구하고자 한다.</li>
+</ul>
+<ol type="1">
+<li><p>Y: 보육기관에서 자란 쌍둥이 IQ</p></li>
+<li><p>X: 친부모가 키운 쌍둥이 IQ</p></li>
+<li><p><span class="math inline">\(A_1=1\)</span>: 친부모의 생활수준=높음</p></li>
+<li><p><span class="math inline">\(A_2=1\)</span>: 친부모의 생활수준=중간</p></li>
+<li><p><span class="math inline">\(A_3=1\)</span>: 친부모의 생활수준=낮음</p></li>
+</ol>
+<ul>
+<li>데이터</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"dataset/twin.rda"</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>twin</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   number   Y   X A1 A2 A3
+1       1  82  82  1  0  0
+2       2  80  90  1  0  0
+3       3  88  91  1  0  0
+4       4 108 115  1  0  0
+5       5 116 115  1  0  0
+6       6 117 129  1  0  0
+7       7 132 131  1  0  0
+8       8  71  78  0  1  0
+9       9  75  79  0  1  0
+10     10  93  82  0  1  0
+11     11  95  97  0  1  0
+12     12  88 100  0  1  0
+13     13 111 107  0  1  0
+14     14  63  68  0  0  1
+15     15  77  73  0  0  1
+16     16  86  81  0  0  1
+17     17  83  85  0  0  1
+18     18  93  87  0  0  1
+19     19  97  87  0  0  1
+20     20  87  93  0  0  1
+21     21  94  94  0  0  1
+22     22  96  95  0  0  1
+23     23 112  97  0  0  1
+24     24 113  97  0  0  1
+25     25 106 103  0  0  1
+26     26 107 106  0  0  1
+27     27  98 111  0  0  1</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">attach</span>(twin)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(X,Y, <span class="at">pch=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>))   </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">legend</span>(<span class="dv">110</span>,<span class="dv">80</span>, <span class="fu">c</span>(<span class="st">"A1=1"</span> ,<span class="st">"A2=1"</span>, <span class="st">"A3=1"</span>), <span class="at">pch=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>))</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="09-chapter9_files/figure-html/ch9_5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>a<span class="ot">&lt;-</span><span class="fu">lm</span>(Y<span class="sc">~</span>A1<span class="sc">+</span>A2<span class="sc">+</span>X)              </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(a)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = Y ~ A1 + A2 + X)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-14.8235  -5.2366  -0.1111   4.4755  13.6978 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   5.6188     9.9628   0.564    0.578    
+A1           -6.2264     3.9171  -1.590    0.126    
+A2           -4.1911     3.6951  -1.134    0.268    
+X             0.9658     0.1069   9.031 5.05e-09 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 7.571 on 23 degrees of freedom
+Multiple R-squared:  0.8039,    Adjusted R-squared:  0.7784 
+F-statistic: 31.44 on 3 and 23 DF,  p-value: 2.604e-08</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anova</span>(a)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Analysis of Variance Table
+
+Response: Y
+          Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+A1         1  631.5   631.5 11.0165  0.002989 ** 
+A2         1  100.1   100.1  1.7456  0.199428    
+X          1 4674.7  4674.7 81.5521 5.047e-09 ***
+Residuals 23 1318.4    57.3                      
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>grid<span class="ot">&lt;-</span><span class="fu">seq</span>(<span class="dv">60</span>,<span class="dv">140</span>, <span class="at">by=</span><span class="dv">4</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>a1<span class="ot">&lt;-</span>a<span class="sc">$</span>coefficients[[<span class="dv">1</span>]]<span class="sc">+</span>a<span class="sc">$</span>coefficients[[<span class="dv">2</span>]]<span class="sc">+</span>a<span class="sc">$</span>coefficients[[<span class="dv">4</span>]]<span class="sc">*</span>grid</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>a2<span class="ot">&lt;-</span>a<span class="sc">$</span>coefficients[[<span class="dv">1</span>]]<span class="sc">+</span>a<span class="sc">$</span>coefficients[[<span class="dv">3</span>]]<span class="sc">+</span>a<span class="sc">$</span>coefficients[[<span class="dv">4</span>]]<span class="sc">*</span>grid</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>a3<span class="ot">&lt;-</span>a<span class="sc">$</span>coefficients[[<span class="dv">1</span>]]<span class="sc">+</span>a<span class="sc">$</span>coefficients[[<span class="dv">4</span>]]<span class="sc">*</span>grid</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(X,Y, <span class="at">pch=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>), <span class="at">sub=</span><span class="st">"(a)"</span>)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>   <span class="fu">legend</span>(<span class="dv">100</span>,<span class="dv">80</span>, <span class="fu">c</span>(<span class="st">"A1=1"</span> ,<span class="st">"A2=1"</span>, <span class="st">"A3=1"</span>), <span class="at">lty=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>))        </span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(grid, a1, <span class="at">lty=</span><span class="dv">1</span>)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(grid, a2, <span class="at">lty=</span><span class="dv">2</span>)</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(grid, a3, <span class="at">lty=</span><span class="dv">3</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="09-chapter9_files/figure-html/ch9_5-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>b<span class="ot">&lt;-</span><span class="fu">lm</span>(Y<span class="sc">~</span>A1<span class="sc">+</span>A2<span class="sc">+</span>X <span class="sc">+</span> A1<span class="sc">:</span>X <span class="sc">+</span> A2<span class="sc">:</span>X)   </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(b) </span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = Y ~ A1 + A2 + X + A1:X + A2:X)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-14.479  -5.248  -0.155   4.582  13.798 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  7.20461   16.75126   0.430    0.672    
+A1          -9.07665   24.44870  -0.371    0.714    
+A2          -6.38859   31.02087  -0.206    0.839    
+X            0.94842    0.18218   5.206 3.69e-05 ***
+A1:X         0.02914    0.24458   0.119    0.906    
+A2:X         0.02414    0.33933   0.071    0.944    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 7.921 on 21 degrees of freedom
+Multiple R-squared:  0.8041,    Adjusted R-squared:  0.7574 
+F-statistic: 17.24 on 5 and 21 DF,  p-value: 8.31e-07</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anova</span>(b)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Analysis of Variance Table
+
+Response: Y
+          Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+A1         1  631.5   631.5 10.0657  0.004585 ** 
+A2         1  100.1   100.1  1.5949  0.220469    
+X          1 4674.7  4674.7 74.5132 2.382e-08 ***
+A1:X       1    0.6     0.6  0.0098  0.922121    
+A2:X       1    0.3     0.3  0.0051  0.943948    
+Residuals 21 1317.5    62.7                      
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>grid<span class="ot">&lt;-</span><span class="fu">seq</span>(<span class="dv">60</span>,<span class="dv">140</span>, <span class="at">by=</span><span class="dv">4</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>b1<span class="ot">&lt;-</span><span class="fu">coef</span>(b)[[<span class="dv">1</span>]]<span class="sc">+</span><span class="fu">coef</span>(b)[[<span class="dv">2</span>]]<span class="sc">+</span>(<span class="fu">coef</span>(b)[[<span class="dv">5</span>]]<span class="sc">+</span><span class="fu">coef</span>(b)[[<span class="dv">4</span>]])<span class="sc">*</span>grid</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>b2<span class="ot">&lt;-</span><span class="fu">coef</span>(b)[[<span class="dv">1</span>]]<span class="sc">+</span><span class="fu">coef</span>(b)[[<span class="dv">3</span>]]<span class="sc">+</span>(<span class="fu">coef</span>(b)[[<span class="dv">6</span>]]<span class="sc">+</span><span class="fu">coef</span>(b)[[<span class="dv">4</span>]])<span class="sc">*</span>grid</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>b3<span class="ot">&lt;-</span><span class="fu">coef</span>(b)[[<span class="dv">1</span>]]<span class="sc">+</span><span class="fu">coef</span>(b)[[<span class="dv">4</span>]]<span class="sc">*</span>grid</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(X,Y, <span class="at">pch=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>), <span class="at">sub=</span><span class="st">"(b)"</span>)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>   <span class="fu">legend</span>(<span class="dv">100</span>,<span class="dv">80</span>, <span class="fu">c</span>(<span class="st">"A1=1"</span> ,<span class="st">"A2=1"</span>, <span class="st">"A3=1"</span>), <span class="at">lty=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>))        </span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(grid, b1, <span class="at">lty=</span><span class="dv">1</span>)</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(grid, b2, <span class="at">lty=</span><span class="dv">2</span>)</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(grid, b3, <span class="at">lty=</span><span class="dv">3</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="09-chapter9_files/figure-html/ch9_5-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<!-- End -->
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./08-chapter8.html" class="pagination-link" aria-label="일반화 가중회귀모형">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">일반화 가중회귀모형</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./10-chapter10.html" class="pagination-link" aria-label="능형회귀추정량과 LASSO 추정량">
+        <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">능형회귀추정량과 LASSO 추정량</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
