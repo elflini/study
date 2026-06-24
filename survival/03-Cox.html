@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>3&nbsp; Cox 비례위험모형(PH model) – Survival Analysis</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./04-Competing.html" rel="next">
+<link href="./02-nonpara.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-9e3e5b9121e68b3f077afb32f2c64d95.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-Cox.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Cox 비례위험모형(PH model)</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Survival Analysis</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">머리말</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-survival.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Survival Analysis?</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-nonpara.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">비모수적 생존함수 추정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-Cox.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Cox 비례위험모형(PH model)</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-Competing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">경쟁위험(Competing Risks)</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-Parametric.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">모수적 생존함수 추정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-others.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Other Issues</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#cox-ph-model" id="toc-cox-ph-model" class="nav-link active" data-scroll-target="#cox-ph-model"><span class="header-section-number">3.1</span> Cox PH model</a>
+  <ul class="collapse">
+  <li><a href="#simple-regression" id="toc-simple-regression" class="nav-link" data-scroll-target="#simple-regression"><span class="header-section-number">3.1.1</span> Simple regression</a></li>
+  <li><a href="#multiple-regression" id="toc-multiple-regression" class="nav-link" data-scroll-target="#multiple-regression"><span class="header-section-number">3.1.2</span> Multiple regression</a></li>
+  <li><a href="#위험비hazard-ratio-계산" id="toc-위험비hazard-ratio-계산" class="nav-link" data-scroll-target="#위험비hazard-ratio-계산"><span class="header-section-number">3.1.3</span> 위험비(hazard ratio) 계산</a></li>
+  </ul></li>
+  <li><a href="#콕스-ph-모형을-이용한-보정된-생존곡선" id="toc-콕스-ph-모형을-이용한-보정된-생존곡선" class="nav-link" data-scroll-target="#콕스-ph-모형을-이용한-보정된-생존곡선"><span class="header-section-number">3.2</span> 콕스 PH 모형을 이용한 보정된 생존곡선</a></li>
+  <li><a href="#비례위험-가정-평가" id="toc-비례위험-가정-평가" class="nav-link" data-scroll-target="#비례위험-가정-평가"><span class="header-section-number">3.3</span> 비례위험 가정 평가</a>
+  <ul class="collapse">
+  <li><a href="#그래프를-이용하는-방법" id="toc-그래프를-이용하는-방법" class="nav-link" data-scroll-target="#그래프를-이용하는-방법"><span class="header-section-number">3.3.1</span> 그래프를 이용하는 방법</a></li>
+  <li><a href="#로그-로그-생존곡선-그림" id="toc-로그-로그-생존곡선-그림" class="nav-link" data-scroll-target="#로그-로그-생존곡선-그림">로그-로그 생존곡선 그림</a></li>
+  <li><a href="#적합도-검정" id="toc-적합도-검정" class="nav-link" data-scroll-target="#적합도-검정"><span class="header-section-number">3.3.2</span> 적합도 검정</a></li>
+  </ul></li>
+  <li><a href="#시간의존-공변량" id="toc-시간의존-공변량" class="nav-link" data-scroll-target="#시간의존-공변량"><span class="header-section-number">3.4</span> 시간의존 공변량</a></li>
+  <li><a href="#sas-예제" id="toc-sas-예제" class="nav-link" data-scroll-target="#sas-예제"><span class="header-section-number">3.5</span> SAS 예제</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="chapter3" class="quarto-section-identifier"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Cox 비례위험모형(PH model)</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<ul>
+<li><p>모수적 모형은 분포에 대한 가정이 타당할 때는 효율적이지만 어떤 모형이 적당한가에 대한 사전 지식 없이 사용하기 어려움</p></li>
+<li><p>Cox의 비례위험모형(proportional hazards model)은 준모수적(semi-parameteric) 방법으로써 생존시간의 분포에 대한 가정을 필요로 하지 않음</p></li>
+<li><p>Cox PH 모형은 시간에 따라 바뀌는 공변량(time-dependent variable)의 경우에도 분석할 수 있음</p></li>
+<li><p>생존자료의 분석에서 자주 사용되는 모형으로 Cox 회귀분석(Cox regression analysis) 이라고도 함</p></li>
+</ul>
+<section id="cox-ph-model" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="cox-ph-model"><span class="header-section-number">3.1</span> Cox PH model</h2>
+<ul>
+<li>생존시간을 <span class="math inline">\(T\)</span>, 영향을 주는 <span class="math inline">\(p\)</span>개의 공변량 <span class="math inline">\(x_1, \ldots, x_p\)</span>이 있을 때, Cox PH model:</li>
+</ul>
+<p><span class="math display">\[
+\lambda(t)=\lambda_0(t)exp(\beta_1 x_1+\cdots +\beta_p x_p)
+\]</span></p>
+<ul>
+<li><p>여기서 <span class="math inline">\(\lambda(t)\)</span>는 공변량들을 고려했을 때의 위험함수(hazard function), <span class="math inline">\(\lambda_0(t)\)</span>는 기저위험함수(baseline hazard function) (예를 들어 공변량의 값들이 모두 0일 때의 위험함수의 값)</p></li>
+<li><p>콕스 PH 모형의 기저위험함수 <span class="math inline">\(\lambda_0(t)\)</span>는 모수적 가정을 하지 않으므로 준모수적 방법이며, 콕스 모형의 중요한 특징 중 하나임</p></li>
+<li><p>콕스 모형이 널리 사용되는 가장 중요한 이유는 기저위험함수의 분포에 대한 가정 없이도 회귀계수 및 위험비를 잘 추정해주고, 다양한 데이터에서 보정된 생존곡선을 그릴 수 있는 장점 때문</p></li>
+<li><p>콕스 모형은 매우 강건(robust)하기 때문에 정확한 모수적인 모형의 추정 결과와 근접한 결과를 얻을 수 있음</p>
+<ul>
+<li>기저위험함수에 대한 정확한 모수적 모형을 알 수 있는 경우에, 콕스 모형을 통한 분석 결과는 모수적 모형의 결과와 매우 유사함</li>
+</ul></li>
+</ul>
+<section id="simple-regression" class="level3" data-number="3.1.1">
+<h3 data-number="3.1.1" class="anchored" data-anchor-id="simple-regression"><span class="header-section-number">3.1.1</span> Simple regression</h3>
+<section id="semi-parametric" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="semi-parametric">Semi-parametric</h4>
+<p><span class="math display">\[
+\lambda(t;z)=\lambda_0(t)e^{z\beta}
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; where <span class="math inline">\(\lambda_0(t)=\lambda\)</span> is called baseline hazard function.</p>
+<ul>
+<li>Baseline hazard function does not depend on <span class="math inline">\(z\)</span>.
+<ul>
+<li>i.e.&nbsp;the hazard function corresponding to individuals with covariate <span class="math inline">\(z=0\)</span>.</li>
+<li><span class="math inline">\(z\)</span>: covariate vector</li>
+<li><span class="math inline">\(\beta\)</span>: regression parameters</li>
+</ul></li>
+<li><span class="math inline">\(\lambda_i(t; z)\)</span>: the hazard function for individual <span class="math inline">\(i\)</span> at time <span class="math inline">\(t\)</span>.
+<ul>
+<li>The covariate act <em>multiplicatively</em> on the hazard function.</li>
+<li>The multiplicative effect of the regression variables on the hazard.</li>
+</ul></li>
+<li>The hazard function for individual <span class="math inline">\(i\)</span> at time <span class="math inline">\(t\)</span> is the product of two factors
+<ul>
+<li><ol type="i">
+<li>a baseline hazard function <span class="math inline">\(\lambda_0(t)\)</span> that is left “unspecified”, except that it can not be negative.</li>
+</ol></li>
+<li><ol start="2" type="i">
+<li>a linear function if a set of <span class="math inline">\(k\)</span> fixed covariates which is then exponentiated.</li>
+</ol></li>
+</ul></li>
+<li>Given regression form</li>
+</ul>
+<p><span class="math display">\[
+\frac{\lambda_i(t;z_1)}{\lambda_j(t;z_2)}=\frac{\lambda_0(t)e^{z_1\beta}}{\lambda_0(t)e^{z_2\beta}}=e^{(z_1-z_2)\beta}
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; constant over time, only depends on <span class="math inline">\(\beta\)</span>.</p>
+<ul>
+<li><p>If <span class="math inline">\(z_1-z_2\)</span> is constant then we assume <span class="math inline">\(z_i\)</span>’s are time independent.</p></li>
+<li><p>The ratio of the hazard is constant over time.</p></li>
+<li><p>The hazard ratio is called the relative risk of <span class="math inline">\(z_1\)</span> vs <span class="math inline">\(z_2\)</span>.</p>
+<ul>
+<li>e.g) <span class="math inline">\(z_1\)</span>=male, <span class="math inline">\(z_2\)</span>=female</li>
+</ul></li>
+<li><p>If we graph the log hazard for nay individuals, the proportional hazard property implies that the hazard function should be strictly parallel.</p></li>
+</ul>
+<p><img src="survival_add2/f9.png" class="img-fluid"></p>
+<ul>
+<li>Cumulative hazard:</li>
+</ul>
+<p><span class="math display">\[
+\Lambda(t; z)=\int_o^t \lambda_0(u)e^{z\beta}du=e^{z\beta}\lambda_0(t)
+\]</span></p>
+<ul>
+<li>Survival function:</li>
+</ul>
+<p><span class="math display">\[
+S(t;z)=e^{-\Lambda(t;z)}=e^{-\Lambda_0(t)e^{z\beta}}=[e^{-\Lambda_0(t)}]^{e^{z\beta}}=[S_0(t)]^{e^{z\beta}}=[S(t;0)]^{e^{z\beta}}
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; <span class="math inline">\(S_0(t)\)</span> is a baseline survival function.</p>
+<ul>
+<li>Cox (1972): Regression models and life tables (JRSS B, V.34, 187-220) proposed using the model <span class="math inline">\(\lambda(t;z)=\lambda_0(t)e^{z\beta}\)</span>, where <span class="math inline">\(\lambda_0(t)\)</span> is unspecified.</li>
+</ul>
+</section>
+<section id="coxs-regression-proportional-hazards-model" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="coxs-regression-proportional-hazards-model">Cox’s Regression (proportional hazards model)</h4>
+<ul>
+<li><p>Cox’s method does not require that you choose some particular probability distribution to represent survival times.</p>
+<ul>
+<li>Semi parametric, hence robust</li>
+</ul></li>
+<li><p>Cox regression makes it relatively easy to incorporate time-dependent covariates,that is, covariates that may change in value over the course of the observation period.</p></li>
+<li><p>Cox regression permits a kind of stratified analysis that is very effective in controlling for nuisance parameters.</p></li>
+<li><p>Cox regression makes it easy to adjust for perilds of time in which an individual is not at risk of an event.</p></li>
+<li><p>Cox regression can readily accommodate both discrete and continuous measurement of event times.</p></li>
+<li><p>Cox (1972) proposed a new estimation that was later named partial likelihood or more accurately maximum partial likelihood.</p>
+<ul>
+<li>The term Cox regression refers to the combination of the model and the estimation method.</li>
+</ul></li>
+</ul>
+</section>
+<section id="regression-model" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="regression-model">Regression model</h4>
+<ul>
+<li>Two major purpose of regression:
+<ul>
+<li>Control or intervention</li>
+<li>Prediction</li>
+</ul></li>
+<li>Identifying prognostic factor or risk factor.</li>
+<li>Prognosis i.e., the prediction of the future of the individual patients.</li>
+</ul>
+<ol type="1">
+<li><p>Find the relationship between survival time and independent variables or covariates measured from patients.</p></li>
+<li><p>Prediction concerning a patient survival probabilities, conditional on his/her covariate values.</p></li>
+</ol>
+<ul>
+<li><strong>Effects of a factor</strong> on a patient’s survival time are measured by the relative risk.</li>
+</ul>
+<ol type="1">
+<li>Binary covariate</li>
+</ol>
+<p><span class="math display">\[
+X_i=\begin{cases} 0, \,\,\, non-exposed \\
+1, \,\,\, exposed \\\end{cases}
+\]</span></p>
+<p><span class="math display">\[
+\lambda(t;x_i=0)=\lambda_0(t)
+\]</span></p>
+<p><span class="math display">\[
+\lambda(t;x_i=1)=\lambda_0(t)e^{\beta}
+\]</span></p>
+<ul>
+<li>relative risk or hazard rate: relative risk of exposure exposed vs non-exposed</li>
+</ul>
+<p><span class="math display">\[
+\frac{\lambda(t;x_i=1)}{\lambda(t;x_i=0)}=\frac{\lambda_0(t)e^{\beta}}{\lambda_0(t)}=e^{\beta}
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; <span class="math inline">\(\beta\)</span>: the value of the relative risk on the log scale.</p>
+<ul>
+<li><p><span class="math inline">\(\beta\)</span>가 양의 부호를 가질 때, 위험함수의 값이 커지므로 변수의 값이 클수록 위험이 크다는 뜻이며, 따라서 예후가 나쁨을 의미함</p></li>
+<li><p><span class="math inline">\(\beta&lt;0\)</span>: 수치의 절대값이 커질수록 예후가 좋음</p></li>
+</ul>
+<ol start="2" type="1">
+<li>Continuous variable</li>
+</ol>
+<p><span class="math display">\[
+\lambda(t;X=x)=\lambda_0(t)e^{\beta x}
+\]</span></p>
+<p><span class="math display">\[
+\lambda(t;X=x+1)=\lambda_0(t)e^{\beta (x+1)}
+\]</span></p>
+<p><span class="math display">\[
+\frac{\lambda(t;X=x+1)}{\lambda(t;X=x)}=e^{\beta}
+\]</span></p>
+<ul>
+<li><p>The relative risk due to one unit increase in the value of <span class="math inline">\(X\)</span>, <span class="math inline">\(X=x\)</span> vs.&nbsp;<span class="math inline">\(X=x+1\)</span>.</p></li>
+<li><p>For <span class="math inline">\(m\)</span> units increase in the value of <span class="math inline">\(X\)</span> say <span class="math inline">\(X=x+m\)</span> vs.&nbsp;<span class="math inline">\(X=x\)</span>, the corresponding relative risk is <span class="math inline">\(e^{m\beta}\)</span>.</p></li>
+<li><p><span class="math inline">\(\hat{R.R}=e^{\hat{\beta}}\)</span></p></li>
+<li><p>95% confidence interval(CI): <span class="math inline">\(exp(\hat{\beta}\pm 1.96\times SE(\hat{\beta}))\)</span></p></li>
+</ul>
+</section>
+<section id="partial-likelihood-construction" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="partial-likelihood-construction">Partial likelihood construction</h4>
+<ul>
+<li><p><span class="math inline">\(n\)</span> independent individuals (<span class="math inline">\(i=1,2, \ldots, n\)</span>)</p></li>
+<li><p>For each individual <span class="math inline">\(i\)</span>, the data consist of three parts (<span class="math inline">\(t_i, \delta_i, z_i\)</span>)</p></li>
+<li><p><span class="math inline">\(t_i\)</span>: The time of event or the time of censoring (i.e., the observed survival time)</p></li>
+</ul>
+<p><span class="math display">\[
+\delta_i=\begin{cases}
+1, \,\,\, uncensored\\
+0, \,\,\, censored
+\end{cases}
+\]</span></p>
+<ul>
+<li>Partial likelihood: the product of the likelihoos for all events that are observed.
+<ul>
+<li>Thus if the <span class="math inline">\(J\)</span> is the number of events,</li>
+</ul></li>
+</ul>
+<p><span class="math display">\[
+PL=\prod_{j=1}^J L_j
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; where <span class="math inline">\(L_j\)</span> is the likelihood for the <span class="math inline">\(j^{th}\)</span> event.</p>
+<ul>
+<li><p>What is the probability that it happened to patient 1 rather than to one of the other patients?</p></li>
+<li><p>Ans=(the hazards for patient 1 at t1) / (the sum of the hazards for all patients who were at risk of death in the same t1)</p></li>
+</ul>
+<p><span class="math display">\[
+\frac{\lambda(t_{(j)};x_j)dt}{\sum_{l\in R(t_{(j)})}\lambda(t_{(j)};x_j)dt} = \frac{e^{x_{(j)}\beta}}{\sum_{l\in R(t_{(j)})}e^{x_{(j)}\beta}}
+\]</span></p>
+<ul>
+<li><p><span class="math inline">\(\lambda(t_{(j)};x_j)dt\)</span>: the probability that an individual with covariate <span class="math inline">\(x\)</span> fails in a small interval <span class="math inline">\((t, t+dt)\)</span>, given the set at risk at <span class="math inline">\(t\)</span>.</p></li>
+<li><p><span class="math inline">\(t\)</span> is non-informative; semi-parametric</p></li>
+<li><p>The partial likelihood depends on only the order of the event time, not on their exact value.</p></li>
+</ul>
+</section>
+<section id="property" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="property">Property</h4>
+<ul>
+<li><p>You get estimates by finding values of <span class="math inline">\(\beta\)</span> that maximize the partial likelihood.</p></li>
+<li><p>The partial likelihoods are consistent and asymptotically normal.</p></li>
+<li><p>In other words, in large samples they are asymptotically unbiased and their sampling distribution is approximately normal.</p></li>
+<li><p>Another interesting property of partial likelihood estimates is that they depend on only the ranks of the event times, not their numerical values.</p></li>
+</ul>
+</section>
+<section id="interpretation-of-the-hazards-ratio-상대위험도-ehatbeta" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="interpretation-of-the-hazards-ratio-상대위험도-ehatbeta">Interpretation of the hazards ratio (상대위험도) <span class="math inline">\(e^{\hat{\beta}}\)</span></h4>
+<ol type="1">
+<li>For indicator (dummy) variables with values of 1 and 0,</li>
+</ol>
+<ul>
+<li><span class="math inline">\(e^{\hat{\beta}}\)</span>: the ratio of the estimated hazards for those with a value of 1 to the estimated hazard for those with a value 0 (controlling for the other covariates)
+<ul>
+<li>e.g) the estimated hazard ratio for the variable FIN (financial aid) is 0.685.</li>
+<li>The hazard of arrest for those who received financial aid is only about 69/% of the hazard for those who did not receive aid (controlling for the other covariates)</li>
+</ul></li>
+</ul>
+<ol start="2" type="1">
+<li>For quantitative covariates,</li>
+</ol>
+<ul>
+<li>For quantitative covariates, a more helpful statistic is obtained by subtracting 1.0 from the risk ratio and multiplying by 100.
+<ul>
+<li>This gives the estimated <percent change=""> in the hazard for each one-unit increase in the covariate e.g) For variable AGE, the risk ratio is 0.944, which yields 100(0.944-1)=-5.6. Therefore, for each one-year increase in the age at release, the hazard of arrest goes down by an estimated 5.6 percent.</percent></li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="multiple-regression" class="level3" data-number="3.1.2">
+<h3 data-number="3.1.2" class="anchored" data-anchor-id="multiple-regression"><span class="header-section-number">3.1.2</span> Multiple regression</h3>
+<ul>
+<li><span class="math inline">\(\lambda(t;z)=\lambda_0e^{z\beta}\)</span>, <span class="math inline">\(z^T=(z_1,z_2,\ldots,z_p)\)</span>, <span class="math inline">\(\beta^T=(\beta_1,\beta_2,\ldots,\beta_p)\)</span></li>
+</ul>
+<section id="best-model-selection-in-cox-regression-model" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="best-model-selection-in-cox-regression-model">Best model selection in Cox-regression model</h4>
+<ol type="1">
+<li>Univariate analysis</li>
+<li>Cox 모형에서best model selection</li>
+<li>Cox 모형의 비례성 가정 검토</li>
+</ol>
+<ul>
+<li>Cox 모형에서 치료효과에 대한 평가가 목적일 때 모형선정 방법</li>
+</ul>
+<p><span class="math display">\[
+변수 \begin{cases}
+치료변수 - variable\,\,\, of \,\,\, interest \\
+예후변수 - covariates\\
+\end{cases}
+\]</span></p>
+<ul>
+<li><p><span class="math inline">\(T\)</span> &lt;- 치료변수(고정): 관심변수</p></li>
+<li><p>Covariate <span class="math inline">\(X=(X_1, X_2, \ldots, X_p)\)</span>: <span class="math inline">\(T\)</span>를 제외한 <span class="math inline">\(p\)</span>개 변수 중 유의한 <span class="math inline">\(q\)</span>개의 변수를 찾아냄</p></li>
+</ul>
+</section>
+<section id="모형-선정-과정" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="모형-선정-과정">모형 선정 과정</h4>
+<ol type="1">
+<li><strong>치료효과에 대한 유의성 검정</strong></li>
+</ol>
+<p>&nbsp; &nbsp; &nbsp; (1-1) 중요한 예후 변수 선택</p>
+<p>&nbsp; &nbsp; &nbsp; - 단일 분석에서 전체 환자군 중 유의한 예후 변수 선택</p>
+<p>&nbsp; &nbsp; &nbsp; - 또는 각 치료군의 환자자료에서 단일 분석으로 유의한 예후 변수를 각각 알아내에 어느 한 치료군에서라도 유의하면 이들 모든 변수 선택</p>
+<p>&nbsp; &nbsp; &nbsp; (1-2) 치료변수를 제외하고서 (1-1)에서 밝혀진 유의한 예후변수로써 multiple regression 모형에 의해 적합한 모형을 찾는다.</p>
+<p>&nbsp; &nbsp; &nbsp; (1-3) (1-2)의 모형에서 치료변수를 추가하여 변수들의 유의성 조사</p>
+<p>&nbsp; &nbsp; &nbsp; - Univariate analysis에서 <span class="math inline">\(\alpha\)</span>는 0.1 또는 0.2를 사용함</p>
+<p>&nbsp; &nbsp; &nbsp; - Strictly하게 <span class="math inline">\(\alpha\)</span>를 정하면 선택변수가 너무 줄어들기 때문에 conservative 하지 않게 하기 위해 0.1 또는 0.2를 사용</p>
+<p>&nbsp; &nbsp; &nbsp; (1-4) 치료변수만의 모형과 (1-3)의 모형과 비교하여 치료변수에 대한 다른 변수들의 영향 조사</p>
+<ol start="2" type="1">
+<li><strong>치료효과에 대한 교호작용 검정</strong></li>
+</ol>
+<ul>
+<li>공변량의 각 수준에 따라 치료효과가 다를 때 치료변수와 공변량은 교호작용이 존재함
+<ul>
+<li>예를 들어, 공변량으로서 성별이 있을 때 남성환자의 경우 두 치료군의 생존율의 차이가 두드러지거나 여성환자의 경우에는 두 치료군의 생존률의 차이가 없어서 두 치료군에 의한 생존율의 차이의 정도가 남성과 여성에서 다를 때,</li>
+<li>또는 남성환자의 경우 만약 첫째 치료군의 생존율이 높으나 여성환자의 경우에는 둘째 치료군의 생존율이 높을 때 이는 성별에 따라 치료효과가 다름을 의미</li>
+</ul></li>
+<li>Hierarchical principle: 교호작용이 모형에 삽입된 경우, 두 공변량의 단순 효과도 반드시 모형에 삽입함</li>
+</ul>
+<ol start="3" type="1">
+<li><strong>비례성 가정에 대한 검토</strong></li>
+</ol>
+<ul>
+<li><p>Cox 모형은 비례성 위험 함수를 가정함. 따라서 Cox 모형 이용시 이 가정이 성립하는 지 살펴봐야 함</p></li>
+<li><p>비례성 위험 함수 모형에서 비례성 가정이 충족되지 않는 경우</p>
+<ul>
+<li>공변량의 효과가 시간에 따라 변함</li>
+<li>모형에 삽입되어야 할 공변량이 제외되었거나</li>
+<li>유의한 교호작용이 모형에서 제외된 경우</li>
+<li>위험함수가 <span class="math inline">\(\lambda(t;z)=\lambda_0(t)e^{z\beta}\)</span>와 같은 지수 형태가 아닌 다른 형태일 경우</li>
+</ul></li>
+</ul>
+<p>&nbsp; &nbsp; &nbsp; (3-1) 비례성 가정 검토방법</p>
+<p>&nbsp; &nbsp; &nbsp; 1. 그래프 이용</p>
+<p>&nbsp; &nbsp; &nbsp; 2. Time-dependent covariate 변수에 대한 검정 통계량 이용</p>
+<p>&nbsp; &nbsp; &nbsp; 3. 잔차 검토</p>
+<p>&nbsp; &nbsp; &nbsp; (3-2) LLS 그래프로서 비례성 가정 검토방법</p>
+<p>&nbsp; &nbsp; &nbsp; - 검토하고자 하는 공변량이 하나일 때 그 공변량의 값에 따라 나누어진 각 부분군의 Kaplan-Meier 생존률 <span class="math inline">\(S(t)\)</span>를 구한 후 이를 이용하여</p>
+<p><span class="math display">\[
+log(-log(S(t))) \,\,\, vs. \,\,\, t
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; LLS 그래프를 그림</p>
+<p>&nbsp; &nbsp; &nbsp; - 만약 이미 비례성 가정이 성립하고 공변량 <span class="math inline">\(x\)</span>가 있으면서 또 다른 공변량의 비례성 가정을 검토하는 경우에는</p>
+<p><span class="math display">\[
+log(-log(S(t;\bar{x}))) \,\,\, vs. \,\,\, t
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; 를 그림. 여기서 <span class="math inline">\(\bar{x}\)</span>는 가정을 검토하여 나누어진 부분군에 속한 환자들의 <span class="math inline">\(x\)</span> 평균값</p>
+<p>&nbsp; &nbsp; &nbsp; - LLS 그래프가 직선이든 곡선이든 대체적으로 평행한 패턴을 보이면 그 공변량은 비례성 가정에 적합하다고 봄</p>
+<p><img src="survival_add2/f10.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="위험비hazard-ratio-계산" class="level3" data-number="3.1.3">
+<h3 data-number="3.1.3" class="anchored" data-anchor-id="위험비hazard-ratio-계산"><span class="header-section-number">3.1.3</span> 위험비(hazard ratio) 계산</h3>
+<ul>
+<li><p>위험비는 어떤 대상의 위함을 다른 대상의 위험으로 나눈 값</p></li>
+<li><p>어떤 대상의 설명변수들을 <span class="math inline">\(X^*\)</span>라 하고 다른 대상의 설명변수들을 <span class="math inline">\(X\)</span>라고 하면 추정된 위험비는 다음과 같음</p></li>
+</ul>
+<p><span class="math display">\[
+\hat{HR}=\frac{\hat{\lambda}(t,X^*)}{\hat{\lambda}(t,X)}
+\]</span></p>
+<ul>
+<li>위험비의 식을 기저위험함수와 지수식의 곱으로 표현하면, 기저위험함수는 약분되어 사라지고 지수식만 남게 됨</li>
+</ul>
+<p><span class="math display">\[
+\hat{HR}=exp(\sum_{i=1}^p \hat{\beta}(X_i^*-X_i))
+\]</span></p>
+<ul>
+<li><p>위험비의 계산에서 시간에 따라 변화하는 기저위험함수가 사라지고 설명변수와 회귀계수만 남게 됨</p></li>
+<li><p>즉, 위험비는 시간이 변하더라도 변하지 않고 일정함을 의미함. 따라서 콕스의 위험비를 “비례위험”이라고 함</p></li>
+</ul>
+<section id="example" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="example">Example</h4>
+<ul>
+<li><p>AutoReg 패키지에 포함되어 있는 anderson 데이터를 사용하여 콕스 PH 모형을 적합 하면 다음과 같음</p></li>
+<li><p>anderson 데이터는 백혈병 환자 42명의 데이터로 대조군(rx=1)과 치료군(rx=0)의 재발(status=1)까지의 시간[time, 단위: 주수(week)]을 기록한 생존데이터이다. 이 데이터에는 성별(sex 0:Female, 1:Male)과 로그백혈구 수(logWBC)가 포함되어 있다.</p></li>
+<li><p>필요 패키지 로드</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(autoReg)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survival)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#library(survminer)</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#library(howto)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#library(flextable)</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#library(ftExtra)</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#library(tidyverse)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fit<span class="ot">=</span><span class="fu">coxph</span>(<span class="fu">Surv</span>(time,status)<span class="sc">~</span>rx<span class="sc">+</span>logWBC,<span class="at">data=</span>anderson)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+coxph(formula = Surv(time, status) ~ rx + logWBC, data = anderson)
+
+  n= 42, number of events= 30 
+
+         coef exp(coef) se(coef)     z Pr(&gt;|z|)    
+rx     1.3861    3.9991   0.4248 3.263   0.0011 ** 
+logWBC 1.6909    5.4243   0.3359 5.034  4.8e-07 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+       exp(coef) exp(-coef) lower .95 upper .95
+rx         3.999     0.2501     1.739     9.195
+logWBC     5.424     0.1844     2.808    10.478
+
+Concordance= 0.852  (se = 0.04 )
+Likelihood ratio test= 46.71  on 2 df,   p=7e-11
+Wald test            = 33.6  on 2 df,   p=5e-08
+Score (logrank) test = 46.07  on 2 df,   p=1e-10</code></pre>
+</div>
+</div>
+<ul>
+<li>위 모형과 같이 rx의 변화에 따른 위험비는 다음과 같음. 이때 모형에 같이 적용된 logWBC는 두 개체간 같은 값을 가진다고 가정함</li>
+</ul>
+<p><span class="math display">\[
+\hat{HR}=exp(1.3861(1-0)+1.6909(logWBC-logWBC))=exp(1.3861)=3.999
+\]</span></p>
+<ul>
+<li>따라서 rx=0인 경우보다 rx=1인 경우에 위험도는 3.999배 높다고 할 수 있음</li>
+<li>마찬가지로 rx가 같은 경우 logWBC 값이 1 증가할 경우 위험도는 5.424배 높아짐</li>
+</ul>
+<p>**** 추가설명 {-}</p>
+<ul>
+<li><p>양변에 로그를 취하고 <span class="math inline">\(\alpha(t)=log\lambda_0(t)\)</span>로 놓으면 <span class="math display">\[log \lambda(t)=\alpha(t)+\beta_1x_1+\cdots+\beta_px_p\]</span></p></li>
+<li><p>만약 <span class="math inline">\(\alpha(t)=\alpha_0\)</span>로 놓으면 지수모형과 같은 형태</p></li>
+<li><p>만약 <span class="math inline">\(\alpha(t)=\alpha_0 + \alpha t\)</span>로 놓으면 곰페르츠 모형과 같은 형태</p></li>
+<li><p>만약 <span class="math inline">\(\alpha(t)=\alpha_0 + \alpha logt\)</span>로 놓으면 와이블 모형과 같은 형태</p></li>
+<li><p>Cox 모형은 분포의 선택이 필요하지 않으며, <span class="math inline">\(\alpha(t)\)</span>의 형태가 어떤 것이든 무관</p></li>
+<li><p>"비례위험모형"의 의미는 어느 환자의 위험률과 다른 환자의 위험률의 비가 시간에 대해 일정하다는 것을 의미</p></li>
+<li><p>예를 들어, <span class="math inline">\(i\)</span>번째 환자와 <span class="math inline">\(j\)</span>번째 환자의 위험함수의 비는</p></li>
+</ul>
+<p><span class="math display">\[\lambda_i(t)/\lambda_j(t)=exp(\beta_1(x_{i1}-x_{j1})+\cdots+\beta_p(x_{ip}-x_{jp}))\]</span></p>
+<p>가 되어 기저위험함수는 상쇄되어 없어지고 위험함수의 비는 시간에 대해서 상수로 됨</p>
+<ul>
+<li>비례위험의 가정이 맞다면, 두 환자에 대해 시간 <span class="math inline">\(t\)</span>에 따른 <span class="math inline">\(log\hat{\Lambda}(t)\)</span> 또는 <span class="math inline">\(log(-log\hat{S}(t))\)</span>의 그래프가 평행하게 되어야 함</li>
+</ul>
+<p><img src="survival2/f7.png" class="img-fluid"></p>
+<p><br></p>
+</section>
+</section>
+</section>
+<section id="콕스-ph-모형을-이용한-보정된-생존곡선" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="콕스-ph-모형을-이용한-보정된-생존곡선"><span class="header-section-number">3.2</span> 콕스 PH 모형을 이용한 보정된 생존곡선</h2>
+<ul>
+<li>anderson 데이터에서 rx에 따른 K-M 생존곡선은 다음과 같음</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fit<span class="ot">=</span><span class="fu">survfit</span>(<span class="fu">Surv</span>(time,status)<span class="sc">~</span>rx,<span class="at">data=</span>anderson)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit, <span class="at">mark.time=</span>T, <span class="at">col=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="at">lty=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>,<span class="fu">c</span>(<span class="st">"rx=0"</span>,<span class="st">"rx=1"</span>), <span class="at">col=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="at">lty=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-Cox_files/figure-html/d1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><p>logWBC의 효과를 보정하고 rx에 따른 생존곡선을 그리려면 먼저 그림을 그릴 새로운 데이터를 생성해야 함</p></li>
+<li><p>이때, rx의 값과 logWBC의 값을 정해주어야 하며, logWBC의 중앙값을 적용함</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fit<span class="ot">=</span><span class="fu">coxph</span>(<span class="fu">Surv</span>(time,status)<span class="sc">~</span>rx<span class="sc">+</span>logWBC,<span class="at">data=</span>anderson)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>rx<span class="ot">=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>logWBC<span class="ot">=</span><span class="fu">median</span>(anderson<span class="sc">$</span>logWBC)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>newdata<span class="ot">=</span><span class="fu">data.frame</span>(rx,logWBC)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">survfit</span>(fit,<span class="at">newdata=</span>newdata),<span class="at">col=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,<span class="at">lty=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="at">legend=</span><span class="fu">c</span>(<span class="st">"rx=0"</span>,<span class="st">"rx=1"</span>), <span class="at">col=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="at">lty=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-Cox_files/figure-html/d2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>R의 autoReg 패키지 내 adjustedPlot을 이용하여 보정된 생존곡선을 그리는 것이 가능함</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fit2<span class="ot">=</span><span class="fu">coxph</span>(<span class="fu">Surv</span>(time,status)<span class="sc">~</span>rx<span class="sc">+</span>logWBC,<span class="at">data=</span>anderson)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">adjustedPlot</span>(fit2,<span class="at">xnames=</span><span class="st">"rx"</span>, <span class="at">mark.time=</span>T, <span class="at">show.median=</span>T)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-Cox_files/figure-html/d3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>설명 변수가 여러 개 있는 경우에도 보정된 생존곡선이 가능</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(cancer,<span class="at">package=</span><span class="st">"survival"</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>fit<span class="ot">=</span><span class="fu">coxph</span>(<span class="fu">Surv</span>(time,status)<span class="sc">~</span>rx<span class="sc">+</span>sex<span class="sc">+</span>age<span class="sc">+</span>differ,<span class="at">data=</span>colon)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">adjustedPlot</span>(fit,<span class="at">xnames=</span><span class="fu">c</span>(<span class="st">"rx"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-Cox_files/figure-html/d4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><br></p>
+</section>
+<section id="비례위험-가정-평가" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="비례위험-가정-평가"><span class="header-section-number">3.3</span> 비례위험 가정 평가</h2>
+<ul>
+<li>비례위험 가정을 평가하는 방법으로 1) 그래프를 이용하는 방법, 2) 적합도 검정을 이용하는 방법, 3) 시간의존 공변량을 사용하는 방법 등이 있음</li>
+</ul>
+<section id="그래프를-이용하는-방법" class="level3" data-number="3.3.1">
+<h3 data-number="3.3.1" class="anchored" data-anchor-id="그래프를-이용하는-방법"><span class="header-section-number">3.3.1</span> 그래프를 이용하는 방법</h3>
+<ul>
+<li>비례위험 가정을 평가하는 방법 중 그래프를 이용하는 방법은 1) 로그-로그(log-log) 생존곡선을 비교하는 방법, 2) 관찰생존곡선-기대생존곡선을 비교하는 방법이 있다.</li>
+</ul>
+</section>
+<section id="로그-로그-생존곡선-그림" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="로그-로그-생존곡선-그림">로그-로그 생존곡선 그림</h3>
+<ul>
+<li><p>두 그룹 간의 생존을 비교할 때 콕스비례위험 가정하에 두 그룹의 생존은 다음과 같음 관계를 가짐</p></li>
+<li><p><span class="math inline">\(S_0\)</span>를 첫번째 그룹의 생존, <span class="math inline">\(S_1\)</span>을 두 번째 그룹의 생존, <span class="math inline">\(exp(\beta)\)</span>를 비례위험상수라 하면</p></li>
+</ul>
+<p><span class="math display">\[
+S_1(t)=S_0(t)^{exp(\beta)}
+\]</span></p>
+<ul>
+<li>양변에 로그를 취하면</li>
+</ul>
+<p><span class="math display">\[
+log(S_1(t))=exp(\beta) \times log(S_0(t))
+\]</span></p>
+<ul>
+<li>생존함수는 1보다 작으므로 생존함수의 로그는 음수값이 됨. 양변에 -1을 곱한 후 다시 양변의 로그를 취하면</li>
+</ul>
+<p><span class="math display">\[
+log(-log(S_1(t)))=\beta + log(-log(S_0(t)))
+\]</span></p>
+<ul>
+<li>따라서 비례위험 가정이 맞으면, 로그-로그 곡선은 <span class="math inline">\(\beta\)</span> 크기만큼 차이를 두고 평행해야 함</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fit<span class="ot">=</span><span class="fu">survfit</span>(<span class="fu">Surv</span>(time,status)<span class="sc">~</span>rx,<span class="at">data=</span>anderson)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">loglogplot</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-Cox_files/figure-html/d5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>anderson 데이터에서 sex를 설명변수로 하는 모형의 비례위험가정을 살펴보면</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>fit1<span class="ot">=</span><span class="fu">survfit</span>(<span class="fu">Surv</span>(time,status)<span class="sc">~</span>sex,<span class="at">data=</span>anderson)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">loglogplot</span>(fit1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-Cox_files/figure-html/d6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><p>남자(sex=0)와 여자(sex=1)의 로그-로그 생존곡선이 서로 교차하기 때문에 비례위험 가정이 맞지 않음</p></li>
+<li><p>logWBC에 대해서, logWBC는 연속형 변수이기 때문에 그룹으로 나누어 살펴보아야 함</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fit2<span class="ot">=</span><span class="fu">survfit</span>(<span class="fu">Surv</span>(time,status)<span class="sc">~</span>logWBC,<span class="at">data=</span>anderson)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">loglogplot</span>(fit2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-Cox_files/figure-html/d7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fit3<span class="ot">=</span><span class="fu">survfit</span>(<span class="fu">Surv</span>(time,status)<span class="sc">~</span>rx<span class="sc">+</span>logWBC,<span class="at">data=</span>anderson)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">loglogplot</span>(fit3,<span class="at">no=</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-Cox_files/figure-html/d8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><p>로그-로그 생존곡선을 이용하여 비례위험 가정을 평가하는 방법은 직관적이기는 하지만 통계적 유의성을 평가할 수 없음</p></li>
+<li><p>특히, 데이터의 수가 적은 경우 문제가 되며, 여러 변수에 대하여 한꺼번에 로그-로그 생존곡선을 그리는 경우 각 그룹에 속한 데이터의 개수가 더 작아지므로 가능하면 하나의 변수를 평가하는 것이 바람직함</p></li>
+</ul>
+<p><br></p>
+<section id="관측-기대값-그림" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="관측-기대값-그림">관측-기대값 그림</h4>
+<ul>
+<li>관측-기대값 그림(observed versus expected plot)은 적합도 검정(goodness of fit, GOF) 검정을 그래프로 그린 것이며, 로그-로그 생존곡선의 대안이 될 수 있음</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fit<span class="ot">=</span><span class="fu">coxph</span>(<span class="fu">Surv</span>(time,status)<span class="sc">~</span>rx,<span class="at">data=</span>anderson)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">OEplot</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-Cox_files/figure-html/d9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><p>점선으로 나타낸 기대값과 실선으로 나타난 관측값 곡선이 가까우면 비례위험 가정에 적합하며, 두 곡선에 차이가 있으면 비례위험 가정이 위배된다고 할 수 있음</p></li>
+<li><p>로그-로그 생존곡선이 "얼마나 평행해야 평행한 것인가?"라는 한계가 있는 것과 마찬가지로 관측-기대값 그림 또한 "얼마나 가까워야 가까운 것인가?"라는 문제가 있음</p></li>
+<li><p>관측값과 기대값의 차이가 심하게 나타날 때 비례위험 가정에 위반된다고 평가하는 것이 바람직 함</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>fit1<span class="ot">=</span><span class="fu">coxph</span>(<span class="fu">Surv</span>(time,status)<span class="sc">~</span>sex,<span class="at">data=</span>anderson)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">OEplot</span>(fit1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-Cox_files/figure-html/d10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>성별에 대해서는 비례위험 가정을 만족하지 못할 가능성을 시사해 줌</li>
+</ul>
+<p><br></p>
+</section>
+</section>
+<section id="적합도-검정" class="level3" data-number="3.3.2">
+<h3 data-number="3.3.2" class="anchored" data-anchor-id="적합도-검정"><span class="header-section-number">3.3.2</span> 적합도 검정</h3>
+<ul>
+<li><p>적합도 검정은 관심 있는 설명변수의 비례위험 가정에 대한 검정통계량과 p값을 제공해주기 때문에 그래프를 이용한 방법에 비해 보다 객관적인 결과를 제시함</p></li>
+<li><p>적합도 검정에는 Schoenfeld 잔차를 사용하며, Schoenfeld 잔차는 대상환자 각각에 대하여 이벤트 발생 시 관찰된 예측변수 값에서 예측변수의 가중평균을 빼서 계산</p></li>
+<li><p>적합도 검정은 특정 예측변수에 대한 Schoenfeld 잔차가 생존시간에 관계없이 일정한지를 검정</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fit<span class="ot">=</span><span class="fu">coxph</span>(<span class="fu">Surv</span>(time,status)<span class="sc">~</span>rx<span class="sc">+</span>sex<span class="sc">+</span>logWBC,<span class="at">data=</span>anderson)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>x<span class="ot">=</span><span class="fu">cox.zph</span>(fit)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>x</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       chisq df    p
+rx     0.036  1 0.85
+sex    5.420  1 0.02
+logWBC 0.142  1 0.71
+GLOBAL 5.879  3 0.12</code></pre>
+</div>
+</div>
+<ul>
+<li>rx와 logWBC에 대한 p값은 유의하지 않으나 sex에 대한 p값은 유의한 것으로 나타남</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coxzphplot</span>(x)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-Cox_files/figure-html/d12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>이 중 sex에 대한 plot만 그려보면</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coxzphplot</span>(x, <span class="at">var=</span><span class="st">"sex"</span>, <span class="at">add.lm=</span>T)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-Cox_files/figure-html/d13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>loess(blue) 회귀곡선에 빨간색의 직선회귀선을 그린 그림으로, 시간이 경과함에 따라서 sex의 위험이 감소하는 것으로 나타남. 이는 시간의 흐름에 따라 sex의 위험이 일정하지 않은, 비례위험 가정을 만족하지 않은 것을 뜻 함</li>
+</ul>
+<p><br></p>
+</section>
+</section>
+<section id="시간의존-공변량" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="시간의존-공변량"><span class="header-section-number">3.4</span> 시간의존 공변량</h2>
+<ul>
+<li><p>콕스 PH 모형의 중요한 가정은 연구가 시작될 때 공변량이 정해지며 시간이 지나도 공변량은 변하지 않는다는 것임</p></li>
+<li><p>하지만 어떤 경우에는 공변량이 시간에 따라 변할 수 있으며, 이를 시간의존 공변량(time-dependent covariate)이라고 함</p></li>
+<li><p>예를 들어, 백혈병 환자의 사망 시점이 관심 있는 반응변수일 때 골수이식과 같은 중간사건(intermediate event)의 발생 여부는 사망시간을 예측하는 데 매우 중요한 영향을 미칠 수 있음</p>
+<ul>
+<li>여기서 중간사건은 연구 기간 동안 그 발생 여부가 서로 다르며 발생 시점 또한 다름</li>
+<li>따라서, 중간사건은 시간의존 공변량으로 간주할 수 있음</li>
+</ul></li>
+<li><p>시간에 따라 변화하는 공변량을 고려한 Cox PH 모형</p></li>
+</ul>
+<p><span class="math display">\[
+log h(t)=\alpha(t)+\beta_1 x_1 +\cdots +\beta_p x_p + \beta_{p+1}x_{p+1}(t)
+\]</span></p>
+<p><br></p>
+<section id="스탠포드-심장이식-연구" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="스탠포드-심장이식-연구">스탠포드 심장이식 연구</h4>
+<ul>
+<li><p>시간의존 공변량을 다룰 때 주의할 점은 미래의 공변량 값으로 생존을 예측할 수 없다는 것임</p></li>
+<li><p>1971년 Clark 등의 연구에서, 심장이식 프로그램에 등록된 환자의 생존에 대해, 심장이식을 받은 환자는 심장이식을 받지 않은 환자에 비해 유의하게 생존이 증가함을 시사함</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(heart,<span class="at">package=</span><span class="st">"survival"</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>fit<span class="ot">=</span><span class="fu">coxph</span>(<span class="fu">Surv</span>(futime,fustat)<span class="sc">~</span>transplant<span class="sc">+</span>age<span class="sc">+</span>surgery,<span class="at">data=</span>jasa)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+coxph(formula = Surv(futime, fustat) ~ transplant + age + surgery, 
+    data = jasa)
+
+  n= 103, number of events= 75 
+
+               coef exp(coef) se(coef)      z Pr(&gt;|z|)    
+transplant -1.71711   0.17958  0.27853 -6.165 7.05e-10 ***
+age         0.05889   1.06065  0.01505  3.913 9.12e-05 ***
+surgery    -0.41902   0.65769  0.37118 -1.129    0.259    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+           exp(coef) exp(-coef) lower .95 upper .95
+transplant    0.1796     5.5684    0.1040     0.310
+age           1.0607     0.9428    1.0298     1.092
+surgery       0.6577     1.5205    0.3177     1.361
+
+Concordance= 0.732  (se = 0.031 )
+Likelihood ratio test= 45.85  on 3 df,   p=6e-10
+Wald test            = 47.15  on 3 df,   p=3e-10
+Score (logrank) test = 52.63  on 3 df,   p=2e-11</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#gaze(fit) %&gt;% myft() %&gt;% highlight(i=1)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><br></p>
+<ul>
+<li>이 연구에서 가장 중요한 공변량 transplant는 심장이식을 받은 경우 1, 받지 않은 경우 0으로 입력되었으며, 공변량 transplant의 위험률(hazard ratio)는 0.18로 매우 낮은 p값을 보임
+<ul>
+<li>이 결과는 심장이식이 환자의 수명을 늘리는 데 매우 효과적임을 시사함</li>
+<li>하지만, 이 연구의 문제는 심장이식이 시간에 따라 변화하는 공변량이라는 점이며, 환자가 심장이식을 받기 위해서는 심장이식을 받을 수 있을 만큼 오래 살아야 함을 의미함</li>
+<li>따라서 이 결과는 오래 산 환자(심장이식 받음)가 오래 살지 못한 환자에 비해 오래 살았다는 것을 보여준 것에 지나지 않음</li>
+</ul></li>
+<li>이러한 문제에 대한 간단한 해결방법은 랜드마크 시간을 정해 환자를 두 군으로 나누는 것임
+<ul>
+<li>랜드마크 시간전에 심장이식을 받은 환자들은 환자군으로 하고 심장이식을 받지 못한 환자들은 대조군으로 함</li>
+<li>이때 중요한 점은 1) 랜드마크 시간까지 생존한 환자들만 연구에 포함시키고 2) 모든 환자들(특히 대조군에 속한 환자들)은 랜드마크 시간 이후에 이식을 받더라도 대조군에 계속 남아 있어야 함</li>
+</ul></li>
+<li>랜드마크 30일을 기준으로 한 분석 결과</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>ind30 <span class="ot">&lt;-</span> jasa<span class="sc">$</span>futime <span class="sc">&gt;=</span> <span class="dv">30</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>transplant30 <span class="ot">&lt;-</span> (jasa<span class="sc">$</span>transplant<span class="sc">==</span><span class="dv">1</span>) <span class="sc">&amp;</span> (jasa<span class="sc">$</span>wait.time<span class="sc">&lt;</span><span class="dv">30</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>fit1<span class="ot">=</span><span class="fu">coxph</span>(<span class="fu">Surv</span>(futime,fustat)<span class="sc">~</span>transplant30<span class="sc">+</span>age<span class="sc">+</span>surgery,<span class="at">data=</span>jasa,<span class="at">subset=</span>ind30)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+coxph(formula = Surv(futime, fustat) ~ transplant30 + age + surgery, 
+    data = jasa, subset = ind30)
+
+  n= 79, number of events= 52 
+
+                     coef exp(coef) se(coef)      z Pr(&gt;|z|)  
+transplant30TRUE -0.04214   0.95874  0.28377 -0.148   0.8820  
+age               0.03720   1.03790  0.01714  2.170   0.0300 *
+surgery          -0.81966   0.44058  0.41297 -1.985   0.0472 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+                 exp(coef) exp(-coef) lower .95 upper .95
+transplant30TRUE    0.9587     1.0430    0.5497    1.6720
+age                 1.0379     0.9635    1.0036    1.0734
+surgery             0.4406     2.2697    0.1961    0.9898
+
+Concordance= 0.618  (se = 0.044 )
+Likelihood ratio test= 9.5  on 3 df,   p=0.02
+Wald test            = 8.61  on 3 df,   p=0.03
+Score (logrank) test = 8.94  on 3 df,   p=0.03</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">#gaze(fit1) %&gt;%myft( ) %&gt;% highlight(i=1)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><br></p>
+<ul>
+<li>transplant30의 위험률은 0.96(95% CI: 0.55-1.67, p=.882)으로 유의하지 않게 나타남
+<ul>
+<li>랜드마크 분석에 따르면 심장이식을 받은 환자와 받지 않은 환자 간의 생존차이는 없다고 할 수 있음</li>
+<li>랜드마크 방법은 적용하기 쉽지만 랜드마크의 크기를 어떻게 정하는지에 대한 뚜렷한 기준이 없음</li>
+</ul></li>
+<li>보다 나은 방법은 transplant를 시간의존 공변량으로 사용하는 것임
+<ul>
+<li>transplant 변수를 시간의존 공변량으로 사용하기 위한 변환</li>
+</ul></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>tdata<span class="ot">=</span>jasa[,<span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,<span class="dv">11</span><span class="sc">:</span><span class="dv">14</span>)] <span class="co">#tdata는 변환 중 임시데이터</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>tdata<span class="sc">$</span>futime<span class="ot">=</span><span class="fu">pmax</span>(.<span class="dv">5</span>,tdata<span class="sc">$</span>futime) <span class="co">#futime이 0인 경우 0.5로 바뀜</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="do">##wait.time과 futime이 같은 경우 wait.time에서 0.5를 뺀다.</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>indx<span class="ot">=</span>{tdata<span class="sc">$</span>wait.time<span class="sc">==</span>tdata<span class="sc">$</span>futime}<span class="sc">&amp;</span>{<span class="sc">!</span><span class="fu">is.na</span>(tdata<span class="sc">$</span>wait.time)}</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>tdata<span class="sc">$</span>id<span class="ot">=</span><span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(tdata)</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>sdata<span class="ot">=</span><span class="fu">tmerge</span>(tdata,tdata,<span class="at">id=</span>id,</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">death=</span><span class="fu">event</span>(futime,fustat),</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">trans=</span><span class="fu">tdc</span>(wait.time))</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>final<span class="ot">=</span>sdata[,<span class="fu">c</span>(<span class="dv">7</span><span class="sc">:</span><span class="dv">11</span>,<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>)]</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(final)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  id tstart tstop death trans surgery      age
+1  1      0    49     1     0       0 30.84463
+2  2      0     5     1     0       0 51.83573
+3  3      0    15     1     1       0 54.29706
+4  4      0    35     0     0       0 40.26283
+5  4     35    38     1     1       0 40.26283
+6  5      0    17     1     0       0 20.78576</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>fit2<span class="ot">=</span><span class="fu">coxph</span>(<span class="fu">Surv</span>(tstart,tstop,death)<span class="sc">~</span>trans<span class="sc">+</span>surgery<span class="sc">+</span>age,<span class="at">data=</span>final)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+coxph(formula = Surv(tstart, tstop, death) ~ trans + surgery + 
+    age, data = final)
+
+  n= 169, number of events= 75 
+
+            coef exp(coef) se(coef)      z Pr(&gt;|z|)  
+trans   -0.07894   0.92410  0.30608 -0.258   0.7965  
+surgery -0.77035   0.46285  0.35959 -2.142   0.0322 *
+age      0.03138   1.03187  0.01392  2.253   0.0242 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+        exp(coef) exp(-coef) lower .95 upper .95
+trans      0.9241     1.0821    0.5072    1.6836
+surgery    0.4629     2.1605    0.2287    0.9365
+age        1.0319     0.9691    1.0041    1.0604
+
+Concordance= 0.6  (se = 0.036 )
+Likelihood ratio test= 10.78  on 3 df,   p=0.01
+Wald test            = 9.72  on 3 df,   p=0.02
+Score (logrank) test = 10.05  on 3 df,   p=0.02</code></pre>
+</div>
+</div>
+<ul>
+<li>시간의존 공변량을 이용한 분석 결과, 심장이식의 HR=0.9241, p=0.7965로 심장이식이 생존을 증가시킨다는 근거를 찾을 수 없음</li>
+</ul>
+<p><br></p>
+</section>
+</section>
+<section id="sas-예제" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="sas-예제"><span class="header-section-number">3.5</span> SAS 예제</h2>
+<ul>
+<li>Example: Colon data
+<ul>
+<li>time: days until event or censoring</li>
+<li>status: censoring status</li>
+<li>rx: treatment; Obs(ervation), Lev(amisole), Lev(amisole_5-FU)</li>
+<li>sex: 1=male, 0:female</li>
+<li>differ: differentiation of tumour (1=well, 2=moderate, 3=poor)</li>
+</ul></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(colon)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  id study      rx sex age obstruct perfor adhere nodes status differ extent
+1  1     1 Lev+5FU   1  43        0      0      0     5      1      2      3
+2  1     1 Lev+5FU   1  43        0      0      0     5      1      2      3
+3  2     1 Lev+5FU   1  63        0      0      0     1      0      2      3
+4  2     1 Lev+5FU   1  63        0      0      0     1      0      2      3
+5  3     1     Obs   0  71        0      0      1     7      1      2      2
+6  3     1     Obs   0  71        0      0      1     7      1      2      2
+  surg node4 time etype
+1    0     1 1521     2
+2    0     1  968     1
+3    0     0 3087     2
+4    0     0 3087     1
+5    0     1  963     2
+6    0     1  542     1</code></pre>
+</div>
+</div>
+<ul>
+<li>Cox proportional hazard model</li>
+</ul>
+<pre><code>Proc phreg data=colon;
+class rx sex differ;
+model time*status(0) = rx sex differ / rl;
+hazardratio 'Pairwise' rx / diff=pairwise;
+run;</code></pre>
+<p><img src="survival_add2/f11.png" class="img-fluid"></p>
+<ul>
+<li>비례성 가정 검토: Log-Log vs log(t)</li>
+</ul>
+<pre><code>proc lifetest data=colon plots=(lls);
+time time*status(0);
+strata rx;
+run;</code></pre>
+<p><img src="survival_add2/f12.png" class="img-fluid"></p>
+<ul>
+<li>비례성 가정 검토: Log-Log vs t</li>
+</ul>
+<pre><code>Proc phreg data=colon;
+class rx sex differ;
+model time*status(0) = sex differ;
+strata rx;
+baseline out=c survival=s loglogs=lls; 
+run;
+
+proc gplot data=c;
+plot lls*time=rx;
+symbol1 interpol=join  color=black line=1;
+symbol2 interpol=join color=blue line=2;
+symbol3 interpol=join color=red line=3;
+run;</code></pre>
+<p><img src="survival_add2/f13.png" class="img-fluid"></p>
+<ul>
+<li>비례성 가정 검토: time dependent</li>
+</ul>
+<pre><code>data colon2;
+set colon;
+if rx='Obs' then rx1=1;
+else if rx='Lev' then rx1=2;
+else if rx='Lev+5FU' then rx1=3;
+run;
+ 
+Proc phreg data=colon2;
+model time*status(0) = rx1 sex differ rx_time sex_time differ_time/ ties=exact;
+rx_time=rx1*log(time);
+sex_time=sex*log(time);
+differ_time=differ*log(time);
+proportionality_test: test rx_time, sex_time, differ_time;
+run;</code></pre>
+<p><img src="survival_add2/f14.png" class="img-fluid"></p>
+<ul>
+<li>비례성 가정 검토: resample</li>
+</ul>
+<pre><code>Proc phreg data=colon;
+class rx sex differ;
+model time*status(0) = rx sex differ;
+assess ph / crpanel resample;
+run;</code></pre>
+<p><img src="survival_add2/f15_1.png" class="img-fluid"></p>
+<p><img src="survival_add2/f15_2.png" class="img-fluid"></p>
+<p><img src="survival_add2/f15_3.png" class="img-fluid"></p>
+<p><img src="survival_add2/f15_4.png" class="img-fluid"></p>
+<p><img src="survival_add2/f15_5.png" class="img-fluid"></p>
+<p><img src="survival_add2/f15_6.png" class="img-fluid"></p>
+<ul>
+<li>시간 의존 공변량: Heart data</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(jasa)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    birth.dt  accept.dt    tx.date    fu.date fustat surgery      age futime
+1 1937-01-10 1967-11-15       &lt;NA&gt; 1968-01-03      1       0 30.84463     49
+2 1916-03-02 1968-01-02       &lt;NA&gt; 1968-01-07      1       0 51.83573      5
+3 1913-09-19 1968-01-06 1968-01-06 1968-01-21      1       0 54.29706     15
+4 1927-12-23 1968-03-28 1968-05-02 1968-05-05      1       0 40.26283     38
+5 1947-07-28 1968-05-10       &lt;NA&gt; 1968-05-27      1       0 20.78576     17
+6 1913-11-08 1968-06-13       &lt;NA&gt; 1968-06-15      1       0 54.59548      2
+  wait.time transplant mismatch hla.a2 mscore reject
+1        NA          0       NA     NA     NA     NA
+2        NA          0       NA     NA     NA     NA
+3         0          1        2      0   1.11      0
+4        35          1        3      0   1.66      0
+5        NA          0       NA     NA     NA     NA
+6        NA          0       NA     NA     NA     NA</code></pre>
+</div>
+</div>
+<ul>
+<li>심장이식을 고려하지 않은 경우</li>
+</ul>
+<pre><code>proc phreg data=heart;
+model futime*fustat(0)=transplant age surgery;
+run;</code></pre>
+<p><img src="survival_add2/f16_1.png" class="img-fluid"></p>
+<ul>
+<li>심장이식을 고려한 경우</li>
+</ul>
+<pre><code>proc phreg data=heart;
+model futime*fustat(0)=plant age surgery;
+if wait_time&gt;futime or wait_time=. then plant=0; else plant=1;
+run;</code></pre>
+<p><img src="survival_add2/f16_2.png" class="img-fluid"></p>
+<p><br></p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./02-nonpara.html" class="pagination-link" aria-label="비모수적 생존함수 추정">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">비모수적 생존함수 추정</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./04-Competing.html" class="pagination-link" aria-label="경쟁위험(Competing Risks)">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">경쟁위험(Competing Risks)</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
