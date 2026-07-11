@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>3&nbsp; 고정효과모형과 랜덤효과모형 – 메타분석</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./04-moderator-analysis.html" rel="next">
+<link href="./02-effect-size.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-3d841e2d0dac331999ea63b9b6b417ac.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-fixed-random-effects.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">고정효과모형과 랜덤효과모형</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">메타분석</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-meta-analysis-overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">메타분석 개요</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-effect-size.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">효과크기 계산</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-fixed-random-effects.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">고정효과모형과 랜덤효과모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-moderator-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">조절효과분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-publication-bias.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">출판 비뚤림 분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-cumulative-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">누적메타분석과 민감도분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-network-meta-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">네트워크 메타분석</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#fixed-vs.-random-effect-model" id="toc-fixed-vs.-random-effect-model" class="nav-link active" data-scroll-target="#fixed-vs.-random-effect-model"><span class="header-section-number">3.1</span> Fixed vs.&nbsp;Random effect model</a>
+  <ul class="collapse">
+  <li><a href="#고정효과모형과-랜덤효과모형의-의미" id="toc-고정효과모형과-랜덤효과모형의-의미" class="nav-link" data-scroll-target="#고정효과모형과-랜덤효과모형의-의미"><span class="header-section-number">3.1.1</span> 고정효과모형과 랜덤효과모형의 의미</a></li>
+  <li><a href="#고정효과모형과-랜덤효과모형의-적용-과정" id="toc-고정효과모형과-랜덤효과모형의-적용-과정" class="nav-link" data-scroll-target="#고정효과모형과-랜덤효과모형의-적용-과정"><span class="header-section-number">3.1.2</span> 고정효과모형과 랜덤효과모형의 적용 과정</a></li>
+  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example"><span class="header-section-number">3.1.3</span> Example</a></li>
+  </ul></li>
+  <li><a href="#효과크기의-이질성" id="toc-효과크기의-이질성" class="nav-link" data-scroll-target="#효과크기의-이질성"><span class="header-section-number">3.2</span> 효과크기의 이질성</a>
+  <ul class="collapse">
+  <li><a href="#효과크기의-이질성-1" id="toc-효과크기의-이질성-1" class="nav-link" data-scroll-target="#효과크기의-이질성-1"><span class="header-section-number">3.2.1</span> 효과크기의 이질성</a></li>
+  <li><a href="#이질성-통계량---q-tau2-및-i2" id="toc-이질성-통계량---q-tau2-및-i2" class="nav-link" data-scroll-target="#이질성-통계량---q-tau2-및-i2"><span class="header-section-number">3.2.2</span> 이질성 통계량 - <span class="math inline">\(Q\)</span>, <span class="math inline">\(\tau^2\)</span> 및 <span class="math inline">\(I^2\)</span></a></li>
+  </ul></li>
+  <li><a href="#연속형-자료-예제" id="toc-연속형-자료-예제" class="nav-link" data-scroll-target="#연속형-자료-예제"><span class="header-section-number">3.3</span> 연속형 자료 예제</a>
+  <ul class="collapse">
+  <li><a href="#example-1" id="toc-example-1" class="nav-link" data-scroll-target="#example-1"><span class="header-section-number">3.3.1</span> Example</a></li>
+  </ul></li>
+  <li><a href="#이산형-자료-예제" id="toc-이산형-자료-예제" class="nav-link" data-scroll-target="#이산형-자료-예제"><span class="header-section-number">3.4</span> 이산형 자료 예제</a>
+  <ul class="collapse">
+  <li><a href="#example-2" id="toc-example-2" class="nav-link" data-scroll-target="#example-2"><span class="header-section-number">3.4.1</span> Example</a></li>
+  </ul></li>
+  <li><a href="#time-to-event-예제" id="toc-time-to-event-예제" class="nav-link" data-scroll-target="#time-to-event-예제"><span class="header-section-number">3.5</span> Time to event 예제</a>
+  <ul class="collapse">
+  <li><a href="#example-3" id="toc-example-3" class="nav-link" data-scroll-target="#example-3"><span class="header-section-number">3.5.1</span> Example</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="chapter3" class="quarto-section-identifier"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">고정효과모형과 랜덤효과모형</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="fixed-vs.-random-effect-model" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="fixed-vs.-random-effect-model"><span class="header-section-number">3.1</span> Fixed vs.&nbsp;Random effect model</h2>
+<section id="고정효과모형과-랜덤효과모형의-의미" class="level3" data-number="3.1.1">
+<h3 data-number="3.1.1" class="anchored" data-anchor-id="고정효과모형과-랜덤효과모형의-의미"><span class="header-section-number">3.1.1</span> 고정효과모형과 랜덤효과모형의 의미</h3>
+<p>메타분석에서 고정효과모형(fixed effect model)과 랜덤효과모형(random effet model)은 실제 효과크기(true effect size)를 어떻게 가정하느냐에 따라 달라진다. 즉 연구자가 평균효과크기를 계산할 때 두 가지 방법 중 어떤 방법을 선택해서 계산하느냐에 따라 평균효과크기의 추정값이 달라지고 그에 따라 평균효과크기의 정밀성(precision)도 달라진다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>고정효과모형</th>
+<th>랜덤효과모형</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>가정: 모든 연구의 모집단 효과크기는 동일하다. (모집단 효과크기의 동질성)</td>
+<td>가정: 각 연구는 대상자, 개입방법, 기간 등이 서로 다르기 때문에 개별 연구의 모집단 효과크기는 서로 다르다. (모집단 효과크기의 이질성)</td>
+</tr>
+<tr class="even">
+<td>목적: 동일한 모집단의 효과, 즉 one true effect (common effect)를 추정한다.</td>
+<td>목적: 서로 상이한 모집단의 효과크기 분포의 평균을 추정한다.</td>
+</tr>
+<tr class="odd">
+<td>각 연구의 효과크기 차이는 표본오차(sampling error)에 기인한다.</td>
+<td>각 연구의 효과크기 차이는 표본오차와 연구 간 분산(between-study variance)으로 구성된다.</td>
+</tr>
+<tr class="even">
+<td>평균효과크기는 각 연구의 동일한 모집단 효과크기를 추정한 값이다.</td>
+<td>평균효과크기는 각 연구의 서로 상이한 모집단 효과크기 분포의 추정 평균값이다.</td>
+</tr>
+<tr class="odd">
+<td>표본크기가 커지면 표준오차는 0에 가까워진다.</td>
+<td>표본크기가 크고 동시에 연구의 규모도 커지면 표준오차는 0에 가까워진다.</td>
+</tr>
+</tbody>
+</table>
+<p>고정효과모형과 랜덤효과모형을 그림으로 설명하면 다음과 같다.</p>
+<p>고정효과모형: 관찰된 효과크기는 실제(true) 하나의 효과 크기 <span class="math inline">\(\theta\)</span>로 부터 발생하고 표본오차(sampling error)에 의해서만 차이가 발생한다고 가정한다. 이를 표현하면 다음과 같다.</p>
+<p><span class="math display">\[
+\theta_k = \theta + \epsilon_k
+\]</span></p>
+<p><img src="ch3/f1.jpg" class="img-fluid"></p>
+<p>랜덤효과모형: 랜덤효과모형은 고정효과모형에서 가정하는 표본오차(<span class="math inline">\(\epsilon_k\)</span>) 외에도 연구 간 발생하는 실제 효과크기의 분포를 고려하고, 때문에 연구 간 실제 효과크기가 서로 다를 수 있음을 가정한다. 이를 <span class="math inline">\(\zeta_k\)</span>로 표현하고 관측된 <span class="math inline">\(\theta_k\)</span>는 다음과 같이 표현된다.</p>
+<p><span class="math display">\[
+\theta_k=\mu+\epsilon_k +\zeta_k
+\]</span></p>
+<p><img src="ch3/f2.jpg" class="img-fluid"></p>
+<p>여기서 circle은 모집단 효과크기이며 square는 관찰된 효과크기를 의미한다.</p>
+<p>그림에서 보는 것처럼 고정효과모형은 각 연구 간 관찰된 효과크기는 서로 다르지만 추정하고자 하는 모집단의 효과크기는 동일하다. 즉 연구 간 효과크기가 서로 다른것은 표본오차에 의한 것이다. 반면 랜덤효과모형은 각 연구 간 관찰된 효과크기가 서로 다르며 추정하고자 하는 모집단의 효과크기도 각각 다르다. 이것은 표본오차에 의한 차이, 즉 연구 내 분산(within-study variance) 뿐 아니라 연구 간 분산(between-study variance)이 존재하기 때문이다.</p>
+<p>고정효과모형과 랜덤효과모형의 차이점은 다음과 같다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>고정효과모형</th>
+<th>랜덤효과모형</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>각 연구들이 기능적으로 동일(identical)하다.</td>
+<td>각 연구들의 표본, 개입방법 등이 서로 다르다.</td>
+</tr>
+<tr class="even">
+<td>효과크기의 동질성(homogeneity of effect)을 가정한다. 따라서 각 연구의 연구 간 분산은 0으로 고정한다.</td>
+<td>효과크기의 이질성(heterogenety of effect)을 가정하고 연구 간 분산을 인정한다.</td>
+</tr>
+<tr class="odd">
+<td>각 연구의 가중값은 매우 다르다.</td>
+<td>가중값이 보다 균형적이고 표준오차가 크다. 따라서 신뢰구간이 더 길다.</td>
+</tr>
+<tr class="even">
+<td>기능적으로 동일한 연구이며, 연구 결과의 적용을 일반화하기보다는 특정 집단에 한정하고자 하는 경우 사용한다.</td>
+<td>각 연구는 연구자들에 의해 독립적으로 이루어진 것이며, 연구 결과를 다른 집단에도 일반화하여 적용하고자 하는 경우에 사용한다.</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>효과크기의 계산 모형(computational model) 선택은, 즉 평균효과크기를 계산할 때 고정효과모형을 선택할 것인가 아니면 랜덤효과모형을 선택할 것인가는 각 연구들이 동일한 모집단의 효과크기를 가정하고 있는지, 그리고 분석의 목적이 무엇인지에 따라 결정되어야 한다.</li>
+</ul>
+</section>
+<section id="고정효과모형과-랜덤효과모형의-적용-과정" class="level3" data-number="3.1.2">
+<h3 data-number="3.1.2" class="anchored" data-anchor-id="고정효과모형과-랜덤효과모형의-적용-과정"><span class="header-section-number">3.1.2</span> 고정효과모형과 랜덤효과모형의 적용 과정</h3>
+<section id="고정효과모형" class="level4" data-number="3.1.2.1">
+<h4 data-number="3.1.2.1" class="anchored" data-anchor-id="고정효과모형"><span class="header-section-number">3.1.2.1</span> 고정효과모형</h4>
+<p>고정효과모형의 적용 과정을 살펴보기 위해 표준화 평균차를 기준으로 살펴보자. 표준화 평균차 <span class="math inline">\(d_i\)</span>와 그 분산은 다음과 같다.</p>
+<ul>
+<li>표준화 평균차:</li>
+</ul>
+<p><span class="math display">\[
+d_i = \frac{\bar{X_1}-\bar{X_2}}{S_p}
+\]</span></p>
+<p>여기서 <span class="math inline">\(S_p\)</span>는 합동표준편차를 의미하며, <span class="math inline">\(S_p\)</span>는 다음과 같다.</p>
+<p><span class="math display">\[
+S_p = \sqrt{\frac{(n_1 -1)S_1^2 + (n_2-1)S_2^2}{n_1+n_2-2}}
+\]</span></p>
+<p>개별 연구의 표준화 평균차 <span class="math inline">\(d_i\)</span>의 분산은 다음과 같이 정의한다.</p>
+<p><span class="math display">\[
+Var(d_i)=\frac{1}{n_1}+\frac{1}{n_2}+\frac{d_i^2}{2(n_1+n_2)}=\frac{n_1+n_2}{n_1n_2}+\frac{d_i^2}{2(n_1+n_2)}
+\]</span></p>
+<ul>
+<li>보정된 표준화 평균차 <span class="math inline">\(g_i\)</span></li>
+</ul>
+<p><span class="math display">\[
+g_i = J \times d_i, \,\,\, J=1-\frac{3}{4(n_1+n_2)-9}
+\]</span></p>
+<p><span class="math inline">\(g_i\)</span>의 분산은 다음과 같다.</p>
+<p><span class="math display">\[
+Var(g_i)=J^2\times Var(d_i)
+\]</span></p>
+<p>따라서 보정된 표준화 평균차의 신뢰구간은 다음과 같다.</p>
+<p><span class="math display">\[
+CI(g_i)=g_i \pm z_{\alpha/2}\times SE(g_i), \quad SE(g_i)=\sqrt{Var(g_i)}
+\]</span></p>
+<p>고정효과모형의 평균효과크기와 분산은 다음과 같다.</p>
+<p>평균효과크기 <span class="math inline">\(M\)</span>: <span class="math display">\[
+M = \frac{\sum_{i=1}^K w_ig_i}{\sum_{i=1}^K w_i}
+\]</span></p>
+<p>여기서 <span class="math inline">\(w_i=\frac{1}{Var(g_i)}\)</span>이다.</p>
+<ul>
+<li>평균효과크기 <span class="math inline">\(M\)</span>의 분산과 표준오차:</li>
+</ul>
+<p><span class="math display">\[Var(M) = \frac{1}{\sum_{i=1}^K w_i}, \quad SE(M)=\sqrt{V_M}\]</span></p>
+<p>이때, 귀무가설 <span class="math inline">\(H_0: M=0\)</span> 하에서 검정통계량은</p>
+<p><span class="math display">\[Z=\frac{M}{SE(M)}\]</span></p>
+<p>이며, 신뢰구간은 다음과 같다.</p>
+<p><span class="math display">\[CI=(M-z_{\alpha/2}\times SE(M),\,\,\, M+z_{\alpha/2}\times SE(M))\]</span></p>
+</section>
+<section id="랜덤효과모형" class="level4" data-number="3.1.2.2">
+<h4 data-number="3.1.2.2" class="anchored" data-anchor-id="랜덤효과모형"><span class="header-section-number">3.1.2.2</span> 랜덤효과모형</h4>
+<p>랜덤효과모형은 고정효과모형과 기본적인 과정에서 차이가 없으며, 다만 평균효과크기를 추정 할 때 적용되는 분산이 달라진다. 랜덤효과모형의 적용 과정을 살펴보기 위해 고정효과모형과 같이 표준화 평균 차를 기준으로 살펴보자. 표준화 평균차 <span class="math inline">\(d_i\)</span>와 분산은 다음과 같다.</p>
+<p>표준화된 평균 차이: <span class="math display">\[
+d_i = \frac{\bar{X_1}-\bar{X_2}}{S_p}
+\]</span></p>
+<p>여기서 <span class="math inline">\(S_p\)</span>는 합동표준편차를 의미하며, <span class="math inline">\(S_p\)</span>는 다음과 같다.</p>
+<p><span class="math display">\[
+S_p = \sqrt{\frac{(n_1 -1)S_1^2 + (n_2-1)S_2^2}{n_1+n_2-2}}
+\]</span></p>
+<p>개별 연구의 표준화된 평균 차이 <span class="math inline">\(d_i\)</span>의 분산은 다음과 같이 정의한다.</p>
+<p><span class="math display">\[
+Var(d_i)=\frac{1}{n_1}+\frac{1}{n_2}+\frac{d_i^2}{2(n_1+n_2)}=\frac{n_1+n_2}{n_1n_2}+\frac{d_i^2}{2(n_1+n_2)}
+\]</span></p>
+<p>교정된 표준화된 평균 차이</p>
+<p><span class="math display">\[
+g_i = J \times d, \,\,\, J=1-\frac{3}{4(n_1+n_2)-9}
+\]</span></p>
+<p><span class="math inline">\(g_i\)</span>의 분산은 다음과 같다.</p>
+<p><span class="math display">\[
+Var(g_i)=J^2\times Var(d_i)
+\]</span></p>
+<p>따라서 교정된 표준화된 평균 차이의 신뢰구간은 다음과 같다.</p>
+<p><span class="math display">\[
+CI(g_i)=g_i \pm z_{\alpha/2}\times SE(g_i), \quad SE(g_i)=\sqrt{Var(g_i)}
+\]</span></p>
+<p>랜덤효과모형의 평균효과크기와 분산은 다음과 같다.</p>
+<ul>
+<li>평균효과크기 <span class="math inline">\(M\)</span>:</li>
+</ul>
+<p><span class="math display">\[
+M = \frac{\sum_{i=1}^K w_ig_i}{\sum_{i=1}^K w_i}
+\]</span></p>
+<p>여기서, <span class="math inline">\(w_i=\frac{1}{Var(g_i)*}\)</span>이며 <span class="math inline">\(Var(g_i)*\)</span>는 <span class="math inline">\(Var(g_i)*=Var(g_i)+\tau^2\)</span>이다.</p>
+<p>연구 간 분산을 의미하는 <span class="math inline">\(\tau^2\)</span>은 다음과 같이 정의한다.</p>
+<p><span class="math display">\[
+\tau^2=\frac{Q-df}{C}, \quad df=K-1
+\]</span></p>
+<p>여기서, <span class="math inline">\(Q=\sum_{i=1}^K w_ig_i^2 - \frac{(\sum_{i=1}^K w_ig_i)^2}{\sum_{i=1}^Kw_i}\)</span>, <span class="math inline">\(C=\sum_{i=1}^K w_i - \frac{\sum_{i=1}^K w_i^2}{\sum_{i=1}^K w_i}\)</span>이다.</p>
+<p>평균효과크기 <span class="math inline">\(M\)</span>의 분산과 표준오차:</p>
+<p><span class="math display">\[Var(M) = \frac{1}{\sum_{i=1}^K w_i}, \quad SE(M)=\sqrt{Var(M)}\]</span></p>
+<p>이때, 귀무가설 <span class="math inline">\(H_0: M=0\)</span> 하에서 검정통계량은</p>
+<p><span class="math display">\[Z=\frac{M}{SE(M)}\]</span></p>
+<p>이며, 신뢰구간은 다음과 같다.</p>
+<p><span class="math display">\[CI=(M-z_{\alpha/2}\times SE(M), M+z_{\alpha/2}\times SE(M))\]</span></p>
+<p>따라서 고정효과모형과 랜덤효과모형에서 평균효과크기를 계산할때 차이점은 랜덤효과모형의 가중값 산출시 연구 간 분산 <span class="math inline">\(\tau^2\)</span>이 더해지며 이로 인해 가중평균, 분산, 신뢰구간의 크기가 달라지게 된다.</p>
+</section>
+</section>
+<section id="example" class="level3" data-number="3.1.3">
+<h3 data-number="3.1.3" class="anchored" data-anchor-id="example"><span class="header-section-number">3.1.3</span> Example</h3>
+<ul>
+<li>A meta-analysis of potential biomarkers associated with severity of coronavirus disease 2019 (COVID-19) (Danwang et al., 2020)</li>
+</ul>
+<p><img src="ch3/random.png" class="img-fluid"></p>
+<section id="데이터-입력" class="level4" data-number="3.1.3.1">
+<h4 data-number="3.1.3.1" class="anchored" data-anchor-id="데이터-입력"><span class="header-section-number">3.1.3.1</span> 데이터 입력:</h4>
+<p>두 집단간 비교연구에서 필요한 값은 각 집단의 표본크기(n1, n2), 평균(m1, m2), 표준편차(s1, s2) 값이다. 여기서는 10개의 개별 연구의 값을 입력한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>random <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="at">text=</span><span class="st">'</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="st">Study   m1  s1  n1  m2   s2 n2</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="st">Wang,R  0.74    0.3111  25  1.11    0.4 100</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="st">Feng,Y  0.82    0.437   70  1.13    0.5481  352</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="st">Cai,Q   0.98    0.4 58  1.34    0.6148  240</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="st">Wan,S   0.8 0.2963  40  1.2 0.5926  95</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="st">Ki,K    0.7 0.3778  25  1.23    0.363   58</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="st">Zheng,F 0.85    0.2741  30  1.12    0.4519  131</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="st">Guan,W  0.8 0.2963  153 1   0.4444  726</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="st">Zhang,J 0.7 0.3704  56  0.8 0.4444  82</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="st">Wang,D  0.8 0.2963  36  0.9 0.4444  102</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="st">Mao,L   0.9 1.8519  88  1.3 1.6296  126</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="st">Qin,C   0.8 0.3704  286 1   0.4444  166</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="st">Yun,L   0.78    0.4148  21  1.14    0.4741  271</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="st">'</span>, <span class="at">header=</span>T)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>random</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     Study   m1     s1  n1   m2     s2  n2
+1   Wang,R 0.74 0.3111  25 1.11 0.4000 100
+2   Feng,Y 0.82 0.4370  70 1.13 0.5481 352
+3    Cai,Q 0.98 0.4000  58 1.34 0.6148 240
+4    Wan,S 0.80 0.2963  40 1.20 0.5926  95
+5     Ki,K 0.70 0.3778  25 1.23 0.3630  58
+6  Zheng,F 0.85 0.2741  30 1.12 0.4519 131
+7   Guan,W 0.80 0.2963 153 1.00 0.4444 726
+8  Zhang,J 0.70 0.3704  56 0.80 0.4444  82
+9   Wang,D 0.80 0.2963  36 0.90 0.4444 102
+10   Mao,L 0.90 1.8519  88 1.30 1.6296 126
+11   Qin,C 0.80 0.3704 286 1.00 0.4444 166
+12   Yun,L 0.78 0.4148  21 1.14 0.4741 271</code></pre>
+</div>
+</div>
+</section>
+<section id="standardized-mean-difference" class="level4" data-number="3.1.3.2">
+<h4 data-number="3.1.3.2" class="anchored" data-anchor-id="standardized-mean-difference"><span class="header-section-number">3.1.3.2</span> Standardized mean difference</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">attach</span>(random)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="do">### 합동분산추정량</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>sp2 <span class="ot">&lt;-</span> ((n1<span class="dv">-1</span>)<span class="sc">*</span>s1<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (n2<span class="dv">-1</span>)<span class="sc">*</span>s2<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span>(n1<span class="sc">+</span>n2<span class="dv">-2</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="do">### 표준오차</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>sp <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(sp2)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="do">### 표준화 평균차</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> (m1 <span class="sc">-</span> m2)<span class="sc">/</span>sp</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(random,sp,d)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     Study   m1     s1  n1   m2     s2  n2        sp          d
+1   Wang,R 0.74 0.3111  25 1.11 0.4000 100 0.3842721 -0.9628595
+2   Feng,Y 0.82 0.4370  70 1.13 0.5481 352 0.5314447 -0.5833157
+3    Cai,Q 0.98 0.4000  58 1.34 0.6148 240 0.5796580 -0.6210559
+4    Wan,S 0.80 0.2963  40 1.20 0.5926  95 0.5233954 -0.7642406
+5     Ki,K 0.70 0.3778  25 1.23 0.3630  58 0.3674473 -1.4423836
+6  Zheng,F 0.85 0.2741  30 1.12 0.4519 131 0.4250532 -0.6352146
+7   Guan,W 0.80 0.2963 153 1.00 0.4444 726 0.4224675 -0.4734092
+8  Zhang,J 0.70 0.3704  56 0.80 0.4444  82 0.4160616 -0.2403490
+9   Wang,D 0.80 0.2963  36 0.90 0.4444 102 0.4114126 -0.2430650
+10   Mao,L 0.90 1.8519  88 1.30 1.6296 126 1.7242977 -0.2319785
+11   Qin,C 0.80 0.3704 286 1.00 0.4444 166 0.3991296 -0.5010904
+12   Yun,L 0.78 0.4148  21 1.14 0.4741 271 0.4702505 -0.7655495</code></pre>
+</div>
+</div>
+</section>
+<section id="corrected-standardized-mean-difference" class="level4" data-number="3.1.3.3">
+<h4 data-number="3.1.3.3" class="anchored" data-anchor-id="corrected-standardized-mean-difference"><span class="header-section-number">3.1.3.3</span> Corrected standardized mean difference</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">### d의 분산</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>vard <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>n1<span class="sc">+</span><span class="dv">1</span><span class="sc">/</span>n2<span class="sc">+</span>d<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>(<span class="dv">2</span><span class="sc">*</span>(n1<span class="sc">+</span>n2))</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="do">### D의 표준오차</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>sed <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(vard)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="do">### 보정된 표준화 평균차 Hedges' g</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>J <span class="ot">&lt;-</span> (<span class="dv">1-3</span><span class="sc">/</span>(<span class="dv">4</span><span class="sc">*</span>(n1<span class="sc">+</span>n2)<span class="sc">-</span><span class="dv">9</span>))</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> d <span class="sc">*</span> J</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="do">### g의 분산과 표준오차</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>varg <span class="ot">&lt;-</span> J<span class="sc">^</span><span class="dv">2</span><span class="sc">*</span>vard; seg <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(varg)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="do">### 신뢰 하한</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>lbg <span class="ot">&lt;-</span> g <span class="sc">-</span> <span class="fu">qnorm</span>(<span class="fl">0.975</span>)<span class="sc">*</span>seg</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="do">### 신뢰 상한</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>ubg <span class="ot">&lt;-</span> g <span class="sc">+</span> <span class="fu">qnorm</span>(<span class="fl">0.975</span>)<span class="sc">*</span>seg</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">study=</span>random[,<span class="dv">1</span>],g,varg,lbg,ubg)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     study          g        varg        lbg        ubg
+1   Wang,R -0.9569764 0.053054084 -1.4084242 -0.5055287
+2   Feng,Y -0.5822734 0.017467184 -0.8413091 -0.3232378
+3    Cai,Q -0.6194810 0.021943492 -0.9098170 -0.3291449
+4    Wan,S -0.7599229 0.037264848 -1.1382764 -0.3815694
+5     Ki,K -1.4289868 0.068484235 -1.9418994 -0.9160742
+6  Zheng,F -0.6322136 0.041822032 -1.0330348 -0.2313924
+7   Guan,W -0.4730043 0.008027091 -0.6486053 -0.2974032
+8  Zhang,J -0.2390211 0.029928110 -0.5780898  0.1000476
+9   Wang,D -0.2417221 0.037379280 -0.6206561  0.1372119
+10   Mao,L -0.2311569 0.019288512 -0.5033627  0.0410490
+11   Qin,C -0.5002548 0.009765704 -0.6939415 -0.3065681
+12   Yun,L -0.7635679 0.052042157 -1.2106896 -0.3164462</code></pre>
+</div>
+</div>
+</section>
+<section id="가중값" class="level4" data-number="3.1.3.4">
+<h4 data-number="3.1.3.4" class="anchored" data-anchor-id="가중값"><span class="header-section-number">3.1.3.4</span> 가중값</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">### w</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>w <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>varg</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="do">### Q</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>Q <span class="ot">=</span> <span class="fu">sum</span>(w<span class="sc">*</span>g<span class="sc">^</span><span class="dv">2</span>)<span class="sc">-</span>(<span class="fu">sum</span>(w<span class="sc">*</span>g))<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span><span class="fu">sum</span>(w)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="do">### C</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>C <span class="ot">=</span> <span class="fu">sum</span>(w) <span class="sc">-</span> <span class="fu">sum</span>(w<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span><span class="fu">sum</span>(w)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="do">### tau</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>df <span class="ot">=</span> <span class="fu">dim</span>(random)[<span class="dv">1</span>]<span class="sc">-</span><span class="dv">1</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>tau2 <span class="ot">=</span> (Q <span class="sc">-</span> df)<span class="sc">/</span>C</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="do">### 가중값</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>wg <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>(varg<span class="sc">+</span>tau2)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="do">### 가중값 표준화</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>wpg <span class="ot">&lt;-</span> wg<span class="sc">/</span><span class="fu">sum</span>(wg)<span class="sc">*</span><span class="dv">100</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">study=</span>random[,<span class="dv">1</span>],g,varg,wg,wpg)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     study          g        varg        wg       wpg
+1   Wang,R -0.9569764 0.053054084 11.088777  6.070777
+2   Feng,Y -0.5822734 0.017467184 18.316908 10.027964
+3    Cai,Q -0.6194810 0.021943492 16.928874  9.268056
+4    Wan,S -0.7599229 0.037264848 13.442300  7.359261
+5     Ki,K -1.4289868 0.068484235  9.468673  5.183818
+6  Zheng,F -0.6322136 0.041822032 12.666370  6.934462
+7   Guan,W -0.4730043 0.008027091 22.146298 12.124441
+8  Zhang,J -0.2390211 0.029928110 14.913066  8.164461
+9   Wang,D -0.2417221 0.037379280 13.421654  7.347958
+10   Mao,L -0.2311569 0.019288512 17.725564  9.704220
+11   Qin,C -0.5002548 0.009765704 21.325196 11.674912
+12   Yun,L -0.7635679 0.052042157 11.214617  6.139670</code></pre>
+</div>
+</div>
+</section>
+<section id="평균효과크기와-분산-신뢰구간" class="level4" data-number="3.1.3.5">
+<h4 data-number="3.1.3.5" class="anchored" data-anchor-id="평균효과크기와-분산-신뢰구간"><span class="header-section-number">3.1.3.5</span> 평균효과크기와 분산, 신뢰구간</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">### 평균효과크기</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>Mg <span class="ot">&lt;-</span> <span class="fu">sum</span>(wg<span class="sc">*</span>g)<span class="sc">/</span><span class="fu">sum</span>(wg)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="do">### 평균효과크기의 분산</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>varMg <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span><span class="fu">sum</span>(wg)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="do">### 평균효과크기의 표준오차</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>seMg <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(varMg)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="do">### 평균효과크기의 신뢰구간</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>lbg <span class="ot">&lt;-</span> Mg <span class="sc">-</span> <span class="fu">qnorm</span>(<span class="fl">0.975</span>)<span class="sc">*</span>seMg</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>ubg <span class="ot">&lt;-</span> Mg <span class="sc">+</span> <span class="fu">qnorm</span>(<span class="fl">0.975</span>)<span class="sc">*</span>seMg</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(Mg, varMg, seMg, lbg, ubg)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          Mg       varMg       seMg        lbg        ubg
+1 -0.5700837 0.005474703 0.07399124 -0.7151038 -0.4250635</code></pre>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="효과크기의-이질성" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="효과크기의-이질성"><span class="header-section-number">3.2</span> 효과크기의 이질성</h2>
+<section id="효과크기의-이질성-1" class="level3" data-number="3.2.1">
+<h3 data-number="3.2.1" class="anchored" data-anchor-id="효과크기의-이질성-1"><span class="header-section-number">3.2.1</span> 효과크기의 이질성</h3>
+<p>메타분석의 목표는 단순히 효과크기의 평균을 도출하는데 있지 않고 효과크기의 전체 패턴(pattern of effect sizes)을 이해하는 데 있다. 일반적으로 메타분석을 하게 되면 각 개별 연구로부터 도출된 추정된 모집단의 효과크기는 서로 다르게 나타나게 되는데, 이러한 효과크기간의 차이(differnces in effect sizes)를 효과크기의 이질성(heterogeneity)이라고 부른다. 즉 효과크기의 이질성은 각 연구로부터 나타난 효과크기의 분포(dispersion of effect sizes) 정도를 의미하며, 연구 간 효과크기가 일관되지 않은 정도를 의미한다(inconsistency across studies).</p>
+<p>메타분석에서 이질성을 평가하는 것은 매우 중요하다. 실제 효과가 다른 두 개 이상의 연구가 하위 그룹으로 존재하기 때문에 높은 이질성이 발생할 수 있다. 이러한 정보는 연구에 매우 유용하게 쓰일 수 있다. 왜냐하면 이를 통해 효과가 더 낮거나 더 높은 특정 중재나 집단을 찾을 수 있기 때문이다. 통계적 관점에서도 높은 이질성은 문제가 되며, 특히 매우 높은 이질성은 연구에 공통점이 없음을 뜻하고 “실제” 진정한 효과가 없음을 의미 할 수 있다. 즉, 합동 효과를 보고하는 것 자체가 전혀 의미 없을 수도 있다 (Borenstein et al.&nbsp;2011).</p>
+<ul>
+<li>연구간 이질성의 예:</li>
+</ul>
+<p><img src="ch3/hetero.png" class="img-fluid"> * A practical guide to meta-analysis (Chung et al., 2006)</p>
+<p>메타분석에서 발생하는 효과크기 이질성은 크게 세가지 유형으로 구분된다.</p>
+<ol type="1">
+<li><p>임상적 이질성: 연구의 표본 간 특성 차이로 발생한다. 예를 들어, 한 연구는 노인을 대상으로 한 연구이고 다른 연구는 대부분 아주 어린 연구 참가자를 모집한 경우 연구간 표본 차이로 인한 이질성이 발생한다.</p></li>
+<li><p>통계적 이질성: 수집 된 효과크기 자료에서 발생하는 통계적 이질성을 의미한다. 이러한 이질성은 임상적 관점(예: 연구마다 효과가 크게 다르기 때문에 치료가 매우 또는 미미하게 효과가 있는지 알 수 없는 경우) 또는 통계적 관점 (이질성으로 인해 pooled 효과크기의 신뢰도에 대한 문제)에서 중요하게 작용한다.</p></li>
+<li><p>기타 다른 이질성(예: 연구 디자인과 관련된 이질성)</p></li>
+</ol>
+<p>임상적 이질성과 기타 이질성은 개별 연구 검색 시 잘 정의된 중재 유형, 모집단 및 그 결과로 제한함으로써 어느 정도 통제할 수 있다.</p>
+</section>
+<section id="이질성-통계량---q-tau2-및-i2" class="level3" data-number="3.2.2">
+<h3 data-number="3.2.2" class="anchored" data-anchor-id="이질성-통계량---q-tau2-및-i2"><span class="header-section-number">3.2.2</span> 이질성 통계량 - <span class="math inline">\(Q\)</span>, <span class="math inline">\(\tau^2\)</span> 및 <span class="math inline">\(I^2\)</span></h3>
+<p>각 연구로부터 도출된 결과, 즉 효과크기의 이질성의 정도를 나타내는 통계량(heterogeneity statistics)으로 활용되는 것으로 Cochran’s <span class="math inline">\(Q\)</span>, <span class="math inline">\(\tau^2\)</span>과 <span class="math inline">\(I^2\)</span> 세 가지가 있다. <span class="math inline">\(\tau^2\)</span>과 <span class="math inline">\(I^2\)</span>을 이해하고 계산하기 위해서는 먼저 효과크기의 동질성 검정(test of homogeneity)에 사용되는 <span class="math inline">\(Q\)</span>값과 <span class="math inline">\(df\)</span>를 이해해야 한다.</p>
+<p><span class="math inline">\(Q\)</span>값은 메타분석에 있어서 각 효과크기들의 관찰된 분산(observed weighted sum of squares)을 의미하며, 이는 표본분산과 실제 연구 간 분산(true variance)을 모두 포함하는 총분산(total variance)을 의미하며, 다음과 같이 정의한다.</p>
+<p><span class="math display">\[
+Q=\sum_{i=1}^K w_ig_i^2 - \frac{(\sum_{i=1}^K w_ig_i)^2}{\sum_{i=1}^Kw_i}
+\]</span></p>
+<p><span class="math inline">\(Q\)</span> 통계량은 효과크기의 동질성(homogeneity)을 검정하는데 사용되지만, 귀무가설을 검정할 뿐이며, 그 분포자체는 <span class="math inline">\(\chi^2\)</span> 분포를 따르기 때문에 자유도(<span class="math inline">\(df\)</span>), 즉 메타분석에 포함된 연구 수(<span class="math inline">\(K\)</span>)에 많은 영향을 받게 된다.</p>
+<p>한편, <span class="math inline">\(df\)</span>(자유도)는 각 연구의 모집단의 효과크기가 모두 동일하다고 가정할 때 기대하는 기대분산 값이다. 따라서 총분산-기대분산=실제분산 이므로 <span class="math inline">\(Q-df\)</span>는 실제 연구 간 효과 차이로 인한 분산의 정도를 의미한다. 하지만 이 값은 총분산에서 기대분산을 제외한 값으로 절대값을 나타내는 것은 아니다. 따라서 비교가능성을 위해 표준화한 형태인 <span class="math inline">\(\tau^2\)</span>을 정의한다. 일반적으로 <span class="math inline">\(\tau^2\)</span>이 0보다 크면 연구 간 이질성이 존재하게 되며 0(또는 &lt;0)인 경우에는 연구간 이질성이 없기때문에 고정효과모형과 랜덤효과모형의 결과가 동일하게 나타난다.</p>
+<p>효과크기의 이질성을 나타내는 다른 지수로는 Higgin’s &amp; Thompson’s <span class="math inline">\(I^2\)</span>이 있으며 정의는 다음과 같다.</p>
+<p><span class="math display">\[
+I^2=max(0, \frac{Q-df}{Q}\times 100\%)
+\]</span></p>
+<p>이는 총분산에 대한 실제분산의 비율을 나타내며, <span class="math inline">\(\tau^2\)</span>과 달리 절대값이 아니라 비율(<span class="math inline">\(\%\)</span>)로 나타난다. 즉, 총분산 대비 실제 연구 간 분산의 비율을 표현한다. 일반적으로 <span class="math inline">\(I^2\)</span>이 <span class="math inline">\(25\%\)</span> 내외이면 이질성이 작은 것으로 해석하며, <span class="math inline">\(50\%\)</span>이면 중간 크기 정도로, 그리고 <span class="math inline">\(70\%\)</span> 이상이면 이질성이 매우 큰 것으로 해석하게 된다. 따라서 <span class="math inline">\(I^2&gt;50\%\)</span>이면 연구 간 이질성이 존재 할 가능성이 크다고 볼 수 있다.</p>
+</section>
+</section>
+<section id="연속형-자료-예제" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="연속형-자료-예제"><span class="header-section-number">3.3</span> 연속형 자료 예제</h2>
+<section id="example-1" class="level3" data-number="3.3.1">
+<h3 data-number="3.3.1" class="anchored" data-anchor-id="example-1"><span class="header-section-number">3.3.1</span> Example</h3>
+<ul>
+<li>Crucial laboratory parameters in COVID-19 diagnosis and prognosis: An updated meta-analysis (Soraya and Ulhaq, 2020)</li>
+</ul>
+<p><img src="ch3/heteroc.png" style="width:80.0%;height:80.0%"></p>
+<p>R 실습을 위해 “Crucial laboratory parameters in COVID-19 diagnosis and prognosis: An updated meta-analysis (Soraya and Ulhaq, 2020)” 논문에 명시된 자료를 이용하고 R-package <strong>meta</strong>를 사용한다.</p>
+<p>우선 R-package <strong>meta</strong>를 install하고 R에서 사용가능하게 <strong>meta</strong> package를 loading 한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("meta")</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(meta)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="자료의-입력" class="level4" data-number="3.3.1.1">
+<h4 data-number="3.3.1.1" class="anchored" data-anchor-id="자료의-입력"><span class="header-section-number">3.3.1.1</span> 자료의 입력</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>heteroc <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="at">text=</span><span class="st">'</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="st">Study   m1  s1  n1  m2  s2  n2</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="st">"Cao et al(1)"  4.48    2.22    19  4.7 1.55    174</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="st">"Cao et al(2)"  11.85   5.35    21  6.57    4.98    107</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="st">"Gao et al" 4.26    1.85    15  4.96    1.85    28</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="st">"Guan et al"    3.7 2.37    173 4.9 1.62    926</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="st">"Huang et al"   11.3    4.67    13  5.7 3.33    28</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="st">"Li et al"  5.5 2.67    25  5.27    1.55    58</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="st">"Liu et al(1)"  5.7 5.33    7   5.2 2.59    44</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="st">"Liu et al(2)"  6.08    2.56    11  5.18    1.63    67</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="st">"Lo et al"  5.57    1.99    4   4.51    1.18    6</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="st">"Mao et al" 5.4 15.03   88  4.5 9.03    126</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="st">"Qian et al"    5.23    1.52    9   4.97    1.2 82</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="st">"Qin et al" 5.6 303 286 4.9 1.77    166</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="st">"Ruan et al"    10.52   4.76    68  6.76    3.49    82</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="st">"Song et al"    6.6 5.25    42  4.2 1.85    31</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="st">"Wang et al(1)" 4.8 7.18    37  4.6 10.66   205</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="st">"Wang et al(2)" 6.6 4.59    36  4.3 1.55    102</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="st">"Yang et al"    0.62    0.37    32  0.74    0.4 20</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="st">"Young et al"   3.4 2.37    6   4.6 3.41    12</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="st">"Yudong et al"  5.53    3.34    16  5.78    2.76    96</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="st">"Zhang et al(1)"    5.3 3.7 56  4.5 1.78    82</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="st">"Zhang et al(2)"    6.2 3.92    55  4.1 2   166</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="st">"Zhang et al(3)"    6.21    3.22    3   4.28    0.82    9</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a><span class="st">"Zhou et al"    9.8 5.18    54  5.2 2.51    137</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a><span class="st">"Zhu et al" 7.8 4.13    43  6.4 2.92    71</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a><span class="st">'</span>, <span class="at">header=</span>T)</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>heteroc</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            Study    m1     s1  n1   m2    s2  n2
+1    Cao et al(1)  4.48   2.22  19 4.70  1.55 174
+2    Cao et al(2) 11.85   5.35  21 6.57  4.98 107
+3       Gao et al  4.26   1.85  15 4.96  1.85  28
+4      Guan et al  3.70   2.37 173 4.90  1.62 926
+5     Huang et al 11.30   4.67  13 5.70  3.33  28
+6        Li et al  5.50   2.67  25 5.27  1.55  58
+7    Liu et al(1)  5.70   5.33   7 5.20  2.59  44
+8    Liu et al(2)  6.08   2.56  11 5.18  1.63  67
+9        Lo et al  5.57   1.99   4 4.51  1.18   6
+10      Mao et al  5.40  15.03  88 4.50  9.03 126
+11     Qian et al  5.23   1.52   9 4.97  1.20  82
+12      Qin et al  5.60 303.00 286 4.90  1.77 166
+13     Ruan et al 10.52   4.76  68 6.76  3.49  82
+14     Song et al  6.60   5.25  42 4.20  1.85  31
+15  Wang et al(1)  4.80   7.18  37 4.60 10.66 205
+16  Wang et al(2)  6.60   4.59  36 4.30  1.55 102
+17     Yang et al  0.62   0.37  32 0.74  0.40  20
+18    Young et al  3.40   2.37   6 4.60  3.41  12
+19   Yudong et al  5.53   3.34  16 5.78  2.76  96
+20 Zhang et al(1)  5.30   3.70  56 4.50  1.78  82
+21 Zhang et al(2)  6.20   3.92  55 4.10  2.00 166
+22 Zhang et al(3)  6.21   3.22   3 4.28  0.82   9
+23     Zhou et al  9.80   5.18  54 5.20  2.51 137
+24      Zhu et al  7.80   4.13  43 6.40  2.92  71</code></pre>
+</div>
+</div>
+</section>
+<section id="자료의-분석" class="level4" data-number="3.3.1.2">
+<h4 data-number="3.3.1.2" class="anchored" data-anchor-id="자료의-분석"><span class="header-section-number">3.3.1.2</span> 자료의 분석</h4>
+<p>고정효과모형 또는 랜덤효과모형으로 평균효과차이를 구하기 위해서 <em>metacont</em> 함수를 이용한다. <em>metacont</em> 함수는 두 방법의 결과를 동시에 제공 가능하기 때문에 어떤 방법을 사용할지 고민할 필요가 없다. 여기서 효과크기는 standardized mean difference (SMD)로 설정하고 교정된 평균효과크기를 위해 “Hedges” 옵션을 사용한다. 이때 사용되는 자료 값은 각 집단의 표본크기(n1, n2), 평균(m1, m2), 표준편차(s1, s2) 등 이다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">metacont</span>(n1, m1, s1, n2, m2, s2, <span class="at">data=</span>heteroc,</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">studlab=</span><span class="fu">paste</span>(Study),</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">comb.fixed =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">comb.random =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">prediction =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>                  <span class="at">sm=</span><span class="st">"SMD"</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>                          <span class="at">method.smd=</span><span class="st">"Hedges"</span>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>fit</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of studies: k = 24
+Number of observations: o = 3944 (o.e = 1119, o.c = 2825)
+
+                        SMD            95% CI    z p-value
+Common effect model  0.1401 [ 0.0639; 0.2163] 3.60  0.0003
+Random effects model 0.3345 [ 0.1029; 0.5662] 2.83  0.0046
+Prediction interval         [-0.7429; 1.4120]             
+
+Quantifying heterogeneity (with 95% CIs):
+ tau^2 = 0.2573 [0.1249; 0.5465]; tau = 0.5073 [0.3534; 0.7392]
+ I^2 = 90.3% [86.8%; 92.8%]; H = 3.20 [2.75; 3.73]
+
+Test of heterogeneity:
+      Q d.f.  p-value
+ 236.09   23 &lt; 0.0001
+
+Details of meta-analysis methods:
+- Inverse variance method
+- Restricted maximum-likelihood estimator for tau^2
+- Q-Profile method for confidence interval of tau^2 and tau
+- Calculation of I^2 based on Q
+- Prediction interval based on t-distribution (df = 23)
+- Hedges' g (bias corrected standardised mean difference; using exact formulae)</code></pre>
+</div>
+</div>
+<p>메타분석 결과는 다음과 같은 결과를 포함하고 있다.</p>
+<ul>
+<li><p>the individual effect sizes for each study, and their weight</p></li>
+<li><p>The total number of included studies (k)</p></li>
+<li><p>The overall effect (in our case, <span class="math inline">\(g=0.1401\)</span> for mixed model and <span class="math inline">\(g=0.3371\)</span> for random effect model) and its confidence interval and <span class="math inline">\(p-value\)</span></p></li>
+<li><p>Measures of between-study heterogeneity, such as <span class="math inline">\(\tau^2\)</span> or <span class="math inline">\(I^2\)</span> and a <span class="math inline">\(Q\)</span>-test of heterogeneity</p>
+<ul>
+<li><span class="math inline">\(\tau^2=0.3572\)</span></li>
+<li><span class="math inline">\(I^2=90.3\% (86.8\%, 92.8\%)\)</span></li>
+<li><span class="math inline">\(Q=236.06\,\, (p-value=&lt;0.0001)\)</span></li>
+</ul></li>
+<li><p>고정효과모형 결과만 산출하고 싶으면 <strong>comb.random = FALSE</strong>로 두고 반대로 랜덤효과모형 결과만 산출하고 싶으면 <strong>comb.fixed = FALSE</strong>로 설정한다.</p></li>
+<li><p>효과크기 설정시 평균차는 <strong>sm=“MD”</strong>, 표준화 평균차는 <strong>sm=“SMD”</strong>, 평균비(ratio of means)는 <strong>sm=“ROM”</strong>으로 설정한다.</p></li>
+<li><p>표준화 평균차를 보정할때는 기본적으로 <strong>method.smd=“Hedges”</strong>로 설정되어 있고 Cohen’s d는 <strong>method.smd=“Cohen”</strong>, Glass’ delta 방법은 <strong>method.smd=“Glass”</strong>로 설정한다.</p></li>
+</ul>
+</section>
+<section id="forest-plot" class="level4" data-number="3.3.1.3">
+<h4 data-number="3.3.1.3" class="anchored" data-anchor-id="forest-plot"><span class="header-section-number">3.3.1.3</span> Forest plot</h4>
+<p>메타분석 결과는 일반적으로 forest plot으로 제공하며 <strong>meta</strong> package에서는 <em>forest</em> 함수를 이용하여 forest plot을 쉽게 추출할 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">forest</span>(fit)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-fixed-random-effects_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>위의 결과는 논문(Soraya and Ulhaq, 2020)에 수록된 결과와 동일함을 알 수 있다.</p>
+<p><img src="ch3/heteroc.png" class="img-fluid"></p>
+</section>
+</section>
+</section>
+<section id="이산형-자료-예제" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="이산형-자료-예제"><span class="header-section-number">3.4</span> 이산형 자료 예제</h2>
+<section id="example-2" class="level3" data-number="3.4.1">
+<h3 data-number="3.4.1" class="anchored" data-anchor-id="example-2"><span class="header-section-number">3.4.1</span> Example</h3>
+<ul>
+<li>Multifocal versus monofocal intraocular lenses for age-related cataract patients: a system review and meta-analysis based on randomized controlled trals (Cao et al., 2019) Figure 12.</li>
+</ul>
+<p><img src="ch3/heterob.png" class="img-fluid"></p>
+<section id="자료의-입력-1" class="level4" data-number="3.4.1.1">
+<h4 data-number="3.4.1.1" class="anchored" data-anchor-id="자료의-입력-1"><span class="header-section-number">3.4.1.1</span> 자료의 입력</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>heterob <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="at">text=</span><span class="st">'</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="st">study e1 n1 e2 n2</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="st">Kamlesh(2001)   9   20  6   20</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="st">Chen(2004)  9   104 5   104</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="st">Cillino(2008)   7   47  1   15</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="st">Harman(2008)    18  24  7   19</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="st">Maxwell(2007)   7   153 3   160</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="st">'</span>, <span class="at">header=</span>T)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>heterob</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          study e1  n1 e2  n2
+1 Kamlesh(2001)  9  20  6  20
+2    Chen(2004)  9 104  5 104
+3 Cillino(2008)  7  47  1  15
+4  Harman(2008) 18  24  7  19
+5 Maxwell(2007)  7 153  3 160</code></pre>
+</div>
+</div>
+</section>
+<section id="자료의-분석-1" class="level4" data-number="3.4.1.2">
+<h4 data-number="3.4.1.2" class="anchored" data-anchor-id="자료의-분석-1"><span class="header-section-number">3.4.1.2</span> 자료의 분석</h4>
+<p>이산형 자료를 이용한 고정효과모형 또는 랜덤효과모형으로 통합효과크기를 구하기 위해서 <strong>metabin</strong> 함수를 이용한다. 여기서 효과크기는 RR로 선택하고 가중값 계산 방법은 MH방법으로 둔다. 이때 필요한 자료의 형태는 각집단의 표본크기 (n1, n2) 그리고 발생한 이벤트 수(e1, e2)이다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>fit2<span class="ot">&lt;-</span> <span class="fu">metabin</span>(e1,n1,e2,n2,</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> heterob,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">studlab =</span> <span class="fu">paste</span>(study),</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">comb.fixed =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">comb.random =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">prediction =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">sm =</span> <span class="st">"RR"</span>,</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">method=</span><span class="st">"MH"</span>)</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>fit2</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of studies: k = 5
+Number of observations: o = 666 (o.e = 348, o.c = 318)
+Number of events: e = 72
+
+                         RR           95% CI    z p-value
+Common effect model  1.9108 [1.2374; 2.9506] 2.92  0.0035
+Random effects model 1.8862 [1.2391; 2.8711] 2.96  0.0031
+Prediction interval         [1.0402; 3.4203]             
+
+Quantifying heterogeneity (with 95% CIs):
+ tau^2 = 0 [0.0000; 0.0193]; tau = 0 [0.0000; 0.1391]
+ I^2 = 0.0% [0.0%; 79.2%]; H = 1.00 [1.00; 2.19]
+
+Test of heterogeneity:
+    Q d.f. p-value
+ 0.53    4  0.9706
+
+Details of meta-analysis methods:
+- Mantel-Haenszel method (common effect model)
+- Inverse variance method (random effects model)
+- Restricted maximum-likelihood estimator for tau^2
+- Q-Profile method for confidence interval of tau^2 and tau
+- Calculation of I^2 based on Q
+- Prediction interval based on t-distribution (df = 4)</code></pre>
+</div>
+</div>
+<p>메타분석 결과는 다음과 같은 결과를 포함하고 있다.</p>
+<ul>
+<li><p>the individual effect sizes for each study, and their weight</p></li>
+<li><p>The total number of included studies (k)</p></li>
+<li><p>The overall effect (in our case,,,, <span class="math inline">\(RR=1.91\)</span> for mixed model and ,,, <span class="math inline">\(RR=1.89\)</span> for random effect model) and its confidence interval and p-value</p></li>
+<li><p>Measures of between-study heterogeneity, such as <span class="math inline">\(\tau^2\)</span> or <span class="math inline">\(I^2\)</span> and a <span class="math inline">\(Q\)</span>-test of heterogeneity</p>
+<ul>
+<li><span class="math inline">\(\tau^2=0\)</span></li>
+<li><span class="math inline">\(I^2=0\%\)</span></li>
+<li><span class="math inline">\(Q=0.53\,\, (p-value=0.9703)\)</span></li>
+</ul></li>
+<li><p>고정효과모형 결과만 산출하고 싶으면 <strong>comb.random = FALSE</strong>로 두고 반대로 랜덤효과모형 결과만 산출하고 싶으면 <strong>comb.fixed = FALSE</strong>로 설정한다.</p></li>
+<li><p>효과크기 설정시 상대위험률(RR)는 <strong>sm=“RR”</strong>, 오즈비(OR)는 <strong>sm=“OR”</strong>, 비율차(RD)는 <strong>sm=“RD”</strong>, Arcsine difference는 <strong>sm=“ASD”</strong>, Diagnostic 오즈비는 <strong>sm=“DOR”</strong>로 설정한다.</p></li>
+<li><p>가중값 산출을 위한 방법으로 method 옵션을 적용하며, <strong>method.smd=“Inverse”</strong>는 역분산법, MH는 <strong>method.smd=“MH”</strong>, Peto 방법은 <strong>method.smd=“Peto”</strong>로 설정한다. 이외에도 <strong>method.smd=“GLMM”</strong> 과 <strong>method.smd=“SSW”</strong> 방법을 설정 가능하다.</p></li>
+</ul>
+</section>
+<section id="forest-plot-1" class="level4" data-number="3.4.1.3">
+<h4 data-number="3.4.1.3" class="anchored" data-anchor-id="forest-plot-1"><span class="header-section-number">3.4.1.3</span> Forest plot</h4>
+<p>메타분석 결과는 일반적으로 forest plot으로 제공하며 <em>meta</em> package에서는 <em>forest</em> 함수를 이용하여 forest plot을 쉽게 추출할 수 있다. 이때 <strong>layout</strong> 옵션을 통해 출력양식을 조절할 수 있다. Review Manager (RevMan) 형태로 출력을 원하면 <strong>layout=“RevMan5”</strong>로 JAMA 스타일을 원하면 <strong>layout=“JAMA”</strong> 옵션으로 조절한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">forest</span>(fit2)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-fixed-random-effects_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="1056"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>위의 결과는 논문(Cao et al., 2019)에 수록된 Figure 12와 동일함을 알 수 있다.</p>
+<p><img src="ch3/f5.jpg" class="img-fluid"></p>
+<p>효과크기의 형태를 Odds ratio로 하고 싶으면 <strong>sm=“OR”</strong>로 설정하고, MH 방법이 아닌 역분산법을 이용하고 싶으면 <strong>method=“Inverse”</strong>로 설정한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>fitor<span class="ot">&lt;-</span> <span class="fu">metabin</span>(e1,n1,e2,n2,</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> heterob,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">studlab =</span> <span class="fu">paste</span>(study),</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">comb.fixed =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">comb.random =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">prediction =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">sm =</span> <span class="st">"OR"</span>,</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">method=</span><span class="st">"Inverse"</span>)</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>fitor</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of studies: k = 5
+Number of observations: o = 666 (o.e = 348, o.c = 318)
+Number of events: e = 72
+
+                         OR           95% CI    z p-value
+Common effect model  2.5294 [1.3761; 4.6492] 2.99  0.0028
+Random effects model 2.5294 [1.3761; 4.6492] 2.99  0.0028
+Prediction interval         [1.0679; 5.9912]             
+
+Quantifying heterogeneity (with 95% CIs):
+ tau^2 = 0 [0.0000; 0.9559]; tau = 0 [0.0000; 0.9777]
+ I^2 = 0.0% [0.0%; 79.2%]; H = 1.00 [1.00; 2.19]
+
+Test of heterogeneity:
+    Q d.f. p-value
+ 1.57    4  0.8136
+
+Details of meta-analysis methods:
+- Inverse variance method
+- Restricted maximum-likelihood estimator for tau^2
+- Q-Profile method for confidence interval of tau^2 and tau
+- Calculation of I^2 based on Q
+- Prediction interval based on t-distribution (df = 4)</code></pre>
+</div>
+</div>
+<p>Forest plot에서 <strong>layout</strong> 옵션을 통해 출력양식을 조절할 수 있다. Review Manager (RevMan) 형태로 출력을 원하면 <strong>layout=“RevMan5”</strong> 옵션으로 조절한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">forest</span>(fitor, <span class="at">layout=</span><span class="st">"RevMan5"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-fixed-random-effects_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="1056"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="time-to-event-예제" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="time-to-event-예제"><span class="header-section-number">3.5</span> Time to event 예제</h2>
+<section id="example-3" class="level3" data-number="3.5.1">
+<h3 data-number="3.5.1" class="anchored" data-anchor-id="example-3"><span class="header-section-number">3.5.1</span> Example</h3>
+<ul>
+<li>A meta-analysis of adjusted hazard ratios from 20 observational studies of bilateral versus single internal thoracic artery coronary artery bypass grafting (Takagi et al., 2014)</li>
+</ul>
+<p><img src="ch3/HR.png" class="img-fluid"></p>
+<section id="자료의-입력-2" class="level4" data-number="3.5.1.1">
+<h4 data-number="3.5.1.1" class="anchored" data-anchor-id="자료의-입력-2"><span class="header-section-number">3.5.1.1</span> 자료의 입력</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>heteroh <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="at">text=</span><span class="st">'</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="st">study loghr se_loghr</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="st">APPROACH(2011)  -0.1424 0.1166</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="st">Bonacchi(2006)  -0.4055 0.6551</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="st">Buxton(1998)    -0.3415 0.1256</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="st">Carrier_p(2009) -0.0781 0.162</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="st">Carrier_n(2009) -0.4368 0.1197</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="st">DiMauro(2005)   -0.5306 0.2349</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="st">Endo(2001)  -0.0502 0.1787</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="st">Glineur(2012)   -0.298  0.1259</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a><span class="st">Grau(2012)  -0.3955 0.1126</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="st">Joo(2012)   -0.0125 0.2648</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a><span class="st">Kelly(2012) -0.2008 0.1004</span></span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a><span class="st">Kinoshita(2012) -0.5906 0.2962</span></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a><span class="st">Kurlansky(2010) -0.1778 0.0426</span></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a><span class="st">Locker_only(2012)   -0.2247 0.1904</span></span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a><span class="st">Locker_RA(2012) -0.1434 0.2412</span></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a><span class="st">Locker_SV(2012) -0.312  0.1276</span></span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a><span class="st">Lytle(2004) -0.2739 0.0704</span></span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a><span class="st">Navia(2013) -0.0194 0.343</span></span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a><span class="st">Parsa(2013) -0.0547 0.067</span></span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a><span class="st">Pick(1997)  -0.2002 0.2489</span></span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a><span class="st">Puskas(2012)    -0.4309 0.1546</span></span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a><span class="st">Stevens(2004)   -0.3081 0.1034</span></span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a><span class="st">Toumpoulis(2006)    -0.12   0.1281</span></span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a><span class="st">'</span>, <span class="at">header=</span>T)</span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>heteroh</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               study   loghr se_loghr
+1     APPROACH(2011) -0.1424   0.1166
+2     Bonacchi(2006) -0.4055   0.6551
+3       Buxton(1998) -0.3415   0.1256
+4    Carrier_p(2009) -0.0781   0.1620
+5    Carrier_n(2009) -0.4368   0.1197
+6      DiMauro(2005) -0.5306   0.2349
+7         Endo(2001) -0.0502   0.1787
+8      Glineur(2012) -0.2980   0.1259
+9         Grau(2012) -0.3955   0.1126
+10         Joo(2012) -0.0125   0.2648
+11       Kelly(2012) -0.2008   0.1004
+12   Kinoshita(2012) -0.5906   0.2962
+13   Kurlansky(2010) -0.1778   0.0426
+14 Locker_only(2012) -0.2247   0.1904
+15   Locker_RA(2012) -0.1434   0.2412
+16   Locker_SV(2012) -0.3120   0.1276
+17       Lytle(2004) -0.2739   0.0704
+18       Navia(2013) -0.0194   0.3430
+19       Parsa(2013) -0.0547   0.0670
+20        Pick(1997) -0.2002   0.2489
+21      Puskas(2012) -0.4309   0.1546
+22     Stevens(2004) -0.3081   0.1034
+23  Toumpoulis(2006) -0.1200   0.1281</code></pre>
+</div>
+</div>
+</section>
+<section id="자료의-분석-2" class="level4" data-number="3.5.1.2">
+<h4 data-number="3.5.1.2" class="anchored" data-anchor-id="자료의-분석-2"><span class="header-section-number">3.5.1.2</span> 자료의 분석</h4>
+<p>본 연구에서는 Log(HR)과 SE(log(HR)) 값이 주어 졌을때, 메타분석을 위해 <em>metagen</em> 함수를 이용한다. <em>metagen</em> 함수는 effect size와 SE 값이 주어진 경우 메타분석을 시행하게 해준다. 따라서 Hazard ratio 뿐만 아니라 연속형자료와 비율형 자료 모두 사용 가능하다. 이때 효과크기 유형은 sm 옵션에서 조절하며, <strong>“RD”, “RR”, “OR”, “ASD”, “HR”, “MD”, “SMD”, “ROM”</strong> 등이 가능하다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>fit3<span class="ot">&lt;-</span> <span class="fu">metagen</span>(loghr,se_loghr,</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> heteroh,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">studlab =</span> <span class="fu">paste</span>(study),</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">comb.fixed =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">comb.random =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">prediction =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">sm =</span> <span class="st">"HR"</span>)</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>fit3</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of studies: k = 23
+
+                        HR           95% CI     z  p-value
+Common effect model 0.8048 [0.7691; 0.8421] -9.38 &lt; 0.0001
+Prediction interval        [0.6814; 0.9212]               
+
+Quantifying heterogeneity (with 95% CIs):
+ tau^2 = 0.0044 [0.0000; 0.0177]; tau = 0.0660 [0.0000; 0.1331]
+ I^2 = 12.0% [0.0%; 45.9%]; H = 1.07 [1.00; 1.36]
+
+Test of heterogeneity:
+     Q d.f. p-value
+ 24.99   22  0.2974
+
+Details of meta-analysis methods:
+- Inverse variance method
+- Restricted maximum-likelihood estimator for tau^2
+- Q-Profile method for confidence interval of tau^2 and tau
+- Calculation of I^2 based on Q
+- Prediction interval based on t-distribution (df = 22)</code></pre>
+</div>
+</div>
+<p>메타분석 결과는 다음과 같은 결과를 포함하고 있다.</p>
+<ul>
+<li>the individual effect sizes for each study, and their weight</li>
+<li>The total number of included studies (k)</li>
+<li>The overall effect (in our case,,,, <span class="math inline">\(HR=0.805\)</span> for mixed model) and its confidence interval and p-value</li>
+<li>Measures of between-study heterogeneity, such as <span class="math inline">\(\tau^2\)</span> or <span class="math inline">\(I^2\)</span> and a <span class="math inline">\(Q\)</span>-test of heterogeneity
+<ul>
+<li><span class="math inline">\(\tau^2=0.0018\)</span></li>
+<li><span class="math inline">\(I^2=12.0\% (0.0%, 45.9\%)\)</span></li>
+<li><span class="math inline">\(Q=24.99\,\, (p-value=0.2974)\)</span></li>
+</ul></li>
+</ul>
+</section>
+<section id="forest-plot-2" class="level4" data-number="3.5.1.3">
+<h4 data-number="3.5.1.3" class="anchored" data-anchor-id="forest-plot-2"><span class="header-section-number">3.5.1.3</span> Forest plot</h4>
+<p>메타분석 결과는 일반적으로 forest plot으로 제공하며 <em>meta</em> package에서는 <em>forest</em> 함수를 이용하여 forest plot을 쉽게 추출할 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">forest</span>(fit3,<span class="at">layout =</span> <span class="st">"RevMan5"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-fixed-random-effects_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>위의 결과는 논문(Takagi et al., 2014)에 수록된 Figure 1과 동일함을 알 수 있다.</p>
+<p><img src="ch3/f6.jpg" class="img-fluid"></p>
+<p>Forest plot에서 layout 옵션을 “JAMA”로 두면 “<strong>Journal of the American Medical Association</strong> (JAMA)” 에서 추천하는 형태로 출력이 된다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">forest</span>(fit3,<span class="at">layout =</span> <span class="st">"JAMA"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03-fixed-random-effects_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./02-effect-size.html" class="pagination-link" aria-label="효과크기 계산">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">효과크기 계산</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./04-moderator-analysis.html" class="pagination-link" aria-label="조절효과분석">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">조절효과분석</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
