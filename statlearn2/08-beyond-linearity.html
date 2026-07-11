@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>8&nbsp; 선형성을 넘어 – 통계적 학습</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./09-tree-based-methods.html" rel="next">
+<link href="./07-model-selection.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-3d841e2d0dac331999ea63b9b6b417ac.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./08-beyond-linearity.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">선형성을 넘어</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">통계적 학습</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="리더 모드 전환">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">머리말</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">소개</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-statistical-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">통계적 학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-introduction-to-r.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">R 소개</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">선형회귀</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-classification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">분류</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-resampling-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">재표본추출 방법</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-model-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">모형 선택과 정규화</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-beyond-linearity.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">선형성을 넘어</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-tree-based-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">트리 기반 방법</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-support-vector-machines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">서포트 벡터 머신</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-unsupervised-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">비지도학습</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#다항회귀" id="toc-다항회귀" class="nav-link active" data-scroll-target="#다항회귀"><span class="header-section-number">8.1</span> 다항회귀</a>
+  <ul class="collapse">
+  <li><a href="#임금-자료-예제" id="toc-임금-자료-예제" class="nav-link" data-scroll-target="#임금-자료-예제"><span class="header-section-number">8.1.1</span> 임금 자료 예제</a></li>
+  </ul></li>
+  <li><a href="#계단함수" id="toc-계단함수" class="nav-link" data-scroll-target="#계단함수"><span class="header-section-number">8.2</span> 계단함수</a></li>
+  <li><a href="#조각별-다항식과-스플라인" id="toc-조각별-다항식과-스플라인" class="nav-link" data-scroll-target="#조각별-다항식과-스플라인"><span class="header-section-number">8.3</span> 조각별 다항식과 스플라인</a>
+  <ul class="collapse">
+  <li><a href="#선형-스플라인" id="toc-선형-스플라인" class="nav-link" data-scroll-target="#선형-스플라인"><span class="header-section-number">8.3.1</span> 선형 스플라인</a></li>
+  <li><a href="#차-회귀-스플라인" id="toc-차-회귀-스플라인" class="nav-link" data-scroll-target="#차-회귀-스플라인"><span class="header-section-number">8.3.2</span> 3차 회귀 스플라인</a></li>
+  <li><a href="#자연-3차-스플라인" id="toc-자연-3차-스플라인" class="nav-link" data-scroll-target="#자연-3차-스플라인"><span class="header-section-number">8.3.3</span> 자연 3차 스플라인</a></li>
+  <li><a href="#매듭의-위치와-자유도" id="toc-매듭의-위치와-자유도" class="nav-link" data-scroll-target="#매듭의-위치와-자유도"><span class="header-section-number">8.3.4</span> 매듭의 위치와 자유도</a></li>
+  </ul></li>
+  <li><a href="#평활-스플라인" id="toc-평활-스플라인" class="nav-link" data-scroll-target="#평활-스플라인"><span class="header-section-number">8.4</span> 평활 스플라인</a></li>
+  <li><a href="#국소회귀" id="toc-국소회귀" class="nav-link" data-scroll-target="#국소회귀"><span class="header-section-number">8.5</span> 국소회귀</a></li>
+  <li><a href="#일반화가법모형" id="toc-일반화가법모형" class="nav-link" data-scroll-target="#일반화가법모형"><span class="header-section-number">8.6</span> 일반화가법모형</a>
+  <ul class="collapse">
+  <li><a href="#임금-자료의-gam" id="toc-임금-자료의-gam" class="nav-link" data-scroll-target="#임금-자료의-gam"><span class="header-section-number">8.6.1</span> 임금 자료의 GAM</a></li>
+  <li><a href="#분류를-위한-gam" id="toc-분류를-위한-gam" class="nav-link" data-scroll-target="#분류를-위한-gam"><span class="header-section-number">8.6.2</span> 분류를 위한 GAM</a></li>
+  </ul></li>
+  <li><a href="#방법-비교" id="toc-방법-비교" class="nav-link" data-scroll-target="#방법-비교"><span class="header-section-number">8.7</span> 방법 비교</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="chapter8" class="quarto-section-identifier"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">선형성을 넘어</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>선형모형은 해석이 쉽고 안정적이지만 실제 관계가 항상 직선인 것은 아니다. 이 장에서는 선형회귀의 기본 구조를 유지하면서 비선형 관계를 표현하는 방법을 다룬다.</p>
+<ul>
+<li>다항회귀(polynomial regression)</li>
+<li>계단함수(step function)</li>
+<li>회귀 스플라인(regression spline)</li>
+<li>평활 스플라인(smoothing spline)</li>
+<li>국소회귀(local regression)</li>
+<li>일반화가법모형(generalized additive model, GAM)</li>
+</ul>
+<p>이 방법들은 설명변수의 변환이나 기저함수(basis function)를 사용하여</p>
+<p><span class="math display">\[
+f(X)=\beta_0+\sum_{m=1}^{M}\beta_m b_m(X)
+\]</span></p>
+<p>형태의 모형을 적합한다. <span class="math inline">\(b_m(X)\)</span>가 주어지면 계수에 대해서는 선형이므로 익숙한 최소제곱법이나 일반화선형모형을 사용할 수 있다.</p>
+<section id="다항회귀" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="다항회귀"><span class="header-section-number">8.1</span> 다항회귀</h2>
+<p>단순선형회귀를 <span class="math inline">\(d\)</span>차 다항식으로 확장하면</p>
+<p><span class="math display">\[
+y_i=\beta_0+\beta_1x_i+\beta_2x_i^2+\cdots+\beta_dx_i^d+\varepsilon_i
+\]</span></p>
+<p>가 된다. 모형은 <span class="math inline">\(x\)</span>에 대해서는 비선형이지만 계수 <span class="math inline">\(\beta\)</span>에 대해서는 선형이다.</p>
+<p>다항식 차수가 커질수록 유연해지지만 경계에서 불안정하게 진동하고 외삽이 위험해질 수 있다. 일반적으로 3차 또는 4차 이상의 고차 다항식은 신중하게 사용해야 한다.</p>
+<section id="임금-자료-예제" class="level3" data-number="8.1.1">
+<h3 data-number="8.1.1" class="anchored" data-anchor-id="임금-자료-예제"><span class="header-section-number">8.1.1</span> 임금 자료 예제</h3>
+<p><code>Wage</code> 자료에서 나이와 임금의 관계를 4차 다항식으로 적합한다.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ISLR2)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(Wage)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>fit_poly4 <span class="ot">&lt;-</span> <span class="fu">lm</span>(wage <span class="sc">~</span> <span class="fu">poly</span>(age, <span class="dv">4</span>), <span class="at">data =</span> Wage)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_poly4)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = wage ~ poly(age, 4), data = Wage)
+#&gt; 
+#&gt; Residuals:
+#&gt;     Min      1Q  Median      3Q     Max 
+#&gt; -98.707 -24.626  -4.993  15.217 203.693 
+#&gt; 
+#&gt; Coefficients:
+#&gt;                Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)    111.7036     0.7287 153.283  &lt; 2e-16 ***
+#&gt; poly(age, 4)1  447.0679    39.9148  11.201  &lt; 2e-16 ***
+#&gt; poly(age, 4)2 -478.3158    39.9148 -11.983  &lt; 2e-16 ***
+#&gt; poly(age, 4)3  125.5217    39.9148   3.145  0.00168 ** 
+#&gt; poly(age, 4)4  -77.9112    39.9148  -1.952  0.05104 .  
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 39.91 on 2995 degrees of freedom
+#&gt; Multiple R-squared:  0.08626,    Adjusted R-squared:  0.08504 
+#&gt; F-statistic: 70.69 on 4 and 2995 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>age_grid <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fu">min</span>(Wage<span class="sc">$</span>age), <span class="fu">max</span>(Wage<span class="sc">$</span>age), <span class="at">length.out =</span> <span class="dv">200</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>pred_poly4 <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  fit_poly4,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">age =</span> age_grid),</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">se.fit =</span> <span class="cn">TRUE</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>upper_poly4 <span class="ot">&lt;-</span> pred_poly4<span class="sc">$</span>fit <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> pred_poly4<span class="sc">$</span>se.fit</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>lower_poly4 <span class="ot">&lt;-</span> pred_poly4<span class="sc">$</span>fit <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> pred_poly4<span class="sc">$</span>se.fit</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Wage<span class="sc">$</span>age, Wage<span class="sc">$</span>wage,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">20</span>, <span class="at">cex =</span> <span class="fl">0.45</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"나이"</span>, <span class="at">ylab =</span> <span class="st">"임금"</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(age_grid, pred_poly4<span class="sc">$</span>fit, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(age_grid, upper_poly4, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(age_grid, lower_poly4, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="08-beyond-linearity_files/figure-html/ch8-polynomial-plot-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><code>poly(age, 4)</code>는 기본적으로 수치적으로 안정적인 직교다항식 기저를 사용한다. 원래의 <span class="math inline">\(age\)</span>, <span class="math inline">\(age^2\)</span>, …, <span class="math inline">\(age^4\)</span> 계수가 필요하면 <code>raw = TRUE</code>를 지정한다. 두 방식은 같은 적합값을 제공하지만 계수값은 다르다.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fit_poly4_raw <span class="ot">&lt;-</span> <span class="fu">lm</span>(wage <span class="sc">~</span> <span class="fu">poly</span>(age, <span class="dv">4</span>, <span class="at">raw =</span> <span class="cn">TRUE</span>), <span class="at">data =</span> Wage)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">fitted</span>(fit_poly4) <span class="sc">-</span> <span class="fu">fitted</span>(fit_poly4_raw)))</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 5.818777e-10</code></pre>
+</div>
+</div>
+<p>다항식 차수는 부분 F 검정, AIC, BIC 또는 교차검증으로 선택할 수 있다.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fit_poly1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(wage <span class="sc">~</span> age, <span class="at">data =</span> Wage)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>fit_poly2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(wage <span class="sc">~</span> <span class="fu">poly</span>(age, <span class="dv">2</span>), <span class="at">data =</span> Wage)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>fit_poly3 <span class="ot">&lt;-</span> <span class="fu">lm</span>(wage <span class="sc">~</span> <span class="fu">poly</span>(age, <span class="dv">3</span>), <span class="at">data =</span> Wage)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(fit_poly1, fit_poly2, fit_poly3, fit_poly4)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Res.Df"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["RSS"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["Df"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Sum of Sq"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["F"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"2998","2":"5022216","3":"NA","4":"NA","5":"NA","6":"NA","_rn_":"1"},{"1":"2997","2":"4793430","3":"1","4":"228786.010","5":"143.602458","6":"2.355831e-32","_rn_":"2"},{"1":"2996","2":"4777674","3":"1","4":"15755.694","5":"9.889400","6":"1.678622e-03","_rn_":"3"},{"1":"2995","2":"4771604","3":"1","4":"6070.152","5":"3.810061","6":"5.103865e-02","_rn_":"4"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="계단함수" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="계단함수"><span class="header-section-number">8.2</span> 계단함수</h2>
+<p>계단함수는 연속형 설명변수를 구간으로 나누고 구간별로 다른 상수를 적합한다. 절단점 <span class="math inline">\(c_1&lt;\cdots&lt;c_K\)</span>가 있을 때</p>
+<p><span class="math display">\[
+C_0(X)=I(X&lt;c_1),\quad
+C_1(X)=I(c_1\le X&lt;c_2),\ldots,
+C_K(X)=I(c_K\le X)
+\]</span></p>
+<p>를 만들고</p>
+<p><span class="math display">\[
+y_i=\beta_0+\beta_1C_1(x_i)+\cdots+\beta_KC_K(x_i)+\varepsilon_i
+\]</span></p>
+<p>를 적합한다. 한 구간을 기준범주로 두므로 완전한 더미변수 집합 중 하나는 제외한다.</p>
+<p>계단함수는 해석이 쉽지만 절단점에서 불연속이고, 구간 경계의 작은 차이가 예측을 크게 바꿀 수 있다.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>Wage<span class="sc">$</span>age_group <span class="ot">&lt;-</span> <span class="fu">cut</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  Wage<span class="sc">$</span>age,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">18</span>, <span class="dv">30</span>, <span class="dv">40</span>, <span class="dv">50</span>, <span class="dv">60</span>, <span class="dv">80</span>),</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">right =</span> <span class="cn">FALSE</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>fit_step <span class="ot">&lt;-</span> <span class="fu">lm</span>(wage <span class="sc">~</span> age_group, <span class="at">data =</span> Wage)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_step)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = wage ~ age_group, data = Wage)
+#&gt; 
+#&gt; Residuals:
+#&gt;     Min      1Q  Median      3Q     Max 
+#&gt; -98.941 -24.954  -5.452  16.142 203.869 
+#&gt; 
+#&gt; Coefficients:
+#&gt;                  Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)        86.728      1.906   45.50  &lt; 2e-16 ***
+#&gt; age_group[30,40)   25.369      2.398   10.58  &lt; 2e-16 ***
+#&gt; age_group[40,50)   32.299      2.319   13.93  &lt; 2e-16 ***
+#&gt; age_group[50,60)   30.569      2.484   12.30  &lt; 2e-16 ***
+#&gt; age_group[60,80)   27.745      3.396    8.17 4.52e-16 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 40.34 on 2991 degrees of freedom
+#&gt;   (4 observations deleted due to missingness)
+#&gt; Multiple R-squared:  0.0673, Adjusted R-squared:  0.06605 
+#&gt; F-statistic: 53.95 on 4 and 2991 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>step_pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  fit_step,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">newdata =</span> <span class="fu">data.frame</span>(</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">age_group =</span> <span class="fu">cut</span>(age_grid,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">18</span>, <span class="dv">30</span>, <span class="dv">40</span>, <span class="dv">50</span>, <span class="dv">60</span>, <span class="dv">80</span>),</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">right =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Wage<span class="sc">$</span>age, Wage<span class="sc">$</span>wage, <span class="at">pch =</span> <span class="dv">20</span>, <span class="at">cex =</span> <span class="fl">0.4</span>,</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"나이"</span>, <span class="at">ylab =</span> <span class="st">"임금"</span>)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(age_grid, step_pred, <span class="at">type =</span> <span class="st">"s"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="08-beyond-linearity_files/figure-html/ch8-step-plot-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="조각별-다항식과-스플라인" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="조각별-다항식과-스플라인"><span class="header-section-number">8.3</span> 조각별 다항식과 스플라인</h2>
+<p>조각별 다항식(piecewise polynomial)은 설명변수 영역을 여러 구간으로 나누고 각 구간에서 별도의 다항식을 적합한다. 구간 경계를 <strong>매듭(knot)</strong>이라 한다.</p>
+<p>각 구간을 독립적으로 적합하면 매듭에서 함수값이나 기울기가 불연속일 수 있다. 스플라인은 매듭에서 적절한 연속성과 미분가능성을 부여해 부드러운 곡선을 만든다.</p>
+<section id="선형-스플라인" class="level3" data-number="8.3.1">
+<h3 data-number="8.3.1" class="anchored" data-anchor-id="선형-스플라인"><span class="header-section-number">8.3.1</span> 선형 스플라인</h3>
+<p>매듭이 <span class="math inline">\(\xi\)</span>인 선형 스플라인은 절단된 선형기저</p>
+<p><span class="math display">\[
+(x-\xi)_+=\begin{cases}
+x-\xi,&amp;x&gt;\xi\cr
+0,&amp;x\le\xi
+\end{cases}
+\]</span></p>
+<p>를 사용하여</p>
+<p><span class="math display">\[
+y_i=\beta_0+\beta_1x_i+\beta_2(x_i-\xi)_++\varepsilon_i
+\]</span></p>
+<p>로 표현할 수 있다. 함수값은 연속이지만 매듭에서 기울기가 바뀐다.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>truncated <span class="ot">&lt;-</span> <span class="cf">function</span>(x, knot) <span class="fu">pmax</span>(x <span class="sc">-</span> knot, <span class="dv">0</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>fit_linear_spline <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  wage <span class="sc">~</span> age <span class="sc">+</span> <span class="fu">truncated</span>(age, <span class="dv">40</span>) <span class="sc">+</span> <span class="fu">truncated</span>(age, <span class="dv">55</span>),</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> Wage</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>pred_linear_spline <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  fit_linear_spline,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">age =</span> age_grid)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Wage<span class="sc">$</span>age, Wage<span class="sc">$</span>wage, <span class="at">pch =</span> <span class="dv">20</span>, <span class="at">cex =</span> <span class="fl">0.4</span>,</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"나이"</span>, <span class="at">ylab =</span> <span class="st">"임금"</span>)</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(age_grid, pred_linear_spline, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="fu">c</span>(<span class="dv">40</span>, <span class="dv">55</span>), <span class="at">lty =</span> <span class="dv">3</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="08-beyond-linearity_files/figure-html/ch8-linear-spline-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="차-회귀-스플라인" class="level3" data-number="8.3.2">
+<h3 data-number="8.3.2" class="anchored" data-anchor-id="차-회귀-스플라인"><span class="header-section-number">8.3.2</span> 3차 회귀 스플라인</h3>
+<p>3차 스플라인(cubic spline)은 각 구간에서 3차 다항식을 사용하고 매듭에서 함수값, 1차 미분, 2차 미분이 연속이 되도록 제약한다. 매듭이 <span class="math inline">\(K\)</span>개인 3차 스플라인은 일반적으로 <span class="math inline">\(K+4\)</span>개의 자유도를 갖는다.</p>
+<p>절단 거듭제곱 기저는</p>
+<p><span class="math display">\[
+1,x,x^2,x^3,(x-\xi_1)_+^3,\ldots,(x-\xi_K)_+^3
+\]</span></p>
+<p>로 표현할 수 있다. 실제 계산에서는 수치적으로 더 안정적인 B-스플라인 기저를 주로 사용한다.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(splines)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>fit_bs <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  wage <span class="sc">~</span> <span class="fu">bs</span>(age, <span class="at">knots =</span> <span class="fu">c</span>(<span class="dv">40</span>, <span class="dv">55</span>), <span class="at">degree =</span> <span class="dv">3</span>),</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> Wage</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>pred_bs <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_bs, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">age =</span> age_grid), <span class="at">se.fit =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Wage<span class="sc">$</span>age, Wage<span class="sc">$</span>wage, <span class="at">pch =</span> <span class="dv">20</span>, <span class="at">cex =</span> <span class="fl">0.4</span>,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"나이"</span>, <span class="at">ylab =</span> <span class="st">"임금"</span>)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(age_grid, pred_bs<span class="sc">$</span>fit, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(age_grid, pred_bs<span class="sc">$</span>fit <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> pred_bs<span class="sc">$</span>se.fit, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(age_grid, pred_bs<span class="sc">$</span>fit <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> pred_bs<span class="sc">$</span>se.fit, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="fu">c</span>(<span class="dv">40</span>, <span class="dv">55</span>), <span class="at">lty =</span> <span class="dv">3</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="08-beyond-linearity_files/figure-html/ch8-bspline-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="자연-3차-스플라인" class="level3" data-number="8.3.3">
+<h3 data-number="8.3.3" class="anchored" data-anchor-id="자연-3차-스플라인"><span class="header-section-number">8.3.3</span> 자연 3차 스플라인</h3>
+<p>일반 3차 스플라인은 자료의 양 끝에서 분산이 커질 수 있다. 자연 3차 스플라인(natural cubic spline)은 경계 매듭 바깥에서 함수가 선형이 되도록 추가 제약을 둔다. 이 제약은 경계에서 더 안정적인 추정과 외삽을 제공한다.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fit_ns <span class="ot">&lt;-</span> <span class="fu">lm</span>(wage <span class="sc">~</span> <span class="fu">ns</span>(age, <span class="at">df =</span> <span class="dv">5</span>), <span class="at">data =</span> Wage)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>pred_ns <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_ns, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">age =</span> age_grid), <span class="at">se.fit =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Wage<span class="sc">$</span>age, Wage<span class="sc">$</span>wage, <span class="at">pch =</span> <span class="dv">20</span>, <span class="at">cex =</span> <span class="fl">0.4</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"나이"</span>, <span class="at">ylab =</span> <span class="st">"임금"</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(age_grid, pred_ns<span class="sc">$</span>fit, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(age_grid, pred_ns<span class="sc">$</span>fit <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> pred_ns<span class="sc">$</span>se.fit, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(age_grid, pred_ns<span class="sc">$</span>fit <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> pred_ns<span class="sc">$</span>se.fit, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="08-beyond-linearity_files/figure-html/ch8-natural-spline-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="매듭의-위치와-자유도" class="level3" data-number="8.3.4">
+<h3 data-number="8.3.4" class="anchored" data-anchor-id="매듭의-위치와-자유도"><span class="header-section-number">8.3.4</span> 매듭의 위치와 자유도</h3>
+<p>스플라인의 유연성은 매듭의 수와 위치 또는 자유도에 의해 결정된다.</p>
+<ul>
+<li>자료가 많은 영역에는 더 많은 매듭을 둘 수 있다.</li>
+<li>실무에서는 설명변수의 분위수를 매듭으로 사용하는 경우가 많다.</li>
+<li>매듭을 직접 고르기보다 자유도를 지정하면 함수가 적절한 매듭을 자동으로 배치한다.</li>
+<li>자유도는 교차검증이나 정보기준으로 선택한다.</li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>K <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>fold_id <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span>K, <span class="at">length.out =</span> <span class="fu">nrow</span>(Wage)))</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>df_grid <span class="ot">&lt;-</span> <span class="dv">3</span><span class="sc">:</span><span class="dv">10</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>cv_mse_ns <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="fu">length</span>(df_grid))</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (m <span class="cf">in</span> <span class="fu">seq_along</span>(df_grid)) {</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  fold_mse <span class="ot">&lt;-</span> <span class="fu">numeric</span>(K)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>K) {</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>      wage <span class="sc">~</span> <span class="fu">ns</span>(age, <span class="at">df =</span> df_grid[m]),</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> Wage[fold_id <span class="sc">!=</span> k, ]</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit, <span class="at">newdata =</span> Wage[fold_id <span class="sc">==</span> k, ])</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    fold_mse[k] <span class="ot">&lt;-</span> <span class="fu">mean</span>((Wage<span class="sc">$</span>wage[fold_id <span class="sc">==</span> k] <span class="sc">-</span> pred)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>  cv_mse_ns[m] <span class="ot">&lt;-</span> <span class="fu">mean</span>(fold_mse)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(자유도 <span class="ot">=</span> df_grid, <span class="at">CV_MSE =</span> cv_mse_ns)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["자유도"],"name":[1],"type":["int"],"align":["right"]},{"label":["CV_MSE"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"3","2":"1595.788"},{"1":"4","2":"1596.523"},{"1":"5","2":"1596.702"},{"1":"6","2":"1594.978"},{"1":"7","2":"1595.109"},{"1":"8","2":"1594.676"},{"1":"9","2":"1595.214"},{"1":"10","2":"1595.969"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="평활-스플라인" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="평활-스플라인"><span class="header-section-number">8.4</span> 평활 스플라인</h2>
+<p>회귀 스플라인은 매듭과 자유도를 정해야 한다. 평활 스플라인은 모든 고유한 <span class="math inline">\(x\)</span> 값에 매듭을 둘 수 있을 만큼 매우 유연한 함수 공간에서 다음 목적함수를 최소화한다.</p>
+<p><span class="math display">\[
+\sum_{i=1}^{n}\{y_i-g(x_i)\}^2
++\lambda\int g''(t)^2\,dt
+\]</span></p>
+<p>첫 항은 자료 적합도를, 두 번째 항은 곡선의 거칠기를 나타낸다.</p>
+<ul>
+<li><span class="math inline">\(\lambda=0\)</span>이면 자료를 매우 가깝게 통과하는 곡선이 된다.</li>
+<li><span class="math inline">\(\lambda\to\infty\)</span>이면 <span class="math inline">\(g''(t)=0\)</span>에 가까워져 직선이 된다.</li>
+</ul>
+<p><span class="math inline">\(\lambda\)</span>는 보통 교차검증 또는 일반화교차검증(GCV)으로 선택한다.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fit_smooth_cv <span class="ot">&lt;-</span> <span class="fu">smooth.spline</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> Wage<span class="sc">$</span>age,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> Wage<span class="sc">$</span>wage,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">cv =</span> <span class="cn">TRUE</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>fit_smooth_gcv <span class="ot">&lt;-</span> <span class="fu">smooth.spline</span>(</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> Wage<span class="sc">$</span>age,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> Wage<span class="sc">$</span>wage,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">cv =</span> <span class="cn">FALSE</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Wage<span class="sc">$</span>age, Wage<span class="sc">$</span>wage, <span class="at">pch =</span> <span class="dv">20</span>, <span class="at">cex =</span> <span class="fl">0.35</span>,</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"나이"</span>, <span class="at">ylab =</span> <span class="st">"임금"</span>)</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(fit_smooth_cv, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(fit_smooth_gcv, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"CV"</span>, <span class="st">"GCV"</span>), <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">lwd =</span> <span class="dv">2</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="08-beyond-linearity_files/figure-html/ch8-smoothing-spline-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(CV_자유도 <span class="ot">=</span> fit_smooth_cv<span class="sc">$</span>df, GCV_자유도 <span class="ot">=</span> fit_smooth_gcv<span class="sc">$</span>df)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;  CV_자유도 GCV_자유도 
+#&gt;   6.794596   6.468299</code></pre>
+</div>
+</div>
+</section>
+<section id="국소회귀" class="level2" data-number="8.5">
+<h2 data-number="8.5" class="anchored" data-anchor-id="국소회귀"><span class="header-section-number">8.5</span> 국소회귀</h2>
+<p>국소회귀(local regression)는 예측하고자 하는 점 <span class="math inline">\(x_0\)</span> 주변의 관측치에 더 큰 가중치를 주어 낮은 차수의 회귀모형을 적합한다.</p>
+<ol type="1">
+<li><span class="math inline">\(x_0\)</span>에 가까운 관측치 집합을 선택한다.</li>
+<li>거리가 가까울수록 큰 가중치를 부여한다.</li>
+<li>가중최소제곱으로 국소 선형 또는 국소 다항모형을 적합한다.</li>
+<li><span class="math inline">\(x_0\)</span>에서의 적합값을 계산한다.</li>
+</ol>
+<p><code>span</code>은 각 국소 적합에 사용되는 자료의 비율이다. 작은 <code>span</code>은 더 유연하고, 큰 <code>span</code>은 더 매끄럽다.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>fit_loess_small <span class="ot">&lt;-</span> <span class="fu">loess</span>(wage <span class="sc">~</span> age, <span class="at">data =</span> Wage, <span class="at">span =</span> <span class="fl">0.35</span>, <span class="at">degree =</span> <span class="dv">2</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>fit_loess_large <span class="ot">&lt;-</span> <span class="fu">loess</span>(wage <span class="sc">~</span> age, <span class="at">data =</span> Wage, <span class="at">span =</span> <span class="fl">0.70</span>, <span class="at">degree =</span> <span class="dv">2</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Wage<span class="sc">$</span>age, Wage<span class="sc">$</span>wage, <span class="at">pch =</span> <span class="dv">20</span>, <span class="at">cex =</span> <span class="fl">0.35</span>,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"나이"</span>, <span class="at">ylab =</span> <span class="st">"임금"</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(age_grid,</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">predict</span>(fit_loess_small, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">age =</span> age_grid)),</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(age_grid,</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">predict</span>(fit_loess_large, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">age =</span> age_grid)),</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"span=0.35"</span>, <span class="st">"span=0.70"</span>),</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">lwd =</span> <span class="dv">2</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="08-beyond-linearity_files/figure-html/ch8-loess-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>국소회귀는 저차원 문제에서 유연하고 직관적이지만 설명변수의 수가 늘어나면 근방에 충분한 관측치가 없어지는 차원의 저주를 겪는다.</p>
+</section>
+<section id="일반화가법모형" class="level2" data-number="8.6">
+<h2 data-number="8.6" class="anchored" data-anchor-id="일반화가법모형"><span class="header-section-number">8.6</span> 일반화가법모형</h2>
+<p>일반화가법모형(generalized additive model, GAM)은 각 설명변수의 효과를 별도의 함수로 더한다.</p>
+<p><span class="math display">\[
+Y=\beta_0+f_1(X_1)+f_2(X_2)+\cdots+f_p(X_p)+\varepsilon
+\]</span></p>
+<p>선형항, 범주형 변수, 스플라인 등을 한 모형에 함께 넣을 수 있다. 각 <span class="math inline">\(f_j\)</span>를 다른 변수를 보정한 <strong>부분효과(partial effect)</strong>로 시각화할 수 있어 비선형모형 중 비교적 해석 가능성이 높다.</p>
+<section id="임금-자료의-gam" class="level3" data-number="8.6.1">
+<h3 data-number="8.6.1" class="anchored" data-anchor-id="임금-자료의-gam"><span class="header-section-number">8.6.1</span> 임금 자료의 GAM</h3>
+<p>나이와 연도는 평활함수로, 교육수준은 범주형 변수로 포함한다.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mgcv)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>fit_gam <span class="ot">&lt;-</span> <span class="fu">gam</span>(</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  wage <span class="sc">~</span> <span class="fu">s</span>(year, <span class="at">k =</span> <span class="dv">5</span>) <span class="sc">+</span> <span class="fu">s</span>(age, <span class="at">k =</span> <span class="dv">8</span>) <span class="sc">+</span> education,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> Wage,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"REML"</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_gam)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Family: gaussian 
+#&gt; Link function: identity 
+#&gt; 
+#&gt; Formula:
+#&gt; wage ~ s(year, k = 5) + s(age, k = 8) + education
+#&gt; 
+#&gt; Parametric coefficients:
+#&gt;                             Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)                   85.459      2.152  39.704  &lt; 2e-16 ***
+#&gt; education2. HS Grad           10.966      2.428   4.517 6.52e-06 ***
+#&gt; education3. Some College      23.515      2.558   9.194  &lt; 2e-16 ***
+#&gt; education4. College Grad      38.185      2.543  15.018  &lt; 2e-16 ***
+#&gt; education5. Advanced Degree   62.546      2.759  22.673  &lt; 2e-16 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Approximate significance of smooth terms:
+#&gt;           edf Ref.df      F  p-value    
+#&gt; s(year) 1.239  1.437  9.069 0.000632 ***
+#&gt; s(age)  4.828  5.689 39.906  &lt; 2e-16 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; R-sq.(adj) =   0.29   Deviance explained = 29.3%
+#&gt; -REML =  14930  Scale est. = 1235.6    n = 3000</code></pre>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>))</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit_gam, <span class="at">pages =</span> <span class="dv">1</span>, <span class="at">shade =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="08-beyond-linearity_files/figure-html/ch8-gam-plot-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>GAM에서 각 평활항의 유효자유도(estimated degrees of freedom, edf)가 1에 가까우면 거의 선형효과를 뜻한다. edf가 1보다 크면 비선형성이 있음을 의미한다. 선형모형과 GAM을 비교하여 비선형항의 필요성을 평가할 수 있다.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>fit_gam_linear_age <span class="ot">&lt;-</span> <span class="fu">gam</span>(</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  wage <span class="sc">~</span> <span class="fu">s</span>(year, <span class="at">k =</span> <span class="dv">5</span>) <span class="sc">+</span> age <span class="sc">+</span> education,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> Wage,</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"REML"</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(fit_gam_linear_age, fit_gam, <span class="at">test =</span> <span class="st">"F"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Resid. Df"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Resid. Dev"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["Df"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Deviance"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["F"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"2991.891","2":"3852777","3":"NA","4":"NA","5":"NA","6":"NA","_rn_":"1"},{"1":"2986.817","2":"3693122","3":"5.074298","4":"159654.3","5":"25.46403","6":"1.452195e-25","_rn_":"2"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section>
+<section id="분류를-위한-gam" class="level3" data-number="8.6.2">
+<h3 data-number="8.6.2" class="anchored" data-anchor-id="분류를-위한-gam"><span class="header-section-number">8.6.2</span> 분류를 위한 GAM</h3>
+<p>이항 반응변수에서도 연결함수를 사용해 GAM을 적합할 수 있다.</p>
+<p><span class="math display">\[
+\log\left\{\frac{p(X)}{1-p(X)}\right\}
+=\beta_0+f_1(X_1)+\cdots+f_p(X_p)
+\]</span></p>
+<p>고소득 여부를 예측하는 예제를 살펴보자.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>Wage<span class="sc">$</span>high_wage <span class="ot">&lt;-</span> Wage<span class="sc">$</span>wage <span class="sc">&gt;</span> <span class="dv">250</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>fit_gam_logit <span class="ot">&lt;-</span> <span class="fu">gam</span>(</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  high_wage <span class="sc">~</span> <span class="fu">s</span>(year, <span class="at">k =</span> <span class="dv">5</span>) <span class="sc">+</span> <span class="fu">s</span>(age, <span class="at">k =</span> <span class="dv">8</span>) <span class="sc">+</span> education,</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> Wage,</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> binomial,</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"REML"</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_gam_logit)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Family: binomial 
+#&gt; Link function: logit 
+#&gt; 
+#&gt; Formula:
+#&gt; high_wage ~ s(year, k = 5) + s(age, k = 8) + education
+#&gt; 
+#&gt; Parametric coefficients:
+#&gt;                               Estimate Std. Error z value Pr(&gt;|z|)
+#&gt; (Intercept)                     -61.02 4099326.33       0        1
+#&gt; education2. HS Grad              55.57 4099326.33       0        1
+#&gt; education3. Some College         56.36 4099326.33       0        1
+#&gt; education4. College Grad         57.39 4099326.33       0        1
+#&gt; education5. Advanced Degree      58.57 4099326.33       0        1
+#&gt; 
+#&gt; Approximate significance of smooth terms:
+#&gt;           edf Ref.df Chi.sq p-value  
+#&gt; s(year) 1.000   1.00   0.13  0.7185  
+#&gt; s(age)  3.408   4.18   9.76  0.0458 *
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; R-sq.(adj) =  0.0516   Deviance explained = 17.3%
+#&gt; -REML = 293.27  Scale est. = 1         n = 3000</code></pre>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>prob_high <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_gam_logit, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>pred_high <span class="ot">&lt;-</span> prob_high <span class="sc">&gt;</span> <span class="fl">0.5</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(실제 <span class="ot">=</span> Wage<span class="sc">$</span>high_wage, 예측 <span class="ot">=</span> pred_high)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;        예측
+#&gt; 실제  FALSE
+#&gt;   FALSE  2921
+#&gt;   TRUE     79</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(pred_high <span class="sc">==</span> Wage<span class="sc">$</span>high_wage)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 0.9736667</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="방법-비교" class="level2" data-number="8.7">
+<h2 data-number="8.7" class="anchored" data-anchor-id="방법-비교"><span class="header-section-number">8.7</span> 방법 비교</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>방법</th>
+<th>유연성의 조절</th>
+<th>장점</th>
+<th>한계</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>다항회귀</td>
+<td>다항식 차수</td>
+<td>단순하고 익숙함</td>
+<td>경계와 외삽에서 불안정</td>
+</tr>
+<tr class="even">
+<td>계단함수</td>
+<td>절단점 수와 위치</td>
+<td>구간별 해석이 쉬움</td>
+<td>불연속적이고 경계에 민감</td>
+</tr>
+<tr class="odd">
+<td>회귀 스플라인</td>
+<td>매듭 또는 자유도</td>
+<td>국소적 유연성과 매끄러움</td>
+<td>복잡도 선택 필요</td>
+</tr>
+<tr class="even">
+<td>평활 스플라인</td>
+<td><span class="math inline">\(\lambda\)</span> 또는 유효자유도</td>
+<td>자동적인 매끄러움 조절</td>
+<td>한 설명변수의 효과에 주로 사용</td>
+</tr>
+<tr class="odd">
+<td>국소회귀</td>
+<td><code>span</code></td>
+<td>강한 국소 적응성</td>
+<td>고차원에서 비효율적</td>
+</tr>
+<tr class="even">
+<td>GAM</td>
+<td>각 평활항의 복잡도</td>
+<td>여러 변수의 비선형 효과를 가법적으로 해석</td>
+<td>상호작용을 자동으로 포함하지 않음</td>
+</tr>
+</tbody>
+</table>
+<p>비선형성을 허용한다고 해서 항상 예측력이 향상되는 것은 아니다. 복잡도는 교차검증으로 선택하고, 자료가 희박한 경계 영역과 외삽에서는 불확실성을 명확히 표시해야 한다.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./07-model-selection.html" class="pagination-link" aria-label="모형 선택과 정규화">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">모형 선택과 정규화</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./09-tree-based-methods.html" class="pagination-link" aria-label="트리 기반 방법">
+        <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">트리 기반 방법</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
