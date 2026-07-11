@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>2&nbsp; 통계적 학습 – 통계적 학습</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./03-introduction-to-r.html" rel="next">
+<link href="./01-introduction.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-3d841e2d0dac331999ea63b9b6b417ac.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./02-statistical-learning.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">통계적 학습</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">통계적 학습</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="리더 모드 전환">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">머리말</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">소개</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-statistical-learning.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">통계적 학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-introduction-to-r.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">R 소개</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">선형회귀</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-classification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">분류</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-resampling-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">재표본추출 방법</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-model-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">모형 선택과 정규화</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-beyond-linearity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">선형성을 넘어</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-tree-based-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">트리 기반 방법</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-support-vector-machines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">서포트 벡터 머신</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-unsupervised-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">비지도학습</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#통계적-학습이란-무엇인가" id="toc-통계적-학습이란-무엇인가" class="nav-link active" data-scroll-target="#통계적-학습이란-무엇인가"><span class="header-section-number">2.1</span> 통계적 학습이란 무엇인가</a>
+  <ul class="collapse">
+  <li><a href="#예측" id="toc-예측" class="nav-link" data-scroll-target="#예측"><span class="header-section-number">2.1.1</span> 예측</a></li>
+  <li><a href="#추론" id="toc-추론" class="nav-link" data-scroll-target="#추론"><span class="header-section-number">2.1.2</span> 추론</a></li>
+  <li><a href="#f의-추정" id="toc-f의-추정" class="nav-link" data-scroll-target="#f의-추정"><span class="header-section-number">2.1.3</span> <span class="math inline">\(f\)</span>의 추정</a></li>
+  <li><a href="#예측-정확도와-모형의-해석-가능성" id="toc-예측-정확도와-모형의-해석-가능성" class="nav-link" data-scroll-target="#예측-정확도와-모형의-해석-가능성"><span class="header-section-number">2.1.4</span> 예측 정확도와 모형의 해석 가능성</a></li>
+  </ul></li>
+  <li><a href="#모형-정확도의-평가" id="toc-모형-정확도의-평가" class="nav-link" data-scroll-target="#모형-정확도의-평가"><span class="header-section-number">2.2</span> 모형 정확도의 평가</a>
+  <ul class="collapse">
+  <li><a href="#적합의-품질-측정" id="toc-적합의-품질-측정" class="nav-link" data-scroll-target="#적합의-품질-측정"><span class="header-section-number">2.2.1</span> 적합의 품질 측정</a></li>
+  <li><a href="#편향분산-절충" id="toc-편향분산-절충" class="nav-link" data-scroll-target="#편향분산-절충"><span class="header-section-number">2.2.2</span> 편향–분산 절충</a></li>
+  <li><a href="#분류-문제" id="toc-분류-문제" class="nav-link" data-scroll-target="#분류-문제"><span class="header-section-number">2.2.3</span> 분류 문제</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="chapter2" class="quarto-section-identifier"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">통계적 학습</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="통계적-학습이란-무엇인가" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="통계적-학습이란-무엇인가"><span class="header-section-number">2.1</span> 통계적 학습이란 무엇인가</h2>
+<ul>
+<li>문헌에서 통계적 학습(statistical learning)은 데이터셋에 포함된 변수 사이의 관계를 수학적으로 표현하고 추정하는 데 도움을 주는 접근법을 의미한다.</li>
+</ul>
+<p><img src="fig1/l1.png" class="img-fluid"></p>
+<ul>
+<li>그림은 TV, 라디오, 신문 광고비와 매출의 관계를 보여주며, 각 패널에는 파란색 선형회귀선이 적합되어 있다.</li>
+<li>이 세 가지 광고매체를 이용하여 매출을 예측할 수 있을까?</li>
+<li>다음과 같은 모형을 사용하면 더 나은 예측이 가능할 수 있다.</li>
+</ul>
+<p><span class="math display">\[
+Sales \approx f(TV, Radio, Newspaper)
+\]</span></p>
+<ul>
+<li>여기서 <code>Sales</code>는 예측하려는 반응변수 또는 목표변수이다.</li>
+<li>반응변수는 일반적으로 <span class="math inline">\(Y\)</span>로 나타낸다.</li>
+<li><code>TV</code>는 특성, 입력 또는 예측변수이며 <span class="math inline">\(X_1\)</span>로 나타낸다.</li>
+<li>같은 방식으로 <code>Radio</code>는 <span class="math inline">\(X_2\)</span>로 나타내며, 나머지 변수도 순서대로 표기한다.</li>
+<li>입력변수 전체를 다음과 같은 벡터로 표현할 수 있다.</li>
+</ul>
+<p><span class="math display">\[
+\mathbf{X}=\begin{pmatrix}
+X_{1}\\
+X_{2}\\
+X_{3}\\
+\end{pmatrix}
+\]</span></p>
+<ul>
+<li>출력변수 <span class="math inline">\(Y\)</span>와 입력변수 <span class="math inline">\(X\)</span>가 모두 존재하는 지도학습에서는 다음 식을 만족하는 함수 <span class="math inline">\(f\)</span>를 찾는 문제로 정리할 수 있다.</li>
+</ul>
+<p><span class="math display">\[
+Y=f(X)+\epsilon
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; 여기서 <span class="math inline">\(\epsilon\)</span>은 측정오차와 모형으로 설명되지 않는 차이를 나타낸다.</p>
+<ul>
+<li><span class="math inline">\(f\)</span>는 고정되어 있지만 알려지지 않은 함수이고, <span class="math inline">\(X=(X_1,X_2,X_3)\)</span>는 예측변수 집합이다. <span class="math inline">\(\epsilon\)</span>은 <span class="math inline">\(X\)</span>와 독립이며 평균이 0인 확률오차항이다.</li>
+</ul>
+<section id="fx는-무엇에-유용한가" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="fx는-무엇에-유용한가"><span class="math inline">\(f(X)\)</span>는 무엇에 유용한가?</h4>
+<ul>
+<li><span class="math inline">\(f\)</span>를 잘 추정하면 새로운 입력값 <span class="math inline">\(X=x\)</span>에서 <span class="math inline">\(Y\)</span>를 예측할 수 있다.</li>
+<li><span class="math inline">\(X=(X_1,X_2,\ldots,X_p)\)</span>의 어떤 성분이 <span class="math inline">\(Y\)</span>를 설명하는 데 중요하며 어떤 성분이 중요하지 않은지 파악할 수 있다.
+<ul>
+<li>예를 들어 근속연수와 교육연수는 소득에 큰 영향을 미칠 수 있지만 혼인상태는 일반적으로 영향이 크지 않을 수 있다.</li>
+</ul></li>
+<li><span class="math inline">\(f\)</span>의 복잡도에 따라 각 성분 <span class="math inline">\(X_j\)</span>가 <span class="math inline">\(Y\)</span>에 미치는 영향을 구체적으로 이해할 수도 있다.</li>
+</ul>
+<p><img src="fig1/l2.png" class="img-fluid"></p>
+<ul>
+<li>이상적인 <span class="math inline">\(f(X)\)</span>가 존재할까?
+<ul>
+<li>예를 들어 <span class="math inline">\(X=4\)</span>일 때 <span class="math inline">\(f(X)\)</span>의 적절한 값은 무엇일까?</li>
+<li><span class="math inline">\(X=4\)</span>인 경우에도 여러 개의 서로 다른 <span class="math inline">\(Y\)</span> 값이 관찰될 수 있다.</li>
+</ul></li>
+<li>적절한 값은 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+f(4)=E(Y\mid X=4)
+\]</span></p>
+<ul>
+<li><span class="math inline">\(E(Y\mid X=4)\)</span>는 <span class="math inline">\(X=4\)</span>가 주어졌을 때 <span class="math inline">\(Y\)</span>의 기댓값, 즉 평균을 의미한다.</li>
+<li>이상적인 함수 <span class="math inline">\(f(x)=E(Y\mid X=x)\)</span>를 <strong>회귀함수(regression function)</strong>라고 한다.
+<ul>
+<li>회귀함수는 벡터 형태의 <span class="math inline">\(X\)</span>에 대해서도 정의할 수 있다.</li>
+</ul></li>
+</ul>
+<p><span class="math display">\[
+f(x)=f(x_1,x_2,x_3)=E(Y\mid X_1=x_1,X_2=x_2,X_3=x_3)
+\]</span></p>
+<ul>
+<li>이 식으로 표현되는 접근은 통계학 전반에서 널리 사용된다.</li>
+<li><span class="math inline">\(Y\)</span>에 변동이 존재할 때 전체 변동을 설명 가능한 체계적 성분과 설명되지 않는 비체계적 성분 또는 확률잡음으로 나눌 수 있다.</li>
+</ul>
+<p><span class="math display">\[
+Y=\text{체계적 성분}+\text{비체계적 성분}
+\]</span></p>
+<ul>
+<li>식 <span class="math inline">\(Y=f(X)+\epsilon\)</span>에서 <span class="math inline">\(f(X)\)</span>는 체계적 성분이고 <span class="math inline">\(\epsilon\)</span>은 비체계적 성분이다.</li>
+</ul>
+</section>
+<section id="목표" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="목표">목표</h4>
+<ul>
+<li>목표는 이용 가능한 자료를 바탕으로 <span class="math inline">\(f\)</span>를 추정하는 것이다.</li>
+<li>James 등의 교재에서는 통계적 학습을 <span class="math inline">\(f\)</span>를 추정하기 위한 접근법의 집합으로 정의한다.</li>
+<li><span class="math inline">\(f\)</span>를 추정하는 두 가지 주요 목적은 <strong>예측</strong>과 <strong>추론</strong>이다.</li>
+</ul>
+</section>
+<section id="예측" class="level3" data-number="2.1.1">
+<h3 data-number="2.1.1" class="anchored" data-anchor-id="예측"><span class="header-section-number">2.1.1</span> 예측</h3>
+<ul>
+<li><span class="math inline">\(f\)</span>의 추정량 <span class="math inline">\(\hat f\)</span>와 입력 <span class="math inline">\(X\)</span>가 주어졌다고 하자. 오차항 <span class="math inline">\(\epsilon\)</span>의 평균이 0이므로 다음과 같이 <span class="math inline">\(Y\)</span>를 예측할 수 있다.</li>
+</ul>
+<p><span class="math display">\[
+\hat{Y}=\hat{f}(X)
+\]</span></p>
+<ul>
+<li>예측이 주된 목적일 때는 <span class="math inline">\(\hat f\)</span>를 흔히 블랙박스로 취급한다. 즉, 결과 <span class="math inline">\(Y\)</span>를 정확하게 예측할 수 있다면 <span class="math inline">\(\hat f\)</span>의 정확한 함수 형태는 핵심 관심사가 아닐 수 있다.</li>
+</ul>
+<p><span class="math display">\[
+\text{입력}\rightarrow\text{블랙박스}\rightarrow\text{예측}
+\]</span></p>
+<section id="예제-임금과-근속연수" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="예제-임금과-근속연수">예제: 임금과 근속연수</h4>
+<ul>
+<li>임금과 현재 직장에서의 근속연수 사이의 관계가 다음과 같다고 가정하자.</li>
+</ul>
+<p><span class="math display">\[
+\log(wage)=2.3+0.025\,tenure-0.00045\,tenure^2+\epsilon
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; 여기서 <span class="math inline">\(\epsilon\sim N(0,\sigma^2)\)</span>이고 <span class="math inline">\(\sigma=0.025\)</span>이다.</p>
+<ul>
+<li>아래 그림의 왼쪽 패널은 50개 관측치로 구성된 표본을, 오른쪽 패널은 실제 함수 <span class="math inline">\(f\)</span>와 각 관측값이 함수에서 벗어난 정도를 보여준다.</li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>tenure <span class="ot">&lt;-</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">40</span> <span class="co"># 동일 직장에서의 근속연수</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>b0 <span class="ot">&lt;-</span> <span class="fl">2.3</span>; b1 <span class="ot">&lt;-</span> .<span class="dv">025</span>; b2 <span class="ot">&lt;-</span> <span class="sc">-</span>.<span class="dv">00045</span> <span class="co"># 모형 모수</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">50</span> <span class="co"># 표본크기</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> .<span class="dv">025</span> <span class="co"># 오차항의 표준편차</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="at">seed =</span> <span class="dv">111</span>) <span class="co"># 예제 재현을 위한 난수 시드</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">sample</span>(tenure, <span class="at">size =</span> n, <span class="at">replace =</span> <span class="cn">TRUE</span>); x2 <span class="ot">&lt;-</span> x<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>e <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> n, <span class="at">sd =</span> sigma) <span class="co"># 오차항 epsilon</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>logwage <span class="ot">&lt;-</span> b0 <span class="sc">+</span> b1 <span class="sc">*</span> x <span class="sc">+</span> b2 <span class="sc">*</span> x<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> e</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>)) <span class="co"># 그래프 영역 분할</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="at">x =</span> x, <span class="at">y =</span> <span class="fu">exp</span>(logwage), <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">pch =</span> <span class="dv">20</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"근속연수"</span>, <span class="at">ylab =</span> <span class="st">"시간당 임금"</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="at">expr =</span> <span class="fu">exp</span>(b0 <span class="sc">+</span> b1 <span class="sc">*</span> x <span class="sc">+</span> b2 <span class="sc">*</span> x<span class="sc">^</span><span class="dv">2</span>), <span class="at">from =</span> <span class="dv">0</span>, <span class="at">to =</span> <span class="dv">40</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">9</span>, <span class="dv">15</span>),</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">xlab =</span> <span class="st">"근속연수"</span>, <span class="at">ylab =</span> <span class="st">"시간당 임금"</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="at">x =</span> x, <span class="at">y =</span> <span class="fu">exp</span>(logwage), <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">pch =</span> <span class="dv">20</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(<span class="at">x0 =</span> x, <span class="at">y0 =</span> <span class="fu">exp</span>(logwage), <span class="at">x1 =</span> x, <span class="at">y1 =</span> <span class="fu">exp</span>(b0 <span class="sc">+</span> b1 <span class="sc">*</span> x <span class="sc">+</span> b2 <span class="sc">*</span> x<span class="sc">^</span><span class="dv">2</span>),</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">col =</span> <span class="st">"blue"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="02-statistical-learning_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>예측오차의 첫 번째 성분은 함수 추정에서 발생하고, 두 번째 성분은 정의상 <span class="math inline">\(X\)</span>로 예측할 수 없는 확률오차에서 발생한다.</li>
+<li>평균제곱예측오차의 관점에서 <span class="math inline">\(Y\)</span>의 이상적 또는 최적 예측변수는 <span class="math inline">\(f(x)=E(Y\mid X=x)\)</span>이다. 이 함수는 모든 함수 <span class="math inline">\(f\)</span> 가운데 각 <span class="math inline">\(X=x\)</span>에서 <span class="math inline">\(E[(Y-f(X))^2\mid X=x]\)</span>를 최소화한다.</li>
+<li>추정오차 <span class="math inline">\(f(x)-\hat f(x)\)</span>는 적절한 통계기법을 사용하여 <span class="math inline">\(f\)</span>를 추정함으로써 줄일 수 있다.
+<ul>
+<li>따라서 이 오차를 <strong>감소 가능한 오차(reducible error)</strong>라고 한다.</li>
+</ul></li>
+<li>완벽한 추정량 <span class="math inline">\(\hat f=f\)</span>를 얻더라도 <span class="math inline">\(\epsilon\)</span> 때문에 <span class="math inline">\(\hat y\)</span>는 <span class="math inline">\(y\)</span>와 다를 수 있다.
+<ul>
+<li>이 오차 <span class="math inline">\(\epsilon=Y-f(x)\)</span>를 <strong>감소 불가능한 오차(irreducible error)</strong>라고 한다.</li>
+<li>즉, <span class="math inline">\(f(x)\)</span>를 정확히 알고 있어도 각 <span class="math inline">\(X=x\)</span>에서 가능한 <span class="math inline">\(Y\)</span> 값들이 분포를 이루므로 예측오차가 발생한다.</li>
+</ul></li>
+<li><span class="math inline">\(f\)</span>의 추정량 <span class="math inline">\(\hat f\)</span>가 주어지면 예측오차 <span class="math inline">\(Y-\hat Y\)</span>는 다음과 같이 분해된다.</li>
+</ul>
+<p><span class="math display">\[
+Y-\hat{Y}=\{f(X)-\hat f(X)\}+\epsilon
+\]</span></p>
+<ul>
+<li>잠시 <span class="math inline">\(\hat f\)</span>와 <span class="math inline">\(X\)</span>가 고정되어 있다고 가정하면 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+\begin{aligned}
+E\left[(Y-\hat{Y})^2\mid X=x\right]
+&amp;=E\left[\{f(x)+\epsilon-\hat f(x)\}^2\right]\\
+&amp;=\underbrace{\{f(x)-\hat f(x)\}^2}_{\text{감소 가능}}
++\underbrace{\operatorname{Var}(\epsilon)}_{\text{감소 불가능}}.
+\end{aligned}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(E[(Y-\hat Y)^2]\)</span>는 실제값과 예측값 사이의 기대제곱예측오차이고, <span class="math inline">\(\operatorname{Var}(\epsilon)\)</span>은 오차항의 분산이다.</li>
+</ul>
+</section>
+<section id="참고" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="참고">참고</h4>
+<ul>
+<li>감소 불가능한 오차는 <span class="math inline">\(Y\)</span> 예측 정확도의 상한을 결정하며, 같은 의미로 예측오차의 하한이 된다.</li>
+</ul>
+<p><span class="math display">\[
+E[(Y-\hat{Y})^2]\geq \operatorname{Var}(\epsilon)
+\]</span></p>
+</section>
+</section>
+<section id="추론" class="level3" data-number="2.1.2">
+<h3 data-number="2.1.2" class="anchored" data-anchor-id="추론"><span class="header-section-number">2.1.2</span> 추론</h3>
+<ul>
+<li>추론 문제는 <span class="math inline">\(\mathbf{X}=(X_1,\ldots,X_p)\)</span>의 함수로서 <span class="math inline">\(Y\)</span>가 어떻게 변화하는지를 이해하는 데 관심이 있다. 따라서 추론은 모형 기반 접근에 의존한다.</li>
+<li>예측 문제와 달리 추론에서는 <span class="math inline">\(f\)</span>를 단순한 블랙박스로 취급할 수 없다.</li>
+<li>다음 사항을 파악하기 위해 <span class="math inline">\(f\)</span>의 구체적인 형태가 핵심 관심 대상이 된다.
+<ul>
+<li>어떤 예측변수가 반응변수와 관련되어 있는가?</li>
+<li>반응변수와 각 예측변수 사이에는 어떤 관계가 있는가?</li>
+<li><span class="math inline">\(f\)</span>의 함수 형태는 선형인가, 아니면 더 복잡한가?</li>
+</ul></li>
+<li>실제 분석에서는 추론과 예측을 동시에 목적으로 삼을 수도 있다.</li>
+</ul>
+<section id="예제-광고-자료" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="예제-광고-자료">예제: 광고 자료</h4>
+<ul>
+<li>다음 그래프는 TV, 라디오 및 신문 광고비와 매출의 관계를 보여준다.</li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"ISLR2"</span>) <span class="co"># ISLR2 패키지 불러오기</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="do">## 프로젝트에 포함된 광고 자료를 불러온다.</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>adv <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="at">file =</span> <span class="st">"data/Advertising.csv"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(adv)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["X"],"name":[1],"type":["int"],"align":["right"]},{"label":["TV"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["radio"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["newspaper"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["sales"],"name":[5],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"230.1","3":"37.8","4":"69.2","5":"22.1","_rn_":"1"},{"1":"2","2":"44.5","3":"39.3","4":"45.1","5":"10.4","_rn_":"2"},{"1":"3","2":"17.2","3":"45.9","4":"69.3","5":"9.3","_rn_":"3"},{"1":"4","2":"151.5","3":"41.3","4":"58.5","5":"18.5","_rn_":"4"},{"1":"5","2":"180.8","3":"10.8","4":"58.4","5":"12.9","_rn_":"5"},{"1":"6","2":"8.7","3":"48.9","4":"75.0","5":"7.2","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(adv)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;        X                TV             radio          newspaper     
+#&gt;  Min.   :  1.00   Min.   :  0.70   Min.   : 0.000   Min.   :  0.30  
+#&gt;  1st Qu.: 50.75   1st Qu.: 74.38   1st Qu.: 9.975   1st Qu.: 12.75  
+#&gt;  Median :100.50   Median :149.75   Median :22.900   Median : 25.75  
+#&gt;  Mean   :100.50   Mean   :147.04   Mean   :23.264   Mean   : 30.55  
+#&gt;  3rd Qu.:150.25   3rd Qu.:218.82   3rd Qu.:36.525   3rd Qu.: 45.10  
+#&gt;  Max.   :200.00   Max.   :296.40   Max.   :49.600   Max.   :114.00  
+#&gt;      sales      
+#&gt;  Min.   : 1.60  
+#&gt;  1st Qu.:10.38  
+#&gt;  Median :12.90  
+#&gt;  Mean   :14.02  
+#&gt;  3rd Qu.:17.40  
+#&gt;  Max.   :27.00</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## 산점도</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>))</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="at">x =</span> adv<span class="sc">$</span>TV, <span class="at">y =</span> adv<span class="sc">$</span>sales, <span class="at">pch =</span> <span class="dv">20</span>, <span class="at">xlab =</span> <span class="st">"TV 광고비(천 달러)"</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"매출(천 단위)"</span>, <span class="at">col =</span> <span class="st">"steel blue"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="fu">lm</span>(sales <span class="sc">~</span> TV, <span class="at">data =</span> adv), <span class="at">col =</span> <span class="st">"blue"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="at">x =</span> adv<span class="sc">$</span>radio, <span class="at">y =</span> adv<span class="sc">$</span>sales, <span class="at">pch =</span> <span class="dv">20</span>, <span class="at">xlab =</span> <span class="st">"라디오 광고비(천 달러)"</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"매출(천 단위)"</span>, <span class="at">col =</span> <span class="st">"steel blue"</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="fu">lm</span>(sales <span class="sc">~</span> radio, <span class="at">data =</span> adv), <span class="at">col =</span> <span class="st">"blue"</span>, <span class="at">lwd =</span> <span class="dv">3</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="at">x =</span> adv<span class="sc">$</span>newspaper, <span class="at">y =</span> adv<span class="sc">$</span>sales, <span class="at">pch =</span> <span class="dv">20</span>, <span class="at">xlab =</span> <span class="st">"신문 광고비(천 달러)"</span>,</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"매출(천 단위)"</span>, <span class="at">col =</span> <span class="st">"steel blue"</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="fu">lm</span>(sales <span class="sc">~</span> newspaper, <span class="at">data =</span> adv), <span class="at">col =</span> <span class="st">"blue"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="02-statistical-learning_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="질문" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="질문">질문</h4>
+<ul>
+<li>어떤 광고매체가 매출에 기여하는가?</li>
+<li>어떤 광고매체가 매출을 가장 크게 증가시키는가?</li>
+<li>TV 광고비가 일정 금액 증가할 때 매출은 얼마나 증가하는가?</li>
+<li>이러한 질문들은 추론을 목적으로 하는 질문의 예이다.</li>
+</ul>
+</section>
+</section>
+<section id="f의-추정" class="level3" data-number="2.1.3">
+<h3 data-number="2.1.3" class="anchored" data-anchor-id="f의-추정"><span class="header-section-number">2.1.3</span> <span class="math inline">\(f\)</span>의 추정</h3>
+<section id="f를-어떻게-추정하는가" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="f를-어떻게-추정하는가"><span class="math inline">\(f\)</span>를 어떻게 추정하는가?</h4>
+<ul>
+<li>일반적으로 <span class="math inline">\(X=4\)</span>와 정확히 일치하는 자료점은 거의 없거나 전혀 없다.</li>
+<li>따라서 <span class="math inline">\(E(Y\mid X=x)\)</span>를 관측자료만으로 직접 계산할 수 없다.</li>
+<li>정의를 완화하여 다음과 같이 둘 수 있다.</li>
+</ul>
+<p><span class="math display">\[
+\hat f(x)=\operatorname{Ave}\{Y\mid X\in N(x)\},
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; 여기서 <span class="math inline">\(N(x)\)</span>는 <span class="math inline">\(x\)</span>의 어떤 <strong>이웃 영역(neighborhood)</strong>이다.</p>
+<p><img src="fig1/l3.png" class="img-fluid"></p>
+<ul>
+<li>최근접 이웃 평균은 <span class="math inline">\(p\)</span>가 작고 표본크기 <span class="math inline">\(N\)</span>이 충분히 클 때 좋은 성능을 보일 수 있다.
+<ul>
+<li>예를 들어 <span class="math inline">\(p\leq4\)</span>인 경우이다.</li>
+</ul></li>
+<li>이후에는 커널 평활과 스플라인 평활처럼 더 부드러운 방법을 살펴본다.</li>
+<li><span class="math inline">\(p\)</span>가 커지면 최근접 이웃 방법의 성능이 매우 나빠질 수 있다.
+<ul>
+<li>이유는 <strong>차원의 저주(curse of dimensionality)</strong>이다. 고차원 공간에서는 최근접 이웃조차 멀리 떨어져 있는 경향이 있다.</li>
+<li>분산을 줄이려면 평균에 사용할 <span class="math inline">\(y_i\)</span>가 충분해야 하며, 예를 들어 전체의 10% 정도를 사용해야 할 수 있다.</li>
+<li>고차원에서 자료의 10%를 포함하는 이웃은 더 이상 국소적이지 않을 수 있으므로, 국소 평균으로 <span class="math inline">\(E(Y\mid X=x)\)</span>를 추정한다는 취지가 약해진다.</li>
+</ul></li>
+</ul>
+<p><img src="fig1/l4.png" class="img-fluid"></p>
+<ul>
+<li>추정방법은 크게 <strong>모수적 방법</strong>과 <strong>비모수적 방법</strong>으로 나눌 수 있다.</li>
+</ul>
+</section>
+<section id="모수적-방법" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="모수적-방법">모수적 방법</h4>
+<ul>
+<li>선형모형은 대표적인 모수적 모형이다.</li>
+</ul>
+<p><span class="math display">\[
+f_L(X)=\beta_0+\beta_1X_1+\beta_2X_2+\cdots+\beta_pX_p
+\]</span></p>
+<ul>
+<li>선형모형은 <span class="math inline">\(p+1\)</span>개의 모수 <span class="math inline">\(\beta_0,\beta_1,\ldots,\beta_p\)</span>로 규정된다.</li>
+<li>훈련 자료에 모형을 적합하여 이 모수들을 추정한다.</li>
+<li>선형모형은 실제 관계를 완벽하게 표현하는 경우가 거의 없지만, 미지의 참함수 <span class="math inline">\(f(X)\)</span>를 해석 가능하고 유용하게 근사하는 경우가 많다.</li>
+<li>선형모형 <span class="math inline">\(\hat f_L(X)=\hat\beta_0+\hat\beta_1X\)</span>는 다음 자료에 비교적 적절하게 적합된다.</li>
+</ul>
+<p><img src="fig1/l5.png" class="img-fluid"></p>
+<ul>
+<li>이차모형 <span class="math inline">\(\hat f_Q(X)=\hat\beta_0+\hat\beta_1X+\hat\beta_2X^2\)</span>은 조금 더 나은 적합을 제공한다.</li>
+</ul>
+<p><img src="fig1/l6.png" class="img-fluid"></p>
+</section>
+<section id="모의실험-예제" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="모의실험-예제">모의실험 예제</h4>
+<p><img src="fig1/l7.png" class="img-fluid"></p>
+<ul>
+<li>빨간 점은 다음 모형에서 생성한 소득의 모의값이다.</li>
+</ul>
+<p><span class="math display">\[
+income=f(education,seniority)+\epsilon
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; 파란색 곡면은 <span class="math inline">\(f\)</span>를 나타낸다.</p>
+<p><img src="fig1/l8.png" class="img-fluid"></p>
+<ul>
+<li>모의자료에 적합한 선형회귀모형은 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+\hat f_L(education,seniority)=\hat\beta_0+\hat\beta_1\times education+\hat\beta_2\times seniority
+\]</span></p>
+<p><img src="fig1/l9.png" class="img-fluid"></p>
+<ul>
+<li>모의자료에 더 유연한 회귀모형 <span class="math inline">\(\hat f_S(education,seniority)\)</span>를 적합하였다.</li>
+<li>여기서는 얇은 판 스플라인(thin-plate spline)을 사용하여 유연한 곡면을 적합한다.</li>
+<li>적합곡면의 거칠기 정도를 조절할 수 있다.</li>
+</ul>
+<p><img src="fig1/l10.png" class="img-fluid"></p>
+<ul>
+<li>더욱 유연한 스플라인 회귀모형을 적합하면 훈련 자료의 모든 관측치를 정확하게 통과할 수 있다.</li>
+<li>훈련 자료에서 오차가 전혀 없더라도 새로운 자료에서 성능이 좋다는 보장은 없다. 이를 <strong>과적합(overfitting)</strong>이라고 한다.</li>
+</ul>
+</section>
+<section id="모수적-모형으로-돌아가기" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="모수적-모형으로-돌아가기">모수적 모형으로 돌아가기</h4>
+<ul>
+<li><span class="math inline">\(x\)</span>와 <span class="math inline">\(y\)</span>에 대한 <span class="math inline">\(n\)</span>개의 관측치 <span class="math inline">\((x_1,y_1),\ldots,(x_n,y_n)\)</span>가 있다고 하자. 여기서 <span class="math inline">\(x_i=(x_{i1},x_{i2},\ldots,x_{ip})\)</span>는 <span class="math inline">\(i\)</span>번째 관측치이다.</li>
+<li><span class="math inline">\(x_{ij}\)</span>는 <span class="math inline">\(i\)</span>번째 관측치의 <span class="math inline">\(j\)</span>번째 변수값을 의미한다. <span class="math inline">\(i=1,\ldots,n\)</span>, <span class="math inline">\(j=1,\ldots,p\)</span>이다.</li>
+<li>훈련 자료는 미지의 함수 <span class="math inline">\(f\)</span>를 학습하고 추정하기 위한 <span class="math inline">\(n\)</span>개의 관측치로 구성된다. 즉, 임의의 관측치 <span class="math inline">\((x,y)\)</span>에 대해 <span class="math inline">\(y\approx\hat f(x)\)</span>가 되도록 함수 <span class="math inline">\(\hat f\)</span>를 찾는다.</li>
+</ul>
+<p>일반적으로 모수적 방법은 두 단계로 구성된다.</p>
+<ol type="1">
+<li><strong>모형 명세</strong>: <span class="math inline">\(f\)</span>의 함수 형태에 대한 가정을 둔다. 예를 들어 <span class="math inline">\(x\)</span>에 대해 선형이라고 가정하면</li>
+</ol>
+<p><span class="math display">\[
+f(x)=\beta_0+\beta_1x_1+\cdots+\beta_px_p
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; 이다. 절편 <span class="math inline">\(\beta_0\)</span>와 기울기 계수 <span class="math inline">\(\beta_j\)</span>, <span class="math inline">\(j=1,\ldots,p\)</span>는 모형의 알려지지 않은 <strong>모수</strong>이다.</p>
+<ol start="2" type="1">
+<li><strong>추정</strong>: 모형을 명세한 뒤 훈련 자료를 사용하여 모형을 <strong>적합</strong>하거나 <strong>학습</strong>한다.</li>
+</ol>
+<ul>
+<li>위 선형모형에서는 표본 관측치에 근거하여 알려지지 않은 <span class="math inline">\(p+1\)</span>개의 모수 <span class="math inline">\(\beta_0,\beta_1,\ldots,\beta_p\)</span>를 추정한다.</li>
+<li>가장 일반적으로 사용하는 방법은 <strong>보통최소제곱법(ordinary least squares, OLS)</strong>이다.</li>
+<li><span class="math inline">\(f\)</span>에 모수적 모형을 가정하면 함수 전체를 추정하는 문제가 <span class="math inline">\(\beta\)</span> 계수와 같은 유한한 모수 집합을 추정하는 문제로 단순화된다.</li>
+<li>모수적 모형은 비교적 <strong>제약적</strong>이다. 모형의 적절성은 가정한 함수 형태가 실제 <span class="math inline">\(f\)</span>와 얼마나 잘 일치하는지에 달려 있다.
+<ul>
+<li>가정과 실제 관계가 크게 다르면 적합도도 나빠진다.</li>
+</ul></li>
+<li>유연한 모형은 다양한 형태의 <span class="math inline">\(f\)</span>를 적합할 수 있다.
+<ul>
+<li>그러나 지나치게 유연한 모형은 훈련 자료의 확률잡음까지 따라가면서 쉽게 과적합될 수 있다.</li>
+</ul></li>
+</ul>
+</section>
+<section id="비모수적-방법" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="비모수적-방법">비모수적 방법</h4>
+<ul>
+<li>비모수적 방법은 <span class="math inline">\(f\)</span>의 함수 형태에 대해 명시적인 가정을 두지 않는다.</li>
+<li>자료점에 가능한 한 가까이 적합하면서도 지나치게 거칠거나 요동하지 않는 <span class="math inline">\(f\)</span>의 추정량을 찾는다.</li>
+<li>이 방법은 모수적 접근에서 발생할 수 있는 모형 오지정 문제를 피할 수 있다.</li>
+<li>하지만 <span class="math inline">\(f\)</span>의 형태에 대한 가정이 거의 없으므로 일반적으로 많은 관측치가 필요하다.</li>
+</ul>
+</section>
+</section>
+<section id="예측-정확도와-모형의-해석-가능성" class="level3" data-number="2.1.4">
+<h3 data-number="2.1.4" class="anchored" data-anchor-id="예측-정확도와-모형의-해석-가능성"><span class="header-section-number">2.1.4</span> 예측 정확도와 모형의 해석 가능성</h3>
+<ul>
+<li>한 방법이 허용하는 <span class="math inline">\(f\)</span>의 함수 형태가 다양할수록 그 방법은 더 유연하다. 그러나 유연성이 높아질수록 모형을 해석하기 어려워지는 대가가 따른다.</li>
+<li>예를 들어 선형회귀는 유연성이 비교적 낮지만 해석하기 쉽다. 반면 여러 스플라인 방법이나 서포트 벡터 머신과 같은 비선형 방법은 매우 유연하지만 해석하기 어려울 수 있다.</li>
+<li>목표가 추론이라면 단순하고 비교적 덜 유연한 접근이 선호된다.</li>
+<li>목표가 순수하게 예측이라면 더 유연한 접근이 더 좋은 예측을 제공할 수 있다.
+<ul>
+<li>그러나 항상 그런 것은 아니다.</li>
+</ul></li>
+</ul>
+<section id="요약" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="요약">요약</h4>
+<ul>
+<li><strong>예측 정확도와 해석 가능성</strong>
+<ul>
+<li>선형모형은 해석하기 쉽지만 얇은 판 스플라인은 그렇지 않다.</li>
+</ul></li>
+<li><strong>적절한 적합, 과적합 및 과소적합</strong>
+<ul>
+<li>적합의 유연성이 적절한 수준인지 어떻게 판단할 것인가?</li>
+</ul></li>
+<li><strong>간결성과 블랙박스</strong>
+<ul>
+<li>모든 변수를 사용하는 블랙박스 예측모형보다 적은 수의 변수로 구성된 단순한 모형을 선호하는 경우가 많다.</li>
+</ul></li>
+</ul>
+<p><img src="fig1/l11.png" class="img-fluid"></p>
+</section>
+</section>
+</section>
+<section id="모형-정확도의-평가" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="모형-정확도의-평가"><span class="header-section-number">2.2</span> 모형 정확도의 평가</h2>
+<section id="질문-1" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="질문-1">질문</h4>
+<p>왜 이렇게 많은 통계방법이 존재하는가?</p>
+</section>
+<section id="답" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="답">답</h4>
+<p>가능한 모든 데이터셋에서 다른 방법보다 항상 우월한 단 하나의 방법은 없기 때문이다.</p>
+</section>
+<section id="적합의-품질-측정" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="적합의-품질-측정"><span class="header-section-number">2.2.1</span> 적합의 품질 측정</h3>
+<ul>
+<li>훈련 자료 <span class="math inline">\(Tr=\{(x_i,y_i)\}_{i=1}^N\)</span>에 모형 <span class="math inline">\(\hat f(x)\)</span>를 적합하고 그 성능을 평가한다고 하자.</li>
+<li>회귀 문제에서 가장 널리 사용하는 성능지표 가운데 하나는 <strong>평균제곱오차(mean squared error, MSE)</strong>이다.</li>
+<li>훈련 자료에서 평균제곱예측오차는 다음과 같이 계산할 수 있다.</li>
+</ul>
+<p><span class="math display">\[
+MSE_{Tr}=\operatorname{Ave}_{i\in Tr}\{y_i-\hat f(x_i)\}^2
+=\frac{1}{N}\sum_{i=1}^{N}\{y_i-\hat f(x_i)\}^2
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; 그러나 이 값은 과적합된 모형을 지나치게 좋게 평가할 수 있다.</p>
+<ul>
+<li>가능하다면 학습에 사용하지 않은 새로운 시험 자료 <span class="math inline">\(Te=\{(x_i,y_i)\}_{i=1}^M\)</span>에서 오차를 계산해야 한다.</li>
+</ul>
+<p><span class="math display">\[
+MSE_{Te}=\operatorname{Ave}_{i\in Te}\{y_i-\hat f(x_i)\}^2
+=\frac{1}{M}\sum_{i=1}^{M}\{y_i-\hat f(x_i)\}^2
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; 여기서 <span class="math inline">\(\hat f(x_i)\)</span>는 <span class="math inline">\(i\)</span>번째 관측치에 대한 예측값이다.</p>
+<ul>
+<li><strong>훈련 MSE</strong>: 훈련 표본에서 계산하며 <span class="math inline">\(\hat f\)</span>의 정확도를 과대평가할 수 있다.</li>
+<li><strong>시험 MSE</strong>: 모형 적합에 사용하지 않은 시험 표본에서 계산하며 <span class="math inline">\(\hat f\)</span>의 실제 예측 정확도를 더 현실적으로 보여준다.</li>
+</ul>
+<p><img src="fig1/fig1_6.jpg" class="img-fluid"></p>
+<p><strong>그림: 모형 정확도와 적합의 품질</strong></p>
+<ul>
+<li>왼쪽: 실제 함수 <span class="math inline">\(f\)</span>(검은 선), 관측치(빈 원), 선형회귀 적합(주황색), 두 개의 스플라인 적합(파란색과 녹색)을 보여준다.</li>
+<li>오른쪽: 훈련 MSE(회색)와 시험 MSE(빨간색)를 보여준다. 사각형은 왼쪽 패널의 세 모형에 대한 훈련 MSE와 시험 MSE를 나타낸다.</li>
+</ul>
+<p><img src="fig1/l12.png" class="img-fluid"></p>
+<ul>
+<li>이 예제에서는 실제 함수가 매끄러우므로 부드러운 적합과 선형모형이 모두 좋은 성능을 보인다.</li>
+</ul>
+<p><img src="fig1/l13.png" class="img-fluid"></p>
+<ul>
+<li>이 예제에서는 실제 함수가 크게 굴곡지고 잡음이 작으므로 더 유연한 적합이 가장 좋은 성능을 보인다.</li>
+</ul>
+<p><strong>별도의 시험 자료가 없다면 교차검증과 부트스트랩을 사용하여 훈련 자료에서 시험 MSE를 추정할 수 있다.</strong></p>
+</section>
+<section id="편향분산-절충" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="편향분산-절충"><span class="header-section-number">2.2.2</span> 편향–분산 절충</h3>
+<ul>
+<li>훈련 자료 <span class="math inline">\(Tr\)</span>에 모형 <span class="math inline">\(\hat f(x)\)</span>를 적합하고, 모집단에서 추출한 시험 관측치를 <span class="math inline">\((x_0,y_0)\)</span>라고 하자.</li>
+<li>실제 모형이 <span class="math inline">\(Y=f(X)+\epsilon\)</span>이고 <span class="math inline">\(f(x)=E(Y\mid X=x)\)</span>라고 하자.</li>
+<li>시험 관측치 <span class="math inline">\((x_0,y_0)\)</span>에서 기대 시험 MSE는 다음과 같이 분해된다.</li>
+</ul>
+<p><span class="math display">\[
+\begin{aligned}
+E\left[\{y_0-\hat f(x_0)\}^2\right]
+&amp;=\underbrace{\operatorname{Var}\{\hat f(x_0)\}}_{\text{분산}}
++\underbrace{\left[\operatorname{Bias}\{\hat f(x_0)\}\right]^2}_{\text{편향의 제곱}}
++\underbrace{\operatorname{Var}(\epsilon)}_{\text{오차분산}}.
+\end{aligned}
+\]</span></p>
+<ul>
+<li>분산 <span class="math inline">\(\operatorname{Var}\{\hat f(x_0)\}\)</span>은 서로 다른 훈련 표본에서 <span class="math inline">\(f\)</span>를 반복해서 추정할 때 <span class="math inline">\(\hat f(x_0)\)</span>가 얼마나 달라지는지를 의미한다.</li>
+<li>편향 <span class="math inline">\(\operatorname{Bias}\{\hat f(x_0)\}\)</span>은 반복표본에서 <span class="math inline">\(\hat f(x_0)\)</span>가 실제 <span class="math inline">\(f(x_0)\)</span>로부터 평균적으로 얼마나 벗어나는지를 의미한다.
+<ul>
+<li>즉, 평균적인 근사오차 <span class="math inline">\(\hat f(x_0)-f(x_0)\)</span>이다.</li>
+</ul></li>
+<li>유연한 방법은 일반적으로 분산이 크고 편향이 작으며, 덜 유연한 방법은 편향이 크고 분산이 작다.</li>
+<li>실제 분석에서는 이러한 <strong>편향–분산 절충(bias–variance trade-off)</strong>을 고려하여 다음의 모형 기반 변동을 최소화하는 방법을 찾아야 한다.</li>
+</ul>
+<p><span class="math display">\[
+\operatorname{Var}\{\hat f(x_0)\}
++\left[\operatorname{Bias}\{\hat f(x_0)\}\right]^2
+\]</span></p>
+<ul>
+<li>MSE의 이론적 하한은 <span class="math inline">\(\operatorname{Var}(\epsilon)\)</span>이다.</li>
+<li>다음 그림은 세 가지 예제의 편향–분산 절충을 보여준다.</li>
+</ul>
+<p><img src="fig1/l14.png" class="img-fluid"></p>
+</section>
+<section id="분류-문제" class="level3" data-number="2.2.3">
+<h3 data-number="2.2.3" class="anchored" data-anchor-id="분류-문제"><span class="header-section-number">2.2.3</span> 분류 문제</h3>
+<ul>
+<li>분류 문제에서 반응변수 <span class="math inline">\(Y\)</span>는 질적 변수이다. 예를 들어 이메일은 <span class="math inline">\(C=(spam,ham)\)</span> 중 하나이며, 숫자 이미지는 <span class="math inline">\(C=\{0,1,\ldots,9\}\)</span> 중 하나에 속한다. 여기서 <code>ham</code>은 정상 이메일을 의미한다.</li>
+<li>목표는 다음과 같다.
+<ul>
+<li>미래의 표지되지 않은 관측치 <span class="math inline">\(X\)</span>에 <span class="math inline">\(C\)</span>의 범주표지를 부여하는 분류기 <span class="math inline">\(C(X)\)</span>를 구축한다.</li>
+<li>각 분류 결과의 불확실성을 평가한다.</li>
+<li><span class="math inline">\(X=(X_1,X_2,\ldots,X_p)\)</span>에 포함된 서로 다른 예측변수의 역할을 이해한다.</li>
+</ul></li>
+</ul>
+<p><img src="fig1/l15.png" class="img-fluid"></p>
+<ul>
+<li>이상적인 <span class="math inline">\(C(X)\)</span>가 존재할까?</li>
+<li><span class="math inline">\(C\)</span>의 <span class="math inline">\(K\)</span>개 범주를 <span class="math inline">\(1,2,\ldots,K\)</span>로 번호 붙인다고 하자.</li>
+<li>다음을 정의한다.</li>
+</ul>
+<p><span class="math display">\[
+p_k(x)=P(Y=k\mid X=x),\qquad k=1,2,\ldots,K
+\]</span></p>
+<ul>
+<li>이는 <span class="math inline">\(x\)</span>에서의 조건부 범주확률이다. 예를 들어 그림에서 <span class="math inline">\(x=5\)</span>인 지점의 작은 막대그래프가 이를 나타낸다.</li>
+<li><span class="math inline">\(x\)</span>에서 <strong>베이즈 최적 분류기(Bayes optimal classifier)</strong>는 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+C(x)=j\quad\text{if}\quad p_j(x)=\max\{p_1(x),p_2(x),\ldots,p_K(x)\}.
+\]</span></p>
+<p><img src="fig1/l16.png" class="img-fluid"></p>
+<ul>
+<li>앞에서와 같이 최근접 이웃 평균을 사용할 수 있다.</li>
+<li>그러나 차원이 증가하면 이 방법도 성능이 저하된다. 다만 <span class="math inline">\(\hat p_k(x)\)</span> 자체를 정확하게 추정하는 것보다 최종 분류 <span class="math inline">\(\hat C(x)\)</span>에는 그 영향이 다소 작을 수 있다.</li>
+</ul>
+<section id="분류에서의-정확도-측정" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="분류에서의-정확도-측정">분류에서의 정확도 측정</h4>
+<ul>
+<li>분류 문제에서 <span class="math inline">\(y_i\)</span>는 범주표지이므로 회귀에서의 편향–분산 분해를 그대로 적용할 수 없으며 일부 수정이 필요하다.</li>
+<li><span class="math inline">\(\hat C(x)\)</span>의 정확도를 측정하는 가장 일반적인 지표 중 하나는 훈련 <strong>오분류율</strong>이다.</li>
+</ul>
+<p><span class="math display">\[
+Err_{tr}=\operatorname{Ave}_{i\in Tr}I\{y_i\neq\hat C(x_i)\}
+=\frac{1}{N}\sum_{i=1}^{N}I(y_i\neq\hat y_i)
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; 여기서 <span class="math inline">\(I(y_i\neq\hat y_i)\)</span>는 <span class="math inline">\(y_i\neq\hat y_i\)</span>이면 1, 즉 잘못 분류되면 1이고, <span class="math inline">\(y_i=\hat y_i\)</span>이면 0인 지시변수이다.</p>
+<ul>
+<li>따라서 <span class="math inline">\(I(y_i\neq\hat y_i)=0\)</span>이면 <span class="math inline">\(i\)</span>번째 관측치가 올바르게 분류되었고, 1이면 오분류되었다.</li>
+<li>시험 자료에서의 시험오차는 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+Err_{te}=\operatorname{Ave}_{i\in Te}I\{y_i\neq\hat C(x_i)\}
+=\frac{1}{M}\sum_{i=1}^{M}I(y_i\neq\hat y_i)
+\]</span></p>
+<ul>
+<li>좋은 분류기는 시험오분류율이 작은 분류기이다.</li>
+<li>실제 <span class="math inline">\(p_k(x)\)</span>를 사용하는 <strong>베이즈 분류기</strong>는 모집단에서 가능한 최소 오류율을 가진다.
+<ul>
+<li>베이즈 분류기는 각 관측치를 주어진 예측변수 값에서 가장 가능성이 높은 범주에 배정한다.</li>
+<li>즉, 예측변수가 <span class="math inline">\(x_0\)</span>인 시험 관측치를 다음 값이 가장 큰 범주 <span class="math inline">\(j\)</span>에 배정한다.</li>
+</ul></li>
+</ul>
+<p><span class="math display">\[
+P(Y=j\mid X=x_0)
+\]</span></p>
+<ul>
+<li>서포트 벡터 머신은 <span class="math inline">\(C(x)\)</span>를 위한 구조화된 모형을 구축한다.</li>
+<li>로지스틱 회귀와 일반화가법모형 등을 이용하여 <span class="math inline">\(p_k(x)\)</span> 자체를 구조적으로 모형화할 수도 있다.</li>
+</ul>
+</section>
+<section id="예제-베이즈-분류기" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="예제-베이즈-분류기">예제: 베이즈 분류기</h4>
+<ul>
+<li>두 범주 분류 문제에서 <span class="math inline">\(Y\)</span>가 범주 1과 범주 2라는 두 값을 가진다고 하자.</li>
+<li>예측변수 값이 <span class="math inline">\(x_0\)</span>일 때 <span class="math inline">\(P(Y=1\mid x_0)&gt;0.5\)</span>이면 범주 1에 배정하고 그렇지 않으면 범주 2에 배정하는 것이 베이즈 규칙이다.</li>
+<li><span class="math inline">\(P(Y=1\mid x_0)=P(Y=2\mid x_0)=0.5\)</span>가 되는 경계를 <strong>베이즈 결정경계(Bayes decision boundary)</strong>라고 한다.</li>
+<li>다음 그림은 <span class="math inline">\(x=(x_1,x_2)^T\)</span>인 모의자료를 보여준다.
+<ul>
+<li>주황색과 파란색 원은 두 범주에서 각각 100개씩 생성한 훈련 관측치이다.</li>
+<li>주황색 영역은 <span class="math inline">\(P(Y=\text{주황색}\mid x)&gt;50\%\)</span>인 지점, 파란색 영역은 그 확률이 50%보다 작은 지점이며, 보라색 점선은 확률이 정확히 50%인 베이즈 결정경계이다.</li>
+</ul></li>
+</ul>
+<p><img src="fig1/fig1_7.jpg" class="img-fluid"></p>
+<ul>
+<li>베이즈 분류기는 가능한 가장 낮은 시험오류율을 제공하며, 이를 <strong>베이즈 오류율(Bayes error rate)</strong>이라고 한다.</li>
+<li><span class="math inline">\(x=x_0\)</span>에서의 최소 오류확률은 <span class="math inline">\(1-\max_jP(Y=j\mid X=x_0)\)</span>이다.</li>
+<li>전체 베이즈 오류율은 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+1-E_X\left[\max_j P(Y=j\mid X)\right].
+\]</span></p>
+<ul>
+<li>베이즈 오류율은 회귀에서의 감소 불가능한 오차와 유사하다.</li>
+<li>그러나 <span class="math inline">\(X\)</span>가 주어졌을 때 <span class="math inline">\(Y\)</span>의 조건부분포는 알려져 있지 않으므로 실제로 베이즈 분류기를 직접 계산할 수 없다.
+<ul>
+<li>대신 베이즈 분류기는 다른 분류기를 평가하는 이론적 기준으로 사용된다.</li>
+</ul></li>
+<li>조건부분포를 알 수 없으므로 이를 추정하고, 관측치를 추정확률이 가장 높은 범주에 분류해야 한다.
+<ul>
+<li>대표적인 방법이 <strong>K-최근접 이웃(K-nearest neighbors, KNN)</strong> 분류기이다.</li>
+</ul></li>
+</ul>
+</section>
+<section id="k-최근접-이웃" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="k-최근접-이웃">K-최근접 이웃</h4>
+<ul>
+<li>양의 정수 <span class="math inline">\(K\)</span>와 시험 관측치 <span class="math inline">\(x_0\)</span>가 주어졌다고 하자. KNN은 훈련 자료에서 <span class="math inline">\(x_0\)</span>에 가장 가까운 <span class="math inline">\(K\)</span>개의 관측치를 찾으며, 이 집합을 <span class="math inline">\(N_0\)</span>라고 한다.</li>
+<li>범주 <span class="math inline">\(j\)</span>에 대한 조건부 확률은 <span class="math inline">\(N_0\)</span>에서 반응값이 범주 <span class="math inline">\(j\)</span>인 관측치의 비율로 추정한다.</li>
+</ul>
+<p><span class="math display">\[
+\widehat{P}(Y=j\mid X=x_0)=\frac{1}{K}\sum_{i\in N_0}I(y_i=j)
+\]</span></p>
+<ul>
+<li>마지막으로 베이즈 규칙을 적용하여 시험 관측치 <span class="math inline">\(x_0\)</span>를 추정확률이 가장 높은 범주에 배정한다.</li>
+</ul>
+</section>
+<section id="예제-knn" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="예제-knn">예제: KNN</h4>
+<ol type="1">
+<li><span class="math inline">\(K=3\)</span>이고 시험 관측치 <span class="math inline">\(x_0\)</span>에 가장 가까운 세 관측치 중 두 개가 범주 1, 한 개가 범주 2에 속한다고 하자.</li>
+</ol>
+<p><img src="fig1/l17.png" class="img-fluid"></p>
+<ol start="2" type="1">
+<li>범주 1의 추정확률은 <span class="math inline">\(2/3\)</span>, 범주 2의 추정확률은 <span class="math inline">\(1/3\)</span>이다.</li>
+<li>따라서 <span class="math inline">\(x_0\)</span>는 범주 1로 분류된다.</li>
+</ol>
+<ul>
+<li>KNN의 주요 문제는 <span class="math inline">\(K\)</span>의 선택이며, 이에 대해서는 뒤에서 자세히 다룬다.</li>
+<li>적절한 유연성 수준, 즉 적절한 <span class="math inline">\(K\)</span>를 선택하는 것이 성공적인 분류에 매우 중요하다.</li>
+<li>작은 <span class="math inline">\(K\)</span>는 높은 유연성과 작은 훈련오차를 의미한다. 극단적으로 <span class="math inline">\(K=1\)</span>이면 훈련오차가 0이지만 시험오차는 클 수 있다.</li>
+<li>큰 <span class="math inline">\(K\)</span>는 유연성이 낮음을 의미하며, 베이즈 경계의 비선형성 정도에 따라 훈련오차도 증가할 수 있다.</li>
+</ul>
+<p><img src="fig1/fig1_8_1.png" class="img-fluid"></p>
+<p><img src="fig1/fig1_8_2.png" class="img-fluid"></p>
+<p>실선은 KNN 결정경계를, 보라색 점선은 베이즈 결정경계를 나타낸다.</p>
+<ul>
+<li>KNN의 훈련오류율</li>
+</ul>
+<p><img src="fig1/l18.png" class="img-fluid"></p>
+<p><br></p>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./01-introduction.html" class="pagination-link" aria-label="소개">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">소개</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./03-introduction-to-r.html" class="pagination-link" aria-label="R 소개">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">R 소개</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

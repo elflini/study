@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>4&nbsp; 선형회귀 – 통계적 학습</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./05-classification.html" rel="next">
+<link href="./03-introduction-to-r.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-3d841e2d0dac331999ea63b9b6b417ac.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-linear-regression.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">선형회귀</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">통계적 학습</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="리더 모드 전환">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">머리말</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">소개</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-statistical-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">통계적 학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-introduction-to-r.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">R 소개</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-linear-regression.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">선형회귀</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-classification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">분류</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-resampling-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">재표본추출 방법</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-model-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">모형 선택과 정규화</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-beyond-linearity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">선형성을 넘어</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-tree-based-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">트리 기반 방법</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-support-vector-machines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">서포트 벡터 머신</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-unsupervised-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">비지도학습</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#단순선형회귀" id="toc-단순선형회귀" class="nav-link active" data-scroll-target="#단순선형회귀"><span class="header-section-number">4.1</span> 단순선형회귀</a></li>
+  <li><a href="#다중선형회귀" id="toc-다중선형회귀" class="nav-link" data-scroll-target="#다중선형회귀"><span class="header-section-number">4.2</span> 다중선형회귀</a>
+  <ul class="collapse">
+  <li><a href="#예측변수의-중요성-회귀계수의-통계적-유의성" id="toc-예측변수의-중요성-회귀계수의-통계적-유의성" class="nav-link" data-scroll-target="#예측변수의-중요성-회귀계수의-통계적-유의성"><span class="header-section-number">4.2.1</span> 예측변수의 중요성: 회귀계수의 통계적 유의성</a></li>
+  <li><a href="#중요한-변수의-선택" id="toc-중요한-변수의-선택" class="nav-link" data-scroll-target="#중요한-변수의-선택"><span class="header-section-number">4.2.2</span> 중요한 변수의 선택</a></li>
+  <li><a href="#모형-적합도" id="toc-모형-적합도" class="nav-link" data-scroll-target="#모형-적합도"><span class="header-section-number">4.2.3</span> 모형 적합도</a></li>
+  <li><a href="#예측과-예측-불확실성" id="toc-예측과-예측-불확실성" class="nav-link" data-scroll-target="#예측과-예측-불확실성"><span class="header-section-number">4.2.4</span> 예측과 예측 불확실성</a></li>
+  </ul></li>
+  <li><a href="#추가-고려사항" id="toc-추가-고려사항" class="nav-link" data-scroll-target="#추가-고려사항"><span class="header-section-number">4.3</span> 추가 고려사항</a>
+  <ul class="collapse">
+  <li><a href="#범주형-예측변수" id="toc-범주형-예측변수" class="nav-link" data-scroll-target="#범주형-예측변수"><span class="header-section-number">4.3.1</span> 범주형 예측변수</a></li>
+  <li><a href="#예제-8-혼인상태를-포함한-임금모형" id="toc-예제-8-혼인상태를-포함한-임금모형" class="nav-link" data-scroll-target="#예제-8-혼인상태를-포함한-임금모형">예제 8: 혼인상태를 포함한 임금모형</a></li>
+  <li><a href="#선형회귀에서-발생할-수-있는-문제" id="toc-선형회귀에서-발생할-수-있는-문제" class="nav-link" data-scroll-target="#선형회귀에서-발생할-수-있는-문제"><span class="header-section-number">4.3.2</span> 선형회귀에서 발생할 수 있는 문제</a></li>
+  </ul></li>
+  <li><a href="#비모수-회귀" id="toc-비모수-회귀" class="nav-link" data-scroll-target="#비모수-회귀"><span class="header-section-number">4.4</span> 비모수 회귀</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="chapter4" class="quarto-section-identifier"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">선형회귀</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<ul>
+<li>선형회귀는 지도학습의 가장 단순하고 기본적인 접근법 가운데 하나이다.</li>
+<li>선형회귀는 <span class="math inline">\(Y\)</span>가 <span class="math inline">\(X_1,X_2,\ldots,X_p\)</span>에 의존하는 관계가 선형이라고 가정한다.</li>
+<li>실제 회귀함수가 완벽하게 선형인 경우는 거의 없다.</li>
+</ul>
+<p><img src="fig4/f1.png" class="img-fluid"></p>
+<ul>
+<li>지나치게 단순해 보일 수 있지만 선형회귀는 개념적으로도 실용적으로도 매우 유용하다.</li>
+<li>광고 자료를 생각해 보자.</li>
+</ul>
+<p><img src="fig4/f2.png" class="img-fluid"></p>
+<ul>
+<li>다음과 같은 질문을 할 수 있다.
+<ul>
+<li>광고비와 매출 사이에 관계가 있는가?</li>
+<li>그 관계는 얼마나 강한가?</li>
+<li>어떤 광고매체가 매출에 기여하는가?</li>
+<li>미래 매출을 얼마나 정확하게 예측할 수 있는가?</li>
+<li>관계는 선형인가?</li>
+<li>광고매체 사이에 시너지 효과가 있는가?</li>
+</ul></li>
+</ul>
+<section id="단순선형회귀" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="단순선형회귀"><span class="header-section-number">4.1</span> 단순선형회귀</h2>
+<p>단순선형회귀모형은 다음과 같이 정의한다.</p>
+<p><span class="math display">\[
+Y=\beta_0+\beta_1X+\epsilon.
+\]</span></p>
+<p>여기서 <span class="math inline">\(Y\)</span>와 <span class="math inline">\(X\)</span>는 관측변수, <span class="math inline">\(\beta_0\)</span>와 <span class="math inline">\(\beta_1\)</span>은 각각 <strong>절편</strong>과 <strong>기울기</strong>라고 부르는 모수이며, <span class="math inline">\(\epsilon\)</span>은 관측되지 않는 확률오차항이다.</p>
+<ul>
+<li>모수 <span class="math inline">\(\beta_0\)</span>와 <span class="math inline">\(\beta_1\)</span>은 알려지지 않은 상수이므로 훈련 자료에서 추정한다.</li>
+<li>모형계수의 추정값 <span class="math inline">\(\hat\beta_0\)</span>와 <span class="math inline">\(\hat\beta_1\)</span>이 주어지면 <span class="math inline">\(X=x\)</span>에서 <span class="math inline">\(Y\)</span>를 다음과 같이 예측한다.</li>
+</ul>
+<p><span class="math display">\[
+\hat y=\hat\beta_0+\hat\beta_1x.
+\]</span></p>
+<ul>
+<li>모자 기호(hat)는 추정값 또는 예측값을 뜻한다.</li>
+</ul>
+<section id="회귀계수의-추정" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="회귀계수의-추정">회귀계수의 추정</h4>
+<ul>
+<li><span class="math inline">\(X\)</span>의 <span class="math inline">\(i\)</span>번째 관측값을 이용한 <span class="math inline">\(Y\)</span>의 예측값을 <span class="math inline">\(\hat y_i=\hat\beta_0+\hat\beta_1x_i\)</span>라고 하자.</li>
+<li><span class="math inline">\(e_i=y_i-\hat y_i\)</span>는 <span class="math inline">\(i\)</span>번째 <strong>잔차(residual)</strong>이다.</li>
+<li><strong>잔차제곱합(residual sum of squares, RSS)</strong>은 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+RSS=e_1^2+e_2^2+\cdots+e_n^2
+\]</span></p>
+<p>또는</p>
+<p><span class="math display">\[
+RSS=\sum_{i=1}^{n}(y_i-\hat\beta_0-\hat\beta_1x_i)^2.
+\]</span></p>
+<ul>
+<li>최소제곱법은 RSS가 최소가 되도록 <span class="math inline">\(\hat\beta_0\)</span>와 <span class="math inline">\(\hat\beta_1\)</span>을 선택한다.</li>
+<li>훈련 자료 <span class="math inline">\((x_1,y_1),\ldots,(x_n,y_n)\)</span>에서 보통최소제곱법(OLS)은 다음 최적화 문제를 푼다.</li>
+</ul>
+<p><span class="math display">\[
+(\hat\beta_0,\hat\beta_1)
+=\underset{\beta_0,\beta_1}{\arg\min}
+\sum_{i=1}^{n}\{y_i-(\beta_0+\beta_1x_i)\}^2.
+\]</span></p>
+<ul>
+<li>해는 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+\hat\beta_1=
+\frac{\sum_{i=1}^{n}(x_i-\bar x)(y_i-\bar y)}
+{\sum_{i=1}^{n}(x_i-\bar x)^2},
+\]</span></p>
+<p><span class="math display">\[
+\hat\beta_0=\bar y-\hat\beta_1\bar x,
+\]</span></p>
+<p>여기서 <span class="math inline">\(\bar x=n^{-1}\sum_{i=1}^{n}x_i\)</span>와 <span class="math inline">\(\bar y=n^{-1}\sum_{i=1}^{n}y_i\)</span>는 각각 <span class="math inline">\(x\)</span>와 <span class="math inline">\(y\)</span>의 표본평균이다.</p>
+</section>
+<section id="참고-1" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="참고-1">참고 1</h4>
+<p>성공적인 추정을 위해 중요한 가정은 다음과 같다.</p>
+<p><span class="math display">\[
+E(\epsilon\mid X=x)=0.
+\]</span></p>
+<p>이 가정은 설명변수 <span class="math inline">\(X\)</span>와 오차항 <span class="math inline">\(\epsilon\)</span> 사이에 체계적인 관련성이 없음을 의미한다.</p>
+</section>
+<section id="예제-1-광고-자료" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="예제-1-광고-자료">예제 1: 광고 자료</h4>
+<p>광고 자료에서 TV 광고비를 이용하여 매출을 회귀분석한다.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>adv <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/Advertising.csv"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(adv)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;        X                TV             radio          newspaper     
+#&gt;  Min.   :  1.00   Min.   :  0.70   Min.   : 0.000   Min.   :  0.30  
+#&gt;  1st Qu.: 50.75   1st Qu.: 74.38   1st Qu.: 9.975   1st Qu.: 12.75  
+#&gt;  Median :100.50   Median :149.75   Median :22.900   Median : 25.75  
+#&gt;  Mean   :100.50   Mean   :147.04   Mean   :23.264   Mean   : 30.55  
+#&gt;  3rd Qu.:150.25   3rd Qu.:218.82   3rd Qu.:36.525   3rd Qu.: 45.10  
+#&gt;  Max.   :200.00   Max.   :296.40   Max.   :49.600   Max.   :114.00  
+#&gt;      sales      
+#&gt;  Min.   : 1.60  
+#&gt;  1st Qu.:10.38  
+#&gt;  Median :12.90  
+#&gt;  Mean   :14.02  
+#&gt;  3rd Qu.:17.40  
+#&gt;  Max.   :27.00</code></pre>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(sales <span class="sc">~</span> TV, <span class="at">data =</span> adv)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = sales ~ TV, data = adv)
+#&gt; 
+#&gt; Residuals:
+#&gt;     Min      1Q  Median      3Q     Max 
+#&gt; -8.3860 -1.9545 -0.1913  2.0671  7.2124 
+#&gt; 
+#&gt; Coefficients:
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept) 7.032594   0.457843   15.36   &lt;2e-16 ***
+#&gt; TV          0.047537   0.002691   17.67   &lt;2e-16 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 3.259 on 198 degrees of freedom
+#&gt; Multiple R-squared:  0.6119, Adjusted R-squared:  0.6099 
+#&gt; F-statistic: 312.1 on 1 and 198 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="at">x =</span> adv<span class="sc">$</span>TV, <span class="at">y =</span> adv<span class="sc">$</span>sales, <span class="at">pch =</span> <span class="dv">20</span>,</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"TV 광고비(천 달러)"</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"매출(천 단위)"</span>, <span class="at">col =</span> <span class="st">"steel blue"</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(fit, <span class="at">col =</span> <span class="st">"dark gray"</span>, <span class="at">lwd =</span> <span class="dv">3</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(<span class="at">x0 =</span> adv<span class="sc">$</span>TV, <span class="at">y0 =</span> <span class="fu">predict</span>(fit),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">x1 =</span> adv<span class="sc">$</span>TV, <span class="at">y1 =</span> adv<span class="sc">$</span>sales, <span class="at">col =</span> <span class="st">"light gray"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="04-linear-regression_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>그림은 매출을 TV 광고비에 회귀한 최소제곱 적합을 보여준다.</li>
+<li>선형모형은 전체적인 관계를 잘 포착하지만 그래프 왼쪽 일부에서는 적합이 다소 부족하다.</li>
+<li>회귀선으로부터의 차이 <span class="math inline">\(e_i=y_i-\hat y_i\)</span>를 잔차라고 하며, 관측되지 않은 오차 <span class="math inline">\(\epsilon_i\)</span>의 추정값으로 해석한다.</li>
+<li>관측값은 <span class="math inline">\(y_i=\hat y_i+e_i\)</span>로 분해할 수 있다.</li>
+<li>다른 표본을 추출하면 <span class="math inline">\(\hat\beta_0\)</span>와 <span class="math inline">\(\hat\beta_1\)</span>의 값도 달라지므로 추정량은 확률변수이다.</li>
+<li>모집단에서 크기 <span class="math inline">\(n\)</span>의 표본을 반복해서 추출하고 매번 추정값을 계산할 때 나타나는 추정값의 분포를 <strong>표본분포(sampling distribution)</strong>라고 한다.</li>
+</ul>
+</section>
+<section id="예제-2-추정량의-표본분포" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="예제-2-추정량의-표본분포">예제 2: 추정량의 표본분포</h4>
+<ul>
+<li>왼쪽 패널은 <span class="math inline">\(n=100\)</span>인 한 표본의 산점도, 모집단 회귀선 및 OLS 회귀선을 보여준다.</li>
+<li>가운데 패널은 크기 100인 서로 다른 10개 표본에서 얻은 OLS 회귀선을 보여준다.</li>
+<li>오른쪽 패널은 크기 100인 1,000개 표본에서 얻은 기울기 추정값 <span class="math inline">\(\hat\beta_1\)</span>의 히스토그램이다.</li>
+<li>모집단 모형은 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+y=2+3x+\epsilon,
+\]</span></p>
+<p>즉 <span class="math inline">\(\beta_0=2\)</span>, <span class="math inline">\(\beta_1=3\)</span>이다. 이 모의실험에서 <span class="math inline">\(x\sim N(0,1)\)</span>이고 <span class="math inline">\(\epsilon\sim N(0,4)\)</span>이다.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">321</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>eps <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">4</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>beta0 <span class="ot">&lt;-</span> <span class="dv">2</span>; beta1 <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> beta0 <span class="sc">+</span> beta1 <span class="sc">*</span> x <span class="sc">+</span> eps</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">cbind</span>(x, y))</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;               x         y
+#&gt; [1,]  1.7049032  1.900747
+#&gt; [2,] -0.7120386 -3.810928
+#&gt; [3,] -0.2779849  5.699243
+#&gt; [4,] -0.1196490  4.912434
+#&gt; [5,] -0.1239606 -3.068909
+#&gt; [6,]  0.2681838  2.450691</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fit_sim <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_sim)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = y ~ x)
+#&gt; 
+#&gt; Residuals:
+#&gt;      Min       1Q   Median       3Q      Max 
+#&gt; -11.0051  -2.0868  -0.1227   2.4214   8.3195 
+#&gt; 
+#&gt; Coefficients:
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)   1.9905     0.3663   5.434 4.03e-07 ***
+#&gt; x             3.3588     0.3852   8.720 7.22e-14 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 3.663 on 98 degrees of freedom
+#&gt; Multiple R-squared:  0.4369, Adjusted R-squared:  0.4311 
+#&gt; F-statistic: 76.03 on 1 and 98 DF,  p-value: 7.219e-14</code></pre>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>))</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, y, <span class="at">col =</span> <span class="st">"steel blue"</span>, <span class="at">xlab =</span> <span class="st">"x"</span>, <span class="at">ylab =</span> <span class="st">"y"</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"첫 번째 표본"</span>, <span class="at">font.main =</span> <span class="dv">1</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> <span class="dv">2</span>, <span class="at">b =</span> <span class="dv">3</span>, <span class="at">col =</span> <span class="st">"red"</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(fit_sim, <span class="at">col =</span> <span class="st">"blue"</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"모집단"</span>, <span class="st">"첫 표본"</span>),</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"red"</span>, <span class="st">"blue"</span>), <span class="at">bty =</span> <span class="st">"n"</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, y, <span class="at">type =</span> <span class="st">"n"</span>, <span class="at">main =</span> <span class="st">"10개 표본의 회귀선"</span>, <span class="at">font.main =</span> <span class="dv">1</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) {</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  x_i <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  eps_i <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">4</span>)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  y_i <span class="ot">&lt;-</span> beta0 <span class="sc">+</span> beta1 <span class="sc">*</span> x_i <span class="sc">+</span> eps_i</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abline</span>(<span class="fu">lm</span>(y_i <span class="sc">~</span> x_i), <span class="at">col =</span> <span class="st">"light blue"</span>)</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> <span class="dv">2</span>, <span class="at">b =</span> <span class="dv">3</span>, <span class="at">col =</span> <span class="st">"red"</span>)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(fit_sim, <span class="at">col =</span> <span class="st">"blue"</span>)</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"모집단"</span>, <span class="st">"첫 표본"</span>, <span class="st">"10회 모의실험"</span>),</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"red"</span>, <span class="st">"blue"</span>, <span class="st">"light blue"</span>), <span class="at">bty =</span> <span class="st">"n"</span>)</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>nsim <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>hat_beta1 <span class="ot">&lt;-</span> <span class="fu">numeric</span>(nsim)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>nsim) {</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>  x_i <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>  eps_i <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">4</span>)</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>  y_i <span class="ot">&lt;-</span> beta0 <span class="sc">+</span> beta1 <span class="sc">*</span> x_i <span class="sc">+</span> eps_i</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>  hat_beta1[i] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">lm</span>(y_i <span class="sc">~</span> x_i))[<span class="dv">2</span>]</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(hat_beta1, <span class="at">xlab =</span> <span class="fu">expression</span>(<span class="fu">hat</span>(beta)[<span class="dv">1</span>]),</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">"light blue"</span>, <span class="at">probability =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="fu">expression</span>(<span class="st">"1,000개의 "</span> <span class="sc">*</span> <span class="fu">hat</span>(beta)[<span class="dv">1</span>] <span class="sc">*</span> <span class="st">" 추정값"</span>))</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="at">mean =</span> <span class="fu">mean</span>(hat_beta1), <span class="at">sd =</span> <span class="fu">sd</span>(hat_beta1)),</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>      <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="04-linear-regression_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_sim)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = y ~ x)
+#&gt; 
+#&gt; Residuals:
+#&gt;      Min       1Q   Median       3Q      Max 
+#&gt; -11.0051  -2.0868  -0.1227   2.4214   8.3195 
+#&gt; 
+#&gt; Coefficients:
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)   1.9905     0.3663   5.434 4.03e-07 ***
+#&gt; x             3.3588     0.3852   8.720 7.22e-14 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 3.663 on 98 degrees of freedom
+#&gt; Multiple R-squared:  0.4369, Adjusted R-squared:  0.4311 
+#&gt; F-statistic: 76.03 on 1 and 98 DF,  p-value: 7.219e-14</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(hat_beta1)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 0.4141057</code></pre>
+</div>
+</div>
+</section>
+<section id="회귀계수의-정확도" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="회귀계수의-정확도">회귀계수의 정확도</h4>
+<ul>
+<li>일반적으로 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>의 실제 관계는 <span class="math inline">\(Y=f(X)+\epsilon\)</span>이다.</li>
+<li>단순선형회귀에서는 <span class="math inline">\(f(X)=\beta_0+\beta_1X\)</span>이므로 모집단 회귀식은 <span class="math inline">\(Y=\beta_0+\beta_1X+\epsilon\)</span>이다.</li>
+<li>예제 2에서 보았듯이 <span class="math inline">\(\hat\beta_0\)</span>와 <span class="math inline">\(\hat\beta_1\)</span>은 모집단 모수 <span class="math inline">\(\beta_0\)</span>와 <span class="math inline">\(\beta_1\)</span>에서 어느 정도 벗어난다.</li>
+<li>하지만 최소제곱 추정량은 적절한 가정 아래 평균적으로 실제 모수와 같다. 즉 <span class="math inline">\(E(\hat\beta_j)=\beta_j\)</span>, <span class="math inline">\(j=0,1\)</span>이다.</li>
+<li>이러한 추정량을 <strong>불편추정량(unbiased estimator)</strong>이라고 한다.</li>
+<li>추정의 정확도는 추정량의 <strong>표준오차(standard error)</strong>로 평가한다.</li>
+</ul>
+<p><span class="math display">\[
+\widehat{SE}(\hat\beta_1)=
+\frac{\hat\sigma}{\sqrt{\sum_{i=1}^{n}(x_i-\bar x)^2}},
+\]</span></p>
+<p><span class="math display">\[
+\widehat{SE}(\hat\beta_0)=
+\hat\sigma\left\{
+\frac{1}{n}+\frac{\bar x^2}{\sum_{i=1}^{n}(x_i-\bar x)^2}
+\right\}^{1/2},
+\]</span></p>
+<p>여기서 <span class="math inline">\(\sigma^2=\operatorname{Var}(\epsilon)\)</span>이다. 회귀분석 소프트웨어는 이러한 표준오차를 기본적으로 제공한다.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_sim)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = y ~ x)
+#&gt; 
+#&gt; Residuals:
+#&gt;      Min       1Q   Median       3Q      Max 
+#&gt; -11.0051  -2.0868  -0.1227   2.4214   8.3195 
+#&gt; 
+#&gt; Coefficients:
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)   1.9905     0.3663   5.434 4.03e-07 ***
+#&gt; x             3.3588     0.3852   8.720 7.22e-14 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 3.663 on 98 degrees of freedom
+#&gt; Multiple R-squared:  0.4369, Adjusted R-squared:  0.4311 
+#&gt; F-statistic: 76.03 on 1 and 98 DF,  p-value: 7.219e-14</code></pre>
+</div>
+</div>
+<ul>
+<li>표준오차는 같은 크기의 표본을 반복해서 추출하고 각 표본에서 <span class="math inline">\(\hat\beta_1\)</span>을 계산했을 때 그 추정값들이 얼마나 변하는지를 추정한다.</li>
+<li>예제의 1,000회 반복에서 계산한 <span class="math inline">\(\hat\beta_1\)</span>의 표준편차는 회귀출력의 표준오차와 비슷한 값을 가져야 한다.</li>
+</ul>
+</section>
+<section id="신뢰구간" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="신뢰구간">신뢰구간</h4>
+<ul>
+<li>표준오차를 이용하여 회귀계수의 <strong>신뢰구간(confidence interval, CI)</strong>을 계산할 수 있다.</li>
+<li><span class="math inline">\(100(1-\alpha)\%\)</span> 신뢰구간은 반복표본을 추출하여 같은 절차로 구간을 만들 때 그 구간의 <span class="math inline">\(100(1-\alpha)\%\)</span>가 실제 모수를 포함하도록 구성된다.</li>
+<li>일반적인 형태는 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+\hat\beta\pm c_{\alpha/2}\widehat{SE}(\hat\beta),
+\]</span></p>
+<p>여기서 <span class="math inline">\(c_{\alpha/2}\)</span>는 <span class="math inline">\(t\)</span>분포 또는 정규분포의 <span class="math inline">\(1-\alpha/2\)</span> 분위수이다.</p>
+<ul>
+<li>유의수준 <span class="math inline">\(\alpha\)</span>는 흔히 0.05 또는 0.01을 사용하며 각각 95%와 99% 신뢰수준에 해당한다.</li>
+<li>표본크기가 충분히 클 때 95% 신뢰구간에서는 <span class="math inline">\(c_{0.025}\approx1.96\approx2\)</span>이다.</li>
+<li>예제 2에서 <span class="math inline">\(\beta_1\)</span>의 95% 신뢰구간은 대략 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+\hat\beta_1\pm2\widehat{SE}(\hat\beta_1).
+\]</span></p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(fit_sim)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;                2.5 %   97.5 %
+#&gt; (Intercept) 1.263579 2.717503
+#&gt; x           2.594394 4.123197</code></pre>
+</div>
+</div>
+<ul>
+<li>이 예제에서는 모집단 기울기 <span class="math inline">\(\beta_1=3\)</span>이 신뢰구간에 포함된다.</li>
+<li>95% 신뢰구간은 반복해서 만든 구간의 약 5%가 실제 모집단 모수를 포함하지 않을 수 있음을 의미한다.</li>
+</ul>
+</section>
+<section id="가설검정" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="가설검정">가설검정</h4>
+<ul>
+<li>표준오차는 가설검정에도 사용된다.</li>
+<li>가장 일반적인 검정은 다음의 귀무가설과 대립가설을 비교한다.</li>
+</ul>
+<p><span class="math display">\[
+H_0:\text{$X$와 $Y$ 사이에 선형관계가 없다}
+\]</span></p>
+<p><span class="math display">\[
+H_1:\text{$X$와 $Y$ 사이에 선형관계가 있다}.
+\]</span></p>
+<ul>
+<li>회귀모형의 모수로 표현하면 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+H_0:\beta_1=0
+\qquad\text{대}\qquad
+H_1:\beta_1\neq0.
+\]</span></p>
+<ul>
+<li><span class="math inline">\(H_0\)</span>가 참이면 <span class="math inline">\(Y=\beta_0+\epsilon\)</span>이므로 <span class="math inline">\(X\)</span>는 <span class="math inline">\(Y\)</span>와 선형적으로 관련되지 않는다.</li>
+<li>더 일반적으로 <span class="math inline">\(H_0:\beta_1=\beta_1^*\)</span>를 검정하는 통계량은 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+t=\frac{\hat\beta_1-\beta_1^*}{\widehat{SE}(\hat\beta_1)}.
+\]</span></p>
+<ul>
+<li><span class="math inline">\(H_0:\beta_1=0\)</span>에서는 다음으로 단순화된다.</li>
+</ul>
+<p><span class="math display">\[
+t=\frac{\hat\beta_1}{\widehat{SE}(\hat\beta_1)}.
+\]</span></p>
+<ul>
+<li>귀무가설이 참이고 정규오차 가정이 성립하면 이 통계량은 자유도 <span class="math inline">\(n-2\)</span>인 Student <span class="math inline">\(t\)</span>분포를 따른다.</li>
+<li>표본크기가 충분히 크면 <span class="math inline">\(t\)</span>분포는 표준정규분포에 가까워진다.</li>
+<li><span class="math inline">\(|t|\)</span>가 충분히 크면 귀무가설을 기각한다.</li>
+<li><span class="math inline">\(p\)</span>값은 귀무가설이 참일 때 관측한 통계량만큼 또는 그보다 더 극단적인 값을 얻을 확률이다.</li>
+<li><span class="math inline">\(p\)</span>값이 미리 정한 유의수준보다 작으면 귀무가설을 기각한다. 흔히 사용하는 기준은 0.05와 0.01이다.</li>
+</ul>
+</section>
+<section id="예제-3-광고-자료의-유의성-및-적합도" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="예제-3-광고-자료의-유의성-및-적합도">예제 3: 광고 자료의 유의성 및 적합도</h4>
+<ul>
+<li>광고 자료에서 TV 계수의 <span class="math inline">\(p\)</span>값은 매우 작다. 따라서 TV 광고가 매출에 영향을 미치지 않는다는 귀무가설을 강하게 기각할 수 있으며, 계수의 부호는 관계가 양의 방향임을 보여준다.</li>
+<li>선형회귀의 적합도는 흔히 <strong>잔차표준오차(residual standard error, RSE)</strong>와 <strong>결정계수 <span class="math inline">\(R^2\)</span></strong>로 평가한다.</li>
+</ul>
+<p><span class="math display">\[
+RSE=\sqrt{\frac{RSS}{n-2}}
+=\sqrt{\frac{1}{n-2}\sum_{i=1}^{n}(y_i-\hat y_i)^2},
+\]</span></p>
+<p><span class="math display">\[
+R^2=\frac{TSS-RSS}{TSS}=1-\frac{RSS}{TSS},
+\]</span></p>
+<p>여기서 <span class="math inline">\(TSS=\sum_{i=1}^{n}(y_i-\bar y)^2\)</span>는 총제곱합이고 <span class="math inline">\(RSS=\sum_{i=1}^{n}(y_i-\hat y_i)^2\)</span>는 잔차제곱합이다.</p>
+<ul>
+<li>단순선형회귀에서는 <span class="math inline">\(R^2=r^2\)</span>이며, <span class="math inline">\(r\)</span>은 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>의 표본상관계수이다.</li>
+</ul>
+<p><span class="math display">\[
+r=\frac{\sum_{i=1}^{n}(x_i-\bar x)(y_i-\bar y)}
+{\sqrt{\sum_{i=1}^{n}(x_i-\bar x)^2}\sqrt{\sum_{i=1}^{n}(y_i-\bar y)^2}}.
+\]</span></p>
+<ul>
+<li><span class="math inline">\(R^2\)</span>은 <span class="math inline">\(0\leq R^2\leq1\)</span>인 적합도 지표이다. <span class="math inline">\(R^2=0\)</span>이면 모형이 반응변수의 변동을 설명하지 못하고, <span class="math inline">\(R^2=1\)</span>이면 완벽하게 적합된다.</li>
+<li>반대로 RSE는 적합되지 않은 오차의 전형적인 크기를 반응변수와 같은 단위로 나타낸다.</li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(sales <span class="sc">~</span> TV, <span class="at">data =</span> adv)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = sales ~ TV, data = adv)
+#&gt; 
+#&gt; Residuals:
+#&gt;     Min      1Q  Median      3Q     Max 
+#&gt; -8.3860 -1.9545 -0.1913  2.0671  7.2124 
+#&gt; 
+#&gt; Coefficients:
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept) 7.032594   0.457843   15.36   &lt;2e-16 ***
+#&gt; TV          0.047537   0.002691   17.67   &lt;2e-16 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 3.259 on 198 degrees of freedom
+#&gt; Multiple R-squared:  0.6119, Adjusted R-squared:  0.6099 
+#&gt; F-statistic: 312.1 on 1 and 198 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<ul>
+<li>예를 들어 RSE가 3.26이라면 TV 광고비에 근거한 매출 예측이 실제 매출에서 전형적으로 약 3.26천 단위만큼 벗어난다고 해석할 수 있다.</li>
+<li>평균 매출이 약 14천 단위라면 이 오차는 평균 매출의 약 23%에 해당한다.</li>
+</ul>
+<p><br></p>
+</section>
+</section>
+<section id="다중선형회귀" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="다중선형회귀"><span class="header-section-number">4.2</span> 다중선형회귀</h2>
+<ul>
+<li>설명변수를 여러 개 포함하면 <strong>다중선형회귀</strong>가 된다.</li>
+</ul>
+<p><span class="math display">\[
+Y=\beta_0+\beta_1X_1+\cdots+\beta_pX_p+\epsilon,
+\]</span></p>
+<p>여기서 <span class="math inline">\(X_j\)</span>는 <span class="math inline">\(j\)</span>번째 예측변수이고 <span class="math inline">\(\beta_j\)</span>는 다른 변수를 고정했을 때 <span class="math inline">\(Y\)</span>와 <span class="math inline">\(X_j\)</span> 사이의 조건부 또는 주변효과를 나타낸다.</p>
+<ul>
+<li><span class="math inline">\(\beta_j\)</span>는 다른 모든 예측변수를 고정했을 때 <span class="math inline">\(X_j\)</span>가 한 단위 증가함에 따라 <span class="math inline">\(Y\)</span>가 평균적으로 얼마나 변하는지를 의미한다.</li>
+<li>계수는 다음 잔차제곱합을 최소화하도록 추정한다.</li>
+</ul>
+<p><span class="math display">\[
+\sum_{i=1}^{n}(y_i-\hat y_i)^2,
+\qquad
+\hat y_i=\hat\beta_0+\hat\beta_1x_{i1}+\cdots+\hat\beta_px_{ip}.
+\]</span></p>
+<section id="회귀계수의-해석" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="회귀계수의-해석">회귀계수의 해석</h4>
+<ul>
+<li>예측변수끼리 상관되지 않는 균형설계가 가장 이상적이다.
+<ul>
+<li>각 계수를 독립적으로 추정하고 검정하기 쉽다.</li>
+<li>“다른 변수를 고정했을 때 <span class="math inline">\(X_j\)</span>의 한 단위 변화는 <span class="math inline">\(Y\)</span>의 <span class="math inline">\(\beta_j\)</span>만큼의 변화와 관련된다”는 해석이 명확하다.</li>
+</ul></li>
+<li>예측변수 사이의 상관은 여러 문제를 일으킨다.
+<ul>
+<li>계수 추정량의 분산이 증가하며 때로는 매우 크게 증가한다.</li>
+<li>실제로 <span class="math inline">\(X_j\)</span>가 변할 때 다른 변수도 함께 변할 수 있으므로 계수의 조건부 해석이 어려워진다.</li>
+</ul></li>
+<li>관찰자료에서는 회귀계수만을 근거로 인과관계를 주장해서는 안 된다.</li>
+<li>Mosteller와 Tukey의 예를 생각해 보자.
+<ul>
+<li>주머니 속 동전의 총액을 <span class="math inline">\(Y\)</span>, 전체 동전 수를 <span class="math inline">\(X_1\)</span>, 1센트·5센트·10센트 동전 수를 <span class="math inline">\(X_2\)</span>라고 하자. <span class="math inline">\(X_2\)</span>만 사용하면 계수는 양수일 것이지만 <span class="math inline">\(X_1\)</span>을 함께 포함하면 해석이 달라질 수 있다.</li>
+<li>한 미식축구 선수의 시즌 태클 수를 <span class="math inline">\(Y\)</span>, 체중과 키를 <span class="math inline">\(W,H\)</span>라고 하자. 적합식이 <span class="math inline">\(\hat Y=b_0+0.50W-0.10H\)</span>일 때 키의 음의 계수는 체중이 같은 선수를 비교한다는 조건부 해석을 가져야 한다.</li>
+</ul></li>
+</ul>
+<blockquote class="blockquote">
+<p>“본질적으로 모든 모형은 틀렸지만, 그중 일부는 유용하다.” — George Box</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>“복잡한 시스템에 충격을 주었을 때 어떤 일이 일어나는지 알아내는 유일한 방법은 그 시스템을 수동적으로 관찰하는 데 그치지 않고 실제로 변화시켜 보는 것이다.” — Mosteller와 Tukey가 George Box의 견해를 바꾸어 표현</p>
+</blockquote>
+</section>
+<section id="다중회귀의-추정과-예측" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="다중회귀의-추정과-예측">다중회귀의 추정과 예측</h4>
+<ul>
+<li>추정값 <span class="math inline">\(\hat\beta_0,\hat\beta_1,\ldots,\hat\beta_p\)</span>가 주어지면 다음 식으로 예측한다.</li>
+</ul>
+<p><span class="math display">\[
+\hat y=\hat\beta_0+\hat\beta_1x_1+\cdots+\hat\beta_px_p.
+\]</span></p>
+<ul>
+<li>계수는 다음 RSS를 최소화하는 값이다.</li>
+</ul>
+<p><span class="math display">\[
+\begin{aligned}
+RSS
+&amp;=\sum_{i=1}^{n}(y_i-\hat y_i)^2\\
+&amp;=\sum_{i=1}^{n}
+(y_i-\hat\beta_0-\hat\beta_1x_{i1}-\cdots-\hat\beta_px_{ip})^2.
+\end{aligned}
+\]</span></p>
+<ul>
+<li>실제 계산은 통계 소프트웨어가 수행한다.</li>
+</ul>
+<p><img src="fig4/f3.png" class="img-fluid" style="width:80.0%"></p>
+<ul>
+<li>광고 자료의 다중회귀 결과는 다음과 같다.</li>
+</ul>
+<p><img src="fig4/f4.png" class="img-fluid" style="width:80.0%"></p>
+</section>
+<section id="예제-4-광고매체의-다중회귀" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="예제-4-광고매체의-다중회귀">예제 4: 광고매체의 다중회귀</h4>
+<p>다음 모형을 적합한다.</p>
+<p><span class="math display">\[
+sales=\beta_0+\beta_1TV+\beta_2radio+\beta_3newspaper+\epsilon.
+\]</span></p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(adv)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;        X                TV             radio          newspaper     
+#&gt;  Min.   :  1.00   Min.   :  0.70   Min.   : 0.000   Min.   :  0.30  
+#&gt;  1st Qu.: 50.75   1st Qu.: 74.38   1st Qu.: 9.975   1st Qu.: 12.75  
+#&gt;  Median :100.50   Median :149.75   Median :22.900   Median : 25.75  
+#&gt;  Mean   :100.50   Mean   :147.04   Mean   :23.264   Mean   : 30.55  
+#&gt;  3rd Qu.:150.25   3rd Qu.:218.82   3rd Qu.:36.525   3rd Qu.: 45.10  
+#&gt;  Max.   :200.00   Max.   :296.40   Max.   :49.600   Max.   :114.00  
+#&gt;      sales      
+#&gt;  Min.   : 1.60  
+#&gt;  1st Qu.:10.38  
+#&gt;  Median :12.90  
+#&gt;  Mean   :14.02  
+#&gt;  3rd Qu.:17.40  
+#&gt;  Max.   :27.00</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(adv)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["X"],"name":[1],"type":["int"],"align":["right"]},{"label":["TV"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["radio"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["newspaper"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["sales"],"name":[5],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"230.1","3":"37.8","4":"69.2","5":"22.1","_rn_":"1"},{"1":"2","2":"44.5","3":"39.3","4":"45.1","5":"10.4","_rn_":"2"},{"1":"3","2":"17.2","3":"45.9","4":"69.3","5":"9.3","_rn_":"3"},{"1":"4","2":"151.5","3":"41.3","4":"58.5","5":"18.5","_rn_":"4"},{"1":"5","2":"180.8","3":"10.8","4":"58.4","5":"12.9","_rn_":"5"},{"1":"6","2":"8.7","3":"48.9","4":"75.0","5":"7.2","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span>(adv)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["X"],"name":[1],"type":["int"],"align":["right"]},{"label":["TV"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["radio"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["newspaper"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["sales"],"name":[5],"type":["dbl"],"align":["right"]}],"data":[{"1":"195","2":"149.7","3":"35.6","4":"6.0","5":"17.3","_rn_":"195"},{"1":"196","2":"38.2","3":"3.7","4":"13.8","5":"7.6","_rn_":"196"},{"1":"197","2":"94.2","3":"4.9","4":"8.1","5":"9.7","_rn_":"197"},{"1":"198","2":"177.0","3":"9.3","4":"6.4","5":"12.8","_rn_":"198"},{"1":"199","2":"283.6","3":"42.0","4":"66.2","5":"25.5","_rn_":"199"},{"1":"200","2":"232.1","3":"8.6","4":"8.7","5":"13.4","_rn_":"200"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(adv[, <span class="fu">c</span>(<span class="st">"TV"</span>, <span class="st">"radio"</span>, <span class="st">"newspaper"</span>, <span class="st">"sales"</span>)])</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;                   TV      radio  newspaper     sales
+#&gt; TV        1.00000000 0.05480866 0.05664787 0.7822244
+#&gt; radio     0.05480866 1.00000000 0.35410375 0.5762226
+#&gt; newspaper 0.05664787 0.35410375 1.00000000 0.2282990
+#&gt; sales     0.78222442 0.57622257 0.22829903 1.0000000</code></pre>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pairs</span>(adv[, <span class="fu">c</span>(<span class="st">"TV"</span>, <span class="st">"radio"</span>, <span class="st">"newspaper"</span>, <span class="st">"sales"</span>)],</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">cex =</span> <span class="fl">0.5</span>, <span class="at">col =</span> <span class="st">"red"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="04-linear-regression_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>fit1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(sales <span class="sc">~</span> TV <span class="sc">+</span> radio <span class="sc">+</span> newspaper, <span class="at">data =</span> adv)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit1)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = sales ~ TV + radio + newspaper, data = adv)
+#&gt; 
+#&gt; Residuals:
+#&gt;     Min      1Q  Median      3Q     Max 
+#&gt; -8.8277 -0.8908  0.2418  1.1893  2.8292 
+#&gt; 
+#&gt; Coefficients:
+#&gt;              Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)  2.938889   0.311908   9.422   &lt;2e-16 ***
+#&gt; TV           0.045765   0.001395  32.809   &lt;2e-16 ***
+#&gt; radio        0.188530   0.008611  21.893   &lt;2e-16 ***
+#&gt; newspaper   -0.001037   0.005871  -0.177     0.86    
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 1.686 on 196 degrees of freedom
+#&gt; Multiple R-squared:  0.8972, Adjusted R-squared:  0.8956 
+#&gt; F-statistic: 570.3 on 3 and 196 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<ul>
+<li>결과에서 TV와 라디오 광고비는 매출과 유의한 관련이 있지만, 다른 광고매체를 통제한 뒤 신문 광고비의 추가 기여는 뚜렷하지 않다.</li>
+<li>TV 광고비가 1천 달러 증가하면 라디오와 신문 광고비를 고정했을 때 매출이 평균적으로 약 46단위 증가한다고 해석한다.</li>
+<li>라디오 광고비가 1천 달러 증가하면 다른 광고비를 고정했을 때 매출이 평균적으로 약 189단위 증가한다.</li>
+<li>잔차를 확인하면 단순한 선형·가법 구조가 충분하지 않을 수 있다.</li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit1, <span class="at">which =</span> <span class="dv">1</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="04-linear-regression_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>잔차그림에 체계적인 곡선이 나타나면 비선형성이 존재할 수 있다.</li>
+<li>유의하지 않은 신문 변수를 제외하고 TV와 라디오 광고비의 제곱항을 추가한다.</li>
+</ul>
+<p><span class="math display">\[
+sales=\beta_0+\beta_1TV+\beta_2radio+\beta_{11}TV^2+\beta_{22}radio^2+\epsilon.
+\]</span></p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>fit1b <span class="ot">&lt;-</span> <span class="fu">lm</span>(sales <span class="sc">~</span> TV <span class="sc">+</span> radio <span class="sc">+</span> <span class="fu">I</span>(TV<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> <span class="fu">I</span>(radio<span class="sc">^</span><span class="dv">2</span>), <span class="at">data =</span> adv)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit1b)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = sales ~ TV + radio + I(TV^2) + I(radio^2), data = adv)
+#&gt; 
+#&gt; Residuals:
+#&gt;     Min      1Q  Median      3Q     Max 
+#&gt; -7.3987 -0.8509  0.0376  0.9781  3.3727 
+#&gt; 
+#&gt; Coefficients:
+#&gt;               Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)  1.535e+00  4.093e-01   3.750 0.000233 ***
+#&gt; TV           7.852e-02  4.978e-03  15.774  &lt; 2e-16 ***
+#&gt; radio        1.588e-01  2.830e-02   5.613 6.78e-08 ***
+#&gt; I(TV^2)     -1.138e-04  1.674e-05  -6.799 1.26e-10 ***
+#&gt; I(radio^2)   7.135e-04  5.709e-04   1.250 0.212862    
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 1.515 on 195 degrees of freedom
+#&gt; Multiple R-squared:  0.9174, Adjusted R-squared:  0.9157 
+#&gt; F-statistic: 541.2 on 4 and 195 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit1b, <span class="at">which =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(adv<span class="sc">$</span>TV, <span class="fu">resid</span>(fit1b), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>), <span class="at">col =</span> <span class="st">"steel blue"</span>,</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"TV 광고비"</span>, <span class="at">ylab =</span> <span class="st">"잔차"</span>, <span class="at">main =</span> <span class="st">"잔차와 TV 광고비"</span>)</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">lowess</span>(adv<span class="sc">$</span>TV, <span class="fu">resid</span>(fit1b), <span class="at">f =</span> .<span class="dv">5</span>), <span class="at">col =</span> <span class="st">"red"</span>)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(adv<span class="sc">$</span>radio, <span class="fu">resid</span>(fit1b), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>), <span class="at">col =</span> <span class="st">"steel blue"</span>,</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"라디오 광고비"</span>, <span class="at">ylab =</span> <span class="st">"잔차"</span>, <span class="at">main =</span> <span class="st">"잔차와 라디오 광고비"</span>)</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">lowess</span>(adv<span class="sc">$</span>radio, <span class="fu">resid</span>(fit1b), <span class="at">f =</span> .<span class="dv">5</span>), <span class="at">col =</span> <span class="st">"red"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="04-linear-regression_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>제곱항을 추가해도 잔차그림에 일부 비선형 패턴이 남을 수 있다.</li>
+<li>TV와 라디오 광고비의 <strong>상호작용항</strong>을 추가한다.</li>
+</ul>
+<p><span class="math display">\[
+sales=\beta_0+\beta_1TV+\beta_2radio+\beta_{11}TV^2
++\beta_{22}radio^2+\beta_{12}(TV\times radio)+\epsilon.
+\]</span></p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>fit1c <span class="ot">&lt;-</span> <span class="fu">lm</span>(sales <span class="sc">~</span> TV <span class="sc">+</span> radio <span class="sc">+</span> <span class="fu">I</span>(TV<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> <span class="fu">I</span>(radio<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> TV<span class="sc">:</span>radio,</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">data =</span> adv)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit1c)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = sales ~ TV + radio + I(TV^2) + I(radio^2) + TV:radio, 
+#&gt;     data = adv)
+#&gt; 
+#&gt; Residuals:
+#&gt;     Min      1Q  Median      3Q     Max 
+#&gt; -5.0027 -0.2859 -0.0062  0.3829  1.2100 
+#&gt; 
+#&gt; Coefficients:
+#&gt;               Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)  5.194e+00  2.061e-01  25.202   &lt;2e-16 ***
+#&gt; TV           5.099e-02  2.236e-03  22.801   &lt;2e-16 ***
+#&gt; radio        2.654e-02  1.242e-02   2.136   0.0339 *  
+#&gt; I(TV^2)     -1.098e-04  6.901e-06 -15.914   &lt;2e-16 ***
+#&gt; I(radio^2)   1.861e-04  2.359e-04   0.789   0.4311    
+#&gt; TV:radio     1.075e-03  3.479e-05  30.892   &lt;2e-16 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 0.6244 on 194 degrees of freedom
+#&gt; Multiple R-squared:  0.986,  Adjusted R-squared:  0.9857 
+#&gt; F-statistic:  2740 on 5 and 194 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(<span class="fu">cbind</span>(<span class="at">radio =</span> adv<span class="sc">$</span>radio, <span class="at">TV =</span> adv<span class="sc">$</span>TV,</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">radioTV =</span> adv<span class="sc">$</span>radio <span class="sc">*</span> adv<span class="sc">$</span>TV))</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;              radio         TV   radioTV
+#&gt; radio   1.00000000 0.05480866 0.6813916
+#&gt; TV      0.05480866 1.00000000 0.6621602
+#&gt; radioTV 0.68139157 0.66216021 1.0000000</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit1c, <span class="at">which =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(adv<span class="sc">$</span>TV, <span class="fu">resid</span>(fit1c), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>), <span class="at">col =</span> <span class="st">"steel blue"</span>,</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"TV 광고비"</span>, <span class="at">ylab =</span> <span class="st">"잔차"</span>, <span class="at">main =</span> <span class="st">"잔차와 TV 광고비"</span>)</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">lowess</span>(adv<span class="sc">$</span>TV, <span class="fu">resid</span>(fit1c), <span class="at">f =</span> .<span class="dv">5</span>), <span class="at">col =</span> <span class="st">"red"</span>)</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(adv<span class="sc">$</span>radio, <span class="fu">resid</span>(fit1c), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>), <span class="at">col =</span> <span class="st">"steel blue"</span>,</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"라디오 광고비"</span>, <span class="at">ylab =</span> <span class="st">"잔차"</span>, <span class="at">main =</span> <span class="st">"잔차와 라디오 광고비"</span>)</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">lowess</span>(adv<span class="sc">$</span>radio, <span class="fu">resid</span>(fit1c), <span class="at">f =</span> .<span class="dv">5</span>), <span class="at">col =</span> <span class="st">"red"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="04-linear-regression_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>두 개의 잠재적 이상치를 제외하면 잔차그림이 이전보다 개선된다. 오차항이 확률잡음이라면 잔차에서 뚜렷한 체계적 패턴이 나타나지 않아야 한다.</li>
+<li>상호작용이 포함되면 계수의 해석은 더 복잡해진다.</li>
+<li>예를 들어 TV 광고비의 효과는 라디오 광고비 수준에 따라 달라진다. 제곱항까지 포함한 모형에서 TV의 순간적인 주변효과는 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+\frac{\partial\widehat{sales}}{\partial TV}
+=\hat\beta_1+2\hat\beta_{11}TV+\hat\beta_{12}radio.
+\]</span></p>
+<ul>
+<li>신문 광고비는 단순회귀에서는 유의하지만 다중회귀에서는 유의하지 않을 수 있다. 신문과 라디오 광고비가 상관되어 있기 때문에 신문만 사용한 모형에서 신문 계수가 라디오 광고의 효과를 일부 대신 반영하기 때문이다.</li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>fit1d <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">log</span>(sales) <span class="sc">~</span> TV <span class="sc">+</span> radio <span class="sc">+</span> <span class="fu">I</span>(TV<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> <span class="fu">I</span>(radio<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> TV<span class="sc">:</span>radio,</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">data =</span> adv[<span class="sc">-</span><span class="fu">c</span>(<span class="dv">131</span>, <span class="dv">156</span>), ])</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit1d)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = log(sales) ~ TV + radio + I(TV^2) + I(radio^2) + 
+#&gt;     TV:radio, data = adv[-c(131, 156), ])
+#&gt; 
+#&gt; Residuals:
+#&gt;       Min        1Q    Median        3Q       Max 
+#&gt; -0.312665 -0.032455 -0.006775  0.045860  0.121585 
+#&gt; 
+#&gt; Coefficients:
+#&gt;               Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)  1.685e+00  2.236e-02  75.321  &lt; 2e-16 ***
+#&gt; TV           6.661e-03  2.440e-04  27.297  &lt; 2e-16 ***
+#&gt; radio        1.071e-02  1.325e-03   8.083 6.91e-14 ***
+#&gt; I(TV^2)     -1.462e-05  7.496e-07 -19.506  &lt; 2e-16 ***
+#&gt; I(radio^2)  -7.432e-05  2.512e-05  -2.958  0.00348 ** 
+#&gt; TV:radio     4.061e-05  3.752e-06  10.823  &lt; 2e-16 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 0.06645 on 192 degrees of freedom
+#&gt; Multiple R-squared:  0.9695, Adjusted R-squared:  0.9687 
+#&gt; F-statistic:  1219 on 5 and 192 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p><img src="fig4/fig4.jpg" class="img-fluid"></p>
+<p><strong>중요한 질문</strong></p>
+<ol type="1">
+<li>예측변수 <span class="math inline">\(X_1,X_2,\ldots,X_p\)</span> 가운데 적어도 하나가 반응변수를 예측하는 데 유용한가?</li>
+<li>모든 예측변수가 <span class="math inline">\(Y\)</span>를 설명하는가, 아니면 일부 변수만 유용한가?</li>
+<li>모형은 자료에 얼마나 잘 적합되는가?</li>
+<li>주어진 예측변수 값에서 어떤 반응값을 예측해야 하며 그 예측은 얼마나 정확한가?</li>
+</ol>
+</section>
+<section id="예측변수의-중요성-회귀계수의-통계적-유의성" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="예측변수의-중요성-회귀계수의-통계적-유의성"><span class="header-section-number">4.2.1</span> 예측변수의 중요성: 회귀계수의 통계적 유의성</h3>
+<ul>
+<li>개별 계수의 유의성은 다음 <span class="math inline">\(t\)</span>통계량과 관련 <span class="math inline">\(p\)</span>값으로 평가한다.</li>
+</ul>
+<p><span class="math display">\[
+t=\frac{\hat\beta_j}{\widehat{SE}(\hat\beta_j)}.
+\]</span></p>
+<ul>
+<li>모든 계수 또는 특정 계수 집합의 <strong>공동유의성</strong>은 다음 귀무가설을 검정한다.</li>
+</ul>
+<p><span class="math display">\[
+H_0:\beta_1=\cdots=\beta_p=0
+\]</span></p>
+<p>대</p>
+<p><span class="math display">\[
+H_1:\text{적어도 하나의 }\beta_j\neq0.
+\]</span></p>
+<ul>
+<li>검정통계량은 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+F=\frac{(TSS-RSS)/p}{RSS/(n-p-1)}.
+\]</span></p>
+<ul>
+<li><span class="math inline">\(H_0\)</span>가 참이면 이 통계량은 자유도 <span class="math inline">\(p\)</span>와 <span class="math inline">\(n-p-1\)</span>인 <span class="math inline">\(F\)</span>분포를 따른다.</li>
+</ul>
+<section id="예제-5-전체-및-부분-f검정" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="예제-5-전체-및-부분-f검정">예제 5: 전체 및 부분 <span class="math inline">\(F\)</span>검정</h4>
+<ul>
+<li>광고 자료의 전체 <span class="math inline">\(F\)</span>검정에서 <span class="math inline">\(p\)</span>값이 매우 작다면 세 광고매체의 계수가 모두 0이라는 귀무가설을 기각한다.</li>
+<li>전체 <span class="math inline">\(F\)</span>검정은 변수 중요성을 평가하는 첫 단계로 볼 수 있다.</li>
+<li>귀무가설을 기각하지 못하면 예측변수가 <span class="math inline">\(Y\)</span>와 선형적으로 관련된다는 근거가 부족하며 모형은 <span class="math inline">\(Y=\beta_0+\epsilon\)</span>에 가까운 형태가 된다.</li>
+<li>귀무가설을 기각하면 어떤 변수가 중요한지 추가로 살펴본다.</li>
+<li>마지막 <span class="math inline">\(q\)</span>개 변수의 중요성을 검정한다고 하면 귀무가설은 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+H_0:\beta_{p-q+1}=\beta_{p-q+2}=\cdots=\beta_p=0.
+\]</span></p>
+<ul>
+<li>축소모형의 잔차제곱합을 <span class="math inline">\(RSS_0\)</span>, 전체모형의 잔차제곱합을 <span class="math inline">\(RSS\)</span>라고 하면 부분 <span class="math inline">\(F\)</span>통계량은 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+F=\frac{(RSS_0-RSS)/q}{RSS/(n-p-1)}.
+\]</span></p>
+</section>
+</section>
+<section id="중요한-변수의-선택" class="level3" data-number="4.2.2">
+<h3 data-number="4.2.2" class="anchored" data-anchor-id="중요한-변수의-선택"><span class="header-section-number">4.2.2</span> 중요한 변수의 선택</h3>
+<ul>
+<li><p>가장 직접적인 방법은 가능한 모든 변수 부분집합의 최소제곱모형을 적합하고, 훈련오차와 모형크기를 함께 고려하는 기준으로 최적 모형을 선택하는 <strong>최적부분집합 선택</strong>이다.</p></li>
+<li><p>가능한 모형은 <span class="math inline">\(2^p\)</span>개이므로 <span class="math inline">\(p\)</span>가 조금만 커져도 모든 모형을 조사하기 어렵다. 예를 들어 <span class="math inline">\(p=40\)</span>이면 가능한 모형이 1조 개를 넘는다.</p></li>
+<li><p>따라서 실제로는 일부 후보모형만 효율적으로 탐색하는 자동화 방법을 사용한다.</p></li>
+<li><p><strong>변수선택</strong> 또는 <strong>모형선택</strong>은 많은 후보변수 가운데 적절한 변수 부분집합을 고르는 문제이다.</p></li>
+<li><p>대표적인 평가기준은 다음과 같다.</p>
+<ul>
+<li>Mallows의 <span class="math inline">\(C_p\)</span></li>
+<li>Akaike 정보기준(AIC)</li>
+<li>Bayesian 정보기준(BIC)</li>
+<li>수정결정계수</li>
+<li>교차검증</li>
+</ul></li>
+<li><p><strong>전진선택</strong></p>
+<ul>
+<li>절편만 포함한 영모형에서 시작한다.</li>
+<li>각 단일 예측변수 모형을 적합하고 RSS를 가장 많이 감소시키는 변수를 추가한다.</li>
+<li>현재 모형에 변수를 하나씩 추가하면서 정지규칙을 만족할 때까지 반복한다.</li>
+</ul></li>
+<li><p><strong>후진제거</strong></p>
+<ul>
+<li>모든 변수를 포함한 모형에서 시작한다.</li>
+<li>가장 유의하지 않은 변수 또는 평가기준을 가장 개선하는 제거 후보를 하나씩 삭제한다.</li>
+<li>정지규칙을 만족할 때까지 반복한다.</li>
+</ul></li>
+<li><p><strong>단계적 선택</strong></p>
+<ul>
+<li>전진선택과 후진제거를 결합한다.</li>
+<li>변수를 추가한 뒤 현재 모형에서 불필요해진 변수를 다시 제거할 수 있다.</li>
+</ul></li>
+</ul>
+<section id="참고-2" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="참고-2">참고 2</h4>
+<ul>
+<li>단계적 선택은 <span class="math inline">\(p\)</span>값뿐 아니라 AIC와 같은 정보기준을 사용하여 수행할 수 있다.</li>
+<li><code>MASS::stepAIC()</code>는 AIC 기반의 단계적 선택을 제공한다.</li>
+</ul>
+</section>
+<section id="예제-6-aic-단계적-변수선택" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="예제-6-aic-단계적-변수선택">예제 6: AIC 단계적 변수선택</h4>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>boston <span class="ot">&lt;-</span> MASS<span class="sc">::</span>Boston</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">digits =</span> <span class="dv">3</span>, <span class="at">scipen =</span> <span class="dv">3</span>)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>fit_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(medv <span class="sc">~</span> ., <span class="at">data =</span> boston)</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_lm)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = medv ~ ., data = boston)
+#&gt; 
+#&gt; Residuals:
+#&gt;     Min      1Q  Median      3Q     Max 
+#&gt; -15.594  -2.730  -0.518   1.777  26.199 
+#&gt; 
+#&gt; Coefficients:
+#&gt;               Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)  36.459488   5.103459    7.14  3.3e-12 ***
+#&gt; crim         -0.108011   0.032865   -3.29  0.00109 ** 
+#&gt; zn            0.046420   0.013727    3.38  0.00078 ***
+#&gt; indus         0.020559   0.061496    0.33  0.73829    
+#&gt; chas          2.686734   0.861580    3.12  0.00193 ** 
+#&gt; nox         -17.766611   3.819744   -4.65  4.2e-06 ***
+#&gt; rm            3.809865   0.417925    9.12  &lt; 2e-16 ***
+#&gt; age           0.000692   0.013210    0.05  0.95823    
+#&gt; dis          -1.475567   0.199455   -7.40  6.0e-13 ***
+#&gt; rad           0.306049   0.066346    4.61  5.1e-06 ***
+#&gt; tax          -0.012335   0.003761   -3.28  0.00111 ** 
+#&gt; ptratio      -0.952747   0.130827   -7.28  1.3e-12 ***
+#&gt; black         0.009312   0.002686    3.47  0.00057 ***
+#&gt; lstat        -0.524758   0.050715  -10.35  &lt; 2e-16 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 4.75 on 492 degrees of freedom
+#&gt; Multiple R-squared:  0.741,  Adjusted R-squared:  0.734 
+#&gt; F-statistic:  108 on 13 and 492 DF,  p-value: &lt;2e-16</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>stw <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">stepAIC</span>(fit_lm, <span class="at">direction =</span> <span class="st">"both"</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(stw)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = medv ~ crim + zn + chas + nox + rm + dis + rad + 
+#&gt;     tax + ptratio + black + lstat, data = boston)
+#&gt; 
+#&gt; Residuals:
+#&gt;     Min      1Q  Median      3Q     Max 
+#&gt; -15.598  -2.739  -0.505   1.727  26.237 
+#&gt; 
+#&gt; Coefficients:
+#&gt;              Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)  36.34115    5.06749    7.17  2.7e-12 ***
+#&gt; crim         -0.10841    0.03278   -3.31  0.00101 ** 
+#&gt; zn            0.04584    0.01352    3.39  0.00075 ***
+#&gt; chas          2.71872    0.85424    3.18  0.00155 ** 
+#&gt; nox         -17.37602    3.53524   -4.92  1.2e-06 ***
+#&gt; rm            3.80158    0.40632    9.36  &lt; 2e-16 ***
+#&gt; dis          -1.49271    0.18573   -8.04  6.8e-15 ***
+#&gt; rad           0.29961    0.06340    4.73  3.0e-06 ***
+#&gt; tax          -0.01178    0.00337   -3.49  0.00052 ***
+#&gt; ptratio      -0.94652    0.12907   -7.33  9.2e-13 ***
+#&gt; black         0.00929    0.00267    3.47  0.00056 ***
+#&gt; lstat        -0.52255    0.04742  -11.02  &lt; 2e-16 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 4.74 on 494 degrees of freedom
+#&gt; Multiple R-squared:  0.741,  Adjusted R-squared:  0.735 
+#&gt; F-statistic:  128 on 11 and 494 DF,  p-value: &lt;2e-16</code></pre>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>fit_lm2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">log</span>(medv) <span class="sc">~</span> ., <span class="at">data =</span> boston)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_lm2)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = log(medv) ~ ., data = boston)
+#&gt; 
+#&gt; Residuals:
+#&gt;     Min      1Q  Median      3Q     Max 
+#&gt; -0.7336 -0.0975 -0.0166  0.0963  0.8643 
+#&gt; 
+#&gt; Coefficients:
+#&gt;              Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)  4.102042   0.204273   20.08  &lt; 2e-16 ***
+#&gt; crim        -0.010272   0.001315   -7.81  3.5e-14 ***
+#&gt; zn           0.001172   0.000549    2.13  0.03335 *  
+#&gt; indus        0.002467   0.002461    1.00  0.31675    
+#&gt; chas         0.100888   0.034486    2.93  0.00360 ** 
+#&gt; nox         -0.778399   0.152890   -5.09  5.1e-07 ***
+#&gt; rm           0.090833   0.016728    5.43  8.9e-08 ***
+#&gt; age          0.000211   0.000529    0.40  0.69057    
+#&gt; dis         -0.049087   0.007983   -6.15  1.6e-09 ***
+#&gt; rad          0.014267   0.002656    5.37  1.2e-07 ***
+#&gt; tax         -0.000626   0.000151   -4.16  3.8e-05 ***
+#&gt; ptratio     -0.038271   0.005237   -7.31  1.1e-12 ***
+#&gt; black        0.000414   0.000108    3.85  0.00014 ***
+#&gt; lstat       -0.029036   0.002030  -14.30  &lt; 2e-16 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 0.19 on 492 degrees of freedom
+#&gt; Multiple R-squared:  0.79,   Adjusted R-squared:  0.784 
+#&gt; F-statistic:  142 on 13 and 492 DF,  p-value: &lt;2e-16</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>stw2 <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">stepAIC</span>(fit_lm2, <span class="at">direction =</span> <span class="st">"both"</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(stw2)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = log(medv) ~ crim + zn + chas + nox + rm + dis + 
+#&gt;     rad + tax + ptratio + black + lstat, data = boston)
+#&gt; 
+#&gt; Residuals:
+#&gt;     Min      1Q  Median      3Q     Max 
+#&gt; -0.7340 -0.0946 -0.0177  0.0978  0.8629 
+#&gt; 
+#&gt; Coefficients:
+#&gt;              Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)  4.083682   0.203049   20.11  &lt; 2e-16 ***
+#&gt; crim        -0.010319   0.001313   -7.86  2.5e-14 ***
+#&gt; zn           0.001087   0.000542    2.01  0.04531 *  
+#&gt; chas         0.105148   0.034228    3.07  0.00224 ** 
+#&gt; nox         -0.721744   0.141653   -5.10  5.0e-07 ***
+#&gt; rm           0.090673   0.016281    5.57  4.2e-08 ***
+#&gt; dis         -0.051706   0.007442   -6.95  1.2e-11 ***
+#&gt; rad          0.013446   0.002540    5.29  1.8e-07 ***
+#&gt; tax         -0.000558   0.000135   -4.13  4.3e-05 ***
+#&gt; ptratio     -0.037426   0.005172   -7.24  1.8e-12 ***
+#&gt; black        0.000413   0.000107    3.85  0.00013 ***
+#&gt; lstat       -0.028604   0.001900  -15.05  &lt; 2e-16 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 0.19 on 494 degrees of freedom
+#&gt; Multiple R-squared:  0.789,  Adjusted R-squared:  0.784 
+#&gt; F-statistic:  168 on 11 and 494 DF,  p-value: &lt;2e-16</code></pre>
+</div>
+</div>
+<ul>
+<li>선택 결과는 반응변수의 변환과 사용한 기준에 따라 달라질 수 있다.</li>
+</ul>
+</section>
+</section>
+<section id="모형-적합도" class="level3" data-number="4.2.3">
+<h3 data-number="4.2.3" class="anchored" data-anchor-id="모형-적합도"><span class="header-section-number">4.2.3</span> 모형 적합도</h3>
+<ul>
+<li>단순회귀와 마찬가지로 다중회귀에서도 <span class="math inline">\(R^2\)</span>과 RSE를 널리 사용한다.</li>
+<li>변수를 추가하면 RSS는 감소하거나 그대로이므로 <span class="math inline">\(R^2\)</span>은 감소하지 않는다. 따라서 불필요한 변수를 추가한 모형도 <span class="math inline">\(R^2\)</span>만 보면 좋아 보일 수 있다.</li>
+<li><strong>수정결정계수(adjusted <span class="math inline">\(R^2\)</span>)</strong>는 변수 수에 대한 벌점을 포함한다.</li>
+</ul>
+<p><span class="math display">\[
+\bar R^2
+=1-\frac{RSS/(n-p-1)}{TSS/(n-1)}
+=1-(1-R^2)\frac{n-1}{n-p-1}.
+\]</span></p>
+<ul>
+<li>불필요한 변수를 제거하면 일반 <span class="math inline">\(R^2\)</span>은 약간 감소할 수 있지만 수정 <span class="math inline">\(R^2\)</span>은 오히려 증가할 수 있다.</li>
+</ul>
+</section>
+<section id="예측과-예측-불확실성" class="level3" data-number="4.2.4">
+<h3 data-number="4.2.4" class="anchored" data-anchor-id="예측과-예측-불확실성"><span class="header-section-number">4.2.4</span> 예측과 예측 불확실성</h3>
+<ul>
+<li>추정모형</li>
+</ul>
+<p><span class="math display">\[
+\hat y=\hat\beta_0+\hat\beta_1x_1+\cdots+\hat\beta_px_p
+\]</span></p>
+<p>은 모집단 회귀함수</p>
+<p><span class="math display">\[
+f(X)=\beta_0+\beta_1X_1+\cdots+\beta_pX_p
+\]</span></p>
+<p>을 추정한다.</p>
+<ul>
+<li>회귀계수 추정의 불확실성은 감소 가능한 오차와 관련된다.</li>
+<li>주어진 <span class="math inline">\(x\)</span>에서 평균반응 <span class="math inline">\(E(Y\mid X=x)\)</span>에 대한 <strong>신뢰구간</strong>은 대략 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+\hat y\pm c_{\alpha/2}\widehat{SE}(\hat y).
+\]</span></p>
+<ul>
+<li>주어진 <span class="math inline">\(x\)</span>에서 앞으로 관찰될 개별 <span class="math inline">\(Y\)</span>에 대한 <strong>예측구간</strong>은 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+\hat y\pm c_{\alpha/2}\widehat{SE}_{pred}(Y).
+\]</span></p>
+<ul>
+<li>예측구간은 평균반응의 추정 불확실성뿐 아니라 개별 관측치의 감소 불가능한 오차까지 포함하므로 신뢰구간보다 넓다.</li>
+</ul>
+<section id="예제-7-회귀선의-신뢰구간과-예측구간" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="예제-7-회귀선의-신뢰구간과-예측구간">예제 7: 회귀선의 신뢰구간과 예측구간</h4>
+<ul>
+<li>광고 자료에서 다음 이차회귀모형을 고려한다.</li>
+</ul>
+<p><span class="math display">\[
+sales=\beta_0+\beta_1TV+\beta_{11}TV^2+\epsilon.
+\]</span></p>
+<ul>
+<li>그림은 회귀선의 95% 신뢰구간과 개별 예측의 95% 예측구간을 보여준다.</li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>fit_quad <span class="ot">&lt;-</span> <span class="fu">lm</span>(sales <span class="sc">~</span> TV <span class="sc">+</span> <span class="fu">I</span>(TV<span class="sc">^</span><span class="dv">2</span>), <span class="at">data =</span> adv)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fu">min</span>(adv<span class="sc">$</span>TV), <span class="fu">max</span>(adv<span class="sc">$</span>TV), <span class="at">length.out =</span> <span class="dv">200</span>)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>xx <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">TV =</span> x)</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>pred_mean <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_quad, <span class="at">newdata =</span> xx, <span class="at">interval =</span> <span class="st">"confidence"</span>)</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>pred_obs <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_quad, <span class="at">newdata =</span> xx, <span class="at">interval =</span> <span class="st">"prediction"</span>)</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sales <span class="sc">~</span> TV, <span class="at">data =</span> adv, <span class="at">type =</span> <span class="st">"n"</span>,</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"TV 광고비"</span>, <span class="at">ylab =</span> <span class="st">"매출"</span>)</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="fu">c</span>(x, <span class="fu">rev</span>(x)), <span class="fu">c</span>(pred_obs[, <span class="st">"upr"</span>], <span class="fu">rev</span>(pred_obs[, <span class="st">"lwr"</span>])),</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">col =</span> <span class="st">"light blue"</span>, <span class="at">border =</span> <span class="cn">NA</span>)</span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="fu">c</span>(x, <span class="fu">rev</span>(x)), <span class="fu">c</span>(pred_mean[, <span class="st">"upr"</span>], <span class="fu">rev</span>(pred_mean[, <span class="st">"lwr"</span>])),</span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">col =</span> <span class="st">"light gray"</span>, <span class="at">border =</span> <span class="cn">NA</span>)</span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x, pred_mean[, <span class="st">"fit"</span>], <span class="at">col =</span> <span class="st">"red"</span>)</span>
+<span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(sales <span class="sc">~</span> TV, <span class="at">data =</span> adv, <span class="at">col =</span> <span class="st">"steel blue"</span>)</span>
+<span id="cb49-14"><a href="#cb49-14" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"회귀선"</span>, <span class="st">"평균반응 신뢰구간"</span>, <span class="st">"개별값 예측구간"</span>),</span>
+<span id="cb49-15"><a href="#cb49-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="cn">NA</span>, <span class="cn">NA</span>), <span class="at">pch =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="dv">15</span>, <span class="dv">15</span>),</span>
+<span id="cb49-16"><a href="#cb49-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"red"</span>, <span class="st">"light gray"</span>, <span class="st">"light blue"</span>), <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="04-linear-regression_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="추가-고려사항" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="추가-고려사항"><span class="header-section-number">4.3</span> 추가 고려사항</h2>
+<section id="범주형-예측변수" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="범주형-예측변수"><span class="header-section-number">4.3.1</span> 범주형 예측변수</h3>
+<ul>
+<li>일부 예측변수는 연속적인 양적 변수가 아니라 유한한 범주값을 가지는 질적 변수이다.</li>
+<li>이러한 변수를 범주형 변수 또는 요인변수라고 한다.</li>
+<li><code>Credit</code> 자료에는 7개의 양적 변수 외에도 성별, 학생 여부, 혼인상태, 인종과 같은 범주형 변수가 포함되어 있다.</li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ISLR)</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>credit <span class="ot">&lt;-</span> ISLR<span class="sc">::</span>Credit</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="fu">pairs</span>(credit[, <span class="fu">c</span>(<span class="st">"Balance"</span>, <span class="st">"Age"</span>, <span class="st">"Cards"</span>, <span class="st">"Education"</span>,</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"Income"</span>, <span class="st">"Limit"</span>, <span class="st">"Rating"</span>)],</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">cex =</span> <span class="fl">0.4</span>, <span class="at">col =</span> <span class="st">"blue"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="04-linear-regression_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><p>범주형 정보는 <strong>지시변수(indicator variable)</strong> 또는 <strong>더미변수(dummy variable)</strong>로 회귀모형에 포함한다.</p></li>
+<li><p><span class="math inline">\(q\)</span>개 범주를 가진 변수에서는 한 범주를 기준범주로 정하고 나머지 <span class="math inline">\(q-1\)</span>개 범주를 <span class="math inline">\(q-1\)</span>개의 더미변수로 나타낸다.</p></li>
+<li><p>더미변수의 계수는 해당 범주와 기준범주 사이의 평균 차이를 의미한다.</p></li>
+<li><p><code>R</code>에서 변수를 <code>factor</code>로 지정하면 회귀모형이 필요한 더미변수를 자동으로 만든다.</p></li>
+<li><p>다른 변수를 무시하고 여성과 남성의 카드잔액 차이를 분석한다고 하자. 여성 지시변수를 다음과 같이 정의할 수 있다.</p></li>
+</ul>
+<p><span class="math display">\[
+x_i=\begin{cases}
+1,&amp;i\text{번째 사람이 여성인 경우},\\
+0,&amp;i\text{번째 사람이 남성인 경우}.
+\end{cases}
+\]</span></p>
+<ul>
+<li>모형은 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+y_i=\beta_0+\beta_1x_i+\epsilon_i
+=\begin{cases}
+\beta_0+\beta_1+\epsilon_i,&amp;\text{여성},\\
+\beta_0+\epsilon_i,&amp;\text{남성}.
+\end{cases}
+\]</span></p>
+<ul>
+<li>따라서 <span class="math inline">\(\beta_0\)</span>는 남성의 평균잔액, <span class="math inline">\(\beta_1\)</span>은 여성과 남성의 평균잔액 차이이다.</li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>credit<span class="sc">$</span>Female <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(credit<span class="sc">$</span>Gender <span class="sc">==</span> <span class="st">"Female"</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>fit_gender <span class="ot">&lt;-</span> <span class="fu">lm</span>(Balance <span class="sc">~</span> Female, <span class="at">data =</span> credit)</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_gender)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = Balance ~ Female, data = credit)
+#&gt; 
+#&gt; Residuals:
+#&gt;    Min     1Q Median     3Q    Max 
+#&gt; -529.5 -455.4  -60.2  334.7 1489.2 
+#&gt; 
+#&gt; Coefficients:
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)    509.8       33.1   15.39   &lt;2e-16 ***
+#&gt; Female          19.7       46.1    0.43     0.67    
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 460 on 398 degrees of freedom
+#&gt; Multiple R-squared:  0.000461,   Adjusted R-squared:  -0.00205 
+#&gt; F-statistic: 0.184 on 1 and 398 DF,  p-value: 0.669</code></pre>
+</div>
+</div>
+<ul>
+<li>세 개 이상의 범주가 있으면 더미변수를 추가한다. 예를 들어 인종변수에서 African American을 기준범주로 두고 Asian과 Caucasian 지시변수를 만들 수 있다.</li>
+</ul>
+<p><span class="math display">\[
+y_i=\beta_0+\beta_1x_{i1}+\beta_2x_{i2}+\epsilon_i
+=\begin{cases}
+\beta_0+\beta_1+\epsilon_i,&amp;\text{Asian},\\
+\beta_0+\beta_2+\epsilon_i,&amp;\text{Caucasian},\\
+\beta_0+\epsilon_i,&amp;\text{African American}.
+\end{cases}
+\]</span></p>
+<ul>
+<li>범주 수보다 더미변수의 수가 하나 적으며, 더미변수가 모두 0인 범주를 기준범주라고 한다.</li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>credit<span class="sc">$</span>Asian <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(credit<span class="sc">$</span>Ethnicity <span class="sc">==</span> <span class="st">"Asian"</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>credit<span class="sc">$</span>Caucasian <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(credit<span class="sc">$</span>Ethnicity <span class="sc">==</span> <span class="st">"Caucasian"</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>fit_ethnicity <span class="ot">&lt;-</span> <span class="fu">lm</span>(Balance <span class="sc">~</span> Asian <span class="sc">+</span> Caucasian, <span class="at">data =</span> credit)</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_ethnicity)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = Balance ~ Asian + Caucasian, data = credit)
+#&gt; 
+#&gt; Residuals:
+#&gt;    Min     1Q Median     3Q    Max 
+#&gt; -531.0 -457.1  -63.2  339.3 1480.5 
+#&gt; 
+#&gt; Coefficients:
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)    531.0       46.3   11.46   &lt;2e-16 ***
+#&gt; Asian          -18.7       65.0   -0.29     0.77    
+#&gt; Caucasian      -12.5       56.7   -0.22     0.83    
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 461 on 397 degrees of freedom
+#&gt; Multiple R-squared:  0.000219,   Adjusted R-squared:  -0.00482 
+#&gt; F-statistic: 0.0434 on 2 and 397 DF,  p-value: 0.957</code></pre>
+</div>
+</div>
+</section>
+<section id="예제-8-혼인상태를-포함한-임금모형" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="예제-8-혼인상태를-포함한-임금모형">예제 8: 혼인상태를 포함한 임금모형</h3>
+<ul>
+<li><code>wooldridge</code> 패키지의 <code>wage1</code> 자료를 이용하여 다음 모형을 적합한다.</li>
+</ul>
+<p><span class="math display">\[
+\begin{aligned}
+\log(wage)=&amp;\ \beta_0+\delta_1singlefemale+\delta_2marriedmale
++\delta_3marriedfemale\\
+&amp;+\beta_2educ+\beta_3tenure+\beta_4exper
++\beta_5tenure^2+\beta_6exper^2+\epsilon.
+\end{aligned}
+\]</span></p>
+<ul>
+<li>미혼 남성이 기준집단이다.</li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>wdf <span class="ot">&lt;-</span> wooldridge<span class="sc">::</span>wage1</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>wdf<span class="sc">$</span>mstatus <span class="ot">&lt;-</span> <span class="fu">with</span>(wdf, <span class="fu">factor</span>(</span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(female <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;</span> married <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"미혼 남성"</span>,</span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(female <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> married <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"미혼 여성"</span>,</span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(female <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;</span> married <span class="sc">==</span> <span class="dv">1</span>, <span class="st">"기혼 남성"</span>, <span class="st">"기혼 여성"</span>))),</span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"미혼 남성"</span>, <span class="st">"미혼 여성"</span>, <span class="st">"기혼 남성"</span>, <span class="st">"기혼 여성"</span>)</span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>fit_wage <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">log</span>(wage) <span class="sc">~</span> mstatus <span class="sc">+</span> educ <span class="sc">+</span> tenure <span class="sc">+</span> exper <span class="sc">+</span></span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a>                 <span class="fu">I</span>(tenure<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> <span class="fu">I</span>(exper<span class="sc">^</span><span class="dv">2</span>), <span class="at">data =</span> wdf)</span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_wage)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = log(wage) ~ mstatus + educ + tenure + exper + I(tenure^2) + 
+#&gt;     I(exper^2), data = wdf)
+#&gt; 
+#&gt; Residuals:
+#&gt;     Min      1Q  Median      3Q     Max 
+#&gt; -1.8970 -0.2406 -0.0269  0.2314  1.0920 
+#&gt; 
+#&gt; Coefficients:
+#&gt;                   Estimate Std. Error t value   Pr(&gt;|t|)    
+#&gt; (Intercept)       0.321378   0.100009    3.21    0.00139 ** 
+#&gt; mstatus미혼 여성 -0.110350   0.055742   -1.98    0.04827 *  
+#&gt; mstatus기혼 남성  0.212676   0.055357    3.84    0.00014 ***
+#&gt; mstatus기혼 여성 -0.198268   0.057835   -3.43    0.00066 ***
+#&gt; educ              0.078910   0.006694   11.79    &lt; 2e-16 ***
+#&gt; tenure            0.029088   0.006762    4.30 0.00002028 ***
+#&gt; exper             0.026801   0.005243    5.11 0.00000045 ***
+#&gt; I(tenure^2)      -0.000533   0.000231   -2.31    0.02153 *  
+#&gt; I(exper^2)       -0.000535   0.000110   -4.85 0.00000166 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 0.393 on 517 degrees of freedom
+#&gt; Multiple R-squared:  0.461,  Adjusted R-squared:  0.453 
+#&gt; F-statistic: 55.2 on 8 and 517 DF,  p-value: &lt;2e-16</code></pre>
+</div>
+</div>
+<section id="선형모형의-확장" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="선형모형의-확장">선형모형의 확장</h4>
+<p>선형모형의 가법성과 선형성 가정을 완화하는 대표적인 방법은 <strong>상호작용</strong>과 <strong>비선형항</strong>을 추가하는 것이다.</p>
+</section>
+<section id="상호작용" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="상호작용">상호작용</h4>
+<ul>
+<li>앞선 광고 자료 분석에서는 한 광고매체의 효과가 다른 광고매체에 지출한 금액과 무관하다고 가정하였다.</li>
+<li>가법 선형모형</li>
+</ul>
+<p><span class="math display">\[
+\widehat{sales}=\beta_0+\beta_1TV+\beta_2radio+\beta_3newspaper
+\]</span></p>
+<p>은 라디오 광고비와 무관하게 TV 광고비가 한 단위 증가할 때 매출이 항상 <span class="math inline">\(\beta_1\)</span>만큼 변한다고 가정한다. - 그러나 라디오 광고가 TV 광고의 효과를 높일 수 있다. 이 경우 라디오 광고비가 증가할수록 TV 광고비의 기울기도 증가해야 한다. - 고정된 광고예산을 TV와 라디오에 나누어 쓰는 것이 한 매체에 전부 사용하는 것보다 매출을 더 크게 증가시킬 수 있다. - 마케팅에서는 이를 시너지 효과, 통계학에서는 상호작용 효과라고 한다.</p>
+<p><img src="fig4/f5.png" class="img-fluid"></p>
+<ul>
+<li>TV 또는 라디오 광고비가 매우 낮을 때와 두 매체에 예산을 함께 배분할 때 단순 가법모형의 예측오차 패턴이 달라질 수 있다.</li>
+<li>상호작용모형은 다음과 같다.</li>
+</ul>
+<p><span class="math display">\[
+\begin{aligned}
+sales
+&amp;=\beta_0+\beta_1TV+\beta_2radio+\beta_3(TV\times radio)+\epsilon\\
+&amp;=\beta_0+(\beta_1+\beta_3radio)TV+\beta_2radio+\epsilon.
+\end{aligned}
+\]</span></p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>fit_interaction <span class="ot">&lt;-</span> <span class="fu">lm</span>(sales <span class="sc">~</span> TV <span class="sc">+</span> radio <span class="sc">+</span> TV<span class="sc">:</span>radio, <span class="at">data =</span> adv)</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_interaction)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = sales ~ TV + radio + TV:radio, data = adv)
+#&gt; 
+#&gt; Residuals:
+#&gt;    Min     1Q Median     3Q    Max 
+#&gt; -6.337 -0.403  0.183  0.595  1.525 
+#&gt; 
+#&gt; Coefficients:
+#&gt;              Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept) 6.7502202  0.2478714   27.23   &lt;2e-16 ***
+#&gt; TV          0.0191011  0.0015041   12.70   &lt;2e-16 ***
+#&gt; radio       0.0288603  0.0089053    3.24   0.0014 ** 
+#&gt; TV:radio    0.0010865  0.0000524   20.73   &lt;2e-16 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 0.944 on 196 degrees of freedom
+#&gt; Multiple R-squared:  0.968,  Adjusted R-squared:  0.967 
+#&gt; F-statistic: 1.96e+03 on 3 and 196 DF,  p-value: &lt;2e-16</code></pre>
+</div>
+</div>
+<ul>
+<li>상호작용항의 <span class="math inline">\(p\)</span>값이 매우 작다면 <span class="math inline">\(H_0:\beta_3=0\)</span>을 기각할 강한 근거가 된다.</li>
+<li>상호작용모형의 <span class="math inline">\(R^2\)</span>이 가법모형보다 크게 증가하면 가법모형이 설명하지 못한 변동의 상당 부분을 상호작용이 설명한 것이다.</li>
+<li>TV 광고비의 효과는 <span class="math inline">\(\beta_1+\beta_3radio\)</span>, 라디오 광고비의 효과는 <span class="math inline">\(\beta_2+\beta_3TV\)</span>가 된다.</li>
+</ul>
+</section>
+<section id="계층원칙" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="계층원칙">계층원칙</h4>
+<ul>
+<li><p>때로는 상호작용항이 매우 유의하지만 관련 주효과의 <span class="math inline">\(p\)</span>값은 유의하지 않을 수 있다.</p></li>
+<li><p><strong>계층원칙(hierarchy principle)</strong>에 따르면 상호작용항을 포함할 때는 관련 주효과도 함께 포함하는 것이 일반적이다.</p></li>
+<li><p>주효과 없이 상호작용만 포함하면 계수의 의미가 달라지고 해석이 어려워진다.</p></li>
+<li><p><code>Credit</code> 자료에서 소득과 학생 여부를 이용해 잔액을 예측한다고 하자.</p></li>
+<li><p>상호작용이 없는 모형은 두 집단의 회귀선 기울기가 같다고 가정한다.</p></li>
+</ul>
+<p><img src="fig4/f6.png" class="img-fluid"></p>
+<ul>
+<li>상호작용을 포함하면 학생과 비학생 집단의 기울기가 서로 다를 수 있다.</li>
+</ul>
+<p><img src="fig4/f7.png" class="img-fluid"></p>
+<p><img src="fig4/f8.png" class="img-fluid"></p>
+<ul>
+<li><p>왼쪽은 소득과 학생 여부 사이의 상호작용이 없는 모형, 오른쪽은 상호작용을 포함한 모형이다.</p></li>
+<li><p><code>Auto</code> 자료에서 마력과 연비 사이의 관계도 직선보다 이차식이 더 적절할 수 있다.</p></li>
+</ul>
+<p><img src="fig4/f9.png" class="img-fluid"></p>
+<p><span class="math display">\[
+mpg=\beta_0+\beta_1horsepower+\beta_2horsepower^2+\epsilon.
+\]</span></p>
+<p><img src="fig4/f10.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="선형회귀에서-발생할-수-있는-문제" class="level3" data-number="4.3.2">
+<h3 data-number="4.3.2" class="anchored" data-anchor-id="선형회귀에서-발생할-수-있는-문제"><span class="header-section-number">4.3.2</span> 선형회귀에서 발생할 수 있는 문제</h3>
+<ul>
+<li>선형회귀를 적합할 때 다음과 같은 문제가 발생할 수 있다.
+<ul>
+<li>설명변수와 오차항의 상관</li>
+<li>비선형성</li>
+<li>오차항 사이의 상관</li>
+<li>이분산성</li>
+<li>이상치</li>
+<li>고레버리지 관측치</li>
+<li>다중공선성</li>
+</ul></li>
+<li>잔차와 적합값 또는 설명변수의 산점도 등 그래프 진단은 이러한 문제를 확인하는 데 매우 유용하다.</li>
+</ul>
+</section>
+</section>
+<section id="비모수-회귀" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="비모수-회귀"><span class="header-section-number">4.4</span> 비모수 회귀</h2>
+<ul>
+<li>모수적 회귀는 <span class="math inline">\(f(x)\)</span>의 함수 형태를 명시적으로 가정한다.</li>
+<li>비모수적 접근은 <span class="math inline">\(f(x)\)</span>의 특정 함수형태를 미리 정하지 않고 자료에 기반하여 관계를 찾는다.</li>
+<li>대표적인 방법이 KNN 분류기와 밀접하게 관련된 <strong>K-최근접 이웃 회귀</strong>이다.</li>
+<li><span class="math inline">\(K\)</span>와 예측점 <span class="math inline">\(x_0\)</span>가 주어지면 <span class="math inline">\(x_0\)</span>에 가장 가까운 <span class="math inline">\(K\)</span>개의 훈련 관측치를 찾아 <span class="math inline">\(N_0\)</span>라고 한다.</li>
+<li><span class="math inline">\(f(x_0)\)</span>는 <span class="math inline">\(N_0\)</span>에 포함된 반응값의 평균으로 추정한다.</li>
+</ul>
+<p><span class="math display">\[
+\hat f(x_0)=\frac{1}{K}\sum_{x_i\in N_0}y_i.
+\]</span></p>
+<ul>
+<li>비모수 회귀는 이후 장에서 다시 다룬다.</li>
+</ul>
+<p><br></p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./03-introduction-to-r.html" class="pagination-link" aria-label="R 소개">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">R 소개</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./05-classification.html" class="pagination-link" aria-label="분류">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">분류</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
