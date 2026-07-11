@@ -1,0 +1,2563 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>3&nbsp; 선형 모형 – 머신러닝</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./04-decision-trees.html" rel="next">
+<link href="./02-model-evaluation.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-3d841e2d0dac331999ea63b9b6b417ac.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-linear-models.html">II. 지도학습</a></li><li class="breadcrumb-item"><a href="./03-linear-models.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">선형 모형</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">머신러닝</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="리더 모드 전환">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">I. 머신러닝의 기초</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">머신러닝의 개념과 발전</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-model-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">모형 평가와 선택</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">II. 지도학습</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-linear-models.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">선형 모형</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-decision-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">의사결정 트리</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-neural-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">신경망</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-support-vector-machines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">서포트 벡터 머신</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-bayesian-classifiers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">베이지안 분류기</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-ensemble-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">앙상블 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">III. 비지도학습과 표현학습</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">클러스터링</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-dimensionality-reduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">차원 축소와 거리 척도 학습</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-feature-selection-sparse-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">특성 선택과 희소 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">IV. 학습이론과 불완전한 데이터</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-computational-learning-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">계산 학습 이론</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-semi-supervised-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">준지도 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">V. 구조화된 확률모형과 규칙</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-probabilistic-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">확률 그래피컬 모형</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-rule-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">규칙 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">VI. 순차적 의사결정과 신뢰성</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-reinforcement-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">강화 학습</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-explainable-trustworthy-ml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">설명 가능한 머신러닝과 신뢰할 수 있는 예측</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#sec-ch03-basic-form" id="toc-sec-ch03-basic-form" class="nav-link active" data-scroll-target="#sec-ch03-basic-form"><span class="header-section-number">3.1</span> 기본 형식</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch03-data-predictor" id="toc-sec-ch03-data-predictor" class="nav-link" data-scroll-target="#sec-ch03-data-predictor"><span class="header-section-number">3.1.1</span> 자료와 선형 예측자</a></li>
+  <li><a href="#sec-ch03-four-components" id="toc-sec-ch03-four-components" class="nav-link" data-scroll-target="#sec-ch03-four-components"><span class="header-section-number">3.1.2</span> 선형 모형의 네 구성요소</a></li>
+  <li><a href="#sec-ch03-probabilistic-predictive" id="toc-sec-ch03-probabilistic-predictive" class="nav-link" data-scroll-target="#sec-ch03-probabilistic-predictive"><span class="header-section-number">3.1.3</span> 확률적 모형과 예측함수</a></li>
+  <li><a href="#sec-ch03-basis-expansion" id="toc-sec-ch03-basis-expansion" class="nav-link" data-scroll-target="#sec-ch03-basis-expansion"><span class="header-section-number">3.1.4</span> 기저함수와 특성 확장</a></li>
+  <li><a href="#sec-ch03-centering-scaling" id="toc-sec-ch03-centering-scaling" class="nav-link" data-scroll-target="#sec-ch03-centering-scaling"><span class="header-section-number">3.1.5</span> 변수의 중심화와 표준화</a></li>
+  <li><a href="#sec-ch03-regularization-overview" id="toc-sec-ch03-regularization-overview" class="nav-link" data-scroll-target="#sec-ch03-regularization-overview"><span class="header-section-number">3.1.6</span> 규제와 제약조건</a></li>
+  <li><a href="#sec-ch03-optimization-overview" id="toc-sec-ch03-optimization-overview" class="nav-link" data-scroll-target="#sec-ch03-optimization-overview"><span class="header-section-number">3.1.7</span> 최적화와 정상방정식</a></li>
+  </ul></li>
+  <li><a href="#sec-ch03-linear-regression" id="toc-sec-ch03-linear-regression" class="nav-link" data-scroll-target="#sec-ch03-linear-regression"><span class="header-section-number">3.2</span> 선형 회귀</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch03-conditional-mean" id="toc-sec-ch03-conditional-mean" class="nav-link" data-scroll-target="#sec-ch03-conditional-mean"><span class="header-section-number">3.2.1</span> 조건부 평균 모형</a></li>
+  <li><a href="#sec-ch03-ols" id="toc-sec-ch03-ols" class="nav-link" data-scroll-target="#sec-ch03-ols"><span class="header-section-number">3.2.2</span> 최소제곱 추정</a></li>
+  <li><a href="#sec-ch03-ols-geometry" id="toc-sec-ch03-ols-geometry" class="nav-link" data-scroll-target="#sec-ch03-ols-geometry"><span class="header-section-number">3.2.3</span> 기하학적 해석</a></li>
+  <li><a href="#sec-ch03-ols-properties" id="toc-sec-ch03-ols-properties" class="nav-link" data-scroll-target="#sec-ch03-ols-properties"><span class="header-section-number">3.2.4</span> 최소제곱의 통계적 성질</a></li>
+  <li><a href="#sec-ch03-linear-prediction" id="toc-sec-ch03-linear-prediction" class="nav-link" data-scroll-target="#sec-ch03-linear-prediction"><span class="header-section-number">3.2.5</span> 예측과 예측구간</a></li>
+  <li><a href="#sec-ch03-multicollinearity" id="toc-sec-ch03-multicollinearity" class="nav-link" data-scroll-target="#sec-ch03-multicollinearity"><span class="header-section-number">3.2.6</span> 다중공선성</a></li>
+  <li><a href="#sec-ch03-diagnostics" id="toc-sec-ch03-diagnostics" class="nav-link" data-scroll-target="#sec-ch03-diagnostics"><span class="header-section-number">3.2.7</span> 영향점과 잔차진단</a></li>
+  <li><a href="#sec-ch03-heteroskedasticity" id="toc-sec-ch03-heteroskedasticity" class="nav-link" data-scroll-target="#sec-ch03-heteroskedasticity"><span class="header-section-number">3.2.8</span> 이분산성과 강건 표준오차</a></li>
+  <li><a href="#sec-ch03-ridge-regression" id="toc-sec-ch03-ridge-regression" class="nav-link" data-scroll-target="#sec-ch03-ridge-regression"><span class="header-section-number">3.2.9</span> 릿지 회귀</a></li>
+  <li><a href="#sec-ch03-linear-evaluation" id="toc-sec-ch03-linear-evaluation" class="nav-link" data-scroll-target="#sec-ch03-linear-evaluation"><span class="header-section-number">3.2.10</span> 선형 회귀의 평가</a></li>
+  </ul></li>
+  <li><a href="#sec-ch03-logistic-regression" id="toc-sec-ch03-logistic-regression" class="nav-link" data-scroll-target="#sec-ch03-logistic-regression"><span class="header-section-number">3.3</span> 로지스틱 회귀</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch03-binary-probability" id="toc-sec-ch03-binary-probability" class="nav-link" data-scroll-target="#sec-ch03-binary-probability"><span class="header-section-number">3.3.1</span> 이진 반응과 사건확률</a></li>
+  <li><a href="#sec-ch03-logistic-likelihood" id="toc-sec-ch03-logistic-likelihood" class="nav-link" data-scroll-target="#sec-ch03-logistic-likelihood"><span class="header-section-number">3.3.2</span> 우도와 교차엔트로피</a></li>
+  <li><a href="#sec-ch03-logistic-optimization" id="toc-sec-ch03-logistic-optimization" class="nav-link" data-scroll-target="#sec-ch03-logistic-optimization"><span class="header-section-number">3.3.3</span> 기울기, 헤시안과 반복가중최소제곱</a></li>
+  <li><a href="#sec-ch03-odds-ratio" id="toc-sec-ch03-odds-ratio" class="nav-link" data-scroll-target="#sec-ch03-odds-ratio"><span class="header-section-number">3.3.4</span> 계수와 오즈비의 해석</a></li>
+  <li><a href="#sec-ch03-logistic-boundary" id="toc-sec-ch03-logistic-boundary" class="nav-link" data-scroll-target="#sec-ch03-logistic-boundary"><span class="header-section-number">3.3.5</span> 결정경계와 임계값</a></li>
+  <li><a href="#sec-ch03-regularized-logistic" id="toc-sec-ch03-regularized-logistic" class="nav-link" data-scroll-target="#sec-ch03-regularized-logistic"><span class="header-section-number">3.3.6</span> 규제 로지스틱 회귀</a></li>
+  <li><a href="#sec-ch03-separation" id="toc-sec-ch03-separation" class="nav-link" data-scroll-target="#sec-ch03-separation"><span class="header-section-number">3.3.7</span> 완전분리와 준완전분리</a></li>
+  <li><a href="#sec-ch03-rare-event-intercept" id="toc-sec-ch03-rare-event-intercept" class="nav-link" data-scroll-target="#sec-ch03-rare-event-intercept"><span class="header-section-number">3.3.8</span> 희귀사건과 절편</a></li>
+  <li><a href="#sec-ch03-logistic-evaluation" id="toc-sec-ch03-logistic-evaluation" class="nav-link" data-scroll-target="#sec-ch03-logistic-evaluation"><span class="header-section-number">3.3.9</span> 로지스틱 회귀의 평가와 보정</a></li>
+  </ul></li>
+  <li><a href="#sec-ch03-lda" id="toc-sec-ch03-lda" class="nav-link" data-scroll-target="#sec-ch03-lda"><span class="header-section-number">3.4</span> 선형 판별분석</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch03-generative-discriminative" id="toc-sec-ch03-generative-discriminative" class="nav-link" data-scroll-target="#sec-ch03-generative-discriminative"><span class="header-section-number">3.4.1</span> 생성적 분류(generative classification)와 판별적 분류(discriminative classification)</a></li>
+  <li><a href="#sec-ch03-lda-gaussian" id="toc-sec-ch03-lda-gaussian" class="nav-link" data-scroll-target="#sec-ch03-lda-gaussian"><span class="header-section-number">3.4.2</span> 가우시안 클래스 조건부분포</a></li>
+  <li><a href="#sec-ch03-lda-estimation" id="toc-sec-ch03-lda-estimation" class="nav-link" data-scroll-target="#sec-ch03-lda-estimation"><span class="header-section-number">3.4.3</span> 모수 추정</a></li>
+  <li><a href="#sec-ch03-lda-geometry" id="toc-sec-ch03-lda-geometry" class="nav-link" data-scroll-target="#sec-ch03-lda-geometry"><span class="header-section-number">3.4.4</span> LDA의 기하학</a></li>
+  <li><a href="#sec-ch03-qda" id="toc-sec-ch03-qda" class="nav-link" data-scroll-target="#sec-ch03-qda"><span class="header-section-number">3.4.5</span> 이차 판별분석과의 비교</a></li>
+  <li><a href="#sec-ch03-lda-logistic-relation" id="toc-sec-ch03-lda-logistic-relation" class="nav-link" data-scroll-target="#sec-ch03-lda-logistic-relation"><span class="header-section-number">3.4.6</span> LDA와 로지스틱 회귀의 관계</a></li>
+  <li><a href="#sec-ch03-lda-workflow" id="toc-sec-ch03-lda-workflow" class="nav-link" data-scroll-target="#sec-ch03-lda-workflow"><span class="header-section-number">3.4.7</span> LDA의 실제 적용 절차</a></li>
+  </ul></li>
+  <li><a href="#sec-ch03-multiclass" id="toc-sec-ch03-multiclass" class="nav-link" data-scroll-target="#sec-ch03-multiclass"><span class="header-section-number">3.5</span> 다중 분류 학습</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch03-multiclass-problem" id="toc-sec-ch03-multiclass-problem" class="nav-link" data-scroll-target="#sec-ch03-multiclass-problem"><span class="header-section-number">3.5.1</span> 다중 클래스 문제</a></li>
+  <li><a href="#sec-ch03-one-vs-rest" id="toc-sec-ch03-one-vs-rest" class="nav-link" data-scroll-target="#sec-ch03-one-vs-rest"><span class="header-section-number">3.5.2</span> 일대나머지 방법</a></li>
+  <li><a href="#sec-ch03-one-vs-one" id="toc-sec-ch03-one-vs-one" class="nav-link" data-scroll-target="#sec-ch03-one-vs-one"><span class="header-section-number">3.5.3</span> 일대일 방법</a></li>
+  <li><a href="#sec-ch03-softmax" id="toc-sec-ch03-softmax" class="nav-link" data-scroll-target="#sec-ch03-softmax"><span class="header-section-number">3.5.4</span> 다항 로지스틱 회귀와 소프트맥스(softmax)</a></li>
+  <li><a href="#sec-ch03-multiclass-lda" id="toc-sec-ch03-multiclass-lda" class="nav-link" data-scroll-target="#sec-ch03-multiclass-lda"><span class="header-section-number">3.5.5</span> 다중 클래스 LDA</a></li>
+  <li><a href="#sec-ch03-ordinal-distinction" id="toc-sec-ch03-ordinal-distinction" class="nav-link" data-scroll-target="#sec-ch03-ordinal-distinction"><span class="header-section-number">3.5.6</span> 순서형 반응의 구분</a></li>
+  <li><a href="#sec-ch03-multiclass-evaluation" id="toc-sec-ch03-multiclass-evaluation" class="nav-link" data-scroll-target="#sec-ch03-multiclass-evaluation"><span class="header-section-number">3.5.7</span> 다중 분류 성능평가</a></li>
+  </ul></li>
+  <li><a href="#sec-ch03-class-imbalance" id="toc-sec-ch03-class-imbalance" class="nav-link" data-scroll-target="#sec-ch03-class-imbalance"><span class="header-section-number">3.6</span> 클래스 불균형 문제</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch03-imbalance-definition" id="toc-sec-ch03-imbalance-definition" class="nav-link" data-scroll-target="#sec-ch03-imbalance-definition"><span class="header-section-number">3.6.1</span> 불균형의 정의와 원인</a></li>
+  <li><a href="#sec-ch03-accuracy-paradox" id="toc-sec-ch03-accuracy-paradox" class="nav-link" data-scroll-target="#sec-ch03-accuracy-paradox"><span class="header-section-number">3.6.2</span> 정확도의 역설</a></li>
+  <li><a href="#sec-ch03-roc-pr" id="toc-sec-ch03-roc-pr" class="nav-link" data-scroll-target="#sec-ch03-roc-pr"><span class="header-section-number">3.6.3</span> ROC 곡선과 정밀도-재현율 곡선</a></li>
+  <li><a href="#sec-ch03-cost-sensitive" id="toc-sec-ch03-cost-sensitive" class="nav-link" data-scroll-target="#sec-ch03-cost-sensitive"><span class="header-section-number">3.6.4</span> 비용민감 학습</a></li>
+  <li><a href="#sec-ch03-resampling-imbalance" id="toc-sec-ch03-resampling-imbalance" class="nav-link" data-scroll-target="#sec-ch03-resampling-imbalance"><span class="header-section-number">3.6.5</span> 언더샘플링과 오버샘플링</a></li>
+  <li><a href="#sec-ch03-resampling-calibration" id="toc-sec-ch03-resampling-calibration" class="nav-link" data-scroll-target="#sec-ch03-resampling-calibration"><span class="header-section-number">3.6.6</span> 표본비율 변경과 확률 보정</a></li>
+  <li><a href="#sec-ch03-imbalance-evaluation-design" id="toc-sec-ch03-imbalance-evaluation-design" class="nav-link" data-scroll-target="#sec-ch03-imbalance-evaluation-design"><span class="header-section-number">3.6.7</span> 불균형 자료의 평가설계</a></li>
+  <li><a href="#sec-ch03-imbalance-strategy" id="toc-sec-ch03-imbalance-strategy" class="nav-link" data-scroll-target="#sec-ch03-imbalance-strategy"><span class="header-section-number">3.6.8</span> 불균형 문제의 실무 전략</a></li>
+  </ul></li>
+  <li><a href="#sec-ch03-integrated-view" id="toc-sec-ch03-integrated-view" class="nav-link" data-scroll-target="#sec-ch03-integrated-view"><span class="header-section-number">3.7</span> 선형 모형의 통합적 이해</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch03-integrated-generative" id="toc-sec-ch03-integrated-generative" class="nav-link" data-scroll-target="#sec-ch03-integrated-generative"><span class="header-section-number">3.7.1</span> 생성적 모형과 판별적 모형</a></li>
+  <li><a href="#sec-ch03-explanation-prediction" id="toc-sec-ch03-explanation-prediction" class="nav-link" data-scroll-target="#sec-ch03-explanation-prediction"><span class="header-section-number">3.7.2</span> 설명과 예측의 구분</a></li>
+  <li><a href="#sec-ch03-why-linear-strong" id="toc-sec-ch03-why-linear-strong" class="nav-link" data-scroll-target="#sec-ch03-why-linear-strong"><span class="header-section-number">3.7.3</span> 선형 모형이 강력한 이유</a></li>
+  <li><a href="#sec-ch03-linear-workflow" id="toc-sec-ch03-linear-workflow" class="nav-link" data-scroll-target="#sec-ch03-linear-workflow"><span class="header-section-number">3.7.4</span> 전체 학습 파이프라인</a></li>
+  <li><a href="#sec-ch03-common-implementation" id="toc-sec-ch03-common-implementation" class="nav-link" data-scroll-target="#sec-ch03-common-implementation"><span class="header-section-number">3.7.5</span> 구현 예제: 회귀와 분류의 공통 구조</a></li>
+  </ul></li>
+  <li><a href="#장-요약" id="toc-장-요약" class="nav-link" data-scroll-target="#장-요약">장 요약</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-linear-models.html">II. 지도학습</a></li><li class="breadcrumb-item"><a href="./03-linear-models.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">선형 모형</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-ch03" class="quarto-section-identifier"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">선형 모형</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>선형 모형은 통계학과 머신러닝을 연결하는 가장 기본적인 모형군이다. 선형 회귀, 로지스틱 회귀와 선형 판별분석(linear discriminant analysis)은 서로 다른 문제를 다루지만, 입력변수의 선형결합을 통해 예측에 필요한 정보를 요약한다는 공통점을 갖는다. 이러한 단순한 구조 덕분에 선형 모형은 계산이 빠르고, 결과를 해석하기 쉬우며, 작은 표본에서도 비교적 안정적으로 사용할 수 있다. 또한 규제, 기저함수(basis function), 커널과 신경망을 이해하기 위한 출발점이 된다.</p>
+<p>관측값을 <span class="math inline">\((\mathbf x_i,y_i)\)</span>라고 하자. 선형 모형의 핵심은 입력벡터 <span class="math inline">\(\mathbf x_i\in\mathbb R^p\)</span>를 하나의 선형 예측자(linear predictor)</p>
+<p><span id="eq-ch03-linear-predictor"><span class="math display">\[
+\eta_i
+=
+\beta_0+\mathbf x_i^\top\boldsymbol\beta
+\tag{3.1}\]</span></span></p>
+<p>로 변환하는 것이다. 회귀에서는 <span class="math inline">\(\eta_i\)</span>가 조건부 평균을 직접 나타내고, 로지스틱 회귀에서는 사건확률의 로짓을 나타내며, 선형 판별분석에서는 각 클래스에 대한 판별점수의 일부가 된다. 따라서 선형 모형을 이해한다는 것은 단순히 직선을 적합하는 방법을 배우는 것이 아니라, <strong>표현</strong>, <strong>확률모형</strong>, <strong>손실함수</strong>, <strong>규제</strong>와 <strong>의사결정 규칙</strong>이 어떻게 결합되는지를 이해하는 것이다.</p>
+<p>Chapter 2에서 모형 평가와 선택을 학습 절차 전체의 일부로 다루었다. 이 장에서는 동일한 관점을 유지한다. 모형을 적합하는 것만으로 분석이 끝나는 것이 아니라, 변수의 표현과 척도를 결정하고, 훈련자료 안에서 모수와 하이퍼파라미터를 추정하며, 독립적인 자료에서 예측성능과 보정도를 평가해야 한다.</p>
+<div class="callout callout-style-default callout-important callout-titled" title="선형이라는 말의 의미">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">중요</span>선형이라는 말의 의미
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>선형 모형은 반드시 원래 입력변수에 대해 직선인 모형을 의미하지 않는다. 변환된 특성 <span class="math inline">\(\phi_1(\mathbf x),\ldots,\phi_m(\mathbf x)\)</span>에 대해</p>
+<p><span class="math display">\[
+f(\mathbf x)
+=
+\beta_0+
+\sum_{j=1}^{m}\beta_j\phi_j(\mathbf x)
+\]</span></p>
+<p>처럼 계수에 선형이면 선형 모형의 계산 구조를 그대로 사용할 수 있다. 다항회귀, 스플라인 회귀와 범주형 변수의 더미변수 표현이 대표적인 예이다.</p>
+</div>
+</div>
+<section id="sec-ch03-basic-form" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="sec-ch03-basic-form"><span class="header-section-number">3.1</span> 기본 형식</h2>
+<section id="sec-ch03-data-predictor" class="level3" data-number="3.1.1">
+<h3 data-number="3.1.1" class="anchored" data-anchor-id="sec-ch03-data-predictor"><span class="header-section-number">3.1.1</span> 자료와 선형 예측자</h3>
+<p>훈련자료를</p>
+<p><span id="eq-ch03-dataset"><span class="math display">\[
+\mathcal D
+=
+\{(\mathbf x_i,y_i)\}_{i=1}^{n},
+\qquad
+\mathbf x_i=(x_{i1},\ldots,x_{ip})^\top
+\tag{3.2}\]</span></span></p>
+<p>라고 하자. 절편을 포함한 설계행렬(design matrix)은</p>
+<p><span id="eq-ch03-design-matrix"><span class="math display">\[
+\mathbf X
+=
+\begin{bmatrix}
+1 &amp; x_{11} &amp; \cdots &amp; x_{1p}\\
+1 &amp; x_{21} &amp; \cdots &amp; x_{2p}\\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots\\
+1 &amp; x_{n1} &amp; \cdots &amp; x_{np}
+\end{bmatrix},
+\qquad
+\boldsymbol\beta
+=
+\begin{bmatrix}
+\beta_0\\
+\beta_1\\
+\vdots\\
+\beta_p
+\end{bmatrix}
+\tag{3.3}\]</span></span></p>
+<p>로 나타낼 수 있다. 전체 관측값의 선형 예측자는</p>
+<p><span id="eq-ch03-matrix-predictor"><span class="math display">\[
+\boldsymbol\eta
+=
+\mathbf X\boldsymbol\beta
+\tag{3.4}\]</span></span></p>
+<p>이다. 선형 모형은 <span class="math inline">\(p\)</span>개의 입력변수를 <span class="math inline">\(p+1\)</span>개의 계수로 요약한다. 각 계수는 다른 변수를 고정했을 때 해당 특성이 선형 예측자에 미치는 국소적 변화를 나타낸다.</p>
+<p>연속형 변수와 범주형 변수가 함께 있는 경우에도 설계행렬을 구성할 수 있다. <span class="math inline">\(K\)</span>개 범주를 가진 변수는 보통 기준범주 하나를 제외한 <span class="math inline">\(K-1\)</span>개의 지시변수로 표현한다. 상호작용(interaction)을 포함하려면 두 변수의 곱을 새로운 열로 추가하고, 비선형성을 표현하려면 제곱항이나 기저함수를 추가한다.</p>
+<p>예를 들어 한 연속형 변수 <span class="math inline">\(x_1\)</span>, 이진변수 <span class="math inline">\(x_2\)</span>와 상호작용을 포함한 모형은</p>
+<p><span id="eq-ch03-interaction-model"><span class="math display">\[
+\eta
+=
+\beta_0+
+\beta_1x_1+
+\beta_2x_2+
+\beta_3x_1x_2
+\tag{3.5}\]</span></span></p>
+<p>로 쓸 수 있다. <span class="math inline">\(x_2=0\)</span>일 때 <span class="math inline">\(x_1\)</span>의 기울기는 <span class="math inline">\(\beta_1\)</span>이고, <span class="math inline">\(x_2=1\)</span>일 때 기울기는 <span class="math inline">\(\beta_1+\beta_3\)</span>이다. 따라서 주효과의 의미는 상호작용이 포함되면 조건부로 해석해야 한다.</p>
+</section>
+<section id="sec-ch03-four-components" class="level3" data-number="3.1.2">
+<h3 data-number="3.1.2" class="anchored" data-anchor-id="sec-ch03-four-components"><span class="header-section-number">3.1.2</span> 선형 모형의 네 구성요소</h3>
+<p>대부분의 선형 학습 문제는 다음 네 요소로 정리할 수 있다.</p>
+<ol type="1">
+<li><strong>표현</strong>: 입력을 어떤 특성으로 나타낼 것인가?</li>
+<li><strong>모형</strong>: 선형 예측자와 반응변수를 어떤 확률적 관계로 연결할 것인가?</li>
+<li><strong>손실함수</strong>: 예측오차를 어떻게 측정할 것인가?</li>
+<li><strong>복잡도 제어</strong>: 계수의 크기와 수를 어떻게 제한할 것인가?</li>
+</ol>
+<p>이를 하나의 최적화 문제로 표현하면</p>
+<p><span id="eq-ch03-regularized-objective"><span class="math display">\[
+\widehat{\boldsymbol\beta}
+=
+\arg\min_{\boldsymbol\beta}
+\left[
+\frac{1}{n}
+\sum_{i=1}^{n}
+L\{y_i,\eta_i(\boldsymbol\beta)\}
++
+\lambda\Omega(\boldsymbol\beta)
+\right]
+\tag{3.6}\]</span></span></p>
+<p>이다. 선형 회귀는 주로 제곱손실을, 로지스틱 회귀는 로그손실을 사용한다. 릿지 회귀(ridge regression)는 <span class="math inline">\(\ell_2\)</span> 패널티를, LASSO는 <span class="math inline">\(\ell_1\)</span> 패널티를 사용한다.</p>
+<div id="tbl-ch03-linear-family" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch03-linear-family-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;3.1: 대표적인 선형 학습모형의 공통 구조
+</figcaption>
+<div aria-describedby="tbl-ch03-linear-family-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>모형</th>
+<th>선형 예측자와 반응의 연결</th>
+<th>대표 손실함수</th>
+<th>대표 규제</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>선형 회귀</td>
+<td><span class="math inline">\(E(Y\mid\mathbf X)=\eta\)</span></td>
+<td>제곱손실</td>
+<td>릿지, LASSO</td>
+</tr>
+<tr class="even">
+<td>로지스틱 회귀</td>
+<td><span class="math inline">\(\operatorname{logit}\{P(Y=1\mid\mathbf X)\}=\eta\)</span></td>
+<td>로그손실</td>
+<td>릿지, LASSO</td>
+</tr>
+<tr class="odd">
+<td>선형 SVM</td>
+<td>분류점수 <span class="math inline">\(f(\mathbf x)=\eta\)</span></td>
+<td>힌지손실</td>
+<td><span class="math inline">\(\ell_2\)</span> 규제</td>
+</tr>
+<tr class="even">
+<td>선형 판별분석</td>
+<td>클래스별 선형 판별점수</td>
+<td>음의 로그우도 또는 분류오차</td>
+<td>공분산 축소</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-ch03-probabilistic-predictive" class="level3" data-number="3.1.3">
+<h3 data-number="3.1.3" class="anchored" data-anchor-id="sec-ch03-probabilistic-predictive"><span class="header-section-number">3.1.3</span> 확률적 모형과 예측함수</h3>
+<p>선형 모형은 확률분포를 명시하는 방식과 손실함수를 직접 최소화하는 방식으로 모두 유도할 수 있다. 선형 회귀에서</p>
+<p><span id="eq-ch03-gaussian-model"><span class="math display">\[
+Y\mid\mathbf X=\mathbf x
+\sim
+N\{\beta_0+\mathbf x^\top\boldsymbol\beta,\sigma^2\}
+\tag{3.7}\]</span></span></p>
+<p>를 가정하면 최대우도추정은 제곱오차 최소화와 동일하다. 로지스틱 회귀에서</p>
+<p><span id="eq-ch03-bernoulli-model"><span class="math display">\[
+Y\mid\mathbf X=\mathbf x
+\sim
+\operatorname{Bernoulli}\{\pi(\mathbf x)\}
+\tag{3.8}\]</span></span></p>
+<p>와 로짓 연결함수를 사용하면 최대우도추정은 교차엔트로피(cross-entropy) 손실 최소화와 동일하다.</p>
+<p>확률모형은 불확실성 추정과 자료생성 과정의 해석에 유용하다. 반면 손실함수 관점은 예측문제를 더 일반적으로 표현하고, 규제나 비표준 손실함수를 도입하기 쉽다. 두 관점은 서로 경쟁하는 것이 아니라 동일한 학습문제를 다른 언어로 설명한다.</p>
+</section>
+<section id="sec-ch03-basis-expansion" class="level3" data-number="3.1.4">
+<h3 data-number="3.1.4" class="anchored" data-anchor-id="sec-ch03-basis-expansion"><span class="header-section-number">3.1.4</span> 기저함수와 특성 확장</h3>
+<p>원래 변수에 대한 선형성이 부적절하더라도 변환된 특성에 대해 선형 모형을 적합할 수 있다. 기저함수 벡터를</p>
+<p><span id="eq-ch03-basis-vector"><span class="math display">\[
+\boldsymbol\phi(\mathbf x)
+=
+\{\phi_1(\mathbf x),\ldots,\phi_m(\mathbf x)\}^\top
+\tag{3.9}\]</span></span></p>
+<p>라고 하면</p>
+<p><span id="eq-ch03-basis-linear-model"><span class="math display">\[
+f(\mathbf x)
+=
+\beta_0+
+\boldsymbol\phi(\mathbf x)^\top\boldsymbol\beta
+\tag{3.10}\]</span></span></p>
+<p>로 표현한다. 단일 변수 <span class="math inline">\(x\)</span>에 대한 3차 다항기저는</p>
+<p><span id="eq-ch03-polynomial-basis"><span class="math display">\[
+\boldsymbol\phi(x)
+=
+(x,x^2,x^3)^\top
+\tag{3.11}\]</span></span></p>
+<p>이다. 모형은 <span class="math inline">\(x\)</span>에 대해서는 비선형이지만 계수에 대해서는 선형이다.</p>
+<p>기저 확장은 표현력을 높이지만 차원을 증가시키고 다중공선성과 과적합 위험을 키울 수 있다. 따라서 기저함수의 수와 형태는 교차검증으로 선택하거나 규제와 함께 사용해야 한다. 고차 다항식은 경계에서 크게 진동할 수 있으므로 스플라인과 같은 국소 기저가 더 안정적인 경우가 많다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch03-basis-expansion" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-basis-expansion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="03-linear-models_files/figure-html/fig-ch03-basis-expansion-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-basis-expansion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;3.1: 원래 입력과 다항기저를 사용한 선형 모형의 표현력
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch03-basis-expansion" class="quarto-xref">그림&nbsp;<span>3.1</span></a><!-- -->은 동일한 선형 추정 알고리즘이 특성 표현에 따라 매우 다른 함수를 학습할 수 있음을 보여준다. 머신러닝에서 모형의 유연성은 알고리즘뿐 아니라 입력을 어떻게 표현하는가에 의해 결정된다.</p>
+</section>
+<section id="sec-ch03-centering-scaling" class="level3" data-number="3.1.5">
+<h3 data-number="3.1.5" class="anchored" data-anchor-id="sec-ch03-centering-scaling"><span class="header-section-number">3.1.5</span> 변수의 중심화와 표준화</h3>
+<p>변수의 단위가 서로 다르면 계수의 크기를 직접 비교하기 어렵고, 규제 패널티가 특정 변수에 더 강하게 작용할 수 있다. 연속형 변수 <span class="math inline">\(x_j\)</span>를</p>
+<p><span id="eq-ch03-standardization"><span class="math display">\[
+z_{ij}
+=
+\frac{x_{ij}-\bar x_j}{s_j}
+\tag{3.12}\]</span></span></p>
+<p>로 표준화하면 평균이 0이고 표준편차가 1인 척도로 변환된다. 표준화는 릿지와 LASSO에서 특히 중요하다. 그렇지 않으면 단위가 큰 변수는 작은 계수만으로도 큰 영향을 만들 수 있어 패널티를 상대적으로 적게 받는다.</p>
+<p>표준화에 사용되는 평균과 표준편차는 반드시 훈련자료에서 계산해야 한다. 검증자료와 시험자료는 훈련자료의 <span class="math inline">\(\bar x_j\)</span>와 <span class="math inline">\(s_j\)</span>를 이용해 변환한다. 전체 자료에서 표준화한 뒤 분할하면 평가자료의 정보가 학습 과정에 유입되는 데이터 누출이 발생한다.</p>
+<p>절편은 일반적으로 패널티를 부과하지 않는다. 입력변수가 중심화되어 있으면 절편은 반응변수의 평균 또는 기준 로그오즈와 직접 연결되어 해석이 쉬워진다.</p>
+</section>
+<section id="sec-ch03-regularization-overview" class="level3" data-number="3.1.6">
+<h3 data-number="3.1.6" class="anchored" data-anchor-id="sec-ch03-regularization-overview"><span class="header-section-number">3.1.6</span> 규제와 제약조건</h3>
+<p>규제는 계수의 크기나 구조에 제약을 주어 분산과 과적합을 줄이는 방법이다. 릿지 패널티는</p>
+<p><span id="eq-ch03-ridge-penalty"><span class="math display">\[
+\Omega_{\mathrm{ridge}}(\boldsymbol\beta)
+=
+\sum_{j=1}^{p}\beta_j^2
+=
+\lVert\boldsymbol\beta\rVert_2^2
+\tag{3.13}\]</span></span></p>
+<p>이고, LASSO 패널티는</p>
+<p><span id="eq-ch03-lasso-penalty"><span class="math display">\[
+\Omega_{\mathrm{lasso}}(\boldsymbol\beta)
+=
+\sum_{j=1}^{p}|\beta_j|
+=
+\lVert\boldsymbol\beta\rVert_1
+\tag{3.14}\]</span></span></p>
+<p>이다. 탄력적 그물은 두 패널티를 결합한다.</p>
+<p><span id="eq-ch03-elastic-net-penalty"><span class="math display">\[
+\Omega_{\mathrm{EN}}(\boldsymbol\beta)
+=
+\alpha\lVert\boldsymbol\beta\rVert_1
++
+\frac{1-\alpha}{2}\lVert\boldsymbol\beta\rVert_2^2,
+\qquad 0\leq\alpha\leq 1
+\tag{3.15}\]</span></span></p>
+<p>패널티 최적화는 제약된 최적화와 연결된다. 예를 들어 릿지 회귀는 적절한 <span class="math inline">\(t\)</span>에 대해</p>
+<p><span id="eq-ch03-ridge-constraint"><span class="math display">\[
+\min_{\boldsymbol\beta}
+\sum_{i=1}^{n}(y_i-\beta_0-\mathbf x_i^\top\boldsymbol\beta)^2
+\quad
+\text{subject to}
+\quad
+\lVert\boldsymbol\beta\rVert_2^2\leq t
+\tag{3.16}\]</span></span></p>
+<p>와 동등하다. <span class="math inline">\(\lambda\)</span>가 커질수록 허용되는 계수 공간은 작아진다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch03-penalty-geometry" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-penalty-geometry-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="03-linear-models_files/figure-html/fig-ch03-penalty-geometry-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-penalty-geometry-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;3.2: <span class="math inline">\(ll_1\)</span>과 <span class="math inline">\(ll_2\)</span> 제약영역의 기하학적 차이
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch03-penalty-geometry" class="quarto-xref">그림&nbsp;<span>3.2</span></a><!-- -->에서 <span class="math inline">\(\ell_1\)</span> 제약영역은 좌표축 위에 꼭짓점을 갖는다. 손실함수의 등고선이 제약영역과 처음 접하는 지점이 꼭짓점이 될 가능성이 높기 때문에 일부 계수가 정확히 0이 될 수 있다. 반면 <span class="math inline">\(\ell_2\)</span> 제약은 계수를 연속적으로 축소하지만 일반적으로 정확한 0을 만들지는 않는다. 특성 선택과 희소학습은 Chapter 11에서 자세히 다룬다.</p>
+</section>
+<section id="sec-ch03-optimization-overview" class="level3" data-number="3.1.7">
+<h3 data-number="3.1.7" class="anchored" data-anchor-id="sec-ch03-optimization-overview"><span class="header-section-number">3.1.7</span> 최적화와 정상방정식</h3>
+<p>목적함수가 미분 가능하면 기울기</p>
+<p><span id="eq-ch03-gradient-general"><span class="math display">\[
+\nabla_{\boldsymbol\beta}J(\boldsymbol\beta)
+\tag{3.17}\]</span></span></p>
+<p>를 이용해 최적점을 찾을 수 있다. 해석적인 해가 존재하는 선형 회귀에서는 정상방정식(normal equations)을 사용할 수 있다. 로지스틱 회귀처럼 닫힌형태의 해가 없는 경우에는 뉴턴 방법, 반복가중최소제곱(iteratively reweighted least squares) 또는 경사하강법을 사용한다.</p>
+<p>경사하강법의 기본 갱신식은</p>
+<p><span id="eq-ch03-gradient-descent"><span class="math display">\[
+\boldsymbol\beta^{(t+1)}
+=
+\boldsymbol\beta^{(t)}
+-
+\eta_t
+\nabla_{\boldsymbol\beta}J\{\boldsymbol\beta^{(t)}\}
+\tag{3.18}\]</span></span></p>
+<p>이다. 학습률 <span class="math inline">\(\eta_t\)</span>가 너무 크면 발산하거나 최적점을 지나칠 수 있고, 너무 작으면 수렴이 느리다. 특성의 척도가 매우 다르면 손실함수의 등고선이 길쭉해져 경사하강법의 수렴이 느려질 수 있으므로 표준화가 계산 측면에서도 도움이 된다.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="해석적 해와 수치 최적화">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">노트</span>해석적 해와 수치 최적화
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>해석적인 해가 존재한다고 해서 반드시 역행렬을 직접 계산해야 하는 것은 아니다. 실제 계산에서는 QR 분해나 특잇값 분해를 이용하는 것이 수치적으로 더 안정적이다. 머신러닝에서 식의 유도와 안정적인 구현은 구분해야 한다.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-ch03-linear-regression" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="sec-ch03-linear-regression"><span class="header-section-number">3.2</span> 선형 회귀</h2>
+<section id="sec-ch03-conditional-mean" class="level3" data-number="3.2.1">
+<h3 data-number="3.2.1" class="anchored" data-anchor-id="sec-ch03-conditional-mean"><span class="header-section-number">3.2.1</span> 조건부 평균 모형</h3>
+<p>선형 회귀는 연속형 반응변수의 조건부 평균을 선형 예측자로 표현한다.</p>
+<p><span id="eq-ch03-linear-conditional-mean"><span class="math display">\[
+E(Y\mid\mathbf X=\mathbf x)
+=
+\beta_0+\mathbf x^\top\boldsymbol\beta
+\tag{3.19}\]</span></span></p>
+<p>관측모형은</p>
+<p><span id="eq-ch03-linear-observation"><span class="math display">\[
+y_i
+=
+\beta_0+\mathbf x_i^\top\boldsymbol\beta+\varepsilon_i
+\tag{3.20}\]</span></span></p>
+<p>로 나타낼 수 있다. <span class="math inline">\(E(\varepsilon_i\mid\mathbf X)=0\)</span>이면 선형 예측자는 조건부 평균을 올바르게 나타낸다. 오차의 정규성은 최소제곱(ordinary least squares) 계수의 계산 자체에 필요한 가정은 아니지만, 작은 표본에서 전통적인 신뢰구간과 가설검정을 유도할 때 사용된다.</p>
+<p>행렬 형태로는</p>
+<p><span id="eq-ch03-linear-matrix-model"><span class="math display">\[
+\mathbf y
+=
+\mathbf X\boldsymbol\beta+\boldsymbol\varepsilon
+\tag{3.21}\]</span></span></p>
+<p>이다.</p>
+</section>
+<section id="sec-ch03-ols" class="level3" data-number="3.2.2">
+<h3 data-number="3.2.2" class="anchored" data-anchor-id="sec-ch03-ols"><span class="header-section-number">3.2.2</span> 최소제곱 추정</h3>
+<p>보통최소제곱법은 잔차제곱합</p>
+<p><span id="eq-ch03-rss"><span class="math display">\[
+\operatorname{RSS}(\boldsymbol\beta)
+=
+\sum_{i=1}^{n}
+\{y_i-\beta_0-\mathbf x_i^\top\boldsymbol\beta\}^2
+=
+(\mathbf y-\mathbf X\boldsymbol\beta)^\top
+(\mathbf y-\mathbf X\boldsymbol\beta)
+\tag{3.22}\]</span></span></p>
+<p>을 최소화한다. 목적함수를 미분하면</p>
+<p><span id="eq-ch03-rss-gradient"><span class="math display">\[
+\frac{\partial\operatorname{RSS}}{\partial\boldsymbol\beta}
+=
+-2\mathbf X^\top
+(\mathbf y-\mathbf X\boldsymbol\beta)
+\tag{3.23}\]</span></span></p>
+<p>이고 이를 0으로 두면 정상방정식</p>
+<p><span id="eq-ch03-normal-equations"><span class="math display">\[
+\mathbf X^\top\mathbf X\widehat{\boldsymbol\beta}
+=
+\mathbf X^\top\mathbf y
+\tag{3.24}\]</span></span></p>
+<p>을 얻는다. <span class="math inline">\(\mathbf X\)</span>의 열이 선형독립이고 <span class="math inline">\(\mathbf X^\top\mathbf X\)</span>가 가역이면</p>
+<p><span id="eq-ch03-ols-solution"><span class="math display">\[
+\widehat{\boldsymbol\beta}_{\mathrm{OLS}}
+=
+(\mathbf X^\top\mathbf X)^{-1}
+\mathbf X^\top\mathbf y
+\tag{3.25}\]</span></span></p>
+<p>이다.</p>
+<p><a href="#eq-ch03-ols-solution" class="quarto-xref">방정식&nbsp;<span>3.25</span></a><!-- -->은 이론적으로 중요하지만 실제 계산에서 역행렬을 직접 구하는 것은 권장되지 않는다. 열 사이의 상관이 매우 높거나 변수 수가 많으면 <span class="math inline">\(\mathbf X^\top\mathbf X\)</span>가 수치적으로 불안정해질 수 있다. QR 분해는 정상방정식을 직접 푸는 것보다 조건수가 덜 악화되고, 특잇값 분해는 랭크 결손과 작은 특잇값을 진단하는 데 유용하다.</p>
+</section>
+<section id="sec-ch03-ols-geometry" class="level3" data-number="3.2.3">
+<h3 data-number="3.2.3" class="anchored" data-anchor-id="sec-ch03-ols-geometry"><span class="header-section-number">3.2.3</span> 기하학적 해석</h3>
+<p>적합값은</p>
+<p><span id="eq-ch03-fitted-hat"><span class="math display">\[
+\widehat{\mathbf y}
+=
+\mathbf X\widehat{\boldsymbol\beta}
+=
+\mathbf H\mathbf y
+\tag{3.26}\]</span></span></p>
+<p>이고</p>
+<p><span id="eq-ch03-hat-matrix"><span class="math display">\[
+\mathbf H
+=
+\mathbf X(\mathbf X^\top\mathbf X)^{-1}\mathbf X^\top
+\tag{3.27}\]</span></span></p>
+<p>를 모자행렬(hat matrix)이라고 한다. <span class="math inline">\(\widehat{\mathbf y}\)</span>는 반응벡터 <span class="math inline">\(\mathbf y\)</span>를 <span class="math inline">\(\mathbf X\)</span>의 열공간에 직교투영한 결과이다. 잔차벡터는</p>
+<p><span id="eq-ch03-residual-vector"><span class="math display">\[
+\widehat{\boldsymbol\varepsilon}
+=
+\mathbf y-\widehat{\mathbf y}
+=
+(\mathbf I-\mathbf H)\mathbf y
+\tag{3.28}\]</span></span></p>
+<p>이며 설계행렬의 모든 열과 직교한다.</p>
+<p><span id="eq-ch03-residual-orthogonality"><span class="math display">\[
+\mathbf X^\top\widehat{\boldsymbol\varepsilon}
+=
+\mathbf 0
+\tag{3.29}\]</span></span></p>
+<p>절편이 포함되면 잔차의 합은 0이고 적합값의 평균은 반응변수의 평균과 같다.</p>
+<p>모자행렬의 대각원소 <span class="math inline">\(h_{ii}\)</span>를 레버리지(leverage)라고 한다. <span class="math inline">\(h_{ii}\)</span>가 큰 관측값은 입력공간에서 다른 관측값과 멀리 떨어져 있어 자신의 적합값에 큰 영향을 줄 수 있다. 평균 레버리지는</p>
+<p><span id="eq-ch03-average-leverage"><span class="math display">\[
+\frac{1}{n}\sum_{i=1}^{n}h_{ii}
+=
+\frac{\operatorname{tr}(\mathbf H)}{n}
+=
+\frac{p+1}{n}
+\tag{3.30}\]</span></span></p>
+<p>이다.</p>
+</section>
+<section id="sec-ch03-ols-properties" class="level3" data-number="3.2.4">
+<h3 data-number="3.2.4" class="anchored" data-anchor-id="sec-ch03-ols-properties"><span class="header-section-number">3.2.4</span> 최소제곱의 통계적 성질</h3>
+<p>선형 조건부 평균이 올바르고</p>
+<p><span id="eq-ch03-gauss-markov-assumptions"><span class="math display">\[
+E(\boldsymbol\varepsilon\mid\mathbf X)=\mathbf 0,
+\qquad
+\operatorname{Var}(\boldsymbol\varepsilon\mid\mathbf X)
+=
+\sigma^2\mathbf I
+\tag{3.31}\]</span></span></p>
+<p>라고 하자. 그러면</p>
+<p><span id="eq-ch03-ols-unbiased"><span class="math display">\[
+E(\widehat{\boldsymbol\beta}\mid\mathbf X)
+=
+\boldsymbol\beta
+\tag{3.32}\]</span></span></p>
+<p>이고</p>
+<p><span id="eq-ch03-ols-variance"><span class="math display">\[
+\operatorname{Var}(\widehat{\boldsymbol\beta}\mid\mathbf X)
+=
+\sigma^2(\mathbf X^\top\mathbf X)^{-1}
+\tag{3.33}\]</span></span></p>
+<p>이다. 가우스-마르코프 정리에 따르면 OLS는 선형 불편추정량 중 가장 작은 분산을 갖는다. 그러나 예측이 목적이라면 불편성이 항상 최선은 아니다. 릿지 회귀는 약간의 편향을 허용하면서 분산을 크게 줄여 더 작은 예측오차를 얻을 수 있다.</p>
+<p>오차분산은</p>
+<p><span id="eq-ch03-residual-variance"><span class="math display">\[
+\widehat\sigma^2
+=
+\frac{\operatorname{RSS}}{n-p-1}
+\tag{3.34}\]</span></span></p>
+<p>로 추정할 수 있다. 정규오차를 가정하면 계수의 표준오차와 신뢰구간을 계산할 수 있다. 하지만 예측모형의 성능은 계수의 유의성만으로 판단해서는 안 된다. 표본이 크면 예측에 거의 기여하지 않는 변수도 통계적으로 유의할 수 있고, 표본이 작으면 중요한 변수도 불확실성이 커 유의하지 않을 수 있다.</p>
+</section>
+<section id="sec-ch03-linear-prediction" class="level3" data-number="3.2.5">
+<h3 data-number="3.2.5" class="anchored" data-anchor-id="sec-ch03-linear-prediction"><span class="header-section-number">3.2.5</span> 예측과 예측구간</h3>
+<p>새로운 입력 <span class="math inline">\(\mathbf x_0\)</span>의 조건부 평균 예측은</p>
+<p><span id="eq-ch03-mean-prediction"><span class="math display">\[
+\widehat\mu_0
+=
+\widetilde{\mathbf x}_0^\top
+\widehat{\boldsymbol\beta}
+\tag{3.35}\]</span></span></p>
+<p>이다. 여기서 <span class="math inline">\(\widetilde{\mathbf x}_0=(1,\mathbf x_0^\top)^\top\)</span>이다. 조건부 평균 추정의 분산은</p>
+<p><span id="eq-ch03-mean-prediction-variance"><span class="math display">\[
+\operatorname{Var}(\widehat\mu_0\mid\mathbf X)
+=
+\sigma^2
+\widetilde{\mathbf x}_0^\top
+(\mathbf X^\top\mathbf X)^{-1}
+\widetilde{\mathbf x}_0
+\tag{3.36}\]</span></span></p>
+<p>이다. 새로운 개별 관측값 <span class="math inline">\(Y_0\)</span>을 예측할 때는 관측오차 <span class="math inline">\(\sigma^2\)</span>가 추가된다.</p>
+<p><span id="eq-ch03-individual-prediction-variance"><span class="math display">\[
+\operatorname{Var}(Y_0-\widehat\mu_0\mid\mathbf X)
+=
+\sigma^2
+\left[
+1+
+\widetilde{\mathbf x}_0^\top
+(\mathbf X^\top\mathbf X)^{-1}
+\widetilde{\mathbf x}_0
+\right]
+\tag{3.37}\]</span></span></p>
+<p>따라서 개별 예측구간은 평균반응의 신뢰구간보다 넓다. 입력값이 훈련자료의 중심에서 멀어질수록 두 구간 모두 넓어진다. 이는 선형 회귀가 외삽을 계산할 수는 있지만, 외삽의 신뢰성이 자동으로 확보되는 것은 아님을 보여준다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch03-confidence-prediction" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-confidence-prediction-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="03-linear-models_files/figure-html/fig-ch03-confidence-prediction-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-confidence-prediction-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;3.3: 선형 회귀의 평균반응 신뢰구간과 개별 예측구간
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch03-multicollinearity" class="level3" data-number="3.2.6">
+<h3 data-number="3.2.6" class="anchored" data-anchor-id="sec-ch03-multicollinearity"><span class="header-section-number">3.2.6</span> 다중공선성</h3>
+<p>두 개 이상의 특성이 강한 선형관계를 가지면 <span class="math inline">\(\mathbf X^\top\mathbf X\)</span>의 작은 고유값이 발생하고 계수추정의 분산이 커진다. 이를 다중공선성(multicollinearity)이라고 한다. 다중공선성이 강하면 전체 예측은 비교적 안정적일 수 있지만 개별 계수의 부호와 크기가 표본에 따라 크게 달라질 수 있다.</p>
+<p>두 설명변수 <span class="math inline">\(x_1\)</span>과 <span class="math inline">\(x_2\)</span>가 거의 동일하다면</p>
+<p><span id="eq-ch03-collinear-combination"><span class="math display">\[
+\beta_1x_1+
+\beta_2x_2
+\tag{3.38}\]</span></span></p>
+<p>의 합은 안정적으로 추정되더라도 <span class="math inline">\(\beta_1\)</span>과 <span class="math inline">\(\beta_2\)</span>를 따로 식별하기 어렵다. 이 경우 변수 하나를 제거하거나, 영역 지식을 이용해 합성지표를 만들거나, 주성분을 사용하거나, 릿지 규제를 적용할 수 있다.</p>
+<p>분산팽창계수는</p>
+<p><span id="eq-ch03-vif"><span class="math display">\[
+\operatorname{VIF}_j
+=
+\frac{1}{1-R_j^2}
+\tag{3.39}\]</span></span></p>
+<p>로 정의한다. 여기서 <span class="math inline">\(R_j^2\)</span>는 <span class="math inline">\(x_j\)</span>를 나머지 설명변수로 회귀했을 때의 결정계수이다. VIF는 진단도구이지 절대적인 제거 기준은 아니다. 예측 목적에서는 교차검증 성능과 안정성을 함께 살펴야 한다.</p>
+</section>
+<section id="sec-ch03-diagnostics" class="level3" data-number="3.2.7">
+<h3 data-number="3.2.7" class="anchored" data-anchor-id="sec-ch03-diagnostics"><span class="header-section-number">3.2.7</span> 영향점과 잔차진단</h3>
+<p>선형 회귀의 예측오차는 일부 관측값에 민감할 수 있다. 큰 잔차를 가진 관측값은 반응축에서 이상하고, 높은 레버리지를 가진 관측값은 입력공간에서 이상하다. 두 특성을 모두 가진 관측값은 계수에 큰 영향을 줄 수 있다.</p>
+<p>Cook 거리는 한 관측값을 제거했을 때 전체 적합값이 얼마나 변하는지를 요약한다.</p>
+<p><span id="eq-ch03-cooks-distance"><span class="math display">\[
+D_i
+=
+\frac{e_i^2}{(p+1)\widehat\sigma^2}
+\frac{h_{ii}}{(1-h_{ii})^2}
+\tag{3.40}\]</span></span></p>
+<p>잔차진단의 목적은 단순히 관측값을 제거하기 위한 것이 아니다. 자료입력 오류, 측정체계의 변화, 누락된 비선형성, 분산의 비균질성과 하위집단 구조를 발견하는 데 있다. 관측값 제거는 사전에 정의된 원칙과 실질적 근거가 있어야 하며, 제거 전후의 민감도 분석을 함께 보고하는 것이 바람직하다.</p>
+</section>
+<section id="sec-ch03-heteroskedasticity" class="level3" data-number="3.2.8">
+<h3 data-number="3.2.8" class="anchored" data-anchor-id="sec-ch03-heteroskedasticity"><span class="header-section-number">3.2.8</span> 이분산성과 강건 표준오차</h3>
+<p>오차분산이 입력에 따라 달라지는 경우</p>
+<p><span id="eq-ch03-heteroskedasticity"><span class="math display">\[
+\operatorname{Var}(\varepsilon_i\mid\mathbf x_i)
+=
+\sigma_i^2
+\tag{3.41}\]</span></span></p>
+<p>라고 쓸 수 있다. 조건부 평균이 올바르고 외생성이 성립하면 OLS 계수는 여전히 불편일 수 있지만, 고전적인 표준오차 공식은 잘못될 수 있다. 추론이 중요하면 이분산성 강건 표준오차나 가중최소제곱을 고려한다.</p>
+<p>예측 관점에서는 잔차의 분산구조 자체를 모형화할 수도 있다. 예를 들어 로그변환, 분산함수, 분위수회귀 또는 분포회귀를 사용할 수 있다. 평균 예측이 정확하더라도 예측구간이 잘못 보정될 수 있으므로 점예측과 불확실성 예측을 구분해야 한다.</p>
+</section>
+<section id="sec-ch03-ridge-regression" class="level3" data-number="3.2.9">
+<h3 data-number="3.2.9" class="anchored" data-anchor-id="sec-ch03-ridge-regression"><span class="header-section-number">3.2.9</span> 릿지 회귀</h3>
+<p>릿지 회귀는 표준화된 특성에 대해</p>
+<p><span id="eq-ch03-ridge-objective"><span class="math display">\[
+\widehat{\boldsymbol\beta}_{\mathrm{ridge}}
+=
+\arg\min_{\boldsymbol\beta}
+\left[
+\lVert\mathbf y-\mathbf X\boldsymbol\beta\rVert_2^2
++
+\lambda\lVert\boldsymbol\beta\rVert_2^2
+\right]
+\tag{3.42}\]</span></span></p>
+<p>를 푼다. 절편은 중심화를 통해 분리하거나 패널티에서 제외한다. 해는</p>
+<p><span id="eq-ch03-ridge-solution"><span class="math display">\[
+\widehat{\boldsymbol\beta}_{\mathrm{ridge}}
+=
+(\mathbf X^\top\mathbf X+\lambda\mathbf I)^{-1}
+\mathbf X^\top\mathbf y
+\tag{3.43}\]</span></span></p>
+<p>이다. <span class="math inline">\(\lambda&gt;0\)</span>이면 <span class="math inline">\(\mathbf X^\top\mathbf X\)</span>가 특이하더라도 역행렬이 존재할 수 있다.</p>
+<p>특잇값 분해를</p>
+<p><span id="eq-ch03-svd"><span class="math display">\[
+\mathbf X
+=
+\mathbf U\mathbf D\mathbf V^\top
+\tag{3.44}\]</span></span></p>
+<p>라고 하면 릿지 회귀는 작은 특잇값 방향을 더 강하게 축소한다. OLS의 각 주성분 방향 계수에</p>
+<p><span id="eq-ch03-ridge-shrinkage-factor"><span class="math display">\[
+\frac{d_j^2}{d_j^2+\lambda}
+\tag{3.45}\]</span></span></p>
+<p>를 곱하는 것과 같다. 정보가 충분한 큰 특잇값 방향은 덜 축소하고, 불안정한 작은 특잇값 방향은 더 많이 축소한다.</p>
+<p>릿지의 유효 자유도는</p>
+<p><span id="eq-ch03-ridge-df"><span class="math display">\[
+\operatorname{df}_{\mathrm{ridge}}(\lambda)
+=
+\operatorname{tr}
+\left[
+\mathbf X
+(\mathbf X^\top\mathbf X+\lambda\mathbf I)^{-1}
+\mathbf X^\top
+\right]
+=
+\sum_j
+\frac{d_j^2}{d_j^2+\lambda}
+\tag{3.46}\]</span></span></p>
+<p>이다. <span class="math inline">\(\lambda\)</span>가 증가하면 유효 자유도가 감소한다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch03-ridge-path" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-ridge-path-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="03-linear-models_files/figure-html/fig-ch03-ridge-path-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-ridge-path-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;3.4: 릿지 규제계수에 따른 표준화 회귀계수의 축소 경로
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch03-ridge-path" class="quarto-xref">그림&nbsp;<span>3.4</span></a><!-- -->에서 모든 계수는 <span class="math inline">\(\lambda\)</span>가 커질수록 0에 가까워지지만 일반적으로 정확히 0이 되지는 않는다. 적절한 <span class="math inline">\(\lambda\)</span>는 훈련오차가 아니라 교차검증으로 선택해야 한다.</p>
+</section>
+<section id="sec-ch03-linear-evaluation" class="level3" data-number="3.2.10">
+<h3 data-number="3.2.10" class="anchored" data-anchor-id="sec-ch03-linear-evaluation"><span class="header-section-number">3.2.10</span> 선형 회귀의 평가</h3>
+<p>선형 회귀의 예측성능은 Chapter 2에서 설명한 RMSE, MAE와 <span class="math inline">\(R^2\)</span> 등을 사용할 수 있다. 서로 다른 손실함수는 서로 다른 오차 특성을 강조한다.</p>
+<p><span id="eq-ch03-rmse"><span class="math display">\[
+\operatorname{RMSE}
+=
+\sqrt{
+\frac{1}{n}
+\sum_{i=1}^{n}(y_i-\widehat y_i)^2
+}
+\tag{3.47}\]</span></span></p>
+<p><span id="eq-ch03-mae"><span class="math display">\[
+\operatorname{MAE}
+=
+\frac{1}{n}
+\sum_{i=1}^{n}|y_i-\widehat y_i|
+\tag{3.48}\]</span></span></p>
+<p>RMSE는 큰 오차에 더 민감하고, MAE는 이상값에 상대적으로 강건하다. 평가척도는 실제 의사결정에서 오차의 비용과 일치하도록 선택해야 한다.</p>
+<p>평균예측의 보정은 관측값과 예측값의 관계를</p>
+<p><span id="eq-ch03-linear-calibration"><span class="math display">\[
+y_i
+=
+\alpha+
+\gamma\widehat y_i+
+\epsilon_i
+\tag{3.49}\]</span></span></p>
+<p>로 회귀하여 살펴볼 수 있다. 이상적인 경우 <span class="math inline">\(\alpha=0\)</span>, <span class="math inline">\(\gamma=1\)</span>이다. 다만 동일한 자료에서 적합한 모형을 같은 자료로 보정 평가하면 낙관적이므로 독립적인 검증자료를 사용해야 한다.</p>
+</section>
+</section>
+<section id="sec-ch03-logistic-regression" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="sec-ch03-logistic-regression"><span class="header-section-number">3.3</span> 로지스틱 회귀</h2>
+<section id="sec-ch03-binary-probability" class="level3" data-number="3.3.1">
+<h3 data-number="3.3.1" class="anchored" data-anchor-id="sec-ch03-binary-probability"><span class="header-section-number">3.3.1</span> 이진 반응과 사건확률</h3>
+<p>이진 반응변수를</p>
+<p><span id="eq-ch03-binary-response"><span class="math display">\[
+Y\in\{0,1\}
+\tag{3.50}\]</span></span></p>
+<p>로 두고 사건확률을</p>
+<p><span id="eq-ch03-event-probability"><span class="math display">\[
+\pi(\mathbf x)
+=
+P(Y=1\mid\mathbf X=\mathbf x)
+\tag{3.51}\]</span></span></p>
+<p>라고 하자. 확률을 선형 예측자에 직접 연결하는</p>
+<p><span id="eq-ch03-linear-probability-model"><span class="math display">\[
+\pi(\mathbf x)
+=
+\beta_0+\mathbf x^\top\boldsymbol\beta
+\tag{3.52}\]</span></span></p>
+<p>는 예측값이 <span class="math inline">\([0,1]\)</span> 범위를 벗어날 수 있고 분산이 평균에 의존한다. 로지스틱 회귀는 오즈의 로그인 로짓을 선형 예측자와 연결한다.</p>
+<p><span id="eq-ch03-logit-model"><span class="math display">\[
+\operatorname{logit}\{\pi(\mathbf x)\}
+=
+\log
+\frac{\pi(\mathbf x)}{1-\pi(\mathbf x)}
+=
+\beta_0+\mathbf x^\top\boldsymbol\beta
+\tag{3.53}\]</span></span></p>
+<p>역변환하면</p>
+<p><span id="eq-ch03-logistic-function"><span class="math display">\[
+\pi(\mathbf x)
+=
+\frac{
+\exp(\beta_0+\mathbf x^\top\boldsymbol\beta)
+}{
+1+
+\exp(\beta_0+\mathbf x^\top\boldsymbol\beta)
+}
+=
+\frac{1}{1+\exp\{-(\beta_0+\mathbf x^\top\boldsymbol\beta)\}}
+\tag{3.54}\]</span></span></p>
+<p>이다. 시그모이드 함수는 모든 실수값을 <span class="math inline">\((0,1)\)</span>로 변환한다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch03-logistic-function" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-logistic-function-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="03-linear-models_files/figure-html/fig-ch03-logistic-function-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-logistic-function-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;3.5: 선형 예측자를 확률로 변환하는 로지스틱 함수
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch03-logistic-likelihood" class="level3" data-number="3.3.2">
+<h3 data-number="3.3.2" class="anchored" data-anchor-id="sec-ch03-logistic-likelihood"><span class="header-section-number">3.3.2</span> 우도와 교차엔트로피</h3>
+<p>조건부 베르누이 확률질량함수는</p>
+<p><span id="eq-ch03-bernoulli-pmf"><span class="math display">\[
+P(Y_i=y_i\mid\mathbf x_i)
+=
+\pi_i^{y_i}(1-\pi_i)^{1-y_i}
+\tag{3.55}\]</span></span></p>
+<p>이다. 독립 관측의 우도는</p>
+<p><span id="eq-ch03-logistic-likelihood"><span class="math display">\[
+L(\boldsymbol\beta)
+=
+\prod_{i=1}^{n}
+\pi_i^{y_i}(1-\pi_i)^{1-y_i}
+\tag{3.56}\]</span></span></p>
+<p>이고 로그우도는</p>
+<p><span id="eq-ch03-logistic-loglik"><span class="math display">\[
+\ell(\boldsymbol\beta)
+=
+\sum_{i=1}^{n}
+\left[
+y_i\log\pi_i
++
+(1-y_i)\log(1-\pi_i)
+\right]
+\tag{3.57}\]</span></span></p>
+<p>이다. 최대우도추정은 음의 로그우도, 즉 이진 교차엔트로피</p>
+<p><span id="eq-ch03-binary-cross-entropy"><span class="math display">\[
+\mathcal L(\boldsymbol\beta)
+=
+-
+\frac{1}{n}
+\sum_{i=1}^{n}
+\left[
+y_i\log\pi_i
++
+(1-y_i)\log(1-\pi_i)
+\right]
+\tag{3.58}\]</span></span></p>
+<p>를 최소화하는 것과 같다.</p>
+<p>로그손실은 정답 클래스에 낮은 확률을 부여한 예측을 크게 벌한다. 단순한 분류정확도와 달리 확률의 품질을 평가하며, 참 조건부 확률을 예측할 때 기대손실이 최소가 되는 적정 점수규칙이다.</p>
+</section>
+<section id="sec-ch03-logistic-optimization" class="level3" data-number="3.3.3">
+<h3 data-number="3.3.3" class="anchored" data-anchor-id="sec-ch03-logistic-optimization"><span class="header-section-number">3.3.3</span> 기울기, 헤시안과 반복가중최소제곱</h3>
+<p><span class="math inline">\(\mathbf X\)</span>가 절편을 포함한 설계행렬이고 <span class="math inline">\(\boldsymbol\pi=(\pi_1,\ldots,\pi_n)^\top\)</span>이면 로그우도의 기울기는</p>
+<p><span id="eq-ch03-logistic-score"><span class="math display">\[
+\nabla\ell(\boldsymbol\beta)
+=
+\mathbf X^\top(\mathbf y-\boldsymbol\pi)
+\tag{3.59}\]</span></span></p>
+<p>이다. 헤시안은</p>
+<p><span id="eq-ch03-logistic-hessian"><span class="math display">\[
+\nabla^2\ell(\boldsymbol\beta)
+=
+-
+\mathbf X^\top\mathbf W\mathbf X
+\tag{3.60}\]</span></span></p>
+<p>이며</p>
+<p><span id="eq-ch03-logistic-weight-matrix"><span class="math display">\[
+\mathbf W
+=
+\operatorname{diag}
+\{\pi_i(1-\pi_i)\}
+\tag{3.61}\]</span></span></p>
+<p>이다. <span class="math inline">\(\mathbf W\)</span>가 양의 준정부호이므로 로그우도는 오목하고 음의 로그우도는 볼록하다. 완전분리(complete separation)가 없는 경우 수치 최적화로 전역최적해를 찾을 수 있다.</p>
+<p>뉴턴-랩슨 갱신은</p>
+<p><span id="eq-ch03-newton-logistic"><span class="math display">\[
+\boldsymbol\beta^{(t+1)}
+=
+\boldsymbol\beta^{(t)}
++
+(\mathbf X^\top\mathbf W^{(t)}\mathbf X)^{-1}
+\mathbf X^\top
+\{\mathbf y-\boldsymbol\pi^{(t)}\}
+\tag{3.62}\]</span></span></p>
+<p>이다. 이를 작업반응</p>
+<p><span id="eq-ch03-working-response"><span class="math display">\[
+\mathbf z^{(t)}
+=
+\mathbf X\boldsymbol\beta^{(t)}
++
+\{\mathbf W^{(t)}\}^{-1}
+(\mathbf y-\boldsymbol\pi^{(t)})
+\tag{3.63}\]</span></span></p>
+<p>에 대한 가중최소제곱으로 해석하면 반복가중최소제곱 알고리즘이 된다.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="0.5 부근의 관측값이 더 큰 가중치를 갖는 이유">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">힌트</span>0.5 부근의 관측값이 더 큰 가중치를 갖는 이유
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><span class="math inline">\(\pi_i(1-\pi_i)\)</span>는 <span class="math inline">\(\pi_i=0.5\)</span>에서 가장 크고 0이나 1에 가까울수록 작다. 현재 모형이 확신하지 못하는 결정경계 부근의 관측값이 국소 이차근사에서 더 큰 정보를 제공한다.</p>
+</div>
+</div>
+</section>
+<section id="sec-ch03-odds-ratio" class="level3" data-number="3.3.4">
+<h3 data-number="3.3.4" class="anchored" data-anchor-id="sec-ch03-odds-ratio"><span class="header-section-number">3.3.4</span> 계수와 오즈비의 해석</h3>
+<p>연속형 변수 <span class="math inline">\(x_j\)</span>가 한 단위 증가하면 다른 변수를 고정했을 때 로그오즈가 <span class="math inline">\(\beta_j\)</span>만큼 변한다.</p>
+<p><span id="eq-ch03-log-odds-change"><span class="math display">\[
+\log
+\frac{\operatorname{odds}(x_j+1)}{
+\operatorname{odds}(x_j)}
+=
+\beta_j
+\tag{3.64}\]</span></span></p>
+<p>따라서 오즈비(odds ratio)는</p>
+<p><span id="eq-ch03-odds-ratio"><span class="math display">\[
+\operatorname{OR}_j
+=
+\exp(\beta_j)
+\tag{3.65}\]</span></span></p>
+<p>이다. <span class="math inline">\(\exp(\beta_j)&gt;1\)</span>이면 사건의 오즈가 증가하고, <span class="math inline">\(\exp(\beta_j)&lt;1\)</span>이면 감소한다.</p>
+<p>오즈비를 위험비나 확률의 차이로 해석해서는 안 된다. 동일한 오즈비라도 기준위험에 따라 절대확률 변화는 다르다. 예를 들어 확률이 0.1에서 0.2로 증가하는 경우와 0.7에서 0.824로 증가하는 경우는 모두 오즈비가 약 2일 수 있지만 절대위험 차이는 다르다.</p>
+<p>확률에 대한 한계효과는</p>
+<p><span id="eq-ch03-logistic-marginal-effect"><span class="math display">\[
+\frac{\partial\pi(\mathbf x)}{\partial x_j}
+=
+\beta_j\pi(\mathbf x)
+\{1-\pi(\mathbf x)\}
+\tag{3.66}\]</span></span></p>
+<p>이므로 입력값에 따라 달라진다. 확률 변화가 연구의 핵심이면 대표적인 입력값에서 예측확률이나 평균한계효과를 보고하는 것이 더 직접적이다.</p>
+</section>
+<section id="sec-ch03-logistic-boundary" class="level3" data-number="3.3.5">
+<h3 data-number="3.3.5" class="anchored" data-anchor-id="sec-ch03-logistic-boundary"><span class="header-section-number">3.3.5</span> 결정경계와 임계값</h3>
+<p>확률 임계값 <span class="math inline">\(c\)</span>를 사용하면</p>
+<p><span id="eq-ch03-threshold-rule"><span class="math display">\[
+\widehat y
+=
+I\{\widehat\pi(\mathbf x)\geq c\}
+\tag{3.67}\]</span></span></p>
+<p>로 분류한다. <span class="math inline">\(c=0.5\)</span>이면</p>
+<p><span id="eq-ch03-logistic-boundary"><span class="math display">\[
+\widehat\pi(\mathbf x)=0.5
+\quad\Longleftrightarrow\quad
+\beta_0+\mathbf x^\top\boldsymbol\beta=0
+\tag{3.68}\]</span></span></p>
+<p>이므로 결정경계는 입력공간에서 초평면이다. 그러나 0.5는 수학적으로 편리한 기본값일 뿐 모든 문제에서 최적인 임계값은 아니다. 사건의 유병률, 거짓양성과 거짓음성의 비용, 의료자원과 후속검사의 가능성을 고려해야 한다.</p>
+<p>비용 <span class="math inline">\(C_{10}\)</span>을 실제 0을 1로 예측하는 비용, <span class="math inline">\(C_{01}\)</span>을 실제 1을 0으로 예측하는 비용이라고 하자. 올바른 확률이 주어졌을 때 1로 분류할 조건은</p>
+<p><span id="eq-ch03-cost-comparison"><span class="math display">\[
+C_{10}\{1-\pi(\mathbf x)\}
+&lt;
+C_{01}\pi(\mathbf x)
+\tag{3.69}\]</span></span></p>
+<p>이고 임계값은</p>
+<p><span id="eq-ch03-cost-threshold"><span class="math display">\[
+c^
+\ast
+=
+\frac{C_{10}}{C_{10}+C_{01}}
+\tag{3.70}\]</span></span></p>
+<p>이다. 거짓음성 비용이 크면 <span class="math inline">\(C_{01}\)</span>이 커지고 임계값은 낮아진다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch03-logistic-boundary" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-logistic-boundary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="03-linear-models_files/figure-html/fig-ch03-logistic-boundary-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-logistic-boundary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;3.6: 로지스틱 회귀의 선형 결정경계와 확률 등고선
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch03-regularized-logistic" class="level3" data-number="3.3.6">
+<h3 data-number="3.3.6" class="anchored" data-anchor-id="sec-ch03-regularized-logistic"><span class="header-section-number">3.3.6</span> 규제 로지스틱 회귀</h3>
+<p>고차원 자료나 다중공선성이 있는 자료에서는 로그손실에 패널티를 추가한다.</p>
+<p><span id="eq-ch03-regularized-logistic"><span class="math display">\[
+\widehat{\boldsymbol\beta}
+=
+\arg\min_{\boldsymbol\beta}
+\left[
+-
+\frac{1}{n}
+\ell(\boldsymbol\beta)
++
+\lambda
+\left\{
+\alpha\lVert\boldsymbol\beta\rVert_1
++
+\frac{1-\alpha}{2}
+\lVert\boldsymbol\beta\rVert_2^2
+\right\}
+\right]
+\tag{3.71}\]</span></span></p>
+<p>위 식에서 절편은 일반적으로 패널티에서 제외한다. <span class="math inline">\(\alpha=0\)</span>이면 릿지 로지스틱 회귀, <span class="math inline">\(\alpha=1\)</span>이면 LASSO 로지스틱 회귀이다. 릿지는 상관된 변수의 정보를 분산해 사용하고, LASSO는 일부 변수만 선택하는 경향이 있다. 탄력적 그물은 상관된 변수군에서 LASSO보다 안정적일 수 있다.</p>
+<p>규제 강도와 혼합계수는 교차검증의 내부 루프에서 선택해야 한다. 변수를 표준화하고, 결측값 대체와 특성 선택을 각 재표본 안에서 다시 수행해야 한다.</p>
+</section>
+<section id="sec-ch03-separation" class="level3" data-number="3.3.7">
+<h3 data-number="3.3.7" class="anchored" data-anchor-id="sec-ch03-separation"><span class="header-section-number">3.3.7</span> 완전분리와 준완전분리</h3>
+<p>어떤 벡터 <span class="math inline">\(\mathbf b\)</span>가 존재하여</p>
+<p><span id="eq-ch03-complete-separation"><span class="math display">\[
+\mathbf x_i^\top\mathbf b&gt;0
+\quad\text{for all } y_i=1,
+\qquad
+\mathbf x_i^\top\mathbf b&lt;0
+\quad\text{for all } y_i=0
+\tag{3.72}\]</span></span></p>
+<p>을 만족하면 두 클래스를 완전히 분리할 수 있다. 이 경우 우도는 계수의 절댓값을 무한히 증가시키면서 계속 커질 수 있어 유한한 최대우도추정량이 존재하지 않는다. 소표본, 희귀사건, 범주가 많은 변수와 고차원 자료에서 자주 발생한다.</p>
+<p>분리 문제는 다음 방법으로 완화할 수 있다.</p>
+<ul>
+<li>릿지 또는 탄력적 그물 규제</li>
+<li>약한 정보의 사전분포를 사용한 베이지안 추정</li>
+<li>Firth 편향감소 추정</li>
+<li>희소 범주의 결합이나 사전 정의된 변수 단순화</li>
+<li>더 많은 사건 표본 확보</li>
+</ul>
+<p>단순히 반복횟수를 늘리거나 최적화 허용오차를 바꾸는 것은 통계적 비식별 문제를 해결하지 못한다.</p>
+</section>
+<section id="sec-ch03-rare-event-intercept" class="level3" data-number="3.3.8">
+<h3 data-number="3.3.8" class="anchored" data-anchor-id="sec-ch03-rare-event-intercept"><span class="header-section-number">3.3.8</span> 희귀사건과 절편</h3>
+<p>사건이 매우 드물면 절편은 큰 음수가 되고, 표본의 사건비율에 민감하다. 사례-대조군 표본처럼 사건과 비사건을 의도적으로 다른 비율로 추출하면 기울기 계수는 일정 조건에서 추정할 수 있지만 절편은 모집단 유병률에 맞게 보정해야 한다.</p>
+<p>모집단 사건비율을 <span class="math inline">\(\pi\)</span>, 표본 사건비율을 <span class="math inline">\(\pi_s\)</span>라고 할 때 표본추출이 클래스 안에서 무작위라면 절편 보정은</p>
+<p><span id="eq-ch03-intercept-correction"><span class="math display">\[
+\beta_0^{\mathrm{pop}}
+=
+\beta_0^{\mathrm{sample}}
++
+\log
+\frac{\pi/(1-\pi)}{\pi_s/(1-\pi_s)}
+\tag{3.73}\]</span></span></p>
+<p>로 표현할 수 있다. 확률 보정(probability calibration) 없이 사례를 과표집한 자료에서 적합한 확률을 그대로 사용하면 실제 위험을 과대평가할 수 있다.</p>
+</section>
+<section id="sec-ch03-logistic-evaluation" class="level3" data-number="3.3.9">
+<h3 data-number="3.3.9" class="anchored" data-anchor-id="sec-ch03-logistic-evaluation"><span class="header-section-number">3.3.9</span> 로지스틱 회귀의 평가와 보정</h3>
+<p>로지스틱 회귀는 세 가지 서로 다른 측면에서 평가해야 한다.</p>
+<ul>
+<li><strong>구별도</strong>: 사건과 비사건의 순위를 얼마나 잘 구분하는가?</li>
+<li><strong>보정도</strong>: 예측확률과 관측빈도가 얼마나 일치하는가?</li>
+<li><strong>임상적 또는 의사결정 효용</strong>: 확률을 이용한 행동이 비용과 편익을 개선하는가?</li>
+</ul>
+<p>AUC가 높더라도 예측확률이 체계적으로 과대 또는 과소평가될 수 있다. 보정절편과 보정기울기는</p>
+<p><span id="eq-ch03-logistic-calibration-model"><span class="math display">\[
+\operatorname{logit}\{P(Y=1)\}
+=
+\alpha+
+\gamma
+\operatorname{logit}(\widehat\pi)
+\tag{3.74}\]</span></span></p>
+<p>로 평가할 수 있다. 이상적인 값은 <span class="math inline">\(\alpha=0\)</span>, <span class="math inline">\(\gamma=1\)</span>이다. <span class="math inline">\(\alpha&lt;0\)</span>이면 평균적으로 위험을 과대평가하는 경향이 있고, <span class="math inline">\(\gamma&lt;1\)</span>이면 예측이 지나치게 극단적이어서 과적합 가능성을 시사한다.</p>
+<p>Brier 점수는</p>
+<p><span id="eq-ch03-brier-score"><span class="math display">\[
+\operatorname{Brier}
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+(y_i-\widehat\pi_i)^2
+\tag{3.75}\]</span></span></p>
+<p>로 정의한다. 구별도와 보정도를 함께 반영하지만 사건비율에 영향을 받으므로 무모형 기준과 비교하거나 분해하여 해석하는 것이 좋다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch03-calibration-example" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-calibration-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="03-linear-models_files/figure-html/fig-ch03-calibration-example-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-calibration-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;3.7: 로지스틱 회귀 예측확률의 그룹화 보정도 예
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch03-calibration-example" class="quarto-xref">그림&nbsp;<span>3.7</span></a><!-- -->의 그룹화 보정도는 직관적이지만 구간 수와 표본크기에 따라 모양이 달라질 수 있다. 실제 분석에서는 유연한 보정곡선과 불확실성 구간을 함께 제시하는 것이 좋다.</p>
+</section>
+</section>
+<section id="sec-ch03-lda" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="sec-ch03-lda"><span class="header-section-number">3.4</span> 선형 판별분석</h2>
+<section id="sec-ch03-generative-discriminative" class="level3" data-number="3.4.1">
+<h3 data-number="3.4.1" class="anchored" data-anchor-id="sec-ch03-generative-discriminative"><span class="header-section-number">3.4.1</span> 생성적 분류(generative classification)와 판별적 분류(discriminative classification)</h3>
+<p>로지스틱 회귀는 <span class="math inline">\(P(Y\mid\mathbf X)\)</span>를 직접 모형화하는 판별적 접근이다. 선형 판별분석은 클래스별 입력분포 <span class="math inline">\(P(\mathbf X\mid Y)\)</span>와 사전확률 <span class="math inline">\(P(Y)\)</span>를 모형화하고 베이즈 정리를 이용해 사후확률을 계산하는 생성적 접근이다.</p>
+<p><span id="eq-ch03-bayes-classification"><span class="math display">\[
+P(Y=k\mid\mathbf X=\mathbf x)
+=
+\frac{
+P(\mathbf X=\mathbf x\mid Y=k)P(Y=k)
+}{
+\sum_{\ell=1}^{K}
+P(\mathbf X=\mathbf x\mid Y=\ell)P(Y=\ell)
+}
+\tag{3.76}\]</span></span></p>
+<p>생성적 모형은 클래스별 분포에 더 강한 가정을 두지만, 가정이 적절하면 작은 표본에서 효율적일 수 있고 결측 또는 잠재변수를 포함하는 확장도 가능하다.</p>
+</section>
+<section id="sec-ch03-lda-gaussian" class="level3" data-number="3.4.2">
+<h3 data-number="3.4.2" class="anchored" data-anchor-id="sec-ch03-lda-gaussian"><span class="header-section-number">3.4.2</span> 가우시안 클래스 조건부분포</h3>
+<p><span class="math inline">\(K\)</span>개 클래스에 대해</p>
+<p><span id="eq-ch03-lda-assumption"><span class="math display">\[
+\mathbf X\mid Y=k
+\sim
+N_p(\boldsymbol\mu_k,\boldsymbol\Sigma)
+\tag{3.77}\]</span></span></p>
+<p>를 가정한다. 각 클래스는 서로 다른 평균 <span class="math inline">\(\boldsymbol\mu_k\)</span>를 갖지만 동일한 공분산행렬 <span class="math inline">\(\boldsymbol\Sigma\)</span>를 공유한다. 클래스 사전확률은</p>
+<p><span id="eq-ch03-class-priors"><span class="math display">\[
+\pi_k=P(Y=k),
+\qquad
+\sum_{k=1}^{K}\pi_k=1
+\tag{3.78}\]</span></span></p>
+<p>이다.</p>
+<p>가우시안 밀도와 베이즈 정리를 사용하면 클래스 <span class="math inline">\(k\)</span>의 로그 사후확률에 비례하는 판별함수는</p>
+<p><span id="eq-ch03-lda-discriminant"><span class="math display">\[
+\delta_k(\mathbf x)
+=
+\mathbf x^\top\boldsymbol\Sigma^{-1}\boldsymbol\mu_k
+-
+\frac{1}{2}
+\boldsymbol\mu_k^\top
+\boldsymbol\Sigma^{-1}\boldsymbol\mu_k
++
+\log\pi_k
+\tag{3.79}\]</span></span></p>
+<p>이다. 예측은</p>
+<p><span id="eq-ch03-lda-classification-rule"><span class="math display">\[
+\widehat y
+=
+\arg\max_{k}
+\delta_k(\mathbf x)
+\tag{3.80}\]</span></span></p>
+<p>로 수행한다. <span class="math inline">\(\delta_k(\mathbf x)\)</span>가 <span class="math inline">\(\mathbf x\)</span>에 선형이므로 선형 판별분석이라 부른다.</p>
+<p>두 클래스 <span class="math inline">\(k\)</span>와 <span class="math inline">\(\ell\)</span>의 결정경계는</p>
+<p><span id="eq-ch03-lda-boundary"><span class="math display">\[
+\delta_k(\mathbf x)-\delta_\ell(\mathbf x)=0
+\tag{3.81}\]</span></span></p>
+<p>이고 초평면을 이룬다. 공분산이 동일하다는 가정이 선형 경계를 만든다.</p>
+</section>
+<section id="sec-ch03-lda-estimation" class="level3" data-number="3.4.3">
+<h3 data-number="3.4.3" class="anchored" data-anchor-id="sec-ch03-lda-estimation"><span class="header-section-number">3.4.3</span> 모수 추정</h3>
+<p>클래스 <span class="math inline">\(k\)</span>의 표본 수를 <span class="math inline">\(n_k\)</span>라고 하면 사전확률은</p>
+<p><span id="eq-ch03-prior-estimate"><span class="math display">\[
+\widehat\pi_k
+=
+\frac{n_k}{n}
+\tag{3.82}\]</span></span></p>
+<p>로 추정할 수 있다. 외부에서 알려진 모집단 비율이나 정책적 가중치를 사용할 수도 있다. 클래스 평균은</p>
+<p><span id="eq-ch03-class-mean-estimate"><span class="math display">\[
+\widehat{\boldsymbol\mu}_k
+=
+\frac{1}{n_k}
+\sum_{i:y_i=k}
+\mathbf x_i
+\tag{3.83}\]</span></span></p>
+<p>이고 공동 공분산은</p>
+<p><span id="eq-ch03-pooled-covariance"><span class="math display">\[
+\widehat{\boldsymbol\Sigma}
+=
+\frac{1}{n-K}
+\sum_{k=1}^{K}
+\sum_{i:y_i=k}
+(\mathbf x_i-\widehat{\boldsymbol\mu}_k)
+(\mathbf x_i-\widehat{\boldsymbol\mu}_k)^\top
+\tag{3.84}\]</span></span></p>
+<p>로 추정한다.</p>
+<p>변수 수가 표본 수에 가깝거나 더 크면 공분산행렬이 특이해질 수 있다. 이 경우</p>
+<p><span id="eq-ch03-shrinkage-covariance"><span class="math display">\[
+\widehat{\boldsymbol\Sigma}_{\lambda}
+=
+(1-\lambda)\widehat{\boldsymbol\Sigma}
++
+\lambda\tau\mathbf I
+\tag{3.85}\]</span></span></p>
+<p>와 같은 축소 공분산을 사용할 수 있다. <span class="math inline">\(\tau\)</span>는 평균분산과 같은 척도값이고 <span class="math inline">\(\lambda\)</span>는 교차검증이나 분석적 기준으로 선택한다.</p>
+</section>
+<section id="sec-ch03-lda-geometry" class="level3" data-number="3.4.4">
+<h3 data-number="3.4.4" class="anchored" data-anchor-id="sec-ch03-lda-geometry"><span class="header-section-number">3.4.4</span> LDA의 기하학</h3>
+<p>두 클래스 문제에서 LDA의 판별방향은</p>
+<p><span id="eq-ch03-lda-direction"><span class="math display">\[
+\mathbf w
+=
+\boldsymbol\Sigma^{-1}
+(\boldsymbol\mu_1-\boldsymbol\mu_0)
+\tag{3.86}\]</span></span></p>
+<p>이다. 입력을 <span class="math inline">\(z=\mathbf w^\top\mathbf x\)</span>로 투영하면 클래스 평균의 차이는 크게 하고 클래스 내 변동은 작게 하는 방향을 얻는다. Fisher의 판별기준은</p>
+<p><span id="eq-ch03-fisher-criterion"><span class="math display">\[
+J(\mathbf w)
+=
+\frac{
+\mathbf w^\top\mathbf S_B\mathbf w
+}{
+\mathbf w^\top\mathbf S_W\mathbf w
+}
+\tag{3.87}\]</span></span></p>
+<p>이다. <span class="math inline">\(\mathbf S_B\)</span>는 클래스 간 산포, <span class="math inline">\(\mathbf S_W\)</span>는 클래스 내 산포를 나타낸다. 이 기준을 최대화하는 방향은 두 클래스에서 <a href="#eq-ch03-lda-direction" class="quarto-xref">방정식&nbsp;<span>3.86</span></a><!-- -->과 연결된다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch03-lda-projection" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-lda-projection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="03-linear-models_files/figure-html/fig-ch03-lda-projection-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-lda-projection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;3.8: LDA 판별방향으로의 투영과 클래스 분리
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch03-qda" class="level3" data-number="3.4.5">
+<h3 data-number="3.4.5" class="anchored" data-anchor-id="sec-ch03-qda"><span class="header-section-number">3.4.5</span> 이차 판별분석과의 비교</h3>
+<p>클래스마다 서로 다른 공분산</p>
+<p><span id="eq-ch03-qda-assumption"><span class="math display">\[
+\mathbf X\mid Y=k
+\sim
+N_p(\boldsymbol\mu_k,\boldsymbol\Sigma_k)
+\tag{3.88}\]</span></span></p>
+<p>을 허용하면 판별함수는</p>
+<p><span id="eq-ch03-qda-discriminant"><span class="math display">\[
+\delta_k^{\mathrm{QDA}}(\mathbf x)
+=
+-
+\frac{1}{2}
+\log|\boldsymbol\Sigma_k|
+-
+\frac{1}{2}
+(\mathbf x-\boldsymbol\mu_k)^\top
+\boldsymbol\Sigma_k^{-1}
+(\mathbf x-\boldsymbol\mu_k)
++
+\log\pi_k
+\tag{3.89}\]</span></span></p>
+<p>가 되고 결정경계는 이차곡면이 된다. QDA는 더 유연하지만 클래스별로 <span class="math inline">\(p(p+1)/2\)</span>개의 공분산 모수를 추정해야 하므로 더 큰 표본이 필요하다. LDA와 QDA의 선택은 단순한 가정검정보다 교차검증 성능, 안정성과 해석 가능성을 함께 고려해야 한다.</p>
+</section>
+<section id="sec-ch03-lda-logistic-relation" class="level3" data-number="3.4.6">
+<h3 data-number="3.4.6" class="anchored" data-anchor-id="sec-ch03-lda-logistic-relation"><span class="header-section-number">3.4.6</span> LDA와 로지스틱 회귀의 관계</h3>
+<p>두 클래스에서 LDA 가정이 성립하면 사후 로그오즈는</p>
+<p><span id="eq-ch03-lda-logit-equivalence"><span class="math display">\[
+\log
+\frac{P(Y=1\mid\mathbf x)}{P(Y=0\mid\mathbf x)}
+=
+\beta_0+\mathbf x^\top\boldsymbol\beta
+\tag{3.90}\]</span></span></p>
+<p>형태가 된다. 따라서 LDA도 선형 로짓을 유도한다. 차이는 모수를 추정하는 방식에 있다.</p>
+<ul>
+<li>LDA는 <span class="math inline">\(P(\mathbf X\mid Y)\)</span>와 <span class="math inline">\(P(Y)\)</span>를 추정한다.</li>
+<li>로지스틱 회귀는 <span class="math inline">\(P(Y\mid\mathbf X)\)</span>를 직접 추정한다.</li>
+</ul>
+<p>가우시안 공분산 가정이 정확하면 LDA가 더 효율적일 수 있다. 반대로 입력분포가 비정규적이거나 공분산 가정이 틀리면 로지스틱 회귀가 더 강건할 수 있다. 표본이 매우 작고 클래스 분리가 명확하지 않을 때 생성적 가정이 도움이 되기도 한다.</p>
+</section>
+<section id="sec-ch03-lda-workflow" class="level3" data-number="3.4.7">
+<h3 data-number="3.4.7" class="anchored" data-anchor-id="sec-ch03-lda-workflow"><span class="header-section-number">3.4.7</span> LDA의 실제 적용 절차</h3>
+<p>LDA를 적용할 때는 다음을 확인한다.</p>
+<ol type="1">
+<li>연속형 입력이 클래스 안에서 심하게 비대칭이거나 이상값에 지배되지 않는가?</li>
+<li>클래스별 공분산 구조가 크게 다른가?</li>
+<li>변수 수에 비해 클래스별 표본 수가 충분한가?</li>
+<li>표준화가 필요한가?</li>
+<li>실제 모집단의 클래스 사전확률이 훈련자료와 같은가?</li>
+<li>결측값 대체와 변수 선택이 재표본화 안에서 수행되었는가?</li>
+</ol>
+<p>LDA는 변수 척도에 불변인 이론적 구조를 가지지만, 공분산 추정과 수치 안정성 때문에 표준화가 도움이 될 수 있다. 특히 축소 공분산이나 대각 공분산 모형을 사용할 때 척도의 영향이 중요하다.</p>
+</section>
+</section>
+<section id="sec-ch03-multiclass" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="sec-ch03-multiclass"><span class="header-section-number">3.5</span> 다중 분류 학습</h2>
+<section id="sec-ch03-multiclass-problem" class="level3" data-number="3.5.1">
+<h3 data-number="3.5.1" class="anchored" data-anchor-id="sec-ch03-multiclass-problem"><span class="header-section-number">3.5.1</span> 다중 클래스 문제</h3>
+<p>반응변수가</p>
+<p><span id="eq-ch03-multiclass-response"><span class="math display">\[
+Y\in\{1,2,\ldots,K\},
+\qquad K&gt;2
+\tag{3.91}\]</span></span></p>
+<p>인 문제를 다중 분류라고 한다. 목표는 각 클래스의 조건부 확률</p>
+<p><span id="eq-ch03-multiclass-probabilities"><span class="math display">\[
+\pi_k(\mathbf x)
+=
+P(Y=k\mid\mathbf X=\mathbf x),
+\qquad
+\sum_{k=1}^{K}\pi_k(\mathbf x)=1
+\tag{3.92}\]</span></span></p>
+<p>을 추정하거나 가장 적절한 클래스를 선택하는 것이다.</p>
+<p>다중 분류는 하나의 통합모형으로 직접 학습하거나 여러 이진 분류문제로 분해할 수 있다. 분해 방식은 기존 이진 알고리즘을 재사용하기 쉽지만, 클래스 확률의 일관성과 계산량을 고려해야 한다.</p>
+</section>
+<section id="sec-ch03-one-vs-rest" class="level3" data-number="3.5.2">
+<h3 data-number="3.5.2" class="anchored" data-anchor-id="sec-ch03-one-vs-rest"><span class="header-section-number">3.5.2</span> 일대나머지 방법</h3>
+<p>일대나머지 방식은 각 클래스 <span class="math inline">\(k\)</span>에 대해</p>
+<p><span id="eq-ch03-ovr-label"><span class="math display">\[
+Y_i^{(k)}
+=
+I(Y_i=k)
+\tag{3.93}\]</span></span></p>
+<p>를 정의하고 <span class="math inline">\(K\)</span>개의 이진 분류기를 학습한다. 예측점수 <span class="math inline">\(s_k(\mathbf x)\)</span>가 가장 큰 클래스를 선택한다.</p>
+<p><span id="eq-ch03-ovr-rule"><span class="math display">\[
+\widehat y
+=
+\arg\max_k s_k(\mathbf x)
+\tag{3.94}\]</span></span></p>
+<p>장점은 단순성과 병렬화 가능성이다. 그러나 각 이진 분류기의 확률이 독립적으로 추정되므로 합이 1이 아닐 수 있고, 한 클래스의 양성표본과 나머지 모든 클래스의 음성표본 사이에 큰 불균형이 생길 수 있다.</p>
+</section>
+<section id="sec-ch03-one-vs-one" class="level3" data-number="3.5.3">
+<h3 data-number="3.5.3" class="anchored" data-anchor-id="sec-ch03-one-vs-one"><span class="header-section-number">3.5.3</span> 일대일 방법</h3>
+<p>일대일 방식은 모든 클래스 쌍에 대해</p>
+<p><span id="eq-ch03-ovo-number"><span class="math display">\[
+\binom{K}{2}
+=
+\frac{K(K-1)}{2}
+\tag{3.95}\]</span></span></p>
+<p>개의 이진 분류기를 학습한다. 각 분류기의 투표를 합산하거나 쌍별 확률을 결합하여 최종 클래스를 선택한다. 각 분류기는 두 클래스의 자료만 사용하므로 문제는 단순하지만 클래스 수가 많으면 모형 수가 빠르게 증가한다.</p>
+<div id="tbl-ch03-multiclass-strategies" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch03-multiclass-strategies-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;3.2: 다중 분류 전략의 비교
+</figcaption>
+<div aria-describedby="tbl-ch03-multiclass-strategies-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 23%">
+<col style="width: 30%">
+<col style="width: 23%">
+<col style="width: 23%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>방법</th>
+<th style="text-align: right;">필요한 이진 분류기 수</th>
+<th>장점</th>
+<th>한계</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>일대나머지</td>
+<td style="text-align: right;"><span class="math inline">\(K\)</span></td>
+<td>단순하고 빠름</td>
+<td>확률 일관성, 클래스 불균형</td>
+</tr>
+<tr class="even">
+<td>일대일</td>
+<td style="text-align: right;"><span class="math inline">\(K(K-1)/2\)</span></td>
+<td>쌍별 문제가 단순함</td>
+<td>클래스 수 증가 시 계산량 큼</td>
+</tr>
+<tr class="odd">
+<td>다항 로지스틱</td>
+<td style="text-align: right;">하나의 통합모형</td>
+<td>확률합이 1, 직접적 해석</td>
+<td>최적화와 모수 수 증가</td>
+</tr>
+<tr class="even">
+<td>다중 클래스 LDA</td>
+<td style="text-align: right;">하나의 생성모형</td>
+<td>작은 표본에서 효율 가능</td>
+<td>분포와 공분산 가정</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-ch03-softmax" class="level3" data-number="3.5.4">
+<h3 data-number="3.5.4" class="anchored" data-anchor-id="sec-ch03-softmax"><span class="header-section-number">3.5.4</span> 다항 로지스틱 회귀와 소프트맥스(softmax)</h3>
+<p>기준 클래스 <span class="math inline">\(K\)</span>를 정하고 각 클래스 <span class="math inline">\(k=1,\ldots,K-1\)</span>의 로그오즈를</p>
+<p><span id="eq-ch03-multinomial-logit"><span class="math display">\[
+\log
+\frac{\pi_k(\mathbf x)}{\pi_K(\mathbf x)}
+=
+\beta_{k0}+
+\mathbf x^\top\boldsymbol\beta_k
+\tag{3.96}\]</span></span></p>
+<p>로 모형화한다. 모든 클래스를 대칭적으로 표현하면 점수</p>
+<p><span id="eq-ch03-class-score"><span class="math display">\[
+\eta_k(\mathbf x)
+=
+\beta_{k0}+
+\mathbf x^\top\boldsymbol\beta_k
+\tag{3.97}\]</span></span></p>
+<p>에 소프트맥스 함수를 적용한다.</p>
+<p><span id="eq-ch03-softmax"><span class="math display">\[
+\pi_k(\mathbf x)
+=
+\frac{\exp\{\eta_k(\mathbf x)\}}
+{
+\sum_{\ell=1}^{K}
+\exp\{\eta_\ell(\mathbf x)\}
+}
+\tag{3.98}\]</span></span></p>
+<p>소프트맥스는 모든 확률을 양수로 만들고 합을 1로 정규화한다. 모든 클래스의 점수에 같은 상수를 더해도 확률이 변하지 않으므로 식별성을 위해 기준 클래스의 계수를 0으로 두거나 합이 0이 되는 제약을 사용한다.</p>
+<p>관측값 <span class="math inline">\(i\)</span>의 원-핫 벡터를 <span class="math inline">\(y_{ik}=I(y_i=k)\)</span>라고 하면 다중 클래스 교차엔트로피는</p>
+<p><span id="eq-ch03-multiclass-cross-entropy"><span class="math display">\[
+\mathcal L(\mathbf B)
+=
+-
+\frac{1}{n}
+\sum_{i=1}^{n}
+\sum_{k=1}^{K}
+y_{ik}\log\pi_{ik}
+\tag{3.99}\]</span></span></p>
+<p>이다. 규제가 필요하면 각 클래스의 계수행렬에 <span class="math inline">\(\ell_1\)</span> 또는 <span class="math inline">\(\ell_2\)</span> 패널티를 추가한다.</p>
+<p>수치적으로 안정한 소프트맥스를 계산하려면 각 관측값에서 최대점수 <span class="math inline">\(m_i=\max_k\eta_{ik}\)</span>를 빼고</p>
+<p><span id="eq-ch03-stable-softmax"><span class="math display">\[
+\pi_{ik}
+=
+\frac{\exp(\eta_{ik}-m_i)}
+{
+\sum_{\ell}
+\exp(\eta_{i\ell}-m_i)}
+\tag{3.100}\]</span></span></p>
+<p>를 사용한다. 이는 확률을 바꾸지 않으면서 지수함수의 overflow를 방지한다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch03-softmax-boundaries" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-softmax-boundaries-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="03-linear-models_files/figure-html/fig-ch03-softmax-boundaries-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-softmax-boundaries-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;3.9: 세 클래스 소프트맥스 모형이 만드는 선형 결정영역
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch03-softmax-boundaries" class="quarto-xref">그림&nbsp;<span>3.9</span></a><!-- -->에서 각 클래스 점수는 선형이며, 두 클래스의 점수가 같은 경계도 직선이다. 여러 직선이 결합되어 다각형 형태의 결정영역을 만든다.</p>
+</section>
+<section id="sec-ch03-multiclass-lda" class="level3" data-number="3.5.5">
+<h3 data-number="3.5.5" class="anchored" data-anchor-id="sec-ch03-multiclass-lda"><span class="header-section-number">3.5.5</span> 다중 클래스 LDA</h3>
+<p>LDA는 원래부터 <span class="math inline">\(K\)</span>개 클래스를 동시에 다룬다. 클래스별 판별함수 <a href="#eq-ch03-lda-discriminant" class="quarto-xref">방정식&nbsp;<span>3.79</span></a><!-- -->를 계산하고 가장 큰 값을 선택한다. 차원 축소 관점에서 최대 <span class="math inline">\(K-1\)</span>개의 판별축을 얻을 수 있다. 이는 클래스 간 변동을 크게 하고 클래스 내 변동을 작게 하는 저차원 표현이다.</p>
+<p>다중 클래스 LDA는 시각화에도 유용하다. 클래스가 3개이면 최대 두 개의 판별축을 사용해 자료를 평면에 표시할 수 있다. 다만 판별축을 같은 자료에서 학습하고 분류성능도 같은 자료에서 평가하면 낙관적이다. 분류성능은 교차검증이나 독립자료로 평가해야 한다.</p>
+</section>
+<section id="sec-ch03-ordinal-distinction" class="level3" data-number="3.5.6">
+<h3 data-number="3.5.6" class="anchored" data-anchor-id="sec-ch03-ordinal-distinction"><span class="header-section-number">3.5.6</span> 순서형 반응의 구분</h3>
+<p>클래스에 자연스러운 순서가 있으면 명목형 다중 분류와 구분해야 한다. 예를 들어 질병 중증도가 경증, 중등도, 중증으로 순서화되어 있다면 클래스 간 거리를 완전히 무시하는 다항 로지스틱 회귀(multinomial logistic regression)보다 순서형 로지스틱 회귀가 더 효율적일 수 있다.</p>
+<p>누적로짓 모형은</p>
+<p><span id="eq-ch03-proportional-odds"><span class="math display">\[
+\operatorname{logit}
+P(Y\leq k\mid\mathbf x)
+=
+\alpha_k-
+\mathbf x^\top\boldsymbol\beta,
+\qquad
+k=1,\ldots,K-1
+\tag{3.101}\]</span></span></p>
+<p>로 표현한다. 모든 누적경계에서 동일한 <span class="math inline">\(\boldsymbol\beta\)</span>를 사용하는 비례오즈 가정이 핵심이다. 이 절에서는 명목형 분류와 순서형 분류가 다른 문제라는 점만 강조하며, 자세한 추정은 일반화 선형모형의 확장에서 다룰 수 있다.</p>
+</section>
+<section id="sec-ch03-multiclass-evaluation" class="level3" data-number="3.5.7">
+<h3 data-number="3.5.7" class="anchored" data-anchor-id="sec-ch03-multiclass-evaluation"><span class="header-section-number">3.5.7</span> 다중 분류 성능평가</h3>
+<p>다중 분류의 혼동행렬은 <span class="math inline">\(K\times K\)</span> 표로 구성된다. 전체 정확도만으로는 소수 클래스의 실패를 발견하기 어렵다. 클래스별 정밀도, 재현율과 F1 점수를 계산하고 평균하는 방식이 필요하다.</p>
+<p>매크로 평균은 클래스별 척도를 동일한 가중치로 평균한다.</p>
+<p><span id="eq-ch03-macro-average"><span class="math display">\[
+M_{\mathrm{macro}}
+=
+\frac{1}{K}
+\sum_{k=1}^{K}M_k
+\tag{3.102}\]</span></span></p>
+<p>가중 매크로 평균은 클래스 빈도를 가중치로 사용한다.</p>
+<p><span id="eq-ch03-weighted-average"><span class="math display">\[
+M_{\mathrm{weighted}}
+=
+\sum_{k=1}^{K}
+\frac{n_k}{n}M_k
+\tag{3.103}\]</span></span></p>
+<p>마이크로 평균은 모든 클래스의 참양성, 거짓양성, 거짓음성을 합친 뒤 척도를 계산한다. 단일레이블 다중 분류에서는 마이크로 정확도가 전체 정확도와 연결되어 다수 클래스의 영향을 크게 받는다.</p>
+<p>다중 클래스 로그손실은 <a href="#eq-ch03-multiclass-cross-entropy" class="quarto-xref">방정식&nbsp;<span>3.99</span></a><!-- -->를 사용하고, 다중 클래스 Brier 점수는</p>
+<p><span id="eq-ch03-multiclass-brier"><span class="math display">\[
+\operatorname{Brier}_{K}
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+\sum_{k=1}^{K}
+(y_{ik}-\widehat\pi_{ik})^2
+\tag{3.104}\]</span></span></p>
+<p>로 정의한다. 확률모형을 사용할 때는 클래스별 보정도와 전체 확률벡터의 적합성을 함께 평가해야 한다.</p>
+</section>
+</section>
+<section id="sec-ch03-class-imbalance" class="level2" data-number="3.6">
+<h2 data-number="3.6" class="anchored" data-anchor-id="sec-ch03-class-imbalance"><span class="header-section-number">3.6</span> 클래스 불균형 문제</h2>
+<p>성능척도의 정의와 평가자료 설계 원칙은 <a href="02-model-evaluation.html#sec-ch02-performance-measures" class="quarto-xref"><span>섹션 2.3</span></a><!-- -->와 <a href="02-model-evaluation.html#sec-ch02-evaluation-methods" class="quarto-xref"><span>섹션 2.2</span></a><!-- -->를 전제로 한다. 여기서는 불균형이 학습과 의사결정 규칙에 미치는 영향에 초점을 둔다.</p>
+<section id="sec-ch03-imbalance-definition" class="level3" data-number="3.6.1">
+<h3 data-number="3.6.1" class="anchored" data-anchor-id="sec-ch03-imbalance-definition"><span class="header-section-number">3.6.1</span> 불균형의 정의와 원인</h3>
+<p>클래스 불균형(class imbalance)은 한 클래스의 관측값이 다른 클래스보다 훨씬 적은 상황을 의미한다. 이진 문제에서 사건비율을</p>
+<p><span id="eq-ch03-prevalence"><span class="math display">\[
+\pi
+=
+P(Y=1)
+\tag{3.105}\]</span></span></p>
+<p>라고 하면 <span class="math inline">\(\pi\)</span>가 0 또는 1에 가까울수록 불균형이 크다. 그러나 단순한 빈도 차이만으로 문제의 난이도를 판단할 수 없다. 소수 클래스가 잘 분리되는 경우에는 심한 불균형에서도 높은 성능을 얻을 수 있고, 중첩이 큰 경우에는 비교적 완만한 불균형도 어렵다.</p>
+<p>불균형은 다음과 같은 이유로 발생한다.</p>
+<ul>
+<li>질병, 부정거래와 시스템 고장처럼 사건 자체가 희귀함</li>
+<li>표본추출 또는 등록 과정에서 특정 집단이 과소대표됨</li>
+<li>사건 정의가 엄격하거나 관찰기간이 짧음</li>
+<li>레이블 비용이 클래스마다 다름</li>
+<li>시간에 따라 사건비율이 변함</li>
+</ul>
+<p>불균형 자료에서는 <strong>학습분포</strong>, <strong>평가분포</strong>, <strong>실제 적용분포</strong>를 구분해야 한다. 학습 편의를 위해 표본비율을 변경할 수 있지만 최종 확률과 성능은 실제 적용분포를 기준으로 평가해야 한다.</p>
+</section>
+<section id="sec-ch03-accuracy-paradox" class="level3" data-number="3.6.2">
+<h3 data-number="3.6.2" class="anchored" data-anchor-id="sec-ch03-accuracy-paradox"><span class="header-section-number">3.6.2</span> 정확도의 역설</h3>
+<p>사건비율이 1%인 자료에서 모든 사람을 비사건으로 분류하면 정확도는 99%이다. 그러나 민감도는 0이며 사건을 하나도 발견하지 못한다. 따라서 정확도는 불균형 문제에서 충분한 척도가 아니다.</p>
+<p>혼동행렬의 요소를 이용하면</p>
+<p><span id="eq-ch03-sensitivity"><span class="math display">\[
+\operatorname{Sensitivity}
+=
+\frac{TP}{TP+FN}
+\tag{3.106}\]</span></span></p>
+<p><span id="eq-ch03-specificity"><span class="math display">\[
+\operatorname{Specificity}
+=
+\frac{TN}{TN+FP}
+\tag{3.107}\]</span></span></p>
+<p><span id="eq-ch03-precision"><span class="math display">\[
+\operatorname{Precision}
+=
+\frac{TP}{TP+FP}
+\tag{3.108}\]</span></span></p>
+<p>로 정의한다. 민감도와 특이도는 클래스 조건부 성능이고, 정밀도는 사건 유병률에 크게 의존한다.</p>
+<p>균형정확도는</p>
+<p><span id="eq-ch03-balanced-accuracy"><span class="math display">\[
+\operatorname{Balanced\ Accuracy}
+=
+\frac{
+\operatorname{Sensitivity}+
+\operatorname{Specificity}
+}{2}
+\tag{3.109}\]</span></span></p>
+<p>로 정의한다. 두 클래스에 동일한 중요도를 부여하지만 실제 오류비용을 자동으로 반영하는 것은 아니다.</p>
+</section>
+<section id="sec-ch03-roc-pr" class="level3" data-number="3.6.3">
+<h3 data-number="3.6.3" class="anchored" data-anchor-id="sec-ch03-roc-pr"><span class="header-section-number">3.6.3</span> ROC 곡선과 정밀도-재현율 곡선</h3>
+<p>ROC 곡선은 임계값을 변화시키며 민감도와 거짓양성률</p>
+<p><span id="eq-ch03-fpr"><span class="math display">\[
+\operatorname{FPR}
+=
+1-
+\operatorname{Specificity}
+\tag{3.110}\]</span></span></p>
+<p>의 관계를 나타낸다. AUC는 무작위로 선택한 사건 관측값이 비사건 관측값보다 높은 점수를 받을 확률로 해석할 수 있다.</p>
+<p>불균형이 심하면 낮은 거짓양성률도 절대적인 거짓양성 수가 매우 클 수 있다. 정밀도-재현율 곡선은 양성예측의 순도와 사건 탐지율을 직접 보여주므로 희귀사건에서 더 실질적인 정보를 제공할 수 있다. 무정보 분류기의 기대 정밀도는 사건비율 <span class="math inline">\(\pi\)</span>와 같다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch03-imbalance-threshold" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-imbalance-threshold-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="03-linear-models_files/figure-html/fig-ch03-imbalance-threshold-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-imbalance-threshold-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;3.10: 희귀사건에서 임계값 변화에 따른 민감도, 특이도와 정밀도
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch03-imbalance-threshold" class="quarto-xref">그림&nbsp;<span>3.10</span></a><!-- -->는 하나의 모형도 임계값에 따라 매우 다른 운영특성을 가진다는 점을 보여준다. 임계값은 검증자료에서 목적함수와 비용을 기준으로 선택하고, 선택된 임계값의 성능은 별도의 시험자료에서 평가해야 한다.</p>
+</section>
+<section id="sec-ch03-cost-sensitive" class="level3" data-number="3.6.4">
+<h3 data-number="3.6.4" class="anchored" data-anchor-id="sec-ch03-cost-sensitive"><span class="header-section-number">3.6.4</span> 비용민감 학습</h3>
+<p>클래스별 오류비용이 다르면 손실함수에 가중치를 줄 수 있다. 가중 로그손실은</p>
+<p><span id="eq-ch03-weighted-logloss"><span class="math display">\[
+\mathcal L_w
+=
+-
+\frac{1}{n}
+\sum_{i=1}^{n}
+\left[
+w_1y_i\log\pi_i
++
+w_0(1-y_i)\log(1-\pi_i)
+\right]
+\tag{3.111}\]</span></span></p>
+<p>이다. <span class="math inline">\(w_1&gt;w_0\)</span>이면 사건을 잘못 분류하는 오류에 더 큰 비중을 둔다. 하지만 클래스 가중치는 단순히 확률모형의 성능을 향상시키는 마법의 장치가 아니다. 가중 손실은 학습목표를 바꾸며, 출력확률의 보정에 영향을 줄 수 있다.</p>
+<p>목표가 실제 사건확률 추정이라면 원래 모집단 분포를 반영한 비가중 우도 또는 표본추출 확률의 역가중을 고려해야 한다. 목표가 특정 비용하의 분류라면 잘 보정된 확률을 먼저 추정하고 비용에 맞는 임계값을 적용하는 방식이 개념적으로 명확하다. 다만 모형 용량과 최적화의 제약 때문에 비용민감 학습(cost-sensitive learning)이 순위성능을 개선하는 경우도 있다.</p>
+</section>
+<section id="sec-ch03-resampling-imbalance" class="level3" data-number="3.6.5">
+<h3 data-number="3.6.5" class="anchored" data-anchor-id="sec-ch03-resampling-imbalance"><span class="header-section-number">3.6.5</span> 언더샘플링과 오버샘플링</h3>
+<p>언더샘플링(undersampling)은 다수 클래스의 일부를 제거하고, 오버샘플링(oversampling)은 소수 클래스를 반복하거나 합성한다. 두 방법 모두 학습 알고리즘이 소수 클래스의 패턴을 더 자주 보게 한다.</p>
+<p>무작위 언더샘플링의 장점은 계산량 감소와 균형 개선이다. 단점은 다수 클래스의 정보를 버린다는 것이다. 반복 언더샘플링과 앙상블을 사용하면 버려지는 정보를 여러 반복에 걸쳐 활용할 수 있다.</p>
+<p>무작위 오버샘플링은 정보를 새로 만들지 않고 같은 소수 관측값을 반복하므로 과적합 위험이 있다. SMOTE와 같은 합성 오버샘플링은 소수 클래스의 이웃 사이에 새로운 점을 만든다.</p>
+<p><span id="eq-ch03-smote"><span class="math display">\[
+\mathbf x_{\mathrm{new}}
+=
+\mathbf x_i+
+\gamma(\mathbf x_j-\mathbf x_i),
+\qquad
+\gamma\sim U(0,1)
+\tag{3.112}\]</span></span></p>
+<p>하지만 두 소수 관측값 사이의 선분이 실제로 소수 클래스의 지지영역 안에 있다는 보장은 없다. 범주형 변수, 희소자료, 고차원 자료와 클래스 중첩이 큰 자료에서는 부적절한 합성점이 생길 수 있다.</p>
+<div class="callout callout-style-default callout-warning callout-titled" title="재표본화는 분할 이후에 수행한다">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">경고</span>재표본화는 분할 이후에 수행한다
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>전체 자료를 먼저 오버샘플링한 뒤 교차검증으로 나누면 원본 또는 매우 유사한 합성 관측값이 훈련 폴드와 검증 폴드에 동시에 포함될 수 있다. 재표본화는 각 훈련 폴드 안에서만 수행하고 검증 폴드는 원래 분포를 유지해야 한다.</p>
+</div>
+</div>
+</section>
+<section id="sec-ch03-resampling-calibration" class="level3" data-number="3.6.6">
+<h3 data-number="3.6.6" class="anchored" data-anchor-id="sec-ch03-resampling-calibration"><span class="header-section-number">3.6.6</span> 표본비율 변경과 확률 보정</h3>
+<p>훈련자료의 클래스 비율을 변경하면 분류경계와 확률의 기준점이 바뀐다. 클래스 조건부로 무작위 표본추출을 했다면 기울기 관계는 보존될 수 있지만 절편은 표본 사전확률을 반영한다. 모집단 유병률을 알고 있다면 <a href="#eq-ch03-intercept-correction" class="quarto-xref">방정식&nbsp;<span>3.73</span></a><!-- -->을 적용할 수 있다.</p>
+<p>더 일반적으로 표본선택확률이 관측값에 따라 달라지면 단순 절편 보정만으로 충분하지 않다. 선택확률의 역가중, 선택모형 또는 독립적인 대표 검증자료에서의 재보정이 필요하다.</p>
+<p>재보정은 다음과 같은 로지스틱 보정모형으로 수행할 수 있다.</p>
+<p><span id="eq-ch03-recalibration"><span class="math display">\[
+\operatorname{logit}\{P(Y=1)\}
+=
+\alpha+
+\gamma
+\operatorname{logit}(\widehat\pi_{  ext{raw}})
+\tag{3.113}\]</span></span></p>
+<p>분류기 점수만 제공하는 경우 Platt scaling이나 등위회귀를 사용할 수 있다. 재보정 자료는 원래 적용분포를 대표해야 하며, 재보정 후의 성능은 다시 독립적으로 평가해야 한다.</p>
+</section>
+<section id="sec-ch03-imbalance-evaluation-design" class="level3" data-number="3.6.7">
+<h3 data-number="3.6.7" class="anchored" data-anchor-id="sec-ch03-imbalance-evaluation-design"><span class="header-section-number">3.6.7</span> 불균형 자료의 평가설계</h3>
+<p>희귀사건에서는 무작위 분할만으로 시험자료의 사건 수가 너무 적어질 수 있다. 사건별 층화분할은 각 분할의 사건비율을 안정화한다. 그러나 환자별 반복측정, 기관자료, 시간자료에서는 클래스 층화보다 군집과 시간 순서를 우선해야 한다.</p>
+<p>평가자료에서 관측되는 사건 수를 <span class="math inline">\(m\)</span>이라고 하면 민감도의 표준오차는 근사적으로</p>
+<p><span id="eq-ch03-sensitivity-se"><span class="math display">\[
+\operatorname{SE}(\widehat{\mathrm{Sensitivity}})
+\approx
+\sqrt{
+\frac{
+\mathrm{Sensitivity}(1-\mathrm{Sensitivity})
+}{m}
+}
+\tag{3.114}\]</span></span></p>
+<p>이다. 사건 수가 적으면 전체 표본이 커도 민감도 추정은 불안정하다. 희귀사건 연구의 평가표본 크기는 전체 관측값보다 사건 수를 중심으로 계획해야 한다.</p>
+<p>반복 교차검증은 내부 비교의 변동을 줄일 수 있지만 동일한 자료를 반복 사용하기 때문에 완전히 새로운 사건정보를 생성하지는 않는다. 최종 적용성을 확인하려면 다른 시점, 기관 또는 지역의 외부검증이 중요하다.</p>
+</section>
+<section id="sec-ch03-imbalance-strategy" class="level3" data-number="3.6.8">
+<h3 data-number="3.6.8" class="anchored" data-anchor-id="sec-ch03-imbalance-strategy"><span class="header-section-number">3.6.8</span> 불균형 문제의 실무 전략</h3>
+<p>클래스 불균형에 대한 실무적 접근은 다음 순서로 정리할 수 있다.</p>
+<ol type="1">
+<li>실제 적용환경의 사건비율과 오류비용을 정의한다.</li>
+<li>훈련·검증·시험 분할에서 군집, 시간과 사건 수를 고려한다.</li>
+<li>무가중 기준모형을 먼저 적합한다.</li>
+<li>ROC와 정밀도-재현율, 보정도와 의사결정 효용을 함께 평가한다.</li>
+<li>필요하면 클래스 가중치, 언더샘플링, 오버샘플링과 규제를 내부 검증으로 비교한다.</li>
+<li>표본비율을 변경했다면 모집단 확률로 보정한다.</li>
+<li>임계값은 비용과 자원 제약을 반영해 선택한다.</li>
+<li>선택된 전체 절차를 독립적인 시험자료에서 평가한다.</li>
+</ol>
+<p>불균형은 데이터 수의 문제이면서 동시에 목표함수와 의사결정의 문제이다. 단순히 소수 클래스를 복제하는 것만으로 해결되지 않으며, 무엇을 예측하고 어떤 행동으로 연결할 것인지가 먼저 정의되어야 한다.</p>
+</section>
+</section>
+<section id="sec-ch03-integrated-view" class="level2" data-number="3.7">
+<h2 data-number="3.7" class="anchored" data-anchor-id="sec-ch03-integrated-view"><span class="header-section-number">3.7</span> 선형 모형의 통합적 이해</h2>
+<section id="sec-ch03-integrated-generative" class="level3" data-number="3.7.1">
+<h3 data-number="3.7.1" class="anchored" data-anchor-id="sec-ch03-integrated-generative"><span class="header-section-number">3.7.1</span> 생성적 모형과 판별적 모형</h3>
+<p>이 장의 분류모형은 다음과 같이 비교할 수 있다.</p>
+<div id="tbl-ch03-logistic-lda-comparison" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch03-logistic-lda-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;3.3: 로지스틱 회귀와 선형 판별분석의 비교
+</figcaption>
+<div aria-describedby="tbl-ch03-logistic-lda-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>관점</th>
+<th>로지스틱 회귀</th>
+<th>선형 판별분석</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>직접 모형화하는 대상</td>
+<td><span class="math inline">\(P(Y\mid\mathbf X)\)</span></td>
+<td><span class="math inline">\(P(\mathbf X\mid Y)\)</span>와 <span class="math inline">\(P(Y)\)</span></td>
+</tr>
+<tr class="even">
+<td>핵심 가정</td>
+<td>로그오즈의 선형성</td>
+<td>클래스별 다변량 정규성과 공동 공분산</td>
+</tr>
+<tr class="odd">
+<td>결정경계</td>
+<td>선형</td>
+<td>선형</td>
+</tr>
+<tr class="even">
+<td>작은 표본</td>
+<td>분리와 불안정 가능</td>
+<td>가정이 맞으면 효율적</td>
+</tr>
+<tr class="odd">
+<td>고차원</td>
+<td>규제 필요</td>
+<td>공분산 축소 필요</td>
+</tr>
+<tr class="even">
+<td>확률 보정</td>
+<td>모형 적합성과 표본설계에 의존</td>
+<td>분포가정과 사전확률에 의존</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>두 방법 모두 선형 결정경계를 만들 수 있지만, 동일한 모형은 아니다. 자료의 생성과정, 표본크기, 입력분포, 공분산 구조와 분석 목적에 따라 성능이 달라진다. 특정 방법이 항상 우월하다고 가정하기보다 동일한 평가설계 안에서 비교해야 한다.</p>
+</section>
+<section id="sec-ch03-explanation-prediction" class="level3" data-number="3.7.2">
+<h3 data-number="3.7.2" class="anchored" data-anchor-id="sec-ch03-explanation-prediction"><span class="header-section-number">3.7.2</span> 설명과 예측의 구분</h3>
+<p>선형 모형은 계수를 제공하기 때문에 자동으로 설명 가능한 모형으로 간주되기 쉽다. 그러나 계수의 해석에는 다음 조건이 필요하다.</p>
+<ul>
+<li>변수의 정의와 척도가 명확함</li>
+<li>상호작용과 비선형성이 적절히 반영됨</li>
+<li>누락된 교란과 선택편향을 구분함</li>
+<li>표본설계와 결측과정을 고려함</li>
+<li>계수 불확실성과 모형 불확실성을 평가함</li>
+</ul>
+<p>예측계수는 조건부 연관을 나타내며 인과효과를 자동으로 의미하지 않는다. 높은 예측성능을 가진 변수는 개입 가능한 원인이 아닐 수 있고, 인과적으로 중요한 변수도 단기 예측성능에는 거의 기여하지 않을 수 있다.</p>
+</section>
+<section id="sec-ch03-why-linear-strong" class="level3" data-number="3.7.3">
+<h3 data-number="3.7.3" class="anchored" data-anchor-id="sec-ch03-why-linear-strong"><span class="header-section-number">3.7.3</span> 선형 모형이 강력한 이유</h3>
+<p>선형 모형은 표현력이 제한적이지만 다음 상황에서 강력한 기준모형이 된다.</p>
+<ul>
+<li>표본 수가 작거나 중간 정도임</li>
+<li>변수 수에 비해 사건 수가 제한됨</li>
+<li>입력과 출력 관계가 대체로 단조롭고 완만함</li>
+<li>설명 가능성과 안정성이 중요함</li>
+<li>고차원 자료에서 적절한 규제를 사용할 수 있음</li>
+<li>빠른 학습과 배포가 필요함</li>
+</ul>
+<p>복잡한 모형이 선형 모형보다 항상 좋은 것은 아니다. 복잡한 모형은 상호작용과 비선형성을 자동으로 표현할 수 있지만 더 많은 자료, 계산, 튜닝과 검증을 요구한다. 따라서 선형 모형은 단순한 과거의 방법이 아니라 모든 복잡한 모형이 넘어야 할 중요한 기준선이다.</p>
+</section>
+<section id="sec-ch03-linear-workflow" class="level3" data-number="3.7.4">
+<h3 data-number="3.7.4" class="anchored" data-anchor-id="sec-ch03-linear-workflow"><span class="header-section-number">3.7.4</span> 전체 학습 파이프라인</h3>
+<p>선형 모형의 전체 분석절차는 다음과 같이 구성할 수 있다.</p>
+<ol type="1">
+<li>예측대상, 적용시점과 성능척도를 정의한다.</li>
+<li>관측단위와 자료분할 단위를 결정한다.</li>
+<li>결측값, 범주형 변수와 연속형 변수의 처리 규칙을 정한다.</li>
+<li>훈련자료 안에서 중심화, 표준화와 기저확장을 수행한다.</li>
+<li>비규제 모형과 규제 모형을 후보로 설정한다.</li>
+<li>내부 교차검증으로 규제강도와 특성 표현을 선택한다.</li>
+<li>독립자료에서 구별도, 보정도와 오류구조를 평가한다.</li>
+<li>계수와 예측값의 안정성을 재표본화로 확인한다.</li>
+<li>적용분포의 변화와 입력범위를 모니터링한다.</li>
+</ol>
+<p>다음 의사코드는 전처리와 하이퍼파라미터 선택을 교차검증 안에 포함하는 구조를 나타낸다.</p>
+<pre class="text"><code>입력: 개발자료 D, 후보 규제계수 Λ, K개의 교차검증 폴드
+
+각 λ ∈ Λ에 대해:
+    각 폴드 k에 대해:
+        D의 k번째 폴드를 검증자료로 분리
+        나머지 자료에서만 결측대체 규칙 추정
+        나머지 자료에서만 평균과 표준편차 추정
+        훈련 폴드에 전처리 적용
+        같은 규칙을 검증 폴드에 적용
+        규제계수 λ로 선형 모형 적합
+        검증손실 저장
+    평균 검증손실 계산
+
+평균 검증손실이 가장 작은 λ 선택
+전체 개발자료에서 전처리 규칙을 다시 추정
+선택된 λ로 최종 모형 적합
+완전히 분리된 시험자료에서 최종 성능 평가</code></pre>
+</section>
+<section id="sec-ch03-common-implementation" class="level3" data-number="3.7.5">
+<h3 data-number="3.7.5" class="anchored" data-anchor-id="sec-ch03-common-implementation"><span class="header-section-number">3.7.5</span> 구현 예제: 회귀와 분류의 공통 구조</h3>
+<p>다음 코드는 선형 회귀와 로지스틱 회귀가 모두 설계행렬을 만들고 선형 예측자를 계산한다는 공통점을 보여준다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 선형 회귀</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>fit_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(y_continuous <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> x1<span class="sc">:</span>x2, <span class="at">data =</span> train_data)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>mu_hat <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_lm, <span class="at">newdata =</span> test_data)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 로지스틱 회귀</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>fit_glm <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  y_binary <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> x1<span class="sc">:</span>x2,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> train_data,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"logit"</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>prob_hat <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_glm, <span class="at">newdata =</span> test_data, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>class_hat <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(prob_hat <span class="sc">&gt;=</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>실제 분석에서는 <code>0.5</code>를 고정하기보다 검증자료에서 임계값을 선택하고, 시험자료에서는 선택된 임계값을 변경하지 않아야 한다. 규제 모형을 사용할 때는 표준화와 규제계수 선택을 재표본화 안에 포함한다.</p>
+</section>
+</section>
+<section id="장-요약" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="장-요약">장 요약</h2>
+<p>선형 모형은 입력 특성의 선형결합인 선형 예측자를 중심으로 구성된다. 원래 입력에 대한 선형성은 제한적일 수 있지만, 기저함수와 상호작용을 사용하면 비선형 관계도 계수에 선형인 형태로 표현할 수 있다.</p>
+<p>선형 회귀는 조건부 평균을 직접 모형화하고 제곱손실을 최소화한다. 최소제곱 추정은 반응벡터를 설계행렬의 열공간에 투영하는 과정이며, 다중공선성과 높은 레버리지는 계수의 불안정성을 증가시킨다. 릿지 회귀는 편향을 도입하여 분산을 줄이고 작은 특잇값 방향을 안정화한다.</p>
+<p>로지스틱 회귀는 사건확률의 로짓을 선형 예측자와 연결한다. 최대우도추정은 교차엔트로피 손실 최소화와 같으며, 계수는 조건부 로그오즈 변화로 해석한다. 확률예측과 최종 분류결정은 구분해야 하며, 임계값은 오류비용과 실제 적용환경에 따라 선택한다.</p>
+<p>선형 판별분석은 클래스별 가우시안 분포와 공동 공분산을 가정하는 생성적 모형이다. 이 가정 아래 사후 로그오즈가 선형이 되어 선형 결정경계를 만든다. 로지스틱 회귀와 LDA는 같은 형태의 경계를 만들 수 있지만 추정하는 확률구조와 필요한 가정이 다르다.</p>
+<p>다중 분류는 일대나머지와 일대일 방식으로 이진문제에 분해하거나, 소프트맥스를 사용하는 다항 로지스틱 회귀와 다중 클래스 LDA로 직접 학습할 수 있다. 평가에서는 전체 정확도뿐 아니라 클래스별 척도, 매크로 평균, 로그손실과 다중 클래스 보정도를 함께 고려해야 한다.</p>
+<p>클래스 불균형은 단순한 표본 수 차이가 아니라 학습목표, 평가척도, 표본설계와 의사결정 비용의 문제이다. 재표본화와 클래스 가중치는 훈련과정에만 적용하고, 최종 평가는 실제 적용분포를 대표하는 자료에서 수행해야 한다. 학습표본의 클래스 비율을 변경했다면 확률의 절편 보정이나 독립자료를 이용한 재보정이 필요하다.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./02-model-evaluation.html" class="pagination-link" aria-label="모형 평가와 선택">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">모형 평가와 선택</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./04-decision-trees.html" class="pagination-link" aria-label="의사결정 트리">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">의사결정 트리</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

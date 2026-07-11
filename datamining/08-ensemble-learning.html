@@ -1,0 +1,2519 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>8&nbsp; 앙상블 학습 – 머신러닝</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./09-clustering.html" rel="next">
+<link href="./07-bayesian-classifiers.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-3d841e2d0dac331999ea63b9b6b417ac.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-linear-models.html">II. 지도학습</a></li><li class="breadcrumb-item"><a href="./08-ensemble-learning.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">앙상블 학습</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">머신러닝</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="리더 모드 전환">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">I. 머신러닝의 기초</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">머신러닝의 개념과 발전</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-model-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">모형 평가와 선택</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">II. 지도학습</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-linear-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">선형 모형</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-decision-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">의사결정 트리</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-neural-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">신경망</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-support-vector-machines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">서포트 벡터 머신</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-bayesian-classifiers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">베이지안 분류기</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-ensemble-learning.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">앙상블 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">III. 비지도학습과 표현학습</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">클러스터링</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-dimensionality-reduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">차원 축소와 거리 척도 학습</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-feature-selection-sparse-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">특성 선택과 희소 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">IV. 학습이론과 불완전한 데이터</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-computational-learning-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">계산 학습 이론</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-semi-supervised-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">준지도 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">V. 구조화된 확률모형과 규칙</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-probabilistic-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">확률 그래피컬 모형</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-rule-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">규칙 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">VI. 순차적 의사결정과 신뢰성</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-reinforcement-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">강화 학습</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-explainable-trustworthy-ml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">설명 가능한 머신러닝과 신뢰할 수 있는 예측</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#sec-ch08-individual-and-ensemble" id="toc-sec-ch08-individual-and-ensemble" class="nav-link active" data-scroll-target="#sec-ch08-individual-and-ensemble"><span class="header-section-number">8.1</span> 개별 학습기와 앙상블</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch08-basic-idea" id="toc-sec-ch08-basic-idea" class="nav-link" data-scroll-target="#sec-ch08-basic-idea"><span class="header-section-number">8.1.1</span> 앙상블 학습의 기본 생각</a></li>
+  <li><a href="#sec-ch08-homogeneous-heterogeneous" id="toc-sec-ch08-homogeneous-heterogeneous" class="nav-link" data-scroll-target="#sec-ch08-homogeneous-heterogeneous"><span class="header-section-number">8.1.2</span> 동질적 앙상블과 이질적 앙상블</a></li>
+  <li><a href="#sec-ch08-parallel-sequential" id="toc-sec-ch08-parallel-sequential" class="nav-link" data-scroll-target="#sec-ch08-parallel-sequential"><span class="header-section-number">8.1.3</span> 병렬적 앙상블과 순차적 앙상블</a></li>
+  <li><a href="#sec-ch08-variance-reduction" id="toc-sec-ch08-variance-reduction" class="nav-link" data-scroll-target="#sec-ch08-variance-reduction"><span class="header-section-number">8.1.4</span> 평균화와 분산 감소</a></li>
+  <li><a href="#sec-ch08-majority-error" id="toc-sec-ch08-majority-error" class="nav-link" data-scroll-target="#sec-ch08-majority-error"><span class="header-section-number">8.1.5</span> 다수결의 오류확률</a></li>
+  <li><a href="#sec-ch08-weak-strong-learners" id="toc-sec-ch08-weak-strong-learners" class="nav-link" data-scroll-target="#sec-ch08-weak-strong-learners"><span class="header-section-number">8.1.6</span> 약한 학습기와 강한 학습기</a></li>
+  <li><a href="#sec-ch08-ensemble-margin" id="toc-sec-ch08-ensemble-margin" class="nav-link" data-scroll-target="#sec-ch08-ensemble-margin"><span class="header-section-number">8.1.7</span> 앙상블 마진</a></li>
+  <li><a href="#sec-ch08-randomness" id="toc-sec-ch08-randomness" class="nav-link" data-scroll-target="#sec-ch08-randomness"><span class="header-section-number">8.1.8</span> 앙상블에서 무작위성의 역할</a></li>
+  </ul></li>
+  <li><a href="#sec-ch08-boosting" id="toc-sec-ch08-boosting" class="nav-link" data-scroll-target="#sec-ch08-boosting"><span class="header-section-number">8.2</span> 부스팅</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch08-boosting-principle" id="toc-sec-ch08-boosting-principle" class="nav-link" data-scroll-target="#sec-ch08-boosting-principle"><span class="header-section-number">8.2.1</span> 부스팅의 기본 원리</a></li>
+  <li><a href="#sec-ch08-adaboost-weights" id="toc-sec-ch08-adaboost-weights" class="nav-link" data-scroll-target="#sec-ch08-adaboost-weights"><span class="header-section-number">8.2.2</span> AdaBoost의 자료 가중치</a></li>
+  <li><a href="#sec-ch08-exponential-loss" id="toc-sec-ch08-exponential-loss" class="nav-link" data-scroll-target="#sec-ch08-exponential-loss"><span class="header-section-number">8.2.3</span> AdaBoost와 지수손실</a></li>
+  <li><a href="#sec-ch08-adaboost-training-bound" id="toc-sec-ch08-adaboost-training-bound" class="nav-link" data-scroll-target="#sec-ch08-adaboost-training-bound"><span class="header-section-number">8.2.4</span> 훈련오류의 상한</a></li>
+  <li><a href="#sec-ch08-adaboost-margin" id="toc-sec-ch08-adaboost-margin" class="nav-link" data-scroll-target="#sec-ch08-adaboost-margin"><span class="header-section-number">8.2.5</span> AdaBoost의 마진 관점</a></li>
+  <li><a href="#sec-ch08-multiclass-adaboost" id="toc-sec-ch08-multiclass-adaboost" class="nav-link" data-scroll-target="#sec-ch08-multiclass-adaboost"><span class="header-section-number">8.2.6</span> 다중분류 AdaBoost</a></li>
+  <li><a href="#sec-ch08-gradient-boosting" id="toc-sec-ch08-gradient-boosting" class="nav-link" data-scroll-target="#sec-ch08-gradient-boosting"><span class="header-section-number">8.2.7</span> 그래디언트 부스팅의 함수공간 최적화</a></li>
+  <li><a href="#sec-ch08-squared-error-boosting" id="toc-sec-ch08-squared-error-boosting" class="nav-link" data-scroll-target="#sec-ch08-squared-error-boosting"><span class="header-section-number">8.2.8</span> 제곱오차 부스팅</a></li>
+  <li><a href="#sec-ch08-logistic-boosting" id="toc-sec-ch08-logistic-boosting" class="nav-link" data-scroll-target="#sec-ch08-logistic-boosting"><span class="header-section-number">8.2.9</span> 로지스틱 손실 부스팅</a></li>
+  <li><a href="#sec-ch08-tree-gradient-boosting" id="toc-sec-ch08-tree-gradient-boosting" class="nav-link" data-scroll-target="#sec-ch08-tree-gradient-boosting"><span class="header-section-number">8.2.10</span> 트리 기반 그래디언트 부스팅</a></li>
+  <li><a href="#sec-ch08-learning-rate-trees" id="toc-sec-ch08-learning-rate-trees" class="nav-link" data-scroll-target="#sec-ch08-learning-rate-trees"><span class="header-section-number">8.2.11</span> 학습률과 트리 수</a></li>
+  <li><a href="#sec-ch08-stochastic-gradient-boosting" id="toc-sec-ch08-stochastic-gradient-boosting" class="nav-link" data-scroll-target="#sec-ch08-stochastic-gradient-boosting"><span class="header-section-number">8.2.12</span> 확률적 그래디언트 부스팅</a></li>
+  <li><a href="#sec-ch08-second-order-boosting" id="toc-sec-ch08-second-order-boosting" class="nav-link" data-scroll-target="#sec-ch08-second-order-boosting"><span class="header-section-number">8.2.13</span> 2차 근사를 이용한 부스팅</a></li>
+  <li><a href="#sec-ch08-modern-boosting" id="toc-sec-ch08-modern-boosting" class="nav-link" data-scroll-target="#sec-ch08-modern-boosting"><span class="header-section-number">8.2.14</span> XGBoost, LightGBM과 CatBoost의 개념적 차이</a></li>
+  <li><a href="#sec-ch08-boosting-overfitting" id="toc-sec-ch08-boosting-overfitting" class="nav-link" data-scroll-target="#sec-ch08-boosting-overfitting"><span class="header-section-number">8.2.15</span> 부스팅의 과적합과 잡음 민감성</a></li>
+  <li><a href="#sec-ch08-boosting-calibration" id="toc-sec-ch08-boosting-calibration" class="nav-link" data-scroll-target="#sec-ch08-boosting-calibration"><span class="header-section-number">8.2.16</span> 부스팅의 확률 보정</a></li>
+  </ul></li>
+  <li><a href="#sec-ch08-bagging-random-forest" id="toc-sec-ch08-bagging-random-forest" class="nav-link" data-scroll-target="#sec-ch08-bagging-random-forest"><span class="header-section-number">8.3</span> 배깅과 랜덤 포레스트</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch08-bootstrap-aggregation" id="toc-sec-ch08-bootstrap-aggregation" class="nav-link" data-scroll-target="#sec-ch08-bootstrap-aggregation"><span class="header-section-number">8.3.1</span> 부트스트랩 집계</a></li>
+  <li><a href="#sec-ch08-bootstrap-inclusion" id="toc-sec-ch08-bootstrap-inclusion" class="nav-link" data-scroll-target="#sec-ch08-bootstrap-inclusion"><span class="header-section-number">8.3.2</span> 부트스트랩 표본에 포함되는 관측값</a></li>
+  <li><a href="#sec-ch08-bagging-variance" id="toc-sec-ch08-bagging-variance" class="nav-link" data-scroll-target="#sec-ch08-bagging-variance"><span class="header-section-number">8.3.3</span> 배깅의 분산 감소 해석</a></li>
+  <li><a href="#sec-ch08-oob-error" id="toc-sec-ch08-oob-error" class="nav-link" data-scroll-target="#sec-ch08-oob-error"><span class="header-section-number">8.3.4</span> Out-of-bag 오차</a></li>
+  <li><a href="#sec-ch08-random-forest-feature-subsampling" id="toc-sec-ch08-random-forest-feature-subsampling" class="nav-link" data-scroll-target="#sec-ch08-random-forest-feature-subsampling"><span class="header-section-number">8.3.5</span> 랜덤 포레스트의 무작위 변수 선택</a></li>
+  <li><a href="#sec-ch08-random-forest-algorithm" id="toc-sec-ch08-random-forest-algorithm" class="nav-link" data-scroll-target="#sec-ch08-random-forest-algorithm"><span class="header-section-number">8.3.6</span> 랜덤 포레스트 알고리즘</a></li>
+  <li><a href="#sec-ch08-number-of-trees" id="toc-sec-ch08-number-of-trees" class="nav-link" data-scroll-target="#sec-ch08-number-of-trees"><span class="header-section-number">8.3.7</span> 트리 수와 몬테카를로 오차</a></li>
+  <li><a href="#sec-ch08-random-forest-hyperparameters" id="toc-sec-ch08-random-forest-hyperparameters" class="nav-link" data-scroll-target="#sec-ch08-random-forest-hyperparameters"><span class="header-section-number">8.3.8</span> 주요 하이퍼파라미터</a></li>
+  <li><a href="#sec-ch08-extremely-randomized-trees" id="toc-sec-ch08-extremely-randomized-trees" class="nav-link" data-scroll-target="#sec-ch08-extremely-randomized-trees"><span class="header-section-number">8.3.9</span> 극단 무작위 트리</a></li>
+  <li><a href="#sec-ch08-random-subspace-rotation" id="toc-sec-ch08-random-subspace-rotation" class="nav-link" data-scroll-target="#sec-ch08-random-subspace-rotation"><span class="header-section-number">8.3.10</span> 랜덤 서브스페이스와 회전 포레스트</a></li>
+  <li><a href="#sec-ch08-random-forest-importance" id="toc-sec-ch08-random-forest-importance" class="nav-link" data-scroll-target="#sec-ch08-random-forest-importance"><span class="header-section-number">8.3.11</span> 변수 중요도</a></li>
+  <li><a href="#sec-ch08-conditional-permutation" id="toc-sec-ch08-conditional-permutation" class="nav-link" data-scroll-target="#sec-ch08-conditional-permutation"><span class="header-section-number">8.3.12</span> 조건부 순열 중요도</a></li>
+  <li><a href="#sec-ch08-forest-interpretation" id="toc-sec-ch08-forest-interpretation" class="nav-link" data-scroll-target="#sec-ch08-forest-interpretation"><span class="header-section-number">8.3.13</span> 부분의존과 개별조건부기대</a></li>
+  <li><a href="#sec-ch08-quantile-forest" id="toc-sec-ch08-quantile-forest" class="nav-link" data-scroll-target="#sec-ch08-quantile-forest"><span class="header-section-number">8.3.14</span> 분위수 회귀 포레스트</a></li>
+  <li><a href="#sec-ch08-imbalanced-random-forest" id="toc-sec-ch08-imbalanced-random-forest" class="nav-link" data-scroll-target="#sec-ch08-imbalanced-random-forest"><span class="header-section-number">8.3.15</span> 클래스 불균형과 랜덤 포레스트</a></li>
+  </ul></li>
+  <li><a href="#sec-ch08-combination-strategies" id="toc-sec-ch08-combination-strategies" class="nav-link" data-scroll-target="#sec-ch08-combination-strategies"><span class="header-section-number">8.4</span> 결합 전략</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch08-voting-strategies" id="toc-sec-ch08-voting-strategies" class="nav-link" data-scroll-target="#sec-ch08-voting-strategies"><span class="header-section-number">8.4.1</span> 다수결과 가중 다수결</a></li>
+  <li><a href="#sec-ch08-probability-averaging" id="toc-sec-ch08-probability-averaging" class="nav-link" data-scroll-target="#sec-ch08-probability-averaging"><span class="header-section-number">8.4.2</span> 확률평균</a></li>
+  <li><a href="#sec-ch08-score-logit-combination" id="toc-sec-ch08-score-logit-combination" class="nav-link" data-scroll-target="#sec-ch08-score-logit-combination"><span class="header-section-number">8.4.3</span> 점수와 로짓의 결합</a></li>
+  <li><a href="#sec-ch08-stacking" id="toc-sec-ch08-stacking" class="nav-link" data-scroll-target="#sec-ch08-stacking"><span class="header-section-number">8.4.4</span> 스태킹</a></li>
+  <li><a href="#sec-ch08-linear-stacking" id="toc-sec-ch08-linear-stacking" class="nav-link" data-scroll-target="#sec-ch08-linear-stacking"><span class="header-section-number">8.4.5</span> 선형 스태킹과 비음수 제약</a></li>
+  <li><a href="#sec-ch08-super-learner" id="toc-sec-ch08-super-learner" class="nav-link" data-scroll-target="#sec-ch08-super-learner"><span class="header-section-number">8.4.6</span> 슈퍼러너</a></li>
+  <li><a href="#sec-ch08-blending" id="toc-sec-ch08-blending" class="nav-link" data-scroll-target="#sec-ch08-blending"><span class="header-section-number">8.4.7</span> 블렌딩</a></li>
+  <li><a href="#sec-ch08-bayesian-model-averaging" id="toc-sec-ch08-bayesian-model-averaging" class="nav-link" data-scroll-target="#sec-ch08-bayesian-model-averaging"><span class="header-section-number">8.4.8</span> 베이지안 모형 평균</a></li>
+  <li><a href="#sec-ch08-mixture-of-experts" id="toc-sec-ch08-mixture-of-experts" class="nav-link" data-scroll-target="#sec-ch08-mixture-of-experts"><span class="header-section-number">8.4.9</span> 혼합 전문가 모형</a></li>
+  <li><a href="#sec-ch08-dynamic-ensemble-selection" id="toc-sec-ch08-dynamic-ensemble-selection" class="nav-link" data-scroll-target="#sec-ch08-dynamic-ensemble-selection"><span class="header-section-number">8.4.10</span> 동적 앙상블 선택</a></li>
+  <li><a href="#sec-ch08-post-ensemble-calibration" id="toc-sec-ch08-post-ensemble-calibration" class="nav-link" data-scroll-target="#sec-ch08-post-ensemble-calibration"><span class="header-section-number">8.4.11</span> 결합 이후의 확률 보정</a></li>
+  </ul></li>
+  <li><a href="#sec-ch08-diversity" id="toc-sec-ch08-diversity" class="nav-link" data-scroll-target="#sec-ch08-diversity"><span class="header-section-number">8.5</span> 다양성</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch08-why-diversity" id="toc-sec-ch08-why-diversity" class="nav-link" data-scroll-target="#sec-ch08-why-diversity"><span class="header-section-number">8.5.1</span> 다양성이 필요한 이유</a></li>
+  <li><a href="#sec-ch08-ambiguity-decomposition" id="toc-sec-ch08-ambiguity-decomposition" class="nav-link" data-scroll-target="#sec-ch08-ambiguity-decomposition"><span class="header-section-number">8.5.2</span> 모호성 분해</a></li>
+  <li><a href="#sec-ch08-pairwise-contingency" id="toc-sec-ch08-pairwise-contingency" class="nav-link" data-scroll-target="#sec-ch08-pairwise-contingency"><span class="header-section-number">8.5.3</span> 분류기 쌍의 분할표</a></li>
+  <li><a href="#sec-ch08-disagreement-measure" id="toc-sec-ch08-disagreement-measure" class="nav-link" data-scroll-target="#sec-ch08-disagreement-measure"><span class="header-section-number">8.5.4</span> 불일치(disagreement) 척도</a></li>
+  <li><a href="#sec-ch08-double-fault" id="toc-sec-ch08-double-fault" class="nav-link" data-scroll-target="#sec-ch08-double-fault"><span class="header-section-number">8.5.5</span> 이중 오류 척도</a></li>
+  <li><a href="#sec-ch08-q-statistic" id="toc-sec-ch08-q-statistic" class="nav-link" data-scroll-target="#sec-ch08-q-statistic"><span class="header-section-number">8.5.6</span> Q 통계량</a></li>
+  <li><a href="#sec-ch08-error-correlation" id="toc-sec-ch08-error-correlation" class="nav-link" data-scroll-target="#sec-ch08-error-correlation"><span class="header-section-number">8.5.7</span> 오류 상관계수</a></li>
+  <li><a href="#sec-ch08-nonpairwise-diversity" id="toc-sec-ch08-nonpairwise-diversity" class="nav-link" data-scroll-target="#sec-ch08-nonpairwise-diversity"><span class="header-section-number">8.5.8</span> 비쌍별 다양성 척도</a></li>
+  <li><a href="#sec-ch08-generating-diversity" id="toc-sec-ch08-generating-diversity" class="nav-link" data-scroll-target="#sec-ch08-generating-diversity"><span class="header-section-number">8.5.9</span> 다양성을 만드는 방법</a></li>
+  <li><a href="#sec-ch08-negative-correlation-learning" id="toc-sec-ch08-negative-correlation-learning" class="nav-link" data-scroll-target="#sec-ch08-negative-correlation-learning"><span class="header-section-number">8.5.10</span> 음의 상관 학습</a></li>
+  <li><a href="#sec-ch08-diversity-regularized-combination" id="toc-sec-ch08-diversity-regularized-combination" class="nav-link" data-scroll-target="#sec-ch08-diversity-regularized-combination"><span class="header-section-number">8.5.11</span> 다양성 규제를 이용한 결합</a></li>
+  <li><a href="#sec-ch08-ensemble-pruning" id="toc-sec-ch08-ensemble-pruning" class="nav-link" data-scroll-target="#sec-ch08-ensemble-pruning"><span class="header-section-number">8.5.12</span> 앙상블 가지치기</a></li>
+  <li><a href="#sec-ch08-greedy-ensemble-selection" id="toc-sec-ch08-greedy-ensemble-selection" class="nav-link" data-scroll-target="#sec-ch08-greedy-ensemble-selection"><span class="header-section-number">8.5.13</span> 그리디 앙상블 선택</a></li>
+  <li><a href="#sec-ch08-diversity-fairness" id="toc-sec-ch08-diversity-fairness" class="nav-link" data-scroll-target="#sec-ch08-diversity-fairness"><span class="header-section-number">8.5.14</span> 다양성과 공정성</a></li>
+  <li><a href="#sec-ch08-ensemble-uncertainty" id="toc-sec-ch08-ensemble-uncertainty" class="nav-link" data-scroll-target="#sec-ch08-ensemble-uncertainty"><span class="header-section-number">8.5.15</span> 앙상블 불확실성</a></li>
+  <li><a href="#sec-ch08-practical-ensemble-design" id="toc-sec-ch08-practical-ensemble-design" class="nav-link" data-scroll-target="#sec-ch08-practical-ensemble-design"><span class="header-section-number">8.5.16</span> 앙상블 설계의 실무 원칙</a></li>
+  <li><a href="#sec-ch08-method-comparison" id="toc-sec-ch08-method-comparison" class="nav-link" data-scroll-target="#sec-ch08-method-comparison"><span class="header-section-number">8.5.17</span> 앙상블 방법의 비교</a></li>
+  </ul></li>
+  <li><a href="#장-요약" id="toc-장-요약" class="nav-link" data-scroll-target="#장-요약">장 요약</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-linear-models.html">II. 지도학습</a></li><li class="breadcrumb-item"><a href="./08-ensemble-learning.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">앙상블 학습</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-ch08" class="quarto-section-identifier"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">앙상블 학습</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>앙상블 학습(ensemble learning)은 여러 개의 학습기를 결합하여 하나의 예측모형을 만드는 방법이다. 개별 학습기의 예측이 완벽하지 않더라도 서로 다른 오류를 보인다면, 이들을 적절히 결합함으로써 단일 학습기보다 안정적이고 정확한 예측을 얻을 수 있다. 현대 머신러닝에서 높은 예측성능을 보이는 랜덤 포레스트(random forest), 그래디언트 부스팅, 스태킹은 모두 앙상블 원리에 기반한다.</p>
+<p>훈련자료를</p>
+<p><span id="eq-ch08-dataset"><span class="math display">\[
+\mathcal D
+=
+\{(\mathbf x_i,y_i)\}_{i=1}^{n}
+\tag{8.1}\]</span></span></p>
+<p>라고 하자. <span class="math inline">\(M\)</span>개의 개별 학습기(base learner 또는 component learner)를</p>
+<p><span id="eq-ch08-base-learners"><span class="math display">\[
+h_1(\mathbf x),\ldots,h_M(\mathbf x)
+\tag{8.2}\]</span></span></p>
+<p>라고 하면, 회귀문제에서 가장 단순한 앙상블은 평균으로 정의된다.</p>
+<p><span id="eq-ch08-simple-average"><span class="math display">\[
+F_M(\mathbf x)
+=
+\frac{1}{M}
+\sum_{m=1}^{M}
+h_m(\mathbf x)
+\tag{8.3}\]</span></span></p>
+<p>가중평균을 사용하면</p>
+<p><span id="eq-ch08-weighted-average"><span class="math display">\[
+F_M(\mathbf x)
+=
+\sum_{m=1}^{M}\alpha_m h_m(\mathbf x),
+\qquad
+\alpha_m\geq 0,
+\qquad
+\sum_{m=1}^{M}\alpha_m=1
+\tag{8.4}\]</span></span></p>
+<p>로 나타낼 수 있다. 분류문제에서는 다수결(majority voting), 클래스 확률의 평균, 점수의 가중합 등을 사용할 수 있다.</p>
+<div class="callout callout-style-default callout-important callout-titled" title="앙상블의 핵심 원리">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">중요</span>앙상블의 핵심 원리
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>앙상블의 성능은 단순히 학습기의 수로 결정되지 않는다. 각 개별 학습기가 어느 정도의 예측력을 가져야 하며, 동시에 학습기들이 서로 다른 오류를 보여야 한다. 따라서 앙상블 학습의 핵심은 <strong>정확성</strong>과 <strong>다양성(diversity)</strong>을 함께 확보하는 데 있다.</p>
+</div>
+</div>
+<p>이 장에서는 먼저 개별 학습기와 앙상블의 관계를 살펴보고, 순차적 결합의 대표적 방법인 부스팅, 병렬적 결합의 대표적 방법인 배깅과 랜덤 포레스트를 설명한다. 이어 다양한 결합 전략과 앙상블 다양성의 측정 및 제어 방법을 다룬다.</p>
+<section id="sec-ch08-individual-and-ensemble" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="sec-ch08-individual-and-ensemble"><span class="header-section-number">8.1</span> 개별 학습기와 앙상블</h2>
+<section id="sec-ch08-basic-idea" class="level3" data-number="8.1.1">
+<h3 data-number="8.1.1" class="anchored" data-anchor-id="sec-ch08-basic-idea"><span class="header-section-number">8.1.1</span> 앙상블 학습의 기본 생각</h3>
+<p>한 명의 전문가보다 서로 다른 관점을 가진 여러 전문가의 의견을 종합하는 것이 더 나은 결정을 만들 수 있다. 앙상블 학습도 같은 원리를 사용한다. 다만 모든 전문가가 동일한 실수를 반복한다면 의견을 합쳐도 성능이 향상되지 않는다. 따라서 앙상블은 다음 두 조건을 필요로 한다.</p>
+<ol type="1">
+<li>각 학습기가 무작위 추측보다 나은 예측력을 가져야 한다.</li>
+<li>학습기들의 오류가 완전히 동일하지 않아야 한다.</li>
+</ol>
+<p>이진분류에서 개별 학습기 <span class="math inline">\(h_m(\mathbf x)\in\{-1,+1\}\)</span>가 출력한다고 하자. 다수결 앙상블은</p>
+<p><span id="eq-ch08-majority-vote"><span class="math display">\[
+H(\mathbf x)
+=
+\operatorname{sign}
+\left
+\{
+\sum_{m=1}^{M}h_m(\mathbf x)
+\right\}
+\tag{8.5}\]</span></span></p>
+<p>로 정의된다. 가중 다수결은</p>
+<p><span id="eq-ch08-weighted-vote"><span class="math display">\[
+H(\mathbf x)
+=
+\operatorname{sign}
+\left
+\{
+\sum_{m=1}^{M}\alpha_m h_m(\mathbf x)
+\right\}
+\tag{8.6}\]</span></span></p>
+<p>이다. 성능이 좋은 학습기에 더 큰 가중치를 부여하거나, 검증자료에서 최적의 가중치를 선택할 수 있다.</p>
+</section>
+<section id="sec-ch08-homogeneous-heterogeneous" class="level3" data-number="8.1.2">
+<h3 data-number="8.1.2" class="anchored" data-anchor-id="sec-ch08-homogeneous-heterogeneous"><span class="header-section-number">8.1.2</span> 동질적 앙상블과 이질적 앙상블</h3>
+<p>앙상블은 개별 학습기의 종류에 따라 두 가지로 구분할 수 있다.</p>
+<ul>
+<li><strong>동질적 앙상블(homogeneous ensemble)</strong>: 같은 종류의 알고리즘을 서로 다른 자료, 변수, 난수 또는 하이퍼파라미터로 학습한다. 배깅, 랜덤 포레스트와 그래디언트 부스팅이 대표적이다.</li>
+<li><strong>이질적 앙상블(heterogeneous ensemble)</strong>: 선형모형, 트리, 서포트 벡터 머신, 신경망처럼 서로 다른 알고리즘을 결합한다. 스태킹과 슈퍼러너가 대표적이다.</li>
+</ul>
+<p>동질적 앙상블은 학습과 해석이 비교적 단순하고 계산을 병렬화하기 쉽다. 이질적 앙상블은 모형별 귀납적 편향이 다르므로 더 큰 다양성을 얻을 수 있지만, 결합과 검증이 복잡해진다.</p>
+</section>
+<section id="sec-ch08-parallel-sequential" class="level3" data-number="8.1.3">
+<h3 data-number="8.1.3" class="anchored" data-anchor-id="sec-ch08-parallel-sequential"><span class="header-section-number">8.1.3</span> 병렬적 앙상블과 순차적 앙상블</h3>
+<p>개별 학습기의 생성방식에 따라 앙상블을 병렬적 방법과 순차적 방법으로 나눌 수 있다.</p>
+<div id="tbl-ch08-ensemble-types" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch08-ensemble-types-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;8.1: 앙상블 학습기의 생성방식
+</figcaption>
+<div aria-describedby="tbl-ch08-ensemble-types-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>구분</th>
+<th>개별 학습기의 관계</th>
+<th>대표 방법</th>
+<th>주요 목적</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>병렬적 앙상블</td>
+<td>서로 독립적 또는 조건부 독립적으로 학습</td>
+<td>배깅, 랜덤 포레스트</td>
+<td>분산 감소</td>
+</tr>
+<tr class="even">
+<td>순차적 앙상블</td>
+<td>앞 학습기의 오류를 다음 학습기가 보완</td>
+<td>AdaBoost, 그래디언트 부스팅</td>
+<td>편향 감소와 어려운 사례 보완</td>
+</tr>
+<tr class="odd">
+<td>계층적 앙상블</td>
+<td>1단계 예측을 상위 모형이 다시 결합</td>
+<td>스태킹, 혼합 전문가</td>
+<td>서로 다른 모형의 장점 결합</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>병렬적 방법은 여러 학습기를 동시에 학습할 수 있으므로 계산 효율성이 높다. 순차적 방법은 이전 단계의 잔차나 오분류 사례를 이용하므로 단계별 의존성이 존재한다.</p>
+</section>
+<section id="sec-ch08-variance-reduction" class="level3" data-number="8.1.4">
+<h3 data-number="8.1.4" class="anchored" data-anchor-id="sec-ch08-variance-reduction"><span class="header-section-number">8.1.4</span> 평균화와 분산 감소</h3>
+<p>회귀문제에서 <span class="math inline">\(M\)</span>개의 예측치가 동일한 분산 <span class="math inline">\(\sigma_h^2\)</span>를 가지며, 서로 다른 두 학습기의 상관계수가 모두 <span class="math inline">\(\rho\)</span>라고 하자. 앙상블 평균의 분산은</p>
+<p><span id="eq-ch08-correlated-average-variance"><span class="math display">\[
+\begin{aligned}
+\operatorname{Var}\{F_M(\mathbf x)\}
+&amp;=
+\operatorname{Var}
+\left\{
+\frac{1}{M}\sum_{m=1}^{M}h_m(\mathbf x)
+\right\} \\
+&amp;=
+\frac{1}{M^2}
+\left[
+M\sigma_h^2
++
+M(M-1)\rho\sigma_h^2
+\right] \\
+&amp;=
+\rho\sigma_h^2
++
+\frac{1-\rho}{M}\sigma_h^2
+\end{aligned}
+\tag{8.7}\]</span></span></p>
+<p>이다. <span class="math inline">\(M\)</span>이 커지면 두 번째 항은 0에 가까워지지만 첫 번째 항은 남는다.</p>
+<p><span id="eq-ch08-variance-limit"><span class="math display">\[
+\lim_{M\to\infty}
+\operatorname{Var}\{F_M(\mathbf x)\}
+=
+\rho\sigma_h^2
+\tag{8.8}\]</span></span></p>
+<p>따라서 학습기의 수를 늘리는 것만으로는 충분하지 않다. 학습기 사이의 상관을 낮추는 것이 중요하다. 랜덤 포레스트가 각 노드에서 일부 변수만 무작위로 선택하는 이유도 트리 사이의 상관을 낮추기 위해서다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch08-variance-correlation" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch08-variance-correlation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="08-ensemble-learning_files/figure-html/fig-ch08-variance-correlation-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch08-variance-correlation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;8.1: 학습기 수와 상관계수에 따른 앙상블 분산
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch08-variance-correlation" class="quarto-xref">그림&nbsp;<span>8.1</span></a><!-- -->에서 학습기 사이의 상관이 낮을수록 평균화에 따른 분산 감소가 크다. 상관이 높으면 학습기의 수를 크게 늘려도 분산 감소가 제한적이다.</p>
+</section>
+<section id="sec-ch08-majority-error" class="level3" data-number="8.1.5">
+<h3 data-number="8.1.5" class="anchored" data-anchor-id="sec-ch08-majority-error"><span class="header-section-number">8.1.5</span> 다수결의 오류확률</h3>
+<p><span class="math inline">\(M\)</span>개의 이진분류기가 서로 독립이고, 각 분류기의 오류확률이 <span class="math inline">\(p&lt;0.5\)</span>라고 하자. <span class="math inline">\(M\)</span>이 홀수일 때 다수결 앙상블의 오류확률은</p>
+<p><span id="eq-ch08-majority-error-probability"><span class="math display">\[
+P_{\mathrm{ens}}
+=
+\sum_{k=(M+1)/2}^{M}
+{M\choose k}
+p^k(1-p)^{M-k}
+\tag{8.9}\]</span></span></p>
+<p>이다. 독립성과 동일한 오류확률이라는 강한 가정 아래에서는 <span class="math inline">\(M\)</span>이 증가할수록 앙상블 오류확률이 감소한다. 그러나 현실의 학습기들은 대체로 양의 상관을 가지므로 실제 개선 폭은 이론적 결과보다 작다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch08-majority-vote-error" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch08-majority-vote-error-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="08-ensemble-learning_files/figure-html/fig-ch08-majority-vote-error-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch08-majority-vote-error-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;8.2: 독립 분류기의 개수에 따른 다수결 오류확률
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch08-weak-strong-learners" class="level3" data-number="8.1.6">
+<h3 data-number="8.1.6" class="anchored" data-anchor-id="sec-ch08-weak-strong-learners"><span class="header-section-number">8.1.6</span> 약한 학습기와 강한 학습기</h3>
+<p>약한 학습기(weak learner)는 무작위 추측보다 약간 나은 성능을 보이는 학습기다. 이진분류에서 가중 오류율이 <span class="math inline">\(0.5\)</span>보다 작으면 약한 학습기로 볼 수 있다. 부스팅은 여러 약한 학습기를 순차적으로 결합하여 강한 학습기를 만드는 대표적인 방법이다.</p>
+<p>그러나 실제 앙상블에서 항상 약한 학습기만 사용해야 하는 것은 아니다. 랜덤 포레스트는 가지치기하지 않은 깊은 트리를 사용하고, 스태킹은 성능이 높은 여러 복잡한 모형을 결합한다. 중요한 것은 개별 학습기의 절대적 복잡도보다 앙상블 안에서의 정확성과 상호보완성이다.</p>
+</section>
+<section id="sec-ch08-ensemble-margin" class="level3" data-number="8.1.7">
+<h3 data-number="8.1.7" class="anchored" data-anchor-id="sec-ch08-ensemble-margin"><span class="header-section-number">8.1.7</span> 앙상블 마진</h3>
+<p>이진분류에서 실제 레이블을 <span class="math inline">\(y_i\in\{-1,+1\}\)</span>이라 하고, 가중 투표함수를</p>
+<p><span id="eq-ch08-vote-score"><span class="math display">\[
+F(\mathbf x)
+=
+\sum_{m=1}^{M}\alpha_m h_m(\mathbf x)
+\tag{8.10}\]</span></span></p>
+<p>라고 하자. 관측값 <span class="math inline">\(i\)</span>의 마진은</p>
+<p><span id="eq-ch08-binary-margin"><span class="math display">\[
+\operatorname{margin}_i
+=
+y_i F(\mathbf x_i)
+\tag{8.11}\]</span></span></p>
+<p>로 정의한다. 마진이 양수이면 정분류, 음수이면 오분류다. 마진의 절댓값이 클수록 앙상블의 판정이 강하다. 다중분류에서는 실제 클래스의 투표점수와 가장 높은 경쟁 클래스의 투표점수 차이로 마진을 정의할 수 있다.</p>
+<p>부스팅의 일반화 성능은 단순한 훈련오류뿐 아니라 전체 관측값의 마진분포와 관련된다. 이미 정분류된 사례라도 작은 마진을 가지면 불안정한 사례이며, 부스팅은 이러한 사례의 마진을 높이는 방향으로 작동한다.</p>
+</section>
+<section id="sec-ch08-randomness" class="level3" data-number="8.1.8">
+<h3 data-number="8.1.8" class="anchored" data-anchor-id="sec-ch08-randomness"><span class="header-section-number">8.1.8</span> 앙상블에서 무작위성의 역할</h3>
+<p>앙상블의 다양성은 여러 종류의 무작위성을 통해 만들어진다.</p>
+<ul>
+<li>관측값을 다시 추출하는 무작위성: 부트스트랩, 서브샘플링</li>
+<li>변수를 다시 추출하는 무작위성: 랜덤 서브스페이스, 랜덤 포레스트</li>
+<li>모형 자체의 무작위성: 초기값, 노드 후보, 확률적 최적화</li>
+<li>하이퍼파라미터의 다양화: 깊이, 규제강도, 학습률</li>
+<li>자료변환의 다양화: 서로 다른 전처리, 특성공학, 데이터 증강</li>
+</ul>
+<p>무작위성은 개별 모형의 성능을 일부 낮출 수 있지만, 모형 사이의 상관을 더 크게 낮춘다면 최종 앙상블 성능을 향상시킨다.</p>
+</section>
+</section>
+<section id="sec-ch08-boosting" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="sec-ch08-boosting"><span class="header-section-number">8.2</span> 부스팅</h2>
+<section id="sec-ch08-boosting-principle" class="level3" data-number="8.2.1">
+<h3 data-number="8.2.1" class="anchored" data-anchor-id="sec-ch08-boosting-principle"><span class="header-section-number">8.2.1</span> 부스팅의 기본 원리</h3>
+<p>부스팅(boosting)은 여러 개의 학습기를 순차적으로 학습하면서 이전 단계에서 잘 예측하지 못한 사례를 다음 단계가 집중적으로 보완하도록 하는 방법이다. 최종 예측은 단계별 학습기의 가중합이다.</p>
+<p><span id="eq-ch08-additive-model"><span class="math display">\[
+F_M(\mathbf x)
+=
+\sum_{m=1}^{M}\alpha_m h_m(\mathbf x)
+\tag{8.12}\]</span></span></p>
+<p>각 단계에서 새로운 학습기 <span class="math inline">\(h_m\)</span>은 기존 앙상블 <span class="math inline">\(F_{m-1}\)</span>이 충분히 설명하지 못한 부분을 학습한다. 부스팅은 다음 두 관점으로 이해할 수 있다.</p>
+<ol type="1">
+<li>오분류된 관측값의 가중치를 증가시키는 재가중 관점</li>
+<li>손실함수를 함수공간에서 단계적으로 최소화하는 가법모형 관점</li>
+</ol>
+<p>AdaBoost는 첫 번째 관점을 대표하고, 그래디언트 부스팅은 두 번째 관점을 일반화한다.</p>
+</section>
+<section id="sec-ch08-adaboost-weights" class="level3" data-number="8.2.2">
+<h3 data-number="8.2.2" class="anchored" data-anchor-id="sec-ch08-adaboost-weights"><span class="header-section-number">8.2.2</span> AdaBoost의 자료 가중치</h3>
+<p>이진분류에서 <span class="math inline">\(y_i\in\{-1,+1\}\)</span>이라 하자. 각 관측값에 초기 가중치를 동일하게 부여한다.</p>
+<p><span id="eq-ch08-adaboost-initial-weights"><span class="math display">\[
+w_i^{(1)}
+=
+\frac{1}{n},
+\qquad i=1,\ldots,n
+\tag{8.13}\]</span></span></p>
+<p><span class="math inline">\(m\)</span>번째 단계에서 가중자료를 이용하여 분류기 <span class="math inline">\(h_m\)</span>을 학습하고, 가중 오분류율을 계산한다.</p>
+<p><span id="eq-ch08-adaboost-weighted-error"><span class="math display">\[
+\varepsilon_m
+=
+\frac{
+\sum_{i=1}^{n}w_i^{(m)}I\{y_i\neq h_m(\mathbf x_i)\}
+}{
+\sum_{i=1}^{n}w_i^{(m)}
+}
+\tag{8.14}\]</span></span></p>
+<p>분류기 가중치는</p>
+<p><span id="eq-ch08-adaboost-alpha"><span class="math display">\[
+\alpha_m
+=
+\frac{1}{2}
+\log
+\left(
+\frac{1-\varepsilon_m}{\varepsilon_m}
+\right)
+\tag{8.15}\]</span></span></p>
+<p>로 정한다. <span class="math inline">\(\varepsilon_m&lt;0.5\)</span>이면 <span class="math inline">\(\alpha_m&gt;0\)</span>이며, 오류율이 작을수록 더 큰 가중치를 받는다.</p>
+<p>관측값 가중치는</p>
+<p><span id="eq-ch08-adaboost-weight-update"><span class="math display">\[
+w_i^{(m+1)}
+=
+\frac{
+w_i^{(m)}
+\exp\{-\alpha_m y_i h_m(\mathbf x_i)\}
+}{Z_m}
+\tag{8.16}\]</span></span></p>
+<p>로 갱신한다. 여기서 <span class="math inline">\(Z_m\)</span>은 가중치의 합이 1이 되도록 하는 정규화 상수다. 정분류된 관측값은 <span class="math inline">\(y_i h_m(\mathbf x_i)=1\)</span>이므로 가중치가 감소하고, 오분류된 관측값은 <span class="math inline">\(y_i h_m(\mathbf x_i)=-1\)</span>이므로 가중치가 증가한다.</p>
+<p>최종 분류기는</p>
+<p><span id="eq-ch08-adaboost-final-classifier"><span class="math display">\[
+H_M(\mathbf x)
+=
+\operatorname{sign}
+\left\{
+\sum_{m=1}^{M}\alpha_m h_m(\mathbf x)
+\right\}
+\tag{8.17}\]</span></span></p>
+<p>이다.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="AdaBoost 알고리즘">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">노트</span>AdaBoost 알고리즘
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li>모든 관측값에 동일한 초기 가중치를 부여한다.</li>
+<li>현재 가중치로 약한 학습기를 적합한다.</li>
+<li>가중 오분류율로 학습기 가중치 <span class="math inline">\(\alpha_m\)</span>을 계산한다.</li>
+<li>오분류 사례의 자료 가중치를 증가시킨다.</li>
+<li>정해진 반복 횟수까지 2–4단계를 반복한다.</li>
+<li>학습기 예측의 가중 다수결로 최종 클래스를 결정한다.</li>
+</ol>
+</div>
+</div>
+</section>
+<section id="sec-ch08-exponential-loss" class="level3" data-number="8.2.3">
+<h3 data-number="8.2.3" class="anchored" data-anchor-id="sec-ch08-exponential-loss"><span class="header-section-number">8.2.3</span> AdaBoost와 지수손실</h3>
+<p>AdaBoost는 지수손실(exponential loss)</p>
+<p><span id="eq-ch08-exponential-loss"><span class="math display">\[
+L\{y,F(\mathbf x)\}
+=
+\exp\{-yF(\mathbf x)\}
+\tag{8.18}\]</span></span></p>
+<p>을 단계적으로 최소화하는 가법모형으로 해석할 수 있다. <span class="math inline">\(m\)</span>번째 단계에서는 기존 모형 <span class="math inline">\(F_{m-1}\)</span>에 새로운 항 <span class="math inline">\(\alpha h\)</span>를 추가한다.</p>
+<p><span id="eq-ch08-adaboost-stagewise-objective"><span class="math display">\[
+(\alpha_m,h_m)
+=
+\arg\min_{\alpha,h}
+\sum_{i=1}^{n}
+\exp
+\left[
+-y_i
+\{F_{m-1}(\mathbf x_i)+\alpha h(\mathbf x_i)\}
+\right]
+\tag{8.19}\]</span></span></p>
+<p>기존 모형에 따른 가중치를</p>
+<p><span id="eq-ch08-adaboost-functional-weights"><span class="math display">\[
+w_i^{(m)}
+=
+\exp\{-y_iF_{m-1}(\mathbf x_i)\}
+\tag{8.20}\]</span></span></p>
+<p>로 두면 목적함수는</p>
+<p><span id="eq-ch08-adaboost-weighted-objective"><span class="math display">\[
+\sum_{i=1}^{n}
+w_i^{(m)}
+\exp\{-\alpha y_i h(\mathbf x_i)\}
+\tag{8.21}\]</span></span></p>
+<p>가 된다. 따라서 잘못 분류되어 마진이 작은 관측값은 더 큰 가중치를 가진다.</p>
+<p>고정된 <span class="math inline">\(h_m\)</span>에 대해 목적함수를 최소화하면 <a href="#eq-ch08-adaboost-alpha" class="quarto-xref">방정식&nbsp;<span>8.15</span></a><!-- -->의 <span class="math inline">\(\alpha_m\)</span>을 얻는다. 이 결과는 자료 재가중 규칙과 지수손실 최소화가 동일한 알고리즘을 유도한다는 것을 보여준다.</p>
+</section>
+<section id="sec-ch08-adaboost-training-bound" class="level3" data-number="8.2.4">
+<h3 data-number="8.2.4" class="anchored" data-anchor-id="sec-ch08-adaboost-training-bound"><span class="header-section-number">8.2.4</span> 훈련오류의 상한</h3>
+<p>AdaBoost의 경험적 분류오류는 지수손실로 상계할 수 있다.</p>
+<p><span id="eq-ch08-adaboost-error-upper-bound"><span class="math display">\[
+\frac{1}{n}
+\sum_{i=1}^{n}
+I\{y_iF_M(\mathbf x_i)\leq 0\}
+\leq
+\frac{1}{n}
+\sum_{i=1}^{n}
+\exp\{-y_iF_M(\mathbf x_i)\}
+\tag{8.22}\]</span></span></p>
+<p>가중치 정규화 상수 <span class="math inline">\(Z_m\)</span>을 사용하면</p>
+<p><span id="eq-ch08-adaboost-product-bound"><span class="math display">\[
+\frac{1}{n}
+\sum_{i=1}^{n}
+\exp\{-y_iF_M(\mathbf x_i)\}
+=
+\prod_{m=1}^{M}Z_m
+\tag{8.23}\]</span></span></p>
+<p>이고, 이진분류에서</p>
+<p><span id="eq-ch08-adaboost-normalization"><span class="math display">\[
+Z_m
+=
+2\sqrt{\varepsilon_m(1-\varepsilon_m)}
+\tag{8.24}\]</span></span></p>
+<p>이다. 모든 단계에서 <span class="math inline">\(\varepsilon_m&lt;0.5\)</span>이면 <span class="math inline">\(Z_m&lt;1\)</span>이므로 훈련오류의 상한이 반복적으로 감소한다.</p>
+</section>
+<section id="sec-ch08-adaboost-margin" class="level3" data-number="8.2.5">
+<h3 data-number="8.2.5" class="anchored" data-anchor-id="sec-ch08-adaboost-margin"><span class="header-section-number">8.2.5</span> AdaBoost의 마진 관점</h3>
+<p>AdaBoost는 훈련오류가 0이 된 뒤에도 학습을 계속할 때가 있다. 이는 단순히 오분류를 없애는 것을 넘어 관측값의 마진을 증가시키기 때문이다. 정규화된 마진을</p>
+<p><span id="eq-ch08-normalized-margin"><span class="math display">\[
+\rho_i
+=
+\frac{
+y_i\sum_{m=1}^{M}\alpha_m h_m(\mathbf x_i)
+}{
+\sum_{m=1}^{M}|\alpha_m|
+}
+\tag{8.25}\]</span></span></p>
+<p>로 정의할 수 있다. 마진분포가 오른쪽으로 이동하면 작은 자료변동에도 분류결과가 유지될 가능성이 높다.</p>
+<p>그러나 잡음이 많거나 잘못된 레이블이 포함되어 있으면 AdaBoost가 이러한 관측값에 지나치게 큰 가중치를 부여할 수 있다. 지수손실은 큰 음의 마진에 매우 민감하므로 이상치와 레이블 오류에 취약할 수 있다.</p>
+</section>
+<section id="sec-ch08-multiclass-adaboost" class="level3" data-number="8.2.6">
+<h3 data-number="8.2.6" class="anchored" data-anchor-id="sec-ch08-multiclass-adaboost"><span class="header-section-number">8.2.6</span> 다중분류 AdaBoost</h3>
+<p>클래스 수가 <span class="math inline">\(K\)</span>일 때 SAMME 알고리즘은 학습기 가중치를</p>
+<p><span id="eq-ch08-samme-alpha"><span class="math display">\[
+\alpha_m
+=
+\log
+\left(
+\frac{1-\varepsilon_m}{\varepsilon_m}
+\right)
++
+\log(K-1)
+\tag{8.26}\]</span></span></p>
+<p>로 정의한다. 약한 학습기가 무작위 분류보다 좋아야 하므로</p>
+<p><span id="eq-ch08-samme-weak-condition"><span class="math display">\[
+\varepsilon_m
+&lt;
+1-rac{1}{K}
+\tag{8.27}\]</span></span></p>
+<p>이 필요하다. 각 클래스에 대한 확률을 출력하는 학습기를 사용할 수 있다면 확률기반 부스팅으로 확장할 수 있다.</p>
+</section>
+<section id="sec-ch08-gradient-boosting" class="level3" data-number="8.2.7">
+<h3 data-number="8.2.7" class="anchored" data-anchor-id="sec-ch08-gradient-boosting"><span class="header-section-number">8.2.7</span> 그래디언트 부스팅의 함수공간 최적화</h3>
+<p>그래디언트 부스팅은 일반적인 미분가능 손실함수에 대해 가법모형을 구축한다. 목적함수는</p>
+<p><span id="eq-ch08-gradient-boosting-risk"><span class="math display">\[
+\widehat R(F)
+=
+\sum_{i=1}^{n}
+L\{y_i,F(\mathbf x_i)\}
+\tag{8.28}\]</span></span></p>
+<p>이다. 모수벡터가 아니라 함수 <span class="math inline">\(F\)</span>를 최적화한다. <span class="math inline">\(m\)</span>번째 단계에서 각 관측값의 음의 그래디언트, 즉 의사잔차(pseudo-residual)를 계산한다.</p>
+<p><span id="eq-ch08-pseudo-residual"><span class="math display">\[
+r_{im}
+=
+-
+\left.
+\frac{\partial L\{y_i,F(\mathbf x_i)\}}
+     {\partial F(\mathbf x_i)}
+\right|_{F=F_{m-1}}
+\tag{8.29}\]</span></span></p>
+<p>새로운 학습기 <span class="math inline">\(h_m\)</span>을 의사잔차에 적합한다.</p>
+<p><span id="eq-ch08-fit-negative-gradient"><span class="math display">\[
+h_m
+=
+\arg\min_{h\in\mathcal H}
+\sum_{i=1}^{n}
+\{r_{im}-h(\mathbf x_i)\}^2
+\tag{8.30}\]</span></span></p>
+<p>그다음 선탐색으로 단계 크기 <span class="math inline">\(\gamma_m\)</span>을 선택한다.</p>
+<p><span id="eq-ch08-gradient-boosting-line-search"><span class="math display">\[
+\gamma_m
+=
+\arg\min_{\gamma}
+\sum_{i=1}^{n}
+L\left\{
+y_i,
+F_{m-1}(\mathbf x_i)+\gamma h_m(\mathbf x_i)
+\right\}
+\tag{8.31}\]</span></span></p>
+<p>그리고 학습률(learning rate) <span class="math inline">\(\nu\)</span>를 사용하여</p>
+<p><span id="eq-ch08-gradient-boosting-update"><span class="math display">\[
+F_m(\mathbf x)
+=
+F_{m-1}(\mathbf x)
++
+\nu\gamma_m h_m(\mathbf x),
+\qquad 0&lt;\nu\leq 1
+\tag{8.32}\]</span></span></p>
+<p>로 갱신한다.</p>
+</section>
+<section id="sec-ch08-squared-error-boosting" class="level3" data-number="8.2.8">
+<h3 data-number="8.2.8" class="anchored" data-anchor-id="sec-ch08-squared-error-boosting"><span class="header-section-number">8.2.8</span> 제곱오차 부스팅</h3>
+<p>회귀에서 제곱오차</p>
+<p><span id="eq-ch08-squared-loss"><span class="math display">\[
+L\{y,F(\mathbf x)\}
+=
+\frac{1}{2}
+\{y-F(\mathbf x)\}^2
+\tag{8.33}\]</span></span></p>
+<p>를 사용하면 음의 그래디언트는 실제 잔차와 같다.</p>
+<p><span id="eq-ch08-squared-loss-residual"><span class="math display">\[
+r_{im}
+=
+y_i-F_{m-1}(\mathbf x_i)
+\tag{8.34}\]</span></span></p>
+<p>따라서 제곱오차 그래디언트 부스팅은 현재 모형의 잔차에 새로운 트리를 적합하고, 그 예측을 기존 모형에 더하는 과정이다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch08-residual-boosting" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch08-residual-boosting-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="08-ensemble-learning_files/figure-html/fig-ch08-residual-boosting-1.png" class="img-fluid figure-img" width="864">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch08-residual-boosting-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;8.3: 잔차를 순차적으로 보완하는 그래디언트 부스팅의 개념
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch08-logistic-boosting" class="level3" data-number="8.2.9">
+<h3 data-number="8.2.9" class="anchored" data-anchor-id="sec-ch08-logistic-boosting"><span class="header-section-number">8.2.9</span> 로지스틱 손실 부스팅</h3>
+<p>이진분류에서 <span class="math inline">\(y_i\in\{0,1\}\)</span>이고</p>
+<p><span id="eq-ch08-logistic-probability"><span class="math display">\[
+p_i
+=
+P(Y_i=1\mid\mathbf x_i)
+=
+\frac{1}{1+\exp\{-F(\mathbf x_i)\}}
+\tag{8.35}\]</span></span></p>
+<p>라 하자. 음의 로그우도 손실은</p>
+<p><span id="eq-ch08-logistic-loss-boosting"><span class="math display">\[
+L(y_i,F_i)
+=
+-y_i\log p_i
+-(1-y_i)\log(1-p_i)
+\tag{8.36}\]</span></span></p>
+<p>이다. 이때 음의 그래디언트는</p>
+<p><span id="eq-ch08-logistic-pseudo-residual"><span class="math display">\[
+r_{im}
+=
+y_i-p_i^{(m-1)}
+\tag{8.37}\]</span></span></p>
+<p>이 된다. 따라서 각 단계는 관측 레이블과 현재 예측확률의 차이를 학습한다.</p>
+<p>다중분류에서는 클래스별 점수함수 <span class="math inline">\(F_k(\mathbf x)\)</span>와 소프트맥스 확률을 사용한다.</p>
+<p><span id="eq-ch08-multiclass-softmax-boosting"><span class="math display">\[
+p_k(\mathbf x)
+=
+\frac{\exp\{F_k(\mathbf x)\}}
+     {\sum_{\ell=1}^{K}\exp\{F_\ell(\mathbf x)\}}
+\tag{8.38}\]</span></span></p>
+</section>
+<section id="sec-ch08-tree-gradient-boosting" class="level3" data-number="8.2.10">
+<h3 data-number="8.2.10" class="anchored" data-anchor-id="sec-ch08-tree-gradient-boosting"><span class="header-section-number">8.2.10</span> 트리 기반 그래디언트 부스팅</h3>
+<p>그래디언트 부스팅에서 가장 널리 사용되는 개별 학습기는 얕은 회귀트리다. <span class="math inline">\(m\)</span>번째 트리가 입력공간을 <span class="math inline">\(J_m\)</span>개의 영역 <span class="math inline">\(R_{jm}\)</span>으로 나누면</p>
+<p><span id="eq-ch08-boosting-tree"><span class="math display">\[
+h_m(\mathbf x)
+=
+\sum_{j=1}^{J_m}
+b_{jm}I(\mathbf x\in R_{jm})
+\tag{8.39}\]</span></span></p>
+<p>로 나타낼 수 있다. 각 말단노드의 갱신값은</p>
+<p><span id="eq-ch08-terminal-node-update"><span class="math display">\[
+\gamma_{jm}
+=
+\arg\min_{\gamma}
+\sum_{\mathbf x_i\in R_{jm}}
+L\left\{
+y_i,
+F_{m-1}(\mathbf x_i)+\gamma
+\right\}
+\tag{8.40}\]</span></span></p>
+<p>로 결정한다. 최종 갱신은</p>
+<p><span id="eq-ch08-tree-boosting-update"><span class="math display">\[
+F_m(\mathbf x)
+=
+F_{m-1}(\mathbf x)
++
+\nu
+\sum_{j=1}^{J_m}
+\gamma_{jm}I(\mathbf x\in R_{jm})
+\tag{8.41}\]</span></span></p>
+<p>이다.</p>
+<p>트리 깊이는 상호작용의 차수를 조절한다. 깊이 1의 결정그루터기(decision stump)는 주효과 중심의 모형을 만들고, 더 깊은 트리는 고차 상호작용을 표현한다.</p>
+</section>
+<section id="sec-ch08-learning-rate-trees" class="level3" data-number="8.2.11">
+<h3 data-number="8.2.11" class="anchored" data-anchor-id="sec-ch08-learning-rate-trees"><span class="header-section-number">8.2.11</span> 학습률과 트리 수</h3>
+<p>학습률 <span class="math inline">\(\nu\)</span>가 작으면 각 트리의 기여가 작아지므로 더 많은 트리가 필요하다. 일반적으로 작은 학습률과 충분한 트리 수의 조합은 더 안정적인 성능을 보이지만 계산량이 증가한다.</p>
+<p>학습률과 트리 수는 독립적으로 선택하면 안 된다. 검증오차를 기준으로 두 하이퍼파라미터를 함께 조정해야 한다.</p>
+<p><span id="eq-ch08-tuning-learning-rate-trees"><span class="math display">\[
+(\widehat \nu,\widehat M)
+=
+\arg\min_{\nu,M}
+\widehat R_{\mathrm{validation}}
+\{F_{M,\nu}\}
+\tag{8.42}\]</span></span></p>
+<p>조기종료는 검증오차가 더 이상 감소하지 않는 시점에서 트리 추가를 중단하는 규제방법이다.</p>
+</section>
+<section id="sec-ch08-stochastic-gradient-boosting" class="level3" data-number="8.2.12">
+<h3 data-number="8.2.12" class="anchored" data-anchor-id="sec-ch08-stochastic-gradient-boosting"><span class="header-section-number">8.2.12</span> 확률적 그래디언트 부스팅</h3>
+<p>확률적 그래디언트 부스팅(stochastic gradient boosting)은 각 단계에서 전체 훈련자료가 아니라 무작위 부분표본을 이용하여 트리를 적합한다. <span class="math inline">\(m\)</span>번째 단계의 부분표본 인덱스를 <span class="math inline">\(S_m\)</span>이라 하면</p>
+<p><span id="eq-ch08-stochastic-boosting-fit"><span class="math display">\[
+h_m
+=
+\arg\min_{h\in\mathcal H}
+\sum_{i\in S_m}
+\{r_{im}-h(\mathbf x_i)\}^2
+\tag{8.43}\]</span></span></p>
+<p>이다. 서브샘플링은 계산량을 줄이고 트리 사이의 상관을 낮춰 일반화 성능을 높일 수 있다. 그러나 부분표본 비율이 지나치게 작으면 각 단계의 추정이 불안정해질 수 있다.</p>
+</section>
+<section id="sec-ch08-second-order-boosting" class="level3" data-number="8.2.13">
+<h3 data-number="8.2.13" class="anchored" data-anchor-id="sec-ch08-second-order-boosting"><span class="header-section-number">8.2.13</span> 2차 근사를 이용한 부스팅</h3>
+<p>현대적 트리 부스팅은 손실함수의 1차 그래디언트뿐 아니라 2차 미분을 이용한다. 현재 예측값에서</p>
+<p><span id="eq-ch08-first-second-gradient"><span class="math display">\[
+g_i
+=
+\frac{\partial L(y_i,F_i)}{\partial F_i},
+\qquad
+h_i
+=
+\frac{\partial^2 L(y_i,F_i)}{\partial F_i^2}
+\tag{8.44}\]</span></span></p>
+<p>라 하면 테일러 근사에 의해 목적함수의 변화는</p>
+<p><span id="eq-ch08-second-order-objective"><span class="math display">\[
+\widetilde{\mathcal L}^{(m)}
+=
+\sum_{i=1}^{n}
+\left[
+g_i f_m(\mathbf x_i)
++
+\frac{1}{2}h_i f_m^2(\mathbf x_i)
+\right]
++
+\Omega(f_m)
+\tag{8.45}\]</span></span></p>
+<p>로 근사할 수 있다. 트리 복잡도 패널티를</p>
+<p><span id="eq-ch08-tree-complexity-penalty"><span class="math display">\[
+\Omega(f)
+=
+\gamma T
++
+\frac{\lambda}{2}
+\sum_{j=1}^{T}w_j^2
+\tag{8.46}\]</span></span></p>
+<p>로 두면 말단노드 수 <span class="math inline">\(T\)</span>와 노드 점수 <span class="math inline">\(w_j\)</span>를 동시에 규제할 수 있다.</p>
+<p>한 말단노드 <span class="math inline">\(j\)</span>에 포함된 관측값 집합을 <span class="math inline">\(I_j\)</span>라고 할 때 최적 노드 점수는</p>
+<p><span id="eq-ch08-optimal-leaf-weight"><span class="math display">\[
+w_j^\ast
+=
+-
+\frac{\sum_{i\in I_j}g_i}
+     {\sum_{i\in I_j}h_i+\lambda}
+\tag{8.47}\]</span></span></p>
+<p>이다. 이 결과는 현대적 그래디언트 부스팅의 분할 이득 계산에 사용된다.</p>
+</section>
+<section id="sec-ch08-modern-boosting" class="level3" data-number="8.2.14">
+<h3 data-number="8.2.14" class="anchored" data-anchor-id="sec-ch08-modern-boosting"><span class="header-section-number">8.2.14</span> XGBoost, LightGBM과 CatBoost의 개념적 차이</h3>
+<p>현대적 부스팅 구현은 모두 트리 기반 그래디언트 부스팅을 효율적으로 계산하지만, 자료 처리와 트리 성장방식에서 차이가 있다.</p>
+<div id="tbl-ch08-modern-boosting-comparison" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch08-modern-boosting-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;8.2: 현대적 트리 부스팅 구현의 개념적 비교
+</figcaption>
+<div aria-describedby="tbl-ch08-modern-boosting-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>방법</th>
+<th>핵심 특징</th>
+<th>주의할 점</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>XGBoost</td>
+<td>2차 근사, 명시적 규제, 희소자료 처리, 병렬 분할 탐색</td>
+<td>하이퍼파라미터가 많고 깊은 트리는 과적합 가능</td>
+</tr>
+<tr class="even">
+<td>LightGBM</td>
+<td>히스토그램 기반 분할, 잎 중심 성장, 대규모 자료에 효율적</td>
+<td>작은 자료에서 잎 중심 성장이 과적합을 유발할 수 있음</td>
+</tr>
+<tr class="odd">
+<td>CatBoost</td>
+<td>범주형 변수의 순서화된 통계량, ordered boosting</td>
+<td>범주형 변수 처리 원리를 이해하지 않으면 누출 가능</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>범주형 변수의 평균 타깃 인코딩은 전체 자료의 레이블을 사용하면 목표 누출을 일으킨다. CatBoost의 순서화된 처리방식은 각 관측값보다 앞선 사례만 사용하여 범주 통계량을 계산함으로써 누출과 예측편향을 줄이려 한다.</p>
+</section>
+<section id="sec-ch08-boosting-overfitting" class="level3" data-number="8.2.15">
+<h3 data-number="8.2.15" class="anchored" data-anchor-id="sec-ch08-boosting-overfitting"><span class="header-section-number">8.2.15</span> 부스팅의 과적합과 잡음 민감성</h3>
+<p>부스팅은 훈련오류를 계속 감소시키지만 일반화오류는 어느 시점 이후 증가할 수 있다. 과적합을 제어하는 주요 수단은 다음과 같다.</p>
+<ul>
+<li>작은 학습률</li>
+<li>얕은 트리</li>
+<li>행 및 열 서브샘플링</li>
+<li>말단노드 최소 표본 수</li>
+<li><span class="math inline">\(\ell_1\)</span> 및 <span class="math inline">\(\ell_2\)</span> 규제</li>
+<li>조기종료</li>
+<li>검증자료를 이용한 반복 횟수 선택</li>
+</ul>
+<p>잡음이 많은 자료에서는 절대오차, Huber 손실, 분위수 손실처럼 이상치에 덜 민감한 손실함수를 선택할 수 있다.</p>
+</section>
+<section id="sec-ch08-boosting-calibration" class="level3" data-number="8.2.16">
+<h3 data-number="8.2.16" class="anchored" data-anchor-id="sec-ch08-boosting-calibration"><span class="header-section-number">8.2.16</span> 부스팅의 확률 보정</h3>
+<p>부스팅의 점수는 분류에는 우수하지만 확률로서 완전히 보정되지 않을 수 있다. 특히 AdaBoost의 지수손실은 극단적인 점수를 만들 수 있다. 확률예측이 중요한 경우 검증자료에서 Platt scaling, 등위회귀 또는 베타 보정을 적용할 수 있다.</p>
+<p>보정은 반드시 학습과 분리된 자료 또는 교차검증의 외부 예측값을 사용해야 한다. 동일한 자료로 부스팅 모형과 보정모형을 함께 적합하면 과도하게 낙관적인 확률이 만들어질 수 있다.</p>
+</section>
+</section>
+<section id="sec-ch08-bagging-random-forest" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="sec-ch08-bagging-random-forest"><span class="header-section-number">8.3</span> 배깅과 랜덤 포레스트</h2>
+<section id="sec-ch08-bootstrap-aggregation" class="level3" data-number="8.3.1">
+<h3 data-number="8.3.1" class="anchored" data-anchor-id="sec-ch08-bootstrap-aggregation"><span class="header-section-number">8.3.1</span> 부트스트랩 집계</h3>
+<p>배깅(bagging)은 bootstrap aggregating의 줄임말이다. 원자료 <span class="math inline">\(\mathcal D\)</span>에서 크기 <span class="math inline">\(n\)</span>의 부트스트랩 표본</p>
+<p><span id="eq-ch08-bootstrap-samples"><span class="math display">\[
+\mathcal D^{\ast 1},\ldots,\mathcal D^{\ast M}
+\tag{8.48}\]</span></span></p>
+<p>을 생성하고, 각 표본에 학습기 <span class="math inline">\(h_m\)</span>을 적합한다. 회귀에서는 평균</p>
+<p><span id="eq-ch08-bagging-regression"><span class="math display">\[
+F_{\mathrm{bag}}(\mathbf x)
+=
+\frac{1}{M}
+\sum_{m=1}^{M}h_m(\mathbf x)
+\tag{8.49}\]</span></span></p>
+<p>을 사용하고, 분류에서는 다수결 또는 클래스 확률의 평균을 사용한다.</p>
+<p>배깅은 자료의 작은 변화에 민감한 불안정 학습기에서 특히 효과적이다. 깊은 의사결정 트리는 훈련자료가 조금만 변해도 상위 분할과 전체 구조가 크게 바뀌므로 배깅에 적합하다. 반면 선형회귀처럼 안정적인 학습기는 배깅의 이득이 상대적으로 작다.</p>
+</section>
+<section id="sec-ch08-bootstrap-inclusion" class="level3" data-number="8.3.2">
+<h3 data-number="8.3.2" class="anchored" data-anchor-id="sec-ch08-bootstrap-inclusion"><span class="header-section-number">8.3.2</span> 부트스트랩 표본에 포함되는 관측값</h3>
+<p>크기 <span class="math inline">\(n\)</span>의 자료에서 복원추출로 <span class="math inline">\(n\)</span>개를 선택할 때 특정 관측값이 한 번도 선택되지 않을 확률은</p>
+<p><span id="eq-ch08-bootstrap-not-selected"><span class="math display">\[
+\left(1-\frac{1}{n}\right)^n
+\tag{8.50}\]</span></span></p>
+<p>이다. <span class="math inline">\(n\)</span>이 커지면</p>
+<p><span id="eq-ch08-bootstrap-oob-limit"><span class="math display">\[
+\left(1-\frac{1}{n}\right)^n
+\longrightarrow e^{-1}
+\approx 0.368
+\tag{8.51}\]</span></span></p>
+<p>이다. 따라서 하나의 부트스트랩 표본에는 원자료의 서로 다른 관측값 중 약</p>
+<p><span id="eq-ch08-bootstrap-unique-fraction"><span class="math display">\[
+1-e^{-1}
+\approx 0.632
+\tag{8.52}\]</span></span></p>
+<p>가 포함된다. 나머지 약 36.8%는 해당 학습기의 out-of-bag 관측값이다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch08-bootstrap-inclusion" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch08-bootstrap-inclusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="08-ensemble-learning_files/figure-html/fig-ch08-bootstrap-inclusion-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch08-bootstrap-inclusion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;8.4: 표본 크기에 따른 부트스트랩 고유 관측값의 기대 비율
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch08-bagging-variance" class="level3" data-number="8.3.3">
+<h3 data-number="8.3.3" class="anchored" data-anchor-id="sec-ch08-bagging-variance"><span class="header-section-number">8.3.3</span> 배깅의 분산 감소 해석</h3>
+<p>자료 <span class="math inline">\(\mathcal D\)</span>에서 학습된 예측기를 <span class="math inline">\(\widehat f(\mathbf x;\mathcal D)\)</span>라고 하자. 이상적인 배깅 예측기는 부트스트랩 자료생성에 대한 기대값이다.</p>
+<p><span id="eq-ch08-ideal-bagging"><span class="math display">\[
+f_{\mathrm{bag}}(\mathbf x)
+=
+E_{\ast}
+\left[
+\widehat f(\mathbf x;\mathcal D^\ast)
+\mid\mathcal D
+\right]
+\tag{8.53}\]</span></span></p>
+<p>실제 배깅은 유한한 <span class="math inline">\(M\)</span>개의 부트스트랩 학습기를 사용하여 이 기대값을 몬테카를로 평균으로 근사한다.</p>
+<p><span id="eq-ch08-monte-carlo-bagging"><span class="math display">\[
+\widehat f_{\mathrm{bag},M}(\mathbf x)
+=
+\frac{1}{M}
+\sum_{m=1}^{M}
+\widehat f(\mathbf x;\mathcal D^{\ast m})
+\tag{8.54}\]</span></span></p>
+<p>평균화는 분산을 감소시키지만 편향을 반드시 줄이지는 않는다. 깊은 트리는 낮은 편향과 높은 분산을 가지므로 배깅이 분산을 줄이는 데 특히 효과적이다.</p>
+</section>
+<section id="sec-ch08-oob-error" class="level3" data-number="8.3.4">
+<h3 data-number="8.3.4" class="anchored" data-anchor-id="sec-ch08-oob-error"><span class="header-section-number">8.3.4</span> Out-of-bag 오차</h3>
+<p>관측값 <span class="math inline">\(i\)</span>가 포함되지 않은 부트스트랩 학습기의 집합을</p>
+<p><span id="eq-ch08-oob-model-set"><span class="math display">\[
+\mathcal M_i^{\mathrm{OOB}}
+=
+\{m:i\notin\mathcal D^{\ast m}\}
+\tag{8.55}\]</span></span></p>
+<p>라고 하자. 회귀의 OOB 예측은</p>
+<p><span id="eq-ch08-oob-regression-prediction"><span class="math display">\[
+\widehat y_i^{\mathrm{OOB}}
+=
+\frac{1}{|\mathcal M_i^{\mathrm{OOB}}|}
+\sum_{m\in\mathcal M_i^{\mathrm{OOB}}}
+h_m(\mathbf x_i)
+\tag{8.56}\]</span></span></p>
+<p>이다. 분류에서는 OOB 학습기의 다수결 또는 확률평균(probability averaging)을 사용한다. OOB 오차는</p>
+<p><span id="eq-ch08-oob-risk"><span class="math display">\[
+\widehat R_{\mathrm{OOB}}
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+L\{y_i,\widehat y_i^{\mathrm{OOB}}\}
+\tag{8.57}\]</span></span></p>
+<p>로 계산한다.</p>
+<p>OOB 오차는 별도의 검증자료를 만들지 않고 일반화오차를 추정할 수 있다는 장점이 있다. 그러나 하이퍼파라미터를 OOB 오차로 반복적으로 선택한 뒤 동일한 OOB 오차를 최종 성능으로 보고하면 선택 편향이 생길 수 있다. 엄격한 최종 평가에는 독립 시험자료나 중첩 교차검증이 필요하다.</p>
+</section>
+<section id="sec-ch08-random-forest-feature-subsampling" class="level3" data-number="8.3.5">
+<h3 data-number="8.3.5" class="anchored" data-anchor-id="sec-ch08-random-forest-feature-subsampling"><span class="header-section-number">8.3.5</span> 랜덤 포레스트의 무작위 변수 선택</h3>
+<p>배깅된 트리들이 강한 예측변수에 반복적으로 의존하면 트리 사이의 상관이 높아질 수 있다. 랜덤 포레스트는 각 노드에서 전체 <span class="math inline">\(p\)</span>개 변수 중 무작위로 선택한 <span class="math inline">\(m_{\mathrm{try}}\)</span>개 변수만 분할 후보로 사용한다.</p>
+<p><span class="math inline">\(m_{\mathrm{try}}\)</span>가 작아지면 트리 사이의 상관은 감소하지만 개별 트리의 예측력도 약해질 수 있다. 따라서 랜덤 포레스트의 성능은 개별 트리의 강도와 트리 간 상관의 균형으로 결정된다.</p>
+<div class="callout callout-style-default callout-important callout-titled" title="랜덤 포레스트의 두 가지 무작위화">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">중요</span>랜덤 포레스트의 두 가지 무작위화
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>랜덤 포레스트는 <strong>관측값의 부트스트랩 추출</strong>과 <strong>노드별 변수의 무작위 추출</strong>을 함께 사용한다. 첫 번째 무작위화는 자료의 다양성을 만들고, 두 번째 무작위화는 강한 변수에 의해 모든 트리가 비슷해지는 것을 방지한다.</p>
+</div>
+</div>
+</section>
+<section id="sec-ch08-random-forest-algorithm" class="level3" data-number="8.3.6">
+<h3 data-number="8.3.6" class="anchored" data-anchor-id="sec-ch08-random-forest-algorithm"><span class="header-section-number">8.3.6</span> 랜덤 포레스트 알고리즘</h3>
+<p>랜덤 포레스트의 기본 절차는 다음과 같다.</p>
+<ol type="1">
+<li>원자료에서 크기 <span class="math inline">\(n\)</span>의 부트스트랩 표본을 추출한다.</li>
+<li>현재 노드에서 <span class="math inline">\(p\)</span>개 변수 중 <span class="math inline">\(m_{\mathrm{try}}\)</span>개를 무작위로 선택한다.</li>
+<li>선택된 변수들만 이용하여 최적 분할을 찾는다.</li>
+<li>정지조건에 도달할 때까지 2–3단계를 반복하여 깊은 트리를 만든다.</li>
+<li>1–4단계를 <span class="math inline">\(M\)</span>번 반복한다.</li>
+<li>회귀에서는 평균, 분류에서는 투표 또는 확률평균으로 결합한다.</li>
+</ol>
+<p>분류트리는 일반적으로 지니 불순도나 엔트로피를 사용하고, 회귀트리는 잔차제곱합 감소를 사용한다.</p>
+</section>
+<section id="sec-ch08-number-of-trees" class="level3" data-number="8.3.7">
+<h3 data-number="8.3.7" class="anchored" data-anchor-id="sec-ch08-number-of-trees"><span class="header-section-number">8.3.7</span> 트리 수와 몬테카를로 오차</h3>
+<p>랜덤 포레스트의 트리 수 <span class="math inline">\(M\)</span>을 늘리면 과적합이 반드시 심해지는 것은 아니다. 트리가 추가될수록 앙상블 평균의 몬테카를로 오차가 감소하고, 예측은 일정한 값으로 안정화된다. 다만 계산시간과 메모리 사용량은 증가한다.</p>
+<p>충분한 트리 수는 OOB 오차, 예측확률 또는 변수 중요도가 안정되는 시점으로 판단할 수 있다. 희귀사건 예측이나 확률분포의 꼬리를 추정할 때는 평균오차가 안정된 이후에도 더 많은 트리가 필요할 수 있다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch08-ensemble-stabilization" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch08-ensemble-stabilization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="08-ensemble-learning_files/figure-html/fig-ch08-ensemble-stabilization-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch08-ensemble-stabilization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;8.5: 트리 수 증가에 따른 앙상블 예측의 안정화
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch08-random-forest-hyperparameters" class="level3" data-number="8.3.8">
+<h3 data-number="8.3.8" class="anchored" data-anchor-id="sec-ch08-random-forest-hyperparameters"><span class="header-section-number">8.3.8</span> 주요 하이퍼파라미터</h3>
+<p>랜덤 포레스트의 주요 하이퍼파라미터는 다음과 같다.</p>
+<ul>
+<li>트리 수 <span class="math inline">\(M\)</span></li>
+<li>노드별 후보 변수 수 <span class="math inline">\(m_{\mathrm{try}}\)</span></li>
+<li>말단노드 최소 관측값 수</li>
+<li>최대 깊이</li>
+<li>부트스트랩 또는 서브샘플 비율</li>
+<li>분할을 허용하기 위한 최소 불순도 감소</li>
+<li>클래스 가중치 또는 균형표본추출 방식</li>
+</ul>
+<p>작은 말단노드는 복잡한 국소구조를 표현하지만 분산이 커질 수 있다. 큰 말단노드는 예측을 평활화하고 확률 추정을 안정화한다. 회귀와 분류, 점예측과 확률예측에 따라 적절한 노드 크기가 달라질 수 있다.</p>
+</section>
+<section id="sec-ch08-extremely-randomized-trees" class="level3" data-number="8.3.9">
+<h3 data-number="8.3.9" class="anchored" data-anchor-id="sec-ch08-extremely-randomized-trees"><span class="header-section-number">8.3.9</span> 극단 무작위 트리</h3>
+<p>극단 무작위 트리(extremely randomized trees)는 변수뿐 아니라 분할점도 무작위로 생성한 뒤 후보 중 가장 좋은 분할을 선택한다. 또한 구현에 따라 부트스트랩 없이 전체 자료를 사용할 수 있다.</p>
+<p>분할점의 추가 무작위화는 트리 사이의 상관을 더 낮추지만 개별 트리의 편향을 증가시킬 수 있다. 자료가 크고 복잡한 상호작용이 존재할 때 계산 효율성과 일반화 성능 측면에서 유용할 수 있다.</p>
+</section>
+<section id="sec-ch08-random-subspace-rotation" class="level3" data-number="8.3.10">
+<h3 data-number="8.3.10" class="anchored" data-anchor-id="sec-ch08-random-subspace-rotation"><span class="header-section-number">8.3.10</span> 랜덤 서브스페이스와 회전 포레스트</h3>
+<p>랜덤 서브스페이스(random subspace) 방법은 각 학습기에서 변수의 부분집합만 사용한다. 고차원 자료에서 변수가 많고 서로 중복된 정보를 포함할 때 효과적이다.</p>
+<p>회전 포레스트(rotation forest)는 변수들을 여러 그룹으로 나누고 각 그룹에서 주성분 분석과 같은 변환을 수행한 뒤, 회전된 특성공간에서 트리를 학습한다. 개별 트리의 정확성을 유지하면서 서로 다른 좌표계를 제공하여 다양성을 만든다.</p>
+</section>
+<section id="sec-ch08-random-forest-importance" class="level3" data-number="8.3.11">
+<h3 data-number="8.3.11" class="anchored" data-anchor-id="sec-ch08-random-forest-importance"><span class="header-section-number">8.3.11</span> 변수 중요도</h3>
+<p>랜덤 포레스트 고유의 중요도를 설명한 뒤, 모형 독립적 중요도와 설명 안정성은 <span class="quarto-unresolved-ref">?sec-ch17-variable-importance</span><!-- -->에서 비교한다.</p>
+<p>랜덤 포레스트에서 널리 사용되는 변수 중요도는 불순도 감소 중요도와 순열 중요도다.</p>
+<p>불순도 감소 중요도는 변수 <span class="math inline">\(X_j\)</span>가 사용된 모든 분할에서의 불순도 감소량을 합한다.</p>
+<p><span id="eq-ch08-mean-decrease-impurity"><span class="math display">\[
+\operatorname{Imp}_{\mathrm{MDI}}(X_j)
+=
+\frac{1}{M}
+\sum_{m=1}^{M}
+\sum_{t\in\mathcal T_m:
+u(t)=j}
+\Delta I_t
+\tag{8.58}\]</span></span></p>
+<p>여기서 <span class="math inline">\(\nu(t)\)</span>는 노드 <span class="math inline">\(t\)</span>에서 사용한 변수이고, <span class="math inline">\(\Delta I_t\)</span>는 해당 분할의 불순도 감소량이다.</p>
+<p>순열 중요도(permutation importance)는 검증자료 또는 OOB 자료에서 변수 <span class="math inline">\(X_j\)</span>의 값을 무작위로 섞은 뒤 성능이 얼마나 감소하는지 측정한다.</p>
+<p><span id="eq-ch08-permutation-importance"><span class="math display">\[
+\operatorname{Imp}_{\mathrm{perm}}(X_j)
+=
+\widehat R_{\mathrm{perm}(j)}
+-
+\widehat R_{\mathrm{original}}
+\tag{8.59}\]</span></span></p>
+<p>불순도 중요도는 가능한 분할점이 많은 연속형 변수나 범주 수가 많은 변수에 유리한 편향을 가질 수 있다. 순열 중요도는 상관된 변수 사이에서 중요도가 분산되거나 대체 가능한 변수를 과소평가할 수 있다.</p>
+</section>
+<section id="sec-ch08-conditional-permutation" class="level3" data-number="8.3.12">
+<h3 data-number="8.3.12" class="anchored" data-anchor-id="sec-ch08-conditional-permutation"><span class="header-section-number">8.3.12</span> 조건부 순열 중요도</h3>
+<p>변수 <span class="math inline">\(X_j\)</span>가 다른 변수와 강하게 상관되어 있으면 단순 순열은 현실적으로 가능하지 않은 특성조합을 만들 수 있다. 조건부 순열 중요도는 관련 변수들의 값을 조건으로 유지하면서 <span class="math inline">\(X_j\)</span>만 교란한다.</p>
+<p>개념적으로는</p>
+<p><span id="eq-ch08-conditional-permutation"><span class="math display">\[
+X_j^{\mathrm{perm}}
+\sim
+P(X_j\mid\mathbf X_{-j})
+\tag{8.60}\]</span></span></p>
+<p>에 가까운 대체값을 생성한다. 이를 통해 다른 변수에 포함된 중복정보를 통제한 조건부 기여도를 평가할 수 있다. 그러나 조건부분포를 정확히 추정해야 하므로 계산과 모형화가 더 복잡하다.</p>
+</section>
+<section id="sec-ch08-forest-interpretation" class="level3" data-number="8.3.13">
+<h3 data-number="8.3.13" class="anchored" data-anchor-id="sec-ch08-forest-interpretation"><span class="header-section-number">8.3.13</span> 부분의존과 개별조건부기대</h3>
+<p>PDP와 ICE의 일반 이론과 상관된 특성에서의 대안은 <span class="quarto-unresolved-ref">?sec-ch17-pdp-ice</span><!-- -->에서 다룬다.</p>
+<p>랜덤 포레스트는 단일 트리보다 해석이 어렵다. 전체 모형의 평균적인 관계는 부분의존함수로 요약할 수 있다.</p>
+<p><span id="eq-ch08-partial-dependence"><span class="math display">\[
+f_j^{\mathrm{PD}}(x_j)
+=
+E_{\mathbf X_{-j}}
+\left[
+F(x_j,\mathbf X_{-j})
+\right]
+\tag{8.61}\]</span></span></p>
+<p>표본평균으로는</p>
+<p><span id="eq-ch08-empirical-partial-dependence"><span class="math display">\[
+\widehat f_j^{\mathrm{PD}}(x_j)
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+F(x_j,\mathbf x_{i,-j})
+\tag{8.62}\]</span></span></p>
+<p>로 추정한다. 개별조건부기대(ICE)는 각 관측값별 곡선을 그려 이질적인 효과를 확인한다. 특성들이 강하게 상관되어 있으면 부분의존함수가 자료가 거의 없는 영역을 평가할 수 있으므로 해석에 주의해야 한다.</p>
+</section>
+<section id="sec-ch08-quantile-forest" class="level3" data-number="8.3.14">
+<h3 data-number="8.3.14" class="anchored" data-anchor-id="sec-ch08-quantile-forest"><span class="header-section-number">8.3.14</span> 분위수 회귀 포레스트</h3>
+<p>일반 랜덤 포레스트 회귀는 조건부 평균을 추정한다. 분위수 회귀 포레스트는 새로운 입력과 같은 말단노드에 반복적으로 포함된 훈련관측값에 가중치를 부여하여 조건부분포를 추정한다.</p>
+<p><span id="eq-ch08-conditional-distribution-forest"><span class="math display">\[
+\widehat F(y\mid\mathbf x)
+=
+\sum_{i=1}^{n}
+w_i(\mathbf x)
+I(y_i\leq y)
+\tag{8.63}\]</span></span></p>
+<p>여기서 <span class="math inline">\(w_i(\mathbf x)\)</span>는 관측값 <span class="math inline">\(i\)</span>가 새로운 입력 <span class="math inline">\(\mathbf x\)</span>와 같은 말단노드에 포함된 빈도를 반영한다. 조건부 <span class="math inline">\(\tau\)</span> 분위수는</p>
+<p><span id="eq-ch08-quantile-forest"><span class="math display">\[
+\widehat Q_\tau(\mathbf x)
+=
+\inf
+\{y:\widehat F(y\mid\mathbf x)\geq\tau\}
+\tag{8.64}\]</span></span></p>
+<p>로 계산한다. 이는 예측구간과 이분산성을 비모수적으로 추정하는 데 유용하다.</p>
+</section>
+<section id="sec-ch08-imbalanced-random-forest" class="level3" data-number="8.3.15">
+<h3 data-number="8.3.15" class="anchored" data-anchor-id="sec-ch08-imbalanced-random-forest"><span class="header-section-number">8.3.15</span> 클래스 불균형과 랜덤 포레스트</h3>
+<p>희귀 클래스가 있는 경우 부트스트랩 표본에 양성 사례가 충분히 포함되지 않을 수 있고, 다수결은 다수 클래스에 치우칠 수 있다. 다음 방법을 사용할 수 있다.</p>
+<ul>
+<li>클래스별 균형 부트스트랩</li>
+<li>비용민감 분할</li>
+<li>클래스 가중 투표</li>
+<li>OOB 자료에서 임계값 선택</li>
+<li>확률 보정 후 의사결정 비용에 따른 임계값 적용</li>
+</ul>
+<p>균형표본추출은 학습분포의 클래스 비율을 바꾸므로, 모형이 출력한 확률을 실제 모집단 유병률에 맞게 보정해야 할 수 있다.</p>
+</section>
+</section>
+<section id="sec-ch08-combination-strategies" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="sec-ch08-combination-strategies"><span class="header-section-number">8.4</span> 결합 전략</h2>
+<section id="sec-ch08-voting-strategies" class="level3" data-number="8.4.1">
+<h3 data-number="8.4.1" class="anchored" data-anchor-id="sec-ch08-voting-strategies"><span class="header-section-number">8.4.1</span> 다수결과 가중 다수결</h3>
+<p>다중분류에서 개별 학습기 <span class="math inline">\(h_m\)</span>이 클래스 레이블을 출력하면 클래스 <span class="math inline">\(k\)</span>의 투표 수는</p>
+<p><span id="eq-ch08-class-votes"><span class="math display">\[
+V_k(\mathbf x)
+=
+\sum_{m=1}^{M}
+I\{h_m(\mathbf x)=k\}
+\tag{8.65}\]</span></span></p>
+<p>이다. 최종 예측은</p>
+<p><span id="eq-ch08-hard-voting"><span class="math display">\[
+\widehat y(\mathbf x)
+=
+\arg\max_k V_k(\mathbf x)
+\tag{8.66}\]</span></span></p>
+<p>로 결정한다. 학습기별 신뢰도를 반영한 가중투표는</p>
+<p><span id="eq-ch08-weighted-class-votes"><span class="math display">\[
+V_k^{(w)}(\mathbf x)
+=
+\sum_{m=1}^{M}
+\alpha_m
+I\{h_m(\mathbf x)=k\}
+\tag{8.67}\]</span></span></p>
+<p>이다.</p>
+<p>가중치는 검증성능의 역오차, 로그오즈, 최적화 또는 메타학습을 통해 선택할 수 있다. 단순히 훈련성능이 높은 모형에 큰 가중치를 부여하면 과적합된 모형이 과도한 영향력을 가질 수 있다.</p>
+</section>
+<section id="sec-ch08-probability-averaging" class="level3" data-number="8.4.2">
+<h3 data-number="8.4.2" class="anchored" data-anchor-id="sec-ch08-probability-averaging"><span class="header-section-number">8.4.2</span> 확률평균</h3>
+<p>개별 학습기가 클래스 확률 <span class="math inline">\(\widehat p_{mk}(\mathbf x)\)</span>를 출력하면 선형 확률풀(linear opinion pool)은</p>
+<p><span id="eq-ch08-linear-probability-pool"><span class="math display">\[
+\widehat p_k^{\mathrm{ens}}(\mathbf x)
+=
+\sum_{m=1}^{M}
+\alpha_m
+\widehat p_{mk}(\mathbf x)
+\tag{8.68}\]</span></span></p>
+<p>로 정의한다. 모든 가중치가 비음수이고 합이 1이면 최종 확률도 유효한 확률분포다.</p>
+<p>로그 확률풀은</p>
+<p><span id="eq-ch08-logarithmic-pool-unnormalized"><span class="math display">\[
+\widetilde p_k(\mathbf x)
+=
+\prod_{m=1}^{M}
+\widehat p_{mk}(\mathbf x)^{\alpha_m}
+\tag{8.69}\]</span></span></p>
+<p>을 계산한 뒤 클래스 전체에 대해 정규화한다.</p>
+<p><span id="eq-ch08-logarithmic-pool"><span class="math display">\[
+\widehat p_k^{\mathrm{log}}(\mathbf x)
+=
+\frac{\widetilde p_k(\mathbf x)}
+     {\sum_{\ell=1}^{K}\widetilde p_\ell(\mathbf x)}
+\tag{8.70}\]</span></span></p>
+<p>선형 평균은 극단적 확률을 완화하는 경향이 있고, 로그 평균은 모든 모형이 동의하는 클래스에 더 큰 확률을 줄 수 있다. 개별 확률이 보정되지 않았다면 결합 후에도 보정이 필요하다.</p>
+</section>
+<section id="sec-ch08-score-logit-combination" class="level3" data-number="8.4.3">
+<h3 data-number="8.4.3" class="anchored" data-anchor-id="sec-ch08-score-logit-combination"><span class="header-section-number">8.4.3</span> 점수와 로짓의 결합</h3>
+<p>이진분류 확률의 로짓을</p>
+<p><span id="eq-ch08-individual-logit-score"><span class="math display">\[
+z_m(\mathbf x)
+=
+\log
+\frac{\widehat p_m(\mathbf x)}
+     {1-\widehat p_m(\mathbf x)}
+\tag{8.71}\]</span></span></p>
+<p>라고 하자. 로짓 평균은</p>
+<p><span id="eq-ch08-logit-combination"><span class="math display">\[
+z_{\mathrm{ens}}(\mathbf x)
+=
+\beta_0
++
+\sum_{m=1}^{M}\beta_m z_m(\mathbf x)
+\tag{8.72}\]</span></span></p>
+<p>으로 구성하고</p>
+<p><span id="eq-ch08-logit-ensemble-probability"><span class="math display">\[
+\widehat p_{\mathrm{ens}}(\mathbf x)
+=
+\frac{1}{1+\exp\{-z_{\mathrm{ens}}(\mathbf x)\}}
+\tag{8.73}\]</span></span></p>
+<p>로 변환한다. 이는 개별 예측을 입력변수로 사용하는 로지스틱 메타모형과 같다.</p>
+</section>
+<section id="sec-ch08-stacking" class="level3" data-number="8.4.4">
+<h3 data-number="8.4.4" class="anchored" data-anchor-id="sec-ch08-stacking"><span class="header-section-number">8.4.4</span> 스태킹</h3>
+<p>스태킹(stacking)은 여러 1단계 모형의 예측을 새로운 특성으로 사용하여 2단계 메타학습기를 적합하는 방법이다. 관측값 <span class="math inline">\(i\)</span>에 대한 1단계 예측벡터를</p>
+<p><span id="eq-ch08-out-of-fold-prediction-vector"><span class="math display">\[
+\mathbf z_i
+=
+\left(
+\widehat f_1^{(-i)}(\mathbf x_i),
+\ldots,
+\widehat f_M^{(-i)}(\mathbf x_i)
+\right)^\top
+\tag{8.74}\]</span></span></p>
+<p>라고 하자. 위첨자 <span class="math inline">\((-i)\)</span>는 관측값 <span class="math inline">\(i\)</span>를 학습에 사용하지 않은 모형의 예측임을 뜻한다. 메타학습기 <span class="math inline">\(g\)</span>는</p>
+<p><span id="eq-ch08-stacking-meta-objective"><span class="math display">\[
+\widehat g
+=
+\arg\min_g
+\sum_{i=1}^{n}
+L\{y_i,g(\mathbf z_i)\}
+\tag{8.75}\]</span></span></p>
+<p>로 학습한다. 새로운 자료에서는 각 1단계 모형을 전체 훈련자료에 다시 적합한 뒤 그 예측을 메타학습기에 입력한다.</p>
+<div class="callout callout-style-default callout-warning callout-titled" title="스태킹에서 가장 중요한 원칙">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">경고</span>스태킹에서 가장 중요한 원칙
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>메타학습기 훈련에는 반드시 <strong>out-of-fold 예측</strong>을 사용해야 한다. 1단계 모형이 자신을 학습한 자료에 대해 만든 적합값을 메타학습기에 사용하면 심각한 데이터 누출과 과적합이 발생한다.</p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch08-stacking-flow" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch08-stacking-flow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="08-ensemble-learning_files/figure-html/fig-ch08-stacking-flow-1.png" class="img-fluid figure-img" width="864">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch08-stacking-flow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;8.6: 교차검증 외부예측을 이용한 스태킹의 구조
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch08-linear-stacking" class="level3" data-number="8.4.5">
+<h3 data-number="8.4.5" class="anchored" data-anchor-id="sec-ch08-linear-stacking"><span class="header-section-number">8.4.5</span> 선형 스태킹과 비음수 제약</h3>
+<p>회귀에서 선형 메타학습기를 사용하면</p>
+<p><span id="eq-ch08-linear-stacking-model"><span class="math display">\[
+\widehat y_i
+=
+\beta_0
++
+\sum_{m=1}^{M}\beta_m z_{im}
+\tag{8.76}\]</span></span></p>
+<p>이다. 가중치에</p>
+<p><span id="eq-ch08-convex-stacking-constraints"><span class="math display">\[
+\beta_m\geq 0,
+\qquad
+\sum_{m=1}^{M}\beta_m=1
+\tag{8.77}\]</span></span></p>
+<p>을 부과하면 최종 예측은 개별 예측의 볼록결합이 된다. 비음수 제약은 모형의 불안정한 상쇄를 줄이고 해석을 단순화한다. 반면 음의 가중치를 허용하면 편향 보정이 가능하지만 외삽과 극단적 예측 위험이 커질 수 있다.</p>
+</section>
+<section id="sec-ch08-super-learner" class="level3" data-number="8.4.6">
+<h3 data-number="8.4.6" class="anchored" data-anchor-id="sec-ch08-super-learner"><span class="header-section-number">8.4.6</span> 슈퍼러너</h3>
+<p>슈퍼러너(super learner)는 후보 학습기 라이브러리의 교차검증 예측을 결합하여 기대손실을 최소화하는 스태킹 방법이다. 후보 가중치 <span class="math inline">\(\boldsymbol\alpha\)</span>에 대해</p>
+<p><span id="eq-ch08-super-learner-optimization"><span class="math display">\[
+\widehat{\boldsymbol\alpha}
+=
+\arg\min_{\boldsymbol\alpha\in\mathcal A}
+\sum_{i=1}^{n}
+L\left\{
+y_i,
+\sum_{m=1}^{M}\alpha_m z_{im}
+\right\}
+\tag{8.78}\]</span></span></p>
+<p>을 푼다. 일반적으로 <span class="math inline">\(\mathcal A\)</span>는 비음수이고 합이 1인 단체(simplex)로 설정한다.</p>
+<p>후보 라이브러리에는 단순모형과 복잡한 모형을 함께 포함하는 것이 좋다. 모든 후보가 비슷한 구조를 가지면 스태킹의 다양성이 제한된다.</p>
+</section>
+<section id="sec-ch08-blending" class="level3" data-number="8.4.7">
+<h3 data-number="8.4.7" class="anchored" data-anchor-id="sec-ch08-blending"><span class="header-section-number">8.4.7</span> 블렌딩</h3>
+<p>블렌딩(blending)은 전체 훈련자료의 일부를 메타학습용 검증자료로 따로 분리한다. 1단계 모형은 나머지 자료에 적합하고, 홀드아웃 예측을 이용해 메타학습기를 학습한다.</p>
+<p>구현이 단순하고 계산비용이 작지만, 1단계와 2단계 모두 사용할 수 있는 자료가 줄어든다. 표본이 충분히 큰 대규모 자료에서는 실용적이지만, 작은 자료에서는 교차검증 기반 스태킹이 더 효율적이다.</p>
+</section>
+<section id="sec-ch08-bayesian-model-averaging" class="level3" data-number="8.4.8">
+<h3 data-number="8.4.8" class="anchored" data-anchor-id="sec-ch08-bayesian-model-averaging"><span class="header-section-number">8.4.8</span> 베이지안 모형 평균</h3>
+<p>후보모형을 <span class="math inline">\(\mathcal M_1,\ldots,\mathcal M_M\)</span>이라고 하자. 베이지안 모형 평균(Bayesian model averaging)은 모형 사후확률을 가중치로 사용한다.</p>
+<p><span id="eq-ch08-bayesian-model-averaging"><span class="math display">\[
+p(y^\ast\mid\mathbf x^\ast,\mathcal D)
+=
+\sum_{m=1}^{M}
+p(y^\ast\mid\mathbf x^\ast,\mathcal D,\mathcal M_m)
+P(\mathcal M_m\mid\mathcal D)
+\tag{8.79}\]</span></span></p>
+<p>여기서</p>
+<p><span id="eq-ch08-model-posterior"><span class="math display">\[
+P(\mathcal M_m\mid\mathcal D)
+\propto
+p(\mathcal D\mid\mathcal M_m)
+P(\mathcal M_m)
+\tag{8.80}\]</span></span></p>
+<p>이다. 베이지안 모형 평균은 모형 선택 불확실성을 예측분포에 반영한다. 그러나 후보모형의 사전확률과 주변우도 계산이 필요하며, 대규모 복잡모형에서는 근사방법이 필요하다.</p>
+</section>
+<section id="sec-ch08-mixture-of-experts" class="level3" data-number="8.4.9">
+<h3 data-number="8.4.9" class="anchored" data-anchor-id="sec-ch08-mixture-of-experts"><span class="header-section-number">8.4.9</span> 혼합 전문가 모형</h3>
+<p>혼합 전문가 모형(mixture of experts)은 입력영역에 따라 다른 전문가의 가중치를 부여한다. 전문가 <span class="math inline">\(m\)</span>의 예측분포를 <span class="math inline">\(p_m(y\mid\mathbf x)\)</span>, 게이팅 함수의 가중치를 <span class="math inline">\(\pi_m(\mathbf x)\)</span>라 하면</p>
+<p><span id="eq-ch08-mixture-of-experts"><span class="math display">\[
+p(y\mid\mathbf x)
+=
+\sum_{m=1}^{M}
+\pi_m(\mathbf x)
+p_m(y\mid\mathbf x)
+\tag{8.81}\]</span></span></p>
+<p>이고</p>
+<p><span id="eq-ch08-gating-constraints"><span class="math display">\[
+\pi_m(\mathbf x)\geq 0,
+\qquad
+\sum_{m=1}^{M}\pi_m(\mathbf x)=1
+\tag{8.82}\]</span></span></p>
+<p>이다. 스태킹의 가중치가 전체 입력공간에서 고정되어 있는 것과 달리, 혼합 전문가에서는 가중치가 입력값에 따라 달라진다.</p>
+<p>예를 들어 선형모형은 전체적인 추세에, 트리는 비선형 상호작용에, 특수 모형은 특정 하위집단에 더 큰 가중치를 받을 수 있다.</p>
+</section>
+<section id="sec-ch08-dynamic-ensemble-selection" class="level3" data-number="8.4.10">
+<h3 data-number="8.4.10" class="anchored" data-anchor-id="sec-ch08-dynamic-ensemble-selection"><span class="header-section-number">8.4.10</span> 동적 앙상블 선택</h3>
+<p>동적 앙상블 선택은 새로운 입력 <span class="math inline">\(\mathbf x\)</span> 주변에서 성능이 좋은 학습기만 선택하거나 더 큰 가중치를 부여한다. 입력의 근방 <span class="math inline">\(\mathcal N(\mathbf x)\)</span>에서 학습기 <span class="math inline">\(m\)</span>의 국소성능을</p>
+<p><span id="eq-ch08-local-competence"><span class="math display">\[
+q_m(\mathbf x)
+=
+\frac{1}{|\mathcal N(\mathbf x)|}
+\sum_{i\in\mathcal N(\mathbf x)}
+I\{h_m(\mathbf x_i)=y_i\}
+\tag{8.83}\]</span></span></p>
+<p>로 평가할 수 있다. 최종 예측은 <span class="math inline">\(q_m(\mathbf x)\)</span>가 높은 학습기들의 투표로 결정한다.</p>
+<p>국소성능 추정은 근방의 정의와 검증자료의 밀도에 민감하다. 고차원 자료에서는 거리집중 현상 때문에 신뢰할 수 있는 근방을 구성하기 어려울 수 있다.</p>
+</section>
+<section id="sec-ch08-post-ensemble-calibration" class="level3" data-number="8.4.11">
+<h3 data-number="8.4.11" class="anchored" data-anchor-id="sec-ch08-post-ensemble-calibration"><span class="header-section-number">8.4.11</span> 결합 이후의 확률 보정</h3>
+<p>앙상블은 분류순위를 개선하더라도 확률 보정을 자동으로 보장하지 않는다. 다수결 비율은 클래스 확률과 같지 않으며, 서로 강하게 상관된 모형들의 평균은 불확실성을 과소평가할 수 있다.</p>
+<p>확률이 의사결정에 사용될 때는 다음을 확인해야 한다.</p>
+<ul>
+<li>교정곡선과 calibration-in-the-large</li>
+<li>calibration slope</li>
+<li>Brier score와 로그손실</li>
+<li>하위집단별 보정</li>
+<li>시간과 기관 변화에 따른 보정 유지</li>
+</ul>
+<p>보정모형은 앙상블 학습과 분리된 자료 또는 외부 교차검증 예측을 이용해야 한다.</p>
+</section>
+</section>
+<section id="sec-ch08-diversity" class="level2" data-number="8.5">
+<h2 data-number="8.5" class="anchored" data-anchor-id="sec-ch08-diversity"><span class="header-section-number">8.5</span> 다양성</h2>
+<section id="sec-ch08-why-diversity" class="level3" data-number="8.5.1">
+<h3 data-number="8.5.1" class="anchored" data-anchor-id="sec-ch08-why-diversity"><span class="header-section-number">8.5.1</span> 다양성이 필요한 이유</h3>
+<p>정확도가 높은 학습기 여러 개를 결합해도 이들이 동일한 사례에서 동일하게 틀리면 앙상블의 이득은 작다. 반대로 각 학습기의 성능이 다소 낮더라도 오류가 상호보완적이면 결합 후 성능이 크게 향상될 수 있다.</p>
+<p>회귀에서 개별 오차를</p>
+<p><span id="eq-ch08-individual-error"><span class="math display">\[
+e_m(\mathbf x)
+=
+y-h_m(\mathbf x)
+\tag{8.84}\]</span></span></p>
+<p>라고 하면 평균 앙상블의 오차는</p>
+<p><span id="eq-ch08-ensemble-error-average"><span class="math display">\[
+e_{\mathrm{ens}}(\mathbf x)
+=
+\frac{1}{M}
+\sum_{m=1}^{M}e_m(\mathbf x)
+\tag{8.85}\]</span></span></p>
+<p>이다. 앙상블 제곱오차는 개별 오차의 분산과 공분산에 의해 결정된다.</p>
+<p><span id="eq-ch08-error-covariance-decomposition"><span class="math display">\[
+E(e_{\mathrm{ens}}^2)
+=
+\frac{1}{M^2}
+\left[
+\sum_{m=1}^{M}E(e_m^2)
++
+2\sum_{m&lt;\ell}E(e_m e_\ell)
+\right]
+\tag{8.86}\]</span></span></p>
+<p>두 번째 항이 작거나 음수일수록 앙상블의 오류가 감소한다.</p>
+</section>
+<section id="sec-ch08-ambiguity-decomposition" class="level3" data-number="8.5.2">
+<h3 data-number="8.5.2" class="anchored" data-anchor-id="sec-ch08-ambiguity-decomposition"><span class="header-section-number">8.5.2</span> 모호성 분해</h3>
+<p>회귀에서 평균 앙상블 <span class="math inline">\(F(\mathbf x)=M^{-1}\sum_m h_m(\mathbf x)\)</span>에 대해 다음 항등식이 성립한다.</p>
+<p><span id="eq-ch08-ambiguity-decomposition"><span class="math display">\[
+\{y-F(\mathbf x)\}^2
+=
+\frac{1}{M}
+\sum_{m=1}^{M}
+\{y-h_m(\mathbf x)\}^2
+-
+\frac{1}{M}
+\sum_{m=1}^{M}
+\{h_m(\mathbf x)-F(\mathbf x)\}^2
+\tag{8.87}\]</span></span></p>
+<p>첫 번째 항은 개별 학습기의 평균 제곱오차이고, 두 번째 항은 앙상블 구성원 사이의 모호성 또는 다양성이다. 따라서</p>
+<p><span id="eq-ch08-error-diversity-identity"><span class="math display">\[
+\text{앙상블 오류}
+=
+\text{평균 개별 오류}
+-
+\text{다양성}
+\tag{8.88}\]</span></span></p>
+<p>로 해석할 수 있다.</p>
+<p>그러나 다양성을 무조건 크게 만드는 것이 목표는 아니다. 매우 부정확한 학습기를 추가하면 다양성은 증가하지만 평균 개별 오류도 더 크게 증가할 수 있다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch08-accuracy-diversity" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch08-accuracy-diversity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="08-ensemble-learning_files/figure-html/fig-ch08-accuracy-diversity-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch08-accuracy-diversity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;8.7: 개별 정확성과 다양성 사이의 균형
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch08-accuracy-diversity" class="quarto-xref">그림&nbsp;<span>8.7</span></a><!-- -->는 무작위화를 강화하면 초기에는 다양성 증가로 앙상블 오류가 감소하지만, 지나친 무작위화는 개별 학습기의 정확도를 크게 낮출 수 있음을 개념적으로 보여준다.</p>
+</section>
+<section id="sec-ch08-pairwise-contingency" class="level3" data-number="8.5.3">
+<h3 data-number="8.5.3" class="anchored" data-anchor-id="sec-ch08-pairwise-contingency"><span class="header-section-number">8.5.3</span> 분류기 쌍의 분할표</h3>
+<p>두 분류기 <span class="math inline">\(h_a\)</span>와 <span class="math inline">\(h_b\)</span>의 정오분류 결과를 <a href="#tbl-ch08-pairwise-correctness" class="quarto-xref">표&nbsp;<span>8.3</span></a><!-- -->와 같이 나타낼 수 있다.</p>
+<div id="tbl-ch08-pairwise-correctness" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch08-pairwise-correctness-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;8.3: 두 분류기의 정오분류 결합빈도
+</figcaption>
+<div aria-describedby="tbl-ch08-pairwise-correctness-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;"><span class="math inline">\(h_b\)</span> 정분류</th>
+<th style="text-align: right;"><span class="math inline">\(h_b\)</span> 오분류</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(h_a\)</span> 정분류</td>
+<td style="text-align: right;"><span class="math inline">\(N^{11}\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(N^{10}\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(h_a\)</span> 오분류</td>
+<td style="text-align: right;"><span class="math inline">\(N^{01}\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(N^{00}\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>여기서 <span class="math inline">\(N^{10}\)</span>과 <span class="math inline">\(N^{01}\)</span>은 두 분류기가 서로 다른 결과를 보인 사례이고, <span class="math inline">\(N^{00}\)</span>은 둘 다 틀린 사례다.</p>
+</section>
+<section id="sec-ch08-disagreement-measure" class="level3" data-number="8.5.4">
+<h3 data-number="8.5.4" class="anchored" data-anchor-id="sec-ch08-disagreement-measure"><span class="header-section-number">8.5.4</span> 불일치(disagreement) 척도</h3>
+<p>두 분류기의 불일치 비율은</p>
+<p><span id="eq-ch08-disagreement"><span class="math display">\[
+\operatorname{Dis}(a,b)
+=
+\frac{N^{10}+N^{01}}{N}
+\tag{8.89}\]</span></span></p>
+<p>이다. 값이 클수록 두 분류기의 예측행동이 다르다. 그러나 불일치는 정분류와 오분류를 구분하지 않으므로, 부정확한 분류기 두 개도 높은 다양성을 가질 수 있다.</p>
+</section>
+<section id="sec-ch08-double-fault" class="level3" data-number="8.5.5">
+<h3 data-number="8.5.5" class="anchored" data-anchor-id="sec-ch08-double-fault"><span class="header-section-number">8.5.5</span> 이중 오류 척도</h3>
+<p>이중 오류(double fault)는 두 분류기가 동시에 틀리는 비율이다.</p>
+<p><span id="eq-ch08-double-fault"><span class="math display">\[
+\operatorname{DF}(a,b)
+=
+\frac{N^{00}}{N}
+\tag{8.90}\]</span></span></p>
+<p>이 값이 작을수록 한 분류기의 오류를 다른 분류기가 보완할 가능성이 높다. 실제 앙상블 선택에서는 단순 불일치보다 이중 오류가 더 직접적인 정보를 제공할 때가 많다.</p>
+</section>
+<section id="sec-ch08-q-statistic" class="level3" data-number="8.5.6">
+<h3 data-number="8.5.6" class="anchored" data-anchor-id="sec-ch08-q-statistic"><span class="header-section-number">8.5.6</span> Q 통계량</h3>
+<p>Q 통계량(Q statistic)은 두 분류기의 정오분류 연관성을 측정한다.</p>
+<p><span id="eq-ch08-q-statistic"><span class="math display">\[
+Q_{ab}
+=
+\frac{
+N^{11}N^{00}-N^{10}N^{01}
+}{
+N^{11}N^{00}+N^{10}N^{01}
+}
+\tag{8.91}\]</span></span></p>
+<p><span class="math inline">\(Q_{ab}=1\)</span>이면 두 분류기의 정오분류 패턴이 완전히 같은 방향이고, <span class="math inline">\(Q_{ab}=-1\)</span>이면 완전히 반대이며, 0에 가까우면 연관성이 약하다.</p>
+</section>
+<section id="sec-ch08-error-correlation" class="level3" data-number="8.5.7">
+<h3 data-number="8.5.7" class="anchored" data-anchor-id="sec-ch08-error-correlation"><span class="header-section-number">8.5.7</span> 오류 상관계수</h3>
+<p>정분류 여부를 이진변수로 두면 두 분류기의 상관계수는</p>
+<p><span id="eq-ch08-pairwise-correlation"><span class="math display">\[
+\rho_{ab}
+=
+\frac{
+N^{11}N^{00}-N^{10}N^{01}
+}{
+\sqrt{
+(N^{11}+N^{10})
+(N^{01}+N^{00})
+(N^{11}+N^{01})
+(N^{10}+N^{00})
+}
+}
+\tag{8.92}\]</span></span></p>
+<p>로 계산된다. 평균 쌍별 상관을 낮추는 것이 배깅과 랜덤 포레스트의 핵심 목적 중 하나다.</p>
+</section>
+<section id="sec-ch08-nonpairwise-diversity" class="level3" data-number="8.5.8">
+<h3 data-number="8.5.8" class="anchored" data-anchor-id="sec-ch08-nonpairwise-diversity"><span class="header-section-number">8.5.8</span> 비쌍별 다양성 척도</h3>
+<p>관측값 <span class="math inline">\(i\)</span>를 올바르게 분류한 학습기의 수를 <span class="math inline">\(l_i\)</span>라고 하자. 분산형 다양성은</p>
+<p><span id="eq-ch08-kohavi-wolpert-variance"><span class="math display">\[
+\operatorname{KW}
+=
+\frac{1}{nM^2}
+\sum_{i=1}^{n}
+l_i(M-l_i)
+\tag{8.93}\]</span></span></p>
+<p>로 정의할 수 있다. <span class="math inline">\(l_i\)</span>가 0이나 <span class="math inline">\(M\)</span>에 가까우면 모든 학습기가 같은 판단을 하므로 다양성이 작다. <span class="math inline">\(l_i\)</span>가 <span class="math inline">\(M/2\)</span>에 가까우면 의견이 크게 나뉘므로 다양성이 크다.</p>
+<p>엔트로피 기반 다양성은</p>
+<p><span id="eq-ch08-ensemble-entropy-diversity"><span class="math display">\[
+E
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+\frac{1}{M-\lceil M/2\rceil}
+\min\{l_i,M-l_i\}
+\tag{8.94}\]</span></span></p>
+<p>처럼 정의할 수 있다. 다만 다양성 척도마다 앙상블 성능과의 관계가 다르며, 하나의 척도가 모든 문제에서 최적이라고 볼 수 없다.</p>
+</section>
+<section id="sec-ch08-generating-diversity" class="level3" data-number="8.5.9">
+<h3 data-number="8.5.9" class="anchored" data-anchor-id="sec-ch08-generating-diversity"><span class="header-section-number">8.5.9</span> 다양성을 만드는 방법</h3>
+<p>앙상블 다양성은 다음과 같은 수준에서 만들 수 있다.</p>
+<div id="tbl-ch08-sources-of-diversity" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch08-sources-of-diversity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;8.4: 앙상블 다양성의 주요 원천
+</figcaption>
+<div aria-describedby="tbl-ch08-sources-of-diversity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>다양성의 원천</th>
+<th>방법의 예</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>관측값</td>
+<td>부트스트랩, 서브샘플링, 클래스별 표본추출</td>
+</tr>
+<tr class="even">
+<td>변수</td>
+<td>랜덤 서브스페이스, 노드별 변수 추출, 특성군 분할</td>
+</tr>
+<tr class="odd">
+<td>표현</td>
+<td>서로 다른 변수변환, 주성분 회전, 데이터 증강</td>
+</tr>
+<tr class="even">
+<td>알고리즘</td>
+<td>선형모형, 트리, SVM, 신경망의 혼합</td>
+</tr>
+<tr class="odd">
+<td>하이퍼파라미터</td>
+<td>깊이, 규제, 커널, 초기값의 변화</td>
+</tr>
+<tr class="even">
+<td>목적함수</td>
+<td>서로 다른 손실함수 또는 비용행렬</td>
+</tr>
+<tr class="odd">
+<td>최적화</td>
+<td>초기값, 미니배치 순서, 학습률 스케줄</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>좋은 다양성은 무작위한 차이 자체가 아니라 예측오류의 상호보완성을 의미한다.</p>
+</section>
+<section id="sec-ch08-negative-correlation-learning" class="level3" data-number="8.5.10">
+<h3 data-number="8.5.10" class="anchored" data-anchor-id="sec-ch08-negative-correlation-learning"><span class="header-section-number">8.5.10</span> 음의 상관 학습</h3>
+<p>신경망 앙상블에서는 개별 학습기를 동시에 학습하면서 다른 학습기와 비슷한 오류를 내지 않도록 패널티를 추가할 수 있다. 학습기 <span class="math inline">\(m\)</span>의 목적함수를</p>
+<p><span id="eq-ch08-negative-correlation-objective"><span class="math display">\[
+\mathcal L_m
+=
+\sum_{i=1}^{n}
+\{y_i-h_m(\mathbf x_i)\}^2
++
+\lambda
+\sum_{i=1}^{n}
+\{h_m(\mathbf x_i)-F(\mathbf x_i)\}
+\sum_{\ell\neq m}
+\{h_\ell(\mathbf x_i)-F(\mathbf x_i)\}
+\tag{8.95}\]</span></span></p>
+<p>처럼 구성할 수 있다. 두 번째 항은 구성원들의 편차가 같은 방향으로 움직이는 것을 억제한다. <span class="math inline">\(\lambda\)</span>가 너무 크면 개별 정확도가 크게 저하될 수 있으므로 검증이 필요하다.</p>
+</section>
+<section id="sec-ch08-diversity-regularized-combination" class="level3" data-number="8.5.11">
+<h3 data-number="8.5.11" class="anchored" data-anchor-id="sec-ch08-diversity-regularized-combination"><span class="header-section-number">8.5.11</span> 다양성 규제를 이용한 결합</h3>
+<p>가중 앙상블에서 예측행렬을 <span class="math inline">\(\mathbf Z\in\mathbb R^{n\times M}\)</span>, 가중치를 <span class="math inline">\(\boldsymbol\alpha\)</span>라고 하자. 회귀의 결합 가중치를 다음과 같이 추정할 수 있다.</p>
+<p><span id="eq-ch08-diversity-regularized-weights"><span class="math display">\[
+\widehat{\boldsymbol\alpha}
+=
+\arg\min_{\boldsymbol\alpha}
+\left[
+\|\mathbf y-\mathbf Z\boldsymbol\alpha\|_2^2
++
+\lambda\boldsymbol\alpha^\top
+\mathbf C
+\boldsymbol\alpha
+\right]
+\tag{8.96}\]</span></span></p>
+<p>여기서 <span class="math inline">\(\mathbf C\)</span>는 학습기 오류의 상관 또는 유사성을 나타내는 행렬이다. 상관된 학습기들에 동시에 큰 가중치를 주는 것을 억제함으로써 정확성과 다양성을 함께 고려한다.</p>
+</section>
+<section id="sec-ch08-ensemble-pruning" class="level3" data-number="8.5.12">
+<h3 data-number="8.5.12" class="anchored" data-anchor-id="sec-ch08-ensemble-pruning"><span class="header-section-number">8.5.12</span> 앙상블 가지치기</h3>
+<p>학습기 수가 많다고 항상 좋은 것은 아니다. 성능이 낮거나 다른 학습기와 거의 같은 예측을 하는 구성원을 제거하면 계산량을 줄이면서 성능을 유지하거나 개선할 수 있다.</p>
+<p>앙상블 가지치기(ensemble pruning)의 목표는 후보집합 <span class="math inline">\(\{h_1,\ldots,h_M\}\)</span>에서 부분집합 <span class="math inline">\(S\)</span>를 선택하는 것이다.</p>
+<p><span id="eq-ch08-ensemble-pruning-objective"><span class="math display">\[
+\widehat S
+=
+\arg\min_{S\subseteq\{1,\ldots,M\}}
+\left[
+\widehat R\{F_S\}
++
+\lambda |S|
+\right]
+\tag{8.97}\]</span></span></p>
+<p>모든 부분집합을 탐색하는 것은 계산적으로 어렵기 때문에 다음 방법을 사용한다.</p>
+<ul>
+<li>성능순 정렬 후 순차 추가</li>
+<li>앞으로 선택 또는 뒤로 제거</li>
+<li>정확도와 다양성의 결합점수</li>
+<li>군집화 후 대표 학습기 선택</li>
+<li>희소 가중치 추정</li>
+<li>유전 알고리즘과 같은 탐색기법</li>
+</ul>
+</section>
+<section id="sec-ch08-greedy-ensemble-selection" class="level3" data-number="8.5.13">
+<h3 data-number="8.5.13" class="anchored" data-anchor-id="sec-ch08-greedy-ensemble-selection"><span class="header-section-number">8.5.13</span> 그리디 앙상블 선택</h3>
+<p>그리디 앙상블 선택은 검증자료에서 가장 좋은 단일 모형으로 시작한 뒤, 현재 앙상블과 결합했을 때 성능을 가장 많이 개선하는 모형을 반복적으로 추가한다.</p>
+<p><span class="math inline">\(m\)</span>번째 단계에서 후보 <span class="math inline">\(j\)</span>의 결합위험을</p>
+<p><span id="eq-ch08-greedy-ensemble-risk"><span class="math display">\[
+\widehat R_{m,j}
+=
+\widehat R\left\{
+\frac{m-1}{m}F_{m-1}
++
+\frac{1}{m}h_j
+\right\}
+\tag{8.98}\]</span></span></p>
+<p>로 평가하고</p>
+<p><span id="eq-ch08-greedy-selection"><span class="math display">\[
+j_m
+=
+\arg\min_j \widehat R_{m,j}
+\tag{8.99}\]</span></span></p>
+<p>를 선택한다. 같은 모형을 여러 번 선택하도록 허용하면 선택 빈도가 암묵적인 가중치 역할을 한다.</p>
+</section>
+<section id="sec-ch08-diversity-fairness" class="level3" data-number="8.5.14">
+<h3 data-number="8.5.14" class="anchored" data-anchor-id="sec-ch08-diversity-fairness"><span class="header-section-number">8.5.14</span> 다양성과 공정성</h3>
+<p>앙상블은 평균 성능을 높일 수 있지만 모든 하위집단에서 동일하게 개선된다는 보장은 없다. 일부 모형이 특정 집단에서 체계적 오류를 공유하면 결합 후에도 편향이 유지될 수 있다.</p>
+<p>따라서 앙상블 평가에서는 전체 오류뿐 아니라 다음을 함께 확인해야 한다.</p>
+<ul>
+<li>하위집단별 민감도와 특이도</li>
+<li>하위집단별 확률 보정</li>
+<li>오분류 비용의 불균형</li>
+<li>집단별 예측 불확실성</li>
+<li>자료대표성의 차이</li>
+</ul>
+<p>다양성은 알고리즘 사이뿐 아니라 자료 출처, 기관, 시간, 인구집단에 대해서도 고려되어야 한다.</p>
+</section>
+<section id="sec-ch08-ensemble-uncertainty" class="level3" data-number="8.5.15">
+<h3 data-number="8.5.15" class="anchored" data-anchor-id="sec-ch08-ensemble-uncertainty"><span class="header-section-number">8.5.15</span> 앙상블 불확실성</h3>
+<p>앙상블 구성원들의 예측 분산은 모형 불확실성의 한 지표로 사용할 수 있다.</p>
+<p><span id="eq-ch08-ensemble-prediction-variance"><span class="math display">\[
+\widehat V_{\mathrm{ens}}(\mathbf x)
+=
+\frac{1}{M-1}
+\sum_{m=1}^{M}
+\{h_m(\mathbf x)-\overline h(\mathbf x)\}^2
+\tag{8.100}\]</span></span></p>
+<p>그러나 구성원들이 동일한 자료와 유사한 구조로 학습되었으면 이 분산은 실제 불확실성을 과소평가할 수 있다. 또한 분류확률의 분산은 자료의 본질적 불확실성과 모형 불확실성을 명확히 구분하지 않는다.</p>
+<p>딥 앙상블에서는 서로 다른 초기값과 자료순서로 여러 신경망을 학습하고, 평균 예측과 구성원 간 변동을 이용한다. 부트스트랩, 베이지안 근사 또는 conformal prediction과 결합하면 더 엄밀한 불확실성 평가가 가능하다.</p>
+</section>
+<section id="sec-ch08-practical-ensemble-design" class="level3" data-number="8.5.16">
+<h3 data-number="8.5.16" class="anchored" data-anchor-id="sec-ch08-practical-ensemble-design"><span class="header-section-number">8.5.16</span> 앙상블 설계의 실무 원칙</h3>
+<p>앙상블을 설계할 때는 다음 원칙이 중요하다.</p>
+<ol type="1">
+<li><strong>단일 기준모형을 먼저 확립한다.</strong> 앙상블의 개선 폭을 객관적으로 평가할 수 있어야 한다.</li>
+<li><strong>구성원의 오류를 비교한다.</strong> 평균 성능뿐 아니라 사례별 오류패턴과 상관을 확인한다.</li>
+<li><strong>외부예측을 사용해 결합한다.</strong> 스태킹과 가중치 추정에는 out-of-fold 또는 독립 검증예측을 사용한다.</li>
+<li><strong>평가척도를 목적에 맞춘다.</strong> 분류순위, 확률 보정, 의사결정 비용 중 무엇이 중요한지 구분한다.</li>
+<li><strong>복잡성을 통제한다.</strong> 구성원이 많을수록 계산량, 유지관리, 설명 부담이 증가한다.</li>
+<li><strong>분포 이동을 평가한다.</strong> 시간, 기관, 장비 또는 인구집단이 바뀌면 구성원별 성능과 최적 가중치도 달라질 수 있다.</li>
+<li><strong>재현 가능한 파이프라인을 사용한다.</strong> 자료분할, 난수, 전처리, 하이퍼파라미터와 결합규칙을 모두 기록한다.</li>
+</ol>
+</section>
+<section id="sec-ch08-method-comparison" class="level3" data-number="8.5.17">
+<h3 data-number="8.5.17" class="anchored" data-anchor-id="sec-ch08-method-comparison"><span class="header-section-number">8.5.17</span> 앙상블 방법의 비교</h3>
+<div id="tbl-ch08-ensemble-method-comparison" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch08-ensemble-method-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;8.5: 주요 앙상블 방법의 비교
+</figcaption>
+<div aria-describedby="tbl-ch08-ensemble-method-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>방법</th>
+<th>구성원 생성</th>
+<th>결합방식</th>
+<th>주된 장점</th>
+<th>주요 위험</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>배깅</td>
+<td>부트스트랩 병렬학습</td>
+<td>평균 또는 투표</td>
+<td>분산 감소, 병렬화</td>
+<td>구성원 상관이 높으면 개선 제한</td>
+</tr>
+<tr class="even">
+<td>랜덤 포레스트</td>
+<td>관측값과 변수 무작위화</td>
+<td>평균 또는 투표</td>
+<td>강한 비선형 성능, OOB 평가</td>
+<td>확률 보정과 해석 문제</td>
+</tr>
+<tr class="odd">
+<td>AdaBoost</td>
+<td>오분류 사례 재가중</td>
+<td>가중투표</td>
+<td>약한 학습기의 강력한 결합</td>
+<td>잡음과 레이블 오류에 민감</td>
+</tr>
+<tr class="even">
+<td>그래디언트 부스팅</td>
+<td>의사잔차의 순차학습</td>
+<td>가법모형</td>
+<td>다양한 손실, 높은 예측성능</td>
+<td>튜닝과 조기종료 필요</td>
+</tr>
+<tr class="odd">
+<td>스태킹</td>
+<td>서로 다른 학습기의 OOF 예측</td>
+<td>메타학습기</td>
+<td>이질적 모형의 장점 결합</td>
+<td>데이터 누출 위험</td>
+</tr>
+<tr class="even">
+<td>혼합 전문가</td>
+<td>입력별 전문가와 게이팅</td>
+<td>입력의존 가중합</td>
+<td>국소적 전문성 활용</td>
+<td>학습과 해석이 복잡</td>
+</tr>
+<tr class="odd">
+<td>베이지안 모형 평균</td>
+<td>모형별 사후확률</td>
+<td>사후예측 혼합</td>
+<td>모형 불확실성 반영</td>
+<td>주변우도와 사전분포에 민감</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+</section>
+<section id="장-요약" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="장-요약">장 요약</h2>
+<p>앙상블 학습은 여러 학습기의 예측을 결합하여 단일 학습기보다 높은 정확성과 안정성을 얻는 방법이다. 평균화에 의한 분산 감소는 개별 학습기 사이의 상관이 낮을수록 커진다. 따라서 앙상블의 성능은 구성원의 수뿐 아니라 개별 정확성과 오류 다양성의 균형에 의해 결정된다.</p>
+<p>부스팅은 순차적으로 학습기를 추가하면서 이전 단계가 잘 처리하지 못한 사례나 손실함수의 음의 그래디언트를 학습한다. AdaBoost는 자료 가중치와 지수손실을 사용하고, 그래디언트 부스팅은 일반적인 미분가능 손실함수에 대해 함수공간의 경사하강을 수행한다. 학습률, 트리 깊이, 반복 횟수, 서브샘플링과 규제는 부스팅의 일반화 성능을 결정하는 핵심 요소다.</p>
+<p>배깅은 부트스트랩 표본에 학습한 여러 불안정 학습기의 예측을 평균하여 분산을 줄인다. 랜덤 포레스트는 노드별 변수 무작위화를 추가하여 트리 사이의 상관을 낮춘다. OOB 관측값은 별도의 검증자료 없이 예측오차와 순열 중요도를 추정하는 데 활용할 수 있다.</p>
+<p>결합 전략에는 다수결, 확률평균, 가중결합, 스태킹, 슈퍼러너, 혼합 전문가와 베이지안 모형 평균이 있다. 특히 스태킹에서는 메타학습기에 교차검증 외부예측을 사용하여 데이터 누출을 방지해야 한다.</p>
+<p>다양성은 불일치, 이중 오류, Q 통계량, 오류 상관과 모호성 분해(ambiguity decomposition) 등으로 평가할 수 있다. 그러나 다양성 자체를 최대화하는 것이 목적은 아니다. 좋은 앙상블은 개별 학습기의 정확성을 유지하면서 상호보완적인 오류구조를 형성해야 한다.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./07-bayesian-classifiers.html" class="pagination-link" aria-label="베이지안 분류기">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">베이지안 분류기</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./09-clustering.html" class="pagination-link" aria-label="클러스터링">
+        <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">클러스터링</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

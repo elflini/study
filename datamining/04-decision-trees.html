@@ -1,0 +1,2278 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>4&nbsp; 의사결정 트리 – 머신러닝</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./05-neural-networks.html" rel="next">
+<link href="./03-linear-models.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-3d841e2d0dac331999ea63b9b6b417ac.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-linear-models.html">II. 지도학습</a></li><li class="breadcrumb-item"><a href="./04-decision-trees.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">의사결정 트리</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">머신러닝</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="리더 모드 전환">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">I. 머신러닝의 기초</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">머신러닝의 개념과 발전</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-model-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">모형 평가와 선택</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">II. 지도학습</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-linear-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">선형 모형</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-decision-trees.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">의사결정 트리</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-neural-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">신경망</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-support-vector-machines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">서포트 벡터 머신</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-bayesian-classifiers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">베이지안 분류기</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-ensemble-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">앙상블 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">III. 비지도학습과 표현학습</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">클러스터링</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-dimensionality-reduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">차원 축소와 거리 척도 학습</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-feature-selection-sparse-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">특성 선택과 희소 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">IV. 학습이론과 불완전한 데이터</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-computational-learning-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">계산 학습 이론</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-semi-supervised-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">준지도 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">V. 구조화된 확률모형과 규칙</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-probabilistic-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">확률 그래피컬 모형</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-rule-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">규칙 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">VI. 순차적 의사결정과 신뢰성</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-reinforcement-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">강화 학습</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-explainable-trustworthy-ml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">설명 가능한 머신러닝과 신뢰할 수 있는 예측</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#sec-ch04-basic-process" id="toc-sec-ch04-basic-process" class="nav-link active" data-scroll-target="#sec-ch04-basic-process"><span class="header-section-number">4.1</span> 기본 프로세스</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch04-recursive-partitioning" id="toc-sec-ch04-recursive-partitioning" class="nav-link" data-scroll-target="#sec-ch04-recursive-partitioning"><span class="header-section-number">4.1.1</span> 재귀적 분할</a></li>
+  <li><a href="#sec-ch04-tree-components" id="toc-sec-ch04-tree-components" class="nav-link" data-scroll-target="#sec-ch04-tree-components"><span class="header-section-number">4.1.2</span> 트리의 구성요소</a></li>
+  <li><a href="#sec-ch04-regression-tree-prediction" id="toc-sec-ch04-regression-tree-prediction" class="nav-link" data-scroll-target="#sec-ch04-regression-tree-prediction"><span class="header-section-number">4.1.3</span> 회귀트리의 예측</a></li>
+  <li><a href="#sec-ch04-classification-tree-prediction" id="toc-sec-ch04-classification-tree-prediction" class="nav-link" data-scroll-target="#sec-ch04-classification-tree-prediction"><span class="header-section-number">4.1.4</span> 분류트리의 예측</a></li>
+  <li><a href="#sec-ch04-partition-geometry" id="toc-sec-ch04-partition-geometry" class="nav-link" data-scroll-target="#sec-ch04-partition-geometry"><span class="header-section-number">4.1.5</span> 입력공간의 기하학적 분할</a></li>
+  <li><a href="#sec-ch04-automatic-interactions" id="toc-sec-ch04-automatic-interactions" class="nav-link" data-scroll-target="#sec-ch04-automatic-interactions"><span class="header-section-number">4.1.6</span> 상호작용의 자동 표현</a></li>
+  <li><a href="#sec-ch04-scale-invariance" id="toc-sec-ch04-scale-invariance" class="nav-link" data-scroll-target="#sec-ch04-scale-invariance"><span class="header-section-number">4.1.7</span> 스케일과 단조변환에 대한 성질</a></li>
+  <li><a href="#sec-ch04-tree-interpretation" id="toc-sec-ch04-tree-interpretation" class="nav-link" data-scroll-target="#sec-ch04-tree-interpretation"><span class="header-section-number">4.1.8</span> 트리의 해석</a></li>
+  </ul></li>
+  <li><a href="#sec-ch04-split-selection" id="toc-sec-ch04-split-selection" class="nav-link" data-scroll-target="#sec-ch04-split-selection"><span class="header-section-number">4.2</span> 분할 선택</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch04-node-impurity" id="toc-sec-ch04-node-impurity" class="nav-link" data-scroll-target="#sec-ch04-node-impurity"><span class="header-section-number">4.2.1</span> 노드 불순도(node impurity)와 손실 감소</a></li>
+  <li><a href="#sec-ch04-regression-split" id="toc-sec-ch04-regression-split" class="nav-link" data-scroll-target="#sec-ch04-regression-split"><span class="header-section-number">4.2.2</span> 회귀트리의 분할 기준</a></li>
+  <li><a href="#sec-ch04-misclassification-error" id="toc-sec-ch04-misclassification-error" class="nav-link" data-scroll-target="#sec-ch04-misclassification-error"><span class="header-section-number">4.2.3</span> 분류오차</a></li>
+  <li><a href="#sec-ch04-gini" id="toc-sec-ch04-gini" class="nav-link" data-scroll-target="#sec-ch04-gini"><span class="header-section-number">4.2.4</span> 지니 불순도</a></li>
+  <li><a href="#sec-ch04-entropy" id="toc-sec-ch04-entropy" class="nav-link" data-scroll-target="#sec-ch04-entropy"><span class="header-section-number">4.2.5</span> 엔트로피와 정보이득</a></li>
+  <li><a href="#sec-ch04-impurity-properties" id="toc-sec-ch04-impurity-properties" class="nav-link" data-scroll-target="#sec-ch04-impurity-properties"><span class="header-section-number">4.2.6</span> 불순도 함수의 성질</a></li>
+  <li><a href="#sec-ch04-cost-sensitive-split" id="toc-sec-ch04-cost-sensitive-split" class="nav-link" data-scroll-target="#sec-ch04-cost-sensitive-split"><span class="header-section-number">4.2.7</span> 비용민감 분할</a></li>
+  <li><a href="#sec-ch04-split-selection-bias" id="toc-sec-ch04-split-selection-bias" class="nav-link" data-scroll-target="#sec-ch04-split-selection-bias"><span class="header-section-number">4.2.8</span> 분할변수 선택의 편향</a></li>
+  <li><a href="#sec-ch04-gain-ratio-multiway" id="toc-sec-ch04-gain-ratio-multiway" class="nav-link" data-scroll-target="#sec-ch04-gain-ratio-multiway"><span class="header-section-number">4.2.9</span> 정보이득비와 다지분할</a></li>
+  <li><a href="#sec-ch04-greedy-limitations" id="toc-sec-ch04-greedy-limitations" class="nav-link" data-scroll-target="#sec-ch04-greedy-limitations"><span class="header-section-number">4.2.10</span> 탐욕적 분할의 한계</a></li>
+  <li><a href="#sec-ch04-split-computation" id="toc-sec-ch04-split-computation" class="nav-link" data-scroll-target="#sec-ch04-split-computation"><span class="header-section-number">4.2.11</span> 분할 계산의 효율성</a></li>
+  </ul></li>
+  <li><a href="#sec-ch04-pruning" id="toc-sec-ch04-pruning" class="nav-link" data-scroll-target="#sec-ch04-pruning"><span class="header-section-number">4.3</span> 가지치기</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch04-tree-overfitting" id="toc-sec-ch04-tree-overfitting" class="nav-link" data-scroll-target="#sec-ch04-tree-overfitting"><span class="header-section-number">4.3.1</span> 트리 성장과 과적합</a></li>
+  <li><a href="#sec-ch04-prepruning" id="toc-sec-ch04-prepruning" class="nav-link" data-scroll-target="#sec-ch04-prepruning"><span class="header-section-number">4.3.2</span> 사전 가지치기</a></li>
+  <li><a href="#sec-ch04-postpruning" id="toc-sec-ch04-postpruning" class="nav-link" data-scroll-target="#sec-ch04-postpruning"><span class="header-section-number">4.3.3</span> 사후 가지치기</a></li>
+  <li><a href="#sec-ch04-cost-complexity" id="toc-sec-ch04-cost-complexity" class="nav-link" data-scroll-target="#sec-ch04-cost-complexity"><span class="header-section-number">4.3.4</span> 비용-복잡도 기준</a></li>
+  <li><a href="#sec-ch04-weakest-link" id="toc-sec-ch04-weakest-link" class="nav-link" data-scroll-target="#sec-ch04-weakest-link"><span class="header-section-number">4.3.5</span> 약한 연결 가지치기</a></li>
+  <li><a href="#sec-ch04-pruning-cross-validation" id="toc-sec-ch04-pruning-cross-validation" class="nav-link" data-scroll-target="#sec-ch04-pruning-cross-validation"><span class="header-section-number">4.3.6</span> 교차검증을 이용한 트리 크기 선택</a></li>
+  <li><a href="#sec-ch04-pruning-selection-bias" id="toc-sec-ch04-pruning-selection-bias" class="nav-link" data-scroll-target="#sec-ch04-pruning-selection-bias"><span class="header-section-number">4.3.7</span> 가지치기와 모형 선택 편향</a></li>
+  <li><a href="#sec-ch04-pruning-stability" id="toc-sec-ch04-pruning-stability" class="nav-link" data-scroll-target="#sec-ch04-pruning-stability"><span class="header-section-number">4.3.8</span> 트리 안정성과 가지치기</a></li>
+  <li><a href="#sec-ch04-pruning-implementation" id="toc-sec-ch04-pruning-implementation" class="nav-link" data-scroll-target="#sec-ch04-pruning-implementation"><span class="header-section-number">4.3.9</span> 가지치기 구현 예시</a></li>
+  </ul></li>
+  <li><a href="#sec-ch04-continuous-missing" id="toc-sec-ch04-continuous-missing" class="nav-link" data-scroll-target="#sec-ch04-continuous-missing"><span class="header-section-number">4.4</span> 연속값과 결측값</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch04-continuous-thresholds" id="toc-sec-ch04-continuous-thresholds" class="nav-link" data-scroll-target="#sec-ch04-continuous-thresholds"><span class="header-section-number">4.4.1</span> 연속형 변수의 후보 분할점</a></li>
+  <li><a href="#sec-ch04-step-function" id="toc-sec-ch04-step-function" class="nav-link" data-scroll-target="#sec-ch04-step-function"><span class="header-section-number">4.4.2</span> 계단함수 근사와 경계효과</a></li>
+  <li><a href="#sec-ch04-ordinal-variables" id="toc-sec-ch04-ordinal-variables" class="nav-link" data-scroll-target="#sec-ch04-ordinal-variables"><span class="header-section-number">4.4.3</span> 순서형 변수</a></li>
+  <li><a href="#sec-ch04-nominal-variables" id="toc-sec-ch04-nominal-variables" class="nav-link" data-scroll-target="#sec-ch04-nominal-variables"><span class="header-section-number">4.4.4</span> 명목형 범주변수</a></li>
+  <li><a href="#sec-ch04-missingness-types" id="toc-sec-ch04-missingness-types" class="nav-link" data-scroll-target="#sec-ch04-missingness-types"><span class="header-section-number">4.4.5</span> 결측값 문제의 구분</a></li>
+  <li><a href="#sec-ch04-imputation" id="toc-sec-ch04-imputation" class="nav-link" data-scroll-target="#sec-ch04-imputation"><span class="header-section-number">4.4.6</span> 사전 결측대체</a></li>
+  <li><a href="#sec-ch04-missing-category" id="toc-sec-ch04-missing-category" class="nav-link" data-scroll-target="#sec-ch04-missing-category"><span class="header-section-number">4.4.7</span> 결측을 별도 범주로 처리하기</a></li>
+  <li><a href="#sec-ch04-surrogate-splits" id="toc-sec-ch04-surrogate-splits" class="nav-link" data-scroll-target="#sec-ch04-surrogate-splits"><span class="header-section-number">4.4.8</span> 대리분할</a></li>
+  <li><a href="#sec-ch04-probabilistic-routing" id="toc-sec-ch04-probabilistic-routing" class="nav-link" data-scroll-target="#sec-ch04-probabilistic-routing"><span class="header-section-number">4.4.9</span> 확률적 경로와 분수 배정</a></li>
+  <li><a href="#sec-ch04-default-direction" id="toc-sec-ch04-default-direction" class="nav-link" data-scroll-target="#sec-ch04-default-direction"><span class="header-section-number">4.4.10</span> 기본방향 학습</a></li>
+  <li><a href="#sec-ch04-missing-evaluation" id="toc-sec-ch04-missing-evaluation" class="nav-link" data-scroll-target="#sec-ch04-missing-evaluation"><span class="header-section-number">4.4.11</span> 결측값 처리의 평가</a></li>
+  <li><a href="#sec-ch04-feature-availability" id="toc-sec-ch04-feature-availability" class="nav-link" data-scroll-target="#sec-ch04-feature-availability"><span class="header-section-number">4.4.12</span> 예측시점의 변수 이용 가능성</a></li>
+  </ul></li>
+  <li><a href="#sec-ch04-multivariate-trees" id="toc-sec-ch04-multivariate-trees" class="nav-link" data-scroll-target="#sec-ch04-multivariate-trees"><span class="header-section-number">4.5</span> 다변량 의사결정 트리</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch04-axis-aligned-limitations" id="toc-sec-ch04-axis-aligned-limitations" class="nav-link" data-scroll-target="#sec-ch04-axis-aligned-limitations"><span class="header-section-number">4.5.1</span> 축평행 분할의 한계</a></li>
+  <li><a href="#sec-ch04-oblique-optimization" id="toc-sec-ch04-oblique-optimization" class="nav-link" data-scroll-target="#sec-ch04-oblique-optimization"><span class="header-section-number">4.5.2</span> 사선분할의 최적화</a></li>
+  <li><a href="#sec-ch04-oblique-scaling" id="toc-sec-ch04-oblique-scaling" class="nav-link" data-scroll-target="#sec-ch04-oblique-scaling"><span class="header-section-number">4.5.3</span> 변수 표준화와 사선분할</a></li>
+  <li><a href="#sec-ch04-sparse-oblique" id="toc-sec-ch04-sparse-oblique" class="nav-link" data-scroll-target="#sec-ch04-sparse-oblique"><span class="header-section-number">4.5.4</span> 희소 사선트리</a></li>
+  <li><a href="#sec-ch04-lda-node-split" id="toc-sec-ch04-lda-node-split" class="nav-link" data-scroll-target="#sec-ch04-lda-node-split"><span class="header-section-number">4.5.5</span> 선형 판별분석을 이용한 노드분할</a></li>
+  <li><a href="#sec-ch04-logistic-node-split" id="toc-sec-ch04-logistic-node-split" class="nav-link" data-scroll-target="#sec-ch04-logistic-node-split"><span class="header-section-number">4.5.6</span> 로지스틱 노드분할</a></li>
+  <li><a href="#sec-ch04-model-trees" id="toc-sec-ch04-model-trees" class="nav-link" data-scroll-target="#sec-ch04-model-trees"><span class="header-section-number">4.5.7</span> 모형트리</a></li>
+  <li><a href="#sec-ch04-multioutput-trees" id="toc-sec-ch04-multioutput-trees" class="nav-link" data-scroll-target="#sec-ch04-multioutput-trees"><span class="header-section-number">4.5.8</span> 다중출력 회귀트리</a></li>
+  <li><a href="#sec-ch04-multilabel-trees" id="toc-sec-ch04-multilabel-trees" class="nav-link" data-scroll-target="#sec-ch04-multilabel-trees"><span class="header-section-number">4.5.9</span> 다중레이블 분류트리</a></li>
+  <li><a href="#sec-ch04-multivariate-tradeoffs" id="toc-sec-ch04-multivariate-tradeoffs" class="nav-link" data-scroll-target="#sec-ch04-multivariate-tradeoffs"><span class="header-section-number">4.5.10</span> 다변량 트리의 장단점</a></li>
+  </ul></li>
+  <li><a href="#sec-ch04-evaluation-interpretation" id="toc-sec-ch04-evaluation-interpretation" class="nav-link" data-scroll-target="#sec-ch04-evaluation-interpretation"><span class="header-section-number">4.6</span> 트리의 평가와 해석</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch04-predictive-evaluation" id="toc-sec-ch04-predictive-evaluation" class="nav-link" data-scroll-target="#sec-ch04-predictive-evaluation"><span class="header-section-number">4.6.1</span> 예측성능 평가</a></li>
+  <li><a href="#sec-ch04-leaf-uncertainty" id="toc-sec-ch04-leaf-uncertainty" class="nav-link" data-scroll-target="#sec-ch04-leaf-uncertainty"><span class="header-section-number">4.6.2</span> 잎 크기와 확률의 불확실성</a></li>
+  <li><a href="#sec-ch04-variable-importance" id="toc-sec-ch04-variable-importance" class="nav-link" data-scroll-target="#sec-ch04-variable-importance"><span class="header-section-number">4.6.3</span> 변수 중요도</a></li>
+  <li><a href="#sec-ch04-path-explanation" id="toc-sec-ch04-path-explanation" class="nav-link" data-scroll-target="#sec-ch04-path-explanation"><span class="header-section-number">4.6.4</span> 경로 기반 설명</a></li>
+  <li><a href="#sec-ch04-pdp-ice" id="toc-sec-ch04-pdp-ice" class="nav-link" data-scroll-target="#sec-ch04-pdp-ice"><span class="header-section-number">4.6.5</span> 부분의존과 개별조건부기대</a></li>
+  <li><a href="#sec-ch04-rule-validation" id="toc-sec-ch04-rule-validation" class="nav-link" data-scroll-target="#sec-ch04-rule-validation"><span class="header-section-number">4.6.6</span> 트리 규칙의 검증</a></li>
+  </ul></li>
+  <li><a href="#sec-ch04-integrated-view" id="toc-sec-ch04-integrated-view" class="nav-link" data-scroll-target="#sec-ch04-integrated-view"><span class="header-section-number">4.7</span> 의사결정 트리의 통합적 이해</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch04-erm-view" id="toc-sec-ch04-erm-view" class="nav-link" data-scroll-target="#sec-ch04-erm-view"><span class="header-section-number">4.7.1</span> 경험위험 최소화 관점</a></li>
+  <li><a href="#sec-ch04-bias-variance" id="toc-sec-ch04-bias-variance" class="nav-link" data-scroll-target="#sec-ch04-bias-variance"><span class="header-section-number">4.7.2</span> 편향과 분산</a></li>
+  <li><a href="#sec-ch04-tree-linear-comparison" id="toc-sec-ch04-tree-linear-comparison" class="nav-link" data-scroll-target="#sec-ch04-tree-linear-comparison"><span class="header-section-number">4.7.3</span> 트리와 선형 모형의 비교</a></li>
+  <li><a href="#sec-ch04-tree-workflow" id="toc-sec-ch04-tree-workflow" class="nav-link" data-scroll-target="#sec-ch04-tree-workflow"><span class="header-section-number">4.7.4</span> 트리 학습의 전체 파이프라인</a></li>
+  <li><a href="#sec-ch04-basic-implementation" id="toc-sec-ch04-basic-implementation" class="nav-link" data-scroll-target="#sec-ch04-basic-implementation"><span class="header-section-number">4.7.5</span> 기본 구현 예제</a></li>
+  <li><a href="#sec-ch04-when-single-tree" id="toc-sec-ch04-when-single-tree" class="nav-link" data-scroll-target="#sec-ch04-when-single-tree"><span class="header-section-number">4.7.6</span> 단일 트리가 적합한 경우</a></li>
+  </ul></li>
+  <li><a href="#장-요약" id="toc-장-요약" class="nav-link" data-scroll-target="#장-요약">장 요약</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-linear-models.html">II. 지도학습</a></li><li class="breadcrumb-item"><a href="./04-decision-trees.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">의사결정 트리</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-ch04" class="quarto-section-identifier"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">의사결정 트리</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>의사결정 트리(decision tree)는 입력공간을 여러 개의 단순한 영역으로 반복해서 나누고, 각 영역 안에서 하나의 예측값을 부여하는 학습방법이다. 회귀문제에서는 각 영역의 평균이나 다른 요약값을 예측하고, 분류문제에서는 다수 클래스 또는 클래스 확률을 예측한다. 트리의 각 내부노드(internal node)는 하나의 질문을 나타내고, 가지는 그 질문에 대한 답을 나타내며, 말단노드(terminal node)는 최종 예측을 나타낸다.</p>
+<p>선형 모형이 전체 입력공간에 하나의 선형 관계를 가정한다면, 의사결정 트리는 입력공간을 국소적인 부분으로 나누어 서로 다른 규칙을 적용한다. 따라서 비선형 관계와 상호작용을 명시적으로 지정하지 않아도 자동으로 표현할 수 있다. 반면 작은 자료 변화에도 분할변수와 분할점(split point)이 달라질 수 있고, 깊은 트리는 훈련자료에 과도하게 적합될 수 있다. 의사결정 트리의 학습은 <strong>표현력</strong>, <strong>탐욕적 최적화</strong>, <strong>복잡도 제어</strong>와 <strong>안정성</strong> 사이의 균형 문제이다.</p>
+<p>훈련자료를</p>
+<p><span id="eq-ch04-dataset"><span class="math display">\[
+\mathcal D
+=
+\{(\mathbf x_i,y_i)\}_{i=1}^{n},
+\qquad
+\mathbf x_i\in\mathbb R^p
+\tag{4.1}\]</span></span></p>
+<p>라고 하자. 트리 <span class="math inline">\(T\)</span>가 입력공간을 서로 겹치지 않는 <span class="math inline">\(M\)</span>개의 말단영역</p>
+<p><span id="eq-ch04-partition"><span class="math display">\[
+R_1,\ldots,R_M,
+\qquad
+\bigcup_{m=1}^{M}R_m=\mathcal X,
+\qquad
+R_m\cap R_\ell=\varnothing\;(m\neq\ell)
+\tag{4.2}\]</span></span></p>
+<p>으로 나눈다면 트리 예측함수는</p>
+<p><span id="eq-ch04-piecewise-constant"><span class="math display">\[
+\widehat f_T(\mathbf x)
+=
+\sum_{m=1}^{M}
+\widehat c_m I(\mathbf x\in R_m)
+\tag{4.3}\]</span></span></p>
+<p>으로 표현할 수 있다. 회귀에서는 <span class="math inline">\(\widehat c_m\)</span>이 영역 <span class="math inline">\(R_m\)</span>의 평균이고, 분류에서는 클래스별 확률벡터 또는 가장 빈도가 높은 클래스가 된다. 즉, 기본적인 의사결정 트리는 입력공간에 대해 <strong>구간별 상수함수</strong>를 학습한다.</p>
+<div class="callout callout-style-default callout-important callout-titled" title="의사결정 트리의 핵심 관점">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">중요</span>의사결정 트리의 핵심 관점
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>의사결정 트리는 단순한 조건문의 집합이 아니다. 입력공간의 분할, 분할 안의 예측, 분할 복잡도의 제어라는 세 요소가 결합된 통계적 학습모형이다. 트리를 이해할 때는 어떤 질문을 선택하는가뿐 아니라, 그 질문이 손실함수를 얼마나 감소시키며 새로운 자료에서 얼마나 안정적으로 작동하는지를 함께 보아야 한다.</p>
+</div>
+</div>
+<section id="sec-ch04-basic-process" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="sec-ch04-basic-process"><span class="header-section-number">4.1</span> 기본 프로세스</h2>
+<section id="sec-ch04-recursive-partitioning" class="level3" data-number="4.1.1">
+<h3 data-number="4.1.1" class="anchored" data-anchor-id="sec-ch04-recursive-partitioning"><span class="header-section-number">4.1.1</span> 재귀적 분할</h3>
+<p>의사결정 트리의 가장 대표적인 학습방식은 재귀적 이진 분할(recursive binary splitting)이다. 현재 노드에 포함된 관측값 집합을 <span class="math inline">\(A\)</span>라고 하자. 변수 <span class="math inline">\(j\)</span>와 분할점 <span class="math inline">\(s\)</span>를 선택하면 현재 영역은</p>
+<p><span id="eq-ch04-binary-split"><span class="math display">\[
+A_L(j,s)
+=
+\{\mathbf x\in A:x_j\leq s\},
+\qquad
+A_R(j,s)
+=
+\{\mathbf x\in A:x_j&gt;s\}
+\tag{4.4}\]</span></span></p>
+<p>로 나뉜다. 가능한 모든 후보 <span class="math inline">\((j,s)\)</span> 중에서 자식노드의 불순도 또는 손실을 가장 많이 감소시키는 분할을 선택한다. 이후 왼쪽과 오른쪽 자식노드에서 같은 과정을 반복한다.</p>
+<p>이 과정은 전체 트리를 한 번에 최적화하지 않는다. 현재 노드에서 가장 좋아 보이는 분할을 선택하는 <strong>탐욕적 알고리즘</strong>이다. 첫 분할에서 선택한 변수와 분할점은 이후 트리 전체의 구조를 제한하므로, 국소적으로 최적인 선택이 전체적으로 최적인 트리를 보장하지는 않는다. 그러나 가능한 모든 트리를 완전탐색하는 것은 조합적으로 매우 어렵기 때문에 재귀적 탐욕분할이 실용적인 표준이 되었다.</p>
+<p>트리 성장의 기본 절차는 다음과 같다.</p>
+<pre class="text"><code>입력: 훈련자료 D, 분할기준, 정지규칙
+
+루트 노드에 모든 훈련관측값을 배치한다.
+
+현재 노드 A에 대해:
+    가능한 모든 변수와 분할점을 생성한다.
+    각 후보 분할의 불순도 감소량을 계산한다.
+    가장 큰 감소량을 만드는 분할을 선택한다.
+
+    정지규칙을 만족하면:
+        현재 노드를 말단노드로 지정한다.
+        노드 예측값을 계산한다.
+    그렇지 않으면:
+        자료를 왼쪽과 오른쪽 자식노드로 나눈다.
+        각 자식노드에서 같은 절차를 반복한다.
+
+출력: 성장된 의사결정 트리</code></pre>
+</section>
+<section id="sec-ch04-tree-components" class="level3" data-number="4.1.2">
+<h3 data-number="4.1.2" class="anchored" data-anchor-id="sec-ch04-tree-components"><span class="header-section-number">4.1.2</span> 트리의 구성요소</h3>
+<p>트리는 다음 구성요소로 이루어진다.</p>
+<ul>
+<li><strong>루트 노드(root node)</strong>: 모든 훈련관측값이 포함되는 시작노드</li>
+<li><strong>내부노드</strong>: 하나의 분할규칙을 포함하는 노드</li>
+<li><strong>가지</strong>: 분할조건의 결과에 따라 연결되는 경로</li>
+<li><strong>자식노드</strong>: 분할로 새롭게 생성된 노드</li>
+<li><strong>부모노드</strong>: 자식노드를 생성한 상위노드</li>
+<li><strong>말단노드 또는 잎</strong>: 더 이상 분할되지 않고 예측값을 제공하는 노드</li>
+<li><strong>깊이</strong>: 루트에서 특정 노드까지 거친 분할 수</li>
+<li><strong>부분트리</strong>: 특정 노드를 루트로 하는 하위구조</li>
+</ul>
+<p>트리의 크기는 말단노드 수, 내부노드 수 또는 최대깊이로 나타낼 수 있다. 이진트리에서 말단노드 수가 <span class="math inline">\(M\)</span>이면 내부노드 수는 일반적으로 <span class="math inline">\(M-1\)</span>이다. 그러나 결측값 경로, 다지분할 또는 특수노드를 허용하는 구현에서는 이 관계가 달라질 수 있다.</p>
+</section>
+<section id="sec-ch04-regression-tree-prediction" class="level3" data-number="4.1.3">
+<h3 data-number="4.1.3" class="anchored" data-anchor-id="sec-ch04-regression-tree-prediction"><span class="header-section-number">4.1.3</span> 회귀트리의 예측</h3>
+<p>제곱손실을 사용하는 회귀트리(regression tree)에서 영역 <span class="math inline">\(R_m\)</span>의 최적 상수예측은</p>
+<p><span id="eq-ch04-regression-leaf-mean"><span class="math display">\[
+\widehat c_m
+=
+\arg\min_c
+\sum_{i:\mathbf x_i\in R_m}(y_i-c)^2
+=
+\frac{1}{N_m}
+\sum_{i:\mathbf x_i\in R_m}y_i
+\tag{4.5}\]</span></span></p>
+<p>이다. 여기서 <span class="math inline">\(N_m\)</span>은 말단영역 <span class="math inline">\(R_m\)</span>에 포함된 관측값 수이다. 따라서 회귀트리의 훈련 제곱오차는</p>
+<p><span id="eq-ch04-regression-tree-risk"><span class="math display">\[
+R(T)
+=
+\sum_{m=1}^{M}
+\sum_{i:\mathbf x_i\in R_m}
+(y_i-\overline y_m)^2
+\tag{4.6}\]</span></span></p>
+<p>로 나타낼 수 있다.</p>
+<p>절대오차 손실</p>
+<p><span id="eq-ch04-absolute-loss"><span class="math display">\[
+L(y,c)=|y-c|
+\tag{4.7}\]</span></span></p>
+<p>을 사용하면 말단노드의 최적 예측값은 평균이 아니라 중앙값이다. 따라서 트리의 노드예측은 손실함수에 의해 결정된다. 평균은 큰 이상치에 민감하지만 중앙값은 더 강건하다.</p>
+</section>
+<section id="sec-ch04-classification-tree-prediction" class="level3" data-number="4.1.4">
+<h3 data-number="4.1.4" class="anchored" data-anchor-id="sec-ch04-classification-tree-prediction"><span class="header-section-number">4.1.4</span> 분류트리의 예측</h3>
+<p><span class="math inline">\(K\)</span>개의 클래스가 있고 말단노드 <span class="math inline">\(R_m\)</span>에서 클래스 <span class="math inline">\(k\)</span>의 관측비율을</p>
+<p><span id="eq-ch04-leaf-class-probability"><span class="math display">\[
+\widehat p_{mk}
+=
+\frac{1}{N_m}
+\sum_{i:\mathbf x_i\in R_m}
+I(y_i=k)
+\tag{4.8}\]</span></span></p>
+<p>라고 하자. 가장 단순한 분류예측은</p>
+<p><span id="eq-ch04-majority-class"><span class="math display">\[
+\widehat y(\mathbf x)
+=
+\arg\max_{k}
+\widehat p_{mk},
+\qquad
+\mathbf x\in R_m
+\tag{4.9}\]</span></span></p>
+<p>이다. 그러나 실제 응용에서는 다수 클래스만 저장하기보다 <span class="math inline">\(\widehat p_{m1},\ldots,\widehat p_{mK}\)</span>를 함께 저장하는 것이 좋다. 클래스 확률을 보존하면 오류비용과 자원제약에 따라 임계값을 나중에 조절할 수 있다.</p>
+<p>트리의 말단확률은 관측빈도에 기반하므로 표본이 적은 잎에서는 0 또는 1에 가까운 극단적 값이 쉽게 생긴다. 라플라스 평활을 적용하면</p>
+<p><span id="eq-ch04-laplace-smoothing"><span class="math display">\[
+\widetilde p_{mk}
+=
+\frac{N_{mk}+a}{N_m+Ka}
+\tag{4.10}\]</span></span></p>
+<p>로 완화할 수 있다. 여기서 <span class="math inline">\(N_{mk}\)</span>는 노드 <span class="math inline">\(m\)</span>의 클래스 <span class="math inline">\(k\)</span> 관측 수이고 <span class="math inline">\(a&gt;0\)</span>은 평활강도이다.</p>
+</section>
+<section id="sec-ch04-partition-geometry" class="level3" data-number="4.1.5">
+<h3 data-number="4.1.5" class="anchored" data-anchor-id="sec-ch04-partition-geometry"><span class="header-section-number">4.1.5</span> 입력공간의 기하학적 분할</h3>
+<p>표준 CART형 트리는 한 번에 하나의 변수만 사용하여</p>
+<p><span id="eq-ch04-axis-aligned-rule"><span class="math display">\[
+x_j\leq s
+\tag{4.11}\]</span></span></p>
+<p>형태로 분할한다. 두 개의 연속형 입력변수가 있을 때 각 분할은 좌표축에 평행한 직선이 되고, 반복분할의 결과는 직사각형 영역의 집합이 된다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch04-recursive-partition" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch04-recursive-partition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-decision-trees_files/figure-html/fig-ch04-recursive-partition-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch04-recursive-partition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;4.1: 재귀적 이진 분할에 의해 생성된 직사각형 입력영역
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch04-recursive-partition" class="quarto-xref">그림&nbsp;<span>4.1</span></a><!-- -->에서 첫 번째 분할은 전체 공간을 둘로 나누고, 이후 분할은 이미 생성된 영역 안에서만 작동한다. 따라서 동일한 변수의 동일한 분할점을 다른 가지에서 사용하더라도 의미는 상위조건에 따라 달라진다.</p>
+</section>
+<section id="sec-ch04-automatic-interactions" class="level3" data-number="4.1.6">
+<h3 data-number="4.1.6" class="anchored" data-anchor-id="sec-ch04-automatic-interactions"><span class="header-section-number">4.1.6</span> 상호작용의 자동 표현</h3>
+<p>트리의 경로는 조건들의 논리곱으로 해석된다. 예를 들어 다음 경로를 생각하자.</p>
+<pre class="text"><code>x1 &lt;= 4.2
+    그리고 x3 &gt; 1.7
+    그리고 x2 &lt;= 8.5</code></pre>
+<p>이는 세 변수의 상호작용을 나타낸다. <span class="math inline">\(x_3\)</span>의 분할효과는 <span class="math inline">\(x_1\leq4.2\)</span>인 관측값에만 적용되고, <span class="math inline">\(x_2\)</span>의 효과는 앞선 두 조건을 모두 만족하는 관측값에만 적용된다. 선형 모형에서는 이러한 상호작용을 곱항으로 미리 지정해야 하지만, 트리는 분할경로를 통해 자연스럽게 발견할 수 있다.</p>
+<p>그러나 트리가 상호작용을 자동으로 발견한다는 말은 모든 상호작용을 안정적으로 찾는다는 뜻은 아니다. 표본이 작거나 첫 분할이 불안정하면 중요한 상호작용이 다른 가지에 가려질 수 있다. 깊은 상호작용을 발견하려면 더 많은 표본과 적절한 복잡도 제어가 필요하다.</p>
+</section>
+<section id="sec-ch04-scale-invariance" class="level3" data-number="4.1.7">
+<h3 data-number="4.1.7" class="anchored" data-anchor-id="sec-ch04-scale-invariance"><span class="header-section-number">4.1.7</span> 스케일과 단조변환에 대한 성질</h3>
+<p>축에 평행한 트리는 변수의 순서만 이용해 후보 분할을 구성한다. 엄격하게 증가하는 변환 <span class="math inline">\(g\)</span>에 대해</p>
+<p><span id="eq-ch04-monotone-invariance"><span class="math display">\[
+x_j\leq s
+\quad\Longleftrightarrow\quad
+g(x_j)\leq g(s)
+\tag{4.12}\]</span></span></p>
+<p>이므로 로그변환, 단위변환과 같은 단조변환은 가능한 자료분할의 순서를 바꾸지 않는다. 따라서 표준 CART는 거리기반 방법이나 규제 선형모형과 달리 변수 표준화가 필수적이지 않다.</p>
+<p>하지만 다음 상황에서는 변수척도가 여전히 중요할 수 있다.</p>
+<ul>
+<li>다변량 또는 사선분할을 사용하는 경우</li>
+<li>분할 전 결측대체나 거리계산을 수행하는 경우</li>
+<li>말단노드에 선형모형을 적합하는 경우</li>
+<li>여러 모형을 결합하는 파이프라인의 일부인 경우</li>
+<li>수치정밀도와 매우 큰 값이 계산에 영향을 주는 경우</li>
+</ul>
+</section>
+<section id="sec-ch04-tree-interpretation" class="level3" data-number="4.1.8">
+<h3 data-number="4.1.8" class="anchored" data-anchor-id="sec-ch04-tree-interpretation"><span class="header-section-number">4.1.8</span> 트리의 해석</h3>
+<p>작은 트리는 사람의 의사결정 규칙과 비슷하게 읽을 수 있다. 각 관측값은 루트에서 시작해 조건을 따라 내려가며 하나의 말단노드에 도달한다. 특정 예측을 설명하려면 그 관측값이 통과한 경로를 제시할 수 있다.</p>
+<p>그러나 트리의 해석가능성을 과장해서는 안 된다. 깊은 트리는 수십 개의 경로를 가지며, 하나의 변수가 여러 위치에 반복해서 나타날 수 있다. 또한 첫 분할이 약간만 달라져도 하위구조 전체가 달라질 수 있다. 따라서 트리 그림 자체뿐 아니라 다음 정보를 함께 확인해야 한다.</p>
+<ul>
+<li>각 노드의 관측값 수</li>
+<li>클래스 또는 반응분포</li>
+<li>불순도 감소량</li>
+<li>교차검증 성능</li>
+<li>재표본화에 따른 분할 안정성</li>
+<li>외부자료에서의 경로 빈도</li>
+</ul>
+</section>
+</section>
+<section id="sec-ch04-split-selection" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="sec-ch04-split-selection"><span class="header-section-number">4.2</span> 분할 선택</h2>
+<section id="sec-ch04-node-impurity" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="sec-ch04-node-impurity"><span class="header-section-number">4.2.1</span> 노드 불순도(node impurity)와 손실 감소</h3>
+<p>현재 노드 <span class="math inline">\(A\)</span>의 불순도를 <span class="math inline">\(I(A)\)</span>라고 하자. 후보 분할 <span class="math inline">\((j,s)\)</span>가 왼쪽 자식노드 <span class="math inline">\(A_L\)</span>과 오른쪽 자식노드 <span class="math inline">\(A_R\)</span>을 만들면 가중 자식불순도는</p>
+<p><span id="eq-ch04-weighted-child-impurity"><span class="math display">\[
+I_{\mathrm{child}}(j,s)
+=
+\frac{N_L}{N_A}I(A_L)
++
+\frac{N_R}{N_A}I(A_R)
+\tag{4.13}\]</span></span></p>
+<p>이다. 분할의 개선량은</p>
+<p><span id="eq-ch04-impurity-decrease"><span class="math display">\[
+\Delta I(j,s)
+=
+I(A)-I_{\mathrm{child}}(j,s)
+\tag{4.14}\]</span></span></p>
+<p>로 정의한다. 트리는 <span class="math inline">\(\Delta I(j,s)\)</span>가 가장 큰 후보를 선택한다.</p>
+<p>자식노드 크기로 가중하는 이유는 작은 노드 하나만 매우 순수하게 만드는 분할이 과대평가되는 것을 막기 위해서다. 그러나 가중평균만으로 작은 잎의 불안정성이 완전히 해결되는 것은 아니므로 최소 노드크기와 가지치기가 추가로 필요하다.</p>
+</section>
+<section id="sec-ch04-regression-split" class="level3" data-number="4.2.2">
+<h3 data-number="4.2.2" class="anchored" data-anchor-id="sec-ch04-regression-split"><span class="header-section-number">4.2.2</span> 회귀트리의 분할 기준</h3>
+<p>제곱오차를 사용하는 회귀트리에서 후보 분할의 목적함수는</p>
+<p><span id="eq-ch04-regression-split-objective"><span class="math display">\[
+Q(j,s)
+=
+\sum_{i:\mathbf x_i\in A_L(j,s)}
+(y_i-\overline y_L)^2
++
+\sum_{i:\mathbf x_i\in A_R(j,s)}
+(y_i-\overline y_R)^2
+\tag{4.15}\]</span></span></p>
+<p>이다. 가장 작은 <span class="math inline">\(Q(j,s)\)</span>를 만드는 변수와 분할점을 선택한다.</p>
+<p>부모노드의 제곱오차를</p>
+<p><span id="eq-ch04-parent-sse"><span class="math display">\[
+\operatorname{SSE}(A)
+=
+\sum_{i:\mathbf x_i\in A}(y_i-\overline y_A)^2
+\tag{4.16}\]</span></span></p>
+<p>라고 하면 분할개선량은</p>
+<p><span id="eq-ch04-sse-reduction"><span class="math display">\[
+\Delta\operatorname{SSE}(j,s)
+=
+\operatorname{SSE}(A)
+-
+\operatorname{SSE}(A_L)
+-
+\operatorname{SSE}(A_R)
+\tag{4.17}\]</span></span></p>
+<p>이다.</p>
+<p>전체 제곱합은 노드 내 제곱합과 노드 간 제곱합으로 분해된다. 따라서 회귀트리의 분할은 두 자식노드 평균의 차이가 크고 각 노드 안의 변동이 작은 후보를 선호한다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch04-split-search" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch04-split-search-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-decision-trees_files/figure-html/fig-ch04-split-search-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch04-split-search-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;4.2: 연속형 변수의 후보 분할점에 따른 회귀트리 잔차제곱합
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch04-split-search" class="quarto-xref">그림&nbsp;<span>4.2</span></a><!-- -->에서 잔차제곱합이 가장 작은 위치가 선택된다. 표본변동이 크거나 여러 개의 비슷한 최솟값이 존재하면 선택된 분할점은 재표본화에 따라 크게 달라질 수 있다.</p>
+</section>
+<section id="sec-ch04-misclassification-error" class="level3" data-number="4.2.3">
+<h3 data-number="4.2.3" class="anchored" data-anchor-id="sec-ch04-misclassification-error"><span class="header-section-number">4.2.3</span> 분류오차</h3>
+<p>노드 <span class="math inline">\(A\)</span>에서 클래스 비율을 <span class="math inline">\(p_1,\ldots,p_K\)</span>라고 하자. 다수 클래스로 예측할 때의 분류오차는</p>
+<p><span id="eq-ch04-misclassification-impurity"><span class="math display">\[
+I_{\mathrm{error}}(A)
+=
+1-\max_k p_k
+\tag{4.18}\]</span></span></p>
+<p>이다. 이 척도는 직접적인 오분류율과 연결되지만, 클래스 비율의 작은 변화에 둔감하다. 예를 들어 이진분류에서 클래스 비율이 <span class="math inline">\((0.51,0.49)\)</span>에서 <span class="math inline">\((0.80,0.20)\)</span>으로 바뀌어도 다수 클래스가 같으면 변화량을 충분히 세밀하게 반영하지 못할 수 있다. 따라서 트리 성장에는 지니 불순도나 엔트로피를 더 자주 사용하고, 분류오차는 가지치기나 최종평가에 사용할 수 있다.</p>
+</section>
+<section id="sec-ch04-gini" class="level3" data-number="4.2.4">
+<h3 data-number="4.2.4" class="anchored" data-anchor-id="sec-ch04-gini"><span class="header-section-number">4.2.4</span> 지니 불순도</h3>
+<p>지니 불순도(Gini impurity)는</p>
+<p><span id="eq-ch04-gini-impurity"><span class="math display">\[
+I_{\mathrm{Gini}}(A)
+=
+\sum_{k=1}^{K}p_k(1-p_k)
+=
+1-\sum_{k=1}^{K}p_k^2
+\tag{4.19}\]</span></span></p>
+<p>로 정의한다. 노드에서 임의로 하나의 관측값을 선택하고 노드의 클래스 비율에 따라 무작위로 레이블을 부여할 때 오분류될 확률로 해석할 수 있다.</p>
+<p>이진분류에서 양성 클래스 비율을 <span class="math inline">\(p\)</span>라고 하면</p>
+<p><span id="eq-ch04-binary-gini"><span class="math display">\[
+I_{\mathrm{Gini}}(p)=2p(1-p)
+\tag{4.20}\]</span></span></p>
+<p>이다. <span class="math inline">\(p=0\)</span> 또는 <span class="math inline">\(p=1\)</span>인 순수노드에서 0이고, <span class="math inline">\(p=0.5\)</span>에서 최대가 된다.</p>
+</section>
+<section id="sec-ch04-entropy" class="level3" data-number="4.2.5">
+<h3 data-number="4.2.5" class="anchored" data-anchor-id="sec-ch04-entropy"><span class="header-section-number">4.2.5</span> 엔트로피와 정보이득</h3>
+<p>엔트로피 불순도는</p>
+<p><span id="eq-ch04-entropy"><span class="math display">\[
+I_{\mathrm{Entropy}}(A)
+=
+-\sum_{k=1}^{K}p_k\log p_k
+\tag{4.21}\]</span></span></p>
+<p>로 정의한다. <span class="math inline">\(p_k=0\)</span>인 항은 <span class="math inline">\(0\log0=0\)</span>으로 처리한다. 분할 전후 엔트로피의 감소량을 정보이득(information gain)이라고 한다.</p>
+<p><span id="eq-ch04-information-gain"><span class="math display">\[
+\operatorname{IG}(j,s)
+=
+I_{\mathrm{Entropy}}(A)
+-
+\frac{N_L}{N_A}I_{\mathrm{Entropy}}(A_L)
+-
+\frac{N_R}{N_A}I_{\mathrm{Entropy}}(A_R)
+\tag{4.22}\]</span></span></p>
+<p>엔트로피는 로그손실과 연결되며, 지니 불순도보다 극단적인 확률에 조금 더 민감하다. 실제로 지니와 엔트로피는 많은 자료에서 비슷한 분할을 선택하지만 항상 동일하지는 않다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch04-impurity-functions" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch04-impurity-functions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-decision-trees_files/figure-html/fig-ch04-impurity-functions-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch04-impurity-functions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;4.3: 이진분류에서 클래스 비율에 따른 불순도 함수
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch04-impurity-functions" class="quarto-xref">그림&nbsp;<span>4.3</span></a><!-- -->에서 세 함수는 모두 순수노드에서 0이고 클래스가 균형일 때 가장 크다. 그러나 지니와 엔트로피는 <span class="math inline">\(p\)</span>의 변화에 더 부드럽게 반응하므로 성장단계에서 세밀한 분할비교가 가능하다.</p>
+</section>
+<section id="sec-ch04-impurity-properties" class="level3" data-number="4.2.6">
+<h3 data-number="4.2.6" class="anchored" data-anchor-id="sec-ch04-impurity-properties"><span class="header-section-number">4.2.6</span> 불순도 함수의 성질</h3>
+<p>좋은 분류 불순도 함수는 일반적으로 다음 성질을 갖는다.</p>
+<ol type="1">
+<li>모든 관측값이 한 클래스에 속하면 최소가 된다.</li>
+<li>클래스 비율이 균등하면 최대가 된다.</li>
+<li>클래스 레이블의 순서에 영향을 받지 않는다.</li>
+<li>클래스 혼합이 증가할수록 불순도가 증가한다.</li>
+<li>자식노드의 가중 불순도가 부모보다 작아질 수 있도록 오목함수를 사용한다.</li>
+</ol>
+<p>이진분류에서 <span class="math inline">\(p\)</span>에 대한 오목한 함수는 서로 다른 클래스 비율을 가진 자식노드로 나눌 때 평균 불순도가 감소하도록 한다. 이것이 트리가 서로 다른 클래스 구성을 가진 영역을 찾는 수학적 근거이다.</p>
+</section>
+<section id="sec-ch04-cost-sensitive-split" class="level3" data-number="4.2.7">
+<h3 data-number="4.2.7" class="anchored" data-anchor-id="sec-ch04-cost-sensitive-split"><span class="header-section-number">4.2.7</span> 비용민감 분할</h3>
+<p>비용민감 학습(cost-sensitive learning)은 오류의 종류에 따라 서로 다른 손실을 부여한다. 트리에서는 이러한 손실을 분할 기준과 말단노드의 의사결정 규칙에 반영할 수 있다.</p>
+<p>오류비용이 비대칭이면 단순한 클래스 비율만으로 분할을 선택하는 것이 부적절할 수 있다. 실제 클래스가 <span class="math inline">\(k\)</span>인데 <span class="math inline">\(\ell\)</span>로 예측했을 때의 비용을 <span class="math inline">\(C_{k\ell}\)</span>이라고 하자. 노드의 클래스별 확률이 <span class="math inline">\(p_k\)</span>일 때 클래스 <span class="math inline">\(a\)</span>로 예측하는 기대비용은</p>
+<p><span id="eq-ch04-node-expected-cost"><span class="math display">\[
+\mathcal C(a\mid A)
+=
+\sum_{k=1}^{K}C_{ka}p_k
+\tag{4.23}\]</span></span></p>
+<p>이고 최적 노드예측은</p>
+<p><span id="eq-ch04-cost-optimal-class"><span class="math display">\[
+\widehat a(A)
+=
+\arg\min_a\mathcal C(a\mid A)
+\tag{4.24}\]</span></span></p>
+<p>이다.</p>
+<p>분할기준에도 클래스 가중치 또는 관측값 가중치를 적용할 수 있다. 가중 클래스 비율은</p>
+<p><span id="eq-ch04-weighted-class-proportion"><span class="math display">\[
+\widetilde p_{mk}
+=
+\frac{
+\sum_{i:\mathbf x_i\in R_m}w_iI(y_i=k)
+}{
+\sum_{i:\mathbf x_i\in R_m}w_i
+}
+\tag{4.25}\]</span></span></p>
+<p>로 계산한다. 그러나 학습가중치를 변경하면 노드확률이 실제 모집단 확률과 달라질 수 있으므로 독립적인 대표자료에서 확률 보정과 의사결정 성능을 확인해야 한다.</p>
+</section>
+<section id="sec-ch04-split-selection-bias" class="level3" data-number="4.2.8">
+<h3 data-number="4.2.8" class="anchored" data-anchor-id="sec-ch04-split-selection-bias"><span class="header-section-number">4.2.8</span> 분할변수 선택의 편향</h3>
+<p>가능한 후보 분할이 많은 변수는 우연히 큰 불순도 감소(impurity decrease)를 만들 기회가 많다. 예를 들어 범주 수가 많은 범주형 변수나 서로 다른 값이 매우 많은 연속형 변수는 후보가 적은 변수보다 선택될 가능성이 높을 수 있다. 이 현상은 변수 중요도에도 영향을 준다.</p>
+<p>분할선택 편향(split-selection bias)을 줄이는 방법으로는 다음을 고려할 수 있다.</p>
+<ul>
+<li>분할변수 선택과 분할점 선택을 분리하는 조건부 추론 방식</li>
+<li>순열검정을 이용한 변수 선택</li>
+<li>최소 노드크기와 불순도 감소량 제한</li>
+<li>교차검증을 통한 복잡도 제어</li>
+<li>분할기회 수에 덜 민감한 순열 중요도 사용</li>
+<li>범주형 변수의 불필요한 고유 식별자 제거</li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled" title="식별자형 변수의 위험">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">경고</span>식별자형 변수의 위험
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>환자번호, 주문번호, 날짜-시간의 세밀한 코드처럼 거의 모든 관측값에서 값이 다른 변수는 훈련자료를 잘게 나누는 데 매우 유리하다. 이런 변수는 높은 훈련성능을 만들 수 있지만 새로운 자료에 재현되는 구조를 담고 있지 않을 가능성이 크다. 모형 적합 전에 변수의 의미와 예측시점에서의 이용 가능성을 확인해야 한다.</p>
+</div>
+</div>
+</section>
+<section id="sec-ch04-gain-ratio-multiway" class="level3" data-number="4.2.9">
+<h3 data-number="4.2.9" class="anchored" data-anchor-id="sec-ch04-gain-ratio-multiway"><span class="header-section-number">4.2.9</span> 정보이득비와 다지분할</h3>
+<p>범주형 변수를 여러 자식노드로 한 번에 나누는 다지분할은 범주가 많은 변수에 유리할 수 있다. 정보이득비는 정보이득을 분할 자체의 엔트로피로 나누어 지나치게 많은 가지를 만드는 분할을 제어한다.</p>
+<p>자식노드 비율을 <span class="math inline">\(q_1,\ldots,q_J\)</span>라고 하면 분할정보는</p>
+<p><span id="eq-ch04-split-information"><span class="math display">\[
+\operatorname{SplitInfo}
+=
+-\sum_{j=1}^{J}q_j\log q_j
+\tag{4.26}\]</span></span></p>
+<p>이고 정보이득비는</p>
+<p><span id="eq-ch04-gain-ratio"><span class="math display">\[
+\operatorname{GainRatio}
+=
+\frac{\operatorname{InformationGain}}
+{\operatorname{SplitInfo}}
+\tag{4.27}\]</span></span></p>
+<p>이다. 다만 분모가 매우 작을 때 불안정할 수 있고, 이진분할과 다지분할은 트리의 깊이와 해석구조가 달라 직접 비교가 쉽지 않다. CART는 일반적으로 이진분할을 사용한다.</p>
+</section>
+<section id="sec-ch04-greedy-limitations" class="level3" data-number="4.2.10">
+<h3 data-number="4.2.10" class="anchored" data-anchor-id="sec-ch04-greedy-limitations"><span class="header-section-number">4.2.10</span> 탐욕적 분할의 한계</h3>
+<p>현재 노드에서 불순도를 가장 크게 줄이는 변수가 전체 예측에 가장 중요한 변수라는 보장은 없다. 다음과 같은 구조에서는 탐욕적 분할이 어려움을 겪을 수 있다.</p>
+<ul>
+<li>개별 변수는 약하지만 두 변수의 조합이 강한 경우</li>
+<li>XOR와 같이 단일 분할로는 개선이 거의 없는 순수 상호작용</li>
+<li>여러 후보 분할의 성능이 거의 같은 경우</li>
+<li>강하게 상관된 변수들이 서로 대체 가능한 경우</li>
+<li>첫 분할의 작은 차이가 하위트리 전체를 바꾸는 경우</li>
+</ul>
+<p>XOR 문제에서 <span class="math inline">\(Y=I(X_1X_2&gt;0)\)</span>이고 <span class="math inline">\(X_1,X_2\)</span>가 대칭적으로 분포하면, 루트에서 <span class="math inline">\(X_1\)</span> 또는 <span class="math inline">\(X_2\)</span> 하나만 분할해도 클래스 비율이 거의 변하지 않을 수 있다. 충분히 깊은 트리는 이 관계를 표현할 수 있지만, 최소 불순도 감소 같은 조기정지 규칙이 강하면 필요한 첫 분할을 만들지 못할 수 있다.</p>
+</section>
+<section id="sec-ch04-split-computation" class="level3" data-number="4.2.11">
+<h3 data-number="4.2.11" class="anchored" data-anchor-id="sec-ch04-split-computation"><span class="header-section-number">4.2.11</span> 분할 계산의 효율성</h3>
+<p>연속형 변수의 값을 정렬한 뒤 인접한 서로 다른 값 사이만 후보 분할점으로 고려하면 된다. <span class="math inline">\(n_A\)</span>개의 관측값이 있는 노드에서 변수 하나를 처음부터 정렬하면 <span class="math inline">\(O(n_A\log n_A)\)</span>의 비용이 들지만, 정렬정보와 누적합을 재사용하면 각 후보의 손실을 효율적으로 갱신할 수 있다.</p>
+<p>회귀트리에서는 왼쪽과 오른쪽의 관측수, 합, 제곱합을 누적하면 각 후보의 SSE를 상수시간에 계산할 수 있다. 분류트리(classification tree)에서는 클래스별 누적빈도를 이용한다. 대규모 자료에서는 후보 분할점을 분위수나 히스토그램 구간으로 근사하여 계산량을 줄이기도 한다.</p>
+</section>
+</section>
+<section id="sec-ch04-pruning" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="sec-ch04-pruning"><span class="header-section-number">4.3</span> 가지치기</h2>
+<section id="sec-ch04-tree-overfitting" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="sec-ch04-tree-overfitting"><span class="header-section-number">4.3.1</span> 트리 성장과 과적합</h3>
+<p>각 말단노드에 한두 개의 관측값만 남을 때까지 트리를 계속 성장시키면 훈련오차는 매우 작아진다. 회귀에서는 각 관측값을 별도 잎으로 만들면 훈련 제곱오차가 0에 가까워지고, 분류에서는 순수노드를 만들면 훈련오분류가 0이 될 수 있다. 그러나 이러한 트리는 표본의 우연한 잡음까지 규칙으로 학습한다.</p>
+<p>트리 깊이가 증가할수록 일반적으로 다음 현상이 나타난다.</p>
+<ul>
+<li>훈련오차는 단조롭게 감소한다.</li>
+<li>분할규칙의 수가 증가한다.</li>
+<li>말단노드 표본 수가 감소한다.</li>
+<li>예측분산이 증가한다.</li>
+<li>확률예측이 극단적으로 변한다.</li>
+<li>작은 자료변화에 대한 구조적 불안정성이 커진다.</li>
+</ul>
+<p>따라서 최대트리를 성장시킨 뒤 복잡도를 줄이거나, 성장과정에서 분할을 제한해야 한다.</p>
+</section>
+<section id="sec-ch04-prepruning" class="level3" data-number="4.3.2">
+<h3 data-number="4.3.2" class="anchored" data-anchor-id="sec-ch04-prepruning"><span class="header-section-number">4.3.2</span> 사전 가지치기</h3>
+<p>사전 가지치기(pre-pruning) 또는 조기정지는 트리를 성장시키는 과정에서 특정 조건을 만족하면 더 이상 분할하지 않는 방법이다. 대표적인 조건은 다음과 같다.</p>
+<ul>
+<li>최대깊이 <code>maxdepth</code></li>
+<li>분할을 시도하기 위한 최소 관측값 수 <code>minsplit</code></li>
+<li>말단노드의 최소 관측값 수 <code>minbucket</code></li>
+<li>최소 불순도 감소량</li>
+<li>최대 말단노드 수</li>
+<li>분할의 통계적 유의성</li>
+</ul>
+<p>사전 가지치기는 계산량을 줄이고 지나치게 작은 노드를 방지한다. 그러나 현재 단계에서 개선이 작더라도 그 분할 아래에서 중요한 상호작용이 발견될 수 있다. 너무 강한 조기정지는 필요한 중간분할을 차단하여 과소적합을 만들 수 있다.</p>
+</section>
+<section id="sec-ch04-postpruning" class="level3" data-number="4.3.3">
+<h3 data-number="4.3.3" class="anchored" data-anchor-id="sec-ch04-postpruning"><span class="header-section-number">4.3.3</span> 사후 가지치기</h3>
+<p>사후 가지치기(post-pruning)는 비교적 큰 트리를 먼저 성장시킨 뒤 검증성능이나 복잡도 기준에 따라 불필요한 가지를 제거한다. 큰 트리가 다양한 후보구조를 포함하도록 한 후 전체적인 성능을 기준으로 단순화한다는 장점이 있다.</p>
+<p>대표적인 접근은 다음과 같다.</p>
+<ul>
+<li>검증자료 오차가 감소하지 않는 부분트리 제거</li>
+<li>감소오차 가지치기</li>
+<li>비관적 오차추정에 기반한 가지치기</li>
+<li>비용-복잡도 가지치기</li>
+</ul>
+<p>CART에서는 비용-복잡도 가지치기(cost-complexity pruning)가 핵심이다.</p>
+</section>
+<section id="sec-ch04-cost-complexity" class="level3" data-number="4.3.4">
+<h3 data-number="4.3.4" class="anchored" data-anchor-id="sec-ch04-cost-complexity"><span class="header-section-number">4.3.4</span> 비용-복잡도 기준</h3>
+<p>큰 트리 <span class="math inline">\(T_0\)</span>의 부분트리 <span class="math inline">\(T\subseteq T_0\)</span>를 생각하자. 비용-복잡도 기준은</p>
+<p><span id="eq-ch04-cost-complexity-risk"><span class="math display">\[
+R_\alpha(T)
+=
+R(T)+\alpha|\widetilde T|
+\tag{4.28}\]</span></span></p>
+<p>로 정의한다. 여기서 <span class="math inline">\(R(T)\)</span>는 트리의 경험손실, <span class="math inline">\(|\widetilde T|\)</span>는 말단노드 수, <span class="math inline">\(\alpha\geq0\)</span>은 복잡도 패널티이다.</p>
+<ul>
+<li><span class="math inline">\(\alpha=0\)</span>이면 훈련손실이 가장 작은 큰 트리를 선호한다.</li>
+<li><span class="math inline">\(\alpha\)</span>가 커질수록 말단노드가 적은 단순한 트리를 선호한다.</li>
+<li>같은 손실이면 더 작은 트리가 선택된다.</li>
+</ul>
+<p>회귀트리에서는</p>
+<p><span id="eq-ch04-cost-complexity-regression-risk"><span class="math display">\[
+R(T)
+=
+\sum_{m\in\widetilde T}
+\sum_{i:\mathbf x_i\in R_m}
+(y_i-\overline y_m)^2
+\tag{4.29}\]</span></span></p>
+<p>를 사용한다. 분류트리에서는 노드 오분류, 지니 기반 위험 또는 관측가중 비용을 사용할 수 있다.</p>
+</section>
+<section id="sec-ch04-weakest-link" class="level3" data-number="4.3.5">
+<h3 data-number="4.3.5" class="anchored" data-anchor-id="sec-ch04-weakest-link"><span class="header-section-number">4.3.5</span> 약한 연결 가지치기</h3>
+<p>내부노드 <span class="math inline">\(t\)</span>를 루트로 하는 부분트리를 <span class="math inline">\(T_t\)</span>라고 하자. <span class="math inline">\(T_t\)</span> 전체를 하나의 말단노드 <span class="math inline">\(t\)</span>로 바꿀 때 손실증가량을 말단노드 감소량으로 나눈 값을</p>
+<p><span id="eq-ch04-weakest-link"><span class="math display">\[
+g(t)
+=
+\frac{R(t)-R(T_t)}{|\widetilde T_t|-1}
+\tag{4.30}\]</span></span></p>
+<p>라고 하자. <span class="math inline">\(g(t)\)</span>가 작다는 것은 여러 개의 잎을 유지해 얻는 손실감소가 잎 하나당 작다는 뜻이다. 약한 연결 가지치기(weakest-link pruning)는 가장 작은 <span class="math inline">\(g(t)\)</span>를 가진 가지를 먼저 제거한다.</p>
+<p>이 과정을 반복하면</p>
+<p><span id="eq-ch04-nested-subtrees"><span class="math display">\[
+T_0\supset T_1\supset\cdots\supset T_L
+\tag{4.31}\]</span></span></p>
+<p>형태의 중첩된 부분트리열을 얻는다. 각 복잡도 구간에서 최적인 부분트리가 이 열 안에 존재하므로 모든 가능한 부분트리를 따로 비교할 필요가 없다.</p>
+</section>
+<section id="sec-ch04-pruning-cross-validation" class="level3" data-number="4.3.6">
+<h3 data-number="4.3.6" class="anchored" data-anchor-id="sec-ch04-pruning-cross-validation"><span class="header-section-number">4.3.6</span> 교차검증을 이용한 트리 크기 선택</h3>
+<p>비용-복잡도 계수 <span class="math inline">\(\alpha\)</span> 또는 부분트리 크기는 교차검증으로 선택할 수 있다. <span class="math inline">\(K\)</span>개의 폴드에서 각 후보 부분트리의 검증손실을 계산하고 평균을 구한다.</p>
+<p><span id="eq-ch04-tree-cv-risk"><span class="math display">\[
+\widehat R_{\mathrm{CV}}(T)
+=
+\frac{1}{K}
+\sum_{k=1}^{K}
+\widehat R^{(k)}_{\mathrm{valid}}(T)
+\tag{4.32}\]</span></span></p>
+<p>가장 작은 평균 검증손실을 가진 트리를 선택할 수 있지만, 복잡한 트리와 단순한 트리의 차이가 검증변동보다 작을 수 있다. 1-표준오차 규칙(one-standard-error rule)은 최소오차 트리의 평균오차에 표준오차 하나를 더한 범위 안에 있는 트리 중 가장 단순한 것을 선택한다.</p>
+<p><span id="eq-ch04-one-se-rule"><span class="math display">\[
+\widehat R_{\mathrm{CV}}(T)
+\leq
+\widehat R_{\min}+\operatorname{SE}_{\min}
+\tag{4.33}\]</span></span></p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch04-pruning-curve" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch04-pruning-curve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-decision-trees_files/figure-html/fig-ch04-pruning-curve-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch04-pruning-curve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;4.4: 트리 복잡도에 따른 훈련오차와 교차검증오차의 전형적 관계
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch04-pruning-curve" class="quarto-xref">그림&nbsp;<span>4.4</span></a><!-- -->에서 훈련오차는 트리 크기에 따라 계속 감소하지만 교차검증오차는 어느 지점 이후 다시 증가할 수 있다. 가지치기의 목표는 훈련자료를 가장 잘 설명하는 트리가 아니라 새로운 자료의 위험을 가장 작게 만드는 트리를 찾는 것이다.</p>
+</section>
+<section id="sec-ch04-pruning-selection-bias" class="level3" data-number="4.3.7">
+<h3 data-number="4.3.7" class="anchored" data-anchor-id="sec-ch04-pruning-selection-bias"><span class="header-section-number">4.3.7</span> 가지치기와 모형 선택 편향</h3>
+<p>같은 교차검증 결과를 이용해 트리 크기를 선택하고 그 성능을 최종성능으로 보고하면 선택 편향이 발생한다. 후보가 많을수록 우연히 낮은 검증오차를 가진 트리를 선택할 가능성이 커진다. 최종 일반화성능은 다음 중 하나로 평가해야 한다.</p>
+<ul>
+<li>완전히 분리된 시험자료</li>
+<li>외부검증자료</li>
+<li>바깥 교차검증에서 평가하고 안쪽 교차검증에서 가지치기하는 중첩 교차검증</li>
+</ul>
+<p>트리 성장 규칙, 결측처리, 클래스 가중치와 가지치기 계수를 모두 데이터로 선택한다면 이 전체 절차가 안쪽 학습과정에 포함되어야 한다.</p>
+</section>
+<section id="sec-ch04-pruning-stability" class="level3" data-number="4.3.8">
+<h3 data-number="4.3.8" class="anchored" data-anchor-id="sec-ch04-pruning-stability"><span class="header-section-number">4.3.8</span> 트리 안정성과 가지치기</h3>
+<p>가지치기는 깊은 가지의 잡음을 제거하고 예측분산을 줄일 수 있지만 트리의 구조적 불안정성을 완전히 없애지는 못한다. 루트 근처의 분할이 재표본화에 따라 달라지면 가지치기된 최종 트리도 크게 변할 수 있다.</p>
+<p>안정성을 평가하려면 부트스트랩이나 반복 교차검증에서 다음을 기록할 수 있다.</p>
+<ul>
+<li>루트 분할변수의 선택빈도</li>
+<li>특정 변수의 전체 선택빈도</li>
+<li>분할점의 분포</li>
+<li>관측쌍이 같은 말단노드에 속하는 빈도</li>
+<li>변수 중요도의 분포</li>
+<li>예측값의 분산</li>
+</ul>
+<p>구조해석이 중요한 경우 하나의 최종 트리만 제시하기보다 이러한 안정성 정보를 함께 제시하는 것이 바람직하다.</p>
+</section>
+<section id="sec-ch04-pruning-implementation" class="level3" data-number="4.3.9">
+<h3 data-number="4.3.9" class="anchored" data-anchor-id="sec-ch04-pruning-implementation"><span class="header-section-number">4.3.9</span> 가지치기 구현 예시</h3>
+<p>다음 코드는 <code>rpart</code>를 이용하여 큰 회귀트리를 적합하고 비용-복잡도 표를 확인한 뒤 가지치기하는 기본 구조를 보여준다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rpart)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>fit_full <span class="ot">&lt;-</span> <span class="fu">rpart</span>(</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  y <span class="sc">~</span> ., <span class="at">data =</span> train_data,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"anova"</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> <span class="fu">rpart.control</span>(</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">cp =</span> <span class="dv">0</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">minsplit =</span> <span class="dv">20</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">minbucket =</span> <span class="dv">7</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">maxdepth =</span> <span class="dv">30</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">xval =</span> <span class="dv">10</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="fu">printcp</span>(fit_full)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>cp_table <span class="ot">&lt;-</span> fit_full<span class="sc">$</span>cptable</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co"># 최소 교차검증오차를 주는 cp</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>cp_min <span class="ot">&lt;-</span> cp_table[<span class="fu">which.min</span>(cp_table[, <span class="st">"xerror"</span>]), <span class="st">"CP"</span>]</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>fit_min <span class="ot">&lt;-</span> <span class="fu">prune</span>(fit_full, <span class="at">cp =</span> cp_min)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co"># 1-표준오차 규칙</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>row_min <span class="ot">&lt;-</span> <span class="fu">which.min</span>(cp_table[, <span class="st">"xerror"</span>])</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>threshold <span class="ot">&lt;-</span> cp_table[row_min, <span class="st">"xerror"</span>] <span class="sc">+</span> cp_table[row_min, <span class="st">"xstd"</span>]</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>eligible <span class="ot">&lt;-</span> <span class="fu">which</span>(cp_table[, <span class="st">"xerror"</span>] <span class="sc">&lt;=</span> threshold)</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>cp_1se <span class="ot">&lt;-</span> cp_table[<span class="fu">min</span>(eligible), <span class="st">"CP"</span>]</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>fit_1se <span class="ot">&lt;-</span> <span class="fu">prune</span>(fit_full, <span class="at">cp =</span> cp_1se)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>rpart</code>의 복잡도 표는 구현상의 상대오차와 교차검증오차를 제공한다. 소프트웨어의 정의와 행 정렬방식을 확인한 뒤 1-표준오차 규칙을 적용해야 한다. 최종 시험자료는 <code>cp</code>를 선택하는 데 사용하지 않는다.</p>
+</section>
+</section>
+<section id="sec-ch04-continuous-missing" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="sec-ch04-continuous-missing"><span class="header-section-number">4.4</span> 연속값과 결측값</h2>
+<section id="sec-ch04-continuous-thresholds" class="level3" data-number="4.4.1">
+<h3 data-number="4.4.1" class="anchored" data-anchor-id="sec-ch04-continuous-thresholds"><span class="header-section-number">4.4.1</span> 연속형 변수의 후보 분할점</h3>
+<p>현재 노드에서 변수 <span class="math inline">\(x_j\)</span>의 서로 다른 정렬값을</p>
+<p><span id="eq-ch04-ordered-unique-values"><span class="math display">\[
+x_{(1)j}&lt;x_{(2)j}&lt;\cdots&lt;x_{(q)j}
+\tag{4.34}\]</span></span></p>
+<p>라고 하자. 동일한 자료분할을 만드는 모든 실수값을 평가할 필요는 없다. 인접한 값 사이의 중간점</p>
+<p><span id="eq-ch04-midpoint-candidates"><span class="math display">\[
+s_r
+=
+\frac{x_{(r)j}+x_{(r+1)j}}{2},
+\qquad
+r=1,\ldots,q-1
+\tag{4.35}\]</span></span></p>
+<p>만 후보로 고려하면 된다.</p>
+<p>분류문제에서는 인접한 두 값의 클래스가 같을 때 일부 후보를 생략하는 최적화가 가능하지만, 표본가중치와 다중 클래스에서는 주의가 필요하다. 최소 말단노드 크기를 적용하면 양쪽에 충분한 관측값을 남기지 못하는 후보를 제외한다.</p>
+<p>연속형 변수가 측정오차를 포함하면 선택된 분할점은 임상적 또는 과학적 임계값과 일치하지 않을 수 있다. <span class="math inline">\(x_j=4.73\)</span>이라는 분할점은 반드시 현실에서 4.73이 특별한 경계라는 뜻이 아니라, 현재 표본에서 손실을 가장 많이 감소시킨 위치일 수 있다.</p>
+</section>
+<section id="sec-ch04-step-function" class="level3" data-number="4.4.2">
+<h3 data-number="4.4.2" class="anchored" data-anchor-id="sec-ch04-step-function"><span class="header-section-number">4.4.2</span> 계단함수 근사와 경계효과</h3>
+<p>기본 회귀트리는 말단노드 안에서 상수값을 예측하므로 부드러운 함수도 계단형으로 근사한다. 분할점에서 예측값이 갑자기 변하고, 관측범위 밖에서는 가장 바깥 잎의 예측값을 그대로 사용한다.</p>
+<p><span id="eq-ch04-step-regression"><span class="math display">\[
+\widehat f_T(x)
+=
+\begin{cases}
+\widehat c_1,&amp;x\leq s_1,\\
+\widehat c_2,&amp;s_1&lt;x\leq s_2,\\
+\vdots&amp;\\
+\widehat c_M,&amp;x&gt;s_{M-1}.
+\end{cases}
+\tag{4.36}\]</span></span></p>
+<p>따라서 다음 상황에서는 주의해야 한다.</p>
+<ul>
+<li>실제 관계가 매우 부드럽고 단조로운 경우</li>
+<li>입력범위 밖의 외삽이 필요한 경우</li>
+<li>작은 입력변화에 연속적인 예측변화가 요구되는 경우</li>
+<li>규제된 선형 또는 스플라인 모형이 더 효율적인 경우</li>
+</ul>
+<p>트리 앙상블은 여러 계단함수를 평균하여 단일 트리보다 부드러운 예측을 만들 수 있지만, 기본적으로 외삽능력은 제한적이다.</p>
+</section>
+<section id="sec-ch04-ordinal-variables" class="level3" data-number="4.4.3">
+<h3 data-number="4.4.3" class="anchored" data-anchor-id="sec-ch04-ordinal-variables"><span class="header-section-number">4.4.3</span> 순서형 변수</h3>
+<p>순서형 범주는 자연스러운 순서를 가지므로 연속형 변수처럼 인접범주 사이를 분할할 수 있다. 예를 들어 질병단계가 I, II, III, IV라면 다음 후보를 고려한다.</p>
+<pre class="text"><code>{I} 대 {II, III, IV}
+{I, II} 대 {III, IV}
+{I, II, III} 대 {IV}</code></pre>
+<p>범주를 임의의 숫자로 코딩하면 간격이 동일하다는 오해가 생길 수 있지만, 트리 분할은 주로 순서만 이용한다. 다만 데이터에 없는 범주순서를 학습과정에서 임의로 재배열해서는 안 된다.</p>
+</section>
+<section id="sec-ch04-nominal-variables" class="level3" data-number="4.4.4">
+<h3 data-number="4.4.4" class="anchored" data-anchor-id="sec-ch04-nominal-variables"><span class="header-section-number">4.4.4</span> 명목형 범주변수</h3>
+<p><span class="math inline">\(K\)</span>개 범주를 가진 명목형 변수의 이진분할은 범주집합 <span class="math inline">\(S\)</span>를 선택하여</p>
+<p><span id="eq-ch04-categorical-split"><span class="math display">\[
+x_j\in S
+\quad\text{대}\quad
+x_j\notin S
+\tag{4.37}\]</span></span></p>
+<p>로 정의한다. 서로 보완적인 분할은 동일하므로 가능한 비중복 분할 수는</p>
+<p><span id="eq-ch04-categorical-split-count"><span class="math display">\[
+2^{K-1}-1
+\tag{4.38}\]</span></span></p>
+<p>이다. 범주 수가 크면 완전탐색이 매우 비싸다.</p>
+<p>이진분류에서는 각 범주의 양성비율을 정렬한 뒤 인접한 순서 사이만 분할해도 최적 지니 또는 엔트로피 분할을 찾을 수 있는 경우가 있다. 회귀에서는 범주별 반응평균을 정렬할 수 있다. 다중분류에서는 이러한 단순 정렬이 일반적으로 충분하지 않아 근사탐색이 필요할 수 있다.</p>
+<p>범주 수가 매우 많은 변수는 다음 문제를 일으킨다.</p>
+<ul>
+<li>후보 분할 수 증가</li>
+<li>희귀범주 잎 생성</li>
+<li>분할선택 편향</li>
+<li>새로운 범주의 처리 문제</li>
+<li>변수 중요도 과대평가</li>
+</ul>
+<p>희귀범주를 의미 있는 상위범주로 묶거나, 예측시점에 이용 가능한 범주만 유지하고, 새로운 범주에 대한 경로를 미리 정의해야 한다.</p>
+</section>
+<section id="sec-ch04-missingness-types" class="level3" data-number="4.4.5">
+<h3 data-number="4.4.5" class="anchored" data-anchor-id="sec-ch04-missingness-types"><span class="header-section-number">4.4.5</span> 결측값 문제의 구분</h3>
+<p>트리에서 결측값을 다룰 때는 두 상황을 구분해야 한다.</p>
+<ol type="1">
+<li><strong>훈련자료에 결측값이 있는 경우</strong>: 분할변수와 분할점을 어떻게 학습할 것인가?</li>
+<li><strong>예측시점에 결측값이 있는 경우</strong>: 학습된 분할에서 관측값을 어느 가지로 보낼 것인가?</li>
+</ol>
+<p>결측값을 단순히 제거하면 완전관측자료가 전체 모집단과 다를 수 있고 표본크기가 감소한다. 특히 결측여부가 결과나 다른 변수와 연관되면 완전사례 분석은 편향될 수 있다.</p>
+</section>
+<section id="sec-ch04-imputation" class="level3" data-number="4.4.6">
+<h3 data-number="4.4.6" class="anchored" data-anchor-id="sec-ch04-imputation"><span class="header-section-number">4.4.6</span> 사전 결측대체</h3>
+<p>결측값을 평균, 중앙값, 최빈값 또는 예측모형으로 대체한 뒤 트리를 적합할 수 있다. 결측대체 규칙은 반드시 각 훈련 폴드 안에서 추정해야 한다.</p>
+<p>연속형 변수의 중앙값 대체는</p>
+<p><span id="eq-ch04-median-imputation"><span class="math display">\[
+x_{ij}^{\mathrm{imp}}
+=
+\begin{cases}
+x_{ij},&amp;x_{ij}\text{가 관측됨},\\
+\operatorname{median}_{r\in\mathcal T}(x_{rj}),&amp;x_{ij}\text{가 결측},
+\end{cases}
+\tag{4.39}\]</span></span></p>
+<p>로 나타낼 수 있다. 여기서 <span class="math inline">\(\mathcal T\)</span>는 현재 훈련자료 인덱스이다.</p>
+<p>대체값만 사용하면 결측여부 자체의 정보를 잃을 수 있으므로 결측지시자</p>
+<p><span id="eq-ch04-missing-indicator"><span class="math display">\[
+M_{ij}=I(x_{ij}\text{가 결측})
+\tag{4.40}\]</span></span></p>
+<p>를 추가할 수 있다. 그러나 결측지시자의 효과는 자료수집 과정에 의존하고, 적용환경에서 결측패턴이 바뀌면 성능이 저하될 수 있다.</p>
+</section>
+<section id="sec-ch04-missing-category" class="level3" data-number="4.4.7">
+<h3 data-number="4.4.7" class="anchored" data-anchor-id="sec-ch04-missing-category"><span class="header-section-number">4.4.7</span> 결측을 별도 범주로 처리하기</h3>
+<p>범주형 변수의 결측을 하나의 새로운 범주로 처리할 수 있다. 일부 구현은 연속형 변수에서도 결측값을 특별한 방향으로 보내는 규칙을 학습한다. 이 방법은 결측여부가 예측정보를 포함할 때 유용하지만, 결측을 실제 측정값과 같은 의미의 범주로 간주해서는 안 된다.</p>
+<p>결측이 특정 기관, 장비, 시간대 또는 임상결정에 의해 발생한다면 모형이 생물학적 관계보다 운영과정을 학습할 수 있다. 적용환경이 바뀌면 이러한 신호는 쉽게 사라진다.</p>
+</section>
+<section id="sec-ch04-surrogate-splits" class="level3" data-number="4.4.8">
+<h3 data-number="4.4.8" class="anchored" data-anchor-id="sec-ch04-surrogate-splits"><span class="header-section-number">4.4.8</span> 대리분할</h3>
+<p>대리분할(surrogate split)은 주 분할변수가 결측일 때 주 분할의 좌우배정을 가장 잘 모방하는 다른 변수를 사용하는 방법이다. 주 분할이</p>
+<p><span id="eq-ch04-primary-split"><span class="math display">\[
+x_j\leq s
+\tag{4.41}\]</span></span></p>
+<p>라면 다른 변수 <span class="math inline">\(x_\ell\)</span>과 분할점 <span class="math inline">\(u\)</span>를 찾아 주 분할의 좌우배정과 최대한 일치하도록 한다.</p>
+<p>대리분할 일치도는 예를 들어</p>
+<p><span id="eq-ch04-surrogate-agreement"><span class="math display">\[
+A(\ell,u)
+=
+\frac{1}{N_{\mathrm{obs}}}
+\sum_{i\in\mathcal O}
+I\left[
+I(x_{ij}\leq s)
+=
+I(x_{i\ell}\leq u)
+\right]
+\tag{4.42}\]</span></span></p>
+<p>로 계산할 수 있다. 여기서 <span class="math inline">\(\mathcal O\)</span>는 두 변수 모두 관측된 사례이다.</p>
+<p>예측시 주 분할변수가 결측이면 가장 높은 일치도를 가진 대리분할을 적용하고, 그것도 결측이면 다음 대리분할을 사용한다. 사용할 수 있는 대리변수가 없으면 더 많은 훈련관측값이 갔던 방향이나 사전 정의된 기본방향(default direction)으로 보낼 수 있다.</p>
+<p>대리분할의 장점은 결측값을 하나의 수치로 대체하지 않고 관측된 변수 간 관계를 이용한다는 점이다. 단점은 계산량이 증가하고, 대리관계가 새로운 환경에서 유지된다는 보장이 없다는 점이다.</p>
+</section>
+<section id="sec-ch04-probabilistic-routing" class="level3" data-number="4.4.9">
+<h3 data-number="4.4.9" class="anchored" data-anchor-id="sec-ch04-probabilistic-routing"><span class="header-section-number">4.4.9</span> 확률적 경로와 분수 배정</h3>
+<p>결측관측값을 왼쪽 또는 오른쪽 한쪽으로 강제하지 않고 훈련자료의 비율에 따라 두 가지로 분수 배정할 수도 있다. 예를 들어 왼쪽 관측비율이 <span class="math inline">\(q_L\)</span>이면 해당 관측값의 가중치를 <span class="math inline">\(q_L\)</span>과 <span class="math inline">\(1-q_L\)</span>로 나누어 두 자식노드에 전달한다.</p>
+<p><span id="eq-ch04-fractional-routing"><span class="math display">\[
+w_{iL}=q_Lw_i,
+\qquad
+w_{iR}=(1-q_L)w_i
+\tag{4.43}\]</span></span></p>
+<p>예측확률도 여러 가능한 경로의 가중평균으로 계산할 수 있다. 이 방식은 결측불확실성을 부분적으로 반영하지만 구현과 해석이 복잡해진다.</p>
+</section>
+<section id="sec-ch04-default-direction" class="level3" data-number="4.4.10">
+<h3 data-number="4.4.10" class="anchored" data-anchor-id="sec-ch04-default-direction"><span class="header-section-number">4.4.10</span> 기본방향 학습</h3>
+<p>대규모 트리 알고리즘에서는 각 분할에서 결측값을 왼쪽 또는 오른쪽으로 보내는 기본방향을 손실함수 기준으로 학습하기도 한다. 후보 분할을 평가할 때 결측값을 모두 왼쪽으로 보낸 경우와 모두 오른쪽으로 보낸 경우를 비교하여 더 큰 개선을 만드는 방향을 저장한다.</p>
+<p>이 방법은 빠르고 단순하지만 결측관측값이 모두 동일한 경로를 따른다. 결측기전이 이질적이면 하나의 기본방향이 충분하지 않을 수 있다.</p>
+</section>
+<section id="sec-ch04-missing-evaluation" class="level3" data-number="4.4.11">
+<h3 data-number="4.4.11" class="anchored" data-anchor-id="sec-ch04-missing-evaluation"><span class="header-section-number">4.4.11</span> 결측값 처리의 평가</h3>
+<p>결측처리 방법은 전체 파이프라인 안에서 비교해야 한다. 다음을 확인하는 것이 좋다.</p>
+<ul>
+<li>전체 성능과 결측집단별 성능</li>
+<li>결측률 변화에 대한 민감도</li>
+<li>변수별 결측패턴의 시간적 변화</li>
+<li>결측대체값과 실제 관측값의 분포</li>
+<li>결측지시자에 대한 과도한 의존</li>
+<li>외부기관에서의 재현성</li>
+</ul>
+<p>무작위로 결측값을 인위적으로 추가하는 스트레스 검증도 가능하지만, 실제 결측기전과 다르면 낙관적 또는 비현실적인 결과를 만들 수 있다.</p>
+</section>
+<section id="sec-ch04-feature-availability" class="level3" data-number="4.4.12">
+<h3 data-number="4.4.12" class="anchored" data-anchor-id="sec-ch04-feature-availability"><span class="header-section-number">4.4.12</span> 예측시점의 변수 이용 가능성</h3>
+<p>트리의 상위노드에서 사용하는 변수는 거의 모든 예측경로에 필요하다. 해당 변수가 예측시점에 늦게 도착하거나 비용이 높으면 실제 시스템에서 트리를 사용할 수 없을 수 있다. 분할개선량뿐 아니라 다음을 고려해야 한다.</p>
+<ul>
+<li>측정비용</li>
+<li>검사소요시간</li>
+<li>침습성</li>
+<li>결측가능성</li>
+<li>법적 또는 윤리적 제한</li>
+<li>실시간 이용 가능성</li>
+</ul>
+<p>측정비용을 포함한 목적함수는 개념적으로</p>
+<p><span id="eq-ch04-cost-aware-split"><span class="math display">\[
+\Delta I(j,s)-\lambda_c C_j
+\tag{4.44}\]</span></span></p>
+<p>처럼 표현할 수 있다. 여기서 <span class="math inline">\(C_j\)</span>는 변수 <span class="math inline">\(j\)</span>의 측정비용이다. 실제 구현에서는 경로별 누적비용과 이미 측정된 변수인지 여부도 함께 고려해야 한다.</p>
+</section>
+</section>
+<section id="sec-ch04-multivariate-trees" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="sec-ch04-multivariate-trees"><span class="header-section-number">4.5</span> 다변량 의사결정 트리</h2>
+<section id="sec-ch04-axis-aligned-limitations" class="level3" data-number="4.5.1">
+<h3 data-number="4.5.1" class="anchored" data-anchor-id="sec-ch04-axis-aligned-limitations"><span class="header-section-number">4.5.1</span> 축평행 분할의 한계</h3>
+<p>표준 트리의 분할은 하나의 변수만 사용한다. 실제 결정경계가</p>
+<p><span id="eq-ch04-diagonal-boundary"><span class="math display">\[
+x_1+x_2&gt;c
+\tag{4.45}\]</span></span></p>
+<p>처럼 사선이면 축평행 트리는 여러 개의 직사각형 분할을 계단식으로 조합해야 한다. 이는 트리를 깊게 만들고 작은 잎을 증가시킬 수 있다.</p>
+<p>다변량 또는 사선 의사결정 트리는 한 노드에서 여러 변수의 선형결합을 사용한다.</p>
+<p><span id="eq-ch04-oblique-split"><span class="math display">\[
+\mathbf w^\top\mathbf x\leq s
+\quad\text{대}\quad
+\mathbf w^\top\mathbf x&gt;s
+\tag{4.46}\]</span></span></p>
+<p>여기서 <span class="math inline">\(\mathbf w=(w_1,\ldots,w_p)^\top\)</span>는 분할방향이다. 축평행 분할은 <span class="math inline">\(\mathbf w\)</span>의 한 원소만 1이고 나머지는 0인 특별한 경우이다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch04-axis-oblique" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch04-axis-oblique-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-decision-trees_files/figure-html/fig-ch04-axis-oblique-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch04-axis-oblique-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;4.5: 축평행 분할과 사선분할의 결정영역 비교
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch04-axis-oblique" class="quarto-xref">그림&nbsp;<span>4.5</span></a><!-- -->에서 사선경계는 하나의 다변량 분할로 표현할 수 있지만, 축평행 트리는 여러 분할이 필요하다.</p>
+</section>
+<section id="sec-ch04-oblique-optimization" class="level3" data-number="4.5.2">
+<h3 data-number="4.5.2" class="anchored" data-anchor-id="sec-ch04-oblique-optimization"><span class="header-section-number">4.5.2</span> 사선분할의 최적화</h3>
+<p>사선분할(oblique split)은 변수 <span class="math inline">\(j\)</span>와 임계값 <span class="math inline">\(s\)</span>만 선택하는 문제가 아니라 <span class="math inline">\(p\)</span>차원 방향벡터 <span class="math inline">\(\mathbf w\)</span>와 임계값을 동시에 찾아야 한다.</p>
+<p><span id="eq-ch04-oblique-objective"><span class="math display">\[
+(\widehat{\mathbf w},\widehat s)
+=
+\arg\max_{\mathbf w,s}
+\Delta I(\mathbf w,s)
+\tag{4.47}\]</span></span></p>
+<p>이 목적함수는 자료가 경계를 통과할 때 불연속적으로 변하고 일반적으로 비볼록이다. 가능한 방향은 무한히 많기 때문에 완전탐색이 불가능하다. 대표적인 근사방법은 다음과 같다.</p>
+<ul>
+<li>좌표별 탐색</li>
+<li>무작위 방향 탐색</li>
+<li>선형 판별분석 방향</li>
+<li>로지스틱 회귀 계수</li>
+<li>퍼셉트론 또는 SVM 방향</li>
+<li>투영추적</li>
+<li>진화 알고리즘</li>
+<li>미분 가능한 부드러운 분할근사</li>
+</ul>
+<p>노드마다 별도의 선형분류기를 적합하면 표현력은 커지지만 계산량과 과적합 위험도 증가한다.</p>
+</section>
+<section id="sec-ch04-oblique-scaling" class="level3" data-number="4.5.3">
+<h3 data-number="4.5.3" class="anchored" data-anchor-id="sec-ch04-oblique-scaling"><span class="header-section-number">4.5.3</span> 변수 표준화와 사선분할</h3>
+<p>사선분할에서는 변수의 단위가 <span class="math inline">\(\mathbf w\)</span>의 추정과 규제에 직접 영향을 준다. 따라서 연속형 변수를</p>
+<p><span id="eq-ch04-oblique-standardization"><span class="math display">\[
+z_j
+=
+\frac{x_j-\mu_j}{\sigma_j}
+\tag{4.48}\]</span></span></p>
+<p>로 표준화하는 것이 일반적이다. 평균과 표준편차는 현재 학습폴드에서 추정해야 한다.</p>
+<p>범주형 변수는 더미변수로 변환할 수 있지만, 범주 수가 많으면 분할방향이 복잡해지고 해석이 어려워진다. 희소규제를 사용하면 일부 변수만 포함하는 사선분할을 만들 수 있다.</p>
+</section>
+<section id="sec-ch04-sparse-oblique" class="level3" data-number="4.5.4">
+<h3 data-number="4.5.4" class="anchored" data-anchor-id="sec-ch04-sparse-oblique"><span class="header-section-number">4.5.4</span> 희소 사선트리</h3>
+<p>사선분할의 해석가능성을 높이기 위해 <span class="math inline">\(\mathbf w\)</span>에 <span class="math inline">\(\ell_1\)</span> 패널티를 적용할 수 있다.</p>
+<p><span id="eq-ch04-sparse-oblique-objective"><span class="math display">\[
+\min_{\mathbf w,s}
+\left
+\{
+\mathcal L(\mathbf w,s)
++
+\lambda\|\mathbf w\|_1
+\right\}
+\tag{4.49}\]</span></span></p>
+<p><span class="math inline">\(\lambda\)</span>가 커질수록 많은 계수가 0이 되어 소수 변수만 포함하는 분할을 만든다. 다만 노드별 변수선택의 불안정성과 패널티 선택 편향을 평가해야 한다.</p>
+<p>축평행 트리와 희소 사선트리(sparse oblique tree)는 해석가능성의 서로 다른 형태를 제공한다.</p>
+<ul>
+<li>축평행 트리: 한 질문에 한 변수</li>
+<li>희소 사선트리: 한 질문에 소수 변수의 점수</li>
+</ul>
+<p>의료 점수나 위험등급처럼 여러 측정을 합한 지표가 자연스러운 경우 사선분할이 더 간결할 수 있다.</p>
+</section>
+<section id="sec-ch04-lda-node-split" class="level3" data-number="4.5.5">
+<h3 data-number="4.5.5" class="anchored" data-anchor-id="sec-ch04-lda-node-split"><span class="header-section-number">4.5.5</span> 선형 판별분석을 이용한 노드분할</h3>
+<p>이진 노드에서 두 클래스의 평균과 공동 공분산을 이용하면 LDA 방향</p>
+<p><span id="eq-ch04-lda-direction"><span class="math display">\[
+\mathbf w
+\propto
+\boldsymbol\Sigma^{-1}
+(\boldsymbol\mu_1-\boldsymbol\mu_0)
+\tag{4.50}\]</span></span></p>
+<p>을 얻을 수 있다. 관측값을 <span class="math inline">\(z=\mathbf w^\top\mathbf x\)</span>로 투영한 뒤 <span class="math inline">\(z\)</span>의 임계값을 탐색한다.</p>
+<p>이 방법은 클래스가 선형적으로 분리되는 방향을 빠르게 찾을 수 있지만 공분산 추정이 불안정할 수 있다. 노드 표본 수가 작거나 <span class="math inline">\(p\)</span>가 크면 축소 공분산, 대각 공분산 또는 릿지 규제가 필요하다.</p>
+</section>
+<section id="sec-ch04-logistic-node-split" class="level3" data-number="4.5.6">
+<h3 data-number="4.5.6" class="anchored" data-anchor-id="sec-ch04-logistic-node-split"><span class="header-section-number">4.5.6</span> 로지스틱 노드분할</h3>
+<p>각 노드에서 로지스틱 회귀를 적합하여</p>
+<p><span id="eq-ch04-logistic-node"><span class="math display">\[
+\operatorname{logit}
+P(Y=1\mid\mathbf X)
+=
+\beta_0+\mathbf x^\top\boldsymbol\beta
+\tag{4.51}\]</span></span></p>
+<p>를 얻고 선형예측자의 임계값으로 분할할 수 있다. 로지스틱 손실과 트리 불순도는 서로 다른 목적이므로 계수 추정 후 최종 임계값을 다시 탐색할 수 있다.</p>
+<p>완전분리와 작은 노드 문제를 막기 위해 릿지 또는 Firth형 규제를 고려할 수 있다. 노드마다 복잡한 모형을 적합하면 전체 트리의 유효복잡도가 빠르게 증가하므로 더 강한 가지치기가 필요하다.</p>
+</section>
+<section id="sec-ch04-model-trees" class="level3" data-number="4.5.7">
+<h3 data-number="4.5.7" class="anchored" data-anchor-id="sec-ch04-model-trees"><span class="header-section-number">4.5.7</span> 모형트리</h3>
+<p>기본 회귀트리는 말단노드에서 상수값을 예측한다. 모형트리(model tree)는 각 잎에서 선형회귀와 같은 국소모형을 적합한다.</p>
+<p><span id="eq-ch04-model-tree"><span class="math display">\[
+\widehat f(\mathbf x)
+=
+\sum_{m=1}^{M}
+I(\mathbf x\in R_m)
+\left(
+\widehat\beta_{m0}
++
+\mathbf x^\top\widehat{\boldsymbol\beta}_m
+\right)
+\tag{4.52}\]</span></span></p>
+<p>모형트리는 계단함수보다 부드러운 국소경향을 표현하고 영역 안에서 제한적인 외삽이 가능하다. 하지만 경계에서 서로 다른 국소모형의 예측이 불연속적으로 바뀔 수 있고, 각 잎에 충분한 표본이 필요하다.</p>
+<p>말단모형의 복잡도까지 고려하면 전체 목적함수는</p>
+<p><span id="eq-ch04-model-tree-complexity"><span class="math display">\[
+R(T)
++
+\alpha|\widetilde T|
++
+\lambda
+\sum_{m=1}^{M}
+\Omega(\boldsymbol\beta_m)
+\tag{4.53}\]</span></span></p>
+<p>처럼 표현할 수 있다. 트리 크기와 잎 모형의 복잡도를 동시에 선택해야 한다.</p>
+</section>
+<section id="sec-ch04-multioutput-trees" class="level3" data-number="4.5.8">
+<h3 data-number="4.5.8" class="anchored" data-anchor-id="sec-ch04-multioutput-trees"><span class="header-section-number">4.5.8</span> 다중출력 회귀트리</h3>
+<p>반응변수가 벡터</p>
+<p><span id="eq-ch04-multivariate-response"><span class="math display">\[
+\mathbf y_i
+=
+(y_{i1},\ldots,y_{iq})^\top
+\tag{4.54}\]</span></span></p>
+<p>인 경우 하나의 트리로 여러 결과를 동시에 예측할 수 있다. 노드의 평균벡터를 <span class="math inline">\(\overline{\mathbf y}_A\)</span>라고 하면 분할손실을</p>
+<p><span id="eq-ch04-multioutput-loss"><span class="math display">\[
+R(A)
+=
+\sum_{i:\mathbf x_i\in A}
+\|\mathbf y_i-\overline{\mathbf y}_A\|_2^2
+\tag{4.55}\]</span></span></p>
+<p>로 정의할 수 있다. 결과마다 단위와 분산이 다르면 표준화 또는 가중치가 필요하다.</p>
+<p><span id="eq-ch04-weighted-multioutput-loss"><span class="math display">\[
+R_w(A)
+=
+\sum_{r=1}^{q}w_r
+\sum_{i:\mathbf x_i\in A}
+(y_{ir}-\overline y_{Ar})^2
+\tag{4.56}\]</span></span></p>
+<p>다중출력 트리(multi-output tree)는 여러 결과가 공유하는 예측구조를 발견할 수 있지만, 한 결과에 좋은 분할이 다른 결과에는 좋지 않을 수 있다. 결과별 중요도와 측정신뢰도를 반영하여 가중치를 정해야 한다.</p>
+</section>
+<section id="sec-ch04-multilabel-trees" class="level3" data-number="4.5.9">
+<h3 data-number="4.5.9" class="anchored" data-anchor-id="sec-ch04-multilabel-trees"><span class="header-section-number">4.5.9</span> 다중레이블 분류트리</h3>
+<p>하나의 관측값이 여러 레이블을 동시에 가질 수 있는 다중레이블 문제에서는 각 레이블을 독립적인 이진결과로 취급하거나 레이블 벡터 전체의 불순도를 정의할 수 있다. 독립 접근의 노드손실은</p>
+<p><span id="eq-ch04-multilabel-impurity"><span class="math display">\[
+I(A)
+=
+\sum_{r=1}^{q}
+\omega_r
+I_r(A)
+\tag{4.57}\]</span></span></p>
+<p>로 나타낼 수 있다. 그러나 레이블 간 의존성을 무시하면 중요한 동시발생 구조를 놓칠 수 있다. 레이블 조합을 하나의 클래스처럼 처리하면 클래스 수가 폭발한다. 실제 문제에서는 레이블 의존모형이나 앙상블과 함께 사용하는 경우가 많다.</p>
+</section>
+<section id="sec-ch04-multivariate-tradeoffs" class="level3" data-number="4.5.10">
+<h3 data-number="4.5.10" class="anchored" data-anchor-id="sec-ch04-multivariate-tradeoffs"><span class="header-section-number">4.5.10</span> 다변량 트리의 장단점</h3>
+<div id="tbl-ch04-multivariate-tree-comparison" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch04-multivariate-tree-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;4.1: 축평행 트리, 사선 트리와 모형트리의 비교
+</figcaption>
+<div aria-describedby="tbl-ch04-multivariate-tree-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>구분</th>
+<th>축평행 트리</th>
+<th>사선 트리</th>
+<th>모형트리</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>노드 분할</td>
+<td>단일 변수 임계값</td>
+<td>변수 선형결합</td>
+<td>단일 또는 다변량 분할</td>
+</tr>
+<tr class="even">
+<td>말단 예측</td>
+<td>상수 또는 클래스 확률</td>
+<td>상수 또는 클래스 확률</td>
+<td>국소 선형모형 등</td>
+</tr>
+<tr class="odd">
+<td>표현력</td>
+<td>계단형, 상호작용에 강함</td>
+<td>사선경계를 간결하게 표현</td>
+<td>영역별 추세 표현</td>
+</tr>
+<tr class="even">
+<td>전처리</td>
+<td>표준화 불필요한 경우가 많음</td>
+<td>표준화가 중요</td>
+<td>말단모형에 따라 필요</td>
+</tr>
+<tr class="odd">
+<td>해석</td>
+<td>질문이 단순함</td>
+<td>분할점수가 복잡할 수 있음</td>
+<td>잎별 계수까지 해석 필요</td>
+</tr>
+<tr class="even">
+<td>계산량</td>
+<td>비교적 작음</td>
+<td>큼</td>
+<td>큼</td>
+</tr>
+<tr class="odd">
+<td>과적합 위험</td>
+<td>깊이에 따라 증가</td>
+<td>방향추정으로 더 증가</td>
+<td>잎 모형으로 더 증가</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>표현력이 높은 트리가 항상 더 좋은 것은 아니다. 사선트리와 모형트리는 작은 트리로 복잡한 경계를 표현할 수 있지만 각 노드에서 더 많은 모수를 추정한다. 표본크기, 설명가능성, 계산량과 적용목적을 함께 고려해야 한다.</p>
+</section>
+</section>
+<section id="sec-ch04-evaluation-interpretation" class="level2" data-number="4.6">
+<h2 data-number="4.6" class="anchored" data-anchor-id="sec-ch04-evaluation-interpretation"><span class="header-section-number">4.6</span> 트리의 평가와 해석</h2>
+<section id="sec-ch04-predictive-evaluation" class="level3" data-number="4.6.1">
+<h3 data-number="4.6.1" class="anchored" data-anchor-id="sec-ch04-predictive-evaluation"><span class="header-section-number">4.6.1</span> 예측성능 평가</h3>
+<p>트리도 Chapter 2에서 설명한 동일한 평가원칙을 따른다. 회귀에서는 MAE, RMSE와 예측오차 분포를 평가하고, 분류에서는 구별도, 클래스별 오류, 확률보정과 의사결정효용을 확인한다.</p>
+<p>트리의 하이퍼파라미터에는 다음이 포함된다.</p>
+<ul>
+<li>최대깊이</li>
+<li>최소 분할크기</li>
+<li>최소 잎크기</li>
+<li>최소 불순도 감소량</li>
+<li>비용-복잡도 계수</li>
+<li>불순도 함수</li>
+<li>클래스 가중치</li>
+<li>범주형 변수 처리방식</li>
+<li>결측값 처리방식</li>
+<li>사선분할의 규제강도</li>
+</ul>
+<p>이들 중 데이터로 선택하는 항목은 모두 내부 검증에 포함해야 한다.</p>
+</section>
+<section id="sec-ch04-leaf-uncertainty" class="level3" data-number="4.6.2">
+<h3 data-number="4.6.2" class="anchored" data-anchor-id="sec-ch04-leaf-uncertainty"><span class="header-section-number">4.6.2</span> 잎 크기와 확률의 불확실성</h3>
+<p>말단노드에서 사건 수가 <span class="math inline">\(m\)</span>이고 총 관측 수가 <span class="math inline">\(N_m\)</span>이면 단순 사건확률은</p>
+<p><span id="eq-ch04-leaf-event-rate"><span class="math display">\[
+\widehat p_m=\frac{m}{N_m}
+\tag{4.58}\]</span></span></p>
+<p>이다. 이항근사 표준오차는</p>
+<p><span id="eq-ch04-leaf-probability-se"><span class="math display">\[
+\operatorname{SE}(\widehat p_m)
+\approx
+\sqrt{
+\frac{\widehat p_m(1-\widehat p_m)}{N_m}
+}
+\tag{4.59}\]</span></span></p>
+<p>이다. <span class="math inline">\(N_m\)</span>이 작으면 잎이 순수해 보여도 불확실성이 매우 크다. 클래스 확률이 중요한 응용에서는 최소 잎크기, 베이지안 평활, 앙상블과 외부 보정이 필요할 수 있다.</p>
+</section>
+<section id="sec-ch04-variable-importance" class="level3" data-number="4.6.3">
+<h3 data-number="4.6.3" class="anchored" data-anchor-id="sec-ch04-variable-importance"><span class="header-section-number">4.6.3</span> 변수 중요도</h3>
+<p>이 절에서는 트리에서 직접 계산되는 중요도에 초점을 둔다. 모형 독립적 중요도와 조건부 중요도는 <span class="quarto-unresolved-ref">?sec-ch17-variable-importance</span><!-- -->에서 비교한다.</p>
+<p>불순도 기반 변수 중요도는 변수 <span class="math inline">\(j\)</span>가 사용된 모든 노드의 불순도 감소량을 합하여 계산한다.</p>
+<p><span id="eq-ch04-impurity-importance"><span class="math display">\[
+\operatorname{VI}_j
+=
+\sum_{t:\,v(t)=j}
+\frac{N_t}{n}
+\Delta I_t
+\tag{4.60}\]</span></span></p>
+<p>여기서 <span class="math inline">\(v(t)\)</span>는 노드 <span class="math inline">\(t\)</span>의 분할변수이다. 상위노드와 큰 노드에서의 개선은 더 크게 반영된다.</p>
+<p>그러나 불순도 중요도는 다음 편향을 가질 수 있다.</p>
+<ul>
+<li>후보 분할이 많은 변수 선호</li>
+<li>연속형 변수와 고범주 변수 선호</li>
+<li>상관변수 사이의 중요도 분산 또는 독점</li>
+<li>훈련자료에 대한 과적합 반영</li>
+</ul>
+<p>순열 중요도(permutation importance)는 평가자료에서 변수 <span class="math inline">\(j\)</span>의 값을 무작위로 섞은 뒤 성능감소를 계산한다.</p>
+<p><span id="eq-ch04-permutation-importance"><span class="math display">\[
+\operatorname{PI}_j
+=
+\widehat R_{
+\mathrm{perm}(j)}
+-
+\widehat R_{\mathrm{original}}
+\tag{4.61}\]</span></span></p>
+<p>상관된 변수에서는 한 변수만 섞어도 다른 변수가 정보를 대체하므로 중요도가 작게 보일 수 있다. 조건부 순열이나 변수군 단위 순열을 고려할 수 있다.</p>
+</section>
+<section id="sec-ch04-path-explanation" class="level3" data-number="4.6.4">
+<h3 data-number="4.6.4" class="anchored" data-anchor-id="sec-ch04-path-explanation"><span class="header-section-number">4.6.4</span> 경로 기반 설명</h3>
+<p>개별 예측은 루트에서 잎까지의 경로로 설명할 수 있다. 회귀트리에서는 부모노드 평균에서 자식노드 평균으로 이동할 때의 변화량을 더하여 예측을 분해할 수 있다.</p>
+<p><span id="eq-ch04-path-decomposition"><span class="math display">\[
+\widehat f(\mathbf x)
+=
+\widehat c_{\mathrm{root}}
++
+\sum_{t\in\operatorname{path}(\mathbf x)}
+\left(
+\widehat c_{\mathrm{child}(t)}
+-
+\widehat c_t
+\right)
+\tag{4.62}\]</span></span></p>
+<p>각 변화량을 해당 분할변수의 기여로 표시할 수 있지만, 변수 순서와 상관구조에 따라 기여가 달라진다. 경로기여는 인과효과가 아니라 특정 트리 구조 안의 예측분해이다.</p>
+</section>
+<section id="sec-ch04-pdp-ice" class="level3" data-number="4.6.5">
+<h3 data-number="4.6.5" class="anchored" data-anchor-id="sec-ch04-pdp-ice"><span class="header-section-number">4.6.5</span> 부분의존과 개별조건부기대</h3>
+<p>부분의존(partial dependence)도와 ICE의 일반적 정의, 상관된 특성에서의 한계는 <span class="quarto-unresolved-ref">?sec-ch17-pdp-ice</span><!-- -->에서 확장한다.</p>
+<p>트리가 복잡하면 전체 경로를 읽기 어렵다. 변수 <span class="math inline">\(x_j\)</span>의 부분의존함수는 다른 변수의 경험분포에 대해 평균낸 예측으로 정의한다.</p>
+<p><span id="eq-ch04-partial-dependence"><span class="math display">\[
+\widehat f_j(z)
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+\widehat f(z,\mathbf x_{i,-j})
+\tag{4.63}\]</span></span></p>
+<p>개별조건부기대 곡선은 각 관측값에 대해</p>
+<p><span id="eq-ch04-ice"><span class="math display">\[
+\widehat f_{ij}(z)
+=
+\widehat f(z,\mathbf x_{i,-j})
+\tag{4.64}\]</span></span></p>
+<p>를 그린다. 변수 간 강한 상관이 있으면 실제로 거의 존재하지 않는 조합에서 예측하게 될 수 있다. 부분의존은 모형의 예측구조를 요약하지만 자료생성 과정이나 인과효과를 직접 나타내지 않는다.</p>
+</section>
+<section id="sec-ch04-rule-validation" class="level3" data-number="4.6.6">
+<h3 data-number="4.6.6" class="anchored" data-anchor-id="sec-ch04-rule-validation"><span class="header-section-number">4.6.6</span> 트리 규칙의 검증</h3>
+<p>트리에서 발견된 규칙을 과학적 결론으로 해석하려면 별도의 검증이 필요하다. 동일한 자료에서 분할점을 탐색하고 그 하위집단의 평균차이를 다시 검정하면 선택과정이 무시되어 유의성이 과대평가된다.</p>
+<p>규칙을 검증하는 방법은 다음과 같다.</p>
+<ul>
+<li>독립자료에서 동일한 규칙 적용</li>
+<li>표본분할을 통한 발견자료와 확인자료 분리</li>
+<li>재표본화에서 경로 선택빈도 평가</li>
+<li>사전 정의된 임계값과 비교</li>
+<li>선택적 추론 또는 다중탐색 보정</li>
+</ul>
+<p>트리의 분할점은 탐색적으로 생성된 후보라는 점을 명시해야 한다.</p>
+</section>
+</section>
+<section id="sec-ch04-integrated-view" class="level2" data-number="4.7">
+<h2 data-number="4.7" class="anchored" data-anchor-id="sec-ch04-integrated-view"><span class="header-section-number">4.7</span> 의사결정 트리의 통합적 이해</h2>
+<section id="sec-ch04-erm-view" class="level3" data-number="4.7.1">
+<h3 data-number="4.7.1" class="anchored" data-anchor-id="sec-ch04-erm-view"><span class="header-section-number">4.7.1</span> 경험위험 최소화 관점</h3>
+<p>의사결정 트리도 규제된 경험위험 최소화의 틀로 표현할 수 있다.</p>
+<p><span id="eq-ch04-tree-erm"><span class="math display">\[
+\widehat T
+=
+\arg\min_{T\in\mathcal T}
+\left[
+\frac{1}{n}
+\sum_{i=1}^{n}
+L\{y_i,f_T(\mathbf x_i)\}
++
+\alpha\Omega(T)
+\right]
+\tag{4.65}\]</span></span></p>
+<p>여기서 <span class="math inline">\(\Omega(T)\)</span>는 말단노드 수, 깊이, 경로길이, 분할변수 수 또는 잎 모형의 복잡도를 나타낼 수 있다. 표준 재귀분할은 이 목적함수의 전역최적해를 직접 찾지 않고, 큰 트리를 탐욕적으로 생성한 후 부분트리열에서 복잡도를 선택한다.</p>
+<p>이 관점에서 각 요소는 다음과 같이 대응된다.</p>
+<div id="tbl-ch04-erm-components" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch04-erm-components-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;4.2: 경험위험 최소화 관점에서 본 의사결정 트리
+</figcaption>
+<div aria-describedby="tbl-ch04-erm-components-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>학습요소</th>
+<th>의사결정 트리에서의 형태</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>가설 공간</td>
+<td>가능한 트리구조와 말단예측의 집합</td>
+</tr>
+<tr class="even">
+<td>손실함수</td>
+<td>제곱손실, 절대손실, 로그손실, 분류비용</td>
+</tr>
+<tr class="odd">
+<td>최적화</td>
+<td>재귀적 탐욕분할과 가지치기</td>
+</tr>
+<tr class="even">
+<td>규제</td>
+<td>깊이, 잎 수, 최소 노드크기, 비용-복잡도 패널티</td>
+</tr>
+<tr class="odd">
+<td>일반화 평가</td>
+<td>교차검증, 시험자료, 외부검증</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-ch04-bias-variance" class="level3" data-number="4.7.2">
+<h3 data-number="4.7.2" class="anchored" data-anchor-id="sec-ch04-bias-variance"><span class="header-section-number">4.7.2</span> 편향과 분산</h3>
+<p>얕은 트리는 입력공간을 거칠게 나누므로 높은 편향과 낮은 분산을 가질 수 있다. 깊은 트리는 복잡한 구조를 표현하지만 표본변동에 민감하여 낮은 편향과 높은 분산을 갖기 쉽다.</p>
+<p>트리의 높은 분산은 두 수준에서 나타난다.</p>
+<ol type="1">
+<li><strong>구조분산</strong>: 분할변수와 분할점 자체가 달라짐</li>
+<li><strong>예측분산</strong>: 같은 입력에 대한 최종예측이 달라짐</li>
+</ol>
+<p>가지치기는 두 분산을 줄이지만 단일 트리의 불안정성을 완전히 제거하지 못한다. Chapter 8에서 다룰 배깅과 랜덤 포레스트는 여러 트리의 예측을 평균하여 분산을 크게 줄인다.</p>
+</section>
+<section id="sec-ch04-tree-linear-comparison" class="level3" data-number="4.7.3">
+<h3 data-number="4.7.3" class="anchored" data-anchor-id="sec-ch04-tree-linear-comparison"><span class="header-section-number">4.7.3</span> 트리와 선형 모형의 비교</h3>
+<div id="tbl-ch04-tree-linear-comparison" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch04-tree-linear-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;4.3: 선형 모형과 의사결정 트리의 비교
+</figcaption>
+<div aria-describedby="tbl-ch04-tree-linear-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>특성</th>
+<th>선형 모형</th>
+<th>의사결정 트리</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>기본 함수형태</td>
+<td>전역 선형 또는 기저함수 선형</td>
+<td>구간별 상수</td>
+</tr>
+<tr class="even">
+<td>비선형성</td>
+<td>사전 변환 필요</td>
+<td>반복분할로 자동 표현</td>
+</tr>
+<tr class="odd">
+<td>상호작용</td>
+<td>명시적 지정</td>
+<td>경로로 자동 표현</td>
+</tr>
+<tr class="even">
+<td>외삽</td>
+<td>선형구조에 따라 가능</td>
+<td>일반적으로 제한적</td>
+</tr>
+<tr class="odd">
+<td>변수척도</td>
+<td>규제 시 표준화 중요</td>
+<td>축평행 트리는 덜 민감</td>
+</tr>
+<tr class="even">
+<td>결측처리</td>
+<td>사전 처리 필요</td>
+<td>대리분할 등 내장 가능</td>
+</tr>
+<tr class="odd">
+<td>안정성</td>
+<td>규제 시 비교적 높음</td>
+<td>단일 트리는 낮을 수 있음</td>
+</tr>
+<tr class="even">
+<td>해석</td>
+<td>계수 중심</td>
+<td>규칙과 경로 중심</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>실제 관계가 대체로 가법적이고 부드러우면 선형모형이나 스플라인이 더 효율적일 수 있다. 임계값, 복잡한 상호작용과 이질적 하위집단이 중요하면 트리가 유리할 수 있다. 두 방법은 경쟁관계만이 아니라, 선형모형의 잔차를 트리로 학습하거나 트리 잎에 선형모형을 적합하는 방식으로 결합할 수 있다.</p>
+</section>
+<section id="sec-ch04-tree-workflow" class="level3" data-number="4.7.4">
+<h3 data-number="4.7.4" class="anchored" data-anchor-id="sec-ch04-tree-workflow"><span class="header-section-number">4.7.4</span> 트리 학습의 전체 파이프라인</h3>
+<p>의사결정 트리 분석은 다음 순서로 구성할 수 있다.</p>
+<ol type="1">
+<li>예측대상, 적용시점과 관측단위를 정의한다.</li>
+<li>군집, 시간과 기관구조를 반영하여 개발자료와 시험자료를 분리한다.</li>
+<li>범주형 변수의 수준, 새로운 범주와 결측값 처리방식을 정의한다.</li>
+<li>큰 트리의 성장조건과 후보 불순도 함수를 설정한다.</li>
+<li>학습폴드 안에서 트리를 성장시키고 가지치기 계수를 선택한다.</li>
+<li>필요하면 클래스 가중치, 손실함수와 사선분할을 함께 비교한다.</li>
+<li>독립자료에서 예측성능, 보정도와 하위집단 성능을 평가한다.</li>
+<li>재표본화로 분할변수, 분할점과 변수 중요도의 안정성을 확인한다.</li>
+<li>배포 후 입력분포, 결측패턴, 잎 점유율과 성능을 모니터링한다.</li>
+</ol>
+<p>다음 의사코드는 가지치기까지 포함한 중첩 평가구조를 나타낸다.</p>
+<pre class="text"><code>입력: 전체 개발자료 D, 바깥 K개 폴드, 안쪽 J개 폴드
+
+각 바깥 폴드 k에 대해:
+    바깥 훈련자료와 바깥 검증자료로 분리
+
+    각 후보 트리 설정 h에 대해:
+        안쪽 J-겹 교차검증 수행
+        각 안쪽 훈련폴드에서만:
+            결측처리 규칙 추정
+            큰 트리 성장
+            비용-복잡도 가지치기
+        안쪽 검증손실 평균 계산
+
+    가장 좋은 설정 h 선택
+    바깥 훈련자료 전체에서 전처리와 트리 재학습
+    바깥 검증자료에서 성능 저장
+
+바깥 폴드 성능을 종합하여 일반화성능 추정
+최종 설정을 결정한 뒤 전체 개발자료에서 최종 트리 학습
+완전히 분리된 시험자료에서 한 번만 최종 평가</code></pre>
+</section>
+<section id="sec-ch04-basic-implementation" class="level3" data-number="4.7.5">
+<h3 data-number="4.7.5" class="anchored" data-anchor-id="sec-ch04-basic-implementation"><span class="header-section-number">4.7.5</span> 기본 구현 예제</h3>
+<p>다음 코드는 분류트리 적합, 확률예측과 가지치기의 기본 구조를 보여준다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rpart)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>fit_tree <span class="ot">&lt;-</span> <span class="fu">rpart</span>(</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  group <span class="sc">~</span> ., <span class="at">data =</span> train_data,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"class"</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">parms =</span> <span class="fu">list</span>(<span class="at">split =</span> <span class="st">"gini"</span>),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> <span class="fu">rpart.control</span>(</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">cp =</span> <span class="dv">0</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">minsplit =</span> <span class="dv">20</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">minbucket =</span> <span class="dv">7</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">maxdepth =</span> <span class="dv">20</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">xval =</span> <span class="dv">10</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>cp_table <span class="ot">&lt;-</span> fit_tree<span class="sc">$</span>cptable</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>row_min <span class="ot">&lt;-</span> <span class="fu">which.min</span>(cp_table[, <span class="st">"xerror"</span>])</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>cp_best <span class="ot">&lt;-</span> cp_table[row_min, <span class="st">"CP"</span>]</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>fit_pruned <span class="ot">&lt;-</span> <span class="fu">prune</span>(fit_tree, <span class="at">cp =</span> cp_best)</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>prob_test <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_pruned, <span class="at">newdata =</span> test_data, <span class="at">type =</span> <span class="st">"prob"</span>)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>class_test <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_pruned, <span class="at">newdata =</span> test_data, <span class="at">type =</span> <span class="st">"class"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>실제 분석에서는 훈련자료 전체의 내장 교차검증 결과만으로 최종 성능을 보고하지 않는다. 시험자료의 전처리와 범주수준은 훈련자료에서 정의된 규칙을 그대로 적용해야 한다.</p>
+</section>
+<section id="sec-ch04-when-single-tree" class="level3" data-number="4.7.6">
+<h3 data-number="4.7.6" class="anchored" data-anchor-id="sec-ch04-when-single-tree"><span class="header-section-number">4.7.6</span> 단일 트리가 적합한 경우</h3>
+<p>단일 의사결정 트리는 다음 상황에서 특히 유용하다.</p>
+<ul>
+<li>설명 가능한 간단한 규칙이 필요함</li>
+<li>현장에서 수작업으로 적용할 점수나 경로가 필요함</li>
+<li>변수 간 임계값과 상호작용이 핵심임</li>
+<li>예측성능보다 의사결정 구조의 전달이 중요함</li>
+<li>기준모형 또는 탐색적 하위집단 발견이 목적임</li>
+</ul>
+<p>반면 최고 수준의 예측성능과 안정성이 우선이면 단일 트리보다 랜덤 포레스트나 그래디언트 부스팅이 더 적합한 경우가 많다. 그럼에도 단일 트리는 앙상블의 기본학습기이자 비선형 예측의 핵심 언어이므로 반드시 이해해야 한다.</p>
+</section>
+</section>
+<section id="장-요약" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="장-요약">장 요약</h2>
+<p>의사결정 트리는 입력공간을 반복적으로 분할하여 구간별 상수예측을 만드는 학습모형이다. 회귀트리는 말단노드의 평균 또는 중앙값을 예측하고, 분류트리는 클래스 비율과 다수 클래스를 예측한다. 분할경로는 변수 간 상호작용을 자연스럽게 표현한다.</p>
+<p>재귀적 분할은 현재 노드에서 불순도 또는 손실을 가장 많이 감소시키는 후보를 선택하는 탐욕적 알고리즘이다. 회귀트리는 잔차제곱합 감소를 주로 사용하고, 분류트리는 지니 불순도와 엔트로피를 사용한다. 분류오차는 직관적이지만 성장단계에서 클래스 비율의 변화에 덜 민감하다.</p>
+<p>후보 분할 수가 많은 변수는 우연히 선택될 가능성이 높아 분할변수 선택과 불순도 기반 중요도(impurity-based importance)에 편향이 생길 수 있다. 클래스 가중치와 비용민감 손실을 사용할 수 있지만 학습분포를 변경했다면 실제 적용분포에서 확률과 의사결정 성능을 다시 평가해야 한다.</p>
+<p>깊은 트리는 훈련자료의 잡음까지 학습하여 높은 분산을 가질 수 있다. 사전 가지치기는 성장단계에서 복잡도를 제한하고, 사후 가지치기는 큰 트리를 만든 뒤 불필요한 부분트리를 제거한다. 비용-복잡도 가지치기는 경험손실과 말단노드 수를 결합하며, 복잡도 계수는 교차검증과 1-표준오차 규칙으로 선택할 수 있다.</p>
+<p>연속형 변수는 인접한 정렬값 사이의 중간점을 후보로 사용한다. 순서형 변수는 순서를 유지하여 분할하고, 명목형 변수는 범주집합의 이진분할을 탐색한다. 범주가 많으면 계산량과 선택편향이 증가한다.</p>
+<p>결측값은 사전대체, 결측지시자, 별도 범주, 대리분할, 기본방향과 확률적 경로로 처리할 수 있다. 결측처리는 훈련과 예측시점을 구분해 설계해야 하며, 각 재표본화의 훈련폴드 안에서만 추정해야 한다.</p>
+<p>다변량 또는 사선트리는 여러 변수의 선형결합으로 노드를 분할하여 사선경계를 간결하게 표현한다. 모형트리는 말단노드에 선형모형을 적합하고, 다중출력 트리는 여러 반응을 공동으로 예측한다. 표현력은 증가하지만 계산량, 규제 필요성과 해석 복잡성도 커진다.</p>
+<p>단일 트리는 명확한 규칙과 비선형 상호작용을 제공하지만 구조적으로 불안정할 수 있다. 가지치기, 재표본화 안정성 평가와 독립검증이 중요하며, 다음 장들에서 다룰 앙상블 방법은 여러 트리를 결합하여 단일 트리의 높은 분산을 줄인다.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./03-linear-models.html" class="pagination-link" aria-label="선형 모형">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">선형 모형</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./05-neural-networks.html" class="pagination-link" aria-label="신경망">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">신경망</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

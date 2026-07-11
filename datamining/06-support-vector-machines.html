@@ -1,0 +1,2946 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>6&nbsp; 서포트 벡터 머신 – 머신러닝</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./07-bayesian-classifiers.html" rel="next">
+<link href="./05-neural-networks.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-3d841e2d0dac331999ea63b9b6b417ac.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-linear-models.html">II. 지도학습</a></li><li class="breadcrumb-item"><a href="./06-support-vector-machines.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">서포트 벡터 머신</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">머신러닝</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="리더 모드 전환">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">I. 머신러닝의 기초</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">머신러닝의 개념과 발전</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-model-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">모형 평가와 선택</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">II. 지도학습</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-linear-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">선형 모형</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-decision-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">의사결정 트리</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-neural-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">신경망</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-support-vector-machines.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">서포트 벡터 머신</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-bayesian-classifiers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">베이지안 분류기</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-ensemble-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">앙상블 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">III. 비지도학습과 표현학습</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">클러스터링</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-dimensionality-reduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">차원 축소와 거리 척도 학습</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-feature-selection-sparse-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">특성 선택과 희소 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">IV. 학습이론과 불완전한 데이터</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-computational-learning-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">계산 학습 이론</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-semi-supervised-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">준지도 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">V. 구조화된 확률모형과 규칙</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-probabilistic-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">확률 그래피컬 모형</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-rule-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">규칙 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">VI. 순차적 의사결정과 신뢰성</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-reinforcement-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">강화 학습</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-explainable-trustworthy-ml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">설명 가능한 머신러닝과 신뢰할 수 있는 예측</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#sec-ch06-margin-support-vectors" id="toc-sec-ch06-margin-support-vectors" class="nav-link active" data-scroll-target="#sec-ch06-margin-support-vectors"><span class="header-section-number">6.1</span> 마진과 서포트 벡터</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch06-separating-hyperplane" id="toc-sec-ch06-separating-hyperplane" class="nav-link" data-scroll-target="#sec-ch06-separating-hyperplane"><span class="header-section-number">6.1.1</span> 분리 초평면(separating hyperplane)</a></li>
+  <li><a href="#sec-ch06-distance-to-hyperplane" id="toc-sec-ch06-distance-to-hyperplane" class="nav-link" data-scroll-target="#sec-ch06-distance-to-hyperplane"><span class="header-section-number">6.1.2</span> 초평면까지의 거리</a></li>
+  <li><a href="#sec-ch06-functional-margin" id="toc-sec-ch06-functional-margin" class="nav-link" data-scroll-target="#sec-ch06-functional-margin"><span class="header-section-number">6.1.3</span> 함수적 마진</a></li>
+  <li><a href="#sec-ch06-geometric-margin" id="toc-sec-ch06-geometric-margin" class="nav-link" data-scroll-target="#sec-ch06-geometric-margin"><span class="header-section-number">6.1.4</span> 기하학적 마진</a></li>
+  <li><a href="#sec-ch06-canonical-scaling" id="toc-sec-ch06-canonical-scaling" class="nav-link" data-scroll-target="#sec-ch06-canonical-scaling"><span class="header-section-number">6.1.5</span> 정규화된 표현</a></li>
+  <li><a href="#sec-ch06-hard-margin-primal" id="toc-sec-ch06-hard-margin-primal" class="nav-link" data-scroll-target="#sec-ch06-hard-margin-primal"><span class="header-section-number">6.1.6</span> 하드 마진 SVM의 원문제</a></li>
+  <li><a href="#sec-ch06-support-vectors" id="toc-sec-ch06-support-vectors" class="nav-link" data-scroll-target="#sec-ch06-support-vectors"><span class="header-section-number">6.1.7</span> 서포트 벡터</a></li>
+  <li><a href="#sec-ch06-margin-generalization" id="toc-sec-ch06-margin-generalization" class="nav-link" data-scroll-target="#sec-ch06-margin-generalization"><span class="header-section-number">6.1.8</span> 최대 마진과 일반화</a></li>
+  <li><a href="#sec-ch06-feature-scaling" id="toc-sec-ch06-feature-scaling" class="nav-link" data-scroll-target="#sec-ch06-feature-scaling"><span class="header-section-number">6.1.9</span> 특성 스케일의 영향</a></li>
+  <li><a href="#sec-ch06-svm-perceptron" id="toc-sec-ch06-svm-perceptron" class="nav-link" data-scroll-target="#sec-ch06-svm-perceptron"><span class="header-section-number">6.1.10</span> 선형 SVM과 퍼셉트론의 차이</a></li>
+  <li><a href="#sec-ch06-multiclass-overview" id="toc-sec-ch06-multiclass-overview" class="nav-link" data-scroll-target="#sec-ch06-multiclass-overview"><span class="header-section-number">6.1.11</span> 다중 클래스 문제의 기본 확장</a></li>
+  </ul></li>
+  <li><a href="#sec-ch06-dual-problem" id="toc-sec-ch06-dual-problem" class="nav-link" data-scroll-target="#sec-ch06-dual-problem"><span class="header-section-number">6.2</span> 쌍대문제</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch06-primal-dual" id="toc-sec-ch06-primal-dual" class="nav-link" data-scroll-target="#sec-ch06-primal-dual"><span class="header-section-number">6.2.1</span> 원문제와 쌍대문제</a></li>
+  <li><a href="#sec-ch06-lagrangian" id="toc-sec-ch06-lagrangian" class="nav-link" data-scroll-target="#sec-ch06-lagrangian"><span class="header-section-number">6.2.2</span> 라그랑지안(Lagrangian)</a></li>
+  <li><a href="#sec-ch06-hard-margin-dual-derivation" id="toc-sec-ch06-hard-margin-dual-derivation" class="nav-link" data-scroll-target="#sec-ch06-hard-margin-dual-derivation"><span class="header-section-number">6.2.3</span> 하드 마진 쌍대문제의 유도</a></li>
+  <li><a href="#sec-ch06-kkt-conditions" id="toc-sec-ch06-kkt-conditions" class="nav-link" data-scroll-target="#sec-ch06-kkt-conditions"><span class="header-section-number">6.2.4</span> KKT 조건</a></li>
+  <li><a href="#sec-ch06-strong-duality" id="toc-sec-ch06-strong-duality" class="nav-link" data-scroll-target="#sec-ch06-strong-duality"><span class="header-section-number">6.2.5</span> 강한 쌍대성과 Slater 조건</a></li>
+  <li><a href="#sec-ch06-intercept-computation" id="toc-sec-ch06-intercept-computation" class="nav-link" data-scroll-target="#sec-ch06-intercept-computation"><span class="header-section-number">6.2.6</span> 절편의 계산</a></li>
+  <li><a href="#sec-ch06-dual-decision-function" id="toc-sec-ch06-dual-decision-function" class="nav-link" data-scroll-target="#sec-ch06-dual-decision-function"><span class="header-section-number">6.2.7</span> 쌍대표현의 판별함수</a></li>
+  <li><a href="#sec-ch06-gram-matrix-dual" id="toc-sec-ch06-gram-matrix-dual" class="nav-link" data-scroll-target="#sec-ch06-gram-matrix-dual"><span class="header-section-number">6.2.8</span> Gram 행렬 표현</a></li>
+  <li><a href="#sec-ch06-primal-vs-dual-computation" id="toc-sec-ch06-primal-vs-dual-computation" class="nav-link" data-scroll-target="#sec-ch06-primal-vs-dual-computation"><span class="header-section-number">6.2.9</span> 원문제와 쌍대문제의 계산 선택</a></li>
+  <li><a href="#sec-ch06-smo" id="toc-sec-ch06-smo" class="nav-link" data-scroll-target="#sec-ch06-smo"><span class="header-section-number">6.2.10</span> 순차 최소 최적화</a></li>
+  <li><a href="#sec-ch06-dual-coefficients-influence" id="toc-sec-ch06-dual-coefficients-influence" class="nav-link" data-scroll-target="#sec-ch06-dual-coefficients-influence"><span class="header-section-number">6.2.11</span> 쌍대계수와 자료 영향</a></li>
+  <li><a href="#sec-ch06-representer-preview" id="toc-sec-ch06-representer-preview" class="nav-link" data-scroll-target="#sec-ch06-representer-preview"><span class="header-section-number">6.2.12</span> 표현정리와 커널 해</a></li>
+  </ul></li>
+  <li><a href="#sec-ch06-kernel-functions" id="toc-sec-ch06-kernel-functions" class="nav-link" data-scroll-target="#sec-ch06-kernel-functions"><span class="header-section-number">6.3</span> 커널 함수(kernel function)</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch06-feature-map" id="toc-sec-ch06-feature-map" class="nav-link" data-scroll-target="#sec-ch06-feature-map"><span class="header-section-number">6.3.1</span> 비선형 분류와 특성사상</a></li>
+  <li><a href="#sec-ch06-kernel-trick" id="toc-sec-ch06-kernel-trick" class="nav-link" data-scroll-target="#sec-ch06-kernel-trick"><span class="header-section-number">6.3.2</span> 커널 트릭</a></li>
+  <li><a href="#sec-ch06-valid-kernel" id="toc-sec-ch06-valid-kernel" class="nav-link" data-scroll-target="#sec-ch06-valid-kernel"><span class="header-section-number">6.3.3</span> 유효한 커널과 양의 준정부호성</a></li>
+  <li><a href="#sec-ch06-mercer-theorem" id="toc-sec-ch06-mercer-theorem" class="nav-link" data-scroll-target="#sec-ch06-mercer-theorem"><span class="header-section-number">6.3.4</span> Mercer 전개(Mercer expansion)의 관점</a></li>
+  <li><a href="#sec-ch06-linear-kernel" id="toc-sec-ch06-linear-kernel" class="nav-link" data-scroll-target="#sec-ch06-linear-kernel"><span class="header-section-number">6.3.5</span> 선형 커널</a></li>
+  <li><a href="#sec-ch06-polynomial-kernel" id="toc-sec-ch06-polynomial-kernel" class="nav-link" data-scroll-target="#sec-ch06-polynomial-kernel"><span class="header-section-number">6.3.6</span> 다항 커널</a></li>
+  <li><a href="#sec-ch06-rbf-kernel" id="toc-sec-ch06-rbf-kernel" class="nav-link" data-scroll-target="#sec-ch06-rbf-kernel"><span class="header-section-number">6.3.7</span> 가우시안 방사기저함수 커널(radial basis function kernel)</a></li>
+  <li><a href="#sec-ch06-laplacian-kernel" id="toc-sec-ch06-laplacian-kernel" class="nav-link" data-scroll-target="#sec-ch06-laplacian-kernel"><span class="header-section-number">6.3.8</span> 라플라스 커널</a></li>
+  <li><a href="#sec-ch06-sigmoid-kernel" id="toc-sec-ch06-sigmoid-kernel" class="nav-link" data-scroll-target="#sec-ch06-sigmoid-kernel"><span class="header-section-number">6.3.9</span> 시그모이드 커널</a></li>
+  <li><a href="#sec-ch06-structured-kernels" id="toc-sec-ch06-structured-kernels" class="nav-link" data-scroll-target="#sec-ch06-structured-kernels"><span class="header-section-number">6.3.10</span> 문자열·그래프·집합 커널</a></li>
+  <li><a href="#sec-ch06-kernel-closure" id="toc-sec-ch06-kernel-closure" class="nav-link" data-scroll-target="#sec-ch06-kernel-closure"><span class="header-section-number">6.3.11</span> 커널의 닫힘 성질</a></li>
+  <li><a href="#sec-ch06-kernel-centering" id="toc-sec-ch06-kernel-centering" class="nav-link" data-scroll-target="#sec-ch06-kernel-centering"><span class="header-section-number">6.3.12</span> 커널 중심화(kernel centering)</a></li>
+  <li><a href="#sec-ch06-kernel-normalization" id="toc-sec-ch06-kernel-normalization" class="nav-link" data-scroll-target="#sec-ch06-kernel-normalization"><span class="header-section-number">6.3.13</span> 커널 정규화(kernel normalization)</a></li>
+  <li><a href="#sec-ch06-kernel-induced-distance" id="toc-sec-ch06-kernel-induced-distance" class="nav-link" data-scroll-target="#sec-ch06-kernel-induced-distance"><span class="header-section-number">6.3.14</span> 커널 유도거리(kernel-induced distance)</a></li>
+  <li><a href="#sec-ch06-kernel-hyperparameters" id="toc-sec-ch06-kernel-hyperparameters" class="nav-link" data-scroll-target="#sec-ch06-kernel-hyperparameters"><span class="header-section-number">6.3.15</span> 커널 하이퍼파라미터 선택</a></li>
+  <li><a href="#sec-ch06-kernel-selection-principles" id="toc-sec-ch06-kernel-selection-principles" class="nav-link" data-scroll-target="#sec-ch06-kernel-selection-principles"><span class="header-section-number">6.3.16</span> 커널 선택의 실무 원칙</a></li>
+  </ul></li>
+  <li><a href="#sec-ch06-soft-margin-regularization" id="toc-sec-ch06-soft-margin-regularization" class="nav-link" data-scroll-target="#sec-ch06-soft-margin-regularization"><span class="header-section-number">6.4</span> 소프트 마진과 규제</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch06-nonseparable-data" id="toc-sec-ch06-nonseparable-data" class="nav-link" data-scroll-target="#sec-ch06-nonseparable-data"><span class="header-section-number">6.4.1</span> 선형분리가 불가능한 자료</a></li>
+  <li><a href="#sec-ch06-soft-margin-primal" id="toc-sec-ch06-soft-margin-primal" class="nav-link" data-scroll-target="#sec-ch06-soft-margin-primal"><span class="header-section-number">6.4.2</span> 소프트 마진 원문제</a></li>
+  <li><a href="#sec-ch06-hinge-loss" id="toc-sec-ch06-hinge-loss" class="nav-link" data-scroll-target="#sec-ch06-hinge-loss"><span class="header-section-number">6.4.3</span> 힌지 손실</a></li>
+  <li><a href="#sec-ch06-regularized-risk-form" id="toc-sec-ch06-regularized-risk-form" class="nav-link" data-scroll-target="#sec-ch06-regularized-risk-form"><span class="header-section-number">6.4.4</span> 경험위험 최소화 표현</a></li>
+  <li><a href="#sec-ch06-soft-margin-dual" id="toc-sec-ch06-soft-margin-dual" class="nav-link" data-scroll-target="#sec-ch06-soft-margin-dual"><span class="header-section-number">6.4.5</span> 소프트 마진 쌍대문제</a></li>
+  <li><a href="#sec-ch06-soft-margin-kkt-cases" id="toc-sec-ch06-soft-margin-kkt-cases" class="nav-link" data-scroll-target="#sec-ch06-soft-margin-kkt-cases"><span class="header-section-number">6.4.6</span> KKT 조건에 따른 관측값 구분</a></li>
+  <li><a href="#sec-ch06-c-effect" id="toc-sec-ch06-c-effect" class="nav-link" data-scroll-target="#sec-ch06-c-effect"><span class="header-section-number">6.4.7</span> C가 결정경계에 미치는 영향</a></li>
+  <li><a href="#sec-ch06-squared-hinge" id="toc-sec-ch06-squared-hinge" class="nav-link" data-scroll-target="#sec-ch06-squared-hinge"><span class="header-section-number">6.4.8</span> 제곱 힌지 손실</a></li>
+  <li><a href="#sec-ch06-l1-regularized-svm" id="toc-sec-ch06-l1-regularized-svm" class="nav-link" data-scroll-target="#sec-ch06-l1-regularized-svm"><span class="header-section-number">6.4.9</span> 가중치의 <span class="math inline">\(\ell_1\)</span> 규제와 희소 선형 SVM(sparse linear SVM)</a></li>
+  <li><a href="#sec-ch06-class-weighted-svm" id="toc-sec-ch06-class-weighted-svm" class="nav-link" data-scroll-target="#sec-ch06-class-weighted-svm"><span class="header-section-number">6.4.10</span> 클래스 가중 SVM(class-weighted SVM)과 소프트 마진</a></li>
+  <li><a href="#sec-ch06-resampling-class-weight" id="toc-sec-ch06-resampling-class-weight" class="nav-link" data-scroll-target="#sec-ch06-resampling-class-weight"><span class="header-section-number">6.4.11</span> 재표본화와 클래스 가중치</a></li>
+  <li><a href="#sec-ch06-score-vs-probability" id="toc-sec-ch06-score-vs-probability" class="nav-link" data-scroll-target="#sec-ch06-score-vs-probability"><span class="header-section-number">6.4.12</span> SVM 점수와 확률</a></li>
+  <li><a href="#sec-ch06-platt-scaling" id="toc-sec-ch06-platt-scaling" class="nav-link" data-scroll-target="#sec-ch06-platt-scaling"><span class="header-section-number">6.4.13</span> Platt 보정</a></li>
+  <li><a href="#sec-ch06-isotonic-calibration" id="toc-sec-ch06-isotonic-calibration" class="nav-link" data-scroll-target="#sec-ch06-isotonic-calibration"><span class="header-section-number">6.4.14</span> 등위회귀 보정(isotonic calibration)</a></li>
+  <li><a href="#sec-ch06-decision-threshold" id="toc-sec-ch06-decision-threshold" class="nav-link" data-scroll-target="#sec-ch06-decision-threshold"><span class="header-section-number">6.4.15</span> 결정 임계값</a></li>
+  <li><a href="#sec-ch06-nu-svm" id="toc-sec-ch06-nu-svm" class="nav-link" data-scroll-target="#sec-ch06-nu-svm"><span class="header-section-number">6.4.16</span> nu-SVM</a></li>
+  <li><a href="#sec-ch06-svm-robustness" id="toc-sec-ch06-svm-robustness" class="nav-link" data-scroll-target="#sec-ch06-svm-robustness"><span class="header-section-number">6.4.17</span> 강건성과 이상치</a></li>
+  <li><a href="#sec-ch06-soft-margin-statistical-view" id="toc-sec-ch06-soft-margin-statistical-view" class="nav-link" data-scroll-target="#sec-ch06-soft-margin-statistical-view"><span class="header-section-number">6.4.18</span> 소프트 마진의 통계적 해석</a></li>
+  </ul></li>
+  <li><a href="#sec-ch06-support-vector-regression" id="toc-sec-ch06-support-vector-regression" class="nav-link" data-scroll-target="#sec-ch06-support-vector-regression"><span class="header-section-number">6.5</span> 서포트 벡터 회귀</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch06-svr-overview" id="toc-sec-ch06-svr-overview" class="nav-link" data-scroll-target="#sec-ch06-svr-overview"><span class="header-section-number">6.5.1</span> 회귀문제로의 확장</a></li>
+  <li><a href="#sec-ch06-epsilon-insensitive-loss" id="toc-sec-ch06-epsilon-insensitive-loss" class="nav-link" data-scroll-target="#sec-ch06-epsilon-insensitive-loss"><span class="header-section-number">6.5.2</span> epsilon-비감응 손실(epsilon-insensitive loss)</a></li>
+  <li><a href="#sec-ch06-svr-primal" id="toc-sec-ch06-svr-primal" class="nav-link" data-scroll-target="#sec-ch06-svr-primal"><span class="header-section-number">6.5.3</span> 선형 SVR의 원문제</a></li>
+  <li><a href="#sec-ch06-epsilon-tube" id="toc-sec-ch06-epsilon-tube" class="nav-link" data-scroll-target="#sec-ch06-epsilon-tube"><span class="header-section-number">6.5.4</span> epsilon-튜브(epsilon tube)의 기하학</a></li>
+  <li><a href="#sec-ch06-svr-dual" id="toc-sec-ch06-svr-dual" class="nav-link" data-scroll-target="#sec-ch06-svr-dual"><span class="header-section-number">6.5.5</span> SVR 쌍대문제</a></li>
+  <li><a href="#sec-ch06-svr-kkt" id="toc-sec-ch06-svr-kkt" class="nav-link" data-scroll-target="#sec-ch06-svr-kkt"><span class="header-section-number">6.5.6</span> KKT 조건과 회귀 서포트 벡터</a></li>
+  <li><a href="#sec-ch06-svr-hyperparameters" id="toc-sec-ch06-svr-hyperparameters" class="nav-link" data-scroll-target="#sec-ch06-svr-hyperparameters"><span class="header-section-number">6.5.7</span> C, epsilon과 gamma의 역할</a></li>
+  <li><a href="#sec-ch06-epsilon-selection" id="toc-sec-ch06-epsilon-selection" class="nav-link" data-scroll-target="#sec-ch06-epsilon-selection"><span class="header-section-number">6.5.8</span> epsilon의 선택</a></li>
+  <li><a href="#sec-ch06-nu-svr" id="toc-sec-ch06-nu-svr" class="nav-link" data-scroll-target="#sec-ch06-nu-svr"><span class="header-section-number">6.5.9</span> nu-SVR</a></li>
+  <li><a href="#sec-ch06-svr-robustness" id="toc-sec-ch06-svr-robustness" class="nav-link" data-scroll-target="#sec-ch06-svr-robustness"><span class="header-section-number">6.5.10</span> SVR과 강건회귀</a></li>
+  <li><a href="#sec-ch06-svr-evaluation" id="toc-sec-ch06-svr-evaluation" class="nav-link" data-scroll-target="#sec-ch06-svr-evaluation"><span class="header-section-number">6.5.11</span> SVR의 평가</a></li>
+  <li><a href="#sec-ch06-svr-uncertainty" id="toc-sec-ch06-svr-uncertainty" class="nav-link" data-scroll-target="#sec-ch06-svr-uncertainty"><span class="header-section-number">6.5.12</span> 불확실성 추정</a></li>
+  </ul></li>
+  <li><a href="#sec-ch06-kernel-methods" id="toc-sec-ch06-kernel-methods" class="nav-link" data-scroll-target="#sec-ch06-kernel-methods"><span class="header-section-number">6.6</span> 커널 기법</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch06-kernel-methods-common-form" id="toc-sec-ch06-kernel-methods-common-form" class="nav-link" data-scroll-target="#sec-ch06-kernel-methods-common-form"><span class="header-section-number">6.6.1</span> 커널방법의 공통 구조</a></li>
+  <li><a href="#sec-ch06-rkhs" id="toc-sec-ch06-rkhs" class="nav-link" data-scroll-target="#sec-ch06-rkhs"><span class="header-section-number">6.6.2</span> 재생커널 힐베르트 공간</a></li>
+  <li><a href="#sec-ch06-kernel-ridge-regression" id="toc-sec-ch06-kernel-ridge-regression" class="nav-link" data-scroll-target="#sec-ch06-kernel-ridge-regression"><span class="header-section-number">6.6.3</span> 커널 릿지 회귀</a></li>
+  <li><a href="#sec-ch06-kernel-logistic-regression" id="toc-sec-ch06-kernel-logistic-regression" class="nav-link" data-scroll-target="#sec-ch06-kernel-logistic-regression"><span class="header-section-number">6.6.4</span> 커널 로지스틱 회귀</a></li>
+  <li><a href="#sec-ch06-kernel-pca" id="toc-sec-ch06-kernel-pca" class="nav-link" data-scroll-target="#sec-ch06-kernel-pca"><span class="header-section-number">6.6.5</span> 커널 PCA</a></li>
+  <li><a href="#sec-ch06-kernel-discriminant-analysis" id="toc-sec-ch06-kernel-discriminant-analysis" class="nav-link" data-scroll-target="#sec-ch06-kernel-discriminant-analysis"><span class="header-section-number">6.6.6</span> 커널 판별분석</a></li>
+  <li><a href="#sec-ch06-one-class-svm" id="toc-sec-ch06-one-class-svm" class="nav-link" data-scroll-target="#sec-ch06-one-class-svm"><span class="header-section-number">6.6.7</span> 일클래스 SVM</a></li>
+  <li><a href="#sec-ch06-svdd" id="toc-sec-ch06-svdd" class="nav-link" data-scroll-target="#sec-ch06-svdd"><span class="header-section-number">6.6.8</span> 최소영역 설명과 SVDD</a></li>
+  <li><a href="#sec-ch06-kernel-alignment" id="toc-sec-ch06-kernel-alignment" class="nav-link" data-scroll-target="#sec-ch06-kernel-alignment"><span class="header-section-number">6.6.9</span> 커널 정렬</a></li>
+  <li><a href="#sec-ch06-multiple-kernel-learning" id="toc-sec-ch06-multiple-kernel-learning" class="nav-link" data-scroll-target="#sec-ch06-multiple-kernel-learning"><span class="header-section-number">6.6.10</span> 다중 커널 학습</a></li>
+  <li><a href="#sec-ch06-kernel-gp-connection" id="toc-sec-ch06-kernel-gp-connection" class="nav-link" data-scroll-target="#sec-ch06-kernel-gp-connection"><span class="header-section-number">6.6.11</span> 커널과 가우시안 과정</a></li>
+  <li><a href="#sec-ch06-kernel-computational-complexity" id="toc-sec-ch06-kernel-computational-complexity" class="nav-link" data-scroll-target="#sec-ch06-kernel-computational-complexity"><span class="header-section-number">6.6.12</span> 커널 계산의 복잡도</a></li>
+  <li><a href="#sec-ch06-nystrom" id="toc-sec-ch06-nystrom" class="nav-link" data-scroll-target="#sec-ch06-nystrom"><span class="header-section-number">6.6.13</span> Nyström 근사</a></li>
+  <li><a href="#sec-ch06-random-fourier-features" id="toc-sec-ch06-random-fourier-features" class="nav-link" data-scroll-target="#sec-ch06-random-fourier-features"><span class="header-section-number">6.6.14</span> 랜덤 푸리에 특성</a></li>
+  <li><a href="#sec-ch06-incomplete-cholesky" id="toc-sec-ch06-incomplete-cholesky" class="nav-link" data-scroll-target="#sec-ch06-incomplete-cholesky"><span class="header-section-number">6.6.15</span> 불완전 Cholesky 분해</a></li>
+  <li><a href="#sec-ch06-large-scale-linear-svm" id="toc-sec-ch06-large-scale-linear-svm" class="nav-link" data-scroll-target="#sec-ch06-large-scale-linear-svm"><span class="header-section-number">6.6.16</span> 대규모 선형 SVM</a></li>
+  <li><a href="#sec-ch06-kernel-advantages" id="toc-sec-ch06-kernel-advantages" class="nav-link" data-scroll-target="#sec-ch06-kernel-advantages"><span class="header-section-number">6.6.17</span> 커널방법의 장점</a></li>
+  <li><a href="#sec-ch06-kernel-limitations" id="toc-sec-ch06-kernel-limitations" class="nav-link" data-scroll-target="#sec-ch06-kernel-limitations"><span class="header-section-number">6.6.18</span> 커널방법의 한계</a></li>
+  <li><a href="#sec-ch06-practical-workflow" id="toc-sec-ch06-practical-workflow" class="nav-link" data-scroll-target="#sec-ch06-practical-workflow"><span class="header-section-number">6.6.19</span> SVM 분석의 실무 절차</a></li>
+  <li><a href="#sec-ch06-svm-logistic-comparison" id="toc-sec-ch06-svm-logistic-comparison" class="nav-link" data-scroll-target="#sec-ch06-svm-logistic-comparison"><span class="header-section-number">6.6.20</span> 선형 SVM과 로지스틱 회귀의 비교</a></li>
+  <li><a href="#sec-ch06-svm-neural-comparison" id="toc-sec-ch06-svm-neural-comparison" class="nav-link" data-scroll-target="#sec-ch06-svm-neural-comparison"><span class="header-section-number">6.6.21</span> SVM과 신경망의 비교</a></li>
+  <li><a href="#sec-ch06-svm-interpretation" id="toc-sec-ch06-svm-interpretation" class="nav-link" data-scroll-target="#sec-ch06-svm-interpretation"><span class="header-section-number">6.6.22</span> 모형 해석</a></li>
+  <li><a href="#sec-ch06-svm-stability" id="toc-sec-ch06-svm-stability" class="nav-link" data-scroll-target="#sec-ch06-svm-stability"><span class="header-section-number">6.6.23</span> 민감도와 안정성</a></li>
+  <li><a href="#sec-ch06-distribution-shift" id="toc-sec-ch06-distribution-shift" class="nav-link" data-scroll-target="#sec-ch06-distribution-shift"><span class="header-section-number">6.6.24</span> 분포이동과 외삽</a></li>
+  <li><a href="#sec-ch06-missing-data" id="toc-sec-ch06-missing-data" class="nav-link" data-scroll-target="#sec-ch06-missing-data"><span class="header-section-number">6.6.25</span> 결측자료 처리</a></li>
+  <li><a href="#sec-ch06-reproducibility" id="toc-sec-ch06-reproducibility" class="nav-link" data-scroll-target="#sec-ch06-reproducibility"><span class="header-section-number">6.6.26</span> 재현성과 보고</a></li>
+  </ul></li>
+  <li><a href="#장-요약" id="toc-장-요약" class="nav-link" data-scroll-target="#장-요약">장 요약</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-linear-models.html">II. 지도학습</a></li><li class="breadcrumb-item"><a href="./06-support-vector-machines.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">서포트 벡터 머신</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-ch06" class="quarto-section-identifier"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">서포트 벡터 머신</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>서포트 벡터 머신(support vector machine, SVM)은 분류경계를 단순히 자료를 구분하는 초평면으로 찾지 않고, 두 클래스 사이의 <strong>마진</strong>을 최대화하는 최적화문제로 구성한다. 이 관점은 분류문제를 기하학, 볼록최적화, 일반화이론과 커널방법으로 연결한다. 선형분리가 가능한 경우에는 가장 넓은 여유공간을 갖는 초평면을 선택하고, 선형분리가 불가능한 경우에는 일부 관측값의 마진 위반을 허용하면서 모형복잡도와 훈련오차를 동시에 조절한다.</p>
+<p>이진분류 자료를</p>
+<p><span id="eq-ch06-dataset"><span class="math display">\[
+\mathcal D
+=
+\{(\mathbf x_i,y_i)\}_{i=1}^{n},
+\qquad
+\mathbf x_i\in\mathbb R^p,
+\qquad
+y_i\in\{-1,+1\}
+\tag{6.1}\]</span></span></p>
+<p>라고 하자. 선형 SVM의 판별함수(decision function)는</p>
+<p><span id="eq-ch06-linear-score"><span class="math display">\[
+f(\mathbf x)
+=
+\mathbf w^\top\mathbf x+b
+\tag{6.2}\]</span></span></p>
+<p>이고 예측 클래스는</p>
+<p><span id="eq-ch06-linear-classifier"><span class="math display">\[
+\widehat y
+=
+\operatorname{sign}\{f(\mathbf x)\}
+\tag{6.3}\]</span></span></p>
+<p>로 정의한다. 벡터 <span class="math inline">\(\mathbf w\)</span>는 초평면의 법선벡터(normal vector)이고 <span class="math inline">\(b\)</span>는 절편이다. 결정경계는 <span class="math inline">\(f(\mathbf x)=0\)</span>인 점들의 집합이다.</p>
+<div class="callout callout-style-default callout-important callout-titled" title="서포트 벡터 머신의 핵심 관점">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">중요</span>서포트 벡터 머신의 핵심 관점
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>SVM은 네 관점에서 이해할 수 있다. 첫째, 두 클래스 사이의 기하학적 마진(geometric margin)을 최대화하는 분류기이다. 둘째, 볼록목적함수와 제약조건을 갖는 최적화문제이다. 셋째, 쌍대문제(dual problem)를 통해 관측값 사이의 내적만으로 학습할 수 있는 커널방법이다. 넷째, 결정경계를 규정하는 일부 관측값인 서포트 벡터에 의존하는 희소한 예측모형이다.</p>
+</div>
+</div>
+<section id="sec-ch06-margin-support-vectors" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="sec-ch06-margin-support-vectors"><span class="header-section-number">6.1</span> 마진과 서포트 벡터</h2>
+<section id="sec-ch06-separating-hyperplane" class="level3" data-number="6.1.1">
+<h3 data-number="6.1.1" class="anchored" data-anchor-id="sec-ch06-separating-hyperplane"><span class="header-section-number">6.1.1</span> 분리 초평면(separating hyperplane)</h3>
+<p><span class="math inline">\(p\)</span>차원 입력공간에서 선형 결정경계는</p>
+<p><span id="eq-ch06-hyperplane"><span class="math display">\[
+\mathcal H_0
+=
+\{\mathbf x:\mathbf w^\top\mathbf x+b=0\}
+\tag{6.4}\]</span></span></p>
+<p>인 <span class="math inline">\((p-1)\)</span>차원 초평면이다. <span class="math inline">\(f(\mathbf x)&gt;0\)</span>인 반공간은 <span class="math inline">\(+1\)</span> 클래스로, <span class="math inline">\(f(\mathbf x)&lt;0\)</span>인 반공간은 <span class="math inline">\(-1\)</span> 클래스로 분류한다.</p>
+<p>선형분리 가능성(linear separability)은 어떤 <span class="math inline">\((\mathbf w,b)\)</span>가 존재하여 모든 관측값을 하나의 초평면으로 구분할 수 있는 성질이다. 구체적으로 주어진 자료가 선형분리 가능하다는 것은 어떤 <span class="math inline">\((\mathbf w,b)\)</span>가 존재하여 모든 <span class="math inline">\(i\)</span>에 대해</p>
+<p><span id="eq-ch06-linear-separability"><span class="math display">\[
+y_i\{\mathbf w^\top\mathbf x_i+b\}&gt;0
+\tag{6.5}\]</span></span></p>
+<p>이 성립한다는 뜻이다. 같은 자료를 완벽하게 분리하는 초평면은 여러 개일 수 있다. SVM은 그중에서 두 클래스에 가장 가까운 관측값까지의 거리가 최대가 되는 초평면을 선택한다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch06-many-separators" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch06-many-separators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-support-vector-machines_files/figure-html/fig-ch06-many-separators-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch06-many-separators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;6.1: 동일한 훈련자료를 구분하는 여러 선형 결정경계
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch06-distance-to-hyperplane" class="level3" data-number="6.1.2">
+<h3 data-number="6.1.2" class="anchored" data-anchor-id="sec-ch06-distance-to-hyperplane"><span class="header-section-number">6.1.2</span> 초평면까지의 거리</h3>
+<p>점 <span class="math inline">\(\mathbf x\)</span>에서 초평면 <span class="math inline">\(\mathcal H_0\)</span>까지의 수직거리는</p>
+<p><span id="eq-ch06-point-hyperplane-distance"><span class="math display">\[
+d(\mathbf x,\mathcal H_0)
+=
+\frac{|\mathbf w^\top\mathbf x+b|}{\|\mathbf w\|_2}
+\tag{6.6}\]</span></span></p>
+<p>이다. <span class="math inline">\(\mathbf w\)</span>와 <span class="math inline">\(b\)</span>에 같은 양의 상수 <span class="math inline">\(c\)</span>를 곱해도 결정경계는 변하지 않는다.</p>
+<p><span id="eq-ch06-scale-invariance"><span class="math display">\[
+\operatorname{sign}\{\mathbf w^\top\mathbf x+b\}
+=
+\operatorname{sign}\{c\mathbf w^\top\mathbf x+cb\}
+\tag{6.7}\]</span></span></p>
+<p>따라서 판별함수의 절댓값 자체는 스케일에 의존하지만, <span class="math inline">\(\|\mathbf w\|_2\)</span>로 나눈 거리는 스케일에 불변이다.</p>
+</section>
+<section id="sec-ch06-functional-margin" class="level3" data-number="6.1.3">
+<h3 data-number="6.1.3" class="anchored" data-anchor-id="sec-ch06-functional-margin"><span class="header-section-number">6.1.3</span> 함수적 마진</h3>
+<p>관측값 <span class="math inline">\((\mathbf x_i,y_i)\)</span>의 함수적 마진(functional margin)은</p>
+<p><span id="eq-ch06-functional-margin"><span class="math display">\[
+\widehat\gamma_i
+=
+y_i\{\mathbf w^\top\mathbf x_i+b\}
+\tag{6.8}\]</span></span></p>
+<p>로 정의한다. <span class="math inline">\(\widehat\gamma_i&gt;0\)</span>이면 올바르게 분류되고, <span class="math inline">\(\widehat\gamma_i&lt;0\)</span>이면 잘못 분류된다. 전체 자료의 함수적 마진은 가장 작은 개별 마진이다.</p>
+<p><span id="eq-ch06-dataset-functional-margin"><span class="math display">\[
+\widehat\gamma
+=
+\min_{1\le i\le n}
+y_i\{\mathbf w^\top\mathbf x_i+b\}
+\tag{6.9}\]</span></span></p>
+<p>함수적 마진은 <span class="math inline">\((\mathbf w,b)\)</span>의 스케일에 따라 임의로 커질 수 있으므로 그 자체로는 기하학적 여유공간을 측정하지 못한다.</p>
+</section>
+<section id="sec-ch06-geometric-margin" class="level3" data-number="6.1.4">
+<h3 data-number="6.1.4" class="anchored" data-anchor-id="sec-ch06-geometric-margin"><span class="header-section-number">6.1.4</span> 기하학적 마진</h3>
+<p>개별 관측값의 부호를 포함한 기하학적 마진은</p>
+<p><span id="eq-ch06-geometric-margin"><span class="math display">\[
+\gamma_i
+=
+\frac{y_i\{\mathbf w^\top\mathbf x_i+b\}}{\|\mathbf w\|_2}
+\tag{6.10}\]</span></span></p>
+<p>이고 자료 전체의 기하학적 마진은</p>
+<p><span id="eq-ch06-dataset-geometric-margin"><span class="math display">\[
+\gamma
+=
+\min_i
+\frac{y_i\{\mathbf w^\top\mathbf x_i+b\}}{\|\mathbf w\|_2}
+\tag{6.11}\]</span></span></p>
+<p>이다. 기하학적 마진은 결정경계와 가장 가까운 관측값 사이의 부호 있는 거리이다. SVM은 이 값을 최대화한다.</p>
+</section>
+<section id="sec-ch06-canonical-scaling" class="level3" data-number="6.1.5">
+<h3 data-number="6.1.5" class="anchored" data-anchor-id="sec-ch06-canonical-scaling"><span class="header-section-number">6.1.5</span> 정규화된 표현</h3>
+<p>선형분리 가능한 자료에서 <span class="math inline">\((\mathbf w,b)\)</span>의 스케일을 조정하여 가장 가까운 관측값이</p>
+<p><span id="eq-ch06-canonical-normalization"><span class="math display">\[
+\min_i y_i\{\mathbf w^\top\mathbf x_i+b\}=1
+\tag{6.12}\]</span></span></p>
+<p>을 만족하도록 할 수 있다. 그러면 두 마진 경계(margin boundary)는</p>
+<p><span id="eq-ch06-margin-hyperplanes"><span class="math display">\[
+\mathbf w^\top\mathbf x+b=1,
+\qquad
+\mathbf w^\top\mathbf x+b=-1
+\tag{6.13}\]</span></span></p>
+<p>이고 각 경계에서 중앙 결정경계까지의 거리는</p>
+<p><span id="eq-ch06-one-sided-margin-width"><span class="math display">\[
+\frac{1}{\|\mathbf w\|_2}
+\tag{6.14}\]</span></span></p>
+<p>이다. 두 마진 경계 사이의 전체 폭은</p>
+<p><span id="eq-ch06-total-margin-width"><span class="math display">\[
+\frac{2}{\|\mathbf w\|_2}
+\tag{6.15}\]</span></span></p>
+<p>이다. 따라서 마진을 최대화하는 것은 <span class="math inline">\(\|\mathbf w\|_2\)</span>를 최소화하는 것과 같다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch06-margin-geometry" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch06-margin-geometry-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-support-vector-machines_files/figure-html/fig-ch06-margin-geometry-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch06-margin-geometry-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;6.2: 결정경계, 마진 경계와 서포트 벡터의 기하학
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch06-hard-margin-primal" class="level3" data-number="6.1.6">
+<h3 data-number="6.1.6" class="anchored" data-anchor-id="sec-ch06-hard-margin-primal"><span class="header-section-number">6.1.6</span> 하드 마진 SVM의 원문제</h3>
+<p>정규화된 표현을 사용하면 하드 마진(hard margin) SVM은 다음 볼록 이차계획법으로 정의된다.</p>
+<p><span id="eq-ch06-hard-margin-primal"><span class="math display">\[
+\begin{aligned}
+\min_{\mathbf w,b}\quad &amp;
+\frac{1}{2}\|\mathbf w\|_2^2\\
+\text{subject to}\quad &amp;
+y_i(\mathbf w^\top\mathbf x_i+b)\ge 1,
+\qquad i=1,\ldots,n.
+\end{aligned}
+\tag{6.16}\]</span></span></p>
+<p>목적함수는 <span class="math inline">\(\mathbf w\)</span>에 대해 엄격히 볼록하고 제약조건은 선형이다. 실행가능한 해가 존재하면 최적 초평면은 본질적으로 유일하다. 절편 <span class="math inline">\(b\)</span>는 특정 퇴화상황에서 유일하지 않을 수 있지만 예측경계는 동일하다.</p>
+</section>
+<section id="sec-ch06-support-vectors" class="level3" data-number="6.1.7">
+<h3 data-number="6.1.7" class="anchored" data-anchor-id="sec-ch06-support-vectors"><span class="header-section-number">6.1.7</span> 서포트 벡터</h3>
+<p>최적해 <span class="math inline">\((\widehat{\mathbf w},\widehat b)\)</span>에서</p>
+<p><span id="eq-ch06-support-vector-condition"><span class="math display">\[
+y_i(\widehat{\mathbf w}^\top\mathbf x_i+\widehat b)=1
+\tag{6.17}\]</span></span></p>
+<p>을 만족하는 관측값을 서포트 벡터라고 한다. 이들은 마진 경계 위에 있으며 결정경계의 위치를 직접 규정한다. 마진 밖에 충분히 멀리 있는 관측값은 작은 변화가 생겨도 최적경계에 영향을 주지 않을 수 있다.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="왜 일부 관측값만 중요한가">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">노트</span>왜 일부 관측값만 중요한가
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>SVM의 최적 초평면은 전체 관측값의 평균적 위치보다 경계에 가장 가까운 관측값에 의해 결정된다. 이 때문에 학습된 모형은 서포트 벡터에 대한 계수만을 저장하는 희소표현을 갖는다. 다만 서포트 벡터가 지나치게 많다면 예측비용과 과적합 가능성이 함께 증가할 수 있다.</p>
+</div>
+</div>
+</section>
+<section id="sec-ch06-margin-generalization" class="level3" data-number="6.1.8">
+<h3 data-number="6.1.8" class="anchored" data-anchor-id="sec-ch06-margin-generalization"><span class="header-section-number">6.1.8</span> 최대 마진과 일반화</h3>
+<p>반지름-마진 비율(radius-margin ratio)은 자료의 범위와 분류 마진을 함께 사용해 유효복잡도를 해석하는 관점이다. 마진이 크다는 것은 훈련관측값이 결정경계에서 멀리 떨어져 있다는 뜻이다. 작은 입력변동에 의해 클래스가 바뀌기 어려우므로 분류규칙이 안정적일 가능성이 높다. 그러나 마진이 크다는 사실만으로 일반화가 자동으로 보장되지는 않는다. 입력의 스케일, 가설공간, 커널의 복잡도, 표본크기와 자료분포를 함께 고려해야 한다.</p>
+<p>반지름 <span class="math inline">\(R\)</span>인 영역에 자료가 놓이고 기하학적 마진이 <span class="math inline">\(\gamma\)</span>인 선형분류기의 복잡도는 직관적으로</p>
+<p><span id="eq-ch06-radius-margin-ratio"><span class="math display">\[
+\left(\frac{R}{\gamma}\right)^2
+\tag{6.18}\]</span></span></p>
+<p>와 관련된다. 같은 자료 범위에서 마진이 커질수록 유효복잡도가 감소한다. 이 관점은 모수의 개수만으로 복잡도를 측정하지 않고, 데이터와 결정경계의 기하학을 함께 고려한다.</p>
+</section>
+<section id="sec-ch06-feature-scaling" class="level3" data-number="6.1.9">
+<h3 data-number="6.1.9" class="anchored" data-anchor-id="sec-ch06-feature-scaling"><span class="header-section-number">6.1.9</span> 특성 스케일의 영향</h3>
+<p>SVM의 마진과 커널은 거리와 내적에 직접 의존한다. 한 변수가 매우 큰 단위를 갖으면 그 변수가 <span class="math inline">\(\|\mathbf w\|_2\)</span>와 관측값 사이의 거리를 지배할 수 있다. 따라서 일반적으로 각 특성을</p>
+<p><span id="eq-ch06-standardization"><span class="math display">\[
+z_{ij}
+=
+\frac{x_{ij}-\widehat\mu_j}{\widehat\sigma_j}
+\tag{6.19}\]</span></span></p>
+<p>와 같이 표준화한다. 평균과 표준편차는 반드시 훈련자료에서 계산하고 검증자료와 시험자료에는 같은 변환을 적용해야 한다. 중앙값과 사분위범위를 이용한 강건한 스케일링도 사용할 수 있다.</p>
+</section>
+<section id="sec-ch06-svm-perceptron" class="level3" data-number="6.1.10">
+<h3 data-number="6.1.10" class="anchored" data-anchor-id="sec-ch06-svm-perceptron"><span class="header-section-number">6.1.10</span> 선형 SVM과 퍼셉트론의 차이</h3>
+<p>퍼셉트론은 잘못 분류된 관측값을 이용하여 분리 가능한 초평면을 찾지만, 가능한 여러 초평면 중 최대 마진(maximum margin) 경계를 선택하지 않는다. SVM은 명시적인 볼록최적화문제로 전역 최적해를 찾는다.</p>
+<div id="tbl-ch06-perceptron-svm" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch06-perceptron-svm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;6.1: 퍼셉트론과 하드 마진 SVM의 비교
+</figcaption>
+<div aria-describedby="tbl-ch06-perceptron-svm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>구분</th>
+<th>퍼셉트론</th>
+<th>하드 마진 SVM</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>목표</td>
+<td>분류오류가 없는 초평면</td>
+<td>마진이 최대인 초평면</td>
+</tr>
+<tr class="even">
+<td>목적함수</td>
+<td>암묵적 또는 퍼셉트론 손실</td>
+<td><span class="math inline">\(\frac12\|\mathbf w\|^2\)</span></td>
+</tr>
+<tr class="odd">
+<td>해의 유일성</td>
+<td>자료 순서와 초기값에 의존</td>
+<td>볼록최적화의 최적해</td>
+</tr>
+<tr class="even">
+<td>핵심 관측값</td>
+<td>오분류 관측값</td>
+<td>서포트 벡터</td>
+</tr>
+<tr class="odd">
+<td>비분리 자료</td>
+<td>수렴하지 않을 수 있음</td>
+<td>소프트 마진으로 확장</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-ch06-multiclass-overview" class="level3" data-number="6.1.11">
+<h3 data-number="6.1.11" class="anchored" data-anchor-id="sec-ch06-multiclass-overview"><span class="header-section-number">6.1.11</span> 다중 클래스 문제의 기본 확장</h3>
+<p>기본 SVM은 이진분류기이다. <span class="math inline">\(K\)</span>개 클래스에는 다음 전략을 사용할 수 있다.</p>
+<ul>
+<li>일대나머지(one-versus-rest): 각 클래스를 나머지 전체와 구분하는 <span class="math inline">\(K\)</span>개 분류기</li>
+<li>일대일(one-versus-one): 클래스 쌍마다 <span class="math inline">\(K(K-1)/2\)</span>개 분류기</li>
+<li>직접 다중클래스 SVM: 여러 클래스의 점수를 하나의 최적화문제로 학습</li>
+</ul>
+<p>일대일 방법은 각 분류기가 일부 자료만 사용하지만 분류기 수가 많다. 일대나머지는 구현이 단순하지만 클래스 불균형과 점수 비교 문제가 생길 수 있다. 다중클래스 전략은 검증설계 안에서 선택해야 한다.</p>
+</section>
+</section>
+<section id="sec-ch06-dual-problem" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="sec-ch06-dual-problem"><span class="header-section-number">6.2</span> 쌍대문제</h2>
+<section id="sec-ch06-primal-dual" class="level3" data-number="6.2.1">
+<h3 data-number="6.2.1" class="anchored" data-anchor-id="sec-ch06-primal-dual"><span class="header-section-number">6.2.1</span> 원문제와 쌍대문제</h3>
+<p>하드 마진 SVM의 원문제(primal problem)는 <span class="math inline">\(p\)</span>차원 가중치벡터 <span class="math inline">\(\mathbf w\)</span>와 절편 <span class="math inline">\(b\)</span>를 직접 구한다. 쌍대문제는 각 관측값에 대응하는 라그랑주 승수(Lagrange multiplier) <span class="math inline">\(\alpha_i\)</span>를 구한다. 쌍대표현의 장점은 입력벡터가 내적 <span class="math inline">\(\mathbf x_i^\top\mathbf x_j\)</span>의 형태로만 나타난다는 점이다. 이 성질이 커널 트릭(kernel trick)의 출발점이다.</p>
+<p>원문제의 각 제약조건을</p>
+<p><span id="eq-ch06-hard-margin-constraint-function"><span class="math display">\[
+g_i(\mathbf w,b)
+=
+1-y_i(\mathbf w^\top\mathbf x_i+b)
+\le 0
+\tag{6.20}\]</span></span></p>
+<p>로 쓰고, <span class="math inline">\(\alpha_i\ge 0\)</span>를 대응하는 라그랑주 승수라고 하자.</p>
+</section>
+<section id="sec-ch06-lagrangian" class="level3" data-number="6.2.2">
+<h3 data-number="6.2.2" class="anchored" data-anchor-id="sec-ch06-lagrangian"><span class="header-section-number">6.2.2</span> 라그랑지안(Lagrangian)</h3>
+<p>하드 마진 원문제의 라그랑지안은</p>
+<p><span id="eq-ch06-hard-margin-lagrangian"><span class="math display">\[
+\mathcal L(\mathbf w,b,\boldsymbol\alpha)
+=
+\frac12\|\mathbf w\|_2^2
++
+\sum_{i=1}^{n}\alpha_i
+\left[
+1-y_i(\mathbf w^\top\mathbf x_i+b)
+\right]
+\tag{6.21}\]</span></span></p>
+<p>이다. 원변수 <span class="math inline">\(\mathbf w\)</span>와 <span class="math inline">\(b\)</span>에 대해 라그랑지안을 최소화한다. <span class="math inline">\(\mathbf w\)</span>에 대한 정상조건(stationarity condition)은</p>
+<p><span id="eq-ch06-stationarity-w"><span class="math display">\[
+\frac{\partial\mathcal L}{\partial\mathbf w}
+=
+\mathbf w-
+\sum_{i=1}^{n}\alpha_i y_i\mathbf x_i
+=
+\mathbf 0
+\tag{6.22}\]</span></span></p>
+<p>이므로</p>
+<p><span id="eq-ch06-w-support-expansion"><span class="math display">\[
+\mathbf w
+=
+\sum_{i=1}^{n}\alpha_i y_i\mathbf x_i
+\tag{6.23}\]</span></span></p>
+<p>를 얻는다. 절편에 대한 정상조건은</p>
+<p><span id="eq-ch06-stationarity-b"><span class="math display">\[
+\frac{\partial\mathcal L}{\partial b}
+=
+-
+\sum_{i=1}^{n}\alpha_i y_i
+=
+0
+\tag{6.24}\]</span></span></p>
+<p>이므로</p>
+<p><span id="eq-ch06-dual-equality-constraint"><span class="math display">\[
+\sum_{i=1}^{n}\alpha_i y_i=0
+\tag{6.25}\]</span></span></p>
+<p>이다.</p>
+<p><a href="#eq-ch06-w-support-expansion" class="quarto-xref">방정식&nbsp;<span>6.23</span></a><!-- -->은 SVM의 핵심 결과이다. 최적 가중치벡터는 훈련관측값의 선형결합이며 <span class="math inline">\(\alpha_i&gt;0\)</span>인 관측값만 기여한다.</p>
+</section>
+<section id="sec-ch06-hard-margin-dual-derivation" class="level3" data-number="6.2.3">
+<h3 data-number="6.2.3" class="anchored" data-anchor-id="sec-ch06-hard-margin-dual-derivation"><span class="header-section-number">6.2.3</span> 하드 마진 쌍대문제의 유도</h3>
+<p><a href="#eq-ch06-w-support-expansion" class="quarto-xref">방정식&nbsp;<span>6.23</span></a><!-- -->과 <a href="#eq-ch06-dual-equality-constraint" class="quarto-xref">방정식&nbsp;<span>6.25</span></a><!-- -->를 라그랑지안에 대입하면 쌍대목적함수를 얻는다.</p>
+<p><span id="eq-ch06-hard-margin-dual-objective"><span class="math display">\[
+W(\boldsymbol\alpha)
+=
+\sum_{i=1}^{n}\alpha_i
+-
+\frac12
+\sum_{i=1}^{n}\sum_{j=1}^{n}
+\alpha_i\alpha_jy_iy_j
+\mathbf x_i^\top\mathbf x_j
+\tag{6.26}\]</span></span></p>
+<p>따라서 하드 마진 SVM의 쌍대문제는</p>
+<p><span id="eq-ch06-hard-margin-dual"><span class="math display">\[
+\begin{aligned}
+\max_{\boldsymbol\alpha}\quad &amp;
+\sum_{i=1}^{n}\alpha_i
+-
+\frac12
+\sum_{i=1}^{n}\sum_{j=1}^{n}
+\alpha_i\alpha_jy_iy_j
+\mathbf x_i^\top\mathbf x_j\\
+\text{subject to}\quad &amp;
+\alpha_i\ge 0,
+\qquad i=1,\ldots,n,\\
+&amp;
+\sum_{i=1}^{n}\alpha_i y_i=0
+\end{aligned}
+\tag{6.27}\]</span></span></p>
+<p>로 표현된다. 목적함수는 <span class="math inline">\(\boldsymbol\alpha\)</span>에 대한 오목 이차함수이므로 최대화문제의 전역 최적해를 구할 수 있다.</p>
+</section>
+<section id="sec-ch06-kkt-conditions" class="level3" data-number="6.2.4">
+<h3 data-number="6.2.4" class="anchored" data-anchor-id="sec-ch06-kkt-conditions"><span class="header-section-number">6.2.4</span> KKT 조건</h3>
+<p>볼록최적화에서 Karush–Kuhn–Tucker(KKT) 조건은 원문제와 쌍대문제의 최적해를 연결한다. 하드 마진 SVM의 KKT 조건(Karush–Kuhn–Tucker conditions)은 다음과 같다.</p>
+<p><strong>원문제 실행가능성(primal feasibility)</strong></p>
+<p><span id="eq-ch06-kkt-primal-feasibility"><span class="math display">\[
+y_i(\mathbf w^\top\mathbf x_i+b)-1\ge 0
+\tag{6.28}\]</span></span></p>
+<p><strong>쌍대 실행가능성(dual feasibility)</strong></p>
+<p><span id="eq-ch06-kkt-dual-feasibility"><span class="math display">\[
+\alpha_i\ge 0
+\tag{6.29}\]</span></span></p>
+<p><strong>정상조건</strong></p>
+<p><span id="eq-ch06-kkt-stationarity"><span class="math display">\[
+\mathbf w
+=
+\sum_{i=1}^{n}\alpha_i y_i\mathbf x_i,
+\qquad
+\sum_{i=1}^{n}\alpha_i y_i=0
+\tag{6.30}\]</span></span></p>
+<p><strong>상보성(complementary slackness) 조건</strong></p>
+<p><span id="eq-ch06-kkt-complementary-slackness"><span class="math display">\[
+\alpha_i
+\left[
+y_i(\mathbf w^\top\mathbf x_i+b)-1
+\right]
+=0
+\tag{6.31}\]</span></span></p>
+<p>상보성 조건에 따르면 <span class="math inline">\(\alpha_i&gt;0\)</span>이면 반드시</p>
+<p><span id="eq-ch06-positive-alpha-margin"><span class="math display">\[
+y_i(\mathbf w^\top\mathbf x_i+b)=1
+\tag{6.32}\]</span></span></p>
+<p>이므로 해당 관측값은 마진 경계 위의 서포트 벡터이다. 반대로 마진 밖에 있는 관측값은 제약조건이 엄격하게 성립하므로 <span class="math inline">\(\alpha_i=0\)</span>이다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch06-kkt-cases" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch06-kkt-cases-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-support-vector-machines_files/figure-html/fig-ch06-kkt-cases-1.png" class="img-fluid figure-img" width="864">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch06-kkt-cases-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;6.3: 하드 마진 SVM에서 KKT 조건과 관측값의 역할
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch06-strong-duality" class="level3" data-number="6.2.5">
+<h3 data-number="6.2.5" class="anchored" data-anchor-id="sec-ch06-strong-duality"><span class="header-section-number">6.2.5</span> 강한 쌍대성과 Slater 조건</h3>
+<p>원문제가 볼록이고 선형분리 가능한 자료에 대해 제약을 엄격하게 만족하는 점이 존재하면 Slater 조건(Slater condition)이 성립한다. 이때 원문제와 쌍대문제의 최적 목적함수값은 같다.</p>
+<p><span id="eq-ch06-strong-duality"><span class="math display">\[
+p^\star=d^\star
+\tag{6.33}\]</span></span></p>
+<p>강한 쌍대성(strong duality)은 쌍대문제를 풀어도 원문제와 같은 최적 분류기를 얻는다는 것을 보장한다. 선형분리가 불가능한 자료에서는 하드 마진 원문제가 실행불가능하지만, 소프트 마진(soft margin)을 도입하면 항상 실행가능한 문제로 확장할 수 있다.</p>
+</section>
+<section id="sec-ch06-intercept-computation" class="level3" data-number="6.2.6">
+<h3 data-number="6.2.6" class="anchored" data-anchor-id="sec-ch06-intercept-computation"><span class="header-section-number">6.2.6</span> 절편의 계산</h3>
+<p>하드 마진에서 <span class="math inline">\(\alpha_i&gt;0\)</span>인 서포트 벡터는</p>
+<p><span id="eq-ch06-margin-equality-for-b"><span class="math display">\[
+y_i(\mathbf w^\top\mathbf x_i+b)=1
+\tag{6.34}\]</span></span></p>
+<p>을 만족하므로</p>
+<p><span id="eq-ch06-intercept-from-support-vector"><span class="math display">\[
+b
+=
+y_i-
+\sum_{j=1}^{n}\alpha_j y_j\mathbf x_j^\top\mathbf x_i
+\tag{6.35}\]</span></span></p>
+<p>로 계산할 수 있다. 수치오차를 줄이기 위해 여러 서포트 벡터에서 얻은 <span class="math inline">\(b\)</span>를 평균하거나, 양·음 클래스의 경계값 사이 중간점을 사용할 수 있다.</p>
+</section>
+<section id="sec-ch06-dual-decision-function" class="level3" data-number="6.2.7">
+<h3 data-number="6.2.7" class="anchored" data-anchor-id="sec-ch06-dual-decision-function"><span class="header-section-number">6.2.7</span> 쌍대표현의 판별함수</h3>
+<p><a href="#eq-ch06-w-support-expansion" class="quarto-xref">방정식&nbsp;<span>6.23</span></a><!-- -->을 판별함수에 대입하면</p>
+<p><span id="eq-ch06-dual-decision-linear"><span class="math display">\[
+f(\mathbf x)
+=
+\sum_{i=1}^{n}
+\alpha_i y_i
+\mathbf x_i^\top\mathbf x
++b
+\tag{6.36}\]</span></span></p>
+<p>가 된다. <span class="math inline">\(\alpha_i=0\)</span>인 관측값은 계산에서 사라지므로 실제로는 서포트 벡터 집합 <span class="math inline">\(\mathcal S\)</span>에 대해서만 합하면 된다.</p>
+<p><span id="eq-ch06-sparse-dual-decision"><span class="math display">\[
+f(\mathbf x)
+=
+\sum_{i\in\mathcal S}
+\alpha_i y_i
+\mathbf x_i^\top\mathbf x
++b
+\tag{6.37}\]</span></span></p>
+<p>이 표현은 입력차원 <span class="math inline">\(p\)</span>보다 서포트 벡터 수가 훨씬 작은 경우 효율적이다. 반대로 서포트 벡터가 매우 많으면 각 새 관측값의 예측에 많은 내적 계산이 필요하다.</p>
+</section>
+<section id="sec-ch06-gram-matrix-dual" class="level3" data-number="6.2.8">
+<h3 data-number="6.2.8" class="anchored" data-anchor-id="sec-ch06-gram-matrix-dual"><span class="header-section-number">6.2.8</span> Gram 행렬 표현</h3>
+<p>Gram 행렬(Gram matrix)을</p>
+<p><span id="eq-ch06-linear-gram-matrix"><span class="math display">\[
+\mathbf K
+=
+\mathbf X\mathbf X^\top,
+\qquad
+K_{ij}=\mathbf x_i^\top\mathbf x_j
+\tag{6.38}\]</span></span></p>
+<p>라고 하고 <span class="math inline">\(\mathbf Y=\operatorname{diag}(y_1,\ldots,y_n)\)</span>라고 하자. 쌍대목적함수는</p>
+<p><span id="eq-ch06-dual-matrix-form"><span class="math display">\[
+W(\boldsymbol\alpha)
+=
+\mathbf 1^\top\boldsymbol\alpha
+-
+\frac12
+\boldsymbol\alpha^\top
+\mathbf Y\mathbf K\mathbf Y
+\boldsymbol\alpha
+\tag{6.39}\]</span></span></p>
+<p>로 쓸 수 있다. 훈련자료가 쌍대문제에 나타나는 방식은 Gram 행렬뿐이다. 따라서 내적을 적절한 커널함수로 바꾸면 명시적으로 고차원 특성을 계산하지 않고도 비선형 분류기를 만들 수 있다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch06-linear-gram" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch06-linear-gram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-support-vector-machines_files/figure-html/fig-ch06-linear-gram-1.png" class="img-fluid figure-img" width="624">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch06-linear-gram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;6.4: 선형 커널 Gram 행렬의 구조
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch06-primal-vs-dual-computation" class="level3" data-number="6.2.9">
+<h3 data-number="6.2.9" class="anchored" data-anchor-id="sec-ch06-primal-vs-dual-computation"><span class="header-section-number">6.2.9</span> 원문제와 쌍대문제의 계산 선택</h3>
+<p>선형 SVM에서 <span class="math inline">\(p\)</span>가 작고 <span class="math inline">\(n\)</span>이 매우 큰 경우에는 원문제 또는 직접적인 선형최적화가 유리할 수 있다. 반대로 <span class="math inline">\(n\)</span>이 비교적 작고 <span class="math inline">\(p\)</span>가 매우 크거나 커널을 사용해야 하는 경우에는 쌍대문제가 자연스럽다.</p>
+<div id="tbl-ch06-primal-dual-choice" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch06-primal-dual-choice-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;6.2: 자료 크기에 따른 SVM 최적화 접근
+</figcaption>
+<div aria-describedby="tbl-ch06-primal-dual-choice-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>자료구조</th>
+<th>일반적으로 유리한 접근</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(n\gg p\)</span>, 선형분류</td>
+<td>원문제, 확률적 최적화, 좌표하강</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(p\gg n\)</span>, 선형분류</td>
+<td>쌍대문제 또는 선형 대수 기반 방법</td>
+</tr>
+<tr class="odd">
+<td>비선형 커널, 중간 규모 <span class="math inline">\(n\)</span></td>
+<td>쌍대문제</td>
+</tr>
+<tr class="even">
+<td>매우 큰 <span class="math inline">\(n\)</span>, 비선형 관계</td>
+<td>근사 커널, 명시적 특성, 신경망·트리 앙상블 검토</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-ch06-smo" class="level3" data-number="6.2.10">
+<h3 data-number="6.2.10" class="anchored" data-anchor-id="sec-ch06-smo"><span class="header-section-number">6.2.10</span> 순차 최소 최적화</h3>
+<p>쌍대문제는 등식제약</p>
+<p><span id="eq-ch06-smo-equality"><span class="math display">\[
+\sum_i\alpha_i y_i=0
+\tag{6.40}\]</span></span></p>
+<p>때문에 하나의 <span class="math inline">\(\alpha_i\)</span>만 독립적으로 변경할 수 없다. 순차 최소 최적화(sequential minimal optimization, SMO)는 매 반복에서 두 개의 승수만 선택하여 나머지를 고정한 채 작은 이차계획문제를 해석적으로 푼다.</p>
+<p>SMO의 일반적 절차는 다음과 같다. 여기서 각 승수에 부과되는 구간 제한을 상자제약(box constraint)이라고 한다.</p>
+<pre class="text"><code>초기 alpha와 절편을 설정한다.
+KKT 조건을 크게 위반하는 첫 번째 관측값을 선택한다.
+목적함수를 충분히 개선할 두 번째 관측값을 선택한다.
+두 alpha가 등식제약과 상자제약(box constraint)을 만족하도록 갱신한다.
+절편과 오차 캐시를 갱신한다.
+모든 관측값이 허용오차 안에서 KKT 조건을 만족할 때까지 반복한다.</code></pre>
+<p>SMO는 전체 Hessian을 명시적으로 분해하지 않아도 되며, 희소한 최적해와 커널 캐시를 활용할 수 있다.</p>
+</section>
+<section id="sec-ch06-dual-coefficients-influence" class="level3" data-number="6.2.11">
+<h3 data-number="6.2.11" class="anchored" data-anchor-id="sec-ch06-dual-coefficients-influence"><span class="header-section-number">6.2.11</span> 쌍대계수와 자료 영향</h3>
+<p><span class="math inline">\(\alpha_i\)</span>는 단순한 회귀계수와 다르다. 그 크기는 관측값이 결정경계에 미치는 기여를 나타내지만 입력 스케일, 커널, 규제모수와 다른 관측값에 의존한다. 따라서 <span class="math inline">\(\alpha_i\)</span>만으로 변수효과나 관측값의 임상적 중요성을 직접 해석해서는 안 된다.</p>
+<p>선형 SVM에서는</p>
+<p><span id="eq-ch06-linear-weight-recovery"><span class="math display">\[
+\mathbf w
+=
+\sum_i\alpha_i y_i\mathbf x_i
+\tag{6.41}\]</span></span></p>
+<p>를 통해 원특성 공간의 가중치를 복원할 수 있다. 그러나 특성 간 상관과 표준화 때문에 <span class="math inline">\(|w_j|\)</span>를 곧바로 독립적 변수중요도로 해석하는 것은 위험하다.</p>
+</section>
+<section id="sec-ch06-representer-preview" class="level3" data-number="6.2.12">
+<h3 data-number="6.2.12" class="anchored" data-anchor-id="sec-ch06-representer-preview"><span class="header-section-number">6.2.12</span> 표현정리와 커널 해</h3>
+<p>규제된 경험위험 최소화 문제가 재생커널 힐베르트 공간에서</p>
+<p><span id="eq-ch06-rkhs-regularized-risk"><span class="math display">\[
+\min_{f\in\mathcal H_K}
+\left[
+\sum_{i=1}^{n}L\{y_i,f(\mathbf x_i)\}
++
+\lambda\|f\|_{\mathcal H_K}^2
+\right]
+\tag{6.42}\]</span></span></p>
+<p>형태를 갖는다면 최적해는</p>
+<p><span id="eq-ch06-representer-form"><span class="math display">\[
+f(\mathbf x)
+=
+\sum_{i=1}^{n}c_iK(\mathbf x_i,\mathbf x)
+\tag{6.43}\]</span></span></p>
+<p>로 표현된다. 이를 표현정리(representer theorem)라고 한다. 무한차원 함수공간에서 최적화하더라도 해는 훈련관측값을 중심으로 한 유한개의 커널함수 조합으로 축약된다.</p>
+</section>
+</section>
+<section id="sec-ch06-kernel-functions" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="sec-ch06-kernel-functions"><span class="header-section-number">6.3</span> 커널 함수(kernel function)</h2>
+<section id="sec-ch06-feature-map" class="level3" data-number="6.3.1">
+<h3 data-number="6.3.1" class="anchored" data-anchor-id="sec-ch06-feature-map"><span class="header-section-number">6.3.1</span> 비선형 분류와 특성사상</h3>
+<p>원입력 공간에서 선형분리가 불가능한 자료도 적절한 비선형 변환을 적용한 특성공간(feature space)에서는 선형분리 가능할 수 있다. 특성사상(feature map)을</p>
+<p><span id="eq-ch06-feature-map"><span class="math display">\[
+\boldsymbol\phi:
+\mathcal X\rightarrow\mathcal F
+\tag{6.44}\]</span></span></p>
+<p>라고 하자. 변환된 공간에서 선형 판별함수는</p>
+<p><span id="eq-ch06-feature-space-linear-score"><span class="math display">\[
+f(\mathbf x)
+=
+\mathbf w^\top\boldsymbol\phi(\mathbf x)+b
+\tag{6.45}\]</span></span></p>
+<p>이다. 원공간에서는 비선형 결정경계가 되지만 특성공간에서는 초평면이다.</p>
+<p>예를 들어 일차원 입력 <span class="math inline">\(x\)</span>를</p>
+<p><span id="eq-ch06-quadratic-feature-map"><span class="math display">\[
+\boldsymbol\phi(x)
+=
+(x,x^2)^\top
+\tag{6.46}\]</span></span></p>
+<p>로 변환하면 원공간에서 구간 형태의 분류규칙을 특성공간의 직선으로 표현할 수 있다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch06-feature-map" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch06-feature-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-support-vector-machines_files/figure-html/fig-ch06-feature-map-1.png" class="img-fluid figure-img" width="864">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch06-feature-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;6.5: 비선형 특성사상을 통한 선형분리
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch06-kernel-trick" class="level3" data-number="6.3.2">
+<h3 data-number="6.3.2" class="anchored" data-anchor-id="sec-ch06-kernel-trick"><span class="header-section-number">6.3.2</span> 커널 트릭</h3>
+<p>쌍대문제에서는 변환된 특성벡터가 내적</p>
+<p><span id="eq-ch06-feature-inner-product"><span class="math display">\[
+\boldsymbol\phi(\mathbf x_i)^\top
+\boldsymbol\phi(\mathbf x_j)
+\tag{6.47}\]</span></span></p>
+<p>의 형태로만 나타난다. 이 내적을 직접 계산하는 대신 커널함수</p>
+<p><span id="eq-ch06-kernel-definition"><span class="math display">\[
+K(\mathbf x_i,\mathbf x_j)
+=
+\boldsymbol\phi(\mathbf x_i)^\top
+\boldsymbol\phi(\mathbf x_j)
+\tag{6.48}\]</span></span></p>
+<p>를 계산하면 고차원 또는 무한차원 특성공간을 명시적으로 구성하지 않고도 같은 결과를 얻을 수 있다. 이를 커널 트릭이라고 한다.</p>
+<p>커널 SVM의 쌍대문제는</p>
+<p><span id="eq-ch06-kernel-hard-margin-dual"><span class="math display">\[
+\begin{aligned}
+\max_{\boldsymbol\alpha}\quad &amp;
+\sum_{i=1}^{n}\alpha_i
+-
+\frac12
+\sum_{i=1}^{n}\sum_{j=1}^{n}
+\alpha_i\alpha_jy_iy_j
+K(\mathbf x_i,\mathbf x_j)\\
+\text{subject to}\quad &amp;
+\alpha_i\ge 0,\\
+&amp;
+\sum_{i=1}^{n}\alpha_i y_i=0
+\end{aligned}
+\tag{6.49}\]</span></span></p>
+<p>이고 판별함수는</p>
+<p><span id="eq-ch06-kernel-decision-function"><span class="math display">\[
+f(\mathbf x)
+=
+\sum_{i\in\mathcal S}
+\alpha_i y_iK(\mathbf x_i,\mathbf x)
++b
+\tag{6.50}\]</span></span></p>
+<p>이다.</p>
+</section>
+<section id="sec-ch06-valid-kernel" class="level3" data-number="6.3.3">
+<h3 data-number="6.3.3" class="anchored" data-anchor-id="sec-ch06-valid-kernel"><span class="header-section-number">6.3.3</span> 유효한 커널과 양의 준정부호성</h3>
+<p>임의의 대칭함수가 모두 커널은 아니다. 훈련자료 <span class="math inline">\(\mathbf x_1,\ldots,\mathbf x_n\)</span>에 대해 Gram 행렬</p>
+<p><span id="eq-ch06-kernel-gram-entry"><span class="math display">\[
+K_{ij}=K(\mathbf x_i,\mathbf x_j)
+\tag{6.51}\]</span></span></p>
+<p>이 모든 유한한 표본과 모든 <span class="math inline">\(\mathbf c\in\mathbb R^n\)</span>에 대해</p>
+<p><span id="eq-ch06-kernel-psd-condition"><span class="math display">\[
+\mathbf c^\top\mathbf K\mathbf c
+\ge 0
+\tag{6.52}\]</span></span></p>
+<p>을 만족하면 <span class="math inline">\(K\)</span>는 양의 준정부호(positive semidefinite) 커널이다. 이 조건은 커널이 어떤 힐베르트 공간의 내적으로 표현될 수 있음을 보장한다.</p>
+<p>수치적으로는 Gram 행렬의 고유값이 비음수인지 확인할 수 있다. 부동소수점 오차 때문에 매우 작은 음의 고유값이 나타날 수 있으나, 큰 음의 고유값은 커널 정의나 구현에 문제가 있음을 뜻한다.</p>
+</section>
+<section id="sec-ch06-mercer-theorem" class="level3" data-number="6.3.4">
+<h3 data-number="6.3.4" class="anchored" data-anchor-id="sec-ch06-mercer-theorem"><span class="header-section-number">6.3.4</span> Mercer 전개(Mercer expansion)의 관점</h3>
+<p>적절한 연속성과 적분조건 아래 대칭함수 <span class="math inline">\(K\)</span>가 양의 준정부호이면 고유함수 전개</p>
+<p><span id="eq-ch06-mercer-expansion"><span class="math display">\[
+K(\mathbf x,\mathbf z)
+=
+\sum_{m=1}^{\infty}
+\lambda_m
+\psi_m(\mathbf x)
+\psi_m(\mathbf z),
+\qquad
+\lambda_m\ge 0
+\tag{6.53}\]</span></span></p>
+<p>를 갖는다. 따라서 특성사상을</p>
+<p><span id="eq-ch06-mercer-feature-map"><span class="math display">\[
+\boldsymbol\phi(\mathbf x)
+=
+\left(
+\sqrt{\lambda_1}\psi_1(\mathbf x),
+\sqrt{\lambda_2}\psi_2(\mathbf x),
+\ldots
+\right)^\top
+\tag{6.54}\]</span></span></p>
+<p>로 생각할 수 있다. 실제 커널 SVM에서는 이 무한차원 벡터를 직접 계산할 필요가 없다.</p>
+</section>
+<section id="sec-ch06-linear-kernel" class="level3" data-number="6.3.5">
+<h3 data-number="6.3.5" class="anchored" data-anchor-id="sec-ch06-linear-kernel"><span class="header-section-number">6.3.5</span> 선형 커널</h3>
+<p>선형 커널(linear kernel)은</p>
+<p><span id="eq-ch06-linear-kernel"><span class="math display">\[
+K(\mathbf x,\mathbf z)
+=
+\mathbf x^\top\mathbf z
+\tag{6.55}\]</span></span></p>
+<p>이다. 원특성 공간에서 선형경계를 학습한다. 고차원 희소자료, 텍스트 빈도자료, 유전자 발현자료처럼 <span class="math inline">\(p\)</span>가 크고 선형구조가 충분한 경우 강력한 기준모형이 된다.</p>
+<p>절편을 커널에 포함하려면</p>
+<p><span id="eq-ch06-inhomogeneous-linear-kernel"><span class="math display">\[
+K(\mathbf x,\mathbf z)
+=
+\mathbf x^\top\mathbf z+c
+\tag{6.56}\]</span></span></p>
+<p>형태를 사용할 수 있지만 일반적으로 SVM 모형에 별도의 <span class="math inline">\(b\)</span>가 포함되므로 단순 선형 커널을 사용한다.</p>
+</section>
+<section id="sec-ch06-polynomial-kernel" class="level3" data-number="6.3.6">
+<h3 data-number="6.3.6" class="anchored" data-anchor-id="sec-ch06-polynomial-kernel"><span class="header-section-number">6.3.6</span> 다항 커널</h3>
+<p>다항 커널(polynomial kernel)은</p>
+<p><span id="eq-ch06-polynomial-kernel"><span class="math display">\[
+K(\mathbf x,\mathbf z)
+=
+(\gamma\mathbf x^\top\mathbf z+r)^d
+\tag{6.57}\]</span></span></p>
+<p>로 정의한다. <span class="math inline">\(d\)</span>는 차수, <span class="math inline">\(\gamma\)</span>는 내적의 스케일, <span class="math inline">\(r\)</span>은 상수항이다. <span class="math inline">\(d=2\)</span>이면 주효과뿐 아니라 이차항과 두 변수 사이의 상호작용을 암묵적으로 포함한다.</p>
+<p>예를 들어 <span class="math inline">\(\mathbf x=(x_1,x_2)^\top\)</span>에 대해</p>
+<p><span id="eq-ch06-polynomial-expansion"><span class="math display">\[
+(1+\mathbf x^\top\mathbf z)^2
+=
+1+2x_1z_1+2x_2z_2+x_1^2z_1^2
++2x_1x_2z_1z_2+x_2^2z_2^2
+\tag{6.58}\]</span></span></p>
+<p>이므로 적절히 스케일된 특성사상은 상수, 일차항, 제곱항과 상호작용항을 포함한다.</p>
+<p>차수 <span class="math inline">\(d\)</span>가 커지면 복잡한 전역적 경계를 만들 수 있지만 입력 스케일과 매개변수에 매우 민감해진다.</p>
+</section>
+<section id="sec-ch06-rbf-kernel" class="level3" data-number="6.3.7">
+<h3 data-number="6.3.7" class="anchored" data-anchor-id="sec-ch06-rbf-kernel"><span class="header-section-number">6.3.7</span> 가우시안 방사기저함수 커널(radial basis function kernel)</h3>
+<p>가우시안 커널(Gaussian kernel), 즉 RBF 커널은</p>
+<p><span id="eq-ch06-rbf-kernel"><span class="math display">\[
+K(\mathbf x,\mathbf z)
+=
+\exp\left(
+-\gamma\|\mathbf x-\mathbf z\|_2^2
+\right)
+\tag{6.59}\]</span></span></p>
+<p>로 정의한다. 흔히</p>
+<p><span id="eq-ch06-rbf-gamma-sigma"><span class="math display">\[
+\gamma
+=
+\frac{1}{2\sigma^2}
+\tag{6.60}\]</span></span></p>
+<p>로 쓴다. 두 관측값이 가까우면 커널값이 1에 가깝고 멀어질수록 0에 가까워진다. RBF 커널은 무한차원 특성공간에 대응하며 국소적인 비선형 결정경계를 만들 수 있다.</p>
+<p><span class="math inline">\(\gamma\)</span>가 작으면 넓은 범위의 관측값이 서로 유사한 것으로 간주되어 매우 매끄러운 경계를 만든다. <span class="math inline">\(\gamma\)</span>가 크면 각 관측값의 영향범위가 좁아져 복잡하고 국소적인 경계를 만들 수 있다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch06-rbf-gamma" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch06-rbf-gamma-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-support-vector-machines_files/figure-html/fig-ch06-rbf-gamma-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch06-rbf-gamma-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;6.6: RBF 커널에서 gamma가 유사도 감소속도에 미치는 영향
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch06-laplacian-kernel" class="level3" data-number="6.3.8">
+<h3 data-number="6.3.8" class="anchored" data-anchor-id="sec-ch06-laplacian-kernel"><span class="header-section-number">6.3.8</span> 라플라스 커널</h3>
+<p>라플라스 커널(Laplacian kernel)은</p>
+<p><span id="eq-ch06-laplacian-kernel"><span class="math display">\[
+K(\mathbf x,\mathbf z)
+=
+\exp\left(-\gamma\|\mathbf x-\mathbf z\|_1\right)
+\tag{6.61}\]</span></span></p>
+<p>로 정의할 수 있다. RBF 커널이 제곱 유클리드 거리를 사용하는 것과 달리 <span class="math inline">\(\ell_1\)</span> 거리를 사용한다. 입력차원별 차이를 절댓값으로 합산하므로 특정 자료구조에서 강건한 유사도를 제공할 수 있다.</p>
+</section>
+<section id="sec-ch06-sigmoid-kernel" class="level3" data-number="6.3.9">
+<h3 data-number="6.3.9" class="anchored" data-anchor-id="sec-ch06-sigmoid-kernel"><span class="header-section-number">6.3.9</span> 시그모이드 커널</h3>
+<p>시그모이드 커널(sigmoid kernel)은</p>
+<p><span id="eq-ch06-sigmoid-kernel"><span class="math display">\[
+K(\mathbf x,\mathbf z)
+=
+\tanh(\gamma\mathbf x^\top\mathbf z+r)
+\tag{6.62}\]</span></span></p>
+<p>이다. 신경망의 활성화와 유사하지만 모든 <span class="math inline">\(\gamma\)</span>와 <span class="math inline">\(r\)</span>에서 양의 준정부호가 되는 것은 아니다. 따라서 사용 전에 구현체의 허용조건과 Gram 행렬의 성질을 확인해야 한다.</p>
+</section>
+<section id="sec-ch06-structured-kernels" class="level3" data-number="6.3.10">
+<h3 data-number="6.3.10" class="anchored" data-anchor-id="sec-ch06-structured-kernels"><span class="header-section-number">6.3.10</span> 문자열·그래프·집합 커널</h3>
+<p>커널은 유클리드 벡터에만 국한되지 않는다. 두 객체 사이의 유사도를 유효한 내적으로 설계할 수 있다면 다음과 같은 구조자료에도 적용할 수 있다.</p>
+<ul>
+<li>문자열 커널(string kernel): 공통 부분문자열, n-gram 또는 부분수열 유사도</li>
+<li>그래프 커널(graph kernel): 경로, 보행, 부분그래프 또는 Weisfeiler–Lehman 구조</li>
+<li>트리 커널: 공통 부분트리</li>
+<li>집합 커널: 원소쌍 커널의 합이나 평균</li>
+<li>확률분포 커널: 분포 사이의 내적 또는 거리 변환</li>
+</ul>
+<p>좋은 커널은 자료의 불변성, 대칭성, 국소성과 영역지식을 반영한다.</p>
+</section>
+<section id="sec-ch06-kernel-closure" class="level3" data-number="6.3.11">
+<h3 data-number="6.3.11" class="anchored" data-anchor-id="sec-ch06-kernel-closure"><span class="header-section-number">6.3.11</span> 커널의 닫힘 성질</h3>
+<p><span class="math inline">\(K_1\)</span>과 <span class="math inline">\(K_2\)</span>가 유효한 커널이고 <span class="math inline">\(a,b\ge0\)</span>이면 다음 함수도 유효한 커널이다.</p>
+<p><span id="eq-ch06-kernel-sum"><span class="math display">\[
+K(\mathbf x,\mathbf z)
+=
+aK_1(\mathbf x,\mathbf z)
++bK_2(\mathbf x,\mathbf z)
+\tag{6.63}\]</span></span></p>
+<p><span id="eq-ch06-kernel-product"><span class="math display">\[
+K(\mathbf x,\mathbf z)
+=
+K_1(\mathbf x,\mathbf z)
+K_2(\mathbf x,\mathbf z)
+\tag{6.64}\]</span></span></p>
+<p>또한 임의의 함수 <span class="math inline">\(g\)</span>에 대해</p>
+<p><span id="eq-ch06-rank-one-kernel"><span class="math display">\[
+K(\mathbf x,\mathbf z)
+=
+g(\mathbf x)g(\mathbf z)
+\tag{6.65}\]</span></span></p>
+<p>도 유효하다. 이 성질을 이용해 여러 자료원이나 변수군의 커널을 결합할 수 있다.</p>
+</section>
+<section id="sec-ch06-kernel-centering" class="level3" data-number="6.3.12">
+<h3 data-number="6.3.12" class="anchored" data-anchor-id="sec-ch06-kernel-centering"><span class="header-section-number">6.3.12</span> 커널 중심화(kernel centering)</h3>
+<p>특성공간에서 평균을 제거하려면 커널 행렬을 중심화한다. <span class="math inline">\(\mathbf H=\mathbf I_n-\frac1n\mathbf 1\mathbf 1^\top\)</span>라고 하면 중심화된 Gram 행렬은</p>
+<p><span id="eq-ch06-kernel-centering"><span class="math display">\[
+\mathbf K_c
+=
+\mathbf H\mathbf K\mathbf H
+\tag{6.66}\]</span></span></p>
+<p>이다. 이는 커널 PCA(kernel principal component analysis)와 같은 비지도 커널방법에서 특히 중요하다. 시험관측값과 훈련관측값 사이의 커널도 훈련평균을 기준으로 일관되게 중심화해야 한다.</p>
+</section>
+<section id="sec-ch06-kernel-normalization" class="level3" data-number="6.3.13">
+<h3 data-number="6.3.13" class="anchored" data-anchor-id="sec-ch06-kernel-normalization"><span class="header-section-number">6.3.13</span> 커널 정규화(kernel normalization)</h3>
+<p>관측값별 자기유사도 크기가 크게 다르면 다음과 같이 정규화할 수 있다.</p>
+<p><span id="eq-ch06-normalized-kernel"><span class="math display">\[
+\widetilde K(\mathbf x,\mathbf z)
+=
+\frac{K(\mathbf x,\mathbf z)}
+{\sqrt{K(\mathbf x,\mathbf x)K(\mathbf z,\mathbf z)}}
+\tag{6.67}\]</span></span></p>
+<p>이 정규화는 특성공간에서 두 벡터의 코사인 유사도에 해당한다. 다만 자기유사도가 0인 경우에는 사용할 수 없으며, 정규화가 항상 예측성능을 높이는 것은 아니다.</p>
+</section>
+<section id="sec-ch06-kernel-induced-distance" class="level3" data-number="6.3.14">
+<h3 data-number="6.3.14" class="anchored" data-anchor-id="sec-ch06-kernel-induced-distance"><span class="header-section-number">6.3.14</span> 커널 유도거리(kernel-induced distance)</h3>
+<p>커널이 정의하는 특성공간의 거리제곱은</p>
+<p><span id="eq-ch06-kernel-distance"><span class="math display">\[
+\|\boldsymbol\phi(\mathbf x)-\boldsymbol\phi(\mathbf z)\|^2
+=
+K(\mathbf x,\mathbf x)
++K(\mathbf z,\mathbf z)
+-2K(\mathbf x,\mathbf z)
+\tag{6.68}\]</span></span></p>
+<p>이다. 커널 선택은 단순히 비선형 함수를 선택하는 것이 아니라 자료 사이의 유사도와 거리를 재정의하는 것이다.</p>
+</section>
+<section id="sec-ch06-kernel-hyperparameters" class="level3" data-number="6.3.15">
+<h3 data-number="6.3.15" class="anchored" data-anchor-id="sec-ch06-kernel-hyperparameters"><span class="header-section-number">6.3.15</span> 커널 하이퍼파라미터 선택</h3>
+<p>커널 종류와 매개변수는 가설공간을 결정한다. RBF SVM에서는 보통 <span class="math inline">\(C\)</span>와 <span class="math inline">\(\gamma\)</span>를 함께 선택해야 한다. 두 값은 강하게 상호작용한다.</p>
+<ul>
+<li>큰 <span class="math inline">\(C\)</span>: 마진 위반을 강하게 벌하여 훈련자료에 더 밀착</li>
+<li>작은 <span class="math inline">\(C\)</span>: 넓은 마진과 더 강한 규제</li>
+<li>큰 <span class="math inline">\(\gamma\)</span>: 좁고 국소적인 커널, 복잡한 경계</li>
+<li>작은 <span class="math inline">\(\gamma\)</span>: 넓고 매끄러운 커널, 단순한 경계</li>
+</ul>
+<p>하이퍼파라미터 선택은 훈련·검증 과정 안에서 수행해야 하며 최종 시험자료를 반복적으로 사용하면 안 된다. 탐색범위는 보통 로그척도에서 구성한다.</p>
+<p><span id="eq-ch06-log-grid-example"><span class="math display">\[
+C\in\{2^{-5},2^{-3},\ldots,2^{15}\},
+\qquad
+\gamma\in\{2^{-15},2^{-13},\ldots,2^3\}
+\tag{6.69}\]</span></span></p>
+<p>이 격자는 예시일 뿐이며 특성 스케일, 표본크기와 자료구조에 따라 조정해야 한다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch06-kernel-grid" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch06-kernel-grid-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-support-vector-machines_files/figure-html/fig-ch06-kernel-grid-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch06-kernel-grid-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;6.7: C와 gamma의 결합 탐색을 나타낸 개념적 검증오차 표면
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch06-kernel-selection-principles" class="level3" data-number="6.3.16">
+<h3 data-number="6.3.16" class="anchored" data-anchor-id="sec-ch06-kernel-selection-principles"><span class="header-section-number">6.3.16</span> 커널 선택의 실무 원칙</h3>
+<p>선형 커널을 항상 기준모형으로 포함하는 것이 좋다. 선형모형이 충분한 성능을 보이면 더 복잡한 커널의 계산비용과 해석부담을 피할 수 있다. 비선형성이 예상되면 RBF 커널이 일반적인 출발점이지만, 구조자료에서는 구조화 커널(structured kernel)처럼 영역에 맞는 커널이 더 적절할 수 있다.</p>
+<div class="callout callout-style-default callout-warning callout-titled" title="커널 탐색과 데이터 누출">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">경고</span>커널 탐색과 데이터 누출
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>표준화, 변수선택, 결측대체, 커널 종류와 하이퍼파라미터 선택은 모두 교차검증의 각 훈련폴드 안에서 수행해야 한다. 전체 자료에서 전처리한 뒤 교차검증하면 검증폴드의 정보가 학습과정에 유입되어 성능이 낙관적으로 추정된다.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-ch06-soft-margin-regularization" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="sec-ch06-soft-margin-regularization"><span class="header-section-number">6.4</span> 소프트 마진과 규제</h2>
+<section id="sec-ch06-nonseparable-data" class="level3" data-number="6.4.1">
+<h3 data-number="6.4.1" class="anchored" data-anchor-id="sec-ch06-nonseparable-data"><span class="header-section-number">6.4.1</span> 선형분리가 불가능한 자료</h3>
+<p>현실 자료에서는 클래스가 겹치거나 이상치가 존재하기 때문에 모든 관측값을 완벽하게 분리하는 초평면이 존재하지 않는 경우가 많다. 설령 분리가 가능하더라도 하나의 이상치를 맞추기 위해 마진이 지나치게 좁아질 수 있다. 소프트 마진 SVM은 일부 관측값이 마진 안으로 들어오거나 잘못 분류되는 것을 허용한다.</p>
+<p>각 관측값에 비음수 슬랙변수(slack variable) <span class="math inline">\(\xi_i\)</span>를 도입하면 제약조건은</p>
+<p><span id="eq-ch06-soft-margin-constraint"><span class="math display">\[
+y_i(\mathbf w^\top\mathbf x_i+b)
+\ge
+1-\xi_i,
+\qquad
+\xi_i\ge0
+\tag{6.70}\]</span></span></p>
+<p>이 된다.</p>
+<p>슬랙변수의 의미는 다음과 같다.</p>
+<ul>
+<li><span class="math inline">\(\xi_i=0\)</span>: 올바른 쪽에서 마진 경계 바깥 또는 위</li>
+<li><span class="math inline">\(0&lt;\xi_i&lt;1\)</span>: 올바르게 분류되지만 마진 내부</li>
+<li><span class="math inline">\(\xi_i=1\)</span>: 결정경계 위</li>
+<li><span class="math inline">\(\xi_i&gt;1\)</span>: 잘못 분류됨</li>
+</ul>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch06-slack-cases" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch06-slack-cases-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-support-vector-machines_files/figure-html/fig-ch06-slack-cases-1.png" class="img-fluid figure-img" width="864">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch06-slack-cases-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;6.8: 소프트 마진에서 슬랙변수의 네 가지 경우
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch06-soft-margin-primal" class="level3" data-number="6.4.2">
+<h3 data-number="6.4.2" class="anchored" data-anchor-id="sec-ch06-soft-margin-primal"><span class="header-section-number">6.4.2</span> 소프트 마진 원문제</h3>
+<p>소프트 마진 SVM은</p>
+<p><span id="eq-ch06-soft-margin-primal"><span class="math display">\[
+\begin{aligned}
+\min_{\mathbf w,b,\boldsymbol\xi}\quad &amp;
+\frac12\|\mathbf w\|_2^2
++
+C\sum_{i=1}^{n}\xi_i\\
+\text{subject to}\quad &amp;
+y_i(\mathbf w^\top\mathbf x_i+b)
+\ge1-\xi_i,\\
+&amp;\xi_i\ge0,
+\qquad i=1,\ldots,n
+\end{aligned}
+\tag{6.71}\]</span></span></p>
+<p>로 정의된다. 첫째 항은 마진을 넓게 만들고, 둘째 항은 마진 위반을 벌한다. <span class="math inline">\(C&gt;0\)</span>는 두 목표 사이의 균형을 조절한다.</p>
+<p><span class="math inline">\(C\)</span>가 크면 훈련오류와 마진 위반에 큰 비용을 부과하여 복잡한 경계를 선택할 수 있다. <span class="math inline">\(C\)</span>가 작으면 일부 위반을 허용하면서 <span class="math inline">\(\|\mathbf w\|_2\)</span>가 작은 넓은 마진을 선호한다.</p>
+</section>
+<section id="sec-ch06-hinge-loss" class="level3" data-number="6.4.3">
+<h3 data-number="6.4.3" class="anchored" data-anchor-id="sec-ch06-hinge-loss"><span class="header-section-number">6.4.3</span> 힌지 손실</h3>
+<p>주어진 <span class="math inline">\((\mathbf w,b)\)</span>에서 제약을 만족하는 최소 슬랙은</p>
+<p><span id="eq-ch06-optimal-slack"><span class="math display">\[
+\xi_i
+=
+\max\left[0,
+1-y_i(\mathbf w^\top\mathbf x_i+b)
+\right]
+\tag{6.72}\]</span></span></p>
+<p>이다. 이를 원문제에 대입하면 제약 없는 목적함수</p>
+<p><span id="eq-ch06-hinge-objective-sum"><span class="math display">\[
+\min_{\mathbf w,b}
+\left[
+\frac12\|\mathbf w\|_2^2
++
+C\sum_{i=1}^{n}
+\max\{0,1-y_if(\mathbf x_i)\}
+\right]
+\tag{6.73}\]</span></span></p>
+<p>를 얻는다. 함수</p>
+<p><span id="eq-ch06-hinge-loss"><span class="math display">\[
+L_{\mathrm{hinge}}(y,f)
+=
+\max(0,1-yf)
+\tag{6.74}\]</span></span></p>
+<p>를 힌지 손실이라고 한다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch06-hinge-loss" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch06-hinge-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-support-vector-machines_files/figure-html/fig-ch06-hinge-loss-1.png" class="img-fluid figure-img" width="720">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch06-hinge-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;6.9: 0-1 손실과 힌지 손실의 비교
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>힌지 손실은 0-1 손실의 볼록 상계이다.</p>
+<p><span id="eq-ch06-hinge-upper-bound"><span class="math display">\[
+I(yf\le0)
+\le
+\max(0,1-yf)
+\tag{6.75}\]</span></span></p>
+<p>잘못 분류된 관측값뿐 아니라 올바르게 분류되더라도 마진 <span class="math inline">\(yf&lt;1\)</span>인 관측값에도 양의 손실을 부과한다. 반면 <span class="math inline">\(yf\ge1\)</span>인 관측값은 손실이 0이다.</p>
+</section>
+<section id="sec-ch06-regularized-risk-form" class="level3" data-number="6.4.4">
+<h3 data-number="6.4.4" class="anchored" data-anchor-id="sec-ch06-regularized-risk-form"><span class="header-section-number">6.4.4</span> 경험위험 최소화 표현</h3>
+<p>목적함수를 표본평균 형태로 쓰면</p>
+<p><span id="eq-ch06-regularized-hinge-risk"><span class="math display">\[
+\min_{\mathbf w,b}
+\left[
+\frac{\lambda}{2}\|\mathbf w\|_2^2
++
+\frac1n\sum_{i=1}^{n}
+L_{\mathrm{hinge}}
+\{y_i,f(\mathbf x_i)\}
+\right]
+\tag{6.76}\]</span></span></p>
+<p>로 나타낼 수 있다. 구현체에 따라 <span class="math inline">\(C\)</span>와 <span class="math inline">\(\lambda\)</span>의 정확한 대응은 표본합 또는 표본평균을 사용하는지에 따라 달라진다. 일반적으로 <span class="math inline">\(C\)</span>가 클수록 규제가 약하고 <span class="math inline">\(\lambda\)</span>가 클수록 규제가 강하다.</p>
+<div class="callout callout-style-default callout-warning callout-titled" title="소프트웨어별 C의 정의">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">경고</span>소프트웨어별 C의 정의
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>서로 다른 소프트웨어는 목적함수에 손실의 합, 평균 또는 클래스별 가중합을 사용할 수 있다. 따라서 같은 숫자의 <span class="math inline">\(C\)</span>가 항상 같은 규제강도를 뜻하지 않는다. 표본크기가 달라지는 재표본화 분석에서는 구현체의 목적함수 정의를 확인해야 한다.</p>
+</div>
+</div>
+</section>
+<section id="sec-ch06-soft-margin-dual" class="level3" data-number="6.4.5">
+<h3 data-number="6.4.5" class="anchored" data-anchor-id="sec-ch06-soft-margin-dual"><span class="header-section-number">6.4.5</span> 소프트 마진 쌍대문제</h3>
+<p>소프트 마진 라그랑지안에 슬랙의 비음수 제약에 대한 승수 <span class="math inline">\(\mu_i\ge0\)</span>를 추가하면</p>
+<p><span id="eq-ch06-soft-margin-lagrangian"><span class="math display">\[
+\begin{aligned}
+\mathcal L
+=&amp;
+\frac12\|\mathbf w\|^2
++C\sum_i\xi_i
++
+\sum_i\alpha_i
+\{1-\xi_i-y_i(\mathbf w^\top\mathbf x_i+b)\}
+-
+\sum_i\mu_i\xi_i.
+\end{aligned}
+\tag{6.77}\]</span></span></p>
+<p><span class="math inline">\(\xi_i\)</span>에 대한 정상조건은</p>
+<p><span id="eq-ch06-soft-margin-xi-stationarity"><span class="math display">\[
+C-\alpha_i-\mu_i=0
+\tag{6.78}\]</span></span></p>
+<p>이다. <span class="math inline">\(\mu_i\ge0\)</span>이므로</p>
+<p><span id="eq-ch06-alpha-box-constraint"><span class="math display">\[
+0\le\alpha_i\le C
+\tag{6.79}\]</span></span></p>
+<p>를 얻는다. 따라서 소프트 마진 쌍대문제는</p>
+<p><span id="eq-ch06-soft-margin-dual"><span class="math display">\[
+\begin{aligned}
+\max_{\boldsymbol\alpha}\quad &amp;
+\sum_{i=1}^{n}\alpha_i
+-
+\frac12
+\sum_{i=1}^{n}\sum_{j=1}^{n}
+\alpha_i\alpha_jy_iy_j
+K(\mathbf x_i,\mathbf x_j)\\
+\text{subject to}\quad &amp;
+0\le\alpha_i\le C,\\
+&amp;
+\sum_{i=1}^{n}\alpha_i y_i=0
+\end{aligned}
+\tag{6.80}\]</span></span></p>
+<p>이다. 하드 마진과 달리 승수에 상한 <span class="math inline">\(C\)</span>가 생긴다.</p>
+</section>
+<section id="sec-ch06-soft-margin-kkt-cases" class="level3" data-number="6.4.6">
+<h3 data-number="6.4.6" class="anchored" data-anchor-id="sec-ch06-soft-margin-kkt-cases"><span class="header-section-number">6.4.6</span> KKT 조건에 따른 관측값 구분</h3>
+<p>소프트 마진에서 <span class="math inline">\(\alpha_i\)</span>의 값은 관측값의 위치와 연결된다.</p>
+<p><span id="eq-ch06-soft-margin-alpha-cases"><span class="math display">\[
+\begin{array}{lll}
+\alpha_i=0
+&amp;\Rightarrow&amp;
+y_if(\mathbf x_i)\ge1,\\
+0&lt;\alpha_i&lt;C
+&amp;\Rightarrow&amp;
+y_if(\mathbf x_i)=1,\\
+\alpha_i=C
+&amp;\Rightarrow&amp;
+y_if(\mathbf x_i)\le1.
+\end{array}
+\tag{6.81}\]</span></span></p>
+<ul>
+<li><span class="math inline">\(\alpha_i=0\)</span>: 마진 밖의 비서포트 벡터</li>
+<li><span class="math inline">\(0&lt;\alpha_i&lt;C\)</span>: 마진 경계 위의 자유 서포트 벡터</li>
+<li><span class="math inline">\(\alpha_i=C\)</span>: 마진 내부 또는 오분류된 경계 서포트 벡터</li>
+</ul>
+<p>절편은 일반적으로 <span class="math inline">\(0&lt;\alpha_i&lt;C\)</span>인 서포트 벡터를 이용하여 계산한다.</p>
+</section>
+<section id="sec-ch06-c-effect" class="level3" data-number="6.4.7">
+<h3 data-number="6.4.7" class="anchored" data-anchor-id="sec-ch06-c-effect"><span class="header-section-number">6.4.7</span> C가 결정경계에 미치는 영향</h3>
+<p><span class="math inline">\(C\)</span>는 단순히 오분류 비용만 바꾸는 것이 아니라 마진폭, 서포트 벡터 수, 경계의 안정성과 훈련오류를 동시에 바꾼다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch06-c-concept" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch06-c-concept-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-support-vector-machines_files/figure-html/fig-ch06-c-concept-1.png" class="img-fluid figure-img" width="864">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch06-c-concept-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;6.10: 작은 C와 큰 C가 만드는 소프트 마진의 개념적 차이
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>이 그림은 개념적 예시이다. 실제 경계는 자료와 최적화 결과에 의해 결정되며, 큰 <span class="math inline">\(C\)</span>가 항상 낮은 시험오류를 보장하지 않는다.</p>
+</section>
+<section id="sec-ch06-squared-hinge" class="level3" data-number="6.4.8">
+<h3 data-number="6.4.8" class="anchored" data-anchor-id="sec-ch06-squared-hinge"><span class="header-section-number">6.4.8</span> 제곱 힌지 손실</h3>
+<p>일부 선형 SVM 구현은 제곱 힌지 손실(squared hinge loss)</p>
+<p><span id="eq-ch06-squared-hinge-loss"><span class="math display">\[
+L_{\mathrm{squared\ hinge}}(y,f)
+=
+\max(0,1-yf)^2
+\tag{6.82}\]</span></span></p>
+<p>을 사용한다. 이는 마진 위반이 큰 관측값을 더 강하게 벌하고 목적함수가 경계점 이외에서 더 매끄럽다. 그러나 이상치의 영향이 커질 수 있다.</p>
+<p><span class="math inline">\(\ell_1\)</span> 소프트 마진이라는 표현은 보통 <span class="math inline">\(\sum_i\xi_i\)</span>를, <span class="math inline">\(\ell_2\)</span> 소프트 마진은 <span class="math inline">\(\sum_i\xi_i^2\)</span>를 벌하는 경우를 뜻한다. 이는 가중치 <span class="math inline">\(\mathbf w\)</span>에 대한 <span class="math inline">\(\ell_1\)</span> 또는 <span class="math inline">\(\ell_2\)</span> 규제와 구분해야 한다.</p>
+</section>
+<section id="sec-ch06-l1-regularized-svm" class="level3" data-number="6.4.9">
+<h3 data-number="6.4.9" class="anchored" data-anchor-id="sec-ch06-l1-regularized-svm"><span class="header-section-number">6.4.9</span> 가중치의 <span class="math inline">\(\ell_1\)</span> 규제와 희소 선형 SVM(sparse linear SVM)</h3>
+<p>변수선택이 필요한 경우 가중치에 <span class="math inline">\(\ell_1\)</span> 규제를 사용할 수 있다.</p>
+<p><span id="eq-ch06-l1-svm"><span class="math display">\[
+\min_{\mathbf w,b}
+\left[
+\lambda\|\mathbf w\|_1
++
+\frac1n\sum_i
+L_{\mathrm{hinge}}
+\{y_i,\mathbf w^\top\mathbf x_i+b\}
+\right]
+\tag{6.83}\]</span></span></p>
+<p><span class="math inline">\(\ell_1\)</span> 규제는 일부 <span class="math inline">\(w_j\)</span>를 정확히 0으로 만들어 희소한 선형분류기를 만들 수 있다. 상관된 변수 중 일부만 선택할 수 있으므로 변수선택의 안정성을 재표본화로 평가해야 한다.</p>
+</section>
+<section id="sec-ch06-class-weighted-svm" class="level3" data-number="6.4.10">
+<h3 data-number="6.4.10" class="anchored" data-anchor-id="sec-ch06-class-weighted-svm"><span class="header-section-number">6.4.10</span> 클래스 가중 SVM(class-weighted SVM)과 소프트 마진</h3>
+<p>비용민감 학습(cost-sensitive learning)의 한 형태로 클래스 불균형이나 오류비용의 비대칭성이 있을 때 관측값별 비용 <span class="math inline">\(C_i\)</span>를 사용할 수 있다.</p>
+<p><span id="eq-ch06-weighted-soft-margin"><span class="math display">\[
+\min_{\mathbf w,b,\boldsymbol\xi}
+\frac12\|\mathbf w\|^2
++
+\sum_{i=1}^{n}C_i\xi_i
+\tag{6.84}\]</span></span></p>
+<p>예를 들어 양성 클래스의 거짓음성 비용이 높다면</p>
+<p><span id="eq-ch06-class-specific-c"><span class="math display">\[
+C_i
+=
+\begin{cases}
+C_+,&amp;y_i=+1,\\
+C_-,&amp;y_i=-1,
+\end{cases}
+\qquad
+C_+&gt;C_-
+\tag{6.85}\]</span></span></p>
+<p>로 설정할 수 있다. 단순히 클래스 빈도의 역수를 사용하는 방법은 출발점일 뿐이며, 실제 의사결정 비용과 목표 민감도에 따라 검증해야 한다.</p>
+</section>
+<section id="sec-ch06-resampling-class-weight" class="level3" data-number="6.4.11">
+<h3 data-number="6.4.11" class="anchored" data-anchor-id="sec-ch06-resampling-class-weight"><span class="header-section-number">6.4.11</span> 재표본화와 클래스 가중치</h3>
+<p>오버샘플링, 언더샘플링과 클래스 가중치는 서로 다른 방식으로 목적함수의 클래스 기여를 조정한다. 재표본화는 훈련자료의 경험분포를 바꾸고, 클래스 가중치는 관측값 손실의 비용을 바꾼다. 둘을 동시에 사용하면 효과가 중복될 수 있다.</p>
+<p>평가자료의 클래스 비율은 실제 적용분포를 유지해야 한다. 훈련자료에서 비율을 조정했더라도 확률보정과 예측도 값은 목표 모집단의 유병률 또는 사건율을 기준으로 평가해야 한다.</p>
+</section>
+<section id="sec-ch06-score-vs-probability" class="level3" data-number="6.4.12">
+<h3 data-number="6.4.12" class="anchored" data-anchor-id="sec-ch06-score-vs-probability"><span class="header-section-number">6.4.12</span> SVM 점수와 확률</h3>
+<p>SVM의 판별값</p>
+<p><span id="eq-ch06-svm-score-not-probability"><span class="math display">\[
+f(\mathbf x)
+=
+\sum_i\alpha_i y_iK(\mathbf x_i,\mathbf x)+b
+\tag{6.86}\]</span></span></p>
+<p>은 결정경계까지의 방향성 있는 점수이지만 일반적으로 <span class="math inline">\(P(Y=1\mid\mathbf X=\mathbf x)\)</span>가 아니다. 점수의 절댓값이 클수록 결정경계에서 멀다는 의미는 있으나, 서로 다른 모형이나 자료집합 사이에서 직접 비교 가능한 확률척도는 아니다.</p>
+<p>확률이 필요하면 독립적인 보정자료 또는 교차검증의 out-of-fold 점수를 이용하여 보정모형을 적합한다.</p>
+</section>
+<section id="sec-ch06-platt-scaling" class="level3" data-number="6.4.13">
+<h3 data-number="6.4.13" class="anchored" data-anchor-id="sec-ch06-platt-scaling"><span class="header-section-number">6.4.13</span> Platt 보정</h3>
+<p>보정도 평가와 등위회귀를 포함한 일반적인 확률 보정은 <a href="02-model-evaluation.html#sec-ch02-calibration" class="quarto-xref"><span>섹션 2.3.10</span></a><!-- -->과 <span class="quarto-unresolved-ref">?sec-ch17-calibration-uncertainty</span><!-- -->에서 다룬다.</p>
+<p>Platt 보정(Platt scaling)은 SVM 점수 <span class="math inline">\(f\)</span>에 로지스틱 함수를 적합한다.</p>
+<p><span id="eq-ch06-platt-scaling"><span class="math display">\[
+\widehat P(Y=1\mid f)
+=
+\frac{1}{1+\exp(Af+B)}
+\tag{6.87}\]</span></span></p>
+<p><span class="math inline">\(A\)</span>와 <span class="math inline">\(B\)</span>는 SVM을 학습하는 데 사용되지 않은 점수에서 추정해야 한다. 같은 훈련점수로 보정하면 과적합된 확률을 얻을 수 있다.</p>
+</section>
+<section id="sec-ch06-isotonic-calibration" class="level3" data-number="6.4.14">
+<h3 data-number="6.4.14" class="anchored" data-anchor-id="sec-ch06-isotonic-calibration"><span class="header-section-number">6.4.14</span> 등위회귀 보정(isotonic calibration)</h3>
+<p>등위회귀는 점수와 사건확률 사이의 단조관계를 비모수적으로 추정한다.</p>
+<p><span id="eq-ch06-isotonic-calibration"><span class="math display">\[
+\widehat p_i
+=
+g(f_i),
+\qquad
+g\text{는 비감소 함수}
+\tag{6.88}\]</span></span></p>
+<p>자료가 충분하면 유연하지만 작은 표본에서는 계단형 과적합이 발생할 수 있다. 보정방법도 내부 검증 또는 중첩 교차검증 안에서 선택해야 한다.</p>
+</section>
+<section id="sec-ch06-decision-threshold" class="level3" data-number="6.4.15">
+<h3 data-number="6.4.15" class="anchored" data-anchor-id="sec-ch06-decision-threshold"><span class="header-section-number">6.4.15</span> 결정 임계값</h3>
+<p>기본 SVM 분류는 <span class="math inline">\(f(\mathbf x)=0\)</span>을 임계값으로 사용하지만 특정 민감도, 특이도 또는 비용기준을 만족하려면</p>
+<p><span id="eq-ch06-svm-threshold"><span class="math display">\[
+\widehat y
+=
+I\{f(\mathbf x)\ge t\}
+\tag{6.89}\]</span></span></p>
+<p>와 같이 <span class="math inline">\(t\)</span>를 조정할 수 있다. 임계값은 시험자료가 아니라 검증자료에서 선택한다. 클래스 가중치, 확률보정과 임계값은 서로 다른 목적을 가진다.</p>
+<ul>
+<li>클래스 가중치: 모형 학습과 결정경계 변경</li>
+<li>확률보정: 점수를 확률척도로 변환</li>
+<li>임계값 조정: 주어진 점수 또는 확률에서 행동규칙 선택</li>
+</ul>
+</section>
+<section id="sec-ch06-nu-svm" class="level3" data-number="6.4.16">
+<h3 data-number="6.4.16" class="anchored" data-anchor-id="sec-ch06-nu-svm"><span class="header-section-number">6.4.16</span> nu-SVM</h3>
+<p><span class="math inline">\(\nu\)</span>-SVM은 <span class="math inline">\(C\)</span> 대신 <span class="math inline">\(\nu\in(0,1]\)</span>를 사용하여 마진오류와 서포트 벡터 비율을 보다 직접적으로 조절한다. 한 가지 원문제는</p>
+<p><span id="eq-ch06-nu-svm-primal"><span class="math display">\[
+\begin{aligned}
+\min_{\mathbf w,b,\rho,\boldsymbol\xi}\quad &amp;
+\frac12\|\mathbf w\|^2
+-
+\nu\rho
++
+\frac1n\sum_i\xi_i\\
+\text{subject to}\quad &amp;
+y_i(\mathbf w^\top\phi(\mathbf x_i)+b)
+\ge\rho-\xi_i,\\
+&amp;\xi_i\ge0,
+\qquad \rho\ge0
+\end{aligned}
+\tag{6.90}\]</span></span></p>
+<p>이다. 적절한 조건에서 <span class="math inline">\(\nu\)</span>는 마진오류 비율의 상계이자 서포트 벡터 비율의 하계로 해석된다. 구현체마다 모수화가 다를 수 있으므로 정의를 확인해야 한다.</p>
+</section>
+<section id="sec-ch06-svm-robustness" class="level3" data-number="6.4.17">
+<h3 data-number="6.4.17" class="anchored" data-anchor-id="sec-ch06-svm-robustness"><span class="header-section-number">6.4.17</span> 강건성과 이상치</h3>
+<p>힌지 손실은 제곱손실보다 큰 잔차의 증가가 선형이므로 일부 상황에서 더 강건하지만, <span class="math inline">\(C\)</span>가 매우 크면 이상치를 맞추기 위해 경계가 크게 이동할 수 있다. RBF 커널에서 큰 <span class="math inline">\(\gamma\)</span>와 큰 <span class="math inline">\(C\)</span>를 함께 사용하면 개별 관측값 주위에 매우 국소적인 경계를 만들 수 있다.</p>
+<p>이상치가 의심될 때는 다음을 점검한다.</p>
+<ul>
+<li>입력오류와 라벨오류</li>
+<li>표준화 전후의 특성분포</li>
+<li>반복 교차검증에서 서포트 벡터 선택 안정성</li>
+<li><span class="math inline">\(C\)</span>와 <span class="math inline">\(\gamma\)</span> 변화에 따른 성능과 서포트 벡터 수</li>
+<li>영향력이 큰 관측값을 제외한 민감도 분석</li>
+</ul>
+</section>
+<section id="sec-ch06-soft-margin-statistical-view" class="level3" data-number="6.4.18">
+<h3 data-number="6.4.18" class="anchored" data-anchor-id="sec-ch06-soft-margin-statistical-view"><span class="header-section-number">6.4.18</span> 소프트 마진의 통계적 해석</h3>
+<p>소프트 마진 SVM은 마진기반 대리손실과 함수복잡도 규제를 결합한 경험위험 최소화로 볼 수 있다. 힌지 손실은 분류오류를 직접 최소화하기 어려운 문제를 볼록최적화로 바꾼다. 그러나 대리손실의 최적화와 최종 적용목표가 일치하려면 평가척도, 클래스 비용과 분포를 함께 고려해야 한다.</p>
+</section>
+</section>
+<section id="sec-ch06-support-vector-regression" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="sec-ch06-support-vector-regression"><span class="header-section-number">6.5</span> 서포트 벡터 회귀</h2>
+<section id="sec-ch06-svr-overview" class="level3" data-number="6.5.1">
+<h3 data-number="6.5.1" class="anchored" data-anchor-id="sec-ch06-svr-overview"><span class="header-section-number">6.5.1</span> 회귀문제로의 확장</h3>
+<p>서포트 벡터 회귀(support vector regression, SVR)는 분류의 마진 개념을 회귀문제로 확장한다. 일반적인 회귀모형은 예측오차가 작을수록 더 좋은 것으로 평가하지만, SVR은 실제값과 예측값의 차이가 미리 정한 허용폭 <span class="math inline">\(\varepsilon\)</span> 이내이면 손실을 0으로 둔다. 이 허용영역을 <strong><span class="math inline">\(\varepsilon\)</span>-튜브</strong>라고 한다.</p>
+<p>선형 SVR의 예측함수는</p>
+<p><span id="eq-ch06-svr-linear-function"><span class="math display">\[
+f(\mathbf x)
+=
+\mathbf w^\top\mathbf x+b
+\tag{6.91}\]</span></span></p>
+<p>이다. 모든 관측값이 튜브 안에 있도록 하면서 <span class="math inline">\(\|\mathbf w\|_2\)</span>를 최소화하면 평평한 함수를 얻는다.</p>
+</section>
+<section id="sec-ch06-epsilon-insensitive-loss" class="level3" data-number="6.5.2">
+<h3 data-number="6.5.2" class="anchored" data-anchor-id="sec-ch06-epsilon-insensitive-loss"><span class="header-section-number">6.5.2</span> epsilon-비감응 손실(epsilon-insensitive loss)</h3>
+<p><span class="math inline">\(\varepsilon\)</span>-비감응 손실은</p>
+<p><span id="eq-ch06-epsilon-insensitive-loss"><span class="math display">\[
+L_{\varepsilon}(y,f)
+=
+\max\{0,|y-f|-\varepsilon\}
+\tag{6.92}\]</span></span></p>
+<p>로 정의한다. 오차의 절댓값이 <span class="math inline">\(\varepsilon\)</span>보다 작거나 같으면 손실이 0이고, 그보다 크면 초과분만 손실로 계산한다.</p>
+<p><span id="eq-ch06-epsilon-loss-piecewise"><span class="math display">\[
+L_{\varepsilon}(y,f)
+=
+\begin{cases}
+0,
+&amp;|y-f|\le\varepsilon,\\
+|y-f|-\varepsilon,
+&amp;|y-f|&gt;\varepsilon.
+\end{cases}
+\tag{6.93}\]</span></span></p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch06-epsilon-loss" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch06-epsilon-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-support-vector-machines_files/figure-html/fig-ch06-epsilon-loss-1.png" class="img-fluid figure-img" width="720">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch06-epsilon-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;6.11: 절대오차 손실과 epsilon-비감응 손실
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch06-svr-primal" class="level3" data-number="6.5.3">
+<h3 data-number="6.5.3" class="anchored" data-anchor-id="sec-ch06-svr-primal"><span class="header-section-number">6.5.3</span> 선형 SVR의 원문제</h3>
+<p>모든 관측값을 튜브 안에 넣을 수 없는 경우 위쪽 위반을 위한 <span class="math inline">\(\xi_i\)</span>와 아래쪽 위반을 위한 <span class="math inline">\(\xi_i^\star\)</span>를 도입한다.</p>
+<p><span id="eq-ch06-svr-primal"><span class="math display">\[
+\begin{aligned}
+\min_{\mathbf w,b,\boldsymbol\xi,\boldsymbol\xi^\star}
+\quad &amp;
+\frac12\|\mathbf w\|_2^2
++
+C\sum_{i=1}^{n}(\xi_i+\xi_i^\star)\\
+\text{subject to}\quad &amp;
+y_i-(\mathbf w^\top\mathbf x_i+b)
+\le\varepsilon+\xi_i,\\
+&amp;
+(\mathbf w^\top\mathbf x_i+b)-y_i
+\le\varepsilon+\xi_i^\star,\\
+&amp;
+\xi_i\ge0,
+\qquad
+\xi_i^\star\ge0.
+\end{aligned}
+\tag{6.94}\]</span></span></p>
+<p>첫째 제약은 실제값이 예측값보다 너무 큰 경우를, 둘째 제약은 예측값이 실제값보다 너무 큰 경우를 제어한다.</p>
+<p>제약 없는 형태는</p>
+<p><span id="eq-ch06-svr-unconstrained"><span class="math display">\[
+\min_{\mathbf w,b}
+\left[
+\frac12\|\mathbf w\|_2^2
++
+C\sum_{i=1}^{n}
+L_{\varepsilon}
+\{y_i,f(\mathbf x_i)\}
+\right]
+\tag{6.95}\]</span></span></p>
+<p>이다.</p>
+</section>
+<section id="sec-ch06-epsilon-tube" class="level3" data-number="6.5.4">
+<h3 data-number="6.5.4" class="anchored" data-anchor-id="sec-ch06-epsilon-tube"><span class="header-section-number">6.5.4</span> epsilon-튜브(epsilon tube)의 기하학</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch06-epsilon-tube" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch06-epsilon-tube-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-support-vector-machines_files/figure-html/fig-ch06-epsilon-tube-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch06-epsilon-tube-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;6.12: 서포트 벡터 회귀의 epsilon-튜브와 서포트 벡터
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>튜브 내부 관측값은 최적해에 직접 기여하지 않을 수 있다. 튜브 경계 위 또는 밖에 있는 관측값이 서포트 벡터가 된다. 따라서 <span class="math inline">\(\varepsilon\)</span>이 커질수록 일반적으로 서포트 벡터 수가 줄어들고 모형이 더 희소해진다.</p>
+</section>
+<section id="sec-ch06-svr-dual" class="level3" data-number="6.5.5">
+<h3 data-number="6.5.5" class="anchored" data-anchor-id="sec-ch06-svr-dual"><span class="header-section-number">6.5.5</span> SVR 쌍대문제</h3>
+<p>두 종류의 제약에 대응하는 라그랑주 승수를 각각 <span class="math inline">\(\alpha_i\)</span>와 <span class="math inline">\(\alpha_i^\star\)</span>라고 하면</p>
+<p><span id="eq-ch06-svr-weight-expansion"><span class="math display">\[
+\mathbf w
+=
+\sum_{i=1}^{n}
+(\alpha_i-\alpha_i^\star)\mathbf x_i
+\tag{6.96}\]</span></span></p>
+<p>를 얻는다. 커널을 포함한 쌍대문제는</p>
+<p><span id="eq-ch06-svr-dual"><span class="math display">\[
+\begin{aligned}
+\max_{\boldsymbol\alpha,\boldsymbol\alpha^\star}
+\, &amp;
+-rac12
+\sum_{i=1}^{n}\sum_{j=1}^{n}
+(\alpha_i-\alpha_i^\star)
+(\alpha_j-\alpha_j^\star)
+K(\mathbf x_i,\mathbf x_j)\\
+&amp;
+-
+\varepsilon\sum_{i=1}^{n}(\alpha_i+\alpha_i^\star)
++
+\sum_{i=1}^{n}y_i(\alpha_i-\alpha_i^\star)\\
+\text{subject to}\, &amp;
+\sum_{i=1}^{n}(\alpha_i-\alpha_i^\star)=0,\\
+&amp;
+0\le\alpha_i\le C,
+\qquad
+0\le\alpha_i^\star\le C.
+\end{aligned}
+\tag{6.97}\]</span></span></p>
+<p>예측함수는</p>
+<p><span id="eq-ch06-svr-kernel-predictor"><span class="math display">\[
+f(\mathbf x)
+=
+\sum_{i=1}^{n}
+(\alpha_i-\alpha_i^\star)
+K(\mathbf x_i,\mathbf x)
++b
+\tag{6.98}\]</span></span></p>
+<p>이다. <span class="math inline">\(\alpha_i-\alpha_i^\star=0\)</span>인 관측값은 예측함수에서 사라진다.</p>
+</section>
+<section id="sec-ch06-svr-kkt" class="level3" data-number="6.5.6">
+<h3 data-number="6.5.6" class="anchored" data-anchor-id="sec-ch06-svr-kkt"><span class="header-section-number">6.5.6</span> KKT 조건과 회귀 서포트 벡터</h3>
+<p>SVR의 KKT 조건에 따르면 다음 관계가 성립한다.</p>
+<ul>
+<li>튜브 내부: <span class="math inline">\(\alpha_i=\alpha_i^\star=0\)</span></li>
+<li>위쪽 튜브 경계: <span class="math inline">\(0&lt;\alpha_i&lt;C\)</span></li>
+<li>아래쪽 튜브 경계: <span class="math inline">\(0&lt;\alpha_i^\star&lt;C\)</span></li>
+<li>튜브 밖 위쪽: <span class="math inline">\(\alpha_i=C\)</span></li>
+<li>튜브 밖 아래쪽: <span class="math inline">\(\alpha_i^\star=C\)</span></li>
+</ul>
+<p>튜브 경계에 있는 자유 서포트 벡터를 이용하여 절편 <span class="math inline">\(b\)</span>를 계산할 수 있다.</p>
+</section>
+<section id="sec-ch06-svr-hyperparameters" class="level3" data-number="6.5.7">
+<h3 data-number="6.5.7" class="anchored" data-anchor-id="sec-ch06-svr-hyperparameters"><span class="header-section-number">6.5.7</span> C, epsilon과 gamma의 역할</h3>
+<p>SVR에서는 최소 세 가지 하이퍼파라미터가 서로 상호작용한다.</p>
+<div id="tbl-ch06-svr-hyperparameters" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch06-svr-hyperparameters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;6.3: SVR 하이퍼파라미터의 역할
+</figcaption>
+<div aria-describedby="tbl-ch06-svr-hyperparameters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>하이퍼파라미터</th>
+<th>작은 값</th>
+<th>큰 값</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(C\)</span></td>
+<td>튜브 위반을 더 허용, 강한 규제</td>
+<td>위반 억제, 자료에 더 밀착</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\varepsilon\)</span></td>
+<td>좁은 튜브, 많은 서포트 벡터</td>
+<td>넓은 튜브, 희소한 해</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\gamma\)</span></td>
+<td>매끄러운 RBF 함수</td>
+<td>국소적이고 복잡한 함수</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><span class="math inline">\(\varepsilon\)</span>은 반응변수의 단위에 의존하므로 반응변수의 스케일과 측정오차 수준을 고려해야 한다. <span class="math inline">\(y\)</span>를 표준화했다면 예측 후 원단위로 되돌려야 한다.</p>
+</section>
+<section id="sec-ch06-epsilon-selection" class="level3" data-number="6.5.8">
+<h3 data-number="6.5.8" class="anchored" data-anchor-id="sec-ch06-epsilon-selection"><span class="header-section-number">6.5.8</span> epsilon의 선택</h3>
+<p><span class="math inline">\(\varepsilon\)</span>은 관측오차 또는 실질적으로 무시할 수 있는 예측오차와 연결할 수 있다. 너무 작으면 거의 모든 관측값이 서포트 벡터가 되어 모형이 복잡하고 계산비용이 커진다. 너무 크면 중요한 구조를 무시하고 과소적합할 수 있다.</p>
+<p>교차검증에서 예측오차만 비교하지 말고 다음도 함께 확인한다.</p>
+<ul>
+<li>서포트 벡터 비율</li>
+<li>잔차분포</li>
+<li>입력공간의 영역별 편향</li>
+<li>반응변수 범위별 오차</li>
+<li><span class="math inline">\(C\)</span>와 <span class="math inline">\(\gamma\)</span> 변화에 대한 민감도</li>
+</ul>
+</section>
+<section id="sec-ch06-nu-svr" class="level3" data-number="6.5.9">
+<h3 data-number="6.5.9" class="anchored" data-anchor-id="sec-ch06-nu-svr"><span class="header-section-number">6.5.9</span> nu-SVR</h3>
+<p><span class="math inline">\(\nu\)</span>-SVR은 <span class="math inline">\(\varepsilon\)</span>을 직접 고정하는 대신 <span class="math inline">\(\nu\)</span>를 통해 튜브 폭과 서포트 벡터 비율을 제어한다. 한 가지 형태는</p>
+<p><span id="eq-ch06-nu-svr-primal"><span class="math display">\[
+\begin{aligned}
+\min_{\mathbf w,b,\varepsilon,\boldsymbol\xi,\boldsymbol\xi^\star}
+\quad &amp;
+\frac12\|\mathbf w\|^2
++C\left[
+\nu\varepsilon
++
+\frac1n\sum_i(\xi_i+\xi_i^\star)
+\right]\\
+\text{subject to}
+\quad &amp;
+y_i-f(\mathbf x_i)\le\varepsilon+\xi_i,\\
+&amp;f(\mathbf x_i)-y_i\le\varepsilon+\xi_i^\star,\\
+&amp;\xi_i,\xi_i^\star,\varepsilon\ge0.
+\end{aligned}
+\tag{6.99}\]</span></span></p>
+<p><span class="math inline">\(\nu\)</span>는 특정 조건에서 튜브 밖 오류 비율의 상계와 서포트 벡터 비율의 하계에 관련된다.</p>
+</section>
+<section id="sec-ch06-svr-robustness" class="level3" data-number="6.5.10">
+<h3 data-number="6.5.10" class="anchored" data-anchor-id="sec-ch06-svr-robustness"><span class="header-section-number">6.5.10</span> SVR과 강건회귀</h3>
+<p><span class="math inline">\(\varepsilon\)</span>-비감응 손실은 튜브 밖에서 선형으로 증가하므로 제곱오차보다 큰 잔차의 영향을 줄일 수 있다. 그러나 <span class="math inline">\(C\)</span>가 크면 이상치가 여전히 큰 영향력을 가질 수 있다. 반응변수의 극단값이 중요한 신호인지 자료오류인지 구분해야 한다.</p>
+<p>Huber 손실과 비교하면 두 손실의 구조는 다르다. Huber 손실은 작은 잔차를 제곱으로, 큰 잔차를 선형으로 벌한다. <span class="math inline">\(\varepsilon\)</span>-비감응 손실은 작은 잔차에 손실을 전혀 부과하지 않고 튜브 밖에서 선형으로 증가한다.</p>
+</section>
+<section id="sec-ch06-svr-evaluation" class="level3" data-number="6.5.11">
+<h3 data-number="6.5.11" class="anchored" data-anchor-id="sec-ch06-svr-evaluation"><span class="header-section-number">6.5.11</span> SVR의 평가</h3>
+<p>SVR은 일반 회귀모형과 동일하게 독립자료에서 평가한다. 대표적 척도는 다음과 같다.</p>
+<p><span id="eq-ch06-svr-mae"><span class="math display">\[
+\operatorname{MAE}
+=
+\frac1n\sum_{i=1}^{n}|y_i-\widehat y_i|
+\tag{6.100}\]</span></span></p>
+<p><span id="eq-ch06-svr-rmse"><span class="math display">\[
+\operatorname{RMSE}
+=
+\sqrt{
+\frac1n\sum_{i=1}^{n}(y_i-\widehat y_i)^2
+}
+\tag{6.101}\]</span></span></p>
+<p><span id="eq-ch06-svr-r2"><span class="math display">\[
+R^2
+=
+1-
+\frac{\sum_i(y_i-\widehat y_i)^2}
+{\sum_i(y_i-\bar y)^2}
+\tag{6.102}\]</span></span></p>
+<p><span class="math inline">\(\varepsilon\)</span>-손실 자체를 검증척도로 사용할 수도 있지만, 적용목표의 실제 비용과 연결된 척도를 우선해야 한다. 예측구간이 필요한 경우 표준 SVR 점예측만으로는 충분하지 않으며 별도의 불확실성 추정방법이 필요하다.</p>
+</section>
+<section id="sec-ch06-svr-uncertainty" class="level3" data-number="6.5.12">
+<h3 data-number="6.5.12" class="anchored" data-anchor-id="sec-ch06-svr-uncertainty"><span class="header-section-number">6.5.12</span> 불확실성 추정</h3>
+<p>기본 SVR은 조건부 평균이나 중앙값의 명시적 확률모형을 제공하지 않는다. 예측구간을 얻기 위해 다음 방법을 고려할 수 있다.</p>
+<ul>
+<li>부트스트랩을 이용한 예측분포</li>
+<li>컨포멀 예측을 이용한 분포비의존적 구간</li>
+<li>분위수 손실과 커널방법의 결합</li>
+<li>잔차분포를 별도로 모형화</li>
+<li>가우시안 과정 회귀와 비교</li>
+</ul>
+<p>불확실성 방법은 자료교환가능성, 이분산성과 분포이동 가정에 따라 성질이 달라진다.</p>
+</section>
+</section>
+<section id="sec-ch06-kernel-methods" class="level2" data-number="6.6">
+<h2 data-number="6.6" class="anchored" data-anchor-id="sec-ch06-kernel-methods"><span class="header-section-number">6.6</span> 커널 기법</h2>
+<section id="sec-ch06-kernel-methods-common-form" class="level3" data-number="6.6.1">
+<h3 data-number="6.6.1" class="anchored" data-anchor-id="sec-ch06-kernel-methods-common-form"><span class="header-section-number">6.6.1</span> 커널방법의 공통 구조</h3>
+<p>커널 SVM은 커널방법의 한 예이다. 많은 커널방법은 함수 <span class="math inline">\(f\)</span>를 재생커널 힐베르트 공간 <span class="math inline">\(\mathcal H_K\)</span>에서 찾고</p>
+<p><span id="eq-ch06-general-kernel-objective"><span class="math display">\[
+\widehat f
+=
+\arg\min_{f\in\mathcal H_K}
+\left[
+\frac1n\sum_{i=1}^{n}L\{y_i,f(\mathbf x_i)\}
++
+\lambda\|f\|_{\mathcal H_K}^2
+\right]
+\tag{6.103}\]</span></span></p>
+<p>를 최소화한다. 손실함수 <span class="math inline">\(L\)</span>을 바꾸면 분류, 회귀, 순위학습과 이상치 탐지로 확장된다.</p>
+<p>표현정리에 따라 최적해는</p>
+<p><span id="eq-ch06-general-kernel-expansion"><span class="math display">\[
+\widehat f(\mathbf x)
+=
+\sum_{i=1}^{n}c_iK(\mathbf x_i,\mathbf x)
+\tag{6.104}\]</span></span></p>
+<p>형태를 갖는다.</p>
+</section>
+<section id="sec-ch06-rkhs" class="level3" data-number="6.6.2">
+<h3 data-number="6.6.2" class="anchored" data-anchor-id="sec-ch06-rkhs"><span class="header-section-number">6.6.2</span> 재생커널 힐베르트 공간</h3>
+<p>재생커널 힐베르트 공간(reproducing kernel Hilbert space, RKHS)은 함수들의 힐베르트 공간으로, 각 <span class="math inline">\(\mathbf x\)</span>에 대해 <span class="math inline">\(K(\mathbf x,\cdot)\)</span>가 공간에 포함되고 재생성질(reproducing property)</p>
+<p><span id="eq-ch06-reproducing-property"><span class="math display">\[
+f(\mathbf x)
+=
+\langle f,K(\mathbf x,\cdot)\rangle_{\mathcal H_K}
+\tag{6.105}\]</span></span></p>
+<p>을 만족한다. 이 성질에서 코시–슈바르츠 부등식을 적용하면</p>
+<p><span id="eq-ch06-rkhs-pointwise-bound"><span class="math display">\[
+|f(\mathbf x)|
+\le
+\|f\|_{\mathcal H_K}
+\sqrt{K(\mathbf x,\mathbf x)}
+\tag{6.106}\]</span></span></p>
+<p>을 얻는다. RKHS 노름은 함수의 크기와 복잡도를 제어하는 역할을 한다.</p>
+<p>RBF 커널의 RKHS 노름은 단순한 미분항 하나로 해석되지는 않지만, 큰 노름은 일반적으로 더 복잡하고 급격하게 변하는 함수를 허용한다.</p>
+</section>
+<section id="sec-ch06-kernel-ridge-regression" class="level3" data-number="6.6.3">
+<h3 data-number="6.6.3" class="anchored" data-anchor-id="sec-ch06-kernel-ridge-regression"><span class="header-section-number">6.6.3</span> 커널 릿지 회귀</h3>
+<p>커널 릿지 회귀(kernel ridge regression)는 제곱손실과 RKHS 규제를 결합한다.</p>
+<p><span id="eq-ch06-kernel-ridge-objective"><span class="math display">\[
+\widehat f
+=
+\arg\min_{f\in\mathcal H_K}
+\left[
+\sum_{i=1}^{n}
+\{y_i-f(\mathbf x_i)\}^2
++
+\lambda\|f\|_{\mathcal H_K}^2
+\right]
+\tag{6.107}\]</span></span></p>
+<p><span class="math inline">\(\mathbf f=\mathbf K\mathbf c\)</span>이고 <span class="math inline">\(\|f\|_{\mathcal H_K}^2=\mathbf c^\top\mathbf K\mathbf c\)</span>이므로</p>
+<p><span id="eq-ch06-kernel-ridge-solution"><span class="math display">\[
+\widehat{\mathbf c}
+=
+(\mathbf K+\lambda\mathbf I_n)^{-1}\mathbf y
+\tag{6.108}\]</span></span></p>
+<p>를 얻는다. 새 관측값의 예측은</p>
+<p><span id="eq-ch06-kernel-ridge-prediction"><span class="math display">\[
+\widehat f(\mathbf x)
+=
+\mathbf k(\mathbf x)^\top
+(\mathbf K+\lambda\mathbf I_n)^{-1}\mathbf y
+\tag{6.109}\]</span></span></p>
+<p>이다. 여기서</p>
+<p><span id="eq-ch06-kernel-vector"><span class="math display">\[
+\mathbf k(\mathbf x)
+=
+\{K(\mathbf x_1,\mathbf x),\ldots,K(\mathbf x_n,\mathbf x)\}^\top
+\tag{6.110}\]</span></span></p>
+<p>이다.</p>
+<p>커널 릿지는 모든 관측값이 일반적으로 0이 아닌 계수를 갖는 반면, SVR은 <span class="math inline">\(\varepsilon\)</span>-손실 때문에 희소한 해를 만들 수 있다.</p>
+</section>
+<section id="sec-ch06-kernel-logistic-regression" class="level3" data-number="6.6.4">
+<h3 data-number="6.6.4" class="anchored" data-anchor-id="sec-ch06-kernel-logistic-regression"><span class="header-section-number">6.6.4</span> 커널 로지스틱 회귀</h3>
+<p>커널 로지스틱 회귀(kernel logistic regression)는</p>
+<p><span id="eq-ch06-kernel-logistic-probability"><span class="math display">\[
+P(Y=1\mid\mathbf x)
+=
+\sigma\{f(\mathbf x)\}
+\tag{6.111}\]</span></span></p>
+<p>와 로그손실을 사용한다.</p>
+<p><span id="eq-ch06-kernel-logistic-objective"><span class="math display">\[
+\min_{f\in\mathcal H_K}
+\left[
+-
+\sum_{i=1}^{n}
+\left
+y_i\log p_i+(1-y_i)\log(1-p_i)
+\right]
++
+\frac\lambda2\|f\|_{\mathcal H_K}^2
+\right]
+\tag{6.112}\]</span></span></p>
+<p>표현정리에 따라 <span class="math inline">\(f(\mathbf x)=\sum_i c_iK(\mathbf x_i,\mathbf x)\)</span>로 쓸 수 있다. SVM과 달리 확률모형을 직접 학습하지만 일반적으로 해가 희소하지 않고 반복최적화가 필요하다.</p>
+</section>
+<section id="sec-ch06-kernel-pca" class="level3" data-number="6.6.5">
+<h3 data-number="6.6.5" class="anchored" data-anchor-id="sec-ch06-kernel-pca"><span class="header-section-number">6.6.5</span> 커널 PCA</h3>
+<p>주성분분석을 비선형 특성공간에서 수행하면 커널 PCA가 된다. 중심화된 커널 행렬 <span class="math inline">\(\mathbf K_c\)</span>의 고유값 문제</p>
+<p><span id="eq-ch06-kernel-pca-eigen"><span class="math display">\[
+\mathbf K_c\mathbf v_m
+=
+\lambda_m\mathbf v_m
+\tag{6.113}\]</span></span></p>
+<p>를 푼다. 훈련관측값 <span class="math inline">\(i\)</span>의 <span class="math inline">\(m\)</span>번째 커널 주성분 점수는 적절한 정규화 아래</p>
+<p><span id="eq-ch06-kernel-pca-score"><span class="math display">\[
+z_{im}
+=
+\sqrt{\lambda_m}\,v_{im}
+\tag{6.114}\]</span></span></p>
+<p>로 표현할 수 있다. 새 관측값의 투영에는 훈련자료 기준으로 중심화된 커널벡터가 필요하다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch06-kernel-pca-concept" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch06-kernel-pca-concept-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-support-vector-machines_files/figure-html/fig-ch06-kernel-pca-concept-1.png" class="img-fluid figure-img" width="816">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch06-kernel-pca-concept-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;6.13: 비선형 구조를 펼쳐내는 커널 PCA의 개념
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch06-kernel-discriminant-analysis" class="level3" data-number="6.6.6">
+<h3 data-number="6.6.6" class="anchored" data-anchor-id="sec-ch06-kernel-discriminant-analysis"><span class="header-section-number">6.6.6</span> 커널 판별분석</h3>
+<p>선형 판별분석의 클래스 간 산포와 클래스 내 산포를 특성공간에서 정의하면 커널 판별분석(kernel discriminant analysis)으로 확장할 수 있다. 계산은 커널 행렬로 표현되며 비선형 분류경계를 얻는다. 클래스 내 산포행렬이 특이해지기 쉬우므로 규제가 필요하다.</p>
+</section>
+<section id="sec-ch06-one-class-svm" class="level3" data-number="6.6.7">
+<h3 data-number="6.6.7" class="anchored" data-anchor-id="sec-ch06-one-class-svm"><span class="header-section-number">6.6.7</span> 일클래스 SVM</h3>
+<p>일클래스 SVM(one-class SVM)은 정상자료만 또는 대부분 정상인 자료에서 정상영역의 경계를 학습하여 이상치를 탐지한다. 특성공간에서 원점과 자료를 분리하는 초평면을 찾는 한 가지 원문제는</p>
+<p><span id="eq-ch06-one-class-svm-primal"><span class="math display">\[
+\begin{aligned}
+\min_{\mathbf w,\rho,\boldsymbol\xi}\quad &amp;
+\frac12\|\mathbf w\|^2
++
+\frac{1}{\nu n}
+\sum_{i=1}^{n}\xi_i
+-
+\rho\\
+\text{subject to}\quad &amp;
+\mathbf w^\top\phi(\mathbf x_i)
+\ge\rho-\xi_i,\\
+&amp;
+\xi_i\ge0.
+\end{aligned}
+\tag{6.115}\]</span></span></p>
+<p>판별함수는</p>
+<p><span id="eq-ch06-one-class-svm-decision"><span class="math display">\[
+f(\mathbf x)
+=
+\operatorname{sign}
+\left[
+\sum_i\alpha_iK(\mathbf x_i,\mathbf x)-\rho
+\right]
+\tag{6.116}\]</span></span></p>
+<p>이다. <span class="math inline">\(\nu\)</span>는 이상치 허용비율과 서포트 벡터 비율을 조절한다. 정상자료가 실제 적용환경을 충분히 대표하지 않으면 정상적인 새로운 패턴을 이상치로 잘못 판단할 수 있다.</p>
+</section>
+<section id="sec-ch06-svdd" class="level3" data-number="6.6.8">
+<h3 data-number="6.6.8" class="anchored" data-anchor-id="sec-ch06-svdd"><span class="header-section-number">6.6.8</span> 최소영역 설명과 SVDD</h3>
+<p>서포트 벡터 자료설명(support vector data description, SVDD)은 특성공간에서 자료를 포함하는 최소 반지름 구를 찾는다.</p>
+<p><span id="eq-ch06-svdd-primal"><span class="math display">\[
+\begin{aligned}
+\min_{R,\mathbf a,\boldsymbol\xi}
+\, &amp;R^2+C\sum_i\xi_i\\
+\text{subject to}
+\, &amp;
+\|\phi(\mathbf x_i)-\mathbf a\|^2
+\le R^2+\xi_i,\\
+&amp;\xi_i\ge0.
+\end{aligned}
+\tag{6.117}\]</span></span></p>
+<p>새 관측값이 학습된 구 바깥에 있으면 이상치로 판단한다. 이동불변 커널에서는 일클래스 SVM과 밀접한 관계가 있다.</p>
+</section>
+<section id="sec-ch06-kernel-alignment" class="level3" data-number="6.6.9">
+<h3 data-number="6.6.9" class="anchored" data-anchor-id="sec-ch06-kernel-alignment"><span class="header-section-number">6.6.9</span> 커널 정렬</h3>
+<p>커널이 목표변수 구조와 얼마나 일치하는지 측정하기 위해 커널 정렬(kernel alignment)을 사용할 수 있다. 중심화된 입력커널 <span class="math inline">\(\mathbf K_c\)</span>와 레이블커널 <span class="math inline">\(\mathbf L_c\)</span>에 대해</p>
+<p><span id="eq-ch06-kernel-alignment"><span class="math display">\[
+A(\mathbf K,\mathbf L)
+=
+\frac{\langle\mathbf K_c,\mathbf L_c\rangle_F}
+{\|\mathbf K_c\|_F\|\mathbf L_c\|_F}
+\tag{6.118}\]</span></span></p>
+<p>로 정의한다. 여기서 <span class="math inline">\(\langle\mathbf A,\mathbf B\rangle_F=\operatorname{tr}(\mathbf A^\top\mathbf B)\)</span>이다. 정렬은 커널 선택의 보조정보를 제공하지만 같은 자료에서 반복적으로 최적화하면 과적합될 수 있다.</p>
+</section>
+<section id="sec-ch06-multiple-kernel-learning" class="level3" data-number="6.6.10">
+<h3 data-number="6.6.10" class="anchored" data-anchor-id="sec-ch06-multiple-kernel-learning"><span class="header-section-number">6.6.10</span> 다중 커널 학습</h3>
+<p>서로 다른 변수군이나 자료원에 대해 커널 <span class="math inline">\(K_1,\ldots,K_M\)</span>을 만든 뒤</p>
+<p><span id="eq-ch06-multiple-kernel-combination"><span class="math display">\[
+K(\mathbf x,\mathbf z)
+=
+\sum_{m=1}^{M}\eta_mK_m(\mathbf x,\mathbf z),
+\qquad
+\eta_m\ge0
+\tag{6.119}\]</span></span></p>
+<p>로 결합할 수 있다. 다중 커널 학습(multiple kernel learning)은 예측모형과 커널 가중치 <span class="math inline">\(\eta_m\)</span>를 함께 추정한다. 유전체, 영상, 임상자료처럼 서로 다른 자료유형을 통합할 때 유용하다.</p>
+</section>
+<section id="sec-ch06-kernel-gp-connection" class="level3" data-number="6.6.11">
+<h3 data-number="6.6.11" class="anchored" data-anchor-id="sec-ch06-kernel-gp-connection"><span class="header-section-number">6.6.11</span> 커널과 가우시안 과정</h3>
+<p>같은 커널함수는 가우시안 과정(Gaussian process)에서도 공분산함수로 사용된다.</p>
+<p><span id="eq-ch06-gaussian-process-prior"><span class="math display">\[
+f\sim\mathcal{GP}\{m(\mathbf x),K(\mathbf x,\mathbf z)\}
+\tag{6.120}\]</span></span></p>
+<p>커널 SVM은 마진과 힌지 손실을 이용한 규제최적화 관점이고, 가우시안 과정은 함수에 대한 확률분포와 사후추론의 관점이다. 두 방법은 같은 유사도 구조를 사용할 수 있지만 예측불확실성과 학습목표가 다르다.</p>
+</section>
+<section id="sec-ch06-kernel-computational-complexity" class="level3" data-number="6.6.12">
+<h3 data-number="6.6.12" class="anchored" data-anchor-id="sec-ch06-kernel-computational-complexity"><span class="header-section-number">6.6.12</span> 커널 계산의 복잡도</h3>
+<p>정확한 커널방법은 일반적으로 <span class="math inline">\(n\times n\)</span> Gram 행렬을 저장해야 하므로 메모리가</p>
+<p><span id="eq-ch06-kernel-memory"><span class="math display">\[
+O(n^2)
+\tag{6.121}\]</span></span></p>
+<p>필요하다. 일반적인 이차계획 또는 행렬분해의 시간복잡도는 문제구조와 알고리즘에 따라 대략</p>
+<p><span id="eq-ch06-kernel-time"><span class="math display">\[
+O(n^2)\text{에서 }O(n^3)
+\tag{6.122}\]</span></span></p>
+<p>범위가 될 수 있다. 따라서 표본이 매우 크면 정확한 커널방법이 병목이 된다.</p>
+</section>
+<section id="sec-ch06-nystrom" class="level3" data-number="6.6.13">
+<h3 data-number="6.6.13" class="anchored" data-anchor-id="sec-ch06-nystrom"><span class="header-section-number">6.6.13</span> Nyström 근사</h3>
+<p>Nyström 방법은 <span class="math inline">\(m\ll n\)</span>개의 대표관측값을 선택하여 커널 행렬을 저랭크로 근사한다. 선택된 열에 대한 행렬을 <span class="math inline">\(\mathbf C\in\mathbb R^{n\times m}\)</span>, 선택된 부분행렬을 <span class="math inline">\(\mathbf W\in\mathbb R^{m\times m}\)</span>라고 하면</p>
+<p><span id="eq-ch06-nystrom-approximation"><span class="math display">\[
+\mathbf K
+\approx
+\mathbf C\mathbf W^{\dagger}\mathbf C^\top
+\tag{6.123}\]</span></span></p>
+<p>이다. <span class="math inline">\(\mathbf W^{\dagger}\)</span>는 일반화 역행렬이다. 대표점 선택은 단순 무작위, k-means 중심, 레버리지 점수 등을 사용할 수 있다.</p>
+</section>
+<section id="sec-ch06-random-fourier-features" class="level3" data-number="6.6.14">
+<h3 data-number="6.6.14" class="anchored" data-anchor-id="sec-ch06-random-fourier-features"><span class="header-section-number">6.6.14</span> 랜덤 푸리에 특성</h3>
+<p>이동불변 커널은 Bochner 정리를 이용하여 무작위 명시적 특성으로 근사할 수 있다. RBF 커널의 경우</p>
+<p><span id="eq-ch06-random-fourier-map"><span class="math display">\[
+\mathbf z(\mathbf x)
+=
+\sqrt{\frac{2}{D}}
+\left[
+\cos(\boldsymbol\omega_1^\top\mathbf x+b_1),
+\ldots,
+\cos(\boldsymbol\omega_D^\top\mathbf x+b_D)
+\right]^\top
+\tag{6.124}\]</span></span></p>
+<p>를 구성하여</p>
+<p><span id="eq-ch06-random-fourier-approximation"><span class="math display">\[
+K(\mathbf x,\mathbf z)
+\approx
+\mathbf z(\mathbf x)^\top\mathbf z(\mathbf z)
+\tag{6.125}\]</span></span></p>
+<p>로 근사한다. RBF 커널에서는 <span class="math inline">\(\boldsymbol\omega_d\)</span>를 적절한 정규분포에서, <span class="math inline">\(b_d\)</span>를 <span class="math inline">\([0,2\pi]\)</span>의 균등분포에서 추출한다. 그다음 명시적 <span class="math inline">\(D\)</span>차원 특성에 선형 SVM을 적합할 수 있다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch06-rff-approximation" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch06-rff-approximation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-support-vector-machines_files/figure-html/fig-ch06-rff-approximation-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch06-rff-approximation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;6.14: 랜덤 푸리에 특성 수에 따른 RBF 커널 근사
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch06-incomplete-cholesky" class="level3" data-number="6.6.15">
+<h3 data-number="6.6.15" class="anchored" data-anchor-id="sec-ch06-incomplete-cholesky"><span class="header-section-number">6.6.15</span> 불완전 Cholesky 분해</h3>
+<p>양의 준정부호 Gram 행렬은</p>
+<p><span id="eq-ch06-incomplete-cholesky"><span class="math display">\[
+\mathbf K
+\approx
+\mathbf G\mathbf G^\top,
+\qquad
+\mathbf G\in\mathbb R^{n\times m}
+\tag{6.126}\]</span></span></p>
+<p>형태의 저랭크 분해로 근사할 수 있다. 잔차 대각원소가 큰 열을 순차적으로 선택하면 필요한 랭크까지 근사할 수 있다.</p>
+</section>
+<section id="sec-ch06-large-scale-linear-svm" class="level3" data-number="6.6.16">
+<h3 data-number="6.6.16" class="anchored" data-anchor-id="sec-ch06-large-scale-linear-svm"><span class="header-section-number">6.6.16</span> 대규모 선형 SVM</h3>
+<p>텍스트나 희소 고차원 자료에서는 비선형 커널보다 선형 SVM이 계산과 성능 면에서 더 적절할 수 있다. 원문제의 힌지손실 또는 쌍대문제를 좌표하강, 확률적 경사법, 절단평면법으로 최적화할 수 있다. 희소행렬을 유지하면 메모리와 계산량을 크게 줄일 수 있다.</p>
+</section>
+<section id="sec-ch06-kernel-advantages" class="level3" data-number="6.6.17">
+<h3 data-number="6.6.17" class="anchored" data-anchor-id="sec-ch06-kernel-advantages"><span class="header-section-number">6.6.17</span> 커널방법의 장점</h3>
+<p>커널방법의 장점은 다음과 같다.</p>
+<ul>
+<li>볼록최적화로 전역 최적해를 구할 수 있음</li>
+<li>작은·중간 표본에서 강력한 비선형 모형을 제공</li>
+<li>내적 또는 유사도 설계를 통해 구조자료를 처리</li>
+<li>규제와 함수공간 이론이 명확함</li>
+<li>SVM에서는 서포트 벡터를 통한 희소표현 가능</li>
+<li>고차원 자료에서 선형 커널이 강력한 기준모형이 됨</li>
+</ul>
+</section>
+<section id="sec-ch06-kernel-limitations" class="level3" data-number="6.6.18">
+<h3 data-number="6.6.18" class="anchored" data-anchor-id="sec-ch06-kernel-limitations"><span class="header-section-number">6.6.18</span> 커널방법의 한계</h3>
+<ul>
+<li>정확한 Gram 행렬의 <span class="math inline">\(O(n^2)\)</span> 메모리 부담</li>
+<li>커널과 하이퍼파라미터 선택에 민감함</li>
+<li>입력 스케일과 거리집중의 영향을 크게 받음</li>
+<li>비선형 커널의 직접적 해석이 어려움</li>
+<li>서포트 벡터가 많으면 예측이 느림</li>
+<li>기본 SVM 점수는 확률이 아님</li>
+<li>매우 큰 비정형 자료에서는 표현학습 모형보다 불리할 수 있음</li>
+<li>결측값을 직접 처리하지 못하는 구현이 많음</li>
+</ul>
+</section>
+<section id="sec-ch06-practical-workflow" class="level3" data-number="6.6.19">
+<h3 data-number="6.6.19" class="anchored" data-anchor-id="sec-ch06-practical-workflow"><span class="header-section-number">6.6.19</span> SVM 분석의 실무 절차</h3>
+<p>SVM 분석은 다음 순서로 진행하는 것이 안전하다.</p>
+<pre class="text"><code>예측목표와 오류비용을 정의한다.
+자료분할 단위와 최종 시험자료를 확정한다.
+훈련폴드 안에서 결측대체와 표준화를 수행한다.
+선형 모형과 선형 SVM을 기준모형으로 적합한다.
+비선형성이 필요한 경우 RBF 또는 영역특화 커널을 검토한다.
+C, gamma, epsilon을 로그척도에서 공동 탐색한다.
+중첩 교차검증으로 선택과 평가를 분리한다.
+성능뿐 아니라 서포트 벡터 수와 안정성을 확인한다.
+확률이 필요하면 out-of-fold 점수로 보정한다.
+검증자료에서 적용 임계값을 선택한다.
+최종 시험자료와 외부자료에서 한 번 평가한다.
+분포이동과 계산비용을 배포 후 모니터링한다.</code></pre>
+</section>
+<section id="sec-ch06-svm-logistic-comparison" class="level3" data-number="6.6.20">
+<h3 data-number="6.6.20" class="anchored" data-anchor-id="sec-ch06-svm-logistic-comparison"><span class="header-section-number">6.6.20</span> 선형 SVM과 로지스틱 회귀의 비교</h3>
+<p>두 방법 모두 선형 점수 <span class="math inline">\(\mathbf w^\top\mathbf x+b\)</span>를 사용할 수 있지만 손실과 출력해석이 다르다.</p>
+<div id="tbl-ch06-svm-logistic" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch06-svm-logistic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;6.4: 선형 SVM과 로지스틱 회귀의 비교
+</figcaption>
+<div aria-describedby="tbl-ch06-svm-logistic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>구분</th>
+<th>선형 SVM</th>
+<th>로지스틱 회귀</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>대표 손실</td>
+<td>힌지 손실</td>
+<td>로그손실</td>
+</tr>
+<tr class="even">
+<td>학습 초점</td>
+<td>마진과 경계 근처 관측값</td>
+<td>모든 관측값의 조건부 확률</td>
+</tr>
+<tr class="odd">
+<td>기본 출력</td>
+<td>판별점수와 클래스</td>
+<td>확률</td>
+</tr>
+<tr class="even">
+<td>희소한 관측값 표현</td>
+<td>쌍대해에서 가능</td>
+<td>일반적으로 아님</td>
+</tr>
+<tr class="odd">
+<td>완전분리</td>
+<td>최대 마진 해 존재</td>
+<td>비규제 MLE 발산 가능</td>
+</tr>
+<tr class="even">
+<td>확률보정</td>
+<td>별도 보정 필요</td>
+<td>모형이 맞으면 직접 가능</td>
+</tr>
+<tr class="odd">
+<td>비선형 확장</td>
+<td>커널 SVM</td>
+<td>커널 로지스틱 회귀</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>어느 방법이 우월한지는 자료와 평가목표에 따라 달라진다. 순위와 분류경계가 중요하면 SVM이, 확률추정과 계수해석이 중요하면 규제 로지스틱 회귀가 더 자연스러울 수 있다.</p>
+</section>
+<section id="sec-ch06-svm-neural-comparison" class="level3" data-number="6.6.21">
+<h3 data-number="6.6.21" class="anchored" data-anchor-id="sec-ch06-svm-neural-comparison"><span class="header-section-number">6.6.21</span> SVM과 신경망의 비교</h3>
+<p>커널 SVM은 커널이 표현을 미리 정의하고 볼록최적화로 출력층을 학습한다. 신경망은 다층 구조에서 표현 자체를 자료로부터 학습하지만 비볼록최적화가 필요하다.</p>
+<div id="tbl-ch06-svm-neural" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch06-svm-neural-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;6.5: 커널 SVM과 신경망의 비교
+</figcaption>
+<div aria-describedby="tbl-ch06-svm-neural-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>구분</th>
+<th>커널 SVM</th>
+<th>신경망</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>표현</td>
+<td>커널로 사전 정의</td>
+<td>층별로 학습</td>
+</tr>
+<tr class="even">
+<td>최적화</td>
+<td>볼록</td>
+<td>일반적으로 비볼록</td>
+</tr>
+<tr class="odd">
+<td>표본규모</td>
+<td>작은·중간 규모에 강점</td>
+<td>대규모 자료와 전이학습에 강점</td>
+</tr>
+<tr class="even">
+<td>계산병목</td>
+<td>Gram 행렬</td>
+<td>반복 순전파·역전파</td>
+</tr>
+<tr class="odd">
+<td>구조자료</td>
+<td>영역특화 커널 필요</td>
+<td>CNN, RNN, Transformer 등</td>
+</tr>
+<tr class="even">
+<td>불확실성</td>
+<td>기본적으로 제공하지 않음</td>
+<td>기본적으로 제공하지 않음</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-ch06-svm-interpretation" class="level3" data-number="6.6.22">
+<h3 data-number="6.6.22" class="anchored" data-anchor-id="sec-ch06-svm-interpretation"><span class="header-section-number">6.6.22</span> 모형 해석</h3>
+<p>선형 SVM에서는 표준화된 특성의 <span class="math inline">\(w_j\)</span> 부호와 크기를 결정점수와 연결할 수 있다. 그러나 상관된 특성, 규제와 클래스 가중치 때문에 인과효과로 해석할 수 없다.</p>
+<p>비선형 커널에서는 다음 방법을 사용할 수 있다.</p>
+<ul>
+<li>변수 하나를 변화시킨 판별점수 곡선</li>
+<li>부분의존도와 ICE</li>
+<li>순열 중요도</li>
+<li>국소 대리모형</li>
+<li>반사실적 입력 탐색</li>
+<li>서포트 벡터와 유사한 사례 제시</li>
+</ul>
+<p>해석방법 자체도 조건부 상관, 외삽과 분포이동에 민감하므로 적용범위를 명시해야 한다.</p>
+</section>
+<section id="sec-ch06-svm-stability" class="level3" data-number="6.6.23">
+<h3 data-number="6.6.23" class="anchored" data-anchor-id="sec-ch06-svm-stability"><span class="header-section-number">6.6.23</span> 민감도와 안정성</h3>
+<p>SVM 결과는 다음 요소에 민감할 수 있다.</p>
+<ul>
+<li>특성 표준화 방법</li>
+<li>이상치와 라벨오류</li>
+<li>커널 종류</li>
+<li><span class="math inline">\(C\)</span>, <span class="math inline">\(\gamma\)</span>, <span class="math inline">\(\varepsilon\)</span></li>
+<li>클래스 가중치</li>
+<li>자료분할과 무작위성</li>
+<li>중복 또는 거의 동일한 관측값</li>
+</ul>
+<p>반복 교차검증에서 성능분포, 선택된 하이퍼파라미터, 서포트 벡터 비율과 선형 가중치의 변동을 함께 보고하면 모형의 안정성을 더 잘 이해할 수 있다.</p>
+</section>
+<section id="sec-ch06-distribution-shift" class="level3" data-number="6.6.24">
+<h3 data-number="6.6.24" class="anchored" data-anchor-id="sec-ch06-distribution-shift"><span class="header-section-number">6.6.24</span> 분포이동과 외삽</h3>
+<p>RBF 커널은 훈련자료에서 멀리 떨어진 새 관측값과의 커널값이 거의 0이 된다. 이 경우 판별함수는 절편이나 일부 전역구조에 의존하며 신뢰하기 어려울 수 있다. SVR도 훈련범위 밖에서 자연스러운 선형 추세를 자동으로 유지하지 않는다.</p>
+<p>따라서 적용 시 다음을 확인한다.</p>
+<ul>
+<li>새 관측값과 훈련자료 사이의 거리</li>
+<li>커널 유사도의 최대값과 분포</li>
+<li>특성별 범위 초과</li>
+<li>시간·기관·집단별 성능변화</li>
+<li>보정도와 임계값의 변화</li>
+</ul>
+</section>
+<section id="sec-ch06-missing-data" class="level3" data-number="6.6.25">
+<h3 data-number="6.6.25" class="anchored" data-anchor-id="sec-ch06-missing-data"><span class="header-section-number">6.6.25</span> 결측자료 처리</h3>
+<p>대부분의 SVM 구현은 결측값을 직접 처리하지 못한다. 결측대체는 교차검증의 훈련폴드 안에서 수행해야 한다. 결측 자체가 정보를 가진다면 결측지시자를 추가할 수 있지만, 대체값과 지시자의 조합이 임상적 또는 운영적 의미를 갖는지 검토해야 한다.</p>
+</section>
+<section id="sec-ch06-reproducibility" class="level3" data-number="6.6.26">
+<h3 data-number="6.6.26" class="anchored" data-anchor-id="sec-ch06-reproducibility"><span class="header-section-number">6.6.26</span> 재현성과 보고</h3>
+<p>SVM 분석을 보고할 때 최소한 다음을 명시한다.</p>
+<ul>
+<li>입력변수와 전처리</li>
+<li>훈련·검증·시험자료의 분할단위</li>
+<li>커널 종류와 수식</li>
+<li><span class="math inline">\(C\)</span>, <span class="math inline">\(\gamma\)</span>, <span class="math inline">\(\varepsilon\)</span> 및 클래스 가중치</li>
+<li>하이퍼파라미터 탐색범위와 선택방법</li>
+<li>교차검증 반복수와 층화·군집 구조</li>
+<li>서포트 벡터 수 또는 비율</li>
+<li>확률보정과 임계값 선택방법</li>
+<li>최종 성능과 불확실성</li>
+<li>사용 소프트웨어와 버전</li>
+</ul>
+</section>
+</section>
+<section id="장-요약" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="장-요약">장 요약</h2>
+<p>서포트 벡터 머신은 두 클래스 사이의 마진을 최대화하는 분류기이다. 선형 판별함수의 결정경계는 <span class="math inline">\(\mathbf w^\top\mathbf x+b=0\)</span>인 초평면이며, 점에서 초평면까지의 거리는 판별값을 <span class="math inline">\(\|\mathbf w\|_2\)</span>로 나누어 계산한다. 함수적 마진은 분류의 부호와 여유를 나타내지만 스케일에 의존하고, 기하학적 마진은 스케일에 불변이다.</p>
+<p>선형분리 가능한 자료의 하드 마진 SVM은 <span class="math inline">\(\frac12\|\mathbf w\|^2\)</span>를 최소화하면서 모든 관측값이 <span class="math inline">\(y_if(\mathbf x_i)\ge1\)</span>을 만족하도록 한다. 마진 경계 위의 관측값이 서포트 벡터이며, 이들이 최적 결정경계를 규정한다. 마진 밖의 관측값은 최적해의 쌍대계수가 0이 될 수 있다.</p>
+<p>라그랑지안과 KKT 조건을 이용하면 SVM의 쌍대문제를 유도할 수 있다. 최적 가중치벡터는 <span class="math inline">\(\mathbf w=\sum_i\alpha_i y_i\mathbf x_i\)</span>로 표현되고, 쌍대목적함수에는 관측값 사이의 내적만 나타난다. 상보성 조건은 양의 쌍대계수를 갖는 관측값과 서포트 벡터의 관계를 설명한다.</p>
+<p>커널 트릭은 특성공간의 내적을 커널함수로 계산하여 고차원 변환을 명시적으로 구성하지 않고 비선형 결정경계를 학습한다. 유효한 커널은 모든 유한한 표본에 대해 양의 준정부호 Gram 행렬을 만들어야 한다. 선형, 다항, RBF와 라플라스 커널은 서로 다른 유사도와 귀납적 편향을 정의한다.</p>
+<p>RBF 커널에서 <span class="math inline">\(\gamma\)</span>는 관측값 영향의 공간적 범위를 조절한다. 작은 <span class="math inline">\(\gamma\)</span>는 매끄러운 전역적 경계를, 큰 <span class="math inline">\(\gamma\)</span>는 국소적이고 복잡한 경계를 만든다. 커널 종류와 매개변수는 가설공간 자체를 바꾸므로 <span class="math inline">\(C\)</span>와 함께 중첩 교차검증 안에서 선택해야 한다.</p>
+<p>소프트 마진 SVM은 슬랙변수를 도입하여 마진 위반과 오분류를 허용한다. 목적함수는 마진을 넓히는 <span class="math inline">\(\|\mathbf w\|^2\)</span> 항과 위반을 벌하는 힌지 손실을 결합한다. <span class="math inline">\(C\)</span>가 크면 훈련위반을 강하게 억제하고, 작으면 넓은 마진과 강한 규제를 선호한다.</p>
+<p>힌지 손실은 0-1 손실의 볼록 상계이며 잘못 분류된 관측값뿐 아니라 마진 내부의 관측값에도 손실을 부과한다. 소프트 마진의 쌍대계수는 <span class="math inline">\(0\le\alpha_i\le C\)</span>를 만족한다. <span class="math inline">\(\alpha_i=0\)</span>인 관측값은 마진 밖, <span class="math inline">\(0&lt;\alpha_i&lt;C\)</span>인 관측값은 마진 위, <span class="math inline">\(\alpha_i=C\)</span>인 관측값은 마진 내부 또는 오분류 관측값에 대응한다.</p>
+<p>클래스 불균형과 비대칭 비용은 클래스별 <span class="math inline">\(C\)</span> 또는 관측값별 가중치를 통해 반영할 수 있다. 그러나 클래스 가중치, 재표본화, 확률보정과 결정 임계값은 서로 다른 역할을 한다. SVM의 판별점수는 확률이 아니므로 확률이 필요하면 out-of-fold 점수를 이용한 Platt 보정이나 등위회귀를 적용해야 한다.</p>
+<p>서포트 벡터 회귀는 <span class="math inline">\(\varepsilon\)</span>-비감응 손실을 사용한다. 실제값과 예측값의 오차가 <span class="math inline">\(\varepsilon\)</span> 이내이면 손실을 0으로 두고, 튜브 밖 초과분만 벌한다. <span class="math inline">\(C\)</span>는 튜브 위반 비용, <span class="math inline">\(\varepsilon\)</span>은 무시할 오차폭, <span class="math inline">\(\gamma\)</span>는 비선형 함수의 국소성을 조절한다.</p>
+<p>SVR의 쌍대해는 <span class="math inline">\((\alpha_i-\alpha_i^\star)\)</span>가 0이 아닌 관측값만 예측함수에 포함하므로 희소할 수 있다. 튜브 내부의 관측값은 일반적으로 서포트 벡터가 아니다. 점예측의 평가에는 MAE, RMSE와 <span class="math inline">\(R^2\)</span>를 사용할 수 있으나 기본 SVR은 예측구간을 직접 제공하지 않는다.</p>
+<p>커널 릿지 회귀, 커널 로지스틱 회귀, 커널 PCA, 일클래스 SVM과 SVDD는 같은 커널 원리를 서로 다른 손실과 목표에 적용한다. 재생커널 힐베르트 공간의 표현정리는 무한차원 함수공간의 최적해가 훈련관측값 중심 커널의 유한 선형결합으로 표현됨을 보장한다.</p>
+<p>정확한 커널방법은 <span class="math inline">\(n\times n\)</span> Gram 행렬 때문에 대규모 표본에서 계산부담이 크다. Nyström 근사(Nyström approximation), 랜덤 푸리에 특성(random Fourier features), 불완전 Cholesky 분해(incomplete Cholesky decomposition)를 이용하면 저차원 명시적 표현으로 근사할 수 있다. 고차원 희소자료에서는 대규모 선형 SVM이 더 효율적일 수 있다.</p>
+<p>SVM의 성공적인 적용에는 표준화, 누출 없는 검증, 커널과 하이퍼파라미터의 공동선택, 서포트 벡터 수와 안정성 확인, 확률보정과 외부검증이 필요하다. 비선형 커널은 유연하지만 외삽과 분포이동에 취약할 수 있으므로 새 관측값과 훈련자료 사이의 유사도를 함께 모니터링해야 한다.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./05-neural-networks.html" class="pagination-link" aria-label="신경망">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">신경망</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./07-bayesian-classifiers.html" class="pagination-link" aria-label="베이지안 분류기">
+        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">베이지안 분류기</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

@@ -1,0 +1,2669 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>10&nbsp; 차원 축소와 거리 척도 학습 – 머신러닝</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./11-feature-selection-sparse-learning.html" rel="next">
+<link href="./09-clustering.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-3d841e2d0dac331999ea63b9b6b417ac.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./09-clustering.html">III. 비지도학습과 표현학습</a></li><li class="breadcrumb-item"><a href="./10-dimensionality-reduction.html"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">차원 축소와 거리 척도 학습</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">머신러닝</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="리더 모드 전환">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">I. 머신러닝의 기초</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">머신러닝의 개념과 발전</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-model-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">모형 평가와 선택</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">II. 지도학습</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-linear-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">선형 모형</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-decision-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">의사결정 트리</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-neural-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">신경망</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-support-vector-machines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">서포트 벡터 머신</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-bayesian-classifiers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">베이지안 분류기</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-ensemble-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">앙상블 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">III. 비지도학습과 표현학습</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">클러스터링</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-dimensionality-reduction.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">차원 축소와 거리 척도 학습</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-feature-selection-sparse-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">특성 선택과 희소 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">IV. 학습이론과 불완전한 데이터</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-computational-learning-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">계산 학습 이론</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-semi-supervised-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">준지도 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">V. 구조화된 확률모형과 규칙</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-probabilistic-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">확률 그래피컬 모형</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-rule-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">규칙 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">VI. 순차적 의사결정과 신뢰성</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-reinforcement-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">강화 학습</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-explainable-trustworthy-ml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">설명 가능한 머신러닝과 신뢰할 수 있는 예측</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#sec-ch10-knn" id="toc-sec-ch10-knn" class="nav-link active" data-scroll-target="#sec-ch10-knn"><span class="header-section-number">10.1</span> k-최근접 이웃과 고차원 공간</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch10-instance-based" id="toc-sec-ch10-instance-based" class="nav-link" data-scroll-target="#sec-ch10-instance-based"><span class="header-section-number">10.1.1</span> 사례 기반 학습</a></li>
+  <li><a href="#sec-ch10-weighted-knn" id="toc-sec-ch10-weighted-knn" class="nav-link" data-scroll-target="#sec-ch10-weighted-knn"><span class="header-section-number">10.1.2</span> 거리 가중 k-최근접 이웃</a></li>
+  <li><a href="#sec-ch10-k-role" id="toc-sec-ch10-k-role" class="nav-link" data-scroll-target="#sec-ch10-k-role"><span class="header-section-number">10.1.3</span> k의 역할과 편향-분산 절충</a></li>
+  <li><a href="#sec-ch10-scaling" id="toc-sec-ch10-scaling" class="nav-link" data-scroll-target="#sec-ch10-scaling"><span class="header-section-number">10.1.4</span> 변수의 척도와 표준화</a></li>
+  <li><a href="#sec-ch10-curse" id="toc-sec-ch10-curse" class="nav-link" data-scroll-target="#sec-ch10-curse"><span class="header-section-number">10.1.5</span> 차원의 저주</a></li>
+  <li><a href="#sec-ch10-distance-concentration" id="toc-sec-ch10-distance-concentration" class="nav-link" data-scroll-target="#sec-ch10-distance-concentration"><span class="header-section-number">10.1.6</span> 거리 집중 현상</a></li>
+  <li><a href="#sec-ch10-knn-dim-reduction" id="toc-sec-ch10-knn-dim-reduction" class="nav-link" data-scroll-target="#sec-ch10-knn-dim-reduction"><span class="header-section-number">10.1.7</span> kNN과 차원 축소의 연결</a></li>
+  </ul></li>
+  <li><a href="#sec-ch10-embedding" id="toc-sec-ch10-embedding" class="nav-link" data-scroll-target="#sec-ch10-embedding"><span class="header-section-number">10.2</span> 임베딩과 표현공간</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch10-embedding-definition" id="toc-sec-ch10-embedding-definition" class="nav-link" data-scroll-target="#sec-ch10-embedding-definition"><span class="header-section-number">10.2.1</span> 임베딩의 정의</a></li>
+  <li><a href="#sec-ch10-linear-nonlinear-embedding" id="toc-sec-ch10-linear-nonlinear-embedding" class="nav-link" data-scroll-target="#sec-ch10-linear-nonlinear-embedding"><span class="header-section-number">10.2.2</span> 선형 임베딩과 비선형 임베딩</a></li>
+  <li><a href="#sec-ch10-global-local" id="toc-sec-ch10-global-local" class="nav-link" data-scroll-target="#sec-ch10-global-local"><span class="header-section-number">10.2.3</span> 전역 구조와 국소 구조</a></li>
+  <li><a href="#sec-ch10-embedding-loss" id="toc-sec-ch10-embedding-loss" class="nav-link" data-scroll-target="#sec-ch10-embedding-loss"><span class="header-section-number">10.2.4</span> 손실함수에 기반한 임베딩</a></li>
+  <li><a href="#sec-ch10-supervision-embedding" id="toc-sec-ch10-supervision-embedding" class="nav-link" data-scroll-target="#sec-ch10-supervision-embedding"><span class="header-section-number">10.2.5</span> 지도·비지도·자기지도 임베딩</a></li>
+  <li><a href="#sec-ch10-embedding-evaluation" id="toc-sec-ch10-embedding-evaluation" class="nav-link" data-scroll-target="#sec-ch10-embedding-evaluation"><span class="header-section-number">10.2.6</span> 임베딩 평가</a></li>
+  </ul></li>
+  <li><a href="#sec-ch10-pca" id="toc-sec-ch10-pca" class="nav-link" data-scroll-target="#sec-ch10-pca"><span class="header-section-number">10.3</span> 주성분분석</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch10-pca-objective" id="toc-sec-ch10-pca-objective" class="nav-link" data-scroll-target="#sec-ch10-pca-objective"><span class="header-section-number">10.3.1</span> 주성분분석의 목적</a></li>
+  <li><a href="#sec-ch10-pca-eigen" id="toc-sec-ch10-pca-eigen" class="nav-link" data-scroll-target="#sec-ch10-pca-eigen"><span class="header-section-number">10.3.2</span> 라그랑주 승수와 고유값 문제</a></li>
+  <li><a href="#sec-ch10-pca-reconstruction" id="toc-sec-ch10-pca-reconstruction" class="nav-link" data-scroll-target="#sec-ch10-pca-reconstruction"><span class="header-section-number">10.3.3</span> 최대분산과 최소재구성오차의 동등성</a></li>
+  <li><a href="#sec-ch10-pca-svd" id="toc-sec-ch10-pca-svd" class="nav-link" data-scroll-target="#sec-ch10-pca-svd"><span class="header-section-number">10.3.4</span> 특이값분해를 이용한 계산</a></li>
+  <li><a href="#sec-ch10-explained-variance" id="toc-sec-ch10-explained-variance" class="nav-link" data-scroll-target="#sec-ch10-explained-variance"><span class="header-section-number">10.3.5</span> 설명분산비와 차원 선택</a></li>
+  <li><a href="#sec-ch10-cov-corr-pca" id="toc-sec-ch10-cov-corr-pca" class="nav-link" data-scroll-target="#sec-ch10-cov-corr-pca"><span class="header-section-number">10.3.6</span> 공분산행렬과 상관행렬 PCA</a></li>
+  <li><a href="#sec-ch10-loadings-scores" id="toc-sec-ch10-loadings-scores" class="nav-link" data-scroll-target="#sec-ch10-loadings-scores"><span class="header-section-number">10.3.7</span> 적재량과 점수의 해석</a></li>
+  <li><a href="#sec-ch10-pca-example" id="toc-sec-ch10-pca-example" class="nav-link" data-scroll-target="#sec-ch10-pca-example"><span class="header-section-number">10.3.8</span> PCA 시뮬레이션 예제</a></li>
+  <li><a href="#sec-ch10-sparse-robust-pca" id="toc-sec-ch10-sparse-robust-pca" class="nav-link" data-scroll-target="#sec-ch10-sparse-robust-pca"><span class="header-section-number">10.3.9</span> 희소 PCA와 강건 PCA</a></li>
+  <li><a href="#sec-ch10-probabilistic-pca" id="toc-sec-ch10-probabilistic-pca" class="nav-link" data-scroll-target="#sec-ch10-probabilistic-pca"><span class="header-section-number">10.3.10</span> 확률적 PCA</a></li>
+  </ul></li>
+  <li><a href="#sec-ch10-kernel-reduction" id="toc-sec-ch10-kernel-reduction" class="nav-link" data-scroll-target="#sec-ch10-kernel-reduction"><span class="header-section-number">10.4</span> 커널을 이용한 차원 축소</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch10-feature-space" id="toc-sec-ch10-feature-space" class="nav-link" data-scroll-target="#sec-ch10-feature-space"><span class="header-section-number">10.4.1</span> 비선형 특성공간</a></li>
+  <li><a href="#sec-ch10-kernel-centering" id="toc-sec-ch10-kernel-centering" class="nav-link" data-scroll-target="#sec-ch10-kernel-centering"><span class="header-section-number">10.4.2</span> 커널 행렬의 중심화</a></li>
+  <li><a href="#sec-ch10-kernel-pca" id="toc-sec-ch10-kernel-pca" class="nav-link" data-scroll-target="#sec-ch10-kernel-pca"><span class="header-section-number">10.4.3</span> 커널 주성분분석</a></li>
+  <li><a href="#sec-ch10-kernel-choices" id="toc-sec-ch10-kernel-choices" class="nav-link" data-scroll-target="#sec-ch10-kernel-choices"><span class="header-section-number">10.4.4</span> 대표적인 커널</a></li>
+  <li><a href="#sec-ch10-kpca-limitations" id="toc-sec-ch10-kpca-limitations" class="nav-link" data-scroll-target="#sec-ch10-kpca-limitations"><span class="header-section-number">10.4.5</span> 커널 PCA의 장점과 한계</a></li>
+  <li><a href="#sec-ch10-kernel-lda" id="toc-sec-ch10-kernel-lda" class="nav-link" data-scroll-target="#sec-ch10-kernel-lda"><span class="header-section-number">10.4.6</span> 커널 선형판별분석</a></li>
+  <li><a href="#sec-ch10-pls" id="toc-sec-ch10-pls" class="nav-link" data-scroll-target="#sec-ch10-pls"><span class="header-section-number">10.4.7</span> 부분최소제곱</a></li>
+  </ul></li>
+  <li><a href="#sec-ch10-manifold-learning" id="toc-sec-ch10-manifold-learning" class="nav-link" data-scroll-target="#sec-ch10-manifold-learning"><span class="header-section-number">10.5</span> 매니폴드 학습</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch10-manifold-assumption" id="toc-sec-ch10-manifold-assumption" class="nav-link" data-scroll-target="#sec-ch10-manifold-assumption"><span class="header-section-number">10.5.1</span> 매니폴드 가정</a></li>
+  <li><a href="#sec-ch10-mds" id="toc-sec-ch10-mds" class="nav-link" data-scroll-target="#sec-ch10-mds"><span class="header-section-number">10.5.2</span> 다차원척도법</a></li>
+  <li><a href="#sec-ch10-isomap" id="toc-sec-ch10-isomap" class="nav-link" data-scroll-target="#sec-ch10-isomap"><span class="header-section-number">10.5.3</span> Isomap</a></li>
+  <li><a href="#sec-ch10-lle" id="toc-sec-ch10-lle" class="nav-link" data-scroll-target="#sec-ch10-lle"><span class="header-section-number">10.5.4</span> 국소선형임베딩</a></li>
+  <li><a href="#sec-ch10-laplacian-eigenmaps" id="toc-sec-ch10-laplacian-eigenmaps" class="nav-link" data-scroll-target="#sec-ch10-laplacian-eigenmaps"><span class="header-section-number">10.5.5</span> 라플라시안 고유지도</a></li>
+  <li><a href="#sec-ch10-diffusion-maps" id="toc-sec-ch10-diffusion-maps" class="nav-link" data-scroll-target="#sec-ch10-diffusion-maps"><span class="header-section-number">10.5.6</span> 확산지도</a></li>
+  <li><a href="#sec-ch10-tsne" id="toc-sec-ch10-tsne" class="nav-link" data-scroll-target="#sec-ch10-tsne"><span class="header-section-number">10.5.7</span> t-SNE</a></li>
+  <li><a href="#sec-ch10-umap" id="toc-sec-ch10-umap" class="nav-link" data-scroll-target="#sec-ch10-umap"><span class="header-section-number">10.5.8</span> UMAP</a></li>
+  <li><a href="#sec-ch10-manifold-comparison" id="toc-sec-ch10-manifold-comparison" class="nav-link" data-scroll-target="#sec-ch10-manifold-comparison"><span class="header-section-number">10.5.9</span> 매니폴드 학습 방법의 비교</a></li>
+  <li><a href="#sec-ch10-manifold-pitfalls" id="toc-sec-ch10-manifold-pitfalls" class="nav-link" data-scroll-target="#sec-ch10-manifold-pitfalls"><span class="header-section-number">10.5.10</span> 매니폴드 학습의 평가와 함정</a></li>
+  </ul></li>
+  <li><a href="#sec-ch10-metric-learning" id="toc-sec-ch10-metric-learning" class="nav-link" data-scroll-target="#sec-ch10-metric-learning"><span class="header-section-number">10.6</span> 거리 척도 학습</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch10-metric-need" id="toc-sec-ch10-metric-need" class="nav-link" data-scroll-target="#sec-ch10-metric-need"><span class="header-section-number">10.6.1</span> 거리 척도의 필요성</a></li>
+  <li><a href="#sec-ch10-metric-supervision" id="toc-sec-ch10-metric-supervision" class="nav-link" data-scroll-target="#sec-ch10-metric-supervision"><span class="header-section-number">10.6.2</span> 지도정보의 형태</a></li>
+  <li><a href="#sec-ch10-constrained-metric" id="toc-sec-ch10-constrained-metric" class="nav-link" data-scroll-target="#sec-ch10-constrained-metric"><span class="header-section-number">10.6.3</span> 제약 기반 거리 학습</a></li>
+  <li><a href="#sec-ch10-nca" id="toc-sec-ch10-nca" class="nav-link" data-scroll-target="#sec-ch10-nca"><span class="header-section-number">10.6.4</span> Neighborhood Components Analysis</a></li>
+  <li><a href="#sec-ch10-lmnn" id="toc-sec-ch10-lmnn" class="nav-link" data-scroll-target="#sec-ch10-lmnn"><span class="header-section-number">10.6.5</span> Large Margin Nearest Neighbor</a></li>
+  <li><a href="#sec-ch10-itml" id="toc-sec-ch10-itml" class="nav-link" data-scroll-target="#sec-ch10-itml"><span class="header-section-number">10.6.6</span> 정보이론적 거리 척도 학습</a></li>
+  <li><a href="#sec-ch10-contrastive-triplet" id="toc-sec-ch10-contrastive-triplet" class="nav-link" data-scroll-target="#sec-ch10-contrastive-triplet"><span class="header-section-number">10.6.7</span> 대조학습과 삼중항 손실</a></li>
+  <li><a href="#sec-ch10-metric-dim-reduction" id="toc-sec-ch10-metric-dim-reduction" class="nav-link" data-scroll-target="#sec-ch10-metric-dim-reduction"><span class="header-section-number">10.6.8</span> 거리 학습과 차원 축소</a></li>
+  <li><a href="#sec-ch10-metric-evaluation" id="toc-sec-ch10-metric-evaluation" class="nav-link" data-scroll-target="#sec-ch10-metric-evaluation"><span class="header-section-number">10.6.9</span> 거리 척도 학습의 평가</a></li>
+  <li><a href="#sec-ch10-metric-comparison" id="toc-sec-ch10-metric-comparison" class="nav-link" data-scroll-target="#sec-ch10-metric-comparison"><span class="header-section-number">10.6.10</span> 거리 학습 방법의 비교</a></li>
+  </ul></li>
+  <li><a href="#sec-ch10-method-selection" id="toc-sec-ch10-method-selection" class="nav-link" data-scroll-target="#sec-ch10-method-selection"><span class="header-section-number">10.7</span> 차원 축소 방법의 선택</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch10-selection-purpose" id="toc-sec-ch10-selection-purpose" class="nav-link" data-scroll-target="#sec-ch10-selection-purpose"><span class="header-section-number">10.7.1</span> 목적에 따른 선택</a></li>
+  <li><a href="#sec-ch10-supervised-leakage" id="toc-sec-ch10-supervised-leakage" class="nav-link" data-scroll-target="#sec-ch10-supervised-leakage"><span class="header-section-number">10.7.2</span> 지도정보 사용과 데이터 누출</a></li>
+  <li><a href="#sec-ch10-number-components" id="toc-sec-ch10-number-components" class="nav-link" data-scroll-target="#sec-ch10-number-components"><span class="header-section-number">10.7.3</span> 차원 수의 선택</a></li>
+  <li><a href="#sec-ch10-hdss" id="toc-sec-ch10-hdss" class="nav-link" data-scroll-target="#sec-ch10-hdss"><span class="header-section-number">10.7.4</span> 고차원 소표본 문제</a></li>
+  <li><a href="#sec-ch10-computational-complexity" id="toc-sec-ch10-computational-complexity" class="nav-link" data-scroll-target="#sec-ch10-computational-complexity"><span class="header-section-number">10.7.5</span> 계산복잡도</a></li>
+  </ul></li>
+  <li><a href="#sec-ch10-unified-view" id="toc-sec-ch10-unified-view" class="nav-link" data-scroll-target="#sec-ch10-unified-view"><span class="header-section-number">10.8</span> 통합적 관점</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch10-representation-distance-learning" id="toc-sec-ch10-representation-distance-learning" class="nav-link" data-scroll-target="#sec-ch10-representation-distance-learning"><span class="header-section-number">10.8.1</span> 표현, 거리와 학습 알고리즘</a></li>
+  <li><a href="#sec-ch10-three-perspectives" id="toc-sec-ch10-three-perspectives" class="nav-link" data-scroll-target="#sec-ch10-three-perspectives"><span class="header-section-number">10.8.2</span> PCA, 매니폴드 학습과 거리 학습의 차이</a></li>
+  <li><a href="#sec-ch10-dim-vs-feature-selection" id="toc-sec-ch10-dim-vs-feature-selection" class="nav-link" data-scroll-target="#sec-ch10-dim-vs-feature-selection"><span class="header-section-number">10.8.3</span> 차원 축소와 특성 선택</a></li>
+  <li><a href="#sec-ch10-reproducibility" id="toc-sec-ch10-reproducibility" class="nav-link" data-scroll-target="#sec-ch10-reproducibility"><span class="header-section-number">10.8.4</span> 재현성과 안정성</a></li>
+  </ul></li>
+  <li><a href="#장-요약" id="toc-장-요약" class="nav-link" data-scroll-target="#장-요약">장 요약</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./09-clustering.html">III. 비지도학습과 표현학습</a></li><li class="breadcrumb-item"><a href="./10-dimensionality-reduction.html"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">차원 축소와 거리 척도 학습</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-ch10" class="quarto-section-identifier"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">차원 축소와 거리 척도 학습</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>고차원 자료에서는 변수의 수가 많다는 사실 자체보다, 차원이 증가하면서 자료의 기하학적 구조가 달라진다는 점이 더 중요하다. 저차원에서 자연스럽게 작동하던 거리, 근접성, 밀도, 시각화와 같은 개념은 고차원에서 직관과 다르게 행동할 수 있다. 따라서 차원 축소는 단순히 변수의 수를 줄이는 전처리 기법이 아니라, 자료의 핵심 구조를 보존하면서 학습에 적합한 새로운 표현을 구성하는 과정으로 이해해야 한다.</p>
+<p>이 장에서는 거리 기반 학습의 대표적 방법인 k-최근접 이웃을 출발점으로 삼아 차원의 저주가 왜 발생하는지 살펴본다. 이어 임베딩의 일반적 개념을 정리하고, 선형 차원 축소의 대표 방법인 주성분분석, 커널을 이용한 비선형 확장, 매니폴드(manifold) 학습, 그리고 학습 목적에 맞는 거리 자체를 추정하는 거리 척도 학습을 다룬다.</p>
+<section id="sec-ch10-knn" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="sec-ch10-knn"><span class="header-section-number">10.1</span> k-최근접 이웃과 고차원 공간</h2>
+<section id="sec-ch10-instance-based" class="level3" data-number="10.1.1">
+<h3 data-number="10.1.1" class="anchored" data-anchor-id="sec-ch10-instance-based"><span class="header-section-number">10.1.1</span> 사례 기반 학습</h3>
+<p>k-최근접 이웃(k-nearest neighbors, kNN)은 새로운 관측값과 가까운 훈련 관측값을 이용하여 예측하는 비모수적 학습 방법이다. 선형 회귀나 로지스틱 회귀처럼 명시적인 전역 모형을 추정하지 않고, 예측 시점에 훈련자료를 직접 참조한다는 점에서 사례 기반 학습(instance-based learning) 또는 기억 기반 학습으로 분류된다.</p>
+<p>훈련자료를</p>
+<p><span id="eq-ch10-training-data"><span class="math display">\[
+\mathcal D
+=
+\{(\mathbf x_i,y_i)\}_{i=1}^{n},
+\qquad
+\mathbf x_i\in\mathbb R^p
+\tag{10.1}\]</span></span></p>
+<p>라고 하자. 새로운 입력값 <span class="math inline">\(\mathbf x_0\)</span>에 대해 <span class="math inline">\(\mathcal N_k(\mathbf x_0)\)</span>를 <span class="math inline">\(\mathbf x_0\)</span>와 가장 가까운 <span class="math inline">\(k\)</span>개의 훈련 관측값 인덱스 집합이라고 정의한다.</p>
+<p>회귀문제에서 kNN 예측값은 보통 이웃 반응값의 평균으로 정의된다.</p>
+<p><span id="eq-ch10-knn-regression"><span class="math display">\[
+\widehat f_k(\mathbf x_0)
+=
+\frac{1}{k}
+\sum_{i\in\mathcal N_k(\mathbf x_0)} y_i.
+\tag{10.2}\]</span></span></p>
+<p>분류문제에서는 가장 많이 관찰된 클래스를 선택한다.</p>
+<p><span id="eq-ch10-knn-classification"><span class="math display">\[
+\widehat y(\mathbf x_0)
+=
+\arg\max_{g\in\{1,\ldots,G\}}
+\sum_{i\in\mathcal N_k(\mathbf x_0)}
+I(y_i=g).
+\tag{10.3}\]</span></span></p>
+<p>클래스 <span class="math inline">\(g\)</span>의 조건부확률은 이웃 가운데 해당 클래스가 차지하는 비율로 추정할 수 있다.</p>
+<p><span id="eq-ch10-knn-probability"><span class="math display">\[
+\widehat P(Y=g\mid\mathbf X=\mathbf x_0)
+=
+\frac{1}{k}
+\sum_{i\in\mathcal N_k(\mathbf x_0)} I(y_i=g).
+\tag{10.4}\]</span></span></p>
+<p>kNN은 모형의 형태를 명시적으로 가정하지 않는다는 장점이 있지만, 거리함수와 <span class="math inline">\(k\)</span>의 선택에 크게 의존한다. 따라서 kNN은 비모수적 방법인 동시에 강한 귀납적 편향을 가진다. 그 핵심 가정은 다음과 같다.</p>
+<blockquote class="blockquote">
+<p>입력공간에서 서로 가까운 관측값은 반응값이나 클래스도 서로 비슷할 가능성이 높다.</p>
+</blockquote>
+<p>이 가정은 자료의 표현과 거리 척도가 적절할 때만 타당하다.</p>
+</section>
+<section id="sec-ch10-weighted-knn" class="level3" data-number="10.1.2">
+<h3 data-number="10.1.2" class="anchored" data-anchor-id="sec-ch10-weighted-knn"><span class="header-section-number">10.1.2</span> 거리 가중 k-최근접 이웃</h3>
+<p>모든 이웃에 동일한 가중치를 부여하는 대신 가까운 관측값에 더 큰 가중치를 줄 수 있다. 회귀에서는</p>
+<p><span id="eq-ch10-weighted-knn"><span class="math display">\[
+\widehat f(\mathbf x_0)
+=
+\frac{
+\sum_{i\in\mathcal N_k(\mathbf x_0)}
+w_i(\mathbf x_0)y_i
+}{
+\sum_{i\in\mathcal N_k(\mathbf x_0)}
+w_i(\mathbf x_0)
+}
+\tag{10.5}\]</span></span></p>
+<p>로 정의할 수 있다. 대표적인 가중함수는 다음과 같다.</p>
+<p><span id="eq-ch10-inverse-distance-weight"><span class="math display">\[
+w_i(\mathbf x_0)
+=
+\frac{1}{\{d(\mathbf x_i,\mathbf x_0)+\epsilon\}^{q}},
+\qquad q&gt;0.
+\tag{10.6}\]</span></span></p>
+<p>여기서 <span class="math inline">\(\epsilon&gt;0\)</span>은 거리가 0일 때 분모가 0이 되는 것을 방지한다. 커널 함수를 이용하여</p>
+<p><span id="eq-ch10-kernel-weight"><span class="math display">\[
+w_i(\mathbf x_0)
+=
+K\left(
+\frac{d(\mathbf x_i,\mathbf x_0)}{h}
+\right)
+\tag{10.7}\]</span></span></p>
+<p>로 정의하면 kNN은 국소평활법과 밀접하게 연결된다.</p>
+</section>
+<section id="sec-ch10-k-role" class="level3" data-number="10.1.3">
+<h3 data-number="10.1.3" class="anchored" data-anchor-id="sec-ch10-k-role"><span class="header-section-number">10.1.3</span> k의 역할과 편향-분산 절충</h3>
+<p><span class="math inline">\(k\)</span>가 작으면 예측은 매우 국소적이고 복잡해진다. 훈련자료의 미세한 변동까지 반영하므로 편향은 작을 수 있지만 분산이 커진다. 반대로 <span class="math inline">\(k\)</span>가 크면 넓은 영역의 관측값을 평균하므로 예측함수가 부드러워지고 분산은 감소하지만 국소구조를 놓쳐 편향이 증가할 수 있다.</p>
+<div id="tbl-ch10-knn-bias-variance" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch10-knn-bias-variance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;10.1: kNN에서 <span class="math inline">\(k\)</span>와 편향-분산의 관계
+</figcaption>
+<div aria-describedby="tbl-ch10-knn-bias-variance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(k\)</span>의 크기</th>
+<th>모형의 특성</th>
+<th style="text-align: right;">편향</th>
+<th style="text-align: right;">분산</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>작음</td>
+<td>국소적이고 복잡함</td>
+<td style="text-align: right;">낮음</td>
+<td style="text-align: right;">높음</td>
+</tr>
+<tr class="even">
+<td>중간</td>
+<td>적절한 평활</td>
+<td style="text-align: right;">중간</td>
+<td style="text-align: right;">중간</td>
+</tr>
+<tr class="odd">
+<td>큼</td>
+<td>전역 평균에 가까움</td>
+<td style="text-align: right;">높음</td>
+<td style="text-align: right;">낮음</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><span class="math inline">\(k\)</span>는 일반적으로 교차검증으로 선택한다. 분류문제에서는 클래스 수와 표본 크기를 고려하여 홀수 값을 사용하는 경우가 많지만, 이는 동률을 줄이기 위한 실무적 관행일 뿐 이론적 필수조건은 아니다.</p>
+</section>
+<section id="sec-ch10-scaling" class="level3" data-number="10.1.4">
+<h3 data-number="10.1.4" class="anchored" data-anchor-id="sec-ch10-scaling"><span class="header-section-number">10.1.4</span> 변수의 척도와 표준화</h3>
+<p>유클리드 거리를 사용하는 경우 변수의 측정단위가 이웃 관계를 결정한다. 예를 들어 연령이 20에서 80 사이이고 연소득이 수백만 단위라면, 표준화하지 않은 거리에서는 연소득이 거의 모든 이웃 관계를 지배한다.</p>
+<p>표준화된 변수는</p>
+<p><span id="eq-ch10-standardization"><span class="math display">\[
+z_{ij}
+=
+\frac{x_{ij}-\bar x_j}{s_j}
+\tag{10.8}\]</span></span></p>
+<p>로 정의한다. 이상치가 심한 경우 평균과 표준편차 대신 중앙값과 중앙절대편차를 사용할 수 있다.</p>
+<p><span id="eq-ch10-robust-scaling"><span class="math display">\[
+z_{ij}^{\mathrm{robust}}
+=
+\frac{x_{ij}-\operatorname{median}(x_{\cdot j})}
+{\operatorname{MAD}(x_{\cdot j})}.
+\tag{10.9}\]</span></span></p>
+<p>범주형 변수와 연속형 변수가 함께 있는 경우 단순한 유클리드 거리는 적절하지 않으며, Gower 거리와 같은 혼합형 자료용 거리나 별도의 임베딩이 필요하다.</p>
+</section>
+<section id="sec-ch10-curse" class="level3" data-number="10.1.5">
+<h3 data-number="10.1.5" class="anchored" data-anchor-id="sec-ch10-curse"><span class="header-section-number">10.1.5</span> 차원의 저주</h3>
+<p>차원의 저주(curse of dimensionality)는 차원이 증가함에 따라 자료를 충분히 조밀하게 채우는 데 필요한 표본 수가 기하급수적으로 증가하는 현상을 말한다. 단위 초입방체 <span class="math inline">\([0,1]^p\)</span>에서 각 축의 길이가 <span class="math inline">\(r\)</span>인 작은 초입방체의 부피는</p>
+<p><span id="eq-ch10-hypercube-volume"><span class="math display">\[
+V_p(r)=r^p
+\tag{10.10}\]</span></span></p>
+<p>이다. 전체 부피의 비율을 <span class="math inline">\(\alpha\)</span>만큼 포함하려면 각 축에서 필요한 길이는</p>
+<p><span id="eq-ch10-side-length"><span class="math display">\[
+r=\alpha^{1/p}
+\tag{10.11}\]</span></span></p>
+<p>이다. 예를 들어 전체 부피의 10%를 포함하려 할 때 <span class="math inline">\(p=1\)</span>이면 <span class="math inline">\(r=0.1\)</span>이지만, <span class="math inline">\(p=10\)</span>이면</p>
+<p><span class="math display">\[
+r=0.1^{1/10}\approx 0.794
+\]</span></p>
+<p>가 된다. 즉, 고차원에서는 전체 공간의 작은 비율을 포함하려 해도 각 축에서 매우 넓은 범위를 사용해야 한다. 결과적으로 국소 이웃이 더 이상 충분히 국소적이지 않게 된다.</p>
+<p>다음 코드 청크는 차원에 따라 일정한 부피비를 포함하기 위해 필요한 축의 길이가 어떻게 변하는지를 보여준다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">50</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>alpha <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.01</span>, <span class="fl">0.05</span>, <span class="fl">0.10</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">matplot</span>(</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  p,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sapply</span>(alpha, <span class="cf">function</span>(a) a<span class="sc">^</span>(<span class="dv">1</span> <span class="sc">/</span> p)),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"l"</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">lty =</span> <span class="dv">1</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"차원 p"</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"필요한 축 길이 r"</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"bottomright"</span>,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">legend =</span> <span class="fu">paste0</span>(<span class="st">"부피비 = "</span>, alpha),</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">lty =</span> <span class="dv">1</span>,</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">bty =</span> <span class="st">"n"</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-ch10-curse-volume" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch10-curse-volume-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="10-dimensionality-reduction_files/figure-html/fig-ch10-curse-volume-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch10-curse-volume-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;10.1: 차원이 증가할 때 일정한 부피비를 포함하기 위해 필요한 축 길이
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch10-distance-concentration" class="level3" data-number="10.1.6">
+<h3 data-number="10.1.6" class="anchored" data-anchor-id="sec-ch10-distance-concentration"><span class="header-section-number">10.1.6</span> 거리 집중 현상</h3>
+<p>고차원에서는 가장 가까운 관측값과 가장 먼 관측값 사이의 상대적 차이가 줄어드는 거리 집중(distance concentration) 현상이 발생할 수 있다. <span class="math inline">\(n\)</span>개 관측값에 대해 한 관측값 <span class="math inline">\(\mathbf x\)</span>에서 다른 관측값까지의 최소거리와 최대거리를 각각 <span class="math inline">\(d_{\min}\)</span>과 <span class="math inline">\(d_{\max}\)</span>라고 하면</p>
+<p><span id="eq-ch10-distance-contrast"><span class="math display">\[
+\frac{d_{\max}-d_{\min}}{d_{\min}}
+\tag{10.12}\]</span></span></p>
+<p>이 차원이 증가할수록 작아질 수 있다. 이 경우 최근접 이웃과 먼 이웃의 구분이 약해지고 거리 기반 알고리즘의 성능이 저하된다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1010</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>dims <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">50</span>, <span class="dv">100</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>contrast <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="fu">length</span>(dims))</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="fu">seq_along</span>(dims)) {</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> dims[j]</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">runif</span>(<span class="dv">400</span> <span class="sc">*</span> p), <span class="at">nrow =</span> <span class="dv">400</span>, <span class="at">ncol =</span> p)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  d <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">rowSums</span>((x[<span class="sc">-</span><span class="dv">1</span>, , <span class="at">drop =</span> <span class="cn">FALSE</span>] <span class="sc">-</span> x[<span class="dv">1</span>, ])<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  contrast[j] <span class="ot">&lt;-</span> (<span class="fu">max</span>(d) <span class="sc">-</span> <span class="fu">min</span>(d)) <span class="sc">/</span> <span class="fu">min</span>(d)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  dims,</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  contrast,</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"b"</span>,</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">19</span>,</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"차원 p"</span>,</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"(최대거리 - 최소거리) / 최소거리"</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-ch10-distance-concentration" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch10-distance-concentration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="10-dimensionality-reduction_files/figure-html/fig-ch10-distance-concentration-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch10-distance-concentration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;10.2: 차원 증가에 따른 최근거리와 최장거리의 상대적 차이
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch10-knn-dim-reduction" class="level3" data-number="10.1.7">
+<h3 data-number="10.1.7" class="anchored" data-anchor-id="sec-ch10-knn-dim-reduction"><span class="header-section-number">10.1.7</span> kNN과 차원 축소의 연결</h3>
+<p>kNN의 어려움은 거리 기반 학습에서 적절한 표현이 얼마나 중요한지를 보여준다. 차원 축소는 다음과 같은 방식으로 kNN을 개선할 수 있다.</p>
+<ol type="1">
+<li>잡음 변수를 제거하여 거리의 신호대잡음비를 높인다.</li>
+<li>상관된 변수를 소수의 축으로 요약한다.</li>
+<li>비선형 구조를 저차원 좌표로 펼친다.</li>
+<li>예측목표에 맞는 거리 척도를 학습한다.</li>
+</ol>
+<p>따라서 이 장의 이후 방법들은 단순한 시각화 기법이 아니라, 근접성의 의미를 재구성하는 방법으로 이해할 수 있다.</p>
+</section>
+</section>
+<section id="sec-ch10-embedding" class="level2" data-number="10.2">
+<h2 data-number="10.2" class="anchored" data-anchor-id="sec-ch10-embedding"><span class="header-section-number">10.2</span> 임베딩과 표현공간</h2>
+<section id="sec-ch10-embedding-definition" class="level3" data-number="10.2.1">
+<h3 data-number="10.2.1" class="anchored" data-anchor-id="sec-ch10-embedding-definition"><span class="header-section-number">10.2.1</span> 임베딩의 정의</h3>
+<p>임베딩(embedding)은 원래의 입력공간 <span class="math inline">\(\mathcal X\)</span>에 있는 관측값을 새로운 표현공간(representation space) <span class="math inline">\(\mathcal Z\)</span>로 변환하는 함수이다.</p>
+<p><span id="eq-ch10-embedding-map"><span class="math display">\[
+\phi:\mathcal X\rightarrow\mathcal Z.
+\tag{10.13}\]</span></span></p>
+<p>일반적으로 <span class="math inline">\(\mathcal X\subseteq\mathbb R^p\)</span>이고 <span class="math inline">\(\mathcal Z\subseteq\mathbb R^q\)</span>이며, 차원 축소에서는 <span class="math inline">\(q&lt;p\)</span>를 목표로 한다. 그러나 임베딩의 본질은 단순한 차원 감소가 아니라 학습에 필요한 구조를 보존하거나 강화하는 데 있다.</p>
+<p>관측값 <span class="math inline">\(\mathbf x_i\)</span>의 임베딩을</p>
+<p><span id="eq-ch10-embedded-coordinate"><span class="math display">\[
+\mathbf z_i=\phi(\mathbf x_i)
+\tag{10.14}\]</span></span></p>
+<p>라고 하자. 좋은 임베딩의 기준은 목적에 따라 달라진다.</p>
+<ul>
+<li>전역 거리 보존</li>
+<li>국소 이웃 보존</li>
+<li>클래스 분리 향상</li>
+<li>재구성오차 최소화</li>
+<li>확률분포의 구조 보존</li>
+<li>후속 예측성능 향상</li>
+</ul>
+</section>
+<section id="sec-ch10-linear-nonlinear-embedding" class="level3" data-number="10.2.2">
+<h3 data-number="10.2.2" class="anchored" data-anchor-id="sec-ch10-linear-nonlinear-embedding"><span class="header-section-number">10.2.2</span> 선형 임베딩과 비선형 임베딩</h3>
+<p>선형 임베딩은</p>
+<p><span id="eq-ch10-linear-embedding"><span class="math display">\[
+\mathbf z
+=
+\mathbf W^\top\mathbf x
+\tag{10.15}\]</span></span></p>
+<p>와 같이 행렬 <span class="math inline">\(\mathbf W\in\mathbb R^{p\times q}\)</span>를 이용한다. 주성분분석과 선형 판별분석이 대표적이다.</p>
+<p>비선형 임베딩은</p>
+<p><span id="eq-ch10-nonlinear-embedding"><span class="math display">\[
+\mathbf z
+=
+\phi(\mathbf x)
+\tag{10.16}\]</span></span></p>
+<p>에서 <span class="math inline">\(\phi\)</span>가 비선형 함수이다. 커널 주성분분석, Isomap, LLE, t-SNE, UMAP과 오토인코더가 이에 해당한다.</p>
+</section>
+<section id="sec-ch10-global-local" class="level3" data-number="10.2.3">
+<h3 data-number="10.2.3" class="anchored" data-anchor-id="sec-ch10-global-local"><span class="header-section-number">10.2.3</span> 전역 구조와 국소 구조</h3>
+<p>임베딩 방법은 어떤 구조를 보존하는가에 따라 크게 구분할 수 있다.</p>
+<div id="tbl-ch10-embedding-objectives" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch10-embedding-objectives-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;10.2: 임베딩 방법이 보존하려는 구조
+</figcaption>
+<div aria-describedby="tbl-ch10-embedding-objectives-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>보존 대상</th>
+<th>대표 방법</th>
+<th>주요 목적</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>전체 분산</td>
+<td>PCA</td>
+<td>전역 선형 구조 요약</td>
+</tr>
+<tr class="even">
+<td>전체 거리</td>
+<td>고전적 MDS</td>
+<td>거리의 전역적 재현</td>
+</tr>
+<tr class="odd">
+<td>지오데식 거리</td>
+<td>Isomap</td>
+<td>비선형 매니폴드의 전역 구조</td>
+</tr>
+<tr class="even">
+<td>국소 선형관계</td>
+<td>LLE</td>
+<td>이웃 재구성관계 보존</td>
+</tr>
+<tr class="odd">
+<td>이웃 그래프</td>
+<td>Laplacian Eigenmaps</td>
+<td>국소 연결성 보존</td>
+</tr>
+<tr class="even">
+<td>국소 확률분포</td>
+<td>t-SNE</td>
+<td>군집 시각화</td>
+</tr>
+<tr class="odd">
+<td>국소·전역 균형</td>
+<td>UMAP</td>
+<td>시각화와 표현학습</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>어떤 임베딩도 모든 구조를 동시에 완벽하게 보존할 수는 없다. 따라서 임베딩 결과를 해석할 때는 해당 방법이 무엇을 최적화했는지를 반드시 확인해야 한다.</p>
+</section>
+<section id="sec-ch10-embedding-loss" class="level3" data-number="10.2.4">
+<h3 data-number="10.2.4" class="anchored" data-anchor-id="sec-ch10-embedding-loss"><span class="header-section-number">10.2.4</span> 손실함수에 기반한 임베딩</h3>
+<p>많은 임베딩 방법은 원래 공간의 관계 <span class="math inline">\(s_{ij}\)</span>와 임베딩 공간의 관계 <span class="math inline">\(\widetilde s_{ij}\)</span> 사이의 차이를 최소화한다.</p>
+<p><span id="eq-ch10-general-embedding-loss"><span class="math display">\[
+\widehat\phi
+=
+\arg\min_{\phi\in\Phi}
+\sum_{i&lt;j}
+\ell\left(s_{ij},\widetilde s_{ij}\right).
+\tag{10.17}\]</span></span></p>
+<p>여기서 <span class="math inline">\(s_{ij}\)</span>는 거리, 유사도, 이웃 여부 또는 확률일 수 있다. 방법 간 차이는 주로 다음 세 요소에서 발생한다.</p>
+<ol type="1">
+<li>원래 공간의 관계를 어떻게 정의하는가</li>
+<li>임베딩 공간의 관계를 어떻게 정의하는가</li>
+<li>두 관계의 차이를 어떤 손실함수로 측정하는가</li>
+</ol>
+</section>
+<section id="sec-ch10-supervision-embedding" class="level3" data-number="10.2.5">
+<h3 data-number="10.2.5" class="anchored" data-anchor-id="sec-ch10-supervision-embedding"><span class="header-section-number">10.2.5</span> 지도·비지도·자기지도 임베딩</h3>
+<p>비지도 임베딩은 입력 <span class="math inline">\(\mathbf X\)</span>의 구조만 사용한다. PCA, MDS와 대부분의 매니폴드 학습이 대표적이다. 지도 임베딩은 클래스나 반응변수를 사용하여 예측에 유리한 표현을 구성한다. 선형 판별분석, 부분최소제곱, NCA와 LMNN이 이에 해당한다.</p>
+<p>자기지도 임베딩은 자료 자체에서 예측과제를 구성한다. 예를 들어 일부 입력을 가리고 복원하거나, 서로 다른 변환을 적용한 동일 관측값의 표현을 가깝게 만드는 방식이다. 이러한 방법은 현대 표현학습의 핵심이지만, 이 장에서는 차원 축소와 거리 학습의 관점에서 개념적으로만 연결한다.</p>
+</section>
+<section id="sec-ch10-embedding-evaluation" class="level3" data-number="10.2.6">
+<h3 data-number="10.2.6" class="anchored" data-anchor-id="sec-ch10-embedding-evaluation"><span class="header-section-number">10.2.6</span> 임베딩 평가</h3>
+<p>임베딩 평가는 단일한 기준으로 해결되지 않는다. 대표적인 평가기준은 다음과 같다.</p>
+<section id="재구성오차" class="level4">
+<h4 class="anchored" data-anchor-id="재구성오차">재구성오차</h4>
+<p>선형 또는 비선형 디코더 <span class="math inline">\(g\)</span>를 이용하여 원래 입력을 복원할 때</p>
+<p><span id="eq-ch10-reconstruction-error"><span class="math display">\[
+\operatorname{RE}
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+\left\|
+\mathbf x_i-g(\phi(\mathbf x_i))
+\right\|_2^2
+\tag{10.18}\]</span></span></p>
+<p>를 사용할 수 있다.</p>
+</section>
+<section id="이웃-보존율" class="level4">
+<h4 class="anchored" data-anchor-id="이웃-보존율">이웃 보존율</h4>
+<p>원래 공간과 임베딩 공간의 <span class="math inline">\(k\)</span>-최근접 이웃 집합을 각각 <span class="math inline">\(\mathcal N_k^X(i)\)</span>와 <span class="math inline">\(\mathcal N_k^Z(i)\)</span>라고 하면</p>
+<p><span id="eq-ch10-neighborhood-preservation"><span class="math display">\[
+\operatorname{NP}_k
+=
+\frac{1}{nk}
+\sum_{i=1}^{n}
+\left|
+\mathcal N_k^X(i)
+\cap
+\mathcal N_k^Z(i)
+\right|
+\tag{10.19}\]</span></span></p>
+<p>로 이웃 보존율을 정의할 수 있다.</p>
+</section>
+<section id="후속-과제-성능" class="level4">
+<h4 class="anchored" data-anchor-id="후속-과제-성능">후속 과제 성능</h4>
+<p>차원 축소된 표현을 사용하여 분류, 회귀 또는 군집화를 수행하고 성능을 평가한다. 실무에서는 이 기준이 가장 중요할 수 있다. 시각적으로 아름다운 임베딩이 반드시 예측에 유용한 표현은 아니다.</p>
+</section>
+</section>
+</section>
+<section id="sec-ch10-pca" class="level2" data-number="10.3">
+<h2 data-number="10.3" class="anchored" data-anchor-id="sec-ch10-pca"><span class="header-section-number">10.3</span> 주성분분석</h2>
+<section id="sec-ch10-pca-objective" class="level3" data-number="10.3.1">
+<h3 data-number="10.3.1" class="anchored" data-anchor-id="sec-ch10-pca-objective"><span class="header-section-number">10.3.1</span> 주성분분석의 목적</h3>
+<p>주성분분석(principal component analysis, PCA)은 상관된 여러 변수를 서로 직교하는 소수의 선형결합으로 요약하는 방법이다. 첫 번째 주성분은 자료의 분산이 가장 큰 방향이고, 이후 주성분은 앞선 방향과 직교하면서 남은 분산을 최대화한다.</p>
+<p>중심화된 자료행렬을</p>
+<p><span id="eq-ch10-centered-data"><span class="math display">\[
+\mathbf X_c
+=
+\mathbf X-\mathbf 1_n\bar{\mathbf x}^{\top}
+\tag{10.20}\]</span></span></p>
+<p>라고 하자. 여기서 <span class="math inline">\(\bar{\mathbf x}\)</span>는 변수별 평균벡터이다.</p>
+<p>첫 번째 주성분 방향 <span class="math inline">\(\mathbf w_1\)</span>은 다음 최적화 문제의 해이다.</p>
+<p><span id="eq-ch10-pca-first-objective"><span class="math display">\[
+\mathbf w_1
+=
+\arg\max_{\mathbf w}
+\operatorname{Var}(\mathbf X_c\mathbf w)
+\quad
+\text{subject to}
+\quad
+\|\mathbf w\|_2=1.
+\tag{10.21}\]</span></span></p>
+<p>표본공분산행렬을</p>
+<p><span id="eq-ch10-sample-covariance"><span class="math display">\[
+\mathbf S
+=
+\frac{1}{n-1}
+\mathbf X_c^{\top}\mathbf X_c
+\tag{10.22}\]</span></span></p>
+<p>라고 하면 목적함수는</p>
+<p><span id="eq-ch10-rayleigh-quotient"><span class="math display">\[
+\operatorname{Var}(\mathbf X_c\mathbf w)
+=
+\mathbf w^{\top}\mathbf S\mathbf w
+\tag{10.23}\]</span></span></p>
+<p>가 된다.</p>
+</section>
+<section id="sec-ch10-pca-eigen" class="level3" data-number="10.3.2">
+<h3 data-number="10.3.2" class="anchored" data-anchor-id="sec-ch10-pca-eigen"><span class="header-section-number">10.3.2</span> 라그랑주 승수와 고유값 문제</h3>
+<p>제약조건을 포함한 라그랑지안은</p>
+<p><span id="eq-ch10-pca-lagrangian"><span class="math display">\[
+\mathcal L(\mathbf w,\lambda)
+=
+\mathbf w^{\top}\mathbf S\mathbf w
+-
+\lambda(\mathbf w^{\top}\mathbf w-1)
+\tag{10.24}\]</span></span></p>
+<p>이다. <span class="math inline">\(\mathbf w\)</span>에 대해 미분하면</p>
+<p><span class="math display">\[
+2\mathbf S\mathbf w-2\lambda\mathbf w=\mathbf 0
+\]</span></p>
+<p>이므로</p>
+<p><span id="eq-ch10-pca-eigen-equation"><span class="math display">\[
+\mathbf S\mathbf w
+=
+\lambda\mathbf w
+\tag{10.25}\]</span></span></p>
+<p>를 얻는다. 따라서 첫 번째 주성분 방향은 가장 큰 고유값에 대응하는 고유벡터이다.</p>
+<p>공분산행렬의 고유값을</p>
+<p><span class="math display">\[
+\lambda_1\geq\lambda_2\geq\cdots\geq\lambda_p\geq0
+\]</span></p>
+<p>라고 하고 대응하는 정규직교 고유벡터를 <span class="math inline">\(\mathbf w_1,\ldots,\mathbf w_p\)</span>라고 하자. <span class="math inline">\(k\)</span>개의 주성분 적재행렬은</p>
+<p><span id="eq-ch10-loading-matrix"><span class="math display">\[
+\mathbf W_k
+=
+[\mathbf w_1,\ldots,\mathbf w_k]
+\tag{10.26}\]</span></span></p>
+<p>이고 주성분 점수(principal component score)는</p>
+<p><span id="eq-ch10-pca-scores"><span class="math display">\[
+\mathbf Z_k
+=
+\mathbf X_c\mathbf W_k
+\tag{10.27}\]</span></span></p>
+<p>이다.</p>
+</section>
+<section id="sec-ch10-pca-reconstruction" class="level3" data-number="10.3.3">
+<h3 data-number="10.3.3" class="anchored" data-anchor-id="sec-ch10-pca-reconstruction"><span class="header-section-number">10.3.3</span> 최대분산과 최소재구성오차의 동등성</h3>
+<p>PCA는 최대분산 방향을 찾는 문제로 설명할 수 있지만, 동시에 <span class="math inline">\(k\)</span>차원 선형 부분공간으로 투영한 뒤 원래 자료를 복원할 때 재구성오차를 최소화한다.</p>
+<p><span class="math inline">\(\mathbf W_k^{\top}\mathbf W_k=\mathbf I_k\)</span>라고 하면 투영된 자료의 복원값은</p>
+<p><span id="eq-ch10-pca-reconstruction"><span class="math display">\[
+\widehat{\mathbf X}_c
+=
+\mathbf X_c\mathbf W_k\mathbf W_k^{\top}
+\tag{10.28}\]</span></span></p>
+<p>이다. PCA는 다음 문제의 해이다.</p>
+<p><span id="eq-ch10-pca-reconstruction-objective"><span class="math display">\[
+\widehat{\mathbf W}_k
+=
+\arg\min_{\mathbf W_k^{\top}\mathbf W_k=\mathbf I_k}
+\left\|
+\mathbf X_c-
+\mathbf X_c\mathbf W_k\mathbf W_k^{\top}
+\right\|_F^2.
+\tag{10.29}\]</span></span></p>
+<p>최소 재구성오차는 버린 고유값의 합과 같다.</p>
+<p><span id="eq-ch10-pca-reconstruction-error"><span class="math display">\[
+\left\|
+\mathbf X_c-
+\widehat{\mathbf X}_c
+\right\|_F^2
+=
+(n-1)
+\sum_{j=k+1}^{p}\lambda_j.
+\tag{10.30}\]</span></span></p>
+</section>
+<section id="sec-ch10-pca-svd" class="level3" data-number="10.3.4">
+<h3 data-number="10.3.4" class="anchored" data-anchor-id="sec-ch10-pca-svd"><span class="header-section-number">10.3.4</span> 특이값분해를 이용한 계산</h3>
+<p>중심화된 자료행렬의 특이값분해(singular value decomposition)를</p>
+<p><span id="eq-ch10-svd"><span class="math display">\[
+\mathbf X_c
+=
+\mathbf U\mathbf D\mathbf V^{\top}
+\tag{10.31}\]</span></span></p>
+<p>라고 하자. 그러면</p>
+<p><span id="eq-ch10-svd-covariance"><span class="math display">\[
+\mathbf S
+=
+\frac{1}{n-1}
+\mathbf V\mathbf D^2\mathbf V^{\top}
+\tag{10.32}\]</span></span></p>
+<p>이므로 주성분 적재량(principal component loading)은 <span class="math inline">\(\mathbf V\)</span>의 열벡터이고, 고유값은</p>
+<p><span id="eq-ch10-pca-eigenvalue-svd"><span class="math display">\[
+\lambda_j
+=
+\frac{d_j^2}{n-1}
+\tag{10.33}\]</span></span></p>
+<p>이다. 실제 계산에서는 공분산행렬을 직접 구성하기보다 SVD를 사용하는 것이 수치적으로 더 안정적이다.</p>
+</section>
+<section id="sec-ch10-explained-variance" class="level3" data-number="10.3.5">
+<h3 data-number="10.3.5" class="anchored" data-anchor-id="sec-ch10-explained-variance"><span class="header-section-number">10.3.5</span> 설명분산비와 차원 선택</h3>
+<p><span class="math inline">\(j\)</span>번째 주성분의 설명분산비(proportion of variance explained)는</p>
+<p><span id="eq-ch10-pve"><span class="math display">\[
+\operatorname{PVE}_j
+=
+\frac{\lambda_j}
+{\sum_{\ell=1}^{p}\lambda_\ell}
+\tag{10.34}\]</span></span></p>
+<p>이고, 처음 <span class="math inline">\(k\)</span>개 주성분의 누적 설명분산비는</p>
+<p><span id="eq-ch10-cumulative-pve"><span class="math display">\[
+\operatorname{CPVE}_k
+=
+\frac{\sum_{j=1}^{k}\lambda_j}
+{\sum_{j=1}^{p}\lambda_j}.
+\tag{10.35}\]</span></span></p>
+<p>차원 <span class="math inline">\(k\)</span>는 다음 방법으로 선택할 수 있다.</p>
+<ul>
+<li>누적 설명분산비 기준</li>
+<li>스크리 도표의 굴곡점</li>
+<li>병렬분석</li>
+<li>교차검증 재구성오차</li>
+<li>후속 예측성능</li>
+<li>해석 가능성</li>
+</ul>
+<p>설명분산비가 높다는 사실만으로 선택된 주성분이 예측목표에 유용하다는 보장은 없다. 반응변수와 관련된 방향의 분산이 작을 수도 있기 때문이다.</p>
+</section>
+<section id="sec-ch10-cov-corr-pca" class="level3" data-number="10.3.6">
+<h3 data-number="10.3.6" class="anchored" data-anchor-id="sec-ch10-cov-corr-pca"><span class="header-section-number">10.3.6</span> 공분산행렬과 상관행렬 PCA</h3>
+<p>원자료를 중심화만 한 뒤 PCA를 수행하면 공분산행렬 PCA가 된다. 변수의 단위와 분산이 크게 다를 때는 표준화한 자료에 PCA를 적용하며, 이는 상관행렬 PCA와 동일하다.</p>
+<div id="tbl-ch10-pca-scaling" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch10-pca-scaling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;10.3: 공분산행렬 PCA와 상관행렬 PCA의 선택
+</figcaption>
+<div aria-describedby="tbl-ch10-pca-scaling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>상황</th>
+<th>권장 방식</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>변수 단위가 동일하고 분산 차이가 의미 있음</td>
+<td>공분산행렬 PCA</td>
+</tr>
+<tr class="even">
+<td>변수 단위가 다름</td>
+<td>상관행렬 PCA</td>
+</tr>
+<tr class="odd">
+<td>큰 분산이 단순 측정단위에서 기인</td>
+<td>상관행렬 PCA</td>
+</tr>
+<tr class="even">
+<td>원래 단위의 변동이 과학적으로 중요</td>
+<td>공분산행렬 PCA</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-ch10-loadings-scores" class="level3" data-number="10.3.7">
+<h3 data-number="10.3.7" class="anchored" data-anchor-id="sec-ch10-loadings-scores"><span class="header-section-number">10.3.7</span> 적재량과 점수의 해석</h3>
+<p>적재량 <span class="math inline">\(w_{jk}\)</span>는 원래 변수 <span class="math inline">\(j\)</span>가 주성분 <span class="math inline">\(k\)</span>에 기여하는 방향과 크기를 나타낸다. 그러나 고유벡터의 부호는 임의적이므로 전체 부호가 반전되어도 동일한 주성분이다.</p>
+<p>관측값 <span class="math inline">\(i\)</span>의 주성분 점수는</p>
+<p><span id="eq-ch10-individual-score"><span class="math display">\[
+z_{ik}
+=
+\mathbf x_{ic}^{\top}\mathbf w_k
+\tag{10.36}\]</span></span></p>
+<p>이다. 점수도표는 관측값의 구조를, 적재량도표는 변수의 구조를 보여준다. 이 둘을 함께 표현하는 바이플롯은 관측값과 변수의 관계를 동시에 탐색하는 데 유용하지만, 축척 방식에 따라 해석이 달라질 수 있다.</p>
+</section>
+<section id="sec-ch10-pca-example" class="level3" data-number="10.3.8">
+<h3 data-number="10.3.8" class="anchored" data-anchor-id="sec-ch10-pca-example"><span class="header-section-number">10.3.8</span> PCA 시뮬레이션 예제</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1020</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">250</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>x2 <span class="ot">&lt;-</span> <span class="fl">0.85</span> <span class="sc">*</span> x1 <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">250</span>, <span class="at">sd =</span> <span class="fl">0.45</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">cbind</span>(x1, x2)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(x, <span class="at">center =</span> <span class="cn">TRUE</span>, <span class="at">scale. =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>center <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(x)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>scale_arrow <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  x,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">19</span>,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">cex =</span> <span class="fl">0.65</span>,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">asp =</span> <span class="dv">1</span>,</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="fu">expression</span>(X[<span class="dv">1</span>]),</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="fu">expression</span>(X[<span class="dv">2</span>])</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="fu">arrows</span>(</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  center[<span class="dv">1</span>], center[<span class="dv">2</span>],</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  center[<span class="dv">1</span>] <span class="sc">+</span> scale_arrow <span class="sc">*</span> fit<span class="sc">$</span>rotation[<span class="dv">1</span>, <span class="dv">1</span>],</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  center[<span class="dv">2</span>] <span class="sc">+</span> scale_arrow <span class="sc">*</span> fit<span class="sc">$</span>rotation[<span class="dv">2</span>, <span class="dv">1</span>],</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">length =</span> <span class="fl">0.1</span>,</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="fu">arrows</span>(</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  center[<span class="dv">1</span>], center[<span class="dv">2</span>],</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  center[<span class="dv">1</span>] <span class="sc">+</span> scale_arrow <span class="sc">*</span> fit<span class="sc">$</span>rotation[<span class="dv">1</span>, <span class="dv">2</span>],</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>  center[<span class="dv">2</span>] <span class="sc">+</span> scale_arrow <span class="sc">*</span> fit<span class="sc">$</span>rotation[<span class="dv">2</span>, <span class="dv">2</span>],</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>  <span class="at">length =</span> <span class="fl">0.1</span>,</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  <span class="at">lty =</span> <span class="dv">2</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>  center[<span class="dv">1</span>] <span class="sc">+</span> scale_arrow <span class="sc">*</span> fit<span class="sc">$</span>rotation[<span class="dv">1</span>, <span class="dv">1</span>],</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>  center[<span class="dv">2</span>] <span class="sc">+</span> scale_arrow <span class="sc">*</span> fit<span class="sc">$</span>rotation[<span class="dv">2</span>, <span class="dv">1</span>],</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels =</span> <span class="st">"PC1"</span>,</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>  <span class="at">pos =</span> <span class="dv">4</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>  center[<span class="dv">1</span>] <span class="sc">+</span> scale_arrow <span class="sc">*</span> fit<span class="sc">$</span>rotation[<span class="dv">1</span>, <span class="dv">2</span>],</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>  center[<span class="dv">2</span>] <span class="sc">+</span> scale_arrow <span class="sc">*</span> fit<span class="sc">$</span>rotation[<span class="dv">2</span>, <span class="dv">2</span>],</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels =</span> <span class="st">"PC2"</span>,</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>  <span class="at">pos =</span> <span class="dv">4</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-ch10-pca-projection" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch10-pca-projection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="10-dimensionality-reduction_files/figure-html/fig-ch10-pca-projection-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch10-pca-projection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;10.3: 상관된 이변량 자료의 주성분 방향
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch10-sparse-robust-pca" class="level3" data-number="10.3.9">
+<h3 data-number="10.3.9" class="anchored" data-anchor-id="sec-ch10-sparse-robust-pca"><span class="header-section-number">10.3.9</span> 희소 PCA와 강건 PCA</h3>
+<p>일반적인 PCA의 적재량은 대부분 0이 아니므로 변수가 많을 때 해석이 어렵다. 희소 PCA(sparse PCA)는 적재량에 <span class="math inline">\(\ell_1\)</span> 제약이나 패널티를 적용하여 일부 계수를 0으로 만든다. 개념적으로 다음과 같은 형태를 가진다.</p>
+<p><span id="eq-ch10-sparse-pca"><span class="math display">\[
+\widehat{\mathbf w}
+=
+\arg\max_{\mathbf w}
+\mathbf w^{\top}\mathbf S\mathbf w
+-
+\lambda\|\mathbf w\|_1
+\quad
+\text{subject to}
+\quad
+\|\mathbf w\|_2=1.
+\tag{10.37}\]</span></span></p>
+<p>강건 PCA(robust PCA)는 이상치나 오염에 민감한 일반 PCA의 한계를 보완한다. 대표적으로 자료행렬을 저랭크 성분과 희소 이상치 성분으로 분해한다.</p>
+<p><span id="eq-ch10-robust-pca-decomposition"><span class="math display">\[
+\mathbf X
+=
+\mathbf L+\mathbf S.
+\tag{10.38}\]</span></span></p>
+<p>이를 다음 최적화 문제로 추정할 수 있다.</p>
+<p><span id="eq-ch10-robust-pca-objective"><span class="math display">\[
+\min_{\mathbf L,\mathbf S}
+\|\mathbf L\|_*
++
+\lambda\|\mathbf S\|_1
+\quad
+\text{subject to}
+\quad
+\mathbf X=\mathbf L+\mathbf S.
+\tag{10.39}\]</span></span></p>
+<p>여기서 <span class="math inline">\(\|\mathbf L\|_*\)</span>는 특이값의 합인 핵노름이다.</p>
+</section>
+<section id="sec-ch10-probabilistic-pca" class="level3" data-number="10.3.10">
+<h3 data-number="10.3.10" class="anchored" data-anchor-id="sec-ch10-probabilistic-pca"><span class="header-section-number">10.3.10</span> 확률적 PCA</h3>
+<p>확률적 PCA(probabilistic PCA)는 잠재변수 모형으로 PCA를 표현한다.</p>
+<p><span id="eq-ch10-ppca-model"><span class="math display">\[
+\mathbf x_i
+=
+\boldsymbol\mu
++
+\mathbf W\mathbf z_i
++
+\boldsymbol\epsilon_i,
+\tag{10.40}\]</span></span></p>
+<p>여기서</p>
+<p><span id="eq-ch10-ppca-distributions"><span class="math display">\[
+\mathbf z_i\sim N(\mathbf 0,\mathbf I_q),
+\qquad
+\boldsymbol\epsilon_i\sim N(\mathbf 0,\sigma^2\mathbf I_p).
+\tag{10.41}\]</span></span></p>
+<p>따라서 주변분포는</p>
+<p><span id="eq-ch10-ppca-marginal"><span class="math display">\[
+\mathbf x_i
+\sim
+N\left(
+\boldsymbol\mu,
+\mathbf W\mathbf W^{\top}+\sigma^2\mathbf I_p
+\right).
+\tag{10.42}\]</span></span></p>
+<p>확률적 표현은 결측자료 처리, 베이지안 확장, 혼합모형과의 연결에 유용하다.</p>
+</section>
+</section>
+<section id="sec-ch10-kernel-reduction" class="level2" data-number="10.4">
+<h2 data-number="10.4" class="anchored" data-anchor-id="sec-ch10-kernel-reduction"><span class="header-section-number">10.4</span> 커널을 이용한 차원 축소</h2>
+<section id="sec-ch10-feature-space" class="level3" data-number="10.4.1">
+<h3 data-number="10.4.1" class="anchored" data-anchor-id="sec-ch10-feature-space"><span class="header-section-number">10.4.1</span> 비선형 특성공간</h3>
+<p>선형 PCA는 원래 입력공간에서 선형 부분공간을 찾는다. 자료가 곡선이나 원형 구조를 가진 경우 선형 투영만으로는 구조를 잘 표현하기 어렵다. 커널 방법은 입력을 고차원 특성공간으로 비선형 변환한 뒤 그 공간에서 선형 방법을 적용한다.</p>
+<p><span id="eq-ch10-kernel-feature-map"><span class="math display">\[
+\phi:\mathbb R^p\rightarrow\mathcal H.
+\tag{10.43}\]</span></span></p>
+<p>특성공간의 내적을 직접 계산하는 대신 커널 함수</p>
+<p><span id="eq-ch10-kernel-function"><span class="math display">\[
+k(\mathbf x_i,\mathbf x_j)
+=
+\langle
+\phi(\mathbf x_i),
+\phi(\mathbf x_j)
+\rangle_{\mathcal H}
+\tag{10.44}\]</span></span></p>
+<p>를 사용한다.</p>
+</section>
+<section id="sec-ch10-kernel-centering" class="level3" data-number="10.4.2">
+<h3 data-number="10.4.2" class="anchored" data-anchor-id="sec-ch10-kernel-centering"><span class="header-section-number">10.4.2</span> 커널 행렬의 중심화</h3>
+<p>커널 행렬을</p>
+<p><span id="eq-ch10-kernel-matrix"><span class="math display">\[
+\mathbf K_{ij}
+=
+k(\mathbf x_i,\mathbf x_j)
+\tag{10.45}\]</span></span></p>
+<p>라고 하자. 특성공간에서 자료를 중심화하려면</p>
+<p><span id="eq-ch10-centered-kernel"><span class="math display">\[
+\mathbf K_c
+=
+\mathbf H\mathbf K\mathbf H,
+\qquad
+\mathbf H
+=
+\mathbf I_n-
+\frac{1}{n}\mathbf 1_n\mathbf 1_n^{\top}
+\tag{10.46}\]</span></span></p>
+<p>를 사용한다.</p>
+</section>
+<section id="sec-ch10-kernel-pca" class="level3" data-number="10.4.3">
+<h3 data-number="10.4.3" class="anchored" data-anchor-id="sec-ch10-kernel-pca"><span class="header-section-number">10.4.3</span> 커널 주성분분석</h3>
+<p>커널 PCA(kernel principal component analysis)는 특성공간에서 PCA를 수행한다. 중심화된 커널 행렬에 대해</p>
+<p><span id="eq-ch10-kpca-eigen"><span class="math display">\[
+\mathbf K_c\boldsymbol\alpha_j
+=
+\eta_j\boldsymbol\alpha_j
+\tag{10.47}\]</span></span></p>
+<p>를 푼다. 정규화를 위해</p>
+<p><span id="eq-ch10-kpca-normalization"><span class="math display">\[
+\boldsymbol\alpha_j^{\top}
+\mathbf K_c
+\boldsymbol\alpha_j
+=1
+\tag{10.48}\]</span></span></p>
+<p>을 적용할 수 있다.</p>
+<p>새로운 관측값 <span class="math inline">\(\mathbf x\)</span>의 <span class="math inline">\(j\)</span>번째 커널 주성분 점수는 중심화된 커널 벡터 <span class="math inline">\(\widetilde{\mathbf k}(\mathbf x)\)</span>를 이용하여</p>
+<p><span id="eq-ch10-kpca-score"><span class="math display">\[
+z_j(\mathbf x)
+=
+\sum_{i=1}^{n}
+\alpha_{ij}
+\widetilde k(\mathbf x_i,\mathbf x)
+\tag{10.49}\]</span></span></p>
+<p>로 계산한다.</p>
+</section>
+<section id="sec-ch10-kernel-choices" class="level3" data-number="10.4.4">
+<h3 data-number="10.4.4" class="anchored" data-anchor-id="sec-ch10-kernel-choices"><span class="header-section-number">10.4.4</span> 대표적인 커널</h3>
+<div id="tbl-ch10-kernels" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch10-kernels-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;10.4: 차원 축소에서 자주 사용하는 커널
+</figcaption>
+<div aria-describedby="tbl-ch10-kernels-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>커널</th>
+<th>식</th>
+<th>주요 하이퍼파라미터</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>선형</td>
+<td><span class="math inline">\(\mathbf x^{\top}\mathbf x'\)</span></td>
+<td>없음</td>
+</tr>
+<tr class="even">
+<td>다항</td>
+<td><span class="math inline">\((\gamma\mathbf x^{\top}\mathbf x'+c)^d\)</span></td>
+<td><span class="math inline">\(\gamma,c,d\)</span></td>
+</tr>
+<tr class="odd">
+<td>RBF</td>
+<td><span class="math inline">\(\exp(-\gamma\|\mathbf x-\mathbf x'\|^2)\)</span></td>
+<td><span class="math inline">\(\gamma\)</span></td>
+</tr>
+<tr class="even">
+<td>라플라스</td>
+<td><span class="math inline">\(\exp(-\gamma\|\mathbf x-\mathbf x'\|_1)\)</span></td>
+<td><span class="math inline">\(\gamma\)</span></td>
+</tr>
+<tr class="odd">
+<td>시그모이드</td>
+<td><span class="math inline">\(\tanh(\gamma\mathbf x^{\top}\mathbf x'+c)\)</span></td>
+<td><span class="math inline">\(\gamma,c\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>RBF 커널의 <span class="math inline">\(\gamma\)</span>가 너무 작으면 모든 관측값이 서로 비슷해져 거의 선형적인 결과가 나타난다. 너무 크면 각 관측값이 자기 자신하고만 유사해져 과도하게 국소적인 표현이 된다.</p>
+</section>
+<section id="sec-ch10-kpca-limitations" class="level3" data-number="10.4.5">
+<h3 data-number="10.4.5" class="anchored" data-anchor-id="sec-ch10-kpca-limitations"><span class="header-section-number">10.4.5</span> 커널 PCA의 장점과 한계</h3>
+<p>커널 PCA는 비선형 구조를 표현할 수 있지만 다음 한계가 있다.</p>
+<ul>
+<li>결과가 커널과 하이퍼파라미터에 민감하다.</li>
+<li><span class="math inline">\(n\times n\)</span> 커널 행렬 저장에 <span class="math inline">\(O(n^2)\)</span> 메모리가 필요하다.</li>
+<li>고유분해에 최대 <span class="math inline">\(O(n^3)\)</span> 계산이 필요하다.</li>
+<li>원래 입력공간으로의 역변환이 직접적이지 않다.</li>
+<li>성분의 해석이 일반 PCA보다 어렵다.</li>
+</ul>
+<p>대규모 자료에서는 Nyström 근사, 랜덤 푸리에 특성 또는 증분형 방법을 사용할 수 있다.</p>
+</section>
+<section id="sec-ch10-kernel-lda" class="level3" data-number="10.4.6">
+<h3 data-number="10.4.6" class="anchored" data-anchor-id="sec-ch10-kernel-lda"><span class="header-section-number">10.4.6</span> 커널 선형판별분석</h3>
+<p>선형 판별분석은 클래스 내 산포에 비해 클래스 간 산포를 크게 만드는 방향을 찾는다. 선형 판별기준은</p>
+<p><span id="eq-ch10-lda-criterion"><span class="math display">\[
+J(\mathbf w)
+=
+\frac{
+\mathbf w^{\top}\mathbf S_B\mathbf w
+}{
+\mathbf w^{\top}\mathbf S_W\mathbf w
+}
+\tag{10.50}\]</span></span></p>
+<p>이다. 커널 LDA는 특성공간에서 동일한 기준을 최적화하여 비선형 분류 구조를 저차원으로 표현한다. 그러나 클래스 수가 <span class="math inline">\(G\)</span>일 때 얻을 수 있는 판별축은 최대 <span class="math inline">\(G-1\)</span>개라는 제약은 유지된다.</p>
+</section>
+<section id="sec-ch10-pls" class="level3" data-number="10.4.7">
+<h3 data-number="10.4.7" class="anchored" data-anchor-id="sec-ch10-pls"><span class="header-section-number">10.4.7</span> 부분최소제곱</h3>
+<p>PCA는 입력변수의 분산만 사용하지만, 부분최소제곱(partial least squares, PLS)은 반응변수와의 공분산이 큰 잠재성분을 찾는다. 단일 반응변수의 첫 번째 방향은 개념적으로</p>
+<p><span id="eq-ch10-pls-objective"><span class="math display">\[
+\widehat{\mathbf w}
+=
+\arg\max_{\|\mathbf w\|_2=1}
+\operatorname{Cov}^2(\mathbf X\mathbf w,Y)
+\tag{10.51}\]</span></span></p>
+<p>와 같이 표현할 수 있다. PLS는 고차원 회귀에서 유용하지만, 지도학습 정보를 사용하므로 성분 수 선택과 성능평가는 반드시 훈련자료 내부에서 수행해야 한다.</p>
+</section>
+</section>
+<section id="sec-ch10-manifold-learning" class="level2" data-number="10.5">
+<h2 data-number="10.5" class="anchored" data-anchor-id="sec-ch10-manifold-learning"><span class="header-section-number">10.5</span> 매니폴드 학습</h2>
+<section id="sec-ch10-manifold-assumption" class="level3" data-number="10.5.1">
+<h3 data-number="10.5.1" class="anchored" data-anchor-id="sec-ch10-manifold-assumption"><span class="header-section-number">10.5.1</span> 매니폴드 가정</h3>
+<p>고차원 관측값이 실제로는 낮은 차원의 매끄러운 구조 위에 놓여 있다는 가정을 매니폴드 가정이라고 한다. 예를 들어 여러 각도에서 촬영한 동일 물체의 이미지는 픽셀 차원은 매우 크지만, 회전각과 조명과 같은 소수의 잠재요인으로 설명될 수 있다.</p>
+<p>관측값 <span class="math inline">\(\mathbf x_i\in\mathbb R^p\)</span>가 저차원 잠재변수 <span class="math inline">\(\mathbf z_i\in\mathbb R^q\)</span>의 매끄러운 함수로 생성된다고 가정하면</p>
+<p><span id="eq-ch10-manifold-model"><span class="math display">\[
+\mathbf x_i
+=
+g(\mathbf z_i)+\boldsymbol\epsilon_i,
+\qquad q\ll p
+\tag{10.52}\]</span></span></p>
+<p>로 표현할 수 있다.</p>
+<p>매니폴드 학습은 알려지지 않은 <span class="math inline">\(g\)</span>의 역방향 구조를 근사하여 <span class="math inline">\(\mathbf z_i\)</span>를 복원하려는 시도이다.</p>
+</section>
+<section id="sec-ch10-mds" class="level3" data-number="10.5.2">
+<h3 data-number="10.5.2" class="anchored" data-anchor-id="sec-ch10-mds"><span class="header-section-number">10.5.2</span> 다차원척도법</h3>
+<p>다차원척도법(multidimensional scaling, MDS)은 관측값 사이의 비유사도 <span class="math inline">\(\delta_{ij}\)</span>를 저차원 좌표 사이의 거리로 재현한다.</p>
+<section id="고전적-mds" class="level4">
+<h4 class="anchored" data-anchor-id="고전적-mds">고전적 MDS</h4>
+<p>유클리드 거리행렬의 제곱을 원소별로 적용한 행렬을 <span class="math inline">\(\mathbf D^{(2)}\)</span>라고 하자. 이중 중심화된 행렬은</p>
+<p><span id="eq-ch10-mds-double-centering"><span class="math display">\[
+\mathbf B
+=
+-
+\frac{1}{2}
+\mathbf H\mathbf D^{(2)}\mathbf H
+\tag{10.53}\]</span></span></p>
+<p>이다. <span class="math inline">\(\mathbf B\)</span>가 양의 준정부호이면 이는 중심화된 좌표의 Gram 행렬이다.</p>
+<p><span id="eq-ch10-mds-gram"><span class="math display">\[
+\mathbf B
+=
+\mathbf Z\mathbf Z^{\top}.
+\tag{10.54}\]</span></span></p>
+<p>고유분해</p>
+<p><span id="eq-ch10-mds-eigen"><span class="math display">\[
+\mathbf B
+=
+\mathbf U\boldsymbol\Lambda\mathbf U^{\top}
+\tag{10.55}\]</span></span></p>
+<p>를 이용하면 <span class="math inline">\(q\)</span>차원 좌표는</p>
+<p><span id="eq-ch10-mds-coordinate"><span class="math display">\[
+\mathbf Z_q
+=
+\mathbf U_q\boldsymbol\Lambda_q^{1/2}
+\tag{10.56}\]</span></span></p>
+<p>로 얻는다.</p>
+</section>
+<section id="비계량-mds" class="level4">
+<h4 class="anchored" data-anchor-id="비계량-mds">비계량 MDS</h4>
+<p>비계량 MDS는 거리의 실제 크기보다 순서를 보존하려 한다. 대표적인 스트레스 함수는</p>
+<p><span id="eq-ch10-mds-stress"><span class="math display">\[
+\operatorname{Stress}(\mathbf Z)
+=
+\sqrt{
+\frac{
+\sum_{i&lt;j}
+\{d_{ij}(\mathbf Z)-\widehat d_{ij}\}^2
+}{
+\sum_{i&lt;j}d_{ij}^2(\mathbf Z)
+}
+}
+\tag{10.57}\]</span></span></p>
+<p>이다. 여기서 <span class="math inline">\(\widehat d_{ij}\)</span>는 원래 비유사도의 순서를 보존하도록 단조변환한 값이다.</p>
+</section>
+</section>
+<section id="sec-ch10-isomap" class="level3" data-number="10.5.3">
+<h3 data-number="10.5.3" class="anchored" data-anchor-id="sec-ch10-isomap"><span class="header-section-number">10.5.3</span> Isomap</h3>
+<p>Isomap은 곡면 위의 두 점 사이의 유클리드 거리 대신 매니폴드를 따라 이동하는 지오데식 거리(geodesic distance)를 근사한다. 절차는 다음과 같다.</p>
+<ol type="1">
+<li>k-최근접 이웃 그래프 또는 <span class="math inline">\(\epsilon\)</span>-이웃 그래프를 구성한다.</li>
+<li>그래프의 변에 원래 공간의 거리를 부여한다.</li>
+<li>모든 점 쌍의 최단경로 거리를 계산한다.</li>
+<li>최단경로 거리행렬에 고전적 MDS를 적용한다.</li>
+</ol>
+<p>그래프가 너무 희소하면 연결이 끊어지고, 너무 조밀하면 매니폴드의 지름길이 생겨 유클리드 거리와 비슷해진다. 따라서 이웃 크기의 선택이 매우 중요하다.</p>
+</section>
+<section id="sec-ch10-lle" class="level3" data-number="10.5.4">
+<h3 data-number="10.5.4" class="anchored" data-anchor-id="sec-ch10-lle"><span class="header-section-number">10.5.4</span> 국소선형임베딩</h3>
+<p>국소선형임베딩(locally linear embedding, LLE)은 각 관측값이 이웃 관측값의 선형결합으로 재구성될 수 있다고 가정한다. 첫 단계에서 재구성 가중치를 추정한다.</p>
+<p><span id="eq-ch10-lle-weight-objective"><span class="math display">\[
+\widehat{\mathbf W}
+=
+\arg\min_{\mathbf W}
+\sum_{i=1}^{n}
+\left\|
+\mathbf x_i-
+\sum_{j\in\mathcal N_k(i)}w_{ij}\mathbf x_j
+\right\|_2^2
+\tag{10.58}\]</span></span></p>
+<p>제약조건은</p>
+<p><span id="eq-ch10-lle-weight-constraint"><span class="math display">\[
+\sum_{j\in\mathcal N_k(i)}w_{ij}=1
+\tag{10.59}\]</span></span></p>
+<p>이다. 두 번째 단계에서는 동일한 재구성관계를 보존하는 저차원 좌표를 찾는다.</p>
+<p><span id="eq-ch10-lle-embedding-objective"><span class="math display">\[
+\widehat{\mathbf Z}
+=
+\arg\min_{\mathbf Z}
+\sum_{i=1}^{n}
+\left\|
+\mathbf z_i-
+\sum_{j\in\mathcal N_k(i)}w_{ij}\mathbf z_j
+\right\|_2^2.
+\tag{10.60}\]</span></span></p>
+<p>축척과 평행이동의 불확정성을 제거하기 위해</p>
+<p><span id="eq-ch10-lle-constraints"><span class="math display">\[
+\sum_{i=1}^{n}\mathbf z_i=\mathbf 0,
+\qquad
+\frac{1}{n}\mathbf Z^{\top}\mathbf Z=\mathbf I_q
+\tag{10.61}\]</span></span></p>
+<p>와 같은 제약을 둔다.</p>
+</section>
+<section id="sec-ch10-laplacian-eigenmaps" class="level3" data-number="10.5.5">
+<h3 data-number="10.5.5" class="anchored" data-anchor-id="sec-ch10-laplacian-eigenmaps"><span class="header-section-number">10.5.5</span> 라플라시안 고유지도</h3>
+<p>관측값을 노드로 하는 가중 그래프를 구성하고, 가까운 관측값이 임베딩에서도 가깝게 위치하도록 한다. 그래프 가중치행렬을 <span class="math inline">\(\mathbf W\)</span>라고 하고 차수행렬을</p>
+<p><span id="eq-ch10-degree-matrix"><span class="math display">\[
+\mathbf D_{ii}
+=
+\sum_j W_{ij}
+\tag{10.62}\]</span></span></p>
+<p>로 정의한다. 그래프 라플라시안(graph Laplacian)은</p>
+<p><span id="eq-ch10-graph-laplacian"><span class="math display">\[
+\mathbf L
+=
+\mathbf D-\mathbf W
+\tag{10.63}\]</span></span></p>
+<p>이다. 목적함수는</p>
+<p><span id="eq-ch10-laplacian-objective"><span class="math display">\[
+\frac{1}{2}
+\sum_{i,j}
+W_{ij}
+\|\mathbf z_i-\mathbf z_j\|_2^2
+=
+\operatorname{tr}(\mathbf Z^{\top}\mathbf L\mathbf Z)
+\tag{10.64}\]</span></span></p>
+<p>로 표현된다. 제약조건</p>
+<p><span id="eq-ch10-laplacian-constraint"><span class="math display">\[
+\mathbf Z^{\top}\mathbf D\mathbf Z
+=
+\mathbf I_q
+\tag{10.65}\]</span></span></p>
+<p>아래에서 일반화 고유값 문제</p>
+<p><span id="eq-ch10-laplacian-eigenproblem"><span class="math display">\[
+\mathbf L\mathbf z
+=
+\lambda\mathbf D\mathbf z
+\tag{10.66}\]</span></span></p>
+<p>를 푼다.</p>
+</section>
+<section id="sec-ch10-diffusion-maps" class="level3" data-number="10.5.6">
+<h3 data-number="10.5.6" class="anchored" data-anchor-id="sec-ch10-diffusion-maps"><span class="header-section-number">10.5.6</span> 확산지도</h3>
+<p>확산지도(diffusion maps)는 그래프 위의 확률적 이동을 이용하여 자료의 연결성을 표현한다. 유사도행렬을 정규화하여 전이확률행렬 <span class="math inline">\(\mathbf P\)</span>를 만들고, <span class="math inline">\(t\)</span>단계 전이확률의 차이로 확산거리를 정의한다.</p>
+<p><span id="eq-ch10-diffusion-distance"><span class="math display">\[
+D_t^2(i,j)
+=
+\sum_{\ell=1}^{n}
+\frac{
+\{P_{i\ell}^{(t)}-P_{j\ell}^{(t)}\}^2
+}{\pi_\ell}
+\tag{10.67}\]</span></span></p>
+<p>여기서 <span class="math inline">\(\pi_\ell\)</span>은 정상분포이다. <span class="math inline">\(\mathbf P\)</span>의 고유값과 고유벡터를 이용하여 확산좌표를 구성한다.</p>
+<p><span id="eq-ch10-diffusion-coordinate"><span class="math display">\[
+\Psi_t(\mathbf x_i)
+=
+\left(
+\lambda_1^t\psi_1(i),
+\ldots,
+\lambda_q^t\psi_q(i)
+\right).
+\tag{10.68}\]</span></span></p>
+</section>
+<section id="sec-ch10-tsne" class="level3" data-number="10.5.7">
+<h3 data-number="10.5.7" class="anchored" data-anchor-id="sec-ch10-tsne"><span class="header-section-number">10.5.7</span> t-SNE</h3>
+<p>t-SNE는 고차원 공간의 국소 이웃 확률분포와 저차원 공간의 확률분포 사이의 차이를 최소화한다.</p>
+<p>고차원에서 조건부 유사도는</p>
+<p><span id="eq-ch10-tsne-high-prob"><span class="math display">\[
+p_{j\mid i}
+=
+\frac{
+\exp\left(
+-\|\mathbf x_i-\mathbf x_j\|_2^2/(2\sigma_i^2)
+\right)
+}{
+\sum_{k\neq i}
+\exp\left(
+-\|\mathbf x_i-\mathbf x_k\|_2^2/(2\sigma_i^2)
+\right)
+}
+\tag{10.69}\]</span></span></p>
+<p>로 정의하고 대칭화한다.</p>
+<p><span id="eq-ch10-tsne-symmetric-prob"><span class="math display">\[
+p_{ij}
+=
+\frac{p_{j\mid i}+p_{i\mid j}}{2n}.
+\tag{10.70}\]</span></span></p>
+<p>저차원에서는 긴 꼬리를 갖는 t 분포를 사용한다.</p>
+<p><span id="eq-ch10-tsne-low-prob"><span class="math display">\[
+q_{ij}
+=
+\frac{
+(1+\|\mathbf z_i-\mathbf z_j\|_2^2)^{-1}
+}{
+\sum_{k\neq\ell}
+(1+\|\mathbf z_k-\mathbf z_\ell\|_2^2)^{-1}
+}.
+\tag{10.71}\]</span></span></p>
+<p>목적함수는 KL 발산이다.</p>
+<p><span id="eq-ch10-tsne-kl"><span class="math display">\[
+\operatorname{KL}(P\|Q)
+=
+\sum_{i\neq j}
+p_{ij}
+\log\frac{p_{ij}}{q_{ij}}.
+\tag{10.72}\]</span></span></p>
+<p>t-SNE는 국소 군집을 시각적으로 잘 분리하지만 다음에 주의해야 한다.</p>
+<ul>
+<li>군집 사이의 거리와 방향은 직접 해석하기 어렵다.</li>
+<li>군집의 크기는 실제 분산을 반영하지 않을 수 있다.</li>
+<li>perplexity와 초기값에 민감하다.</li>
+<li>동일 자료에서도 실행마다 배치가 달라질 수 있다.</li>
+<li>새로운 관측값을 직접 사상하는 함수가 기본적으로 제공되지 않는다.</li>
+</ul>
+<p>따라서 t-SNE 그림만으로 군집의 존재나 분리 가능성을 확정해서는 안 된다.</p>
+</section>
+<section id="sec-ch10-umap" class="level3" data-number="10.5.8">
+<h3 data-number="10.5.8" class="anchored" data-anchor-id="sec-ch10-umap"><span class="header-section-number">10.5.8</span> UMAP</h3>
+<p>UMAP은 국소 이웃 구조를 퍼지 그래프로 표현한 뒤 저차원 그래프와의 차이를 최소화한다. 고차원에서 관측값 <span class="math inline">\(i\)</span>와 <span class="math inline">\(j\)</span> 사이의 연결 강도를 개념적으로</p>
+<p><span id="eq-ch10-umap-weight"><span class="math display">\[
+w_{ij}
+=
+\exp\left(
+-
+\frac{
+\max(0,d_{ij}-\rho_i)
+}{\sigma_i}
+\right)
+\tag{10.73}\]</span></span></p>
+<p>로 정의하고 대칭화한다. 저차원에서는</p>
+<p><span id="eq-ch10-umap-low-weight"><span class="math display">\[
+\widetilde w_{ij}
+=
+\frac{1}{1+a\|\mathbf z_i-\mathbf z_j\|^{2b}}
+\tag{10.74}\]</span></span></p>
+<p>와 같은 함수를 사용한다. 목적함수는 퍼지집합의 교차엔트로피에 해당한다.</p>
+<p>UMAP은 t-SNE보다 전역 구조를 어느 정도 더 유지하고 새로운 관측값 변환을 제공하는 구현이 많다. 그러나 결과는 여전히 하이퍼파라미터와 확률적 최적화에 영향을 받는다.</p>
+</section>
+<section id="sec-ch10-manifold-comparison" class="level3" data-number="10.5.9">
+<h3 data-number="10.5.9" class="anchored" data-anchor-id="sec-ch10-manifold-comparison"><span class="header-section-number">10.5.9</span> 매니폴드 학습 방법의 비교</h3>
+<div id="tbl-ch10-manifold-comparison" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch10-manifold-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;10.5: 대표적인 매니폴드 학습 방법의 비교
+</figcaption>
+<div aria-describedby="tbl-ch10-manifold-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>방법</th>
+<th>보존 구조</th>
+<th>지도정보</th>
+<th>새 관측값 변환</th>
+<th>주요 용도</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>MDS</td>
+<td>전체 거리</td>
+<td>없음</td>
+<td>제한적</td>
+<td>거리자료 시각화</td>
+</tr>
+<tr class="even">
+<td>Isomap</td>
+<td>지오데식 거리</td>
+<td>없음</td>
+<td>제한적</td>
+<td>곡면의 전역 구조</td>
+</tr>
+<tr class="odd">
+<td>LLE</td>
+<td>국소 재구성관계</td>
+<td>없음</td>
+<td>제한적</td>
+<td>국소 선형 매니폴드</td>
+</tr>
+<tr class="even">
+<td>Laplacian Eigenmaps</td>
+<td>이웃 그래프</td>
+<td>없음</td>
+<td>제한적</td>
+<td>스펙트럴 임베딩</td>
+</tr>
+<tr class="odd">
+<td>Diffusion Maps</td>
+<td>확산 연결성</td>
+<td>없음</td>
+<td>가능</td>
+<td>연속적 과정 탐색</td>
+</tr>
+<tr class="even">
+<td>t-SNE</td>
+<td>국소 확률구조</td>
+<td>없음</td>
+<td>기본적으로 어려움</td>
+<td>2차원 시각화</td>
+</tr>
+<tr class="odd">
+<td>UMAP</td>
+<td>국소 퍼지그래프</td>
+<td>없음</td>
+<td>가능</td>
+<td>시각화와 표현</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-ch10-manifold-pitfalls" class="level3" data-number="10.5.10">
+<h3 data-number="10.5.10" class="anchored" data-anchor-id="sec-ch10-manifold-pitfalls"><span class="header-section-number">10.5.10</span> 매니폴드 학습의 평가와 함정</h3>
+<p>매니폴드 학습 결과는 시각적으로 강한 인상을 주기 때문에 과도한 해석 위험이 크다. 다음 사항을 점검해야 한다.</p>
+<ol type="1">
+<li>여러 초기값에서 결과가 안정적인가</li>
+<li>이웃 수와 거리 척도를 바꾸어도 구조가 유지되는가</li>
+<li>알려진 기술적 변수나 배치효과가 임베딩을 지배하지 않는가</li>
+<li>군집 구조가 원래 공간의 정량적 평가에서도 확인되는가</li>
+<li>후속 예측이나 군집 성능이 실제로 개선되는가</li>
+</ol>
+<p>시각화는 탐색의 출발점이지 통계적 검증의 대체물이 아니다.</p>
+</section>
+</section>
+<section id="sec-ch10-metric-learning" class="level2" data-number="10.6">
+<h2 data-number="10.6" class="anchored" data-anchor-id="sec-ch10-metric-learning"><span class="header-section-number">10.6</span> 거리 척도 학습</h2>
+<section id="sec-ch10-metric-need" class="level3" data-number="10.6.1">
+<h3 data-number="10.6.1" class="anchored" data-anchor-id="sec-ch10-metric-need"><span class="header-section-number">10.6.1</span> 거리 척도의 필요성</h3>
+<p>유클리드 거리는 모든 변수 방향을 동일하게 취급한다. 그러나 예측목표와 관련된 방향은 일부에 불과할 수 있으며, 변수 간 상관구조를 고려해야 할 수도 있다. 거리 척도 학습(metric learning)은 유사해야 하는 관측값은 가깝게, 달라야 하는 관측값은 멀게 배치하도록 거리함수의 모수를 학습한다.</p>
+<p>일반화된 마할라노비스 거리(generalized Mahalanobis distance)는</p>
+<p><span id="eq-ch10-mahalanobis-metric"><span class="math display">\[
+d_{\mathbf M}^2(\mathbf x_i,\mathbf x_j)
+=
+(\mathbf x_i-\mathbf x_j)^{\top}
+\mathbf M
+(\mathbf x_i-\mathbf x_j)
+\tag{10.75}\]</span></span></p>
+<p>로 정의한다. 거리의 비음수성과 삼각부등식 성질을 확보하기 위해 보통</p>
+<p><span id="eq-ch10-psd-metric"><span class="math display">\[
+\mathbf M\succeq0
+\tag{10.76}\]</span></span></p>
+<p>을 요구한다.</p>
+<p>양의 준정부호행렬은</p>
+<p><span id="eq-ch10-metric-factorization"><span class="math display">\[
+\mathbf M
+=
+\mathbf L^{\top}\mathbf L
+\tag{10.77}\]</span></span></p>
+<p>로 분해할 수 있다. 그러면</p>
+<p><span id="eq-ch10-metric-embedding-equivalence"><span class="math display">\[
+d_{\mathbf M}^2(\mathbf x_i,\mathbf x_j)
+=
+\|\mathbf L\mathbf x_i-\mathbf L\mathbf x_j\|_2^2
+\tag{10.78}\]</span></span></p>
+<p>가 된다. 따라서 거리 척도 학습은 선형 임베딩 학습과 동등하게 해석할 수 있다.</p>
+</section>
+<section id="sec-ch10-metric-supervision" class="level3" data-number="10.6.2">
+<h3 data-number="10.6.2" class="anchored" data-anchor-id="sec-ch10-metric-supervision"><span class="header-section-number">10.6.2</span> 지도정보의 형태</h3>
+<p>거리 학습에 사용하는 지도정보는 여러 형태가 있다.</p>
+<ul>
+<li>클래스 레이블</li>
+<li>유사 쌍과 비유사 쌍</li>
+<li>삼중항 제약</li>
+<li>순위 정보</li>
+<li>연속형 반응값</li>
+</ul>
+<p>유사 쌍 집합을 <span class="math inline">\(\mathcal S\)</span>, 비유사 쌍 집합을 <span class="math inline">\(\mathcal D\)</span>라고 하면 기본 목적은</p>
+<p><span class="math display">\[
+(i,j)\in\mathcal S
+\Rightarrow
+d_{\mathbf M}(\mathbf x_i,\mathbf x_j)
+\text{를 작게},
+\]</span></p>
+<p><span class="math display">\[
+(i,j)\in\mathcal D
+\Rightarrow
+d_{\mathbf M}(\mathbf x_i,\mathbf x_j)
+\text{를 크게}
+\]</span></p>
+<p>만드는 것이다.</p>
+</section>
+<section id="sec-ch10-constrained-metric" class="level3" data-number="10.6.3">
+<h3 data-number="10.6.3" class="anchored" data-anchor-id="sec-ch10-constrained-metric"><span class="header-section-number">10.6.3</span> 제약 기반 거리 학습</h3>
+<p>대표적인 형태는 유사 쌍의 거리를 최소화하면서 비유사 쌍이 일정 거리 이상 떨어지도록 제약하는 것이다.</p>
+<p><span class="math display">\[
+\min_{\mathbf M\succeq0}
+\sum_{(i,j)\in\mathcal S}
+d_{\mathbf M}^2(\mathbf x_i,\mathbf x_j)
+\]</span></p>
+<p><span id="eq-ch10-constrained-metric-objective"><span class="math display">\[
+\text{subject to}
+\quad
+\sum_{(i,j)\in\mathcal D}
+d_{\mathbf M}(\mathbf x_i,\mathbf x_j)
+\geq c.
+\tag{10.79}\]</span></span></p>
+<p>행렬 <span class="math inline">\(\mathbf M\)</span>의 자유도가 <span class="math inline">\(p(p+1)/2\)</span>이므로 고차원에서는 규제나 저랭크 제약이 필요하다.</p>
+</section>
+<section id="sec-ch10-nca" class="level3" data-number="10.6.4">
+<h3 data-number="10.6.4" class="anchored" data-anchor-id="sec-ch10-nca"><span class="header-section-number">10.6.4</span> Neighborhood Components Analysis</h3>
+<p>Neighborhood Components Analysis(NCA)는 확률적 최근접 이웃 분류의 기대 정확도를 최대화한다. 관측값 <span class="math inline">\(i\)</span>가 <span class="math inline">\(j\)</span>를 이웃으로 선택할 확률을</p>
+<p><span id="eq-ch10-nca-probability"><span class="math display">\[
+p_{ij}
+=
+\frac{
+\exp\{-\|\mathbf L\mathbf x_i-\mathbf L\mathbf x_j\|_2^2\}
+}{
+\sum_{k\neq i}
+\exp\{-\|\mathbf L\mathbf x_i-\mathbf L\mathbf x_k\|_2^2\}
+},
+\qquad j\neq i
+\tag{10.80}\]</span></span></p>
+<p>로 정의한다. 관측값 <span class="math inline">\(i\)</span>가 올바르게 분류될 확률은</p>
+<p><span id="eq-ch10-nca-correct-probability"><span class="math display">\[
+p_i
+=
+\sum_{j:y_j=y_i}p_{ij}
+\tag{10.81}\]</span></span></p>
+<p>이다. NCA는</p>
+<p><span id="eq-ch10-nca-objective"><span class="math display">\[
+\widehat{\mathbf L}
+=
+\arg\max_{\mathbf L}
+\sum_{i=1}^{n}p_i
+-
+\lambda\|\mathbf L\|_F^2
+\tag{10.82}\]</span></span></p>
+<p>를 최적화한다. 목적함수는 일반적으로 비볼록이므로 초기값과 최적화에 민감할 수 있다.</p>
+</section>
+<section id="sec-ch10-lmnn" class="level3" data-number="10.6.5">
+<h3 data-number="10.6.5" class="anchored" data-anchor-id="sec-ch10-lmnn"><span class="header-section-number">10.6.5</span> Large Margin Nearest Neighbor</h3>
+<p>Large Margin Nearest Neighbor(LMNN)는 같은 클래스의 목표 이웃을 가깝게 하고, 다른 클래스 관측값이 일정 마진 안으로 들어오지 않도록 한다.</p>
+<p>목표 이웃 관계를 <span class="math inline">\(j\rightsquigarrow i\)</span>로 표시하면 목적함수는 개념적으로</p>
+<p><span id="eq-ch10-lmnn-objective"><span class="math display">\[
+\sum_{i,j\rightsquigarrow i}
+d_{\mathbf M}^2(\mathbf x_i,\mathbf x_j)
++
+\mu
+\sum_{i,j\rightsquigarrow i}
+\sum_{\ell:y_\ell\neq y_i}
+\left[
+1+d_{\mathbf M}^2(\mathbf x_i,\mathbf x_j)
+-d_{\mathbf M}^2(\mathbf x_i,\mathbf x_\ell)
+\right]_+
+\tag{10.83}\]</span></span></p>
+<p>로 표현된다. 첫 항은 같은 클래스 이웃을 끌어당기고, 두 번째 항은 다른 클래스 침입자를 마진 밖으로 밀어낸다.</p>
+</section>
+<section id="sec-ch10-itml" class="level3" data-number="10.6.6">
+<h3 data-number="10.6.6" class="anchored" data-anchor-id="sec-ch10-itml"><span class="header-section-number">10.6.6</span> 정보이론적 거리 척도 학습</h3>
+<p>Information-Theoretic Metric Learning(ITML)은 기준 거리행렬 <span class="math inline">\(\mathbf M_0\)</span>에서 크게 벗어나지 않으면서 쌍별 거리 제약을 만족하는 <span class="math inline">\(\mathbf M\)</span>을 찾는다. 행렬 사이의 LogDet 발산을 사용할 수 있다.</p>
+<p><span id="eq-ch10-logdet-divergence"><span class="math display">\[
+D_{\mathrm{ld}}(\mathbf M,\mathbf M_0)
+=
+\operatorname{tr}(\mathbf M\mathbf M_0^{-1})
+-
+\log\det(\mathbf M\mathbf M_0^{-1})
+-p.
+\tag{10.84}\]</span></span></p>
+<p>목적함수는</p>
+<p><span class="math display">\[
+\min_{\mathbf M\succeq0}
+D_{\mathrm{ld}}(\mathbf M,\mathbf M_0)
+\]</span></p>
+<p>아래에서 유사 쌍에는 상한, 비유사 쌍에는 하한을 부과한다.</p>
+</section>
+<section id="sec-ch10-contrastive-triplet" class="level3" data-number="10.6.7">
+<h3 data-number="10.6.7" class="anchored" data-anchor-id="sec-ch10-contrastive-triplet"><span class="header-section-number">10.6.7</span> 대조학습과 삼중항 손실</h3>
+<p>딥러닝 기반 거리 학습에서는 신경망 임베딩 <span class="math inline">\(f_\theta(\mathbf x)\)</span>를 학습한다. 유사 쌍 <span class="math inline">\((i,j)\)</span>과 비유사 쌍에 대한 대조손실(contrastive loss)은</p>
+<p><span id="eq-ch10-contrastive-loss"><span class="math display">\[
+\mathcal L_{ij}
+=
+y_{ij}
+\|f_\theta(\mathbf x_i)-f_\theta(\mathbf x_j)\|_2^2
++
+(1-y_{ij})
+\left[
+m-
+\|f_\theta(\mathbf x_i)-f_\theta(\mathbf x_j)\|_2
+\right]_+^2
+\tag{10.85}\]</span></span></p>
+<p>로 정의할 수 있다. 여기서 <span class="math inline">\(y_{ij}=1\)</span>이면 유사 쌍이다.</p>
+<p>삼중항은 기준 관측값(anchor) <span class="math inline">\(a\)</span>, 같은 의미의 양성 관측값 <span class="math inline">\(p\)</span>, 다른 의미의 음성 관측값 <span class="math inline">\(n\)</span>으로 구성된다. 삼중항 손실(triplet loss)은</p>
+<p><span id="eq-ch10-triplet-loss"><span class="math display">\[
+\mathcal L_{    ext{triplet}}
+=
+\left[
+\|f_\theta(\mathbf x_a)-f_\theta(\mathbf x_p)\|_2^2
+-
+\|f_\theta(\mathbf x_a)-f_\theta(\mathbf x_n)\|_2^2
++m
+\right]_+
+\tag{10.86}\]</span></span></p>
+<p>이다. 적절한 음성 관측값을 선택하는 하드 네거티브 마이닝이 성능에 큰 영향을 준다.</p>
+</section>
+<section id="sec-ch10-metric-dim-reduction" class="level3" data-number="10.6.8">
+<h3 data-number="10.6.8" class="anchored" data-anchor-id="sec-ch10-metric-dim-reduction"><span class="header-section-number">10.6.8</span> 거리 학습과 차원 축소</h3>
+<p><span class="math inline">\(\mathbf L\in\mathbb R^{q\times p}\)</span>이고 <span class="math inline">\(q&lt;p\)</span>이면 거리 학습은 동시에 차원 축소를 수행한다. 목적에 따라 다음과 같은 규제를 적용할 수 있다.</p>
+<section id="저랭크-제약" class="level4">
+<h4 class="anchored" data-anchor-id="저랭크-제약">저랭크 제약</h4>
+<p><span id="eq-ch10-low-rank-metric"><span class="math display">\[
+\operatorname{rank}(\mathbf M)\leq q.
+\tag{10.87}\]</span></span></p>
+</section>
+<section id="희소성-제약" class="level4">
+<h4 class="anchored" data-anchor-id="희소성-제약">희소성 제약</h4>
+<p><span id="eq-ch10-sparse-metric"><span class="math display">\[
+\lambda\|\mathbf M\|_1
+\tag{10.88}\]</span></span></p>
+<p>을 추가하여 일부 변수 또는 변수 간 관계를 제거할 수 있다.</p>
+</section>
+<section id="그룹-구조" class="level4">
+<h4 class="anchored" data-anchor-id="그룹-구조">그룹 구조</h4>
+<p>변수군에 그룹 라소 패널티를 적용하여 해석 가능한 임베딩을 구성할 수 있다.</p>
+</section>
+</section>
+<section id="sec-ch10-metric-evaluation" class="level3" data-number="10.6.9">
+<h3 data-number="10.6.9" class="anchored" data-anchor-id="sec-ch10-metric-evaluation"><span class="header-section-number">10.6.9</span> 거리 척도 학습의 평가</h3>
+<p>거리 학습은 훈련자료에서 이웃을 잘 분리하는 것만으로 평가해서는 안 된다. 다음을 구분해야 한다.</p>
+<ul>
+<li>훈련자료의 쌍 제약 만족도</li>
+<li>검증자료의 kNN 분류성능</li>
+<li>검색 정확도와 순위 지표</li>
+<li>군집 구조의 안정성</li>
+<li>새로운 클래스나 새로운 영역으로의 일반화</li>
+</ul>
+<p>특히 쌍 또는 삼중항을 생성할 때 같은 개체에서 나온 반복자료가 훈련과 평가에 동시에 포함되지 않도록 해야 한다. 그렇지 않으면 데이터 누출이 발생한다.</p>
+</section>
+<section id="sec-ch10-metric-comparison" class="level3" data-number="10.6.10">
+<h3 data-number="10.6.10" class="anchored" data-anchor-id="sec-ch10-metric-comparison"><span class="header-section-number">10.6.10</span> 거리 학습 방법의 비교</h3>
+<div id="tbl-ch10-metric-learning" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch10-metric-learning-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;10.6: 대표적인 거리 척도 학습 방법
+</figcaption>
+<div aria-describedby="tbl-ch10-metric-learning-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>방법</th>
+<th>지도정보</th>
+<th>학습대상</th>
+<th>목적</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>마할라노비스 추정</td>
+<td>공분산</td>
+<td><span class="math inline">\(\mathbf M\)</span></td>
+<td>변수 척도와 상관 보정</td>
+</tr>
+<tr class="even">
+<td>제약 기반 방법</td>
+<td>유사·비유사 쌍</td>
+<td><span class="math inline">\(\mathbf M\)</span></td>
+<td>쌍별 거리 제약</td>
+</tr>
+<tr class="odd">
+<td>NCA</td>
+<td>클래스</td>
+<td><span class="math inline">\(\mathbf L\)</span></td>
+<td>최근접 이웃 정확도 최대화</td>
+</tr>
+<tr class="even">
+<td>LMNN</td>
+<td>클래스·목표 이웃</td>
+<td><span class="math inline">\(\mathbf M\)</span></td>
+<td>큰 마진 이웃 분리</td>
+</tr>
+<tr class="odd">
+<td>ITML</td>
+<td>쌍 제약·기준행렬</td>
+<td><span class="math inline">\(\mathbf M\)</span></td>
+<td>정보이론적 거리 수정</td>
+</tr>
+<tr class="even">
+<td>대조학습</td>
+<td>쌍</td>
+<td>신경망 임베딩</td>
+<td>유사 쌍 근접화</td>
+</tr>
+<tr class="odd">
+<td>삼중항 학습</td>
+<td>삼중항</td>
+<td>신경망 임베딩</td>
+<td>순위와 마진 학습</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+</section>
+<section id="sec-ch10-method-selection" class="level2" data-number="10.7">
+<h2 data-number="10.7" class="anchored" data-anchor-id="sec-ch10-method-selection"><span class="header-section-number">10.7</span> 차원 축소 방법의 선택</h2>
+<section id="sec-ch10-selection-purpose" class="level3" data-number="10.7.1">
+<h3 data-number="10.7.1" class="anchored" data-anchor-id="sec-ch10-selection-purpose"><span class="header-section-number">10.7.1</span> 목적에 따른 선택</h3>
+<p>차원 축소 방법은 시각화, 압축, 예측, 군집화 또는 잡음 제거 중 무엇을 목적으로 하는지에 따라 달라진다.</p>
+<div id="tbl-ch10-method-selection" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch10-method-selection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;10.7: 분석 목적에 따른 차원 축소 방법
+</figcaption>
+<div aria-describedby="tbl-ch10-method-selection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>분석 목적</th>
+<th>우선 고려할 방법</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>선형 구조 요약</td>
+<td>PCA</td>
+</tr>
+<tr class="even">
+<td>반응변수와 관련된 축</td>
+<td>PLS, LDA</td>
+</tr>
+<tr class="odd">
+<td>비선형 전역구조</td>
+<td>Isomap, kernel PCA</td>
+</tr>
+<tr class="even">
+<td>국소구조 시각화</td>
+<td>t-SNE, UMAP</td>
+</tr>
+<tr class="odd">
+<td>거리자료 시각화</td>
+<td>MDS</td>
+</tr>
+<tr class="even">
+<td>최근접 이웃 성능 개선</td>
+<td>NCA, LMNN</td>
+</tr>
+<tr class="odd">
+<td>대규모 표현학습</td>
+<td>오토인코더, 대조학습</td>
+</tr>
+<tr class="even">
+<td>해석 가능한 변수 축소</td>
+<td>희소 PCA, 특성 선택</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-ch10-supervised-leakage" class="level3" data-number="10.7.2">
+<h3 data-number="10.7.2" class="anchored" data-anchor-id="sec-ch10-supervised-leakage"><span class="header-section-number">10.7.2</span> 지도정보 사용과 데이터 누출</h3>
+<p>PCA처럼 반응변수를 사용하지 않는 방법도 평가 과정에서는 훈련자료에만 적합해야 한다. 전체 자료에서 평균, 표준편차, 주성분 방향을 계산한 뒤 시험자료를 평가하면 시험자료 정보가 훈련과정에 유입된다.</p>
+<p>올바른 과정은 다음과 같다.</p>
+<ol type="1">
+<li>훈련자료에서 전처리 모수를 추정한다.</li>
+<li>훈련자료에서 차원 축소 모형을 적합한다.</li>
+<li>동일한 변환을 검증자료와 시험자료에 적용한다.</li>
+<li>축소된 훈련자료로 예측모형을 적합한다.</li>
+<li>독립된 시험자료에서 최종 성능을 평가한다.</li>
+</ol>
+<p>교차검증에서도 각 폴드의 훈련부분에서만 차원 축소를 적합해야 한다. 지도 차원 축소와 거리 학습에서는 이 원칙이 더욱 중요하다.</p>
+</section>
+<section id="sec-ch10-number-components" class="level3" data-number="10.7.3">
+<h3 data-number="10.7.3" class="anchored" data-anchor-id="sec-ch10-number-components"><span class="header-section-number">10.7.3</span> 차원 수의 선택</h3>
+<p>차원 수 <span class="math inline">\(q\)</span>는 다음 기준을 이용할 수 있다.</p>
+<ul>
+<li>설명분산비</li>
+<li>재구성오차</li>
+<li>이웃 보존도</li>
+<li>교차검증 예측성능</li>
+<li>군집 안정성</li>
+<li>계산비용</li>
+<li>해석 가능성</li>
+</ul>
+<p>여러 기준이 서로 다른 값을 제안할 수 있다. 최종 선택은 후속 분석의 목적에 맞추어야 한다.</p>
+</section>
+<section id="sec-ch10-hdss" class="level3" data-number="10.7.4">
+<h3 data-number="10.7.4" class="anchored" data-anchor-id="sec-ch10-hdss"><span class="header-section-number">10.7.4</span> 고차원 소표본 문제</h3>
+<p><span class="math inline">\(p\gg n\)</span>인 자료에서는 표본공분산행렬의 랭크가 최대 <span class="math inline">\(n-1\)</span>이므로 비영 고유값도 최대 <span class="math inline">\(n-1\)</span>개이다. 따라서 일반 PCA가 제공할 수 있는 유효 성분 수는</p>
+<p><span id="eq-ch10-pca-rank"><span class="math display">\[
+\operatorname{rank}(\mathbf X_c)
+\leq
+\min(n-1,p)
+\tag{10.89}\]</span></span></p>
+<p>이다. 이러한 상황에서는 다음을 고려할 수 있다.</p>
+<ul>
+<li>SVD 기반 계산</li>
+<li>수축 공분산 추정</li>
+<li>희소 PCA</li>
+<li>규제 판별분석</li>
+<li>사전 변수선택</li>
+<li>교차검증 기반 차원 선택</li>
+</ul>
+<p>표본 크기가 작을수록 임베딩의 불확실성과 안정성을 평가해야 한다.</p>
+</section>
+<section id="sec-ch10-computational-complexity" class="level3" data-number="10.7.5">
+<h3 data-number="10.7.5" class="anchored" data-anchor-id="sec-ch10-computational-complexity"><span class="header-section-number">10.7.5</span> 계산복잡도</h3>
+<div id="tbl-ch10-computation" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch10-computation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;10.8: 차원 축소 방법의 계산복잡도와 대규모 확장
+</figcaption>
+<div aria-describedby="tbl-ch10-computation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>방법</th>
+<th>주요 계산부담</th>
+<th>대규모 자료 대응</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>PCA</td>
+<td>SVD 또는 고유분해</td>
+<td>무작위 SVD, 증분 PCA</td>
+</tr>
+<tr class="even">
+<td>kernel PCA</td>
+<td><span class="math inline">\(n\times n\)</span> 커널 고유분해</td>
+<td>Nyström, 랜덤 특성</td>
+</tr>
+<tr class="odd">
+<td>MDS</td>
+<td>거리행렬과 고유분해</td>
+<td>표본추출, landmark MDS</td>
+</tr>
+<tr class="even">
+<td>Isomap</td>
+<td>그래프 최단경로와 MDS</td>
+<td>landmark Isomap</td>
+</tr>
+<tr class="odd">
+<td>t-SNE</td>
+<td>쌍별 유사도와 최적화</td>
+<td>Barnes-Hut, FFT 근사</td>
+</tr>
+<tr class="even">
+<td>UMAP</td>
+<td>근접 그래프와 확률적 최적화</td>
+<td>근사 최근접 이웃</td>
+</tr>
+<tr class="odd">
+<td>거리 학습</td>
+<td>행렬 또는 신경망 최적화</td>
+<td>저랭크 모수화, 미니배치</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+</section>
+<section id="sec-ch10-unified-view" class="level2" data-number="10.8">
+<h2 data-number="10.8" class="anchored" data-anchor-id="sec-ch10-unified-view"><span class="header-section-number">10.8</span> 통합적 관점</h2>
+<section id="sec-ch10-representation-distance-learning" class="level3" data-number="10.8.1">
+<h3 data-number="10.8.1" class="anchored" data-anchor-id="sec-ch10-representation-distance-learning"><span class="header-section-number">10.8.1</span> 표현, 거리와 학습 알고리즘</h3>
+<p>차원 축소와 거리 척도 학습은 서로 분리된 주제가 아니다. 입력표현 <span class="math inline">\(\phi(\mathbf x)\)</span>를 선택하면 그 공간의 거리와 이웃관계가 결정되고, 이는 후속 학습 알고리즘의 귀납적 편향을 바꾼다.</p>
+<p><span id="eq-ch10-representation-pipeline"><span class="math display">\[
+\mathbf x
+\xrightarrow{\phi}
+\mathbf z
+\xrightarrow{d}
+\text{이웃 또는 유사도}
+\xrightarrow{A}
+\widehat y
+\tag{10.90}\]</span></span></p>
+<p>여기서 <span class="math inline">\(A\)</span>는 kNN, 군집화, 커널 방법 또는 다른 학습 알고리즘이다.</p>
+</section>
+<section id="sec-ch10-three-perspectives" class="level3" data-number="10.8.2">
+<h3 data-number="10.8.2" class="anchored" data-anchor-id="sec-ch10-three-perspectives"><span class="header-section-number">10.8.2</span> PCA, 매니폴드 학습과 거리 학습의 차이</h3>
+<p>PCA는 자료의 분산을 기준으로 선형 축을 찾는다. 매니폴드 학습은 자료의 비선형 기하구조를 저차원 좌표로 표현한다. 거리 학습은 예측목표나 유사성 제약을 이용하여 어떤 차이가 중요한지를 학습한다.</p>
+<div id="tbl-ch10-three-perspectives" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch10-three-perspectives-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;10.9: 세 가지 차원 축소 관점
+</figcaption>
+<div aria-describedby="tbl-ch10-three-perspectives-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>관점</th>
+<th>핵심 질문</th>
+<th>대표 목적함수</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>PCA</td>
+<td>가장 큰 변동은 어느 방향인가</td>
+<td>분산 최대화</td>
+</tr>
+<tr class="even">
+<td>매니폴드 학습</td>
+<td>국소·전역 기하구조를 어떻게 보존할까</td>
+<td>거리·이웃 보존</td>
+</tr>
+<tr class="odd">
+<td>거리 학습</td>
+<td>과제에 유용한 유사성은 무엇인가</td>
+<td>분류·순위 손실 최소화</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-ch10-dim-vs-feature-selection" class="level3" data-number="10.8.3">
+<h3 data-number="10.8.3" class="anchored" data-anchor-id="sec-ch10-dim-vs-feature-selection"><span class="header-section-number">10.8.3</span> 차원 축소와 특성 선택</h3>
+<p>차원 축소는 여러 원변수의 조합으로 새로운 변수를 만든다. 특성 선택은 원변수 중 일부를 그대로 유지한다.</p>
+<p><span class="math display">\[
+\text{차원 축소:}
+\quad
+\mathbf z=\mathbf W^{\top}\mathbf x,
+\]</span></p>
+<p><span id="eq-ch10-dim-vs-selection"><span class="math display">\[
+\text{특성 선택:}
+\quad
+\mathbf z=(x_{j_1},\ldots,x_{j_q})^{\top}.
+\tag{10.91}\]</span></span></p>
+<p>차원 축소는 상관구조를 효율적으로 요약할 수 있지만 해석이 어려울 수 있다. 특성 선택은 해석성이 높지만 분산된 신호를 놓칠 수 있다. 두 접근은 Chapter 11에서 희소학습과 함께 다시 연결된다.</p>
+</section>
+<section id="sec-ch10-reproducibility" class="level3" data-number="10.8.4">
+<h3 data-number="10.8.4" class="anchored" data-anchor-id="sec-ch10-reproducibility"><span class="header-section-number">10.8.4</span> 재현성과 안정성</h3>
+<p>차원 축소 결과의 재현성을 높이기 위해 다음을 기록해야 한다.</p>
+<ul>
+<li>중심화와 표준화 방법</li>
+<li>사용한 거리함수</li>
+<li>이웃 수와 커널 하이퍼파라미터</li>
+<li>선택한 차원 수</li>
+<li>확률적 알고리즘의 난수 시드</li>
+<li>훈련자료와 적용자료의 구분</li>
+<li>새로운 관측값 변환방법</li>
+<li>소프트웨어와 구현 옵션</li>
+</ul>
+<p>PCA처럼 결정론적 방법도 고유값이 매우 비슷하면 성분 방향이 불안정할 수 있다. 따라서 개별 적재량보다 주성분이 생성하는 부분공간 자체가 더 안정적인 대상일 수 있다.</p>
+</section>
+</section>
+<section id="장-요약" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="장-요약">장 요약</h2>
+<p>고차원 공간에서는 표본이 희소해지고 최근접 이웃과 먼 이웃의 구분이 약해질 수 있다. 이러한 차원의 저주는 거리 기반 학습의 성능을 저하시킨다. k-최근접 이웃은 단순한 알고리즘이지만, 적절한 자료 표현과 거리 척도의 중요성을 분명하게 보여준다.</p>
+<p>임베딩은 원래 입력공간을 새로운 표현공간으로 변환하는 과정이다. 좋은 임베딩의 기준은 분석 목적에 따라 달라지며, 전역 거리, 국소 이웃, 재구성 가능성, 클래스 분리 또는 후속 예측성능을 보존하도록 설계할 수 있다.</p>
+<p>PCA는 자료의 분산을 가장 잘 보존하는 직교 선형축을 찾는다. 이는 최대분산 문제와 최소재구성오차 문제의 해이며, 공분산행렬의 고유분해 또는 자료행렬의 특이값분해로 계산한다. 희소 PCA, 강건 PCA와 확률적 PCA는 해석성, 이상치와 확률모형 측면에서 일반 PCA를 확장한다.</p>
+<p>커널 차원 축소는 비선형 특성공간에서 선형 방법을 적용한다. 커널 PCA와 커널 판별분석은 복잡한 구조를 표현할 수 있지만 커널 선택, 계산비용과 해석의 어려움을 함께 가진다.</p>
+<p>매니폴드 학습은 고차원 자료가 저차원 비선형 구조 위에 놓여 있다는 가정에서 출발한다. MDS, Isomap, LLE, 라플라시안 고유지도, 확산지도, t-SNE와 UMAP은 서로 다른 거리와 이웃관계를 보존한다. 특히 시각화 결과를 해석할 때는 방법의 목적함수와 하이퍼파라미터 민감성을 고려해야 한다.</p>
+<p>거리 척도 학습은 유사성과 차이를 과제에 맞게 학습한다. 일반화된 마할라노비스 거리, NCA, LMNN, ITML, 대조학습과 삼중항 학습은 선형 또는 비선형 임베딩을 통해 이웃구조를 조정한다. 거리 학습은 kNN, 검색, 군집화와 표현학습의 성능을 개선할 수 있지만, 독립된 평가자료와 누출 방지가 필수적이다.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./09-clustering.html" class="pagination-link" aria-label="클러스터링">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">클러스터링</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./11-feature-selection-sparse-learning.html" class="pagination-link" aria-label="특성 선택과 희소 학습">
+        <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">특성 선택과 희소 학습</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

@@ -1,0 +1,3136 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>11&nbsp; 특성 선택과 희소 학습 – 머신러닝</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./12-computational-learning-theory.html" rel="next">
+<link href="./10-dimensionality-reduction.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-3d841e2d0dac331999ea63b9b6b417ac.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./09-clustering.html">III. 비지도학습과 표현학습</a></li><li class="breadcrumb-item"><a href="./11-feature-selection-sparse-learning.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">특성 선택과 희소 학습</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">머신러닝</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="리더 모드 전환">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">I. 머신러닝의 기초</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">머신러닝의 개념과 발전</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-model-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">모형 평가와 선택</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">II. 지도학습</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-linear-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">선형 모형</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-decision-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">의사결정 트리</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-neural-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">신경망</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-support-vector-machines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">서포트 벡터 머신</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-bayesian-classifiers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">베이지안 분류기</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-ensemble-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">앙상블 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">III. 비지도학습과 표현학습</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">클러스터링</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-dimensionality-reduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">차원 축소와 거리 척도 학습</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-feature-selection-sparse-learning.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">특성 선택과 희소 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">IV. 학습이론과 불완전한 데이터</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-computational-learning-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">계산 학습 이론</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-semi-supervised-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">준지도 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">V. 구조화된 확률모형과 규칙</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-probabilistic-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">확률 그래피컬 모형</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-rule-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">규칙 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">VI. 순차적 의사결정과 신뢰성</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-reinforcement-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">강화 학습</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-explainable-trustworthy-ml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">설명 가능한 머신러닝과 신뢰할 수 있는 예측</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#sec-ch11-feature-selection-problem" id="toc-sec-ch11-feature-selection-problem" class="nav-link active" data-scroll-target="#sec-ch11-feature-selection-problem"><span class="header-section-number">11.1</span> 특성 선택의 기본 문제</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch11-selection-vs-extraction" id="toc-sec-ch11-selection-vs-extraction" class="nav-link" data-scroll-target="#sec-ch11-selection-vs-extraction"><span class="header-section-number">11.1.1</span> 특성 선택과 차원 축소</a></li>
+  <li><a href="#sec-ch11-support-set" id="toc-sec-ch11-support-set" class="nav-link" data-scroll-target="#sec-ch11-support-set"><span class="header-section-number">11.1.2</span> 부분집합과 지지집합</a></li>
+  <li><a href="#sec-ch11-sparsity-assumption" id="toc-sec-ch11-sparsity-assumption" class="nav-link" data-scroll-target="#sec-ch11-sparsity-assumption"><span class="header-section-number">11.1.3</span> 희소성 가정</a></li>
+  <li><a href="#sec-ch11-prediction-discovery" id="toc-sec-ch11-prediction-discovery" class="nav-link" data-scroll-target="#sec-ch11-prediction-discovery"><span class="header-section-number">11.1.4</span> 예측과 변수발견의 차이</a></li>
+  </ul></li>
+  <li><a href="#sec-ch11-subset-search" id="toc-sec-ch11-subset-search" class="nav-link" data-scroll-target="#sec-ch11-subset-search"><span class="header-section-number">11.2</span> 부분집합 탐색과 평가</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch11-exhaustive-search" id="toc-sec-ch11-exhaustive-search" class="nav-link" data-scroll-target="#sec-ch11-exhaustive-search"><span class="header-section-number">11.2.1</span> 전수 부분집합 탐색</a></li>
+  <li><a href="#sec-ch11-forward-selection" id="toc-sec-ch11-forward-selection" class="nav-link" data-scroll-target="#sec-ch11-forward-selection"><span class="header-section-number">11.2.2</span> 전진 선택</a></li>
+  <li><a href="#sec-ch11-backward-stepwise" id="toc-sec-ch11-backward-stepwise" class="nav-link" data-scroll-target="#sec-ch11-backward-stepwise"><span class="header-section-number">11.2.3</span> 후진 제거와 단계적 선택</a></li>
+  <li><a href="#sec-ch11-branch-bound-mio" id="toc-sec-ch11-branch-bound-mio" class="nav-link" data-scroll-target="#sec-ch11-branch-bound-mio"><span class="header-section-number">11.2.4</span> 분기한정법과 혼합정수 최적화</a></li>
+  <li><a href="#sec-ch11-subset-evaluation" id="toc-sec-ch11-subset-evaluation" class="nav-link" data-scroll-target="#sec-ch11-subset-evaluation"><span class="header-section-number">11.2.5</span> 부분집합 평가기준</a></li>
+  <li><a href="#sec-ch11-selection-evaluation-separation" id="toc-sec-ch11-selection-evaluation-separation" class="nav-link" data-scroll-target="#sec-ch11-selection-evaluation-separation"><span class="header-section-number">11.2.6</span> 선택과 평가의 분리</a></li>
+  <li><a href="#sec-ch11-selection-stability" id="toc-sec-ch11-selection-stability" class="nav-link" data-scroll-target="#sec-ch11-selection-stability"><span class="header-section-number">11.2.7</span> 선택 안정성(selection stability)</a></li>
+  </ul></li>
+  <li><a href="#sec-ch11-filter-methods" id="toc-sec-ch11-filter-methods" class="nav-link" data-scroll-target="#sec-ch11-filter-methods"><span class="header-section-number">11.3</span> 필터 방식 특성 선택</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch11-filter-overview" id="toc-sec-ch11-filter-overview" class="nav-link" data-scroll-target="#sec-ch11-filter-overview"><span class="header-section-number">11.3.1</span> 필터 방식의 기본 구조</a></li>
+  <li><a href="#sec-ch11-variance-filter" id="toc-sec-ch11-variance-filter" class="nav-link" data-scroll-target="#sec-ch11-variance-filter"><span class="header-section-number">11.3.2</span> 분산 기반 필터</a></li>
+  <li><a href="#sec-ch11-univariate-filter" id="toc-sec-ch11-univariate-filter" class="nav-link" data-scroll-target="#sec-ch11-univariate-filter"><span class="header-section-number">11.3.3</span> 상관과 단변량 검정</a></li>
+  <li><a href="#sec-ch11-multiple-testing-filter" id="toc-sec-ch11-multiple-testing-filter" class="nav-link" data-scroll-target="#sec-ch11-multiple-testing-filter"><span class="header-section-number">11.3.4</span> 다중검정과 거짓발견률</a></li>
+  <li><a href="#sec-ch11-mutual-information" id="toc-sec-ch11-mutual-information" class="nav-link" data-scroll-target="#sec-ch11-mutual-information"><span class="header-section-number">11.3.5</span> 상호정보량</a></li>
+  <li><a href="#sec-ch11-mrmr" id="toc-sec-ch11-mrmr" class="nav-link" data-scroll-target="#sec-ch11-mrmr"><span class="header-section-number">11.3.6</span> 최대 관련성 최소 중복성</a></li>
+  <li><a href="#sec-ch11-relief" id="toc-sec-ch11-relief" class="nav-link" data-scroll-target="#sec-ch11-relief"><span class="header-section-number">11.3.7</span> Relief 계열</a></li>
+  <li><a href="#sec-ch11-laplacian-score" id="toc-sec-ch11-laplacian-score" class="nav-link" data-scroll-target="#sec-ch11-laplacian-score"><span class="header-section-number">11.3.8</span> 라플라시안 점수와 비지도 특성 선택</a></li>
+  <li><a href="#sec-ch11-filter-example" id="toc-sec-ch11-filter-example" class="nav-link" data-scroll-target="#sec-ch11-filter-example"><span class="header-section-number">11.3.9</span> 필터 점수의 예시</a></li>
+  <li><a href="#sec-ch11-filter-pros-cons" id="toc-sec-ch11-filter-pros-cons" class="nav-link" data-scroll-target="#sec-ch11-filter-pros-cons"><span class="header-section-number">11.3.10</span> 필터 방식의 장점과 한계</a></li>
+  </ul></li>
+  <li><a href="#sec-ch11-wrapper-methods" id="toc-sec-ch11-wrapper-methods" class="nav-link" data-scroll-target="#sec-ch11-wrapper-methods"><span class="header-section-number">11.4</span> 래퍼 방식 특성 선택</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch11-wrapper-overview" id="toc-sec-ch11-wrapper-overview" class="nav-link" data-scroll-target="#sec-ch11-wrapper-overview"><span class="header-section-number">11.4.1</span> 래퍼 방식의 개념</a></li>
+  <li><a href="#sec-ch11-sequential-feature-selection" id="toc-sec-ch11-sequential-feature-selection" class="nav-link" data-scroll-target="#sec-ch11-sequential-feature-selection"><span class="header-section-number">11.4.2</span> 순차 특성 선택</a></li>
+  <li><a href="#sec-ch11-rfe" id="toc-sec-ch11-rfe" class="nav-link" data-scroll-target="#sec-ch11-rfe"><span class="header-section-number">11.4.3</span> 재귀적 특성 제거</a></li>
+  <li><a href="#sec-ch11-genetic-search" id="toc-sec-ch11-genetic-search" class="nav-link" data-scroll-target="#sec-ch11-genetic-search"><span class="header-section-number">11.4.4</span> 유전 알고리즘과 확률적 탐색</a></li>
+  <li><a href="#sec-ch11-boruta" id="toc-sec-ch11-boruta" class="nav-link" data-scroll-target="#sec-ch11-boruta"><span class="header-section-number">11.4.5</span> Boruta와 그림자 변수</a></li>
+  <li><a href="#sec-ch11-wrapper-overfitting" id="toc-sec-ch11-wrapper-overfitting" class="nav-link" data-scroll-target="#sec-ch11-wrapper-overfitting"><span class="header-section-number">11.4.6</span> 래퍼 방식의 과적합</a></li>
+  <li><a href="#sec-ch11-cost-sensitive-selection" id="toc-sec-ch11-cost-sensitive-selection" class="nav-link" data-scroll-target="#sec-ch11-cost-sensitive-selection"><span class="header-section-number">11.4.7</span> 비용을 고려한 특성 선택</a></li>
+  <li><a href="#sec-ch11-wrapper-example" id="toc-sec-ch11-wrapper-example" class="nav-link" data-scroll-target="#sec-ch11-wrapper-example"><span class="header-section-number">11.4.8</span> 전진 래퍼 선택의 간단한 예</a></li>
+  </ul></li>
+  <li><a href="#sec-ch11-embedded-methods" id="toc-sec-ch11-embedded-methods" class="nav-link" data-scroll-target="#sec-ch11-embedded-methods"><span class="header-section-number">11.5</span> 내장형 선택과 희소 규제</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch11-embedded-overview" id="toc-sec-ch11-embedded-overview" class="nav-link" data-scroll-target="#sec-ch11-embedded-overview"><span class="header-section-number">11.5.1</span> 내장형 선택의 개념</a></li>
+  <li><a href="#sec-ch11-ridge-lasso" id="toc-sec-ch11-ridge-lasso" class="nav-link" data-scroll-target="#sec-ch11-ridge-lasso"><span class="header-section-number">11.5.2</span> 릿지와 LASSO</a></li>
+  <li><a href="#sec-ch11-lasso-geometry" id="toc-sec-ch11-lasso-geometry" class="nav-link" data-scroll-target="#sec-ch11-lasso-geometry"><span class="header-section-number">11.5.3</span> 제약형식과 기하학</a></li>
+  <li><a href="#sec-ch11-soft-thresholding" id="toc-sec-ch11-soft-thresholding" class="nav-link" data-scroll-target="#sec-ch11-soft-thresholding"><span class="header-section-number">11.5.4</span> 직교설계와 소프트 임계화</a></li>
+  <li><a href="#sec-ch11-coordinate-descent" id="toc-sec-ch11-coordinate-descent" class="nav-link" data-scroll-target="#sec-ch11-coordinate-descent"><span class="header-section-number">11.5.5</span> 좌표하강법</a></li>
+  <li><a href="#sec-ch11-lasso-kkt" id="toc-sec-ch11-lasso-kkt" class="nav-link" data-scroll-target="#sec-ch11-lasso-kkt"><span class="header-section-number">11.5.6</span> KKT 조건과 변수선택</a></li>
+  <li><a href="#sec-ch11-regularization-path" id="toc-sec-ch11-regularization-path" class="nav-link" data-scroll-target="#sec-ch11-regularization-path"><span class="header-section-number">11.5.7</span> 규제 경로</a></li>
+  <li><a href="#sec-ch11-lambda-selection" id="toc-sec-ch11-lambda-selection" class="nav-link" data-scroll-target="#sec-ch11-lambda-selection"><span class="header-section-number">11.5.8</span> 규제 모수의 선택</a></li>
+  <li><a href="#sec-ch11-elastic-net" id="toc-sec-ch11-elastic-net" class="nav-link" data-scroll-target="#sec-ch11-elastic-net"><span class="header-section-number">11.5.9</span> 상관된 변수와 elastic net</a></li>
+  <li><a href="#sec-ch11-glm-lasso" id="toc-sec-ch11-glm-lasso" class="nav-link" data-scroll-target="#sec-ch11-glm-lasso"><span class="header-section-number">11.5.10</span> 일반화 선형모형의 희소화</a></li>
+  <li><a href="#sec-ch11-group-lasso" id="toc-sec-ch11-group-lasso" class="nav-link" data-scroll-target="#sec-ch11-group-lasso"><span class="header-section-number">11.5.11</span> 그룹 LASSO</a></li>
+  <li><a href="#sec-ch11-fused-lasso" id="toc-sec-ch11-fused-lasso" class="nav-link" data-scroll-target="#sec-ch11-fused-lasso"><span class="header-section-number">11.5.12</span> fused LASSO와 구조화 희소성</a></li>
+  <li><a href="#sec-ch11-adaptive-nonconvex" id="toc-sec-ch11-adaptive-nonconvex" class="nav-link" data-scroll-target="#sec-ch11-adaptive-nonconvex"><span class="header-section-number">11.5.13</span> adaptive LASSO와 비볼록 패널티</a></li>
+  <li><a href="#sec-ch11-tree-embedded-selection" id="toc-sec-ch11-tree-embedded-selection" class="nav-link" data-scroll-target="#sec-ch11-tree-embedded-selection"><span class="header-section-number">11.5.14</span> 트리와 부스팅의 내장형 선택</a></li>
+  <li><a href="#sec-ch11-selection-consistency" id="toc-sec-ch11-selection-consistency" class="nav-link" data-scroll-target="#sec-ch11-selection-consistency"><span class="header-section-number">11.5.15</span> 선택 일관성과 예측 일관성</a></li>
+  <li><a href="#sec-ch11-stability-selection" id="toc-sec-ch11-stability-selection" class="nav-link" data-scroll-target="#sec-ch11-stability-selection"><span class="header-section-number">11.5.16</span> 안정성 선택</a></li>
+  <li><a href="#sec-ch11-post-selection-inference" id="toc-sec-ch11-post-selection-inference" class="nav-link" data-scroll-target="#sec-ch11-post-selection-inference"><span class="header-section-number">11.5.17</span> 선택 후 추론</a></li>
+  </ul></li>
+  <li><a href="#sec-ch11-sparse-representation" id="toc-sec-ch11-sparse-representation" class="nav-link" data-scroll-target="#sec-ch11-sparse-representation"><span class="header-section-number">11.6</span> 희소 표현과 사전학습</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch11-sparse-coding-overview" id="toc-sec-ch11-sparse-coding-overview" class="nav-link" data-scroll-target="#sec-ch11-sparse-coding-overview"><span class="header-section-number">11.6.1</span> 희소 표현의 기본 개념</a></li>
+  <li><a href="#sec-ch11-sparse-coding-problem" id="toc-sec-ch11-sparse-coding-problem" class="nav-link" data-scroll-target="#sec-ch11-sparse-coding-problem"><span class="header-section-number">11.6.2</span> 희소 부호화 문제</a></li>
+  <li><a href="#sec-ch11-fixed-learned-dictionary" id="toc-sec-ch11-fixed-learned-dictionary" class="nav-link" data-scroll-target="#sec-ch11-fixed-learned-dictionary"><span class="header-section-number">11.6.3</span> 고정 사전과 학습 사전</a></li>
+  <li><a href="#sec-ch11-dictionary-learning-objective" id="toc-sec-ch11-dictionary-learning-objective" class="nav-link" data-scroll-target="#sec-ch11-dictionary-learning-objective"><span class="header-section-number">11.6.4</span> 사전학습의 목적함수</a></li>
+  <li><a href="#sec-ch11-mod-ksvd" id="toc-sec-ch11-mod-ksvd" class="nav-link" data-scroll-target="#sec-ch11-mod-ksvd"><span class="header-section-number">11.6.5</span> MOD와 K-SVD</a></li>
+  <li><a href="#sec-ch11-orthogonal-dictionary-example" id="toc-sec-ch11-orthogonal-dictionary-example" class="nav-link" data-scroll-target="#sec-ch11-orthogonal-dictionary-example"><span class="header-section-number">11.6.6</span> 직교사전에서의 희소복원</a></li>
+  <li><a href="#sec-ch11-sparse-representation-classification" id="toc-sec-ch11-sparse-representation-classification" class="nav-link" data-scroll-target="#sec-ch11-sparse-representation-classification"><span class="header-section-number">11.6.7</span> 희소 표현을 이용한 분류</a></li>
+  <li><a href="#sec-ch11-supervised-dictionary-learning" id="toc-sec-ch11-supervised-dictionary-learning" class="nav-link" data-scroll-target="#sec-ch11-supervised-dictionary-learning"><span class="header-section-number">11.6.8</span> 지도 사전학습</a></li>
+  <li><a href="#sec-ch11-sparse-autoencoder" id="toc-sec-ch11-sparse-autoencoder" class="nav-link" data-scroll-target="#sec-ch11-sparse-autoencoder"><span class="header-section-number">11.6.9</span> 희소 오토인코더와의 관계</a></li>
+  <li><a href="#sec-ch11-dictionary-identifiability" id="toc-sec-ch11-dictionary-identifiability" class="nav-link" data-scroll-target="#sec-ch11-dictionary-identifiability"><span class="header-section-number">11.6.10</span> 사전학습의 식별성과 실무 문제</a></li>
+  </ul></li>
+  <li><a href="#sec-ch11-compressed-sensing" id="toc-sec-ch11-compressed-sensing" class="nav-link" data-scroll-target="#sec-ch11-compressed-sensing"><span class="header-section-number">11.7</span> 압축 센싱</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch11-cs-overview" id="toc-sec-ch11-cs-overview" class="nav-link" data-scroll-target="#sec-ch11-cs-overview"><span class="header-section-number">11.7.1</span> 불충분한 측정에서의 신호복원</a></li>
+  <li><a href="#sec-ch11-basis-pursuit" id="toc-sec-ch11-basis-pursuit" class="nav-link" data-scroll-target="#sec-ch11-basis-pursuit"><span class="header-section-number">11.7.2</span> <span class="math inline">\(\ell_0\)</span> 복원과 basis pursuit</a></li>
+  <li><a href="#sec-ch11-spark" id="toc-sec-ch11-spark" class="nav-link" data-scroll-target="#sec-ch11-spark"><span class="header-section-number">11.7.3</span> spark와 유일복원</a></li>
+  <li><a href="#sec-ch11-mutual-coherence" id="toc-sec-ch11-mutual-coherence" class="nav-link" data-scroll-target="#sec-ch11-mutual-coherence"><span class="header-section-number">11.7.4</span> 상호 일관성</a></li>
+  <li><a href="#sec-ch11-rip" id="toc-sec-ch11-rip" class="nav-link" data-scroll-target="#sec-ch11-rip"><span class="header-section-number">11.7.5</span> 제한 등거리 성질</a></li>
+  <li><a href="#sec-ch11-null-space-property" id="toc-sec-ch11-null-space-property" class="nav-link" data-scroll-target="#sec-ch11-null-space-property"><span class="header-section-number">11.7.6</span> 영공간 성질</a></li>
+  <li><a href="#sec-ch11-omp" id="toc-sec-ch11-omp" class="nav-link" data-scroll-target="#sec-ch11-omp"><span class="header-section-number">11.7.7</span> 직교매칭추구</a></li>
+  <li><a href="#sec-ch11-iht" id="toc-sec-ch11-iht" class="nav-link" data-scroll-target="#sec-ch11-iht"><span class="header-section-number">11.7.8</span> 반복적 하드 임계화</a></li>
+  <li><a href="#sec-ch11-cs-simulation" id="toc-sec-ch11-cs-simulation" class="nav-link" data-scroll-target="#sec-ch11-cs-simulation"><span class="header-section-number">11.7.9</span> 압축 센싱 복원 시뮬레이션</a></li>
+  <li><a href="#sec-ch11-noisy-approximate-sparsity" id="toc-sec-ch11-noisy-approximate-sparsity" class="nav-link" data-scroll-target="#sec-ch11-noisy-approximate-sparsity"><span class="header-section-number">11.7.10</span> 잡음과 근사 희소성</a></li>
+  <li><a href="#sec-ch11-sensing-matrix" id="toc-sec-ch11-sensing-matrix" class="nav-link" data-scroll-target="#sec-ch11-sensing-matrix"><span class="header-section-number">11.7.11</span> 측정행렬의 설계</a></li>
+  <li><a href="#sec-ch11-cs-feature-selection-relation" id="toc-sec-ch11-cs-feature-selection-relation" class="nav-link" data-scroll-target="#sec-ch11-cs-feature-selection-relation"><span class="header-section-number">11.7.12</span> 압축 센싱과 특성 선택의 관계</a></li>
+  <li><a href="#sec-ch11-cs-applications" id="toc-sec-ch11-cs-applications" class="nav-link" data-scroll-target="#sec-ch11-cs-applications"><span class="header-section-number">11.7.13</span> 압축 센싱의 응용</a></li>
+  </ul></li>
+  <li><a href="#sec-ch11-unified-view" id="toc-sec-ch11-unified-view" class="nav-link" data-scroll-target="#sec-ch11-unified-view"><span class="header-section-number">11.8</span> 통합적 관점</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch11-three-selection-families" id="toc-sec-ch11-three-selection-families" class="nav-link" data-scroll-target="#sec-ch11-three-selection-families"><span class="header-section-number">11.8.1</span> 세 가지 특성 선택 방식의 비교</a></li>
+  <li><a href="#sec-ch11-three-levels-sparsity" id="toc-sec-ch11-three-levels-sparsity" class="nav-link" data-scroll-target="#sec-ch11-three-levels-sparsity"><span class="header-section-number">11.8.2</span> 희소성의 세 수준</a></li>
+  <li><a href="#sec-ch11-sparsity-interpretability" id="toc-sec-ch11-sparsity-interpretability" class="nav-link" data-scroll-target="#sec-ch11-sparsity-interpretability"><span class="header-section-number">11.8.3</span> 희소성과 해석 가능성</a></li>
+  <li><a href="#sec-ch11-correlated-features" id="toc-sec-ch11-correlated-features" class="nav-link" data-scroll-target="#sec-ch11-correlated-features"><span class="header-section-number">11.8.4</span> 상관된 변수군의 해석</a></li>
+  <li><a href="#sec-ch11-feature-selection-leakage" id="toc-sec-ch11-feature-selection-leakage" class="nav-link" data-scroll-target="#sec-ch11-feature-selection-leakage"><span class="header-section-number">11.8.5</span> 데이터 누출 방지</a></li>
+  <li><a href="#sec-ch11-sample-size-sparsity" id="toc-sec-ch11-sample-size-sparsity" class="nav-link" data-scroll-target="#sec-ch11-sample-size-sparsity"><span class="header-section-number">11.8.6</span> 표본 크기와 희소도</a></li>
+  <li><a href="#sec-ch11-method-selection" id="toc-sec-ch11-method-selection" class="nav-link" data-scroll-target="#sec-ch11-method-selection"><span class="header-section-number">11.8.7</span> 분석방법 선택</a></li>
+  <li><a href="#sec-ch11-reporting" id="toc-sec-ch11-reporting" class="nav-link" data-scroll-target="#sec-ch11-reporting"><span class="header-section-number">11.8.8</span> 재현 가능한 보고</a></li>
+  </ul></li>
+  <li><a href="#장-요약" id="toc-장-요약" class="nav-link" data-scroll-target="#장-요약">장 요약</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./09-clustering.html">III. 비지도학습과 표현학습</a></li><li class="breadcrumb-item"><a href="./11-feature-selection-sparse-learning.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">특성 선택과 희소 학습</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-ch11" class="quarto-section-identifier"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">특성 선택과 희소 학습</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>고차원 자료에서는 변수의 수가 많다는 사실 자체보다, 예측에 실제로 필요한 정보가 소수의 변수나 소수의 표현계수에 집중되어 있을 가능성이 중요하다. 유전체 자료, 영상자료, 텍스트 자료와 센서 자료에서는 변수의 수가 표본 수보다 훨씬 많을 수 있으며, 많은 변수는 서로 강하게 상관되거나 잡음만 포함할 수 있다. 이러한 상황에서 모든 변수를 그대로 사용하는 모형은 계산비용이 커질 뿐 아니라 과적합, 불안정한 추정, 해석의 어려움과 자료수집 비용 증가를 초래할 수 있다.</p>
+<p>특성 선택(feature selection)은 원래 변수 가운데 분석에 필요한 일부를 선택하는 과정이다. 반면 희소 학습(sparse learning)은 모수나 표현계수 대부분을 정확히 0으로 만들거나 0에 가깝게 만들어 소수의 성분만 사용하도록 학습하는 접근이다. 두 방법은 목적과 구현이 다르지만, 불필요한 자유도를 줄이고 핵심 신호를 강조한다는 점에서 밀접하게 연결된다.</p>
+<p>이 장에서는 부분집합 탐색과 평가에서 출발하여 필터 방식, 래퍼 방식, 내장형 선택과 <span class="math inline">\(\ell_1\)</span> 규제를 살펴본다. 이어 자료를 소수의 기저벡터 조합으로 표현하는 희소 표현과 사전학습을 설명하고, 제한된 선형측정으로부터 희소 신호를 복원하는 압축 센싱으로 확장한다.</p>
+<section id="sec-ch11-feature-selection-problem" class="level2" data-number="11.1">
+<h2 data-number="11.1" class="anchored" data-anchor-id="sec-ch11-feature-selection-problem"><span class="header-section-number">11.1</span> 특성 선택의 기본 문제</h2>
+<section id="sec-ch11-selection-vs-extraction" class="level3" data-number="11.1.1">
+<h3 data-number="11.1.1" class="anchored" data-anchor-id="sec-ch11-selection-vs-extraction"><span class="header-section-number">11.1.1</span> 특성 선택과 차원 축소</h3>
+<p>훈련자료를</p>
+<p><span id="eq-ch11-training-data"><span class="math display">\[
+\mathcal D
+=
+\{(\mathbf x_i,y_i)\}_{i=1}^{n},
+\qquad
+\mathbf x_i\in\mathbb R^p
+\tag{11.1}\]</span></span></p>
+<p>라고 하자. 특성 선택은 전체 변수 인덱스 집합</p>
+<p><span id="eq-ch11-full-index-set"><span class="math display">\[
+\mathcal P=\{1,2,\ldots,p\}
+\tag{11.2}\]</span></span></p>
+<p>에서 부분집합 <span class="math inline">\(S\subseteq\mathcal P\)</span>를 선택하고, 선택된 변수</p>
+<p><span id="eq-ch11-selected-features"><span class="math display">\[
+\mathbf x_{i,S}=(x_{ij}:j\in S)
+\tag{11.3}\]</span></span></p>
+<p>만을 이용하여 예측함수를 학습하는 문제이다.</p>
+<p>특성 선택과 차원 축소는 모두 입력 차원을 줄이지만 결과의 의미가 다르다. 특성 선택은 원변수 자체를 유지한다.</p>
+<p><span id="eq-ch11-feature-selection-map"><span class="math display">\[
+\mathbf z
+=
+(x_{j_1},\ldots,x_{j_q})^{\top}.
+\tag{11.4}\]</span></span></p>
+<p>차원 축소는 일반적으로 원변수의 선형 또는 비선형 결합을 생성한다.</p>
+<p><span id="eq-ch11-feature-extraction-map"><span class="math display">\[
+\mathbf z
+=
+\phi(\mathbf x),
+\qquad
+\mathbf z\in\mathbb R^q,
+\quad q&lt;p.
+\tag{11.5}\]</span></span></p>
+<div id="tbl-ch11-selection-extraction" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch11-selection-extraction-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;11.1: 특성 선택과 차원 축소의 비교
+</figcaption>
+<div aria-describedby="tbl-ch11-selection-extraction-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>구분</th>
+<th>특성 선택</th>
+<th>차원 축소</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>결과</td>
+<td>원변수의 부분집합</td>
+<td>새롭게 생성된 표현</td>
+</tr>
+<tr class="even">
+<td>해석</td>
+<td>비교적 직접적</td>
+<td>성분 해석이 어려울 수 있음</td>
+</tr>
+<tr class="odd">
+<td>상관된 신호</td>
+<td>일부 변수만 남길 수 있음</td>
+<td>여러 변수의 정보를 결합</td>
+</tr>
+<tr class="even">
+<td>자료수집 비용</td>
+<td>실제 측정변수 수를 줄일 수 있음</td>
+<td>원변수 측정이 여전히 필요할 수 있음</td>
+</tr>
+<tr class="odd">
+<td>대표 방법</td>
+<td>필터, 래퍼, LASSO</td>
+<td>PCA, 커널 PCA, 오토인코더</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>특성 선택의 목적은 단순히 예측성능을 최대화하는 데 한정되지 않는다. 분석 목적에 따라 다음 목표가 함께 고려될 수 있다.</p>
+<ul>
+<li>새로운 자료에 대한 예측성능 향상</li>
+<li>모형의 해석 가능성 향상</li>
+<li>측정·저장·계산 비용 감소</li>
+<li>불안정한 잡음변수 제거</li>
+<li>영역 지식과 일치하는 간결한 모형 구성</li>
+<li>후속 실험에서 확인할 후보 변수 도출</li>
+</ul>
+<p>이 목표들은 항상 일치하지 않는다. 예측성능이 거의 같은 두 모형 가운데 하나는 변수 수가 적어 해석이 쉽고, 다른 하나는 상관된 변수들을 모두 포함하여 재현성이 높을 수 있다. 따라서 특성 선택에서는 선택 기준뿐 아니라 선택 목적을 먼저 명확히 해야 한다.</p>
+</section>
+<section id="sec-ch11-support-set" class="level3" data-number="11.1.2">
+<h3 data-number="11.1.2" class="anchored" data-anchor-id="sec-ch11-support-set"><span class="header-section-number">11.1.2</span> 부분집합과 지지집합</h3>
+<p>모수벡터 <span class="math inline">\(\boldsymbol\beta=(\beta_1,\ldots,\beta_p)^{\top}\)</span>에서 0이 아닌 계수의 인덱스 집합을 지지집합(support set)이라고 한다.</p>
+<p><span id="eq-ch11-support"><span class="math display">\[
+\operatorname{supp}(\boldsymbol\beta)
+=
+\{j:\beta_j\neq 0\}.
+\tag{11.6}\]</span></span></p>
+<p>지지집합의 크기는 <span class="math inline">\(\ell_0\)</span> 준노름(<span class="math inline">\(\ell_0\)</span> pseudo-norm)으로 나타낸다.</p>
+<p><span id="eq-ch11-l0-norm"><span class="math display">\[
+\|\boldsymbol\beta\|_0
+=
+\sum_{j=1}^{p}I(\beta_j\neq 0).
+\tag{11.7}\]</span></span></p>
+<p>엄밀히 말하면 <span class="math inline">\(\|\cdot\|_0\)</span>는 노름의 공리를 만족하지 않지만, 0이 아닌 원소의 수를 나타내는 관행적 표기이다. 특성 선택은 지지집합을 추정하는 문제로 표현할 수 있다.</p>
+<p><span id="eq-ch11-estimated-support"><span class="math display">\[
+\widehat S
+=
+\operatorname{supp}(\widehat{\boldsymbol\beta}).
+\tag{11.8}\]</span></span></p>
+<p>선형 회귀에서 변수 수를 최대 <span class="math inline">\(k\)</span>개로 제한하는 최적부분집합 선택(best subset selection)은 다음과 같다.</p>
+<p><span id="eq-ch11-best-subset-constrained"><span class="math display">\[
+\widehat{\boldsymbol\beta}
+=
+\arg\min_{\boldsymbol\beta}
+\left\{
+\frac{1}{2n}
+\|\mathbf y-\mathbf X\boldsymbol\beta\|_2^2
+\right\}
+\quad
+\text{subject to}
+\quad
+\|\boldsymbol\beta\|_0\leq k.
+\tag{11.9}\]</span></span></p>
+<p>동일한 문제를 패널티 형태로 나타내면</p>
+<p><span id="eq-ch11-best-subset-penalized"><span class="math display">\[
+\widehat{\boldsymbol\beta}
+=
+\arg\min_{\boldsymbol\beta}
+\left\{
+\frac{1}{2n}
+\|\mathbf y-\mathbf X\boldsymbol\beta\|_2^2
++
+\lambda\|\boldsymbol\beta\|_0
+\right\}
+\tag{11.10}\]</span></span></p>
+<p>가 된다. <span class="math inline">\(\lambda\)</span>가 클수록 더 적은 변수를 선택한다.</p>
+</section>
+<section id="sec-ch11-sparsity-assumption" class="level3" data-number="11.1.3">
+<h3 data-number="11.1.3" class="anchored" data-anchor-id="sec-ch11-sparsity-assumption"><span class="header-section-number">11.1.3</span> 희소성 가정</h3>
+<p>희소성 가정은 전체 <span class="math inline">\(p\)</span>개 변수 중 실제 신호에 기여하는 변수가 소수라는 가정이다. 참 모수벡터를 <span class="math inline">\(\boldsymbol\beta^{\ast}\)</span>라고 할 때</p>
+<p><span id="eq-ch11-sparsity-assumption"><span class="math display">\[
+s
+=
+\|\boldsymbol\beta^{\ast}\|_0
+\ll p
+\tag{11.11}\]</span></span></p>
+<p>로 표현한다. 특히 <span class="math inline">\(p\gg n\)</span>인 고차원 상황에서는 아무런 구조적 가정 없이 <span class="math inline">\(p\)</span>개의 효과를 모두 안정적으로 추정하기 어렵다. 희소성은 고차원 문제를 학습 가능하게 만드는 대표적 구조 가정이다.</p>
+<p>그러나 실제 자료의 신호가 반드시 정확히 희소한 것은 아니다. 작은 효과가 많은 경우에는 근사 희소성(approximate sparsity)을 고려할 수 있다. 계수의 절댓값을 큰 순서대로 정렬하여</p>
+<p><span class="math display">\[
+|\beta^{\ast}|_{(1)}
+\geq
+|\beta^{\ast}|_{(2)}
+\geq\cdots\geq
+|\beta^{\ast}|_{(p)}
+\]</span></p>
+<p>라고 할 때, 계수가 빠르게 감소한다면 소수의 큰 효과만으로 전체 신호를 근사할 수 있다.</p>
+<div class="callout callout-style-default callout-warning callout-titled" title="희소성은 자료가 아니라 표현에 관한 가정이다">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">경고</span>희소성은 자료가 아니라 표현에 관한 가정이다
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>같은 신호도 어떤 기저나 변수표현을 사용하는지에 따라 희소할 수도 있고 그렇지 않을 수도 있다. 시간영역에서는 조밀한 신호가 주파수영역에서는 소수의 성분만 가질 수 있다. 따라서 희소 학습의 성공은 적절한 표현공간의 선택과 밀접하다.</p>
+</div>
+</div>
+</section>
+<section id="sec-ch11-prediction-discovery" class="level3" data-number="11.1.4">
+<h3 data-number="11.1.4" class="anchored" data-anchor-id="sec-ch11-prediction-discovery"><span class="header-section-number">11.1.4</span> 예측과 변수발견의 차이</h3>
+<p>특성 선택은 크게 두 가지 목적을 가질 수 있다.</p>
+<ol type="1">
+<li>새로운 관측값의 예측을 개선하는 것</li>
+<li>반응과 관련된 변수를 발견하는 것</li>
+</ol>
+<p>예측을 목적으로 할 때는 상관된 변수 중 하나만 선택해도 충분할 수 있다. 그러나 과학적 발견이나 기전 해석에서는 상관된 후보군 전체가 중요할 수 있다. 또한 예측에 유용한 변수가 반드시 인과적 변수인 것은 아니다.</p>
+<p>예측위험을 최소화하는 부분집합을</p>
+<p><span id="eq-ch11-prediction-subset"><span class="math display">\[
+S_{\mathrm{pred}}
+=
+\arg\min_{S\subseteq\mathcal P}
+R(S)
+\tag{11.12}\]</span></span></p>
+<p>라고 하고, 참 자료생성 과정에 직접 포함된 변수집합을 <span class="math inline">\(S^{\ast}\)</span>라고 하자. 일반적으로</p>
+<p><span id="eq-ch11-predictive-causal-difference"><span class="math display">\[
+S_{\mathrm{pred}}
+\neq
+S^{\ast}
+\tag{11.13}\]</span></span></p>
+<p>일 수 있다. 대리변수, 측정오차, 상관구조와 표본변동 때문에 예측에 가장 좋은 변수집합과 과학적으로 관심 있는 변수집합이 다를 수 있기 때문이다.</p>
+</section>
+</section>
+<section id="sec-ch11-subset-search" class="level2" data-number="11.2">
+<h2 data-number="11.2" class="anchored" data-anchor-id="sec-ch11-subset-search"><span class="header-section-number">11.2</span> 부분집합 탐색과 평가</h2>
+<section id="sec-ch11-exhaustive-search" class="level3" data-number="11.2.1">
+<h3 data-number="11.2.1" class="anchored" data-anchor-id="sec-ch11-exhaustive-search"><span class="header-section-number">11.2.1</span> 전수 부분집합 탐색</h3>
+<p><span class="math inline">\(p\)</span>개 변수의 가능한 부분집합 수는</p>
+<p><span id="eq-ch11-number-subsets"><span class="math display">\[
+\sum_{k=0}^{p}\binom{p}{k}
+=
+2^p
+\tag{11.14}\]</span></span></p>
+<p>이다. <span class="math inline">\(p=20\)</span>이면 약 백만 개의 부분집합이 존재하고, <span class="math inline">\(p=50\)</span>이면 그 수는 약 <span class="math inline">\(1.13\times10^{15}\)</span>개에 이른다. 따라서 모든 부분집합을 평가하는 전수탐색은 변수 수가 조금만 증가해도 현실적으로 불가능하다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">60</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>number_subsets <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">^</span>p</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  p,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log10</span>(number_subsets),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"l"</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"전체 변수 수 p"</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="fu">expression</span>(log[<span class="dv">10</span>](<span class="dv">2</span><span class="sc">^</span>p))</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">9</span>, <span class="dv">12</span>, <span class="dv">15</span>), <span class="at">lty =</span> <span class="dv">3</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-ch11-subset-growth" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch11-subset-growth-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="11-feature-selection-sparse-learning_files/figure-html/fig-ch11-subset-growth-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch11-subset-growth-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;11.1: 변수 수에 따른 가능한 부분집합 수의 증가
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>전수탐색이 가능한 작은 문제에서는 각 부분집합 크기 <span class="math inline">\(k\)</span>에 대해 잔차제곱합이 가장 작은 모형을 찾은 뒤, 교차검증이나 정보기준으로 최종 <span class="math inline">\(k\)</span>를 선택할 수 있다. 그러나 훈련오차는 변수를 추가할수록 감소하므로 훈련오차만으로 부분집합 크기를 결정할 수 없다.</p>
+</section>
+<section id="sec-ch11-forward-selection" class="level3" data-number="11.2.2">
+<h3 data-number="11.2.2" class="anchored" data-anchor-id="sec-ch11-forward-selection"><span class="header-section-number">11.2.2</span> 전진 선택</h3>
+<p>전진 선택(forward selection)은 빈 모형에서 시작하여 매 단계에서 성능을 가장 많이 개선하는 변수 하나를 추가한다.</p>
+<p>초기 집합을</p>
+<p><span class="math display">\[
+S_0=\varnothing
+\]</span></p>
+<p>으로 두고, <span class="math inline">\(t\)</span>번째 단계에서</p>
+<p><span id="eq-ch11-forward-choice"><span class="math display">\[
+j_t
+=
+\arg\min_{j\notin S_{t-1}}
+\widehat R(S_{t-1}\cup\{j\})
+\tag{11.15}\]</span></span></p>
+<p>를 선택한 뒤</p>
+<p><span id="eq-ch11-forward-update"><span class="math display">\[
+S_t=S_{t-1}\cup\{j_t\}
+\tag{11.16}\]</span></span></p>
+<p>로 갱신한다.</p>
+<p>전진 선택은 계산이 빠르고 <span class="math inline">\(p&gt;n\)</span>에서도 사용할 수 있지만, 한번 제외된 변수는 이후 다시 고려되지 않는다. 상호작용이 강하거나 단독효과는 약하지만 함께 포함될 때 유용한 변수들은 선택되지 않을 수 있다.</p>
+</section>
+<section id="sec-ch11-backward-stepwise" class="level3" data-number="11.2.3">
+<h3 data-number="11.2.3" class="anchored" data-anchor-id="sec-ch11-backward-stepwise"><span class="header-section-number">11.2.3</span> 후진 제거와 단계적 선택</h3>
+<p>후진 제거(backward elimination)는 모든 변수를 포함한 모형에서 시작하여 성능 손실이 가장 작은 변수를 하나씩 제거한다.</p>
+<p><span id="eq-ch11-backward-choice"><span class="math display">\[
+j_t
+=
+\arg\min_{j\in S_{t-1}}
+\widehat R(S_{t-1}\setminus\{j\}).
+\tag{11.17}\]</span></span></p>
+<p>후진 제거는 초기 전체모형을 적합할 수 있어야 하므로 일반적으로 <span class="math inline">\(p&lt;n\)</span>이 필요하다. 단계적 선택(stepwise selection)은 전진 단계와 후진 단계를 번갈아 수행하여 이미 선택된 변수도 다시 제거할 수 있도록 한다.</p>
+<p>순차 부동 선택(sequential floating selection)은 고정된 전진·후진 횟수를 두지 않고, 추가와 제거를 반복하여 탐색경로의 경직성을 완화한다. 그러나 이러한 탐욕적 방법은 전역 최적부분집합을 보장하지 않는다.</p>
+</section>
+<section id="sec-ch11-branch-bound-mio" class="level3" data-number="11.2.4">
+<h3 data-number="11.2.4" class="anchored" data-anchor-id="sec-ch11-branch-bound-mio"><span class="header-section-number">11.2.4</span> 분기한정법과 혼합정수 최적화</h3>
+<p>분기한정법(branch and bound)은 탐색공간을 여러 부분으로 나눈 뒤, 각 부분에서 얻을 수 있는 최선의 목적함수 하한을 계산하여 최적해가 존재할 수 없는 영역을 제거한다. 설계행렬의 구조와 목적함수의 단조성을 이용하면 전수탐색보다 훨씬 적은 부분집합만 평가할 수 있다.</p>
+<p>현대의 최적부분집합 선택은 이진변수 <span class="math inline">\(z_j\in\{0,1\}\)</span>를 도입한 혼합정수 최적화(mixed-integer optimization)로 표현할 수 있다.</p>
+<p><span class="math display">\[
+\min_{\boldsymbol\beta,\mathbf z}
+\frac{1}{2n}
+\|\mathbf y-\mathbf X\boldsymbol\beta\|_2^2
+\]</span></p>
+<p>subject to</p>
+<p><span class="math display">\[
+-Mz_j\leq\beta_j\leq Mz_j,
+\qquad j=1,\ldots,p,
+\]</span></p>
+<p><span id="eq-ch11-mio-best-subset"><span class="math display">\[
+\sum_{j=1}^{p}z_j\leq k,
+\qquad
+z_j\in\{0,1\}.
+\tag{11.18}\]</span></span></p>
+<p>여기서 <span class="math inline">\(M\)</span>은 충분히 큰 상수이다. <span class="math inline">\(z_j=0\)</span>이면 <span class="math inline">\(\beta_j=0\)</span>이 되어 변수가 제외된다. 혼합정수 최적화는 전역해 또는 전역해와의 오차한계를 제공할 수 있지만, 대규모 문제에서는 계산비용이 매우 클 수 있다.</p>
+</section>
+<section id="sec-ch11-subset-evaluation" class="level3" data-number="11.2.5">
+<h3 data-number="11.2.5" class="anchored" data-anchor-id="sec-ch11-subset-evaluation"><span class="header-section-number">11.2.5</span> 부분집합 평가기준</h3>
+<p>부분집합을 평가하는 기준은 분석 목적에 따라 달라진다. 회귀모형에서 흔히 사용하는 기준은 다음과 같다.</p>
+<section id="교차검증-오차" class="level4">
+<h4 class="anchored" data-anchor-id="교차검증-오차">교차검증 오차</h4>
+<p><span class="math inline">\(K\)</span>겹 교차검증 오차는</p>
+<p><span id="eq-ch11-cv-subset"><span class="math display">\[
+\operatorname{CV}(S)
+=
+\frac{1}{K}
+\sum_{k=1}^{K}
+\frac{1}{|\mathcal I_k|}
+\sum_{i\in\mathcal I_k}
+L\{y_i,\widehat f_S^{(-k)}(\mathbf x_i)\}
+\tag{11.19}\]</span></span></p>
+<p>이다. 여기서 <span class="math inline">\(\widehat f_S^{(-k)}\)</span>는 <span class="math inline">\(k\)</span>번째 검증폴드를 제외한 자료로 적합한 모형이다.</p>
+</section>
+<section id="mallows의-c_p" class="level4">
+<h4 class="anchored" data-anchor-id="mallows의-c_p">Mallows의 <span class="math inline">\(C_p\)</span></h4>
+<p>선형 회귀에서 후보모형의 잔차제곱합을 <span class="math inline">\(\operatorname{RSS}_S\)</span>라고 하면</p>
+<p><span id="eq-ch11-mallows-cp"><span class="math display">\[
+C_p(S)
+=
+\frac{\operatorname{RSS}_S}{\widehat\sigma^2}
+-n+2|S|
+\tag{11.20}\]</span></span></p>
+<p>로 정의할 수 있다. 적절한 모형에서는 <span class="math inline">\(C_p\)</span>가 대략 모수 수와 비슷할 것으로 기대된다.</p>
+</section>
+<section id="aic와-bic" class="level4">
+<h4 class="anchored" data-anchor-id="aic와-bic">AIC와 BIC</h4>
+<p>로그우도를 <span class="math inline">\(\ell_S\)</span>라고 할 때</p>
+<p><span id="eq-ch11-aic"><span class="math display">\[
+\operatorname{AIC}(S)
+=
+-2\ell_S+2d_S,
+\tag{11.21}\]</span></span></p>
+<p><span id="eq-ch11-bic"><span class="math display">\[
+\operatorname{BIC}(S)
+=
+-2\ell_S+d_S\log n,
+\tag{11.22}\]</span></span></p>
+<p>이다. <span class="math inline">\(d_S\)</span>는 모형의 유효 모수 수이다. BIC는 표본이 커질수록 복잡도에 더 강한 패널티를 부여한다.</p>
+<div id="tbl-ch11-subset-criteria" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch11-subset-criteria-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;11.2: 부분집합 선택에서 사용하는 대표 평가기준
+</figcaption>
+<div aria-describedby="tbl-ch11-subset-criteria-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>평가목적</th>
+<th>대표 기준</th>
+<th>특징</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>예측성능</td>
+<td>교차검증, 독립 검증자료</td>
+<td>직접적인 일반화 성능 평가</td>
+</tr>
+<tr class="even">
+<td>간결성 포함 예측</td>
+<td>1-표준오차 규칙</td>
+<td>최저오차와 비슷한 더 단순한 모형 선택</td>
+</tr>
+<tr class="odd">
+<td>likelihood 기반 비교</td>
+<td>AIC</td>
+<td>예측 효율을 강조</td>
+</tr>
+<tr class="even">
+<td>참모형 선택 관점</td>
+<td>BIC</td>
+<td>더 강한 복잡도 패널티</td>
+</tr>
+<tr class="odd">
+<td>선형 회귀</td>
+<td><span class="math inline">\(C_p\)</span>, 조정 <span class="math inline">\(R^2\)</span></td>
+<td>잔차변동과 모형크기 반영</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+</section>
+<section id="sec-ch11-selection-evaluation-separation" class="level3" data-number="11.2.6">
+<h3 data-number="11.2.6" class="anchored" data-anchor-id="sec-ch11-selection-evaluation-separation"><span class="header-section-number">11.2.6</span> 선택과 평가의 분리</h3>
+<p>동일한 자료를 사용하여 변수집합을 선택하고 성능까지 평가하면 성능이 낙관적으로 추정된다. 변수선택 자체가 자료에 적합된 학습과정이기 때문이다.</p>
+<p>올바른 외부평가는 다음 구조를 가진다.</p>
+<ol type="1">
+<li>외부 훈련자료에서 변수선택 절차를 수행한다.</li>
+<li>선택된 변수로 모형을 적합한다.</li>
+<li>외부 시험자료에서 성능을 평가한다.</li>
+</ol>
+<p>하이퍼파라미터와 변수 수까지 선택한다면 중첩 교차검증이 필요하다. 외부 폴드는 전체 선택절차의 일반화 성능을 평가하고, 내부 폴드는 변수 수나 규제 모수를 선택한다.</p>
+<p><span id="eq-ch11-nested-selection"><span class="math display">\[
+\text{외부 훈련자료}
+\rightarrow
+\left[
+\text{내부 변수선택과 튜닝}
+\right]
+\rightarrow
+\text{외부 검증자료 평가}
+\tag{11.23}\]</span></span></p>
+<div class="callout callout-style-default callout-important callout-titled" title="변수선택도 전처리의 일부이다">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">중요</span>변수선택도 전처리의 일부이다
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>필터 방식처럼 단순한 변수순위도 전체 자료에서 계산하면 시험자료 정보가 유입된다. 각 교차검증 폴드의 훈련부분에서 점수 계산, 변수선택, 표준화와 모형적합을 모두 다시 수행해야 한다.</p>
+</div>
+</div>
+</section>
+<section id="sec-ch11-selection-stability" class="level3" data-number="11.2.7">
+<h3 data-number="11.2.7" class="anchored" data-anchor-id="sec-ch11-selection-stability"><span class="header-section-number">11.2.7</span> 선택 안정성(selection stability)</h3>
+<p>표본이 조금만 달라져도 선택되는 변수가 크게 변할 수 있다. 재표본화 반복 <span class="math inline">\(b=1,\ldots,B\)</span>에서 선택된 변수집합을 <span class="math inline">\(\widehat S^{(b)}\)</span>라고 하면 변수 <span class="math inline">\(j\)</span>의 선택빈도는</p>
+<p><span id="eq-ch11-selection-frequency"><span class="math display">\[
+\widehat\pi_j
+=
+\frac{1}{B}
+\sum_{b=1}^{B}
+I\{j\in\widehat S^{(b)}\}
+\tag{11.24}\]</span></span></p>
+<p>로 정의한다. 선택빈도가 높은 변수는 표본변동에 더 안정적이라고 볼 수 있다.</p>
+<p>두 선택집합 <span class="math inline">\(S_a\)</span>와 <span class="math inline">\(S_b\)</span>의 유사성은 Jaccard 지수로 평가할 수 있다.</p>
+<p><span id="eq-ch11-jaccard-selection"><span class="math display">\[
+J(S_a,S_b)
+=
+\frac{|S_a\cap S_b|}{|S_a\cup S_b|}.
+\tag{11.25}\]</span></span></p>
+<p>예측성능이 높더라도 선택안정성이 매우 낮다면 개별 변수의 과학적 해석에는 주의해야 한다.</p>
+</section>
+</section>
+<section id="sec-ch11-filter-methods" class="level2" data-number="11.3">
+<h2 data-number="11.3" class="anchored" data-anchor-id="sec-ch11-filter-methods"><span class="header-section-number">11.3</span> 필터 방식 특성 선택</h2>
+<section id="sec-ch11-filter-overview" class="level3" data-number="11.3.1">
+<h3 data-number="11.3.1" class="anchored" data-anchor-id="sec-ch11-filter-overview"><span class="header-section-number">11.3.1</span> 필터 방식의 기본 구조</h3>
+<p>필터 방식(filter method)은 특정 예측알고리즘을 적합하기 전에 각 변수 또는 변수집합의 통계적 특성을 이용하여 변수를 선택한다. 일반적 구조는 다음과 같다.</p>
+<p><span id="eq-ch11-filter-pipeline"><span class="math display">\[
+\mathbf X
+\xrightarrow{\text{점수 계산}}
+(s_1,\ldots,s_p)
+\xrightarrow{\text{순위 또는 임계값}}
+\widehat S
+\xrightarrow{\text{예측모형}}
+\widehat f.
+\tag{11.26}\]</span></span></p>
+<p>필터 방식은 계산이 빠르고 모형에 독립적이며 <span class="math inline">\(p\gg n\)</span>인 자료에서도 쉽게 적용할 수 있다. 그러나 변수 간 상호작용과 후속 예측모형의 구조를 충분히 반영하지 못할 수 있다.</p>
+</section>
+<section id="sec-ch11-variance-filter" class="level3" data-number="11.3.2">
+<h3 data-number="11.3.2" class="anchored" data-anchor-id="sec-ch11-variance-filter"><span class="header-section-number">11.3.2</span> 분산 기반 필터</h3>
+<p>가장 단순한 비지도 필터는 분산이 거의 없는 변수를 제거하는 것이다.</p>
+<p><span id="eq-ch11-feature-variance"><span class="math display">\[
+s_j^2
+=
+\frac{1}{n-1}
+\sum_{i=1}^{n}(x_{ij}-\bar x_j)^2.
+\tag{11.27}\]</span></span></p>
+<p>분산이 0인 변수는 모든 관측값에서 같은 값을 가지므로 대부분의 학습 알고리즘에 정보를 제공하지 않는다. 그러나 분산이 작다는 사실이 반응과의 관련성이 작음을 의미하지는 않는다. 측정단위가 다른 변수에서는 표준화 전 분산을 직접 비교해서도 안 된다.</p>
+</section>
+<section id="sec-ch11-univariate-filter" class="level3" data-number="11.3.3">
+<h3 data-number="11.3.3" class="anchored" data-anchor-id="sec-ch11-univariate-filter"><span class="header-section-number">11.3.3</span> 상관과 단변량 검정</h3>
+<p>연속형 반응에서는 피어슨 상관계수</p>
+<p><span id="eq-ch11-correlation-score"><span class="math display">\[
+r_j
+=
+\frac{
+\sum_{i=1}^{n}(x_{ij}-\bar x_j)(y_i-\bar y)
+}{
+\sqrt{\sum_{i=1}^{n}(x_{ij}-\bar x_j)^2}
+\sqrt{\sum_{i=1}^{n}(y_i-\bar y)^2}
+}
+\tag{11.28}\]</span></span></p>
+<p>의 절댓값을 변수점수로 사용할 수 있다. 비선형 단조관계에는 스피어만 순위상관이 더 적합할 수 있다.</p>
+<p>이진 분류에서는 두 집단 평균 차이에 대한 <span class="math inline">\(t\)</span> 통계량을 사용할 수 있다.</p>
+<p><span id="eq-ch11-t-score"><span class="math display">\[
+t_j
+=
+\frac{\bar x_{j1}-\bar x_{j0}}
+{
+\sqrt{s_{j1}^2/n_1+s_{j0}^2/n_0}
+}.
+\tag{11.29}\]</span></span></p>
+<p>범주형 변수와 클래스의 관련성은 카이제곱 통계량으로 평가할 수 있다.</p>
+<p><span id="eq-ch11-chi-square-score"><span class="math display">\[
+\chi_j^2
+=
+\sum_{a}\sum_{g}
+\frac{(O_{ag}-E_{ag})^2}{E_{ag}}.
+\tag{11.30}\]</span></span></p>
+<p>이러한 단변량 점수는 해석이 쉽고 계산이 매우 빠르지만, 개별효과가 약하고 상호작용을 통해서만 중요한 변수는 놓칠 수 있다.</p>
+</section>
+<section id="sec-ch11-multiple-testing-filter" class="level3" data-number="11.3.4">
+<h3 data-number="11.3.4" class="anchored" data-anchor-id="sec-ch11-multiple-testing-filter"><span class="header-section-number">11.3.4</span> 다중검정과 거짓발견률</h3>
+<p>수천 개 변수에 대해 개별 가설검정을 수행하면 우연히 작은 <span class="math inline">\(p\)</span>값을 갖는 변수가 많이 나타난다. 변수 <span class="math inline">\(j\)</span>에 대한 귀무가설을</p>
+<p><span class="math display">\[
+H_{0j}: X_j\text{와 }Y\text{는 관련이 없다}
+\]</span></p>
+<p>라고 하자. 단순히 <span class="math inline">\(p_j&lt;0.05\)</span>를 적용하면 변수 수가 많을 때 거짓양성이 크게 증가한다.</p>
+<p>Benjamini–Hochberg 절차는 정렬된 <span class="math inline">\(p\)</span>값</p>
+<p><span class="math display">\[
+p_{(1)}\leq p_{(2)}\leq\cdots\leq p_{(p)}
+\]</span></p>
+<p>에 대해</p>
+<p><span id="eq-ch11-bh-rule"><span class="math display">\[
+k^{\ast}
+=
+\max\left\{
+k:
+p_{(k)}\leq\frac{k}{p}q
+\right\}
+\tag{11.31}\]</span></span></p>
+<p>를 찾고 <span class="math inline">\(p_{(1)},\ldots,p_{(k^{\ast})}\)</span>에 해당하는 변수를 선택한다. 여기서 <span class="math inline">\(q\)</span>는 목표 거짓발견률이다.</p>
+<p>다중검정 조정은 과학적 발견을 위한 후보변수 선별에 유용하지만, 예측성능을 직접 최적화하는 기준은 아니다.</p>
+</section>
+<section id="sec-ch11-mutual-information" class="level3" data-number="11.3.5">
+<h3 data-number="11.3.5" class="anchored" data-anchor-id="sec-ch11-mutual-information"><span class="header-section-number">11.3.5</span> 상호정보량</h3>
+<p>상호정보량(mutual information)은 한 변수를 관찰했을 때 다른 변수의 불확실성이 얼마나 감소하는지를 측정한다. 이산형 변수 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>에 대해</p>
+<p><span id="eq-ch11-mutual-information"><span class="math display">\[
+I(X;Y)
+=
+\sum_x\sum_y
+p(x,y)
+\log
+\frac{p(x,y)}{p(x)p(y)}.
+\tag{11.32}\]</span></span></p>
+<p>엔트로피를 사용하면</p>
+<p><span id="eq-ch11-mi-entropy"><span class="math display">\[
+I(X;Y)
+=
+H(Y)-H(Y\mid X)
+\tag{11.33}\]</span></span></p>
+<p>로 쓸 수 있다. <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>가 독립이면 상호정보량은 0이고, 관계가 강할수록 값이 커진다. 상관계수와 달리 비선형 관계도 탐지할 수 있지만, 연속형 자료에서는 밀도 또는 이웃 기반 추정이 필요하고 표본이 작으면 편향이 클 수 있다.</p>
+</section>
+<section id="sec-ch11-mrmr" class="level3" data-number="11.3.6">
+<h3 data-number="11.3.6" class="anchored" data-anchor-id="sec-ch11-mrmr"><span class="header-section-number">11.3.6</span> 최대 관련성 최소 중복성</h3>
+<p>개별적으로 반응과 관련성이 높은 변수들이 서로 거의 같은 정보를 담고 있다면 모두 선택할 필요가 없을 수 있다. 최대 관련성 최소 중복성(maximum relevance minimum redundancy, mRMR)은 반응과의 관련성을 높이면서 선택변수 간 중복을 줄인다.</p>
+<p>선택집합 <span class="math inline">\(S\)</span>의 평균 관련성을</p>
+<p><span id="eq-ch11-mrmr-relevance"><span class="math display">\[
+D(S)
+=
+\frac{1}{|S|}
+\sum_{j\in S}I(X_j;Y)
+\tag{11.34}\]</span></span></p>
+<p>로, 평균 중복성을</p>
+<p><span id="eq-ch11-mrmr-redundancy"><span class="math display">\[
+R(S)
+=
+\frac{1}{|S|^2}
+\sum_{j,k\in S}I(X_j;X_k)
+\tag{11.35}\]</span></span></p>
+<p>로 정의하면 대표적 목적은</p>
+<p><span id="eq-ch11-mrmr-objective"><span class="math display">\[
+\max_S\{D(S)-R(S)\}
+\tag{11.36}\]</span></span></p>
+<p>이다. 실제로는 변수를 하나씩 추가하는 탐욕적 알고리즘을 사용한다.</p>
+</section>
+<section id="sec-ch11-relief" class="level3" data-number="11.3.7">
+<h3 data-number="11.3.7" class="anchored" data-anchor-id="sec-ch11-relief"><span class="header-section-number">11.3.7</span> Relief 계열</h3>
+<p>Relief는 각 관측값의 가까운 동일클래스 이웃과 다른클래스 이웃을 비교하여 변수를 평가한다. 변수 <span class="math inline">\(j\)</span>가 좋은 변수라면 같은 클래스의 가까운 관측값에서는 값이 비슷하고, 다른 클래스의 가까운 관측값에서는 값이 달라야 한다.</p>
+<p>단순화한 갱신은 다음과 같이 나타낼 수 있다.</p>
+<p><span id="eq-ch11-relief-update"><span class="math display">\[
+w_j
+\leftarrow
+w_j
+-
+\frac{1}{m}\operatorname{diff}_j(\mathbf x_i,\mathbf x_{\text{hit}})
++
+\frac{1}{m}\operatorname{diff}_j(\mathbf x_i,\mathbf x_{\text{miss}}).
+\tag{11.37}\]</span></span></p>
+<p>ReliefF는 여러 이웃과 다중 클래스를 사용하도록 확장한다. 단변량 검정과 달리 국소적 상호작용을 일부 반영할 수 있지만, 거리척도와 이웃 수에 민감하다.</p>
+</section>
+<section id="sec-ch11-laplacian-score" class="level3" data-number="11.3.8">
+<h3 data-number="11.3.8" class="anchored" data-anchor-id="sec-ch11-laplacian-score"><span class="header-section-number">11.3.8</span> 라플라시안 점수와 비지도 특성 선택</h3>
+<p>레이블이 없는 자료에서는 국소 이웃구조를 잘 보존하는 변수를 선택할 수 있다. 유사도행렬을 <span class="math inline">\(W=(w_{ik})\)</span>라고 하고 그래프 차수행렬과 라플라시안을</p>
+<p><span class="math display">\[
+\mathbf D=\operatorname{diag}(d_1,\ldots,d_n),
+\qquad
+d_i=\sum_k w_{ik},
+\]</span></p>
+<p><span id="eq-ch11-graph-laplacian"><span class="math display">\[
+\mathbf L=\mathbf D-\mathbf W
+\tag{11.38}\]</span></span></p>
+<p>로 정의하자. 중심화된 변수벡터를 <span class="math inline">\(\widetilde{\mathbf x}_j\)</span>라고 하면 라플라시안 점수(Laplacian score)는</p>
+<p><span id="eq-ch11-laplacian-score"><span class="math display">\[
+\operatorname{LS}(j)
+=
+\frac{
+\widetilde{\mathbf x}_j^{\top}
+\mathbf L
+\widetilde{\mathbf x}_j
+}{
+\widetilde{\mathbf x}_j^{\top}
+\mathbf D
+\widetilde{\mathbf x}_j
+}
+\tag{11.39}\]</span></span></p>
+<p>로 정의할 수 있다. 점수가 작을수록 그래프에서 가까운 관측값들이 해당 변수에서도 비슷한 값을 가지므로 국소구조를 잘 보존한다.</p>
+</section>
+<section id="sec-ch11-filter-example" class="level3" data-number="11.3.9">
+<h3 data-number="11.3.9" class="anchored" data-anchor-id="sec-ch11-filter-example"><span class="header-section-number">11.3.9</span> 필터 점수의 예시</h3>
+<p>다음 시뮬레이션은 실제 신호변수, 중복변수와 잡음변수가 함께 있을 때 상관점수가 어떻게 나타나는지를 보여준다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1111</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">180</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">30</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>x2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>x3 <span class="ot">&lt;-</span> <span class="fl">0.9</span> <span class="sc">*</span> x1 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd =</span> <span class="fl">0.3</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>noise <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> (p <span class="sc">-</span> <span class="dv">3</span>)), <span class="at">nrow =</span> n)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">cbind</span>(x1, x2, x3, noise)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fl">2.0</span> <span class="sc">*</span> x1 <span class="sc">-</span> <span class="fl">1.5</span> <span class="sc">*</span> x2 <span class="sc">+</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>score <span class="ot">&lt;-</span> <span class="fu">drop</span>(<span class="fu">abs</span>(<span class="fu">cor</span>(X, y)))</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  score,</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">names.arg =</span> <span class="fu">seq_along</span>(score),</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"변수 번호"</span>,</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"|상관계수|"</span>,</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">border =</span> <span class="cn">NA</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fl">0.2</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-ch11-filter-scores" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch11-filter-scores-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="11-feature-selection-sparse-learning_files/figure-html/fig-ch11-filter-scores-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch11-filter-scores-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;11.2: 신호변수, 중복변수와 잡음변수의 단변량 필터 점수
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><span class="math inline">\(x_1\)</span>과 <span class="math inline">\(x_2\)</span>는 실제 신호변수이고 <span class="math inline">\(x_3\)</span>은 <span class="math inline">\(x_1\)</span>의 중복정보를 담는다. 단변량 필터는 <span class="math inline">\(x_1\)</span>과 <span class="math inline">\(x_3\)</span>을 모두 높은 순위로 평가할 수 있다. 중복 제거가 중요한 경우 상관구조를 추가로 고려해야 한다.</p>
+</section>
+<section id="sec-ch11-filter-pros-cons" class="level3" data-number="11.3.10">
+<h3 data-number="11.3.10" class="anchored" data-anchor-id="sec-ch11-filter-pros-cons"><span class="header-section-number">11.3.10</span> 필터 방식의 장점과 한계</h3>
+<div id="tbl-ch11-filter-pros-cons" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch11-filter-pros-cons-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;11.3: 필터 방식의 장점과 한계
+</figcaption>
+<div aria-describedby="tbl-ch11-filter-pros-cons-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>장점</th>
+<th>한계</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>매우 빠르고 대규모 변수에 적용 가능</td>
+<td>후속 학습알고리즘과 분리됨</td>
+</tr>
+<tr class="even">
+<td>모형에 독립적</td>
+<td>상호작용을 놓칠 수 있음</td>
+</tr>
+<tr class="odd">
+<td>변수별 점수 해석이 쉬움</td>
+<td>상관된 변수의 중복선택 가능</td>
+</tr>
+<tr class="even">
+<td>초기 차원 축소에 유용</td>
+<td>임계값과 선택 수가 임의적일 수 있음</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(p\gg n\)</span>에서 적용 가능</td>
+<td>표본이 작으면 점수 불안정</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>필터 방식은 수만 개 변수를 수백 개 수준으로 줄이는 1차 선별에 특히 유용하다. 이후 래퍼 방식이나 규제 모형을 적용하는 다단계 전략도 자주 사용된다.</p>
+</section>
+</section>
+<section id="sec-ch11-wrapper-methods" class="level2" data-number="11.4">
+<h2 data-number="11.4" class="anchored" data-anchor-id="sec-ch11-wrapper-methods"><span class="header-section-number">11.4</span> 래퍼 방식 특성 선택</h2>
+<section id="sec-ch11-wrapper-overview" class="level3" data-number="11.4.1">
+<h3 data-number="11.4.1" class="anchored" data-anchor-id="sec-ch11-wrapper-overview"><span class="header-section-number">11.4.1</span> 래퍼 방식의 개념</h3>
+<p>래퍼 방식(wrapper method)은 특정 학습알고리즘의 검증성능을 직접 이용하여 변수부분집합을 평가한다.</p>
+<p><span id="eq-ch11-wrapper-objective"><span class="math display">\[
+S
+\xrightarrow{\text{모형 적합}}
+\widehat f_S
+\xrightarrow{\text{재표본화 평가}}
+\widehat R_{\mathrm{val}}(S).
+\tag{11.40}\]</span></span></p>
+<p>최종 선택은</p>
+<p><span id="eq-ch11-wrapper-selection"><span class="math display">\[
+\widehat S
+=
+\arg\min_{S\in\mathcal C}
+\widehat R_{\mathrm{val}}(S)
+\tag{11.41}\]</span></span></p>
+<p>로 표현할 수 있다. 여기서 <span class="math inline">\(\mathcal C\)</span>는 탐색알고리즘이 고려한 후보 부분집합의 집합이다.</p>
+<p>래퍼 방식은 학습알고리즘의 비선형성, 상호작용과 성능척도를 직접 반영할 수 있다. 반면 각 후보집합마다 모형을 반복 적합하므로 계산비용이 매우 크고, 검증자료에 대한 과적합이 발생할 수 있다.</p>
+</section>
+<section id="sec-ch11-sequential-feature-selection" class="level3" data-number="11.4.2">
+<h3 data-number="11.4.2" class="anchored" data-anchor-id="sec-ch11-sequential-feature-selection"><span class="header-section-number">11.4.2</span> 순차 특성 선택</h3>
+<p>순차 전진 선택은 매 단계에서 검증성능을 가장 많이 개선하는 변수를 추가한다.</p>
+<p><span id="eq-ch11-sfs"><span class="math display">\[
+j_t
+=
+\arg\min_{j\notin S_{t-1}}
+\operatorname{CV}
+(S_{t-1}\cup\{j\};\mathcal A),
+\tag{11.42}\]</span></span></p>
+<p>여기서 <span class="math inline">\(\mathcal A\)</span>는 지정된 학습알고리즘이다. 선형 회귀를 사용하면 고전적 전진 선택과 비슷하지만, 랜덤 포레스트, SVM 또는 kNN을 사용하면 해당 알고리즘의 검증성능에 맞춘 변수집합을 선택한다.</p>
+<p>순차 후진 제거는 전체 변수집합에서 시작한다. 변수 수가 매우 많거나 전체모형을 적합하기 어려운 경우에는 먼저 필터 방식으로 후보 수를 줄이는 것이 필요하다.</p>
+</section>
+<section id="sec-ch11-rfe" class="level3" data-number="11.4.3">
+<h3 data-number="11.4.3" class="anchored" data-anchor-id="sec-ch11-rfe"><span class="header-section-number">11.4.3</span> 재귀적 특성 제거</h3>
+<p>재귀적 특성 제거(recursive feature elimination, RFE)는 현재 변수집합으로 모형을 적합한 뒤 중요도가 가장 낮은 변수를 제거하는 과정을 반복한다.</p>
+<ol type="1">
+<li>현재 변수집합 <span class="math inline">\(S_t\)</span>로 모형을 적합한다.</li>
+<li>변수 중요도 <span class="math inline">\(v_j\)</span>를 계산한다.</li>
+<li>중요도가 가장 낮은 변수 또는 일정 비율을 제거한다.</li>
+<li>미리 정한 변수 수에 도달할 때까지 반복한다.</li>
+<li>각 변수 수에서 교차검증 성능을 비교한다.</li>
+</ol>
+<p>선형 SVM에서는 <span class="math inline">\(|\widehat\beta_j|\)</span> 또는 <span class="math inline">\(\widehat\beta_j^2\)</span>을 중요도로 사용할 수 있다. 트리 기반 모형에서는 분할이득이나 순열 중요도를 사용할 수 있다. 그러나 편향된 중요도 척도를 사용하면 RFE의 선택도 편향될 수 있다.</p>
+</section>
+<section id="sec-ch11-genetic-search" class="level3" data-number="11.4.4">
+<h3 data-number="11.4.4" class="anchored" data-anchor-id="sec-ch11-genetic-search"><span class="header-section-number">11.4.4</span> 유전 알고리즘과 확률적 탐색</h3>
+<p>변수부분집합을 이진벡터</p>
+<p><span id="eq-ch11-binary-subset"><span class="math display">\[
+\mathbf z=(z_1,\ldots,z_p),
+\qquad
+z_j\in\{0,1\}
+\tag{11.43}\]</span></span></p>
+<p>로 표현할 수 있다. 유전 알고리즘은 여러 후보 벡터를 개체군으로 유지하면서 선택, 교차와 돌연변이를 통해 새로운 부분집합을 생성한다. 적합도 함수는 예를 들어</p>
+<p><span id="eq-ch11-genetic-fitness"><span class="math display">\[
+F(\mathbf z)
+=
+-\operatorname{CV}(\mathbf z)
+-
+\gamma\sum_{j=1}^{p}z_j
+\tag{11.44}\]</span></span></p>
+<p>처럼 검증오차와 변수 수를 함께 반영할 수 있다.</p>
+<p>확률적 탐색은 탐욕적 방법이 놓치는 변수조합을 발견할 가능성이 있지만, 결과가 난수시드에 따라 달라질 수 있고 계산량이 크다. 여러 번 반복하여 선택빈도와 목적함수 분포를 확인해야 한다.</p>
+</section>
+<section id="sec-ch11-boruta" class="level3" data-number="11.4.5">
+<h3 data-number="11.4.5" class="anchored" data-anchor-id="sec-ch11-boruta"><span class="header-section-number">11.4.5</span> Boruta와 그림자 변수</h3>
+<p>Boruta 방식은 원변수를 무작위로 섞어 만든 그림자 변수(shadow feature)를 추가하고, 랜덤 포레스트 중요도를 비교한다. 원변수의 중요도가 가장 중요한 그림자 변수보다 지속적으로 높다면 해당 변수를 중요한 변수로 판단한다.</p>
+<p>이 접근은 최소한의 예측부분집합보다 반응과 관련된 모든 변수를 찾는 데 초점을 둔다. 상관된 변수들도 함께 선택될 수 있으며, 랜덤 포레스트 중요도와 반복 횟수에 영향을 받는다.</p>
+</section>
+<section id="sec-ch11-wrapper-overfitting" class="level3" data-number="11.4.6">
+<h3 data-number="11.4.6" class="anchored" data-anchor-id="sec-ch11-wrapper-overfitting"><span class="header-section-number">11.4.6</span> 래퍼 방식의 과적합</h3>
+<p>후보부분집합을 많이 탐색할수록 우연히 검증자료에서 좋은 성능을 보이는 부분집합이 나타날 가능성이 커진다. 후보 수를 <span class="math inline">\(M\)</span>이라고 할 때</p>
+<p><span class="math display">\[
+\min_{m=1,\ldots,M}
+\widehat R_{\mathrm{val}}(S_m)
+\]</span></p>
+<p>은 각 후보의 참위험보다 낙관적일 수 있다. 따라서 탐색과 성능평가를 분리하는 중첩 재표본화가 필수적이다.</p>
+<p>래퍼 방식의 내부 교차검증은 변수집합을 선택하고, 외부 교차검증은 선택절차 전체를 평가한다. 최종 시험자료는 전체 분석설계를 확정한 뒤 한 번만 사용해야 한다.</p>
+</section>
+<section id="sec-ch11-cost-sensitive-selection" class="level3" data-number="11.4.7">
+<h3 data-number="11.4.7" class="anchored" data-anchor-id="sec-ch11-cost-sensitive-selection"><span class="header-section-number">11.4.7</span> 비용을 고려한 특성 선택</h3>
+<p>변수마다 측정비용 <span class="math inline">\(c_j\)</span>가 다르면 예측오차뿐 아니라 총 측정비용도 고려할 수 있다.</p>
+<p><span id="eq-ch11-cost-sensitive-selection"><span class="math display">\[
+\widehat S
+=
+\arg\min_S
+\left\{
+\widehat R_{\mathrm{val}}(S)
++
+\gamma\sum_{j\in S}c_j
+\right\}.
+\tag{11.45}\]</span></span></p>
+<p>비용에는 금전적 비용, 검사시간, 환자 부담, 저장공간과 계산시간이 포함될 수 있다. 응용환경에 따라 비용제약을</p>
+<p><span id="eq-ch11-cost-budget"><span class="math display">\[
+\sum_{j\in S}c_j\leq C
+\tag{11.46}\]</span></span></p>
+<p>로 직접 설정할 수도 있다.</p>
+</section>
+<section id="sec-ch11-wrapper-example" class="level3" data-number="11.4.8">
+<h3 data-number="11.4.8" class="anchored" data-anchor-id="sec-ch11-wrapper-example"><span class="header-section-number">11.4.8</span> 전진 래퍼 선택의 간단한 예</h3>
+<p>다음 코드는 선형 회귀와 5겹 교차검증을 이용한 단순 전진 래퍼 선택을 구현한다. 실제 분석에서는 교차검증 분할을 반복하고, 선택절차 전체를 외부 재표본화 안에서 수행해야 한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1121</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">160</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">12</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> p), <span class="at">nrow =</span> n)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fl">2.2</span> <span class="sc">*</span> X[, <span class="dv">1</span>] <span class="sc">-</span> <span class="fl">1.8</span> <span class="sc">*</span> X[, <span class="dv">4</span>] <span class="sc">+</span> <span class="fl">1.2</span> <span class="sc">*</span> X[, <span class="dv">7</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>fold_id <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">length.out =</span> n))</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>selected <span class="ot">&lt;-</span> <span class="fu">integer</span>(<span class="dv">0</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>remaining <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>p</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>cv_path <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="dv">0</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>cv_mse <span class="ot">&lt;-</span> <span class="cf">function</span>(cols) {</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  err <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="dv">5</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>) {</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    train <span class="ot">&lt;-</span> fold_id <span class="sc">!=</span> k</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    valid <span class="ot">&lt;-</span> <span class="sc">!</span>train</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(y[train] <span class="sc">~</span> X[train, cols, <span class="at">drop =</span> <span class="cn">FALSE</span>])</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    pred <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, X[valid, cols, <span class="at">drop =</span> <span class="cn">FALSE</span>]) <span class="sc">%*%</span> <span class="fu">coef</span>(fit)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    err[k] <span class="ot">&lt;-</span> <span class="fu">mean</span>((y[valid] <span class="sc">-</span> pred)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(err)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (step <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>) {</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  candidate_error <span class="ot">&lt;-</span> <span class="fu">sapply</span>(</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    remaining,</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">function</span>(j) <span class="fu">cv_mse</span>(<span class="fu">c</span>(selected, j))</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  best <span class="ot">&lt;-</span> remaining[<span class="fu">which.min</span>(candidate_error)]</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  selected <span class="ot">&lt;-</span> <span class="fu">c</span>(selected, best)</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>  remaining <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(remaining, best)</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>  cv_path[step] <span class="ot">&lt;-</span> <span class="fu">min</span>(candidate_error)</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(cv_path),</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>  cv_path,</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"b"</span>,</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">19</span>,</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"선택된 변수 수"</span>,</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"5겹 교차검증 MSE"</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-ch11-forward-wrapper" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch11-forward-wrapper-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="11-feature-selection-sparse-learning_files/figure-html/fig-ch11-forward-wrapper-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch11-forward-wrapper-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;11.3: 전진 래퍼 선택에서 변수 수에 따른 교차검증 오차
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-ch11-embedded-methods" class="level2" data-number="11.5">
+<h2 data-number="11.5" class="anchored" data-anchor-id="sec-ch11-embedded-methods"><span class="header-section-number">11.5</span> 내장형 선택과 희소 규제</h2>
+<section id="sec-ch11-embedded-overview" class="level3" data-number="11.5.1">
+<h3 data-number="11.5.1" class="anchored" data-anchor-id="sec-ch11-embedded-overview"><span class="header-section-number">11.5.1</span> 내장형 선택의 개념</h3>
+<p>내장형 방법(embedded method)은 모형적합과 변수선택을 하나의 최적화 문제 안에서 동시에 수행한다. 별도의 후보부분집합을 반복 평가하지 않고, 목적함수나 모형구조가 자연스럽게 변수선택을 유도한다.</p>
+<p>대표적인 예는 다음과 같다.</p>
+<ul>
+<li>LASSO와 elastic net</li>
+<li>그룹 LASSO와 fused LASSO</li>
+<li>희소 판별분석</li>
+<li>트리 기반 분할</li>
+<li>일부 부스팅 알고리즘</li>
+<li>규제된 신경망 게이트</li>
+</ul>
+<p>내장형 방법은 래퍼 방식보다 계산이 효율적이고, 필터 방식보다 예측모형의 구조를 직접 반영한다.</p>
+</section>
+<section id="sec-ch11-ridge-lasso" class="level3" data-number="11.5.2">
+<h3 data-number="11.5.2" class="anchored" data-anchor-id="sec-ch11-ridge-lasso"><span class="header-section-number">11.5.2</span> 릿지와 LASSO</h3>
+<p>릿지 회귀의 기본 추정과 예측 관점은 <a href="03-linear-models.html#sec-ch03-ridge-regression" class="quarto-xref"><span>섹션 3.2.9</span></a><!-- -->에서 다루었다. 이 절에서는 변수선택과 희소성에 초점을 둔다.</p>
+<p>중심화된 선형 회귀모형에서 릿지 회귀는</p>
+<p><span id="eq-ch11-ridge"><span class="math display">\[
+\widehat{\boldsymbol\beta}^{\mathrm{ridge}}
+=
+\arg\min_{\boldsymbol\beta}
+\left\{
+\frac{1}{2n}
+\|\mathbf y-\mathbf X\boldsymbol\beta\|_2^2
++
+\lambda\|\boldsymbol\beta\|_2^2
+\right\}
+\tag{11.47}\]</span></span></p>
+<p>로 정의된다. 릿지는 계수를 0에 가깝게 축소하지만 일반적으로 정확히 0으로 만들지 않는다.</p>
+<p>LASSO(least absolute shrinkage and selection operator)는 <span class="math inline">\(\ell_1\)</span> 패널티를 사용한다.</p>
+<p><span id="eq-ch11-lasso"><span class="math display">\[
+\widehat{\boldsymbol\beta}^{\mathrm{lasso}}
+=
+\arg\min_{\boldsymbol\beta}
+\left\{
+\frac{1}{2n}
+\|\mathbf y-\mathbf X\boldsymbol\beta\|_2^2
++
+\lambda\|\boldsymbol\beta\|_1
+\right\},
+\tag{11.48}\]</span></span></p>
+<p>여기서</p>
+<p><span id="eq-ch11-l1-norm"><span class="math display">\[
+\|\boldsymbol\beta\|_1
+=
+\sum_{j=1}^{p}|\beta_j|.
+\tag{11.49}\]</span></span></p>
+<p>LASSO는 일부 계수를 정확히 0으로 만들어 변수선택과 추정을 동시에 수행한다.</p>
+</section>
+<section id="sec-ch11-lasso-geometry" class="level3" data-number="11.5.3">
+<h3 data-number="11.5.3" class="anchored" data-anchor-id="sec-ch11-lasso-geometry"><span class="header-section-number">11.5.3</span> 제약형식과 기하학</h3>
+<p>LASSO는 다음 제약문제와 동등하다.</p>
+<p><span id="eq-ch11-lasso-constrained"><span class="math display">\[
+\min_{\boldsymbol\beta}
+\frac{1}{2n}
+\|\mathbf y-\mathbf X\boldsymbol\beta\|_2^2
+\quad
+\text{subject to}
+\quad
+\|\boldsymbol\beta\|_1\leq t.
+\tag{11.50}\]</span></span></p>
+<p>두 변수의 경우 <span class="math inline">\(\ell_1\)</span> 제약영역은 꼭짓점이 축 위에 있는 마름모 모양이다. 잔차제곱합의 등고선이 제약영역과 처음 만나는 지점이 꼭짓점일 가능성이 높으므로 하나 이상의 계수가 0이 된다. 반면 <span class="math inline">\(\ell_2\)</span> 제약영역은 매끄러운 원이므로 해가 축 위에 정확히 놓일 가능성이 낮다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>theta <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">2</span> <span class="sc">*</span> pi, <span class="at">length.out =</span> <span class="dv">500</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cos</span>(theta), <span class="fu">sin</span>(theta),</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">asp =</span> <span class="dv">1</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="fu">expression</span>(beta[<span class="dv">1</span>]),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="fu">expression</span>(beta[<span class="dv">2</span>]),</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="fu">expression</span>(L[<span class="dv">2</span>] <span class="sc">*</span> <span class="st">" 제약"</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">3</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">300</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>b2_upper <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">abs</span>(b1)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(b1, <span class="fu">rev</span>(b1)),</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(b2_upper, <span class="sc">-</span><span class="fu">rev</span>(b2_upper)),</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">asp =</span> <span class="dv">1</span>,</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="fu">expression</span>(beta[<span class="dv">1</span>]),</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="fu">expression</span>(beta[<span class="dv">2</span>]),</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="fu">expression</span>(L[<span class="dv">1</span>] <span class="sc">*</span> <span class="st">" 제약"</span>)</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">3</span>)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-ch11-l1-l2-geometry" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch11-l1-l2-geometry-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="11-feature-selection-sparse-learning_files/figure-html/fig-ch11-l1-l2-geometry-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch11-l1-l2-geometry-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;11.4: <span class="math inline">\(ll_1\)</span>과 <span class="math inline">\(ll_2\)</span> 제약영역의 기하학적 차이
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch11-soft-thresholding" class="level3" data-number="11.5.4">
+<h3 data-number="11.5.4" class="anchored" data-anchor-id="sec-ch11-soft-thresholding"><span class="header-section-number">11.5.4</span> 직교설계와 소프트 임계화</h3>
+<p>설계행렬의 열이 표준화되어</p>
+<p><span id="eq-ch11-orthonormal-design"><span class="math display">\[
+\frac{1}{n}\mathbf X^{\top}\mathbf X=\mathbf I
+\tag{11.51}\]</span></span></p>
+<p>를 만족한다고 하자. 최소제곱 추정량을</p>
+<p><span class="math display">\[
+z_j
+=
+\frac{1}{n}\mathbf x_j^{\top}\mathbf y
+\]</span></p>
+<p>라고 하면 LASSO 해는 소프트 임계화(soft thresholding) 연산자로 주어진다.</p>
+<p><span class="math display">\[
+\widehat\beta_j
+=
+S(z_j,\lambda),
+\]</span></p>
+<p><span id="eq-ch11-soft-threshold"><span class="math display">\[
+S(z,\lambda)
+=
+\operatorname{sign}(z)
+(|z|-\lambda)_+.
+\tag{11.52}\]</span></span></p>
+<p><span class="math inline">\(|z_j|\leq\lambda\)</span>이면 계수는 0이 되고, 그보다 크면 절댓값이 <span class="math inline">\(\lambda\)</span>만큼 감소한다. <span class="math inline">\(\ell_0\)</span> 패널티와 관련된 하드 임계화는 작은 계수를 0으로 만들지만 큰 계수는 축소하지 않는다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="at">length.out =</span> <span class="dv">600</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>lambda <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>hard <span class="ot">&lt;-</span> z <span class="sc">*</span> (<span class="fu">abs</span>(z) <span class="sc">&gt;</span> lambda)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>soft <span class="ot">&lt;-</span> <span class="fu">sign</span>(z) <span class="sc">*</span> <span class="fu">pmax</span>(<span class="fu">abs</span>(z) <span class="sc">-</span> lambda, <span class="dv">0</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  z, hard,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"l"</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"입력 z"</span>,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"임계화 결과"</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(z, soft, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">v =</span> <span class="fu">c</span>(<span class="sc">-</span>lambda, lambda), <span class="at">lty =</span> <span class="dv">3</span>)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">"topleft"</span>,</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"하드 임계화"</span>, <span class="st">"소프트 임계화"</span>),</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>),</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">bty =</span> <span class="st">"n"</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-ch11-thresholding" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch11-thresholding-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="11-feature-selection-sparse-learning_files/figure-html/fig-ch11-thresholding-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch11-thresholding-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;11.5: 하드 임계화와 소프트 임계화 함수
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch11-coordinate-descent" class="level3" data-number="11.5.5">
+<h3 data-number="11.5.5" class="anchored" data-anchor-id="sec-ch11-coordinate-descent"><span class="header-section-number">11.5.5</span> 좌표하강법</h3>
+<p>일반 설계행렬에서는 LASSO 해가 닫힌형태로 주어지지 않는다. 좌표하강법(coordinate descent)은 다른 계수를 고정한 채 하나의 계수만 반복적으로 갱신한다.</p>
+<p>변수 <span class="math inline">\(j\)</span>를 제외한 부분잔차를</p>
+<p><span id="eq-ch11-partial-residual"><span class="math display">\[
+\mathbf r_j
+=
+\mathbf y-
+\sum_{k\neq j}\mathbf x_k\beta_k
+\tag{11.53}\]</span></span></p>
+<p>라고 하면 표준화된 변수에 대한 갱신은</p>
+<p><span id="eq-ch11-coordinate-update"><span class="math display">\[
+\beta_j
+\leftarrow
+\frac{
+S\left(rac{1}{n}\mathbf x_j^{\top}\mathbf r_j,\lambda\right)
+}{
+\frac{1}{n}\mathbf x_j^{\top}\mathbf x_j
+}
+\tag{11.54}\]</span></span></p>
+<p>이다. 모든 좌표를 순환하며 목적함수 변화가 충분히 작아질 때까지 반복한다.</p>
+<p>웜스타트(warm start)는 큰 <span class="math inline">\(\lambda\)</span>의 해를 다음으로 작은 <span class="math inline">\(\lambda\)</span>의 초기값으로 사용하여 전체 규제 경로를 효율적으로 계산한다.</p>
+</section>
+<section id="sec-ch11-lasso-kkt" class="level3" data-number="11.5.6">
+<h3 data-number="11.5.6" class="anchored" data-anchor-id="sec-ch11-lasso-kkt"><span class="header-section-number">11.5.6</span> KKT 조건과 변수선택</h3>
+<p>LASSO 목적함수의 최적해는 Karush–Kuhn–Tucker 조건을 만족한다. 잔차를</p>
+<p><span class="math display">\[
+\widehat{\mathbf r}
+=
+\mathbf y-\mathbf X\widehat{\boldsymbol\beta}
+\]</span></p>
+<p>라고 하면</p>
+<p><span id="eq-ch11-kkt-active"><span class="math display">\[
+\frac{1}{n}\mathbf x_j^{\top}\widehat{\mathbf r}
+=
+\lambda\operatorname{sign}(\widehat\beta_j),
+\qquad
+\widehat\beta_j\neq0,
+\tag{11.55}\]</span></span></p>
+<p><span id="eq-ch11-kkt-inactive"><span class="math display">\[
+\left|
+\frac{1}{n}\mathbf x_j^{\top}\widehat{\mathbf r}
+\right|
+\leq\lambda,
+\qquad
+\widehat\beta_j=0.
+\tag{11.56}\]</span></span></p>
+<p>비활성 변수의 잔차상관이 <span class="math inline">\(\lambda\)</span> 이하이면 해당 계수는 0으로 유지된다. 이 조건은 스크리닝 규칙과 최적성 검증에 사용된다.</p>
+</section>
+<section id="sec-ch11-regularization-path" class="level3" data-number="11.5.7">
+<h3 data-number="11.5.7" class="anchored" data-anchor-id="sec-ch11-regularization-path"><span class="header-section-number">11.5.7</span> 규제 경로</h3>
+<p><span class="math inline">\(\lambda\)</span>가 매우 크면 모든 계수가 0이 된다. <span class="math inline">\(\lambda\)</span>가 감소하면 변수들이 차례로 모형에 진입하고 계수의 절댓값이 증가한다. 선형 회귀에서 모든 계수가 0이 되는 최소 상한은</p>
+<p><span id="eq-ch11-lambda-max"><span class="math display">\[
+\lambda_{\max}
+=
+\max_j
+\left|
+\frac{1}{n}\mathbf x_j^{\top}\mathbf y
+\right|
+\tag{11.57}\]</span></span></p>
+<p>이다.</p>
+<p>다음 코드는 base R로 간단한 LASSO 좌표하강법을 구현하여 규제 경로(regularization path)를 그린다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1131</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">120</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">scale</span>(<span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> p), <span class="at">nrow =</span> n), <span class="at">center =</span> <span class="cn">TRUE</span>, <span class="at">scale =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>beta_true <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">2.5</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="fl">1.3</span>, <span class="fu">rep</span>(<span class="dv">0</span>, p <span class="sc">-</span> <span class="dv">3</span>))</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(X <span class="sc">%*%</span> beta_true <span class="sc">+</span> <span class="fu">rnorm</span>(n))</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> y <span class="sc">-</span> <span class="fu">mean</span>(y)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>soft_threshold <span class="ot">&lt;-</span> <span class="cf">function</span>(z, lambda) {</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sign</span>(z) <span class="sc">*</span> <span class="fu">pmax</span>(<span class="fu">abs</span>(z) <span class="sc">-</span> lambda, <span class="dv">0</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>lasso_cd <span class="ot">&lt;-</span> <span class="cf">function</span>(X, y, lambda, <span class="at">beta_init =</span> <span class="cn">NULL</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>                     <span class="at">max_iter =</span> <span class="dv">5000</span>, <span class="at">tol =</span> <span class="fl">1e-8</span>) {</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(X)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">ncol</span>(X)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  beta <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="fu">is.null</span>(beta_init)) <span class="fu">numeric</span>(p) <span class="cf">else</span> beta_init</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  x2 <span class="ot">&lt;-</span> <span class="fu">colSums</span>(X<span class="sc">^</span><span class="dv">2</span>) <span class="sc">/</span> n</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (iter <span class="cf">in</span> <span class="fu">seq_len</span>(max_iter)) {</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    beta_old <span class="ot">&lt;-</span> beta</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="fu">seq_len</span>(p)) {</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>      rj <span class="ot">&lt;-</span> y <span class="sc">-</span> <span class="fu">as.numeric</span>(X <span class="sc">%*%</span> beta) <span class="sc">+</span> X[, j] <span class="sc">*</span> beta[j]</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>      zj <span class="ot">&lt;-</span> <span class="fu">sum</span>(X[, j] <span class="sc">*</span> rj) <span class="sc">/</span> n</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>      beta[j] <span class="ot">&lt;-</span> <span class="fu">soft_threshold</span>(zj, lambda) <span class="sc">/</span> x2[j]</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">max</span>(<span class="fu">abs</span>(beta <span class="sc">-</span> beta_old)) <span class="sc">&lt;</span> tol) <span class="cf">break</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>  beta</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>lambda_max <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">crossprod</span>(X, y))) <span class="sc">/</span> n</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>lambda_seq <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fu">seq</span>(<span class="fu">log</span>(lambda_max), <span class="fu">log</span>(lambda_max <span class="sc">*</span> <span class="fl">0.03</span>), <span class="at">length.out =</span> <span class="dv">80</span>))</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>coef_path <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> <span class="fu">length</span>(lambda_seq), <span class="at">ncol =</span> p)</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>beta_start <span class="ot">&lt;-</span> <span class="fu">numeric</span>(p)</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(lambda_seq)) {</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>  beta_start <span class="ot">&lt;-</span> <span class="fu">lasso_cd</span>(X, y, lambda_seq[i], beta_start)</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>  coef_path[i, ] <span class="ot">&lt;-</span> beta_start</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="fu">matplot</span>(</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log</span>(lambda_seq),</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>  coef_path,</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"l"</span>,</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>  <span class="at">lty =</span> <span class="dv">1</span>,</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="fl">1.5</span>,</span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="fu">expression</span>(<span class="fu">log</span>(lambda)),</span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"회귀계수"</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">3</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-ch11-lasso-path" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch11-lasso-path-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="11-feature-selection-sparse-learning_files/figure-html/fig-ch11-lasso-path-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch11-lasso-path-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;11.6: LASSO 규제 모수에 따른 계수경로
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch11-lambda-selection" class="level3" data-number="11.5.8">
+<h3 data-number="11.5.8" class="anchored" data-anchor-id="sec-ch11-lambda-selection"><span class="header-section-number">11.5.8</span> 규제 모수의 선택</h3>
+<p><span class="math inline">\(\lambda\)</span>는 일반적으로 교차검증으로 선택한다. 최소 교차검증 오차를 갖는 값을</p>
+<p><span id="eq-ch11-lambda-min"><span class="math display">\[
+\widehat\lambda_{\min}
+=
+\arg\min_{\lambda}
+\widehat R_{\mathrm{CV}}(\lambda)
+\tag{11.58}\]</span></span></p>
+<p>라고 한다. 1-표준오차 규칙은 최소오차의 한 표준오차 이내에서 가장 큰 <span class="math inline">\(\lambda\)</span>를 선택한다.</p>
+<p><span id="eq-ch11-lambda-1se"><span class="math display">\[
+\widehat\lambda_{1\mathrm{se}}
+=
+\max\left\{
+\lambda:
+\widehat R_{\mathrm{CV}}(\lambda)
+\leq
+\widehat R_{\mathrm{CV}}(\widehat\lambda_{\min})
++
+\operatorname{SE}_{\min}
+\right\}.
+\tag{11.59}\]</span></span></p>
+<p><span class="math inline">\(\lambda_{1\mathrm{se}}\)</span>는 일반적으로 더 적은 변수를 선택하고 모형이 단순하다. 변수선택의 안정성과 해석을 중시할 때 유용하지만, 항상 최적 예측성능을 보장하는 것은 아니다.</p>
+</section>
+<section id="sec-ch11-elastic-net" class="level3" data-number="11.5.9">
+<h3 data-number="11.5.9" class="anchored" data-anchor-id="sec-ch11-elastic-net"><span class="header-section-number">11.5.9</span> 상관된 변수와 elastic net</h3>
+<p>LASSO는 강하게 상관된 변수군에서 일부 변수만 선택하고 나머지를 제외하는 경향이 있다. 선택결과가 표본에 따라 달라질 수 있다. elastic net은 <span class="math inline">\(\ell_1\)</span>과 <span class="math inline">\(\ell_2\)</span> 패널티를 결합한다.</p>
+<p><span id="eq-ch11-elastic-net"><span class="math display">\[
+\widehat{\boldsymbol\beta}^{\mathrm{EN}}
+=
+\arg\min_{\boldsymbol\beta}
+\left\{
+\frac{1}{2n}
+\|\mathbf y-\mathbf X\boldsymbol\beta\|_2^2
++
+\lambda
+\left[
+\alpha\|\boldsymbol\beta\|_1
++
+\frac{1-\alpha}{2}
+\|\boldsymbol\beta\|_2^2
+\right]
+\right\}.
+\tag{11.60}\]</span></span></p>
+<p><span class="math inline">\(\alpha=1\)</span>이면 LASSO, <span class="math inline">\(\alpha=0\)</span>이면 릿지 회귀가 된다. <span class="math inline">\(\ell_2\)</span> 성분은 상관된 변수들의 계수를 함께 유지하는 그룹화 효과를 줄 수 있다.</p>
+</section>
+<section id="sec-ch11-glm-lasso" class="level3" data-number="11.5.10">
+<h3 data-number="11.5.10" class="anchored" data-anchor-id="sec-ch11-glm-lasso"><span class="header-section-number">11.5.10</span> 일반화 선형모형의 희소화</h3>
+<p>이항 반응에서는 음의 로그우도에 <span class="math inline">\(\ell_1\)</span> 패널티를 추가한다.</p>
+<p><span id="eq-ch11-logistic-lasso"><span class="math display">\[
+\widehat{\boldsymbol\beta}
+=
+\arg\min_{\beta_0,\boldsymbol\beta}
+\left[
+-
+\frac{1}{n}
+\sum_{i=1}^{n}
+\left\{
+y_i\eta_i-
+\log(1+e^{\eta_i})
+\right\}
++
+\lambda\|\boldsymbol\beta\|_1
+\right],
+\qquad
+\eta_i=\beta_0+\mathbf x_i^{\top}\boldsymbol\beta.
+\tag{11.61}\]</span></span></p>
+<p>다항 로지스틱 회귀, 포아송 회귀와 Cox 비례위험모형에도 동일한 원리로 희소 패널티를 적용할 수 있다. 손실함수만 달라지고 규제 구조는 유지된다.</p>
+</section>
+<section id="sec-ch11-group-lasso" class="level3" data-number="11.5.11">
+<h3 data-number="11.5.11" class="anchored" data-anchor-id="sec-ch11-group-lasso"><span class="header-section-number">11.5.11</span> 그룹 LASSO</h3>
+<p>범주형 변수의 더미변수, 스플라인 기저 또는 다중오믹스 변수군처럼 여러 계수를 하나의 그룹으로 함께 선택해야 할 수 있다. 그룹 <span class="math inline">\(g\)</span>의 계수벡터를 <span class="math inline">\(\boldsymbol\beta_g\)</span>라고 하면 그룹 LASSO는</p>
+<p><span id="eq-ch11-group-lasso"><span class="math display">\[
+\widehat{\boldsymbol\beta}
+=
+\arg\min_{\boldsymbol\beta}
+\left\{
+\mathcal L(\boldsymbol\beta)
++
+\lambda
+\sum_{g=1}^{G}
+w_g
+\|\boldsymbol\beta_g\|_2
+\right\}
+\tag{11.62}\]</span></span></p>
+<p>로 정의된다. 한 그룹의 <span class="math inline">\(\ell_2\)</span> 노름에 <span class="math inline">\(\ell_1\)</span> 형태로 패널티를 부여하므로 그룹 전체가 동시에 0이 되거나 유지된다.</p>
+<p>희소 그룹 LASSO(sparse group LASSO)는 그룹 선택과 그룹 내부 선택을 동시에 수행한다.</p>
+<p><span id="eq-ch11-sparse-group-lasso"><span class="math display">\[
+\mathcal L(\boldsymbol\beta)
++
+\lambda_1\sum_{g=1}^{G}w_g\|\boldsymbol\beta_g\|_2
++
+\lambda_2\|\boldsymbol\beta\|_1.
+\tag{11.63}\]</span></span></p>
+</section>
+<section id="sec-ch11-fused-lasso" class="level3" data-number="11.5.12">
+<h3 data-number="11.5.12" class="anchored" data-anchor-id="sec-ch11-fused-lasso"><span class="header-section-number">11.5.12</span> fused LASSO와 구조화 희소성</h3>
+<p>순서가 있는 변수나 인접 영역의 계수가 비슷할 것으로 예상되면 계수 차이에 패널티를 부여할 수 있다.</p>
+<p><span id="eq-ch11-fused-lasso"><span class="math display">\[
+\widehat{\boldsymbol\beta}
+=
+\arg\min_{\boldsymbol\beta}
+\left\{
+\mathcal L(\boldsymbol\beta)
++
+\lambda_1\sum_{j=1}^{p}|\beta_j|
++
+\lambda_2\sum_{j=2}^{p}|\beta_j-\beta_{j-1}|
+\right\}.
+\tag{11.64}\]</span></span></p>
+<p>첫 번째 패널티는 희소성을, 두 번째 패널티는 인접 계수의 구간별 상수구조를 유도한다. 유전체의 복제수 변이, 시간계수와 공간신호 분석에 활용할 수 있다.</p>
+<p>구조화 희소성은 그룹, 계층, 그래프와 공간적 인접관계 같은 사전구조를 패널티에 반영한다.</p>
+</section>
+<section id="sec-ch11-adaptive-nonconvex" class="level3" data-number="11.5.13">
+<h3 data-number="11.5.13" class="anchored" data-anchor-id="sec-ch11-adaptive-nonconvex"><span class="header-section-number">11.5.13</span> adaptive LASSO와 비볼록 패널티</h3>
+<p>LASSO는 모든 계수에 같은 수준의 축소를 적용하므로 큰 계수에도 편향을 유발한다. adaptive LASSO는 초기추정량 <span class="math inline">\(\widetilde\beta_j\)</span>를 이용한 가중치를</p>
+<p><span id="eq-ch11-adaptive-weight"><span class="math display">\[
+w_j
+=
+\frac{1}{|\widetilde\beta_j|^{\gamma}},
+\qquad \gamma&gt;0
+\tag{11.65}\]</span></span></p>
+<p>로 정의하고</p>
+<p><span id="eq-ch11-adaptive-lasso"><span class="math display">\[
+\mathcal L(\boldsymbol\beta)
++
+\lambda\sum_{j=1}^{p}w_j|\beta_j|
+\tag{11.66}\]</span></span></p>
+<p>를 최소화한다. 초기효과가 큰 변수에는 작은 패널티를 적용한다.</p>
+<p>SCAD와 MCP는 작은 계수에는 강한 패널티를 주지만 큰 계수에 대한 축소는 완화하는 비볼록 패널티이다. 선택편향을 줄일 수 있지만 목적함수가 비볼록하여 국소해와 초기값에 민감할 수 있다.</p>
+</section>
+<section id="sec-ch11-tree-embedded-selection" class="level3" data-number="11.5.14">
+<h3 data-number="11.5.14" class="anchored" data-anchor-id="sec-ch11-tree-embedded-selection"><span class="header-section-number">11.5.14</span> 트리와 부스팅의 내장형 선택</h3>
+<p>의사결정 트리는 분할에 사용되지 않은 변수를 자동으로 제외한다. 부스팅도 반복과정에서 선택된 약한 학습기와 변수만 모형에 포함한다. 그러나 트리 기반 중요도는 고유값이 많거나 분할후보가 많은 변수에 편향될 수 있고, 상관된 변수 사이에서 중요도가 분산될 수 있다.</p>
+<p>트리 기반 선택에서는 다음을 함께 확인하는 것이 좋다.</p>
+<ul>
+<li>불순도 감소 중요도와 순열 중요도의 차이</li>
+<li>상관된 변수에 대한 조건부 순열 중요도</li>
+<li>재표본화에 따른 선택빈도</li>
+<li>변수 제거 후 외부검증 성능</li>
+</ul>
+</section>
+<section id="sec-ch11-selection-consistency" class="level3" data-number="11.5.15">
+<h3 data-number="11.5.15" class="anchored" data-anchor-id="sec-ch11-selection-consistency"><span class="header-section-number">11.5.15</span> 선택 일관성과 예측 일관성</h3>
+<p>선택 일관성은 표본크기가 증가할 때 참 지지집합을 정확히 복원할 확률이 1에 가까워지는 성질이다.</p>
+<p><span id="eq-ch11-selection-consistency"><span class="math display">\[
+P(\widehat S=S^{\ast})
+\rightarrow1
+\qquad(n\rightarrow\infty).
+\tag{11.67}\]</span></span></p>
+<p>예측 일관성은 선택된 모형의 예측위험이 최적 위험에 가까워지는 성질이다. 좋은 예측을 위해 참 변수집합을 정확히 복원할 필요는 없다. 강하게 상관된 변수들이 있는 경우 서로 다른 부분집합이 거의 같은 예측을 제공할 수 있다.</p>
+<p>LASSO의 정확한 변수선택에는 설계행렬의 상관구조, 최소 신호크기와 규제 강도의 변화 속도에 대한 조건이 필요하다. 이러한 조건이 성립하지 않더라도 예측오차는 우수할 수 있다.</p>
+</section>
+<section id="sec-ch11-stability-selection" class="level3" data-number="11.5.16">
+<h3 data-number="11.5.16" class="anchored" data-anchor-id="sec-ch11-stability-selection"><span class="header-section-number">11.5.16</span> 안정성 선택</h3>
+<p>안정성 선택(stability selection)은 반복 부분표본에서 희소학습을 수행하고 선택확률이 높은 변수를 유지한다. 부분표본 <span class="math inline">\(b\)</span>에서 규제 모수 <span class="math inline">\(\lambda\)</span>에 의해 선택된 집합을 <span class="math inline">\(\widehat S^{(b)}_{\lambda}\)</span>라고 하면</p>
+<p><span id="eq-ch11-stability-probability"><span class="math display">\[
+\widehat\pi_j(\lambda)
+=
+\frac{1}{B}
+\sum_{b=1}^{B}
+I\{j\in\widehat S^{(b)}_{\lambda}\}
+\tag{11.68}\]</span></span></p>
+<p>를 계산한다. 선택확률이 임계값 <span class="math inline">\(\pi_{\mathrm{thr}}\)</span>보다 큰 변수를 최종 선택한다.</p>
+<p><span id="eq-ch11-stability-set"><span class="math display">\[
+\widehat S_{\mathrm{stable}}
+=
+\{j:\max_{\lambda\in\Lambda}\widehat\pi_j(\lambda)
+\geq\pi_{\mathrm{thr}}\}.
+\tag{11.69}\]</span></span></p>
+<p>안정성 선택은 변수선택의 재현성을 높이고 거짓선택 수를 제어하는 틀을 제공한다. 다만 부분표본 비율, 규제 경로와 임계값을 명시해야 한다.</p>
+</section>
+<section id="sec-ch11-post-selection-inference" class="level3" data-number="11.5.17">
+<h3 data-number="11.5.17" class="anchored" data-anchor-id="sec-ch11-post-selection-inference"><span class="header-section-number">11.5.17</span> 선택 후 추론</h3>
+<p>변수선택 후 일반적인 표준오차와 <span class="math inline">\(p\)</span>값을 그대로 계산하면 선택과정의 불확실성을 무시한다. 선택된 변수는 우연히 큰 효과를 보인 경향이 있으므로 계수 크기가 과대추정되고 신뢰구간이 지나치게 좁아질 수 있다.</p>
+<p>가능한 접근은 다음과 같다.</p>
+<ul>
+<li>독립된 자료에서 선택변수 효과를 재추정</li>
+<li>표본분할과 교차적합</li>
+<li>선택사건을 조건으로 하는 선택적 추론</li>
+<li>탈편향 LASSO</li>
+<li>부트스트랩과 안정성 분석</li>
+<li>예측목적과 추론목적의 명확한 분리</li>
+</ul>
+<p>특성 선택 결과를 과학적 발견으로 해석할 때는 선택 후 추론문제를 반드시 고려해야 한다.</p>
+</section>
+</section>
+<section id="sec-ch11-sparse-representation" class="level2" data-number="11.6">
+<h2 data-number="11.6" class="anchored" data-anchor-id="sec-ch11-sparse-representation"><span class="header-section-number">11.6</span> 희소 표현과 사전학습</h2>
+<section id="sec-ch11-sparse-coding-overview" class="level3" data-number="11.6.1">
+<h3 data-number="11.6.1" class="anchored" data-anchor-id="sec-ch11-sparse-coding-overview"><span class="header-section-number">11.6.1</span> 희소 표현의 기본 개념</h3>
+<p>특성 선택은 원변수 중 일부를 선택한다. 희소 표현(sparse representation)은 관측벡터를 사전(dictionary)의 소수 원자(atom) 조합으로 표현한다.</p>
+<p>관측벡터 <span class="math inline">\(\mathbf x\in\mathbb R^m\)</span>에 대해</p>
+<p><span id="eq-ch11-sparse-representation"><span class="math display">\[
+\mathbf x
+\approx
+\mathbf D\boldsymbol\alpha
+\tag{11.70}\]</span></span></p>
+<p>로 나타낸다. 여기서</p>
+<ul>
+<li><span class="math inline">\(\mathbf D=[\mathbf d_1,\ldots,\mathbf d_K]\in\mathbb R^{m\times K}\)</span>는 사전행렬</li>
+<li><span class="math inline">\(\mathbf d_k\)</span>는 사전 원자</li>
+<li><span class="math inline">\(\boldsymbol\alpha\in\mathbb R^K\)</span>는 표현계수</li>
+</ul>
+<p>이다. 희소 표현에서는</p>
+<p><span id="eq-ch11-sparse-code"><span class="math display">\[
+\|\boldsymbol\alpha\|_0\ll K
+\tag{11.71}\]</span></span></p>
+<p>를 가정한다.</p>
+<p><span class="math inline">\(K&gt;m\)</span>인 경우 사전은 과완전 사전(overcomplete dictionary)이 되며, 표현계수의 가능한 해가 무수히 많다. 희소성 제약이 이 가운데 소수 원자만 사용하는 해를 선택한다.</p>
+</section>
+<section id="sec-ch11-sparse-coding-problem" class="level3" data-number="11.6.2">
+<h3 data-number="11.6.2" class="anchored" data-anchor-id="sec-ch11-sparse-coding-problem"><span class="header-section-number">11.6.2</span> 희소 부호화 문제</h3>
+<p>사전 <span class="math inline">\(\mathbf D\)</span>가 주어졌을 때 희소계수는 다음 문제로 추정할 수 있다.</p>
+<p><span id="eq-ch11-l0-sparse-coding"><span class="math display">\[
+\widehat{\boldsymbol\alpha}
+=
+\arg\min_{\boldsymbol\alpha}
+\left\{
+\frac{1}{2}
+\|\mathbf x-\mathbf D\boldsymbol\alpha\|_2^2
++
+\lambda\|\boldsymbol\alpha\|_0
+\right\}.
+\tag{11.72}\]</span></span></p>
+<p><span class="math inline">\(\ell_0\)</span> 문제는 조합적이므로 <span class="math inline">\(\ell_1\)</span> 완화가 널리 사용된다.</p>
+<p><span id="eq-ch11-l1-sparse-coding"><span class="math display">\[
+\widehat{\boldsymbol\alpha}
+=
+\arg\min_{\boldsymbol\alpha}
+\left\{
+\frac{1}{2}
+\|\mathbf x-\mathbf D\boldsymbol\alpha\|_2^2
++
+\lambda\|\boldsymbol\alpha\|_1
+\right\}.
+\tag{11.73}\]</span></span></p>
+<p>이는 설계행렬을 사전 <span class="math inline">\(\mathbf D\)</span>, 반응을 관측벡터 <span class="math inline">\(\mathbf x\)</span>로 본 LASSO와 같은 형태이다.</p>
+<p>재구성오차 허용수준을 직접 지정하면 basis pursuit denoising 문제로 표현된다.</p>
+<p><span id="eq-ch11-bpdn-sparse-coding"><span class="math display">\[
+\min_{\boldsymbol\alpha}
+\|\boldsymbol\alpha\|_1
+\quad
+\text{subject to}
+\quad
+\|\mathbf x-\mathbf D\boldsymbol\alpha\|_2
+\leq\epsilon.
+\tag{11.74}\]</span></span></p>
+</section>
+<section id="sec-ch11-fixed-learned-dictionary" class="level3" data-number="11.6.3">
+<h3 data-number="11.6.3" class="anchored" data-anchor-id="sec-ch11-fixed-learned-dictionary"><span class="header-section-number">11.6.3</span> 고정 사전과 학습 사전</h3>
+<p>고정 사전은 푸리에, 웨이블릿, 코사인 변환처럼 사전에 정의된 기저를 사용한다. 학습 사전은 관측자료에 맞게 원자 자체를 추정한다.</p>
+<div id="tbl-ch11-dictionary-types" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch11-dictionary-types-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;11.4: 희소 표현에서 사용하는 사전의 유형
+</figcaption>
+<div aria-describedby="tbl-ch11-dictionary-types-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>사전 유형</th>
+<th>장점</th>
+<th>한계</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>고정 직교기저</td>
+<td>빠른 변환, 이론이 명확함</td>
+<td>자료특화 구조 반영이 제한적</td>
+</tr>
+<tr class="even">
+<td>과완전 고정사전</td>
+<td>여러 패턴 표현 가능</td>
+<td>사전이 매우 커질 수 있음</td>
+</tr>
+<tr class="odd">
+<td>자료학습 사전</td>
+<td>자료의 반복구조를 적응적으로 학습</td>
+<td>최적화가 비볼록이고 계산량 큼</td>
+</tr>
+<tr class="even">
+<td>지도 사전</td>
+<td>분류·예측 목적을 반영</td>
+<td>레이블 과적합 가능</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-ch11-dictionary-learning-objective" class="level3" data-number="11.6.4">
+<h3 data-number="11.6.4" class="anchored" data-anchor-id="sec-ch11-dictionary-learning-objective"><span class="header-section-number">11.6.4</span> 사전학습의 목적함수</h3>
+<p><span class="math inline">\(n\)</span>개 관측벡터를 열로 갖는 행렬을</p>
+<p><span class="math display">\[
+\mathbf X
+=[\mathbf x_1,\ldots,\mathbf x_n]
+\in\mathbb R^{m\times n}
+\]</span></p>
+<p>이라고 하고, 희소계수행렬을</p>
+<p><span class="math display">\[
+\mathbf A
+=[\boldsymbol\alpha_1,\ldots,\boldsymbol\alpha_n]
+\in\mathbb R^{K\times n}
+\]</span></p>
+<p>라고 하자. 사전학습(dictionary learning)은</p>
+<p><span id="eq-ch11-dictionary-learning"><span class="math display">\[
+\min_{\mathbf D,\mathbf A}
+\frac{1}{2}
+\|\mathbf X-\mathbf D\mathbf A\|_F^2
++
+\lambda
+\sum_{i=1}^{n}
+\|\boldsymbol\alpha_i\|_1
+\tag{11.75}\]</span></span></p>
+<p>을 푼다. 스케일의 비식별성을 방지하기 위해 각 원자에</p>
+<p><span id="eq-ch11-dictionary-constraint"><span class="math display">\[
+\|\mathbf d_k\|_2\leq1
+\tag{11.76}\]</span></span></p>
+<p>제약을 둔다.</p>
+<p><span class="math inline">\(\mathbf D\)</span>와 <span class="math inline">\(\mathbf A\)</span>를 동시에 최적화하는 문제는 비볼록이지만, 한쪽을 고정하면 다른 쪽에 대해 볼록인 경우가 많다. 따라서 교대최적화가 사용된다.</p>
+<ol type="1">
+<li>현재 사전 <span class="math inline">\(\mathbf D\)</span>를 고정하고 각 <span class="math inline">\(\boldsymbol\alpha_i\)</span>를 희소 부호화한다.</li>
+<li>현재 계수행렬 <span class="math inline">\(\mathbf A\)</span>를 고정하고 사전 <span class="math inline">\(\mathbf D\)</span>를 갱신한다.</li>
+<li>목적함수 감소가 작아질 때까지 반복한다.</li>
+</ol>
+</section>
+<section id="sec-ch11-mod-ksvd" class="level3" data-number="11.6.5">
+<h3 data-number="11.6.5" class="anchored" data-anchor-id="sec-ch11-mod-ksvd"><span class="header-section-number">11.6.5</span> MOD와 K-SVD</h3>
+<p>MOD(method of optimal directions)는 계수행렬을 고정한 상태에서 최소제곱으로 사전을 갱신한다.</p>
+<p><span id="eq-ch11-mod-update"><span class="math display">\[
+\widehat{\mathbf D}
+=
+\mathbf X\mathbf A^{\top}
+(\mathbf A\mathbf A^{\top})^{\dagger},
+\tag{11.77}\]</span></span></p>
+<p>여기서 <span class="math inline">\(\dagger\)</span>는 일반화 역행렬이다. 갱신 후 각 원자를 정규화한다.</p>
+<p>K-SVD는 사전 원자를 하나씩 갱신한다. 원자 <span class="math inline">\(k\)</span>를 제외한 잔차를</p>
+<p><span id="eq-ch11-ksvd-residual"><span class="math display">\[
+\mathbf E_k
+=
+\mathbf X-
+\sum_{j\neq k}
+\mathbf d_j\boldsymbol\alpha_{j\cdot}
+\tag{11.78}\]</span></span></p>
+<p>로 정의하고, 원자 <span class="math inline">\(k\)</span>가 사용된 관측값에 해당하는 부분잔차에 특이값분해를 적용하여 <span class="math inline">\(\mathbf d_k\)</span>와 관련 계수를 동시에 갱신한다.</p>
+</section>
+<section id="sec-ch11-orthogonal-dictionary-example" class="level3" data-number="11.6.6">
+<h3 data-number="11.6.6" class="anchored" data-anchor-id="sec-ch11-orthogonal-dictionary-example"><span class="header-section-number">11.6.6</span> 직교사전에서의 희소복원</h3>
+<p>사전이 직교행렬이면 희소계수 추정은 변환계수에 대한 소프트 임계화가 된다. 다음 예에서는 소수의 코사인 성분으로 구성된 신호에 잡음을 추가한 뒤, 변환계수를 임계화하여 신호를 복원한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1141</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="dv">128</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>index <span class="ot">&lt;-</span> <span class="dv">0</span><span class="sc">:</span>(m <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> m, <span class="at">ncol =</span> m)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>D[, <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">sqrt</span>(m)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>m) {</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  D[, k] <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="dv">2</span> <span class="sc">/</span> m) <span class="sc">*</span> <span class="fu">cos</span>(pi <span class="sc">*</span> (index <span class="sc">+</span> <span class="fl">0.5</span>) <span class="sc">*</span> (k <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">/</span> m)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>alpha_true <span class="ot">&lt;-</span> <span class="fu">numeric</span>(m)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>alpha_true[<span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">8</span>, <span class="dv">19</span>, <span class="dv">31</span>)] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">3.5</span>, <span class="sc">-</span><span class="fl">2.8</span>, <span class="fl">2.0</span>, <span class="fl">1.5</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>signal <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(D <span class="sc">%*%</span> alpha_true)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>observed <span class="ot">&lt;-</span> signal <span class="sc">+</span> <span class="fu">rnorm</span>(m, <span class="at">sd =</span> <span class="fl">0.35</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>raw_coef <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">crossprod</span>(D, observed))</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>lambda <span class="ot">&lt;-</span> <span class="fl">0.65</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>alpha_hat <span class="ot">&lt;-</span> <span class="fu">sign</span>(raw_coef) <span class="sc">*</span> <span class="fu">pmax</span>(<span class="fu">abs</span>(raw_coef) <span class="sc">-</span> lambda, <span class="dv">0</span>)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>reconstructed <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(D <span class="sc">%*%</span> alpha_hat)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  index,</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  observed,</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"l"</span>,</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"위치"</span>,</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"신호값"</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(index, signal, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(index, reconstructed, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>  <span class="st">"topright"</span>,</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>  <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"잡음 관측"</span>, <span class="st">"참 신호"</span>, <span class="st">"희소 복원"</span>),</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>  <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>),</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>),</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>  <span class="at">bty =</span> <span class="st">"n"</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-ch11-sparse-denoising" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch11-sparse-denoising-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="11-feature-selection-sparse-learning_files/figure-html/fig-ch11-sparse-denoising-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch11-sparse-denoising-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;11.7: 직교 코사인 사전에서 소프트 임계화를 이용한 희소 신호 복원
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch11-sparse-representation-classification" class="level3" data-number="11.6.7">
+<h3 data-number="11.6.7" class="anchored" data-anchor-id="sec-ch11-sparse-representation-classification"><span class="header-section-number">11.6.7</span> 희소 표현을 이용한 분류</h3>
+<p>클래스별 훈련관측값을 사전 원자로 사용하면 새로운 관측값을 전체 사전에 대해 희소하게 표현한 뒤 클래스별 재구성오차를 비교할 수 있다. 클래스 <span class="math inline">\(g\)</span>에 해당하는 계수만 남기는 연산자를 <span class="math inline">\(\delta_g(\boldsymbol\alpha)\)</span>라고 하면</p>
+<p><span id="eq-ch11-src-residual"><span class="math display">\[
+r_g(\mathbf x)
+=
+\|\mathbf x-
+\mathbf D\delta_g(\widehat{\boldsymbol\alpha})\|_2
+\tag{11.79}\]</span></span></p>
+<p>를 계산하고</p>
+<p><span id="eq-ch11-src-classifier"><span class="math display">\[
+\widehat y
+=
+\arg\min_g r_g(\mathbf x)
+\tag{11.80}\]</span></span></p>
+<p>로 분류한다. 이는 희소표현 기반 분류(sparse representation-based classification)의 기본 원리이다.</p>
+</section>
+<section id="sec-ch11-supervised-dictionary-learning" class="level3" data-number="11.6.8">
+<h3 data-number="11.6.8" class="anchored" data-anchor-id="sec-ch11-supervised-dictionary-learning"><span class="header-section-number">11.6.8</span> 지도 사전학습</h3>
+<p>지도 사전학습은 재구성뿐 아니라 분류성능도 목적함수에 포함한다.</p>
+<p><span id="eq-ch11-supervised-dictionary"><span class="math display">\[
+\min_{\mathbf D,\mathbf A,\mathbf W}
+\frac{1}{2}
+\|\mathbf X-\mathbf D\mathbf A\|_F^2
++
+\lambda\|\mathbf A\|_1
++
+\gamma
+\mathcal L
+(\mathbf Y,\mathbf W\mathbf A).
+\tag{11.81}\]</span></span></p>
+<p>여기서 <span class="math inline">\(\mathbf W\)</span>는 희소계수에서 레이블을 예측하는 분류모수이다. 학습된 원자들이 클래스 구분에 유용한 패턴을 표현하도록 유도한다.</p>
+</section>
+<section id="sec-ch11-sparse-autoencoder" class="level3" data-number="11.6.9">
+<h3 data-number="11.6.9" class="anchored" data-anchor-id="sec-ch11-sparse-autoencoder"><span class="header-section-number">11.6.9</span> 희소 오토인코더와의 관계</h3>
+<p>오토인코더는 입력을 잠재표현으로 부호화하고 다시 복원한다.</p>
+<p><span class="math display">\[
+\mathbf z
+=f_{\theta}(\mathbf x),
+\qquad
+\widehat{\mathbf x}
+=g_{\phi}(\mathbf z).
+\]</span></p>
+<p>잠재표현에 희소 패널티를 추가하면</p>
+<p><span id="eq-ch11-sparse-autoencoder"><span class="math display">\[
+\min_{\theta,\phi}
+\sum_{i=1}^{n}
+\|\mathbf x_i-
+g_{\phi}(f_{\theta}(\mathbf x_i))\|_2^2
++
+\lambda
+\sum_{i=1}^{n}
+\|f_{\theta}(\mathbf x_i)\|_1
+\tag{11.82}\]</span></span></p>
+<p>와 같은 희소 오토인코더를 얻는다. 선형 부호기와 복호기를 사용하는 경우 사전학습과 밀접한 관계가 있으며, 비선형 네트워크는 더 복잡한 표현을 학습할 수 있다.</p>
+</section>
+<section id="sec-ch11-dictionary-identifiability" class="level3" data-number="11.6.10">
+<h3 data-number="11.6.10" class="anchored" data-anchor-id="sec-ch11-dictionary-identifiability"><span class="header-section-number">11.6.10</span> 사전학습의 식별성과 실무 문제</h3>
+<p>사전학습에는 여러 비식별성이 존재한다.</p>
+<ul>
+<li>원자의 순서를 바꾸어도 동일한 재구성이 가능하다.</li>
+<li>원자의 부호와 해당 계수의 부호를 함께 바꿀 수 있다.</li>
+<li>원자의 크기와 계수의 크기를 반대로 조정할 수 있다.</li>
+<li>유사한 원자가 중복 학습될 수 있다.</li>
+</ul>
+<p>따라서 원자 노름 제약, 중복 원자 제거, 초기화와 반복횟수 설정이 필요하다. 검증자료에서 재구성오차뿐 아니라 희소도, 안정성과 후속 예측성능을 함께 평가해야 한다.</p>
+</section>
+</section>
+<section id="sec-ch11-compressed-sensing" class="level2" data-number="11.7">
+<h2 data-number="11.7" class="anchored" data-anchor-id="sec-ch11-compressed-sensing"><span class="header-section-number">11.7</span> 압축 센싱</h2>
+<section id="sec-ch11-cs-overview" class="level3" data-number="11.7.1">
+<h3 data-number="11.7.1" class="anchored" data-anchor-id="sec-ch11-cs-overview"><span class="header-section-number">11.7.1</span> 불충분한 측정에서의 신호복원</h3>
+<p>압축 센싱(compressed sensing)은 고차원 신호가 적절한 표현에서 희소하다면, 신호 차원보다 훨씬 적은 수의 선형측정만으로도 원신호를 복원할 수 있다는 이론과 방법이다.</p>
+<p>원신호를 <span class="math inline">\(\mathbf x\in\mathbb R^p\)</span>, 측정행렬을 <span class="math inline">\(\mathbf A\in\mathbb R^{m\times p}\)</span>라고 하자. 관측은</p>
+<p><span id="eq-ch11-cs-measurement"><span class="math display">\[
+\mathbf y
+=
+\mathbf A\mathbf x+\boldsymbol\varepsilon,
+\qquad
+m&lt;p
+\tag{11.83}\]</span></span></p>
+<p>로 주어진다. 측정 수 <span class="math inline">\(m\)</span>이 신호 차원 <span class="math inline">\(p\)</span>보다 작으므로 일반적으로 해는 무수히 많다. 그러나 <span class="math inline">\(\mathbf x\)</span>가 <span class="math inline">\(s\)</span>-희소하여</p>
+<p><span id="eq-ch11-cs-sparsity"><span class="math display">\[
+\|\mathbf x\|_0=s\ll p
+\tag{11.84}\]</span></span></p>
+<p>라면 희소성을 이용하여 해를 식별할 수 있다.</p>
+</section>
+<section id="sec-ch11-basis-pursuit" class="level3" data-number="11.7.2">
+<h3 data-number="11.7.2" class="anchored" data-anchor-id="sec-ch11-basis-pursuit"><span class="header-section-number">11.7.2</span> <span class="math inline">\(\ell_0\)</span> 복원과 basis pursuit</h3>
+<p>잡음이 없는 경우 가장 희소한 해는</p>
+<p><span id="eq-ch11-cs-l0"><span class="math display">\[
+\min_{\mathbf x}
+\|\mathbf x\|_0
+\quad
+\text{subject to}
+\quad
+\mathbf A\mathbf x=\mathbf y
+\tag{11.85}\]</span></span></p>
+<p>로 정의된다. 이 문제는 조합적으로 어렵기 때문에 <span class="math inline">\(\ell_1\)</span> 완화인 basis pursuit를 사용한다.</p>
+<p><span id="eq-ch11-basis-pursuit"><span class="math display">\[
+\min_{\mathbf x}
+\|\mathbf x\|_1
+\quad
+\text{subject to}
+\quad
+\mathbf A\mathbf x=\mathbf y.
+\tag{11.86}\]</span></span></p>
+<p>적절한 측정행렬 조건이 성립하면 <span class="math inline">\(\ell_1\)</span> 문제의 해가 가장 희소한 <span class="math inline">\(\ell_0\)</span> 해와 일치할 수 있다.</p>
+<p>잡음이 있는 경우에는 basis pursuit denoising을 사용한다.</p>
+<p><span id="eq-ch11-cs-bpdn"><span class="math display">\[
+\min_{\mathbf x}
+\|\mathbf x\|_1
+\quad
+\text{subject to}
+\quad
+\|\mathbf A\mathbf x-\mathbf y\|_2\leq\epsilon.
+\tag{11.87}\]</span></span></p>
+<p>또는 LASSO 형태로</p>
+<p><span id="eq-ch11-cs-lasso"><span class="math display">\[
+\min_{\mathbf x}
+\frac{1}{2}
+\|\mathbf A\mathbf x-\mathbf y\|_2^2
++
+\lambda\|\mathbf x\|_1
+\tag{11.88}\]</span></span></p>
+<p>를 사용할 수 있다.</p>
+</section>
+<section id="sec-ch11-spark" class="level3" data-number="11.7.3">
+<h3 data-number="11.7.3" class="anchored" data-anchor-id="sec-ch11-spark"><span class="header-section-number">11.7.3</span> spark와 유일복원</h3>
+<p>측정행렬 <span class="math inline">\(\mathbf A\)</span>의 spark는 선형종속인 최소 열 개수이다.</p>
+<p><span id="eq-ch11-spark"><span class="math display">\[
+\operatorname{spark}(\mathbf A)
+=
+\min\left\{
+|S|:
+\{\mathbf a_j:j\in S\}
+\text{가 선형종속}
+\right\}.
+\tag{11.89}\]</span></span></p>
+<p>희소해 <span class="math inline">\(\mathbf x\)</span>가</p>
+<p><span id="eq-ch11-spark-uniqueness"><span class="math display">\[
+\|\mathbf x\|_0
+&lt;
+\frac{\operatorname{spark}(\mathbf A)}{2}
+\tag{11.90}\]</span></span></p>
+<p>를 만족하면 <span class="math inline">\(\mathbf A\mathbf x=\mathbf y\)</span>를 만족하는 가장 희소한 해는 유일하다. 그러나 spark를 정확히 계산하는 것은 일반적으로 어렵다.</p>
+</section>
+<section id="sec-ch11-mutual-coherence" class="level3" data-number="11.7.4">
+<h3 data-number="11.7.4" class="anchored" data-anchor-id="sec-ch11-mutual-coherence"><span class="header-section-number">11.7.4</span> 상호 일관성</h3>
+<p>측정행렬의 열을 단위노름으로 정규화했다고 하자. 상호 일관성(mutual coherence)은 서로 다른 두 열의 최대 절대내적으로 정의된다.</p>
+<p><span id="eq-ch11-mutual-coherence"><span class="math display">\[
+\mu(\mathbf A)
+=
+\max_{j\neq k}
+|\mathbf a_j^{\top}\mathbf a_k|.
+\tag{11.91}\]</span></span></p>
+<p><span class="math inline">\(\mu\)</span>가 작을수록 측정행렬의 열들이 서로 덜 비슷하므로 희소신호를 구분하기 쉽다. 충분조건의 한 형태는</p>
+<p><span id="eq-ch11-coherence-recovery"><span class="math display">\[
+s
+&lt;
+\frac{1}{2}
+\left(1+\frac{1}{\mu(\mathbf A)}\right)
+\tag{11.92}\]</span></span></p>
+<p>일 때 희소해의 유일성과 특정 복원 알고리즘의 성공을 보장한다.</p>
+<p>상호 일관성은 계산이 쉽지만 보수적인 조건일 수 있다.</p>
+</section>
+<section id="sec-ch11-rip" class="level3" data-number="11.7.5">
+<h3 data-number="11.7.5" class="anchored" data-anchor-id="sec-ch11-rip"><span class="header-section-number">11.7.5</span> 제한 등거리 성질</h3>
+<p>제한 등거리 성질(restricted isometry property, RIP)은 측정행렬이 모든 <span class="math inline">\(s\)</span>-희소 벡터의 길이를 거의 보존하는 조건이다. <span class="math inline">\(s\)</span>차 제한 등거리 상수 <span class="math inline">\(\delta_s\)</span>는 모든 <span class="math inline">\(s\)</span>-희소 벡터 <span class="math inline">\(\mathbf x\)</span>에 대해</p>
+<p><span id="eq-ch11-rip"><span class="math display">\[
+(1-\delta_s)\|\mathbf x\|_2^2
+\leq
+\|\mathbf A\mathbf x\|_2^2
+\leq
+(1+\delta_s)\|\mathbf x\|_2^2
+\tag{11.93}\]</span></span></p>
+<p>를 만족하는 가장 작은 값이다.</p>
+<p><span class="math inline">\(\delta_s\)</span>가 충분히 작으면 서로 다른 희소신호가 측정공간에서 구별되고, <span class="math inline">\(\ell_1\)</span> 복원이 안정적으로 작동한다. 무작위 가우시안 또는 베르누이 측정행렬은 적절한 측정 수에서 높은 확률로 RIP를 만족한다.</p>
+<p>대표적인 측정 수의 규모는</p>
+<p><span id="eq-ch11-cs-sample-complexity"><span class="math display">\[
+m
+\gtrsim
+C s\log\left(\frac{p}{s}\right)
+\tag{11.94}\]</span></span></p>
+<p>이다. 즉, 신호가 충분히 희소하다면 <span class="math inline">\(p\)</span>보다 훨씬 작은 <span class="math inline">\(m\)</span>으로도 복원 가능하다.</p>
+</section>
+<section id="sec-ch11-null-space-property" class="level3" data-number="11.7.6">
+<h3 data-number="11.7.6" class="anchored" data-anchor-id="sec-ch11-null-space-property"><span class="header-section-number">11.7.6</span> 영공간 성질</h3>
+<p>행렬 <span class="math inline">\(\mathbf A\)</span>의 영공간을</p>
+<p><span class="math display">\[
+\mathcal N(\mathbf A)
+=
+\{\mathbf h:\mathbf A\mathbf h=\mathbf0\}
+\]</span></p>
+<p>라고 하자. 모든 <span class="math inline">\(\mathbf h\in\mathcal N(\mathbf A)\setminus\{\mathbf0\}\)</span>와 모든 <span class="math inline">\(|S|\leq s\)</span>에 대해</p>
+<p><span id="eq-ch11-null-space-property"><span class="math display">\[
+\|\mathbf h_S\|_1
+&lt;
+\|\mathbf h_{S^c}\|_1
+\tag{11.95}\]</span></span></p>
+<p>가 성립하면 모든 <span class="math inline">\(s\)</span>-희소 신호는 basis pursuit로 정확히 복원된다. 영공간 성질(null space property)은 <span class="math inline">\(\ell_1\)</span> 복원의 필요충분조건을 제공하지만 실제 검증은 어렵다.</p>
+</section>
+<section id="sec-ch11-omp" class="level3" data-number="11.7.7">
+<h3 data-number="11.7.7" class="anchored" data-anchor-id="sec-ch11-omp"><span class="header-section-number">11.7.7</span> 직교매칭추구</h3>
+<p>직교매칭추구(orthogonal matching pursuit, OMP)는 잔차와 가장 상관이 큰 측정행렬 열을 반복 선택하는 탐욕적 알고리즘이다.</p>
+<p>초기값은</p>
+<p><span class="math display">\[
+\mathbf r^{(0)}=\mathbf y,
+\qquad
+S_0=\varnothing
+\]</span></p>
+<p>이다. <span class="math inline">\(t\)</span>번째 단계에서</p>
+<p><span id="eq-ch11-omp-selection"><span class="math display">\[
+j_t
+=
+\arg\max_j
+|\mathbf a_j^{\top}\mathbf r^{(t-1)}|
+\tag{11.96}\]</span></span></p>
+<p>를 선택하고</p>
+<p><span class="math display">\[
+S_t=S_{t-1}\cup\{j_t\}
+\]</span></p>
+<p>로 갱신한다. 선택된 열에 대해 최소제곱을 계산한다.</p>
+<p><span id="eq-ch11-omp-ls"><span class="math display">\[
+\widehat{\mathbf x}_{S_t}
+=
+\arg\min_{\mathbf b}
+\|\mathbf y-\mathbf A_{S_t}\mathbf b\|_2^2.
+\tag{11.97}\]</span></span></p>
+<p>잔차는</p>
+<p><span id="eq-ch11-omp-residual"><span class="math display">\[
+\mathbf r^{(t)}
+=
+\mathbf y-
+\mathbf A_{S_t}
+\widehat{\mathbf x}_{S_t}
+\tag{11.98}\]</span></span></p>
+<p>로 갱신한다. 희소도 <span class="math inline">\(s\)</span>에 도달하거나 잔차노름이 임계값 이하가 되면 종료한다.</p>
+<p>OMP는 빠르고 해석이 쉬우나 초기의 잘못된 변수선택을 되돌리기 어렵고, 상관된 열이 많을 때 성능이 저하될 수 있다.</p>
+</section>
+<section id="sec-ch11-iht" class="level3" data-number="11.7.8">
+<h3 data-number="11.7.8" class="anchored" data-anchor-id="sec-ch11-iht"><span class="header-section-number">11.7.8</span> 반복적 하드 임계화</h3>
+<p>반복적 하드 임계화(iterative hard thresholding)는 경사하강 단계 뒤 가장 큰 <span class="math inline">\(s\)</span>개 원소만 남긴다.</p>
+<p><span class="math display">\[
+\mathbf z^{(t+1)}
+=
+\mathbf x^{(t)}
++
+\eta\mathbf A^{\top}
+(\mathbf y-\mathbf A\mathbf x^{(t)}),
+\]</span></p>
+<p><span id="eq-ch11-iht"><span class="math display">\[
+\mathbf x^{(t+1)}
+=
+H_s(\mathbf z^{(t+1)}),
+\tag{11.99}\]</span></span></p>
+<p>여기서 <span class="math inline">\(H_s\)</span>는 절댓값이 가장 큰 <span class="math inline">\(s\)</span>개 원소만 남기는 하드 임계화 연산자이다. <span class="math inline">\(\ell_0\)</span> 제약을 직접 반영하지만 희소도 <span class="math inline">\(s\)</span>를 미리 정해야 한다.</p>
+</section>
+<section id="sec-ch11-cs-simulation" class="level3" data-number="11.7.9">
+<h3 data-number="11.7.9" class="anchored" data-anchor-id="sec-ch11-cs-simulation"><span class="header-section-number">11.7.9</span> 압축 센싱 복원 시뮬레이션</h3>
+<p>다음 코드는 희소신호를 무작위 가우시안 측정행렬로 관측한 뒤 OMP로 복원한다. 측정 수가 증가할수록 복원오차가 감소하는 경향을 확인할 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1151</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>omp <span class="ot">&lt;-</span> <span class="cf">function</span>(A, y, sparsity) {</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">ncol</span>(A)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  selected <span class="ot">&lt;-</span> <span class="fu">integer</span>(<span class="dv">0</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  residual <span class="ot">&lt;-</span> y</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  coef <span class="ot">&lt;-</span> <span class="fu">numeric</span>(p)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (step <span class="cf">in</span> <span class="fu">seq_len</span>(sparsity)) {</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    score <span class="ot">&lt;-</span> <span class="fu">abs</span>(<span class="fu">crossprod</span>(A, residual))</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    score[selected] <span class="ot">&lt;-</span> <span class="sc">-</span><span class="cn">Inf</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    j <span class="ot">&lt;-</span> <span class="fu">which.max</span>(score)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    selected <span class="ot">&lt;-</span> <span class="fu">c</span>(selected, j)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    fit <span class="ot">&lt;-</span> <span class="fu">qr.solve</span>(A[, selected, <span class="at">drop =</span> <span class="cn">FALSE</span>], y)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    residual <span class="ot">&lt;-</span> y <span class="sc">-</span> A[, selected, drop <span class="ot">=</span> <span class="cn">FALSE</span>] <span class="sc">%*%</span> fit</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  coef[selected] <span class="ot">&lt;-</span> fit</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  coef</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">160</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="dv">8</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>measurement_grid <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">20</span>, <span class="dv">100</span>, <span class="at">by =</span> <span class="dv">10</span>)</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>repetitions <span class="ot">&lt;-</span> <span class="dv">30</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>mean_error <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="fu">length</span>(measurement_grid))</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (g <span class="cf">in</span> <span class="fu">seq_along</span>(measurement_grid)) {</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> measurement_grid[g]</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>  errors <span class="ot">&lt;-</span> <span class="fu">numeric</span>(repetitions)</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (b <span class="cf">in</span> <span class="fu">seq_len</span>(repetitions)) {</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    x_true <span class="ot">&lt;-</span> <span class="fu">numeric</span>(p)</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    support <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">seq_len</span>(p), s)</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    x_true[support] <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(s)</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    A <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(m <span class="sc">*</span> p), <span class="at">nrow =</span> m, <span class="at">ncol =</span> p)</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    A <span class="ot">&lt;-</span> <span class="fu">sweep</span>(A, <span class="dv">2</span>, <span class="fu">sqrt</span>(<span class="fu">colSums</span>(A<span class="sc">^</span><span class="dv">2</span>)), <span class="st">"/"</span>)</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(A <span class="sc">%*%</span> x_true)</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    x_hat <span class="ot">&lt;-</span> <span class="fu">omp</span>(A, y, <span class="at">sparsity =</span> s)</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    errors[b] <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">sum</span>((x_hat <span class="sc">-</span> x_true)<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">/</span></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>(<span class="fu">sum</span>(x_true<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>  mean_error[g] <span class="ot">&lt;-</span> <span class="fu">mean</span>(errors)</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>  measurement_grid,</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>  mean_error,</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"b"</span>,</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">19</span>,</span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"측정 수 m"</span>,</span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"평균 상대 복원오차"</span></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-ch11-compressed-sensing" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch11-compressed-sensing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="11-feature-selection-sparse-learning_files/figure-html/fig-ch11-compressed-sensing-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch11-compressed-sensing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;11.8: 측정 수에 따른 OMP 희소신호 복원오차
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch11-noisy-approximate-sparsity" class="level3" data-number="11.7.10">
+<h3 data-number="11.7.10" class="anchored" data-anchor-id="sec-ch11-noisy-approximate-sparsity"><span class="header-section-number">11.7.10</span> 잡음과 근사 희소성</h3>
+<p>실제 신호는 정확히 희소하지 않고 잡음도 포함한다. 참 신호에서 절댓값이 큰 <span class="math inline">\(s\)</span>개 성분만 남긴 최선의 <span class="math inline">\(s\)</span>-희소 근사를 <span class="math inline">\(\mathbf x_s\)</span>라고 하자. 적절한 조건 아래 <span class="math inline">\(\ell_1\)</span> 복원오차는 개념적으로</p>
+<p><span id="eq-ch11-stable-recovery-bound"><span class="math display">\[
+\|\widehat{\mathbf x}-\mathbf x\|_2
+\leq
+C_1\epsilon
++
+C_2
+\frac{\|\mathbf x-\mathbf x_s\|_1}{\sqrt{s}}
+\tag{11.100}\]</span></span></p>
+<p>형태로 제한된다. 첫 번째 항은 측정잡음, 두 번째 항은 정확한 희소성에서 벗어난 정도를 나타낸다. 따라서 압축 센싱은 정확히 희소한 신호뿐 아니라 계수가 빠르게 감소하는 근사 희소 신호에도 적용될 수 있다.</p>
+</section>
+<section id="sec-ch11-sensing-matrix" class="level3" data-number="11.7.11">
+<h3 data-number="11.7.11" class="anchored" data-anchor-id="sec-ch11-sensing-matrix"><span class="header-section-number">11.7.11</span> 측정행렬의 설계</h3>
+<p>좋은 측정행렬은 희소표현의 원자들과 지나치게 정렬되지 않아야 한다. 대표적인 선택은 다음과 같다.</p>
+<ul>
+<li>독립 가우시안 무작위 행렬</li>
+<li>무작위 베르누이 행렬</li>
+<li>부분 푸리에 행렬</li>
+<li>구조화 무작위 행렬</li>
+<li>응용장치의 물리적 제약을 반영한 행렬</li>
+</ul>
+<p>무작위 행렬은 이론적 성질이 좋지만 저장과 행렬곱 비용이 클 수 있다. 부분 푸리에와 구조화 행렬은 빠른 변환을 이용할 수 있다.</p>
+<p>원신호가 직접 희소하지 않고 변환기저 <span class="math inline">\(\mathbf\Psi\)</span>에서 희소하여</p>
+<p><span class="math display">\[
+\mathbf x
+=
+\mathbf\Psi\boldsymbol\alpha
+\]</span></p>
+<p>라고 하면 측정모형은</p>
+<p><span id="eq-ch11-cs-transform-domain"><span class="math display">\[
+\mathbf y
+=
+\mathbf A\mathbf\Psi\boldsymbol\alpha
++
+\boldsymbol\varepsilon
+\tag{11.101}\]</span></span></p>
+<p>가 된다. 이때 유효 측정행렬은 <span class="math inline">\(\mathbf A\mathbf\Psi\)</span>이며 <span class="math inline">\(\boldsymbol\alpha\)</span>를 희소복원한 뒤 원신호를 재구성한다.</p>
+</section>
+<section id="sec-ch11-cs-feature-selection-relation" class="level3" data-number="11.7.12">
+<h3 data-number="11.7.12" class="anchored" data-anchor-id="sec-ch11-cs-feature-selection-relation"><span class="header-section-number">11.7.12</span> 압축 센싱과 특성 선택의 관계</h3>
+<p>특성 선택과 압축 센싱은 모두 희소성을 사용하지만 목표가 다르다.</p>
+<div id="tbl-ch11-selection-compressed-sensing" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch11-selection-compressed-sensing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;11.5: 특성 선택과 압축 센싱의 비교
+</figcaption>
+<div aria-describedby="tbl-ch11-selection-compressed-sensing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>구분</th>
+<th>특성 선택</th>
+<th>압축 센싱</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>관측자료</td>
+<td>모든 후보변수가 관측됨</td>
+<td>신호의 선형측정만 관측됨</td>
+</tr>
+<tr class="even">
+<td>목표</td>
+<td>예측에 필요한 변수 선택</td>
+<td>원희소신호 복원</td>
+</tr>
+<tr class="odd">
+<td>설계행렬</td>
+<td>자료의 특성행렬</td>
+<td>측정과정의 센싱행렬</td>
+</tr>
+<tr class="even">
+<td>손실</td>
+<td>예측손실</td>
+<td>측정 재구성오차</td>
+</tr>
+<tr class="odd">
+<td>주요 질문</td>
+<td>어떤 변수가 필요한가</td>
+<td>얼마나 적은 측정으로 복원 가능한가</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>수학적으로는 두 문제 모두 <span class="math inline">\(\ell_0\)</span> 제약과 <span class="math inline">\(\ell_1\)</span> 완화를 공유한다. LASSO 회귀에서는 반응을 예측하는 희소계수를 찾고, 압축 센싱에서는 측정값을 생성한 희소신호를 복원한다.</p>
+</section>
+<section id="sec-ch11-cs-applications" class="level3" data-number="11.7.13">
+<h3 data-number="11.7.13" class="anchored" data-anchor-id="sec-ch11-cs-applications"><span class="header-section-number">11.7.13</span> 압축 센싱의 응용</h3>
+<p>압축 센싱은 측정 자체가 비싸거나 느린 분야에서 특히 유용하다.</p>
+<ul>
+<li>자기공명영상의 촬영시간 단축</li>
+<li>희소 각도 단층촬영</li>
+<li>무선통신과 채널 추정</li>
+<li>레이더와 원격탐사</li>
+<li>천문관측</li>
+<li>센서 네트워크</li>
+<li>압축 카메라</li>
+<li>스펙트럼 신호복원</li>
+</ul>
+<p>성공적인 적용을 위해서는 신호의 희소표현, 측정행렬의 구조, 잡음수준과 복원 알고리즘을 함께 설계해야 한다.</p>
+</section>
+</section>
+<section id="sec-ch11-unified-view" class="level2" data-number="11.8">
+<h2 data-number="11.8" class="anchored" data-anchor-id="sec-ch11-unified-view"><span class="header-section-number">11.8</span> 통합적 관점</h2>
+<section id="sec-ch11-three-selection-families" class="level3" data-number="11.8.1">
+<h3 data-number="11.8.1" class="anchored" data-anchor-id="sec-ch11-three-selection-families"><span class="header-section-number">11.8.1</span> 세 가지 특성 선택 방식의 비교</h3>
+<p>필터, 래퍼와 내장형 방법은 선택점수와 예측모형의 결합정도가 다르다.</p>
+<div id="tbl-ch11-selection-family-comparison" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch11-selection-family-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;11.6: 필터·래퍼·내장형 특성 선택의 비교
+</figcaption>
+<div aria-describedby="tbl-ch11-selection-family-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>방식</th>
+<th>선택정보</th>
+<th style="text-align: right;">계산비용</th>
+<th style="text-align: right;">상호작용 반영</th>
+<th style="text-align: right;">모형 의존성</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>필터</td>
+<td>변수와 반응의 통계적 관련성</td>
+<td style="text-align: right;">낮음</td>
+<td style="text-align: right;">제한적</td>
+<td style="text-align: right;">낮음</td>
+</tr>
+<tr class="even">
+<td>래퍼</td>
+<td>후보모형의 검증성능</td>
+<td style="text-align: right;">매우 높음</td>
+<td style="text-align: right;">가능</td>
+<td style="text-align: right;">높음</td>
+</tr>
+<tr class="odd">
+<td>내장형</td>
+<td>모형적합 목적함수</td>
+<td style="text-align: right;">중간</td>
+<td style="text-align: right;">모형에 따라 다름</td>
+<td style="text-align: right;">높음</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>실제 고차원 분석에서는 세 접근을 결합할 수 있다. 예를 들어 분산 필터와 단변량 점수로 수만 개 변수를 수백 개로 줄인 뒤 elastic net을 적용하고, 선택안정성을 반복 재표본화로 평가할 수 있다.</p>
+</section>
+<section id="sec-ch11-three-levels-sparsity" class="level3" data-number="11.8.2">
+<h3 data-number="11.8.2" class="anchored" data-anchor-id="sec-ch11-three-levels-sparsity"><span class="header-section-number">11.8.2</span> 희소성의 세 수준</h3>
+<p>이 장에서 다룬 희소성은 세 수준으로 구분할 수 있다.</p>
+<ol type="1">
+<li><strong>변수 수준 희소성</strong>: 예측모형에서 소수의 원변수만 사용한다.</li>
+<li><strong>표현 수준 희소성</strong>: 관측값을 소수의 사전 원자로 표현한다.</li>
+<li><strong>신호 수준 희소성</strong>: 제한된 측정에서 원희소신호를 복원한다.</li>
+</ol>
+<p>이를 공통형식으로 나타내면</p>
+<p><span id="eq-ch11-unified-sparse-objective"><span class="math display">\[
+\widehat{\boldsymbol\theta}
+=
+\arg\min_{\boldsymbol\theta}
+\left\{
+\mathcal L(\boldsymbol\theta)
++
+\lambda\Omega(\boldsymbol\theta)
+\right\}
+\tag{11.102}\]</span></span></p>
+<p>이다. <span class="math inline">\(\boldsymbol\theta\)</span>는 회귀계수, 희소부호 또는 원신호가 될 수 있고, <span class="math inline">\(\Omega\)</span>는 <span class="math inline">\(\ell_0\)</span>, <span class="math inline">\(\ell_1\)</span>, 그룹 또는 구조화 패널티가 될 수 있다.</p>
+</section>
+<section id="sec-ch11-sparsity-interpretability" class="level3" data-number="11.8.3">
+<h3 data-number="11.8.3" class="anchored" data-anchor-id="sec-ch11-sparsity-interpretability"><span class="header-section-number">11.8.3</span> 희소성과 해석 가능성</h3>
+<p>변수 수가 적다고 해서 자동으로 해석 가능한 모형이 되는 것은 아니다. 해석 가능성은 다음 요소에 좌우된다.</p>
+<ul>
+<li>변수의 임상적·과학적 의미</li>
+<li>변수 간 상관과 대체가능성</li>
+<li>계수의 방향과 크기의 안정성</li>
+<li>전처리와 변수변환</li>
+<li>상호작용과 비선형성</li>
+<li>선택과정의 재현성</li>
+<li>적용집단에서의 외부 타당성</li>
+</ul>
+<p>희소모형은 설명의 출발점을 제공하지만, 선택된 변수가 인과적이거나 유일한 설명이라는 뜻은 아니다.</p>
+</section>
+<section id="sec-ch11-correlated-features" class="level3" data-number="11.8.4">
+<h3 data-number="11.8.4" class="anchored" data-anchor-id="sec-ch11-correlated-features"><span class="header-section-number">11.8.4</span> 상관된 변수군의 해석</h3>
+<p>상관된 변수들이 같은 잠재신호를 측정하면 LASSO는 이 중 하나만 임의로 선택할 수 있다. 다음과 같은 전략을 고려할 수 있다.</p>
+<ul>
+<li>elastic net으로 그룹화 효과 유도</li>
+<li>변수군을 사전에 정의하여 그룹 LASSO 적용</li>
+<li>상관군별 대표변수 선택</li>
+<li>선택빈도를 변수군 수준에서 평가</li>
+<li>개별 변수 대신 예측기여의 공동효과 해석</li>
+</ul>
+<p>과학적 보고에서는 선택된 변수뿐 아니라 높은 상관 때문에 대체될 수 있었던 변수도 함께 제시하는 것이 좋다.</p>
+</section>
+<section id="sec-ch11-feature-selection-leakage" class="level3" data-number="11.8.5">
+<h3 data-number="11.8.5" class="anchored" data-anchor-id="sec-ch11-feature-selection-leakage"><span class="header-section-number">11.8.5</span> 데이터 누출 방지</h3>
+<p>특성 선택은 모든 평가분할 안에서 다시 수행해야 한다. 올바른 교차검증 절차는 다음과 같다.</p>
+<ol type="1">
+<li>훈련폴드에서 결측치 대체와 표준화 모수를 추정한다.</li>
+<li>훈련폴드에서 필터 점수 또는 규제 경로를 계산한다.</li>
+<li>내부 검증으로 변수 수와 하이퍼파라미터를 선택한다.</li>
+<li>선택된 변수로 훈련폴드 전체에서 모형을 재적합한다.</li>
+<li>동일한 전처리와 변수집합을 검증폴드에 적용한다.</li>
+</ol>
+<p>전체 자료에서 먼저 상위 변수를 선택한 뒤 교차검증을 수행하면 선택편향이 발생한다. 반응변수를 사용하지 않는 분산 필터도 시험자료 분포를 이용할 수 있으므로 원칙적으로 훈련자료에서만 추정하는 것이 안전하다.</p>
+</section>
+<section id="sec-ch11-sample-size-sparsity" class="level3" data-number="11.8.6">
+<h3 data-number="11.8.6" class="anchored" data-anchor-id="sec-ch11-sample-size-sparsity"><span class="header-section-number">11.8.6</span> 표본 크기와 희소도</h3>
+<p>고차원 희소학습에서 필요한 표본 크기는 단순히 <span class="math inline">\(p\)</span>에 비례하지 않고 희소도와 로그 차원에 영향을 받는다. 이상적인 조건 아래 대표적 규모는</p>
+<p><span id="eq-ch11-high-dimensional-rate"><span class="math display">\[
+n
+\gtrsim
+C s\log p
+\tag{11.103}\]</span></span></p>
+<p>형태로 나타난다. 그러나 실제 필요한 표본 수는 다음에 따라 크게 달라진다.</p>
+<ul>
+<li>신호 크기</li>
+<li>변수 간 상관</li>
+<li>잡음 수준</li>
+<li>클래스 불균형</li>
+<li>선택목표와 허용오차</li>
+<li>자료분포의 복잡성</li>
+</ul>
+<p>표본 수가 작고 변수 수가 많을수록 선택 결과보다 불확실성과 안정성을 함께 보고해야 한다.</p>
+</section>
+<section id="sec-ch11-method-selection" class="level3" data-number="11.8.7">
+<h3 data-number="11.8.7" class="anchored" data-anchor-id="sec-ch11-method-selection"><span class="header-section-number">11.8.7</span> 분석방법 선택</h3>
+<div id="tbl-ch11-method-selection" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch11-method-selection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;11.7: 분석상황에 따른 특성 선택과 희소학습 방법
+</figcaption>
+<div aria-describedby="tbl-ch11-method-selection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>분석상황</th>
+<th>우선 고려할 방법</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>변수 수가 수만 개 이상</td>
+<td>단순 필터 후 희소모형</td>
+</tr>
+<tr class="even">
+<td>예측알고리즘과 직접 최적화</td>
+<td>래퍼 또는 내장형 방법</td>
+</tr>
+<tr class="odd">
+<td>상관된 변수군이 많음</td>
+<td>elastic net, 그룹 LASSO</td>
+</tr>
+<tr class="even">
+<td>변수비용이 서로 다름</td>
+<td>비용민감 부분집합 선택</td>
+</tr>
+<tr class="odd">
+<td>순서·공간 구조가 있음</td>
+<td>fused LASSO, 그래프 패널티</td>
+</tr>
+<tr class="even">
+<td>원신호를 소수 패턴으로 표현</td>
+<td>희소 부호화와 사전학습</td>
+</tr>
+<tr class="odd">
+<td>적은 선형측정에서 신호복원</td>
+<td>압축 센싱</td>
+</tr>
+<tr class="even">
+<td>과학적 변수발견이 목적</td>
+<td>안정성 분석과 선택 후 추론</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-ch11-reporting" class="level3" data-number="11.8.8">
+<h3 data-number="11.8.8" class="anchored" data-anchor-id="sec-ch11-reporting"><span class="header-section-number">11.8.8</span> 재현 가능한 보고</h3>
+<p>특성 선택과 희소학습 결과를 재현하기 위해 다음을 보고해야 한다.</p>
+<ul>
+<li>후보변수의 정의와 초기 변수 수</li>
+<li>결측치 처리와 표준화 방법</li>
+<li>필터 점수와 임계값</li>
+<li>사용한 학습알고리즘과 손실함수</li>
+<li>규제 패널티와 하이퍼파라미터 범위</li>
+<li>교차검증 또는 중첩 교차검증 설계</li>
+<li>최종 선택변수와 계수</li>
+<li>선택빈도와 안정성 척도</li>
+<li>외부 시험자료 성능</li>
+<li>난수시드와 소프트웨어 구현</li>
+</ul>
+<p>압축 센싱에서는 측정행렬, 신호표현 기저, 추정 희소도, 잡음수준과 종료기준을 추가로 명시해야 한다.</p>
+</section>
+</section>
+<section id="장-요약" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="장-요약">장 요약</h2>
+<p>특성 선택은 원변수 중 분석에 필요한 일부를 선택하는 과정이고, 희소 학습은 모수나 표현계수 대부분을 0으로 만들어 소수의 성분만 사용하도록 하는 접근이다. 두 방법은 고차원 자료에서 과적합과 계산비용을 줄이고 해석 가능한 구조를 얻는 데 사용된다.</p>
+<p>부분집합 선택은 <span class="math inline">\(\ell_0\)</span> 제약을 통해 직접 표현할 수 있지만 가능한 부분집합 수가 <span class="math inline">\(2^p\)</span>로 증가하므로 전수탐색은 빠르게 불가능해진다. 전진 선택, 후진 제거, 단계적 선택, 분기한정법과 혼합정수 최적화는 탐색비용과 최적성 사이에서 서로 다른 절충을 제공한다. 변수선택과 성능평가는 반드시 독립적으로 이루어져야 하며, 전체 선택절차는 중첩 재표본화로 평가해야 한다.</p>
+<p>필터 방식은 상관, 단변량 검정, 상호정보량과 그래프 구조 같은 통계적 점수를 이용하여 모형적합 전에 변수를 선별한다. 계산이 빠르고 대규모 자료에 적합하지만 상호작용과 후속 모형의 구조를 충분히 반영하지 못할 수 있다. mRMR과 Relief 계열은 중복성과 국소 상호작용을 일부 고려한다.</p>
+<p>래퍼 방식은 특정 학습알고리즘의 검증성능을 이용하여 변수부분집합을 평가한다. 순차 선택, 재귀적 특성 제거와 유전 알고리즘은 비선형성과 상호작용을 반영할 수 있지만 계산비용이 크고 검증자료에 과적합될 수 있다. 측정비용이 중요한 경우 예측오차와 변수비용을 함께 최적화할 수 있다.</p>
+<p>내장형 방법은 모형적합과 변수선택을 하나의 목적함수 안에서 수행한다. LASSO는 <span class="math inline">\(\ell_1\)</span> 패널티의 비미분성과 기하학적 꼭짓점 때문에 일부 계수를 정확히 0으로 만든다. elastic net은 상관된 변수군에 더 안정적이며, 그룹 LASSO, 희소 그룹 LASSO와 fused LASSO는 그룹·순서·공간 구조를 반영한다. 규제 모수는 교차검증으로 선택하고 선택안정성과 선택 후 추론(post-selection inference)을 별도로 평가해야 한다.</p>
+<p>희소 표현은 관측벡터를 사전 원자의 소수 조합으로 나타낸다. 사전이 주어진 희소 부호화(sparse coding)는 LASSO와 같은 형태이며, 사전학습은 희소계수와 원자를 교대로 갱신한다. 고정 변환보다 자료적응적 표현을 얻을 수 있지만 목적함수가 비볼록이고 식별성과 초기화 문제가 있다.</p>
+<p>압축 센싱은 희소신호가 적절한 측정행렬로 관측되면 신호 차원보다 적은 측정으로도 복원이 가능하다는 원리를 다룬다. basis pursuit는 <span class="math inline">\(\ell_0\)</span> 복원을 <span class="math inline">\(\ell_1\)</span> 최적화로 완화하며, 상호 일관성, 제한 등거리 성질과 영공간 성질은 복원 가능성을 설명한다. OMP와 반복적 하드 임계화는 대표적인 탐욕적·반복적 복원 알고리즘이다.</p>
+<p>희소성은 변수 수준, 표현 수준과 신호 수준에서 나타날 수 있다. 희소모형은 간결하지만 자동으로 인과적이거나 안정적인 설명을 제공하지 않는다. 상관구조, 표본변동, 데이터 누출, 선택 후 추론과 외부 타당성을 함께 고려해야 한다.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./10-dimensionality-reduction.html" class="pagination-link" aria-label="차원 축소와 거리 척도 학습">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">차원 축소와 거리 척도 학습</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./12-computational-learning-theory.html" class="pagination-link" aria-label="계산 학습 이론">
+        <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">계산 학습 이론</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

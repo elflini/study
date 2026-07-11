@@ -1,0 +1,2665 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>16&nbsp; 강화 학습 – 머신러닝</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./17-explainable-trustworthy-ml.html" rel="next">
+<link href="./15-rule-learning.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-3d841e2d0dac331999ea63b9b6b417ac.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./16-reinforcement-learning.html">VI. 순차적 의사결정과 신뢰성</a></li><li class="breadcrumb-item"><a href="./16-reinforcement-learning.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">강화 학습</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">머신러닝</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="리더 모드 전환">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">I. 머신러닝의 기초</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">머신러닝의 개념과 발전</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-model-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">모형 평가와 선택</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">II. 지도학습</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-linear-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">선형 모형</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-decision-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">의사결정 트리</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-neural-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">신경망</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-support-vector-machines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">서포트 벡터 머신</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-bayesian-classifiers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">베이지안 분류기</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-ensemble-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">앙상블 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">III. 비지도학습과 표현학습</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">클러스터링</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-dimensionality-reduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">차원 축소와 거리 척도 학습</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-feature-selection-sparse-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">특성 선택과 희소 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">IV. 학습이론과 불완전한 데이터</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-computational-learning-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">계산 학습 이론</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-semi-supervised-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">준지도 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">V. 구조화된 확률모형과 규칙</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-probabilistic-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">확률 그래피컬 모형</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-rule-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">규칙 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">VI. 순차적 의사결정과 신뢰성</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-reinforcement-learning.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">강화 학습</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-explainable-trustworthy-ml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">설명 가능한 머신러닝과 신뢰할 수 있는 예측</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#sec-ch16-task-reward" id="toc-sec-ch16-task-reward" class="nav-link active" data-scroll-target="#sec-ch16-task-reward"><span class="header-section-number">16.1</span> 과업과 보상</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch16-agent-environment" id="toc-sec-ch16-agent-environment" class="nav-link" data-scroll-target="#sec-ch16-agent-environment"><span class="header-section-number">16.1.1</span> 에이전트, 환경과 시간</a></li>
+  <li><a href="#sec-ch16-mdp" id="toc-sec-ch16-mdp" class="nav-link" data-scroll-target="#sec-ch16-mdp"><span class="header-section-number">16.1.2</span> 마르코프 의사결정과정</a></li>
+  <li><a href="#sec-ch16-reward-return" id="toc-sec-ch16-reward-return" class="nav-link" data-scroll-target="#sec-ch16-reward-return"><span class="header-section-number">16.1.3</span> 보상과 수익</a></li>
+  <li><a href="#sec-ch16-policy" id="toc-sec-ch16-policy" class="nav-link" data-scroll-target="#sec-ch16-policy"><span class="header-section-number">16.1.4</span> 정책</a></li>
+  <li><a href="#sec-ch16-value-functions" id="toc-sec-ch16-value-functions" class="nav-link" data-scroll-target="#sec-ch16-value-functions"><span class="header-section-number">16.1.5</span> 상태가치와 행동가치</a></li>
+  <li><a href="#sec-ch16-bellman-expectation" id="toc-sec-ch16-bellman-expectation" class="nav-link" data-scroll-target="#sec-ch16-bellman-expectation"><span class="header-section-number">16.1.6</span> 벨만 기대방정식</a></li>
+  <li><a href="#sec-ch16-pomdp" id="toc-sec-ch16-pomdp" class="nav-link" data-scroll-target="#sec-ch16-pomdp"><span class="header-section-number">16.1.7</span> 부분관측과 믿음상태</a></li>
+  <li><a href="#sec-ch16-exploration-exploitation" id="toc-sec-ch16-exploration-exploitation" class="nav-link" data-scroll-target="#sec-ch16-exploration-exploitation"><span class="header-section-number">16.1.8</span> 탐색과 활용</a></li>
+  </ul></li>
+  <li><a href="#sec-ch16-k-armed-bandit" id="toc-sec-ch16-k-armed-bandit" class="nav-link" data-scroll-target="#sec-ch16-k-armed-bandit"><span class="header-section-number">16.2</span> k-무장 밴딧</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch16-bandit-definition" id="toc-sec-ch16-bandit-definition" class="nav-link" data-scroll-target="#sec-ch16-bandit-definition"><span class="header-section-number">16.2.1</span> 밴딧 문제의 정의</a></li>
+  <li><a href="#sec-ch16-regret" id="toc-sec-ch16-regret" class="nav-link" data-scroll-target="#sec-ch16-regret"><span class="header-section-number">16.2.2</span> 누적후회</a></li>
+  <li><a href="#sec-ch16-epsilon-greedy" id="toc-sec-ch16-epsilon-greedy" class="nav-link" data-scroll-target="#sec-ch16-epsilon-greedy"><span class="header-section-number">16.2.3</span> 탐욕정책과 epsilon-탐욕정책</a></li>
+  <li><a href="#sec-ch16-nonstationary-bandit" id="toc-sec-ch16-nonstationary-bandit" class="nav-link" data-scroll-target="#sec-ch16-nonstationary-bandit"><span class="header-section-number">16.2.4</span> 비정상 밴딧과 일정 학습률</a></li>
+  <li><a href="#sec-ch16-ucb" id="toc-sec-ch16-ucb" class="nav-link" data-scroll-target="#sec-ch16-ucb"><span class="header-section-number">16.2.5</span> 상한신뢰구간 행동선택</a></li>
+  <li><a href="#sec-ch16-thompson-sampling" id="toc-sec-ch16-thompson-sampling" class="nav-link" data-scroll-target="#sec-ch16-thompson-sampling"><span class="header-section-number">16.2.6</span> 톰프슨 표본추출</a></li>
+  <li><a href="#sec-ch16-contextual-bandit" id="toc-sec-ch16-contextual-bandit" class="nav-link" data-scroll-target="#sec-ch16-contextual-bandit"><span class="header-section-number">16.2.7</span> 문맥적 밴딧</a></li>
+  </ul></li>
+  <li><a href="#sec-ch16-model-based-learning" id="toc-sec-ch16-model-based-learning" class="nav-link" data-scroll-target="#sec-ch16-model-based-learning"><span class="header-section-number">16.3</span> 모델 기반 학습</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch16-planning-known-model" id="toc-sec-ch16-planning-known-model" class="nav-link" data-scroll-target="#sec-ch16-planning-known-model"><span class="header-section-number">16.3.1</span> 알려진 모형에서의 계획</a></li>
+  <li><a href="#sec-ch16-iterative-policy-evaluation" id="toc-sec-ch16-iterative-policy-evaluation" class="nav-link" data-scroll-target="#sec-ch16-iterative-policy-evaluation"><span class="header-section-number">16.3.2</span> 반복적 정책평가</a></li>
+  <li><a href="#sec-ch16-policy-iteration" id="toc-sec-ch16-policy-iteration" class="nav-link" data-scroll-target="#sec-ch16-policy-iteration"><span class="header-section-number">16.3.3</span> 정책개선과 정책반복</a></li>
+  <li><a href="#sec-ch16-value-iteration" id="toc-sec-ch16-value-iteration" class="nav-link" data-scroll-target="#sec-ch16-value-iteration"><span class="header-section-number">16.3.4</span> 가치반복</a></li>
+  <li><a href="#sec-ch16-asynchronous-dp" id="toc-sec-ch16-asynchronous-dp" class="nav-link" data-scroll-target="#sec-ch16-asynchronous-dp"><span class="header-section-number">16.3.5</span> 비동기 동적계획법과 우선순위 갱신</a></li>
+  <li><a href="#sec-ch16-model-learning" id="toc-sec-ch16-model-learning" class="nav-link" data-scroll-target="#sec-ch16-model-learning"><span class="header-section-number">16.3.6</span> 환경모형의 학습</a></li>
+  <li><a href="#sec-ch16-dyna" id="toc-sec-ch16-dyna" class="nav-link" data-scroll-target="#sec-ch16-dyna"><span class="header-section-number">16.3.7</span> Dyna 구조</a></li>
+  <li><a href="#sec-ch16-mpc-mcts" id="toc-sec-ch16-mpc-mcts" class="nav-link" data-scroll-target="#sec-ch16-mpc-mcts"><span class="header-section-number">16.3.8</span> 모형예측제어와 트리탐색</a></li>
+  </ul></li>
+  <li><a href="#sec-ch16-model-free-learning" id="toc-sec-ch16-model-free-learning" class="nav-link" data-scroll-target="#sec-ch16-model-free-learning"><span class="header-section-number">16.4</span> 모델 프리 학습</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch16-prediction-control" id="toc-sec-ch16-prediction-control" class="nav-link" data-scroll-target="#sec-ch16-prediction-control"><span class="header-section-number">16.4.1</span> 예측과 제어</a></li>
+  <li><a href="#sec-ch16-monte-carlo" id="toc-sec-ch16-monte-carlo" class="nav-link" data-scroll-target="#sec-ch16-monte-carlo"><span class="header-section-number">16.4.2</span> 몬테카를로 예측</a></li>
+  <li><a href="#sec-ch16-temporal-difference" id="toc-sec-ch16-temporal-difference" class="nav-link" data-scroll-target="#sec-ch16-temporal-difference"><span class="header-section-number">16.4.3</span> 시간차 학습</a></li>
+  <li><a href="#sec-ch16-n-step-td" id="toc-sec-ch16-n-step-td" class="nav-link" data-scroll-target="#sec-ch16-n-step-td"><span class="header-section-number">16.4.4</span> n-단계 수익과 TD(lambda)</a></li>
+  <li><a href="#sec-ch16-sarsa" id="toc-sec-ch16-sarsa" class="nav-link" data-scroll-target="#sec-ch16-sarsa"><span class="header-section-number">16.4.5</span> SARSA</a></li>
+  <li><a href="#sec-ch16-q-learning" id="toc-sec-ch16-q-learning" class="nav-link" data-scroll-target="#sec-ch16-q-learning"><span class="header-section-number">16.4.6</span> Q-학습(Q-learning)</a></li>
+  <li><a href="#sec-ch16-expected-sarsa-double-q" id="toc-sec-ch16-expected-sarsa-double-q" class="nav-link" data-scroll-target="#sec-ch16-expected-sarsa-double-q"><span class="header-section-number">16.4.7</span> 기대 SARSA와 이중 Q-학습</a></li>
+  <li><a href="#sec-ch16-on-off-policy" id="toc-sec-ch16-on-off-policy" class="nav-link" data-scroll-target="#sec-ch16-on-off-policy"><span class="header-section-number">16.4.8</span> 온정책과 오프정책 학습</a></li>
+  <li><a href="#sec-ch16-model-free-comparison" id="toc-sec-ch16-model-free-comparison" class="nav-link" data-scroll-target="#sec-ch16-model-free-comparison"><span class="header-section-number">16.4.9</span> 모델 프리 학습 알고리즘의 비교</a></li>
+  </ul></li>
+  <li><a href="#sec-ch16-value-function-approximation" id="toc-sec-ch16-value-function-approximation" class="nav-link" data-scroll-target="#sec-ch16-value-function-approximation"><span class="header-section-number">16.5</span> 가치 함수 근사</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch16-tabular-limitations" id="toc-sec-ch16-tabular-limitations" class="nav-link" data-scroll-target="#sec-ch16-tabular-limitations"><span class="header-section-number">16.5.1</span> 표 형식 방법의 한계</a></li>
+  <li><a href="#sec-ch16-value-objective" id="toc-sec-ch16-value-objective" class="nav-link" data-scroll-target="#sec-ch16-value-objective"><span class="header-section-number">16.5.2</span> 가치예측의 목적함수</a></li>
+  <li><a href="#sec-ch16-linear-value-approximation" id="toc-sec-ch16-linear-value-approximation" class="nav-link" data-scroll-target="#sec-ch16-linear-value-approximation"><span class="header-section-number">16.5.3</span> 선형 가치함수 근사</a></li>
+  <li><a href="#sec-ch16-lstd" id="toc-sec-ch16-lstd" class="nav-link" data-scroll-target="#sec-ch16-lstd"><span class="header-section-number">16.5.4</span> 최소제곱 시간차 학습</a></li>
+  <li><a href="#sec-ch16-approximate-control" id="toc-sec-ch16-approximate-control" class="nav-link" data-scroll-target="#sec-ch16-approximate-control"><span class="header-section-number">16.5.5</span> 근사 행동가치와 제어</a></li>
+  <li><a href="#sec-ch16-dqn" id="toc-sec-ch16-dqn" class="nav-link" data-scroll-target="#sec-ch16-dqn"><span class="header-section-number">16.5.6</span> 심층 Q-네트워크</a></li>
+  <li><a href="#sec-ch16-policy-gradient" id="toc-sec-ch16-policy-gradient" class="nav-link" data-scroll-target="#sec-ch16-policy-gradient"><span class="header-section-number">16.5.7</span> 정책경사법</a></li>
+  <li><a href="#sec-ch16-baseline-advantage" id="toc-sec-ch16-baseline-advantage" class="nav-link" data-scroll-target="#sec-ch16-baseline-advantage"><span class="header-section-number">16.5.8</span> 기준선과 이점함수</a></li>
+  <li><a href="#sec-ch16-actor-critic" id="toc-sec-ch16-actor-critic" class="nav-link" data-scroll-target="#sec-ch16-actor-critic"><span class="header-section-number">16.5.9</span> 액터-크리틱</a></li>
+  <li><a href="#sec-ch16-trpo-ppo" id="toc-sec-ch16-trpo-ppo" class="nav-link" data-scroll-target="#sec-ch16-trpo-ppo"><span class="header-section-number">16.5.10</span> 신뢰영역과 PPO</a></li>
+  <li><a href="#sec-ch16-continuous-actions" id="toc-sec-ch16-continuous-actions" class="nav-link" data-scroll-target="#sec-ch16-continuous-actions"><span class="header-section-number">16.5.11</span> 연속 행동과 결정론적 정책경사</a></li>
+  <li><a href="#sec-ch16-modern-value-extensions" id="toc-sec-ch16-modern-value-extensions" class="nav-link" data-scroll-target="#sec-ch16-modern-value-extensions"><span class="header-section-number">16.5.12</span> 분포적·다중단계·모형결합 확장</a></li>
+  </ul></li>
+  <li><a href="#sec-ch16-imitation-learning" id="toc-sec-ch16-imitation-learning" class="nav-link" data-scroll-target="#sec-ch16-imitation-learning"><span class="header-section-number">16.6</span> 모방학습</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch16-imitation-definition" id="toc-sec-ch16-imitation-definition" class="nav-link" data-scroll-target="#sec-ch16-imitation-definition"><span class="header-section-number">16.6.1</span> 전문가 자료에서 정책 학습</a></li>
+  <li><a href="#sec-ch16-behavior-cloning" id="toc-sec-ch16-behavior-cloning" class="nav-link" data-scroll-target="#sec-ch16-behavior-cloning"><span class="header-section-number">16.6.2</span> 행동복제</a></li>
+  <li><a href="#sec-ch16-dagger" id="toc-sec-ch16-dagger" class="nav-link" data-scroll-target="#sec-ch16-dagger"><span class="header-section-number">16.6.3</span> DAgger</a></li>
+  <li><a href="#sec-ch16-inverse-rl" id="toc-sec-ch16-inverse-rl" class="nav-link" data-scroll-target="#sec-ch16-inverse-rl"><span class="header-section-number">16.6.4</span> 역강화 학습</a></li>
+  <li><a href="#sec-ch16-maxent-irl" id="toc-sec-ch16-maxent-irl" class="nav-link" data-scroll-target="#sec-ch16-maxent-irl"><span class="header-section-number">16.6.5</span> 최대엔트로피 역강화 학습</a></li>
+  <li><a href="#sec-ch16-gail" id="toc-sec-ch16-gail" class="nav-link" data-scroll-target="#sec-ch16-gail"><span class="header-section-number">16.6.6</span> 생성적 적대 모방학습</a></li>
+  <li><a href="#sec-ch16-offline-rl" id="toc-sec-ch16-offline-rl" class="nav-link" data-scroll-target="#sec-ch16-offline-rl"><span class="header-section-number">16.6.7</span> 오프라인 강화 학습과의 관계</a></li>
+  <li><a href="#sec-ch16-imperfect-experts" id="toc-sec-ch16-imperfect-experts" class="nav-link" data-scroll-target="#sec-ch16-imperfect-experts"><span class="header-section-number">16.6.8</span> 전문가의 불완전성과 다중 전문가</a></li>
+  <li><a href="#sec-ch16-imitation-evaluation" id="toc-sec-ch16-imitation-evaluation" class="nav-link" data-scroll-target="#sec-ch16-imitation-evaluation"><span class="header-section-number">16.6.9</span> 모방학습의 평가</a></li>
+  </ul></li>
+  <li><a href="#강화-학습의-실무-설계" id="toc-강화-학습의-실무-설계" class="nav-link" data-scroll-target="#강화-학습의-실무-설계">강화 학습의 실무 설계</a>
+  <ul class="collapse">
+  <li><a href="#문제를-mdp로-변환하기" id="toc-문제를-mdp로-변환하기" class="nav-link" data-scroll-target="#문제를-mdp로-변환하기">문제를 MDP로 변환하기</a></li>
+  <li><a href="#알고리즘-선택" id="toc-알고리즘-선택" class="nav-link" data-scroll-target="#알고리즘-선택">알고리즘 선택</a></li>
+  <li><a href="#정책평가와-불확실성" id="toc-정책평가와-불확실성" class="nav-link" data-scroll-target="#정책평가와-불확실성">정책평가와 불확실성</a></li>
+  <li><a href="#안전성과-제약" id="toc-안전성과-제약" class="nav-link" data-scroll-target="#안전성과-제약">안전성과 제약</a></li>
+  <li><a href="#재현-가능한-실험" id="toc-재현-가능한-실험" class="nav-link" data-scroll-target="#재현-가능한-실험">재현 가능한 실험</a></li>
+  </ul></li>
+  <li><a href="#장-요약" id="toc-장-요약" class="nav-link" data-scroll-target="#장-요약">장 요약</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./16-reinforcement-learning.html">VI. 순차적 의사결정과 신뢰성</a></li><li class="breadcrumb-item"><a href="./16-reinforcement-learning.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">강화 학습</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-ch16" class="quarto-section-identifier"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">강화 학습</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>지도학습은 입력과 정답의 쌍으로부터 예측규칙을 학습하고, 비지도학습은 명시적인 정답 없이 자료의 구조를 탐색한다. 그러나 많은 실제 문제에서는 학습자가 단순히 주어진 자료를 분석하는 데 그치지 않고 환경에 <strong>행동</strong>을 가하며, 그 행동의 결과로 얻는 보상을 이용하여 이후의 선택을 개선해야 한다. 로봇의 이동, 임상치료 전략, 재고관리, 광고배치, 추천시스템과 게임 플레이는 모두 현재의 행동이 미래의 상태와 보상에 영향을 주는 순차적 의사결정 문제이다.</p>
+<p>강화 학습(reinforcement learning)은 에이전트(agent)가 환경(environment)과 반복적으로 상호작용하면서 장기 누적보상을 최대화하는 정책(policy)을 학습하는 방법이다. 시점 <span class="math inline">\(t\)</span>에서 에이전트는 상태 <span class="math inline">\(S_t\)</span>를 관찰하고 행동 <span class="math inline">\(A_t\)</span>를 선택한다. 환경은 보상 <span class="math inline">\(R_{t+1}\)</span>과 다음 상태 <span class="math inline">\(S_{t+1}\)</span>을 반환한다.</p>
+<p><span id="eq-ch16-agent-environment-transition"><span class="math display">\[
+S_t
+\xrightarrow{\ A_t\ }
+(R_{t+1},S_{t+1}).
+\tag{16.1}\]</span></span></p>
+<p>강화 학습의 어려움은 정답 행동이 직접 주어지지 않는다는 데 있다. 에이전트는 행동의 결과로 받은 보상만을 이용해 어떤 선택이 좋은지 추론해야 한다. 또한 즉각적인 보상이 큰 행동이 장기적으로도 최선이라는 보장은 없다. 현재의 행동은 미래에 도달할 수 있는 상태를 변화시키므로, 강화 학습은 <strong>시간적으로 지연된 결과에 대한 책임 할당</strong>, <strong>탐색과 활용의 절충</strong>, <strong>관측되지 않은 환경동역학의 학습</strong>, <strong>분포가 계속 변하는 자료에서의 안정적 최적화</strong>를 동시에 다룬다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch16-overview" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch16-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="16-reinforcement-learning_files/figure-html/fig-ch16-overview-1.png" class="img-fluid figure-img" width="864">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch16-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;16.1: 강화 학습에서 에이전트와 환경의 순환적 상호작용
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch16-overview" class="quarto-xref">그림&nbsp;<span>16.1</span></a><!-- -->에서 강화 학습 자료는 고정된 표본이 아니다. 현재 정책이 선택한 행동이 다음 상태와 이후에 수집되는 자료를 결정한다. 따라서 예측모형의 오차를 줄이는 것만으로는 충분하지 않으며, 행동이 미래에 미치는 영향을 평가해야 한다.</p>
+<p>이 장에서는 먼저 강화 학습 과업을 마르코프 의사결정과정으로 정식화하고 보상, 수익, 정책과 가치함수를 정의한다. 이어 즉각적인 의사결정을 다루는 <span class="math inline">\(k\)</span>-무장 밴딧, 환경모형을 이용하는 모델 기반 학습, 모형 없이 경험으로부터 학습하는 모델 프리 방법, 고차원 문제를 위한 가치함수 근사와 심층 강화 학습, 전문가 행동으로부터 정책을 학습하는 모방학습을 설명한다.</p>
+<section id="sec-ch16-task-reward" class="level2" data-number="16.1">
+<h2 data-number="16.1" class="anchored" data-anchor-id="sec-ch16-task-reward"><span class="header-section-number">16.1</span> 과업과 보상</h2>
+<section id="sec-ch16-agent-environment" class="level3" data-number="16.1.1">
+<h3 data-number="16.1.1" class="anchored" data-anchor-id="sec-ch16-agent-environment"><span class="header-section-number">16.1.1</span> 에이전트, 환경과 시간</h3>
+<p>강화 학습의 기본 단위는 에이전트와 환경의 상호작용이다. 이산시간 <span class="math inline">\(t=0,1,2,\ldots\)</span>에서 에이전트는 상태공간 <span class="math inline">\(\mathcal S\)</span>의 상태 <span class="math inline">\(S_t\)</span>를 관찰하고, 행동공간 <span class="math inline">\(\mathcal A(S_t)\)</span>에서 행동 <span class="math inline">\(A_t\)</span>를 선택한다. 환경은 다음 상태와 스칼라 보상을 생성한다.</p>
+<p><span id="eq-ch16-basic-components"><span class="math display">\[
+S_t\in\mathcal S,
+\qquad
+A_t\in\mathcal A(S_t),
+\qquad
+R_{t+1}\in\mathbb R.
+\tag{16.2}\]</span></span></p>
+<p>상태는 미래 의사결정에 필요한 정보를 요약한다. 예를 들어 임상치료 문제에서 상태는 현재 질병 중증도, 검사결과, 이전 치료와 부작용을 포함할 수 있다. 행동은 투약 여부나 용량이며, 보상은 건강상태의 개선, 비용과 부작용을 결합한 효용으로 정의할 수 있다.</p>
+<p>강화 학습 문제는 흔히 <strong>에피소드형</strong>(episodic)과 <strong>계속형</strong>(continuing)으로 구분한다.</p>
+<ul>
+<li>에피소드형 과업은 시작상태와 종료상태가 있다. 게임 한 판, 환자의 입원기간, 로봇이 목표지점에 도달하는 과정이 예이다.</li>
+<li>계속형 과업은 자연스러운 종료점 없이 지속된다. 전력망 제어, 온라인 추천, 공정제어가 예이다.</li>
+</ul>
+<p>에피소드 <span class="math inline">\(i\)</span>의 궤적(trajectory)은 다음과 같다.</p>
+<p><span id="eq-ch16-trajectory"><span class="math display">\[
+\tau_i
+=
+(S_0,A_0,R_1,S_1,A_1,R_2,\ldots,S_{T_i}).
+\tag{16.3}\]</span></span></p>
+<p>지도학습의 관측값과 달리 궤적 안의 상태와 행동은 일반적으로 서로 독립이 아니다. 또한 궤적의 분포는 자료를 생성한 정책에 의존한다.</p>
+</section>
+<section id="sec-ch16-mdp" class="level3" data-number="16.1.2">
+<h3 data-number="16.1.2" class="anchored" data-anchor-id="sec-ch16-mdp"><span class="header-section-number">16.1.2</span> 마르코프 의사결정과정</h3>
+<p>강화 학습의 대표적인 수학적 모형은 <strong>마르코프 의사결정과정</strong>(Markov decision process, MDP)이다. 유한 MDP는 보통 다음의 튜플로 정의한다.</p>
+<p><span id="eq-ch16-mdp-tuple"><span class="math display">\[
+\mathcal M
+=
+(\mathcal S,\mathcal A,P,r,\gamma).
+\tag{16.4}\]</span></span></p>
+<p>여기서</p>
+<ul>
+<li><span class="math inline">\(\mathcal S\)</span>는 상태공간,</li>
+<li><span class="math inline">\(\mathcal A\)</span>는 행동공간,</li>
+<li><span class="math inline">\(P(s'\mid s,a)\)</span>는 상태전이확률,</li>
+<li><span class="math inline">\(r(s,a)\)</span> 또는 <span class="math inline">\(r(s,a,s')\)</span>는 기대보상,</li>
+<li><span class="math inline">\(\gamma\in[0,1]\)</span>는 할인율이다.</li>
+</ul>
+<p>마르코프 성질은 현재 상태와 행동이 주어졌을 때 다음 상태와 보상의 분포가 과거 전체와 독립임을 뜻한다.</p>
+<p><span id="eq-ch16-markov-property"><span class="math display">\[
+\Pr(S_{t+1}=s',R_{t+1}=r
+\mid S_0,A_0,\ldots,S_t=s,A_t=a)
+=
+\Pr(S_{t+1}=s',R_{t+1}=r\mid S_t=s,A_t=a).
+\tag{16.5}\]</span></span></p>
+<p>상태전이와 보상을 함께 나타내면</p>
+<p><span id="eq-ch16-transition-reward-kernel"><span class="math display">\[
+p(s',r\mid s,a)
+=
+\Pr(S_{t+1}=s',R_{t+1}=r\mid S_t=s,A_t=a)
+\tag{16.6}\]</span></span></p>
+<p>이고, 상태전이확률과 기대보상은 각각</p>
+<p><span id="eq-ch16-transition-probability"><span class="math display">\[
+P(s'\mid s,a)
+=
+\sum_r p(s',r\mid s,a),
+\tag{16.7}\]</span></span></p>
+<p><span id="eq-ch16-expected-reward"><span class="math display">\[
+r(s,a)
+=
+E(R_{t+1}\mid S_t=s,A_t=a)
+\tag{16.8}\]</span></span></p>
+<p>로 정의한다.</p>
+<p>마르코프 성질은 현실의 모든 과정이 기억이 없다는 의미가 아니다. 상태를 적절히 정의하여 미래 예측에 필요한 과거 정보를 충분히 포함한다는 모형화 가정이다. 현재 관측만으로 충분하지 않으면 과거 관측의 요약, 순환신경망의 은닉상태 또는 믿음상태(belief state)를 사용할 수 있다.</p>
+</section>
+<section id="sec-ch16-reward-return" class="level3" data-number="16.1.3">
+<h3 data-number="16.1.3" class="anchored" data-anchor-id="sec-ch16-reward-return"><span class="header-section-number">16.1.3</span> 보상과 수익</h3>
+<p>보상 <span class="math inline">\(R_{t+1}\)</span>은 한 단계에서 환경이 제공하는 즉각적 평가이다. 그러나 에이전트의 목표는 일반적으로 즉각적 보상이 아니라 미래 보상의 누적합인 <strong>수익</strong>(return)을 최대화하는 것이다. 유한 에피소드에서 시점 <span class="math inline">\(t\)</span>의 수익은</p>
+<p><span id="eq-ch16-undiscounted-return"><span class="math display">\[
+G_t
+=
+R_{t+1}+R_{t+2}+\cdots+R_T
+\tag{16.9}\]</span></span></p>
+<p>로 정의할 수 있다. 계속형 과업에서는 무한합이 발산할 수 있으므로 할인율 <span class="math inline">\(\gamma\)</span>를 사용한다.</p>
+<p><span id="eq-ch16-discounted-return"><span class="math display">\[
+G_t
+=
+\sum_{k=0}^{\infty}\gamma^k R_{t+k+1},
+\qquad 0\leq\gamma&lt;1.
+\tag{16.10}\]</span></span></p>
+<p>수익은 다음의 재귀식을 만족한다.</p>
+<p><span id="eq-ch16-return-recursion"><span class="math display">\[
+G_t
+=
+R_{t+1}+\gamma G_{t+1}.
+\tag{16.11}\]</span></span></p>
+<p>할인율은 미래 보상의 현재가치를 조절한다. <span class="math inline">\(\gamma\)</span>가 작으면 즉각적 보상을 중시하고, 1에 가까우면 먼 미래의 결과까지 고려한다. 그러나 할인율은 단순한 시간선호만을 의미하지 않는다. 과업이 임의의 시점에 종료될 확률이나 장기예측의 불확실성을 나타내는 수학적 장치로도 해석할 수 있다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch16-discounting" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch16-discounting-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="16-reinforcement-learning_files/figure-html/fig-ch16-discounting-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch16-discounting-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;16.2: 할인율에 따른 미래 보상의 가중치
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch16-discounting" class="quarto-xref">그림&nbsp;<span>16.2</span></a><!-- -->에서 작은 할인율은 가까운 미래에 대부분의 가중치를 부여한다. <span class="math inline">\(\gamma=0.99\)</span>처럼 큰 할인율은 장기간의 결과를 고려하지만, 가치추정의 분산과 계산부담을 증가시킬 수 있다.</p>
+<p>보상 설계는 강화 학습의 핵심 모형화 단계이다. 에이전트는 설계자가 의도한 목표가 아니라 실제로 주어진 보상을 최대화한다. 따라서 잘못 정의된 대리보상은 보상 해킹(reward hacking), 원하지 않은 우회행동과 안전문제를 유발할 수 있다. 보상은 가능한 한 최종 목표와 정렬되어야 하며, 여러 목표가 있으면 가중합, 제약조건 또는 다목적 최적화로 표현할 수 있다.</p>
+</section>
+<section id="sec-ch16-policy" class="level3" data-number="16.1.4">
+<h3 data-number="16.1.4" class="anchored" data-anchor-id="sec-ch16-policy"><span class="header-section-number">16.1.4</span> 정책</h3>
+<p>정책 <span class="math inline">\(\pi\)</span>는 상태에서 행동을 선택하는 규칙이다. 확률적 정책은</p>
+<p><span id="eq-ch16-stochastic-policy"><span class="math display">\[
+\pi(a\mid s)
+=
+\Pr(A_t=a\mid S_t=s)
+\tag{16.12}\]</span></span></p>
+<p>로 정의한다. 결정론적 정책은</p>
+<p><span id="eq-ch16-deterministic-policy"><span class="math display">\[
+A_t=\mu(S_t)
+\tag{16.13}\]</span></span></p>
+<p>와 같이 상태를 하나의 행동으로 대응시킨다.</p>
+<p>확률적 정책은 탐색을 자연스럽게 표현하고, 동일한 상태에서도 여러 행동이 합리적일 수 있는 문제에 유용하다. 연속형 행동에서는 평균과 분산을 신경망으로 출력하는 정규분포 정책을 사용할 수 있다.</p>
+<p>정책 <span class="math inline">\(\pi\)</span>가 유도하는 궤적분포는</p>
+<p><span id="eq-ch16-trajectory-distribution"><span class="math display">\[
+p_\pi(\tau)
+=
+p(S_0)
+\prod_{t=0}^{T-1}
+\pi(A_t\mid S_t)
+P(S_{t+1}\mid S_t,A_t)
+\tag{16.14}\]</span></span></p>
+<p>로 표현된다. 강화 학습의 목표는 정책의 기대수익</p>
+<p><span id="eq-ch16-policy-objective"><span class="math display">\[
+J(\pi)
+=
+E_{\tau\sim p_\pi}[G_0]
+\tag{16.15}\]</span></span></p>
+<p>을 최대화하는 정책을 찾는 것이다.</p>
+<p><span id="eq-ch16-optimal-policy"><span class="math display">\[
+\pi^*
+\in
+\arg\max_{\pi}J(\pi).
+\tag{16.16}\]</span></span></p>
+</section>
+<section id="sec-ch16-value-functions" class="level3" data-number="16.1.5">
+<h3 data-number="16.1.5" class="anchored" data-anchor-id="sec-ch16-value-functions"><span class="header-section-number">16.1.5</span> 상태가치와 행동가치</h3>
+<p>정책 <span class="math inline">\(\pi\)</span>의 <strong>상태가치함수(state-value function)</strong>는 상태 <span class="math inline">\(s\)</span>에서 시작해 정책 <span class="math inline">\(\pi\)</span>를 따를 때의 기대수익이다.</p>
+<p><span id="eq-ch16-state-value"><span class="math display">\[
+v_\pi(s)
+=
+E_\pi(G_t\mid S_t=s).
+\tag{16.17}\]</span></span></p>
+<p><strong>행동가치함수(action-value function)</strong>는 상태 <span class="math inline">\(s\)</span>에서 행동 <span class="math inline">\(a\)</span>를 선택한 뒤 정책 <span class="math inline">\(\pi\)</span>를 따를 때의 기대수익이다.</p>
+<p><span id="eq-ch16-action-value"><span class="math display">\[
+q_\pi(s,a)
+=
+E_\pi(G_t\mid S_t=s,A_t=a).
+\tag{16.18}\]</span></span></p>
+<p>두 가치함수는 다음 관계를 갖는다.</p>
+<p><span id="eq-ch16-v-from-q"><span class="math display">\[
+v_\pi(s)
+=
+\sum_{a\in\mathcal A(s)}
+\pi(a\mid s)q_\pi(s,a).
+\tag{16.19}\]</span></span></p>
+<p>상태가치는 상태의 장기적 유망성을, 행동가치는 특정 상태에서 각 행동의 장기적 가치를 평가한다. 최적 행동가치함수를 알고 있으면 최적 정책은 탐욕적으로 선택할 수 있다.</p>
+<p><span id="eq-ch16-greedy-optimal-policy"><span class="math display">\[
+\pi^*(s)
+\in
+\arg\max_a q_*(s,a).
+\tag{16.20}\]</span></span></p>
+</section>
+<section id="sec-ch16-bellman-expectation" class="level3" data-number="16.1.6">
+<h3 data-number="16.1.6" class="anchored" data-anchor-id="sec-ch16-bellman-expectation"><span class="header-section-number">16.1.6</span> 벨만 기대방정식</h3>
+<p>수익의 재귀식 <a href="#eq-ch16-return-recursion" class="quarto-xref">방정식&nbsp;<span>16.11</span></a><!-- -->을 가치함수에 적용하면 벨만 기대방정식을 얻는다.</p>
+<p><span id="eq-ch16-bellman-expectation-v"><span class="math display">\[
+\begin{aligned}
+v_\pi(s)
+&amp;=
+E_\pi(R_{t+1}+\gamma G_{t+1}\mid S_t=s)\\
+&amp;=
+\sum_a\pi(a\mid s)
+\sum_{s'}P(s'\mid s,a)
+\left[r(s,a,s')+\gamma v_\pi(s')\right].
+\end{aligned}
+\tag{16.21}\]</span></span></p>
+<p>행동가치함수는</p>
+<p><span id="eq-ch16-bellman-expectation-q"><span class="math display">\[
+q_\pi(s,a)
+=
+\sum_{s'}P(s'\mid s,a)
+\left[
+r(s,a,s')
++
+\gamma
+\sum_{a'}\pi(a'\mid s')q_\pi(s',a')
+\right]
+\tag{16.22}\]</span></span></p>
+<p>를 만족한다.</p>
+<p>벨만 방정식(Bellman equation)은 장기적 가치가 즉각적 보상과 다음 상태의 가치로 분해된다는 것을 보여준다. 강화 학습의 많은 알고리즘은 이 자기일관성 조건을 표본자료로 근사하는 방법이다.</p>
+<p>최적 가치함수는 벨만 최적방정식을 만족한다.</p>
+<p><span id="eq-ch16-bellman-optimality-v"><span class="math display">\[
+v_*(s)
+=
+\max_a
+\sum_{s'}P(s'\mid s,a)
+\left[r(s,a,s')+\gamma v_*(s')\right],
+\tag{16.23}\]</span></span></p>
+<p><span id="eq-ch16-bellman-optimality-q"><span class="math display">\[
+q_*(s,a)
+=
+\sum_{s'}P(s'\mid s,a)
+\left[r(s,a,s')+\gamma\max_{a'}q_*(s',a')\right].
+\tag{16.24}\]</span></span></p>
+<p>기대방정식은 주어진 정책을 평가하는 선형 관계이고, 최적방정식은 최대연산 때문에 비선형이다.</p>
+</section>
+<section id="sec-ch16-pomdp" class="level3" data-number="16.1.7">
+<h3 data-number="16.1.7" class="anchored" data-anchor-id="sec-ch16-pomdp"><span class="header-section-number">16.1.7</span> 부분관측과 믿음상태</h3>
+<p>현실에서는 에이전트가 참된 상태를 직접 관찰하지 못하는 경우가 많다. 부분관측 마르코프 의사결정과정(partially observable MDP, POMDP)에서는 숨은 상태 <span class="math inline">\(S_t\)</span>로부터 관측 <span class="math inline">\(O_t\)</span>가 생성된다.</p>
+<p><span id="eq-ch16-observation-model"><span class="math display">\[
+O_t\sim Z(\cdot\mid S_t).
+\tag{16.25}\]</span></span></p>
+<p>과거 관측과 행동에 근거한 상태의 사후분포</p>
+<p><span id="eq-ch16-belief-state"><span class="math display">\[
+b_t(s)
+=
+\Pr(S_t=s\mid O_{0:t},A_{0:t-1})
+\tag{16.26}\]</span></span></p>
+<p>를 믿음상태라고 한다. 믿음상태는 확률분포이지만 마르코프 상태로 사용할 수 있다. 실제 구현에서는 베이지안 필터, 은닉 마르코프 모형, 순환신경망과 트랜스포머를 이용하여 상태정보를 요약한다.</p>
+</section>
+<section id="sec-ch16-exploration-exploitation" class="level3" data-number="16.1.8">
+<h3 data-number="16.1.8" class="anchored" data-anchor-id="sec-ch16-exploration-exploitation"><span class="header-section-number">16.1.8</span> 탐색과 활용</h3>
+<p>에이전트는 현재 가장 좋아 보이는 행동을 선택하는 <strong>활용</strong>(exploitation)과, 불확실하지만 더 나을 가능성이 있는 행동을 시도하는 <strong>탐색</strong>(exploration) 사이에서 절충해야 한다. 지나친 활용은 잘못된 초기추정에 갇힐 수 있고, 지나친 탐색은 이미 알려진 좋은 행동을 충분히 사용하지 못한다.</p>
+<p>탐색은 단순한 무작위 행동뿐 아니라 다음과 같은 형태를 포함한다.</p>
+<ul>
+<li><span class="math inline">\(\varepsilon\)</span>-탐욕 정책처럼 일정 확률로 무작위 행동을 선택한다.</li>
+<li>불확실성 상한을 이용해 정보가 부족한 행동을 낙관적으로 평가한다.</li>
+<li>사후분포에서 가능한 환경을 표본추출하여 행동한다.</li>
+<li>상태공간의 방문빈도 또는 예측오차를 내재적 보상으로 사용한다.</li>
+<li>정책의 엔트로피를 유지하여 조기 결정화를 막는다.</li>
+</ul>
+<p>탐색의 필요성과 난이도는 이후의 밴딧과 모델 프리 학습에서 구체적으로 다룬다.</p>
+<div class="callout callout-style-default callout-important callout-titled" title="강화 학습 과업의 네 가지 질문">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">중요</span>강화 학습 과업의 네 가지 질문
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>강화 학습 문제를 설계할 때는 상태가 의사결정에 충분한가, 행동이 실제로 실행 가능한가, 보상이 최종 목표와 정렬되는가, 할인율과 종료조건이 시간적 목표를 적절히 나타내는가를 먼저 점검해야 한다.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-ch16-k-armed-bandit" class="level2" data-number="16.2">
+<h2 data-number="16.2" class="anchored" data-anchor-id="sec-ch16-k-armed-bandit"><span class="header-section-number">16.2</span> k-무장 밴딧</h2>
+<section id="sec-ch16-bandit-definition" class="level3" data-number="16.2.1">
+<h3 data-number="16.2.1" class="anchored" data-anchor-id="sec-ch16-bandit-definition"><span class="header-section-number">16.2.1</span> 밴딧 문제의 정의</h3>
+<p><span class="math inline">\(k\)</span>-무장 밴딧(<span class="math inline">\(k\)</span>-armed bandit)은 상태전이가 없는 가장 단순한 강화 학습 문제이다. 시점 <span class="math inline">\(t\)</span>마다 에이전트는 <span class="math inline">\(k\)</span>개의 행동 중 하나를 선택하고 즉각적 보상 <span class="math inline">\(R_t\)</span>를 받는다. 행동 <span class="math inline">\(a\)</span>의 참된 가치는</p>
+<p><span id="eq-ch16-bandit-true-value"><span class="math display">\[
+q_*(a)
+=
+E(R_t\mid A_t=a)
+\tag{16.27}\]</span></span></p>
+<p>이다. 최적 행동은</p>
+<p><span id="eq-ch16-bandit-optimal-action"><span class="math display">\[
+a^*
+\in
+\arg\max_a q_*(a)
+\tag{16.28}\]</span></span></p>
+<p>로 정의한다.</p>
+<p>밴딧 문제에는 다음 상태가 없으므로 시간적 책임 할당은 필요하지 않다. 그러나 각 행동의 보상분포를 알지 못하기 때문에 탐색과 활용의 핵심 문제가 그대로 남는다.</p>
+<p>시점 <span class="math inline">\(t\)</span>까지 행동 <span class="math inline">\(a\)</span>를 선택한 횟수를</p>
+<p><span id="eq-ch16-bandit-count"><span class="math display">\[
+N_t(a)
+=
+\sum_{i=1}^{t}I(A_i=a)
+\tag{16.29}\]</span></span></p>
+<p>라고 하자. 표본평균 행동가치 추정량은</p>
+<p><span id="eq-ch16-sample-average-action-value"><span class="math display">\[
+Q_t(a)
+=
+\frac{\sum_{i=1}^{t}R_i I(A_i=a)}{N_t(a)}
+\tag{16.30}\]</span></span></p>
+<p>이다. 새 보상 <span class="math inline">\(R_t\)</span>가 관측되면 전체 자료를 저장하지 않고 다음과 같이 갱신할 수 있다.</p>
+<p><span id="eq-ch16-incremental-mean"><span class="math display">\[
+Q_{n+1}(a)
+=
+Q_n(a)
++
+\frac{1}{n}
+\left[R_n-Q_n(a)\right].
+\tag{16.31}\]</span></span></p>
+<p>대괄호 안의 항은 현재 예측과 관측 보상의 차이인 오차이다. 강화 학습의 많은 갱신식은</p>
+<p><span id="eq-ch16-general-update-form"><span class="math display">\[
+\text{새 추정값}
+=
+\text{이전 추정값}
++
+\text{학습률}\times\text{오차}
+\tag{16.32}\]</span></span></p>
+<p>라는 공통 구조를 갖는다.</p>
+</section>
+<section id="sec-ch16-regret" class="level3" data-number="16.2.2">
+<h3 data-number="16.2.2" class="anchored" data-anchor-id="sec-ch16-regret"><span class="header-section-number">16.2.2</span> 누적후회</h3>
+<p>밴딧 알고리즘은 보상뿐 아니라 <strong>후회</strong>(regret)로 평가할 수 있다. 시점 <span class="math inline">\(t\)</span>에서 최적 행동을 선택하지 않아 잃은 기대보상은</p>
+<p><span class="math display">\[
+q_*(a^*)-q_*(A_t)
+\]</span></p>
+<p>이고, <span class="math inline">\(T\)</span>시점까지의 누적후회는</p>
+<p><span id="eq-ch16-cumulative-regret"><span class="math display">\[
+\mathcal R_T
+=
+\sum_{t=1}^{T}
+\left[q_*(a^*)-q_*(A_t)\right]
+\tag{16.33}\]</span></span></p>
+<p>이다. 기대 누적후회는 행동별 선택횟수로도 표현할 수 있다.</p>
+<p><span id="eq-ch16-regret-gap-form"><span class="math display">\[
+E(\mathcal R_T)
+=
+\sum_{a\neq a^*}
+\Delta_a E[N_T(a)],
+\qquad
+\Delta_a=q_*(a^*)-q_*(a).
+\tag{16.34}\]</span></span></p>
+<p>좋은 밴딧 알고리즘은 최적이 아닌 행동을 충분히 탐색하되, 장기적으로 그 선택횟수가 전체 시간보다 느리게 증가하여 평균후회가 0으로 수렴해야 한다.</p>
+</section>
+<section id="sec-ch16-epsilon-greedy" class="level3" data-number="16.2.3">
+<h3 data-number="16.2.3" class="anchored" data-anchor-id="sec-ch16-epsilon-greedy"><span class="header-section-number">16.2.3</span> 탐욕정책과 epsilon-탐욕정책</h3>
+<p>탐욕정책은 현재 추정가치가 가장 큰 행동을 선택한다.</p>
+<p><span id="eq-ch16-greedy-action"><span class="math display">\[
+A_t
+\in
+\arg\max_a Q_t(a).
+\tag{16.35}\]</span></span></p>
+<p>탐욕정책은 활용만 수행하므로 초기의 우연한 고보상 행동에 고착될 수 있다. <span class="math inline">\(\varepsilon\)</span>-탐욕 정책은 확률 <span class="math inline">\(1-\varepsilon\)</span>로 탐욕행동을, 확률 <span class="math inline">\(\varepsilon\)</span>로 무작위 행동을 선택한다.</p>
+<p><span id="eq-ch16-epsilon-greedy-policy"><span class="math display">\[
+\Pr(A_t=a)
+=
+\begin{cases}
+1-\varepsilon+\varepsilon/k,
+&amp; a\in\arg\max_bQ_t(b),\\
+\varepsilon/k,
+&amp; \text{otherwise}.
+\end{cases}
+\tag{16.36}\]</span></span></p>
+<p><span class="math inline">\(\varepsilon\)</span>을 시간에 따라 감소시키면 초기에는 넓게 탐색하고 후반에는 활용을 강화할 수 있다. 그러나 너무 빠른 감소는 충분한 탐색을 막는다.</p>
+<p>낙관적 초기값은 모든 행동의 초기 추정값 <span class="math inline">\(Q_1(a)\)</span>을 현실적인 보상보다 크게 설정한다. 선택된 행동의 추정값은 실제 보상으로 낮아지므로 아직 선택하지 않은 행동이 상대적으로 매력적으로 보인다. 이 방법은 정상환경에서는 효과적이지만 비정상환경에서 지속적 탐색을 보장하지 않는다.</p>
+</section>
+<section id="sec-ch16-nonstationary-bandit" class="level3" data-number="16.2.4">
+<h3 data-number="16.2.4" class="anchored" data-anchor-id="sec-ch16-nonstationary-bandit"><span class="header-section-number">16.2.4</span> 비정상 밴딧과 일정 학습률</h3>
+<p>행동가치가 시간에 따라 변하면 모든 과거 보상에 동일한 가중치를 주는 표본평균은 적절하지 않다. 일정한 학습률 <span class="math inline">\(\alpha\in(0,1]\)</span>을 사용하면</p>
+<p><span id="eq-ch16-constant-step-update"><span class="math display">\[
+Q_{t+1}(a)
+=
+Q_t(a)
++
+\alpha\left[R_t-Q_t(a)\right]
+\tag{16.37}\]</span></span></p>
+<p>로 갱신한다. 반복 전개하면 최근 보상에 더 큰 가중치를 부여하는 지수이동평균이 된다.</p>
+<p><span id="eq-ch16-exponential-recency-weighting"><span class="math display">\[
+Q_{t+1}
+=
+(1-\alpha)^tQ_1
++
+\sum_{i=1}^{t}
+\alpha(1-\alpha)^{t-i}R_i.
+\tag{16.38}\]</span></span></p>
+</section>
+<section id="sec-ch16-ucb" class="level3" data-number="16.2.5">
+<h3 data-number="16.2.5" class="anchored" data-anchor-id="sec-ch16-ucb"><span class="header-section-number">16.2.5</span> 상한신뢰구간 행동선택</h3>
+<p>상한신뢰구간(upper confidence bound, UCB) 방법은 추정가치와 불확실성 보너스를 함께 고려한다.</p>
+<p><span id="eq-ch16-ucb-action"><span class="math display">\[
+A_t
+=
+\arg\max_a
+\left[
+Q_t(a)
++
+c\sqrt{\frac{\log t}{N_t(a)}}
+\right].
+\tag{16.39}\]</span></span></p>
+<p>첫 항은 활용, 둘째 항은 탐색을 나타낸다. 선택횟수가 적은 행동은 큰 보너스를 받고, 시간이 지나면 모든 행동을 충분히 탐색하게 된다. 조절상수 <span class="math inline">\(c\)</span>가 크면 탐색이 증가한다.</p>
+<p>UCB1은 제한된 보상을 갖는 정상 밴딧에서 로그 차수의 누적후회를 갖는다.</p>
+<p><span id="eq-ch16-ucb-regret-order"><span class="math display">\[
+E(\mathcal R_T)
+=O(\log T).
+\tag{16.40}\]</span></span></p>
+<p>이는 무작위 탐색을 계속하는 고정 <span class="math inline">\(\varepsilon\)</span>-탐욕보다 장기적으로 효율적일 수 있음을 뜻한다.</p>
+</section>
+<section id="sec-ch16-thompson-sampling" class="level3" data-number="16.2.6">
+<h3 data-number="16.2.6" class="anchored" data-anchor-id="sec-ch16-thompson-sampling"><span class="header-section-number">16.2.6</span> 톰프슨 표본추출</h3>
+<p>톰프슨 표본추출(Thompson sampling)은 각 행동의 보상모수에 대한 사후분포를 유지한다. 매 시점 사후분포에서 모수를 하나씩 표본추출하고, 표본값이 가장 큰 행동을 선택한다.</p>
+<p>베르누이 보상에서 행동 <span class="math inline">\(a\)</span>의 성공확률을 <span class="math inline">\(\theta_a\)</span>라고 하고 베타 사전분포를 사용하면</p>
+<p><span id="eq-ch16-beta-prior"><span class="math display">\[
+\theta_a\sim\operatorname{Beta}(\alpha_a,\beta_a).
+\tag{16.41}\]</span></span></p>
+<p>성공 <span class="math inline">\(S_a\)</span>회와 실패 <span class="math inline">\(F_a\)</span>회를 관측한 사후분포는</p>
+<p><span id="eq-ch16-beta-posterior"><span class="math display">\[
+\theta_a\mid\mathcal D
+\sim
+\operatorname{Beta}(\alpha_a+S_a,\beta_a+F_a)
+\tag{16.42}\]</span></span></p>
+<p>가 된다. 각 시점에</p>
+<p><span class="math display">\[
+\widetilde\theta_a
+\sim
+\operatorname{Beta}(\alpha_a+S_a,\beta_a+F_a)
+\]</span></p>
+<p>를 표본추출한 뒤</p>
+<p><span id="eq-ch16-thompson-action"><span class="math display">\[
+A_t=\arg\max_a\widetilde\theta_a
+\tag{16.43}\]</span></span></p>
+<p>를 선택한다. 불확실한 행동의 사후분포는 넓으므로 높은 값이 표본추출될 가능성이 있고, 자연스럽게 탐색이 일어난다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch16-bandit-regret" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch16-bandit-regret-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="16-reinforcement-learning_files/figure-html/fig-ch16-bandit-regret-1.png" class="img-fluid figure-img" width="816">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch16-bandit-regret-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;16.3: 밴딧 행동선택 방법에 따른 평균 누적후회
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch16-bandit-regret" class="quarto-xref">그림&nbsp;<span>16.3</span></a><!-- -->은 하나의 모의실험 결과이므로 일반적 우열을 단정할 수는 없다. 그러나 탐색을 구조적으로 조절하는 UCB와 톰프슨 표본추출이 고정 확률의 무작위 탐색보다 후회를 빠르게 줄일 수 있음을 보여준다.</p>
+</section>
+<section id="sec-ch16-contextual-bandit" class="level3" data-number="16.2.7">
+<h3 data-number="16.2.7" class="anchored" data-anchor-id="sec-ch16-contextual-bandit"><span class="header-section-number">16.2.7</span> 문맥적 밴딧</h3>
+<p>문맥적 밴딧(contextual bandit)에서는 매 시점 특성벡터 <span class="math inline">\(X_t\)</span>를 관찰한 뒤 행동을 선택한다. 행동가치는 문맥에 따라 달라진다.</p>
+<p><span id="eq-ch16-contextual-value"><span class="math display">\[
+q_*(x,a)
+=
+E(R_t\mid X_t=x,A_t=a).
+\tag{16.44}\]</span></span></p>
+<p>선형 문맥밴딧은</p>
+<p><span id="eq-ch16-linear-contextual-bandit"><span class="math display">\[
+E(R_t\mid X_t=x,A_t=a)
+=
+x^\top\theta_a
+\tag{16.45}\]</span></span></p>
+<p>를 가정한다. LinUCB는 추정평균과 불확실성 보너스를 결합한다.</p>
+<p><span id="eq-ch16-linucb"><span class="math display">\[
+A_t
+=
+\arg\max_a
+\left[
+x_t^\top\widehat\theta_a
++
+\alpha
+\sqrt{x_t^\top A_a^{-1}x_t}
+\right].
+\tag{16.46}\]</span></span></p>
+<p>문맥밴딧은 추천, 광고, 개인화 치료와 같이 현재 특성에 따라 행동을 선택하지만 행동이 다음 문맥에 미치는 영향은 무시할 수 있는 문제에 적합하다. 행동이 미래 상태를 바꾸면 완전한 MDP가 필요하다.</p>
+</section>
+</section>
+<section id="sec-ch16-model-based-learning" class="level2" data-number="16.3">
+<h2 data-number="16.3" class="anchored" data-anchor-id="sec-ch16-model-based-learning"><span class="header-section-number">16.3</span> 모델 기반 학습</h2>
+<section id="sec-ch16-planning-known-model" class="level3" data-number="16.3.1">
+<h3 data-number="16.3.1" class="anchored" data-anchor-id="sec-ch16-planning-known-model"><span class="header-section-number">16.3.1</span> 알려진 모형에서의 계획</h3>
+<p>모델 기반 강화 학습(model-based RL)은 상태전이확률과 보상모형을 알고 있거나 자료로 추정한 뒤, 그 모형을 이용해 정책을 계산한다. 환경모형</p>
+<p><span id="eq-ch16-estimated-model"><span class="math display">\[
+\widehat P(s'\mid s,a),
+\qquad
+\widehat r(s,a,s')
+\tag{16.47}\]</span></span></p>
+<p>이 있으면 실제 환경과 추가로 상호작용하지 않고 가상 전이를 생성하거나 동적계획법(dynamic programming)으로 가치를 계산할 수 있다. 모형을 이용해 미래를 예상하고 행동을 선택하는 과정을 <strong>계획</strong>(planning)이라고 한다.</p>
+<p>모델 기반 방법은 표본효율성이 높고 예측 가능한 구조를 이용할 수 있다는 장점이 있다. 그러나 모형이 잘못되면 계획이 모형오차를 증폭시킬 수 있다.</p>
+</section>
+<section id="sec-ch16-iterative-policy-evaluation" class="level3" data-number="16.3.2">
+<h3 data-number="16.3.2" class="anchored" data-anchor-id="sec-ch16-iterative-policy-evaluation"><span class="header-section-number">16.3.2</span> 반복적 정책평가</h3>
+<p>유한 MDP에서 정책 <span class="math inline">\(\pi\)</span>가 주어지면 벨만 기대연산자를 반복하여 가치함수를 계산할 수 있다.</p>
+<p><span id="eq-ch16-iterative-policy-evaluation"><span class="math display">\[
+v_{k+1}(s)
+\leftarrow
+\sum_a\pi(a\mid s)
+\sum_{s'}P(s'\mid s,a)
+\left[r(s,a,s')+\gamma v_k(s')\right].
+\tag{16.48}\]</span></span></p>
+<p>할인율이 1보다 작으면 벨만 연산자는 최대노름에서 <span class="math inline">\(\gamma\)</span>-수축이다.</p>
+<p><span id="eq-ch16-bellman-contraction"><span class="math display">\[
+\|T_\pi v-T_\pi u\|_\infty
+\leq
+\gamma\|v-u\|_\infty.
+\tag{16.49}\]</span></span></p>
+<p>따라서 임의의 초기값에서 반복해도 유일한 고정점 <span class="math inline">\(v_\pi\)</span>에 수렴한다.</p>
+<p>행렬표현에서 정책전이행렬을 <span class="math inline">\(P_\pi\)</span>, 기대보상벡터를 <span class="math inline">\(r_\pi\)</span>라고 하면</p>
+<p><span class="math display">\[
+v_\pi
+=
+r_\pi+\gamma P_\pi v_\pi
+\]</span></p>
+<p>이므로</p>
+<p><span id="eq-ch16-policy-evaluation-matrix"><span class="math display">\[
+v_\pi
+=
+(I-\gamma P_\pi)^{-1}r_\pi
+\tag{16.50}\]</span></span></p>
+<p>로 직접 계산할 수도 있다. 그러나 상태공간이 크면 행렬역산보다 반복법이 효율적이다.</p>
+</section>
+<section id="sec-ch16-policy-iteration" class="level3" data-number="16.3.3">
+<h3 data-number="16.3.3" class="anchored" data-anchor-id="sec-ch16-policy-iteration"><span class="header-section-number">16.3.3</span> 정책개선과 정책반복</h3>
+<p>현재 정책의 가치함수 <span class="math inline">\(v_\pi\)</span>를 계산한 뒤 각 상태에서 한 단계 앞을 내다보아 더 좋은 행동을 선택한다.</p>
+<p><span id="eq-ch16-policy-improvement"><span class="math display">\[
+\pi'(s)
+\in
+\arg\max_a
+\sum_{s'}P(s'\mid s,a)
+\left[r(s,a,s')+\gamma v_\pi(s')\right].
+\tag{16.51}\]</span></span></p>
+<p>정책개선정리에 따라 <span class="math inline">\(\pi'\)</span>는 <span class="math inline">\(\pi\)</span>보다 나쁘지 않다.</p>
+<p><span id="eq-ch16-policy-improvement-theorem"><span class="math display">\[
+v_{\pi'}(s)\geq v_\pi(s)
+\qquad\text{for all }s.
+\tag{16.52}\]</span></span></p>
+<p><strong>정책반복</strong>(policy iteration)은 정책평가와 정책개선을 번갈아 수행한다.</p>
+<ol type="1">
+<li>현재 정책 <span class="math inline">\(\pi_k\)</span>의 가치 <span class="math inline">\(v_{\pi_k}\)</span>를 평가한다.</li>
+<li><span class="math inline">\(v_{\pi_k}\)</span>에 대해 탐욕정책 <span class="math inline">\(\pi_{k+1}\)</span>을 만든다.</li>
+<li>정책이 변하지 않을 때 종료한다.</li>
+</ol>
+<p>유한 MDP에서는 유한번의 개선 후 최적정책에 도달한다.</p>
+</section>
+<section id="sec-ch16-value-iteration" class="level3" data-number="16.3.4">
+<h3 data-number="16.3.4" class="anchored" data-anchor-id="sec-ch16-value-iteration"><span class="header-section-number">16.3.4</span> 가치반복</h3>
+<p>가치반복(value iteration)은 정책평가를 완전히 끝내지 않고 벨만 최적연산을 직접 반복한다.</p>
+<p><span id="eq-ch16-value-iteration"><span class="math display">\[
+v_{k+1}(s)
+\leftarrow
+\max_a
+\sum_{s'}P(s'\mid s,a)
+\left[r(s,a,s')+\gamma v_k(s')\right].
+\tag{16.53}\]</span></span></p>
+<p>수렴한 가치함수에서 탐욕적으로 행동하면 최적정책을 얻는다. 가치반복은 정책반복보다 한 반복의 계산량이 작지만 더 많은 반복이 필요할 수 있다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch16-gridworld-value" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch16-gridworld-value-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="16-reinforcement-learning_files/figure-html/fig-ch16-gridworld-value-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch16-gridworld-value-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;16.4: 격자세계에서 가치반복으로 계산한 최적 상태가치와 정책
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch16-gridworld-value" class="quarto-xref">그림&nbsp;<span>16.4</span></a><!-- -->에서 목표에 가까운 상태일수록 가치가 크고, 화살표는 최적 행동을 나타낸다. 장애물은 가능한 경로와 상태가치를 변화시킨다.</p>
+</section>
+<section id="sec-ch16-asynchronous-dp" class="level3" data-number="16.3.5">
+<h3 data-number="16.3.5" class="anchored" data-anchor-id="sec-ch16-asynchronous-dp"><span class="header-section-number">16.3.5</span> 비동기 동적계획법과 우선순위 갱신</h3>
+<p>모든 상태를 매 반복마다 갱신할 필요는 없다. 비동기 동적계획법은 일부 상태만 선택해 갱신한다. 중요한 변화가 예상되는 상태를 먼저 갱신하는 우선순위 스위핑(prioritized sweeping)은 큰 상태공간에서 계산을 절약할 수 있다.</p>
+<p>벨만 잔차</p>
+<p><span id="eq-ch16-bellman-residual"><span class="math display">\[
+\delta(s)
+=
+\left|
+\max_a\sum_{s'}P(s'\mid s,a)
+[r(s,a,s')+\gamma v(s')]
+-v(s)
+\right|
+\tag{16.54}\]</span></span></p>
+<p>가 큰 상태를 우선 갱신하는 것이 대표적 방법이다.</p>
+</section>
+<section id="sec-ch16-model-learning" class="level3" data-number="16.3.6">
+<h3 data-number="16.3.6" class="anchored" data-anchor-id="sec-ch16-model-learning"><span class="header-section-number">16.3.6</span> 환경모형의 학습</h3>
+<p>환경모형을 알지 못하면 경험자료에서 추정할 수 있다. 이산 MDP에서 최대우도 전이확률은</p>
+<p><span id="eq-ch16-transition-mle"><span class="math display">\[
+\widehat P(s'\mid s,a)
+=
+\frac{N(s,a,s')}{\sum_uN(s,a,u)}
+\tag{16.55}\]</span></span></p>
+<p>이고, 보상모형은 해당 전이에서 관측된 보상의 평균으로 추정할 수 있다.</p>
+<p><span id="eq-ch16-reward-model-estimate"><span class="math display">\[
+\widehat r(s,a,s')
+=
+\frac{1}{N(s,a,s')}
+\sum_{i:(s_i,a_i,s_i')=(s,a,s')}r_i.
+\tag{16.56}\]</span></span></p>
+<p>연속상태에서는 선형모형, 가우시안 과정, 신경망 또는 확률적 생성모형으로 다음 상태와 보상의 조건부분포를 추정한다.</p>
+<p>모형오차는 계획의 깊이가 길수록 누적된다. 결정론적 예측모형이 평균 다음 상태만 출력하면 다봉분포와 불확실성을 잃을 수 있으므로, 확률적 모형이나 모형 앙상블을 사용해 불확실성을 표현하는 것이 중요하다.</p>
+</section>
+<section id="sec-ch16-dyna" class="level3" data-number="16.3.7">
+<h3 data-number="16.3.7" class="anchored" data-anchor-id="sec-ch16-dyna"><span class="header-section-number">16.3.7</span> Dyna 구조</h3>
+<p>Dyna는 직접 경험으로부터의 모델 프리 학습과 학습된 모형을 이용한 계획을 결합한다.</p>
+<ol type="1">
+<li>실제 환경에서 전이 <span class="math inline">\((S_t,A_t,R_{t+1},S_{t+1})\)</span>를 관측한다.</li>
+<li>실제 전이로 가치함수 또는 정책을 갱신한다.</li>
+<li>환경모형을 갱신한다.</li>
+<li>모형에서 가상 전이를 여러 번 생성한다.</li>
+<li>가상 전이로 가치함수 또는 정책을 추가 갱신한다.</li>
+</ol>
+<p>실제 경험 하나를 여러 계획갱신에 재사용하므로 표본효율성이 높아질 수 있다.</p>
+</section>
+<section id="sec-ch16-mpc-mcts" class="level3" data-number="16.3.8">
+<h3 data-number="16.3.8" class="anchored" data-anchor-id="sec-ch16-mpc-mcts"><span class="header-section-number">16.3.8</span> 모형예측제어와 트리탐색</h3>
+<p>모형예측제어(model predictive control)는 현재 상태에서 유한한 계획수평의 행동열을 최적화하고, 첫 행동만 실행한 뒤 새로운 상태에서 다시 계획한다.</p>
+<p><span id="eq-ch16-mpc-objective"><span class="math display">\[
+(a_t^*,\ldots,a_{t+H-1}^*)
+=
+\arg\max_{a_{t:t+H-1}}
+E\left[
+\sum_{h=0}^{H-1}\gamma^hR_{t+h+1}
++\gamma^H\widehat V(S_{t+H})
+\right].
+\tag{16.57}\]</span></span></p>
+<p>몬테카를로 트리탐색(Monte Carlo tree search, MCTS)은 가능한 미래 행동과 상태를 트리로 확장하고 모의실험을 통해 유망한 가지에 계산을 집중한다. 선택단계에서는 흔히 UCB 원리를 이용한다.</p>
+<p><span id="eq-ch16-uct"><span class="math display">\[
+\operatorname{UCT}(s,a)
+=
+Q(s,a)
++c\sqrt{\frac{\log N(s)}{N(s,a)}}.
+\tag{16.58}\]</span></span></p>
+<p>모델 기반 방법은 계획과 설명가능성에 유리하지만, 잘못된 모형을 지나치게 신뢰하지 않도록 불확실성, 강건성, 실제 환경 검증을 함께 고려해야 한다.</p>
+</section>
+</section>
+<section id="sec-ch16-model-free-learning" class="level2" data-number="16.4">
+<h2 data-number="16.4" class="anchored" data-anchor-id="sec-ch16-model-free-learning"><span class="header-section-number">16.4</span> 모델 프리 학습</h2>
+<section id="sec-ch16-prediction-control" class="level3" data-number="16.4.1">
+<h3 data-number="16.4.1" class="anchored" data-anchor-id="sec-ch16-prediction-control"><span class="header-section-number">16.4.1</span> 예측과 제어</h3>
+<p>모델 프리 강화 학습(model-free RL)은 <span class="math inline">\(P\)</span>와 <span class="math inline">\(r\)</span>을 명시적으로 추정하지 않고 경험 전이로부터 가치함수나 정책을 직접 학습한다. 문제는 두 가지로 구분된다.</p>
+<ul>
+<li><strong>예측</strong>: 주어진 정책 <span class="math inline">\(\pi\)</span>의 가치함수 <span class="math inline">\(v_\pi\)</span> 또는 <span class="math inline">\(q_\pi\)</span>를 추정한다.</li>
+<li><strong>제어</strong>: 최적정책 또는 최적 가치함수를 학습한다.</li>
+</ul>
+<p>모델 프리 방법은 모형화 부담이 적지만, 실제 환경과의 상호작용이 많이 필요할 수 있다.</p>
+</section>
+<section id="sec-ch16-monte-carlo" class="level3" data-number="16.4.2">
+<h3 data-number="16.4.2" class="anchored" data-anchor-id="sec-ch16-monte-carlo"><span class="header-section-number">16.4.2</span> 몬테카를로 예측</h3>
+<p>몬테카를로 학습(Monte Carlo learning)은 에피소드에서 실제로 관측한 누적수익을 학습목표로 사용한다. 몬테카를로 방법은 에피소드가 끝난 뒤 실제로 관측한 수익 <span class="math inline">\(G_t\)</span>를 목표값으로 사용한다.</p>
+<p><span id="eq-ch16-mc-value-update"><span class="math display">\[
+V(S_t)
+\leftarrow
+V(S_t)
++
+\alpha\left[G_t-V(S_t)\right].
+\tag{16.59}\]</span></span></p>
+<p>첫 방문 몬테카를로는 한 에피소드에서 상태가 처음 나타난 시점의 수익만 사용하고, 매 방문 몬테카를로는 모든 방문을 사용한다. 충분한 탐색과 정상성 조건 아래 표본평균은 참된 가치에 수렴한다.</p>
+<p>몬테카를로 목표는 실제 전체 수익이므로 편향이 작지만, 여러 미래 보상의 무작위성을 모두 포함하여 분산이 크다. 또한 에피소드가 끝나기 전에는 갱신할 수 없다.</p>
+</section>
+<section id="sec-ch16-temporal-difference" class="level3" data-number="16.4.3">
+<h3 data-number="16.4.3" class="anchored" data-anchor-id="sec-ch16-temporal-difference"><span class="header-section-number">16.4.3</span> 시간차 학습</h3>
+<p>시간차(temporal-difference, TD) 학습은 다음 상태의 현재 가치추정치를 이용해 한 단계 후 바로 갱신한다. TD(0)의 갱신식은</p>
+<p><span id="eq-ch16-td-update"><span class="math display">\[
+V(S_t)
+\leftarrow
+V(S_t)
++
+\alpha\delta_t
+\tag{16.60}\]</span></span></p>
+<p>이고, TD 오차는</p>
+<p><span id="eq-ch16-td-error"><span class="math display">\[
+\delta_t
+=
+R_{t+1}+\gamma V(S_{t+1})-V(S_t)
+\tag{16.61}\]</span></span></p>
+<p>이다. 목표값</p>
+<p><span class="math display">\[
+R_{t+1}+\gamma V(S_{t+1})
+\]</span></p>
+<p>에 현재 추정치가 포함되므로 이를 부트스트래핑(bootstrapping)이라고 한다.</p>
+<p>TD 학습은 에피소드 종료를 기다리지 않고 온라인으로 갱신할 수 있으며, 몬테카를로보다 분산이 작을 수 있다. 반면 부정확한 현재 가치추정치를 목표에 사용하므로 편향이 생긴다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch16-mc-td-backup" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch16-mc-td-backup-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="16-reinforcement-learning_files/figure-html/fig-ch16-mc-td-backup-1.png" class="img-fluid figure-img" width="864">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch16-mc-td-backup-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;16.5: 몬테카를로와 시간차 학습의 백업 구조
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch16-mc-td-backup" class="quarto-xref">그림&nbsp;<span>16.5</span></a><!-- -->에서 몬테카를로는 실제 종결수익을 기다리는 반면, TD는 다음 상태의 추정값을 이용해 즉시 현재 상태를 갱신한다.</p>
+</section>
+<section id="sec-ch16-n-step-td" class="level3" data-number="16.4.4">
+<h3 data-number="16.4.4" class="anchored" data-anchor-id="sec-ch16-n-step-td"><span class="header-section-number">16.4.4</span> n-단계 수익과 TD(lambda)</h3>
+<p>몬테카를로와 TD(0) 사이에는 <span class="math inline">\(n\)</span>-단계 수익이 있다.</p>
+<p><span id="eq-ch16-n-step-return"><span class="math display">\[
+G_{t:t+n}
+=
+R_{t+1}
++
+\gamma R_{t+2}
++
+\cdots
++
+\gamma^{n-1}R_{t+n}
++
+\gamma^nV(S_{t+n}).
+\tag{16.62}\]</span></span></p>
+<p><span class="math inline">\(n=1\)</span>이면 TD(0), 에피소드 끝까지 사용하면 몬테카를로 수익이 된다. 여러 <span class="math inline">\(n\)</span>-단계 수익을 가중평균한 <span class="math inline">\(\lambda\)</span>-수익은</p>
+<p><span id="eq-ch16-lambda-return"><span class="math display">\[
+G_t^\lambda
+=
+(1-\lambda)
+\sum_{n=1}^{\infty}
+\lambda^{n-1}G_{t:t+n}
+\tag{16.63}\]</span></span></p>
+<p>로 정의한다. <span class="math inline">\(\lambda=0\)</span>은 TD(0), <span class="math inline">\(\lambda\)</span>가 1에 가까우면 몬테카를로에 가까워진다.</p>
+<p>후방관점에서는 <strong>적격흔적</strong>(eligibility trace)을 사용한다.</p>
+<p><span id="eq-ch16-eligibility-trace"><span class="math display">\[
+e_t(s)
+=
+\gamma\lambda e_{t-1}(s)
++I(S_t=s),
+\tag{16.64}\]</span></span></p>
+<p><span id="eq-ch16-td-lambda-update"><span class="math display">\[
+V(s)
+\leftarrow
+V(s)+\alpha\delta_t e_t(s).
+\tag{16.65}\]</span></span></p>
+<p>현재 TD 오차를 최근 방문한 여러 상태에 배분하므로 지연된 보상의 책임을 빠르게 전파할 수 있다.</p>
+</section>
+<section id="sec-ch16-sarsa" class="level3" data-number="16.4.5">
+<h3 data-number="16.4.5" class="anchored" data-anchor-id="sec-ch16-sarsa"><span class="header-section-number">16.4.5</span> SARSA</h3>
+<p>SARSA는 현재 정책을 따르며 행동가치를 학습하는 온정책(on-policy) 제어 알고리즘이다. 전이</p>
+<p><span class="math display">\[
+(S_t,A_t,R_{t+1},S_{t+1},A_{t+1})
+\]</span></p>
+<p>의 다섯 요소에서 이름이 유래하였다. 갱신식은</p>
+<p><span id="eq-ch16-sarsa-update"><span class="math display">\[
+Q(S_t,A_t)
+\leftarrow
+Q(S_t,A_t)
++
+\alpha
+\left[
+R_{t+1}
++
+\gamma Q(S_{t+1},A_{t+1})
+-
+Q(S_t,A_t)
+\right].
+\tag{16.66}\]</span></span></p>
+<p>다음 행동 <span class="math inline">\(A_{t+1}\)</span>도 현재 행동정책에서 실제로 선택하므로 탐색의 위험까지 가치에 반영된다. 행동정책을 점차 탐욕적으로 만들면서 모든 상태-행동 쌍을 충분히 방문하면 최적정책에 수렴할 수 있다.</p>
+</section>
+<section id="sec-ch16-q-learning" class="level3" data-number="16.4.6">
+<h3 data-number="16.4.6" class="anchored" data-anchor-id="sec-ch16-q-learning"><span class="header-section-number">16.4.6</span> Q-학습(Q-learning)</h3>
+<p>Q-학습은 행동을 생성한 정책과 관계없이 최적 행동가치를 직접 학습하는 오프정책(off-policy) 방법이다.</p>
+<p><span id="eq-ch16-q-learning-update"><span class="math display">\[
+Q(S_t,A_t)
+\leftarrow
+Q(S_t,A_t)
++
+\alpha
+\left[
+R_{t+1}
++
+\gamma\max_aQ(S_{t+1},a)
+-
+Q(S_t,A_t)
+\right].
+\tag{16.67}\]</span></span></p>
+<p>행동정책은 <span class="math inline">\(\varepsilon\)</span>-탐욕일 수 있지만 목표는 다음 상태에서 완전한 탐욕행동을 가정한다. SARSA와 Q-학습의 차이는 목표값에 있다.</p>
+<p><span id="eq-ch16-sarsa-q-targets"><span class="math display">\[
+\begin{aligned}
+\text{SARSA 목표}
+&amp;=R_{t+1}+\gamma Q(S_{t+1},A_{t+1}),\\
+\text{Q-학습 목표}
+&amp;=R_{t+1}+\gamma\max_aQ(S_{t+1},a).
+\end{aligned}
+\tag{16.68}\]</span></span></p>
+<p>위험한 상태가 있는 문제에서 SARSA는 실제 탐색정책의 위험을 고려하여 더 안전한 경로를 학습할 수 있고, Q-학습은 탐색이 사라진 뒤의 최적경로를 추정하므로 훈련 중 위험상태를 더 자주 방문할 수 있다.</p>
+</section>
+<section id="sec-ch16-expected-sarsa-double-q" class="level3" data-number="16.4.7">
+<h3 data-number="16.4.7" class="anchored" data-anchor-id="sec-ch16-expected-sarsa-double-q"><span class="header-section-number">16.4.7</span> 기대 SARSA와 이중 Q-학습</h3>
+<p>기대 SARSA는 다음 행동 하나를 표본추출하는 대신 정책에 대한 기대값을 사용한다.</p>
+<p><span id="eq-ch16-expected-sarsa"><span class="math display">\[
+Q(S_t,A_t)
+\leftarrow
+Q(S_t,A_t)
++
+\alpha
+\left[
+R_{t+1}
++
+\gamma\sum_a\pi(a\mid S_{t+1})Q(S_{t+1},a)
+-
+Q(S_t,A_t)
+\right].
+\tag{16.69}\]</span></span></p>
+<p>최대연산은 추정오차가 있는 행동가치 중 큰 값을 선택하므로 체계적인 과대추정 편향을 만들 수 있다.</p>
+<p><span id="eq-ch16-maximization-bias"><span class="math display">\[
+E\left[\max_a\widehat Q(a)\right]
+\geq
+\max_aE[\widehat Q(a)].
+\tag{16.70}\]</span></span></p>
+<p>이중 Q-학습은 행동선택과 행동평가에 서로 다른 추정량을 사용한다. 예를 들어 <span class="math inline">\(Q_1\)</span>을 갱신할 때</p>
+<p><span class="math display">\[
+a^*
+=
+\arg\max_aQ_1(S_{t+1},a),
+\]</span></p>
+<p><span id="eq-ch16-double-q-update"><span class="math display">\[
+Q_1(S_t,A_t)
+\leftarrow
+Q_1(S_t,A_t)
++
+\alpha
+\left[
+R_{t+1}+\gamma Q_2(S_{t+1},a^*)-Q_1(S_t,A_t)
+\right]
+\tag{16.71}\]</span></span></p>
+<p>를 사용한다.</p>
+</section>
+<section id="sec-ch16-on-off-policy" class="level3" data-number="16.4.8">
+<h3 data-number="16.4.8" class="anchored" data-anchor-id="sec-ch16-on-off-policy"><span class="header-section-number">16.4.8</span> 온정책과 오프정책 학습</h3>
+<p>행동정책(behavior policy) <span class="math inline">\(b\)</span>는 자료를 생성하고, 목표정책(target policy) <span class="math inline">\(\pi\)</span>는 평가하거나 개선하려는 정책이다. 온정책 학습은 <span class="math inline">\(b=\pi\)</span>이고, 오프정책 학습은 두 정책이 다르다.</p>
+<p>오프정책 학습은 과거 로그자료, 전문가 자료와 다른 정책의 경험을 재사용할 수 있다는 장점이 있다. 그러나 정책분포가 크게 다르면 추정분산이 커지고 학습이 불안정해진다.</p>
+<p>중요도 비율은</p>
+<p><span id="eq-ch16-trajectory-importance-ratio"><span class="math display">\[
+\rho_{t:T-1}
+=
+\prod_{k=t}^{T-1}
+\frac{\pi(A_k\mid S_k)}{b(A_k\mid S_k)}
+\tag{16.72}\]</span></span></p>
+<p>로 정의한다. 오프정책 몬테카를로 추정에서 목표정책의 수익을 행동정책 자료로 보정할 수 있지만 긴 궤적에서는 비율의 분산이 매우 커질 수 있다.</p>
+</section>
+<section id="sec-ch16-model-free-comparison" class="level3" data-number="16.4.9">
+<h3 data-number="16.4.9" class="anchored" data-anchor-id="sec-ch16-model-free-comparison"><span class="header-section-number">16.4.9</span> 모델 프리 학습 알고리즘의 비교</h3>
+<div id="tbl-ch16-model-free-comparison" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch16-model-free-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;16.1: 대표적인 모델 프리 학습 방법의 비교
+</figcaption>
+<div aria-describedby="tbl-ch16-model-free-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 18%">
+<col style="width: 25%">
+<col style="width: 18%">
+<col style="width: 18%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>방법</th>
+<th>목표값</th>
+<th style="text-align: right;">부트스트래핑</th>
+<th>정책 관계</th>
+<th>주요 특성</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>몬테카를로</td>
+<td>실제 종결수익</td>
+<td style="text-align: right;">아니오</td>
+<td>온·오프정책 가능</td>
+<td>낮은 편향, 높은 분산</td>
+</tr>
+<tr class="even">
+<td>TD(0)</td>
+<td>한 단계 보상 + 다음 가치</td>
+<td style="text-align: right;">예</td>
+<td>주로 온정책 예측</td>
+<td>온라인 갱신</td>
+</tr>
+<tr class="odd">
+<td>SARSA</td>
+<td>다음 실제 행동의 가치</td>
+<td style="text-align: right;">예</td>
+<td>온정책</td>
+<td>탐색정책의 위험 반영</td>
+</tr>
+<tr class="even">
+<td>Q-학습</td>
+<td>다음 최대 행동가치</td>
+<td style="text-align: right;">예</td>
+<td>오프정책</td>
+<td>최적 행동가치 직접 추정</td>
+</tr>
+<tr class="odd">
+<td>기대 SARSA</td>
+<td>다음 정책의 기대가치</td>
+<td style="text-align: right;">예</td>
+<td>온·오프정책 가능</td>
+<td>행동표본 분산 감소</td>
+</tr>
+<tr class="even">
+<td>TD(<span class="math inline">\(\lambda\)</span>)</td>
+<td>여러 단계 수익의 혼합</td>
+<td style="text-align: right;">예</td>
+<td>설정에 따라 다름</td>
+<td>신용할당 속도 조절</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="부트스트래핑, 함수근사와 오프정책의 조합">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">경고</span>부트스트래핑, 함수근사와 오프정책의 조합
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>오프정책 학습, 부트스트래핑, 함수근사를 동시에 사용하면 학습이 발산할 수 있다. 이를 치명적 삼각형(deadly triad)이라고 한다. 심층 강화 학습의 안정화 기법은 이 문제를 완화하려는 장치로 이해할 수 있다.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-ch16-value-function-approximation" class="level2" data-number="16.5">
+<h2 data-number="16.5" class="anchored" data-anchor-id="sec-ch16-value-function-approximation"><span class="header-section-number">16.5</span> 가치 함수 근사</h2>
+<section id="sec-ch16-tabular-limitations" class="level3" data-number="16.5.1">
+<h3 data-number="16.5.1" class="anchored" data-anchor-id="sec-ch16-tabular-limitations"><span class="header-section-number">16.5.1</span> 표 형식 방법의 한계</h3>
+<p>표 형식 알고리즘은 모든 상태 또는 상태-행동 쌍에 별도의 값을 저장한다. 상태가 연속형이거나 차원이 높으면 가능한 상태 수가 너무 커져 방문하지 않은 상태에 일반화할 수 없다. 가치함수 근사는 모수 <span class="math inline">\(\boldsymbol w\)</span>를 사용하여</p>
+<p><span id="eq-ch16-approximate-value"><span class="math display">\[
+\widehat v(s;\boldsymbol w)
+\approx
+v_\pi(s)
+\tag{16.73}\]</span></span></p>
+<p>또는</p>
+<p><span id="eq-ch16-approximate-action-value"><span class="math display">\[
+\widehat q(s,a;\boldsymbol w)
+\approx
+q_\pi(s,a)
+\tag{16.74}\]</span></span></p>
+<p>로 표현한다. 동일한 모수를 여러 상태가 공유하므로 관측한 상태의 정보가 유사한 미관측 상태로 전달된다.</p>
+</section>
+<section id="sec-ch16-value-objective" class="level3" data-number="16.5.2">
+<h3 data-number="16.5.2" class="anchored" data-anchor-id="sec-ch16-value-objective"><span class="header-section-number">16.5.2</span> 가치예측의 목적함수</h3>
+<p>상태분포 <span class="math inline">\(d(s)\)</span>에 대한 평균제곱 가치오차는</p>
+<p><span id="eq-ch16-mean-squared-value-error"><span class="math display">\[
+J(\boldsymbol w)
+=
+\frac{1}{2}
+\sum_s d(s)
+\left[v_\pi(s)-\widehat v(s;\boldsymbol w)\right]^2
+\tag{16.75}\]</span></span></p>
+<p>이다. 참된 가치 <span class="math inline">\(v_\pi(s)\)</span>는 알 수 없으므로 몬테카를로 수익 또는 TD 목표를 사용한다.</p>
+<p>몬테카를로 목표 <span class="math inline">\(G_t\)</span>에 대한 확률적 경사하강은</p>
+<p><span id="eq-ch16-gradient-mc-update"><span class="math display">\[
+\boldsymbol w_{t+1}
+=
+\boldsymbol w_t
++
+\alpha
+\left[G_t-\widehat v(S_t;\boldsymbol w_t)\right]
+\nabla_{\boldsymbol w}
+\widehat v(S_t;\boldsymbol w_t)
+\tag{16.76}\]</span></span></p>
+<p>이다.</p>
+<p>TD 목표를 사용하면</p>
+<p><span id="eq-ch16-semi-gradient-td"><span class="math display">\[
+\boldsymbol w_{t+1}
+=
+\boldsymbol w_t
++
+\alpha
+\delta_t
+\nabla_{\boldsymbol w}
+\widehat v(S_t;\boldsymbol w_t),
+\tag{16.77}\]</span></span></p>
+<p><span class="math display">\[
+\delta_t
+=
+R_{t+1}
++
+\gamma\widehat v(S_{t+1};\boldsymbol w_t)
+-
+\widehat v(S_t;\boldsymbol w_t).
+\]</span></p>
+<p>목표값도 <span class="math inline">\(\boldsymbol w_t\)</span>에 의존하지만 그 미분은 무시하므로 준경사(semi-gradient) 방법이라고 한다.</p>
+</section>
+<section id="sec-ch16-linear-value-approximation" class="level3" data-number="16.5.3">
+<h3 data-number="16.5.3" class="anchored" data-anchor-id="sec-ch16-linear-value-approximation"><span class="header-section-number">16.5.3</span> 선형 가치함수 근사</h3>
+<p>특성벡터 <span class="math inline">\(\boldsymbol x(s)\in\mathbb R^p\)</span>를 사용한 선형 근사는</p>
+<p><span id="eq-ch16-linear-value-function"><span class="math display">\[
+\widehat v(s;\boldsymbol w)
+=
+\boldsymbol w^\top\boldsymbol x(s)
+\tag{16.78}\]</span></span></p>
+<p>이다. 경사는 <span class="math inline">\(\boldsymbol x(s)\)</span>이므로 TD 갱신은</p>
+<p><span id="eq-ch16-linear-td-update"><span class="math display">\[
+\boldsymbol w_{t+1}
+=
+\boldsymbol w_t
++
+\alpha\delta_t\boldsymbol x(S_t)
+\tag{16.79}\]</span></span></p>
+<p>가 된다.</p>
+<p>연속상태에서는 다항기저, 방사형기저함수, 타일코딩과 푸리에 기저를 사용할 수 있다. 기저함수는 상태의 유사성에 대한 귀납적 편향을 결정한다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch16-basis-functions" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch16-basis-functions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="16-reinforcement-learning_files/figure-html/fig-ch16-basis-functions-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch16-basis-functions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;16.6: 연속 상태공간을 표현하는 중첩 방사형기저함수
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch16-basis-functions" class="quarto-xref">그림&nbsp;<span>16.6</span></a><!-- -->의 각 상태는 여러 기저함수의 활성값으로 표현된다. 가까운 상태는 비슷한 특성벡터를 가지므로 가치추정이 국소적으로 일반화된다.</p>
+</section>
+<section id="sec-ch16-lstd" class="level3" data-number="16.5.4">
+<h3 data-number="16.5.4" class="anchored" data-anchor-id="sec-ch16-lstd"><span class="header-section-number">16.5.4</span> 최소제곱 시간차 학습</h3>
+<p>선형 TD의 기대 고정점 조건은</p>
+<p><span class="math display">\[
+A\boldsymbol w=b
+\]</span></p>
+<p>형태로 나타낼 수 있다. 표본으로 추정한</p>
+<p><span id="eq-ch16-lstd-a"><span class="math display">\[
+\widehat A
+=
+\sum_t
+\boldsymbol x_t
+(\boldsymbol x_t-\gamma\boldsymbol x_{t+1})^\top,
+\tag{16.80}\]</span></span></p>
+<p><span id="eq-ch16-lstd-b"><span class="math display">\[
+\widehat b
+=
+\sum_t
+\boldsymbol x_tR_{t+1}
+\tag{16.81}\]</span></span></p>
+<p>를 사용하면 최소제곱 시간차 학습(temporal-difference learning)의 해는</p>
+<p><span id="eq-ch16-lstd-solution"><span class="math display">\[
+\widehat{\boldsymbol w}
+=
+(\widehat A+\lambda I)^{-1}\widehat b
+\tag{16.82}\]</span></span></p>
+<p>이다. 반복 TD보다 자료효율적일 수 있지만, 특성 수가 크면 행렬 계산비용이 증가한다.</p>
+</section>
+<section id="sec-ch16-approximate-control" class="level3" data-number="16.5.5">
+<h3 data-number="16.5.5" class="anchored" data-anchor-id="sec-ch16-approximate-control"><span class="header-section-number">16.5.5</span> 근사 행동가치와 제어</h3>
+<p>상태-행동 특성 <span class="math inline">\(\boldsymbol x(s,a)\)</span>를 사용하면</p>
+<p><span id="eq-ch16-linear-action-value"><span class="math display">\[
+\widehat q(s,a;\boldsymbol w)
+=
+\boldsymbol w^\top\boldsymbol x(s,a)
+\tag{16.83}\]</span></span></p>
+<p>로 근사할 수 있다. 준경사 SARSA는</p>
+<p><span class="math display">\[
+\boldsymbol w_{t+1}
+=
+\boldsymbol w_t
++
+\alpha\delta_t
+\nabla_{\boldsymbol w}
+\widehat q(S_t,A_t;\boldsymbol w_t),
+\]</span></p>
+<p><span id="eq-ch16-semi-gradient-sarsa"><span class="math display">\[
+\delta_t
+=
+R_{t+1}
++
+\gamma\widehat q(S_{t+1},A_{t+1};\boldsymbol w_t)
+-
+\widehat q(S_t,A_t;\boldsymbol w_t)
+\tag{16.84}\]</span></span></p>
+<p>로 갱신한다.</p>
+</section>
+<section id="sec-ch16-dqn" class="level3" data-number="16.5.6">
+<h3 data-number="16.5.6" class="anchored" data-anchor-id="sec-ch16-dqn"><span class="header-section-number">16.5.6</span> 심층 Q-네트워크</h3>
+<p>심층 Q-네트워크(deep Q-network, DQN)는 신경망 <span class="math inline">\(Q(s,a;\boldsymbol\theta)\)</span>로 행동가치를 근사한다. 한 전이 <span class="math inline">\((s,a,r,s')\)</span>에 대한 제곱 TD 손실은</p>
+<p><span id="eq-ch16-dqn-loss"><span class="math display">\[
+L(\boldsymbol\theta)
+=
+\frac{1}{2}
+\left[
+y-Q(s,a;\boldsymbol\theta)
+\right]^2
+\tag{16.85}\]</span></span></p>
+<p>이고, 목표값은</p>
+<p><span id="eq-ch16-dqn-target"><span class="math display">\[
+y
+=
+r+\gamma\max_{a'}Q(s',a';\boldsymbol\theta^-)
+\tag{16.86}\]</span></span></p>
+<p>이다. <span class="math inline">\(\boldsymbol\theta^-\)</span>는 일정 간격으로 갱신하는 목표네트워크의 모수이다.</p>
+<p>DQN의 두 핵심 안정화 장치는 다음과 같다.</p>
+<ol type="1">
+<li><strong>경험재현</strong>(experience replay): 전이를 재현버퍼에 저장하고 무작위 미니배치로 학습하여 연속자료의 상관을 줄이고 경험을 재사용한다.</li>
+<li><strong>목표네트워크</strong>(target network): 목표값을 계산하는 모수를 일정 기간 고정하여 학습목표가 빠르게 움직이는 문제를 완화한다.</li>
+</ol>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch16-dqn-architecture" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch16-dqn-architecture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="16-reinforcement-learning_files/figure-html/fig-ch16-dqn-architecture-1.png" class="img-fluid figure-img" width="960">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch16-dqn-architecture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;16.7: 심층 Q-네트워크의 학습 구조
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch16-dqn-architecture" class="quarto-xref">그림&nbsp;<span>16.7</span></a><!-- -->에서 실제 환경에서 얻은 전이는 재현버퍼에 저장되고, 온라인 네트워크와 목표네트워크를 분리하여 TD 목표를 계산한다.</p>
+<p>이중 DQN은 온라인망으로 행동을 선택하고 목표망으로 평가하여 최대화 편향을 줄인다.</p>
+<p><span id="eq-ch16-double-dqn-target"><span class="math display">\[
+y^{\text{Double}}
+=
+r
++
+\gamma
+Q\left(
+s',
+\arg\max_{a'}Q(s',a';\boldsymbol\theta);
+\boldsymbol\theta^-
+\right).
+\tag{16.87}\]</span></span></p>
+<p>듀얼링 네트워크는 상태가치와 행동의 이점함수를 분리한다.</p>
+<p><span id="eq-ch16-dueling-q"><span class="math display">\[
+Q(s,a)
+=
+V(s)
++
+A(s,a)
+-
+\frac{1}{|\mathcal A|}\sum_{a'}A(s,a').
+\tag{16.88}\]</span></span></p>
+<p>우선순위 경험재현은 TD 오차가 큰 전이를 더 자주 표본추출하고 중요도 가중치로 편향을 보정한다.</p>
+</section>
+<section id="sec-ch16-policy-gradient" class="level3" data-number="16.5.7">
+<h3 data-number="16.5.7" class="anchored" data-anchor-id="sec-ch16-policy-gradient"><span class="header-section-number">16.5.7</span> 정책경사법</h3>
+<p>가치기반 방법은 행동가치를 추정한 뒤 최대값 행동을 선택한다. 정책기반 방법은 모수화된 정책 <span class="math inline">\(\pi_\theta(a\mid s)\)</span>의 기대수익을 직접 최대화한다.</p>
+<p><span id="eq-ch16-policy-gradient-objective"><span class="math display">\[
+J(\boldsymbol\theta)
+=
+E_{\tau\sim\pi_\theta}[G_0].
+\tag{16.89}\]</span></span></p>
+<p>정책경사정리에 따라</p>
+<p><span id="eq-ch16-policy-gradient-theorem"><span class="math display">\[
+\nabla_{\boldsymbol\theta}J(\boldsymbol\theta)
+=
+E_{\pi_\theta}
+\left[
+\sum_t
+\nabla_{\boldsymbol\theta}
+\log\pi_\theta(A_t\mid S_t)
+q_{\pi_\theta}(S_t,A_t)
+\right].
+\tag{16.90}\]</span></span></p>
+<p>REINFORCE는 <span class="math inline">\(q_\pi\)</span> 대신 몬테카를로 수익을 사용한다.</p>
+<p><span id="eq-ch16-reinforce-update"><span class="math display">\[
+\boldsymbol\theta
+\leftarrow
+\boldsymbol\theta
++
+\alpha
+G_t
+\nabla_{\boldsymbol\theta}
+\log\pi_\theta(A_t\mid S_t).
+\tag{16.91}\]</span></span></p>
+<p>수익이 큰 행동의 로그확률은 증가하고 수익이 작은 행동의 확률은 감소한다. REINFORCE는 불편하지만 분산이 크다.</p>
+</section>
+<section id="sec-ch16-baseline-advantage" class="level3" data-number="16.5.8">
+<h3 data-number="16.5.8" class="anchored" data-anchor-id="sec-ch16-baseline-advantage"><span class="header-section-number">16.5.8</span> 기준선과 이점함수</h3>
+<p>행동과 무관한 기준선 <span class="math inline">\(b(s)\)</span>을 빼도 정책경사(policy gradient)의 기대값은 변하지 않는다.</p>
+<p><span id="eq-ch16-baseline-zero-expectation"><span class="math display">\[
+E_{A\sim\pi}
+\left[
+\nabla_\theta\log\pi(A\mid s)b(s)
+\right]
+=0.
+\tag{16.92}\]</span></span></p>
+<p>따라서</p>
+<p><span id="eq-ch16-policy-gradient-baseline"><span class="math display">\[
+\nabla_\theta J
+=
+E
+\left[
+\nabla_\theta\log\pi_\theta(A_t\mid S_t)
+\{G_t-b(S_t)\}
+\right]
+\tag{16.93}\]</span></span></p>
+<p>를 사용하여 분산을 줄일 수 있다. 기준선으로 상태가치 <span class="math inline">\(v_\pi(s)\)</span>를 사용하면</p>
+<p><span id="eq-ch16-advantage-function"><span class="math display">\[
+A_\pi(s,a)
+=
+q_\pi(s,a)-v_\pi(s)
+\tag{16.94}\]</span></span></p>
+<p>인 이점함수를 얻게 된다. 이점은 행동이 그 상태의 평균적 선택보다 얼마나 나은지를 나타낸다.</p>
+</section>
+<section id="sec-ch16-actor-critic" class="level3" data-number="16.5.9">
+<h3 data-number="16.5.9" class="anchored" data-anchor-id="sec-ch16-actor-critic"><span class="header-section-number">16.5.9</span> 액터-크리틱</h3>
+<p>액터-크리틱(actor–critic)은 정책을 나타내는 액터와 가치함수를 추정하는 크리틱을 함께 학습한다. 한 단계 TD 오차를 이점의 근사로 사용하면</p>
+<p><span class="math display">\[
+\delta_t
+=
+R_{t+1}
++
+\gamma V(S_{t+1};\boldsymbol w)
+-
+V(S_t;\boldsymbol w)
+\]</span></p>
+<p>이고, 액터는</p>
+<p><span id="eq-ch16-actor-update"><span class="math display">\[
+\boldsymbol\theta
+\leftarrow
+\boldsymbol\theta
++
+\alpha_\theta
+\delta_t
+\nabla_\theta\log\pi_\theta(A_t\mid S_t)
+\tag{16.95}\]</span></span></p>
+<p>로, 크리틱은</p>
+<p><span id="eq-ch16-critic-update"><span class="math display">\[
+\boldsymbol w
+\leftarrow
+\boldsymbol w
++
+\alpha_w
+\delta_t
+\nabla_wV(S_t;\boldsymbol w)
+\tag{16.96}\]</span></span></p>
+<p>로 갱신한다.</p>
+<p>크리틱은 정책경사의 분산을 줄이지만 부트스트래핑 편향을 도입한다. 일반화된 이점추정(generalized advantage estimation, GAE)은 여러 단계 TD 오차를 결합하여 편향과 분산을 조절한다.</p>
+<p><span id="eq-ch16-gae"><span class="math display">\[
+\widehat A_t^{\text{GAE}(\gamma,\lambda)}
+=
+\sum_{l=0}^{\infty}
+(\gamma\lambda)^l\delta_{t+l}.
+\tag{16.97}\]</span></span></p>
+</section>
+<section id="sec-ch16-trpo-ppo" class="level3" data-number="16.5.10">
+<h3 data-number="16.5.10" class="anchored" data-anchor-id="sec-ch16-trpo-ppo"><span class="header-section-number">16.5.10</span> 신뢰영역과 PPO</h3>
+<p>정책을 한 번에 크게 변경하면 새 정책이 이전 정책의 자료분포에서 벗어나 성능이 급락할 수 있다. 신뢰영역 정책최적화(trust region policy optimization, TRPO)는 이전 정책으로 수집한 자료에서 계산한 대리목적함수를 최대화하되, 정책 간 평균 KL 발산을 제한한다.</p>
+<p><span class="math display">\[
+\max_{\boldsymbol\theta}
+E_t
+\left[
+\frac{\pi_{\boldsymbol\theta}(A_t\mid S_t)}
+{\pi_{\boldsymbol\theta_{\mathrm{old}}}(A_t\mid S_t)}
+\widehat A_t
+\right]
+\]</span></p>
+<p>subject to</p>
+<p><span id="eq-ch16-trpo-objective"><span class="math display">\[
+E_t
+\left[
+D_{\mathrm{KL}}
+\left(
+\pi_{\boldsymbol\theta_{\mathrm{old}}}(\cdot\mid S_t)
+\,\|\,
+\pi_{\boldsymbol\theta}(\cdot\mid S_t)
+\right)
+\right]
+\leq\delta.
+\tag{16.98}\]</span></span></p>
+<p>근접정책최적화(proximal policy optimization, PPO)는 제약최적화 대신 확률비를 절단한 목적함수를 사용한다. 이전 정책과 새 정책의 확률비를</p>
+<p><span id="eq-ch16-ppo-ratio"><span class="math display">\[
+r_t(\boldsymbol\theta)
+=
+\frac{\pi_{\boldsymbol\theta}(A_t\mid S_t)}
+{\pi_{\boldsymbol\theta_{\mathrm{old}}}(A_t\mid S_t)}
+\tag{16.99}\]</span></span></p>
+<p>라고 하면 절단 목적함수는</p>
+<p><span id="eq-ch16-ppo-objective"><span class="math display">\[
+L^{\mathrm{clip}}(\boldsymbol\theta)
+=
+E_t
+\left[
+\min
+\left(
+r_t(\boldsymbol\theta)\widehat A_t,
+\operatorname{clip}
+\left(
+r_t(\boldsymbol\theta),1-\epsilon,1+\epsilon
+\right)
+\widehat A_t
+\right)
+\right].
+\tag{16.100}\]</span></span></p>
+<p>위 수식에서 표기 혼동을 피하기 위해 <span class="math inline">\(r_t(\boldsymbol\theta)\)</span>를 그대로 사용한 표준형을 다시 쓰면 다음과 같다.</p>
+<p><span id="eq-ch16-ppo-objective-standard"><span class="math display">\[
+L^{\mathrm{clip}}(\boldsymbol\theta)
+=
+E_t
+\left[
+\min
+\left(
+a_t,
+\widetilde a_t
+\right)
+\right].
+\tag{16.101}\]</span></span></p>
+<p><span id="eq-ch16-ppo-clipped-terms"><span class="math display">\[
+a_t
+=
+r_t(\boldsymbol\theta)\widehat A_t,
+\qquad
+\widetilde a_t
+=
+\operatorname{clip}
+\left(
+r_t(\boldsymbol\theta),1-\epsilon,1+\epsilon
+\right)
+\widehat A_t.
+\tag{16.102}\]</span></span></p>
+<p>여기서 <span class="math inline">\(\epsilon\)</span>은 한 번의 갱신에서 허용하는 정책변화의 크기를 조절한다. 이점이 양수인 행동의 확률은 지나치게 증가하지 못하고, 이점이 음수인 행동의 확률도 지나치게 감소하지 못한다. PPO는 구현이 비교적 단순하면서도 큰 정책갱신으로 인한 불안정을 완화한다.</p>
+</section>
+<section id="sec-ch16-continuous-actions" class="level3" data-number="16.5.11">
+<h3 data-number="16.5.11" class="anchored" data-anchor-id="sec-ch16-continuous-actions"><span class="header-section-number">16.5.11</span> 연속 행동과 결정론적 정책경사</h3>
+<p>연속 행동에서는 가능한 모든 행동에 대해 최대값을 계산하기 어렵다. 결정론적 정책 <span class="math inline">\(\mu_{\boldsymbol\theta}(s)\)</span>에 대한 정책경사는</p>
+<p><span id="eq-ch16-deterministic-policy-gradient"><span class="math display">\[
+\nabla_{\boldsymbol\theta}J
+=
+E_{s\sim d^\mu}
+\left[
+\nabla_{\boldsymbol\theta}\mu_{\boldsymbol\theta}(s)
+\nabla_aQ^\mu(s,a)
+\big|_{a=\mu_{\boldsymbol\theta}(s)}
+\right]
+\tag{16.103}\]</span></span></p>
+<p>이다. DDPG는 결정론적 액터와 Q-크리틱, 경험재현과 목표네트워크를 결합한다. TD3는 두 개의 크리틱 가운데 작은 추정값을 사용하고, 액터 갱신을 지연하며, 목표행동에 작은 잡음을 더하여 과대추정과 불안정을 완화한다.</p>
+<p>소프트 액터-크리틱(soft actor–critic, SAC)은 기대수익과 정책엔트로피를 함께 최대화한다.</p>
+<p><span id="eq-ch16-sac-objective"><span class="math display">\[
+J_{\mathrm{SAC}}(\pi)
+=
+E_\pi
+\left[
+\sum_{t=0}^{\infty}
+\gamma^t
+\left(
+r(S_t,A_t)
++
+\alpha\mathcal H
+\left(
+\pi(\cdot\mid S_t)
+\right)
+\right)
+\right].
+\tag{16.104}\]</span></span></p>
+<p>여기서 <span class="math inline">\(\alpha&gt;0\)</span>는 보상과 엔트로피 사이의 균형을 조절하는 온도모수이다. 엔트로피를 크게 유지하면 여러 행동을 탐색하고 정책이 한 행동에 너무 일찍 집중되는 것을 막을 수 있다. 실제 구현에서는 목표 엔트로피에 맞추어 <span class="math inline">\(\alpha\)</span>를 자동으로 학습하기도 한다.</p>
+</section>
+<section id="sec-ch16-modern-value-extensions" class="level3" data-number="16.5.12">
+<h3 data-number="16.5.12" class="anchored" data-anchor-id="sec-ch16-modern-value-extensions"><span class="header-section-number">16.5.12</span> 분포적·다중단계·모형결합 확장</h3>
+<p>전통적 가치함수는 수익의 기댓값만 추정한다. 분포적 강화 학습은 수익분포</p>
+<p><span id="eq-ch16-distributional-bellman"><span class="math display">\[
+Z^\pi(s,a)
+\overset{D}{=}
+R_{t+1}+\gamma Z^\pi(S_{t+1},A_{t+1})
+\tag{16.105}\]</span></span></p>
+<p>자체를 학습한다. 이는 위험민감 의사결정과 더 풍부한 학습신호에 유용하다.</p>
+<p>다중단계 목표, 우선순위 재현, 이중추정, 듀얼링 구조, 잡음층과 분포적 가치학습을 결합한 방법도 있다. 그러나 구성요소가 많아질수록 평가설계와 제거실험이 중요하다.</p>
+</section>
+</section>
+<section id="sec-ch16-imitation-learning" class="level2" data-number="16.6">
+<h2 data-number="16.6" class="anchored" data-anchor-id="sec-ch16-imitation-learning"><span class="header-section-number">16.6</span> 모방학습</h2>
+<section id="sec-ch16-imitation-definition" class="level3" data-number="16.6.1">
+<h3 data-number="16.6.1" class="anchored" data-anchor-id="sec-ch16-imitation-definition"><span class="header-section-number">16.6.1</span> 전문가 자료에서 정책 학습</h3>
+<p>모방학습(imitation learning)은 보상함수를 직접 설계하거나 환경과 대규모로 상호작용하는 대신 전문가가 수행한 행동자료로부터 정책을 학습한다. 전문가 궤적의 집합은</p>
+<p><span id="eq-ch16-expert-dataset"><span class="math display">\[
+\mathcal D_E
+=
+\left\{
+\tau_i^E
+=
+(S_{i0},A_{i0},S_{i1},A_{i1},\ldots,S_{iT_i})
+\right\}_{i=1}^{n_E}.
+\tag{16.106}\]</span></span></p>
+<p>전문가 정책을 <span class="math inline">\(\pi_E\)</span>라고 할 때 목표는 제한된 시연자료로부터 전문가와 유사한 상태방문과 행동선택을 보이는 정책 <span class="math inline">\(\pi_\theta\)</span>를 학습하는 것이다. 모방학습은 다음 상황에서 특히 유용하다.</p>
+<ul>
+<li>보상함수를 명시적으로 수치화하기 어렵다.</li>
+<li>무작위 탐색이 위험하거나 비용이 크다.</li>
+<li>전문가의 행동로그는 있지만 환경모형은 없다.</li>
+<li>강화 학습의 초기정책을 안전하고 효율적으로 설정해야 한다.</li>
+</ul>
+<p>모방학습은 전문가가 항상 최적이라는 가정을 필요로 하지 않는다. 그러나 전문가 자료의 품질, 행동의 다양성, 관측되지 않은 교란요인과 선택편향이 최종정책에 직접 영향을 준다.</p>
+</section>
+<section id="sec-ch16-behavior-cloning" class="level3" data-number="16.6.2">
+<h3 data-number="16.6.2" class="anchored" data-anchor-id="sec-ch16-behavior-cloning"><span class="header-section-number">16.6.2</span> 행동복제</h3>
+<p>행동복제(behavior cloning)는 전문가의 상태-행동 쌍을 지도학습 자료로 간주한다. 이산 행동에서는 음의 로그우도 또는 교차엔트로피를 최소화한다.</p>
+<p><span id="eq-ch16-behavior-cloning-discrete"><span class="math display">\[
+\widehat{\boldsymbol\theta}
+=
+\arg\min_{\boldsymbol\theta}
+-
+\frac{1}{N_E}
+\sum_{(s,a)\in\mathcal D_E}
+\log\pi_{\boldsymbol\theta}(a\mid s).
+\tag{16.107}\]</span></span></p>
+<p>연속 행동의 결정론적 정책에서는 평균제곱오차를 사용할 수 있다.</p>
+<p><span id="eq-ch16-behavior-cloning-continuous"><span class="math display">\[
+\widehat{\boldsymbol\theta}
+=
+\arg\min_{\boldsymbol\theta}
+\frac{1}{N_E}
+\sum_{(s,a)\in\mathcal D_E}
+\left\|
+a-\mu_{\boldsymbol\theta}(s)
+\right\|_2^2.
+\tag{16.108}\]</span></span></p>
+<p>행동복제는 구현이 단순하고 환경과 추가로 상호작용하지 않아도 된다. 그러나 훈련자료는 전문가 정책의 상태분포 <span class="math inline">\(d_{\pi_E}(s)\)</span>에서 수집되고, 배포 후 자료는 학습정책의 상태분포 <span class="math inline">\(d_{\pi_\theta}(s)\)</span>에서 생성된다. 작은 행동오차가 에이전트를 전문가가 거의 방문하지 않은 상태로 이동시키면, 그 상태에서 다시 잘못된 행동을 선택하여 오차가 누적된다.</p>
+<p>한 시점의 분류오차가 <span class="math inline">\(\epsilon\)</span>일 때 독립적인 지도학습 관점에서는 전체 오차가 <span class="math inline">\(O(T\epsilon)\)</span>처럼 보일 수 있다. 그러나 상태분포 이동까지 고려하면 최악의 경우 에피소드 비용이</p>
+<p><span id="eq-ch16-behavior-cloning-compounding-error"><span class="math display">\[
+O(T^2\epsilon)
+\tag{16.109}\]</span></span></p>
+<p>차수로 누적될 수 있다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch16-covariate-shift" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch16-covariate-shift-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="16-reinforcement-learning_files/figure-html/fig-ch16-covariate-shift-1.png" class="img-fluid figure-img" width="864">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch16-covariate-shift-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;16.8: 행동복제에서 작은 행동오차가 만드는 상태분포 이동
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch16-covariate-shift" class="quarto-xref">그림&nbsp;<span>16.8</span></a><!-- -->에서 초기의 작은 행동차이가 이후 상태분포를 변화시킨다. 전문가 자료가 없는 영역에서는 정책의 예측오차가 커질 수 있다.</p>
+</section>
+<section id="sec-ch16-dagger" class="level3" data-number="16.6.3">
+<h3 data-number="16.6.3" class="anchored" data-anchor-id="sec-ch16-dagger"><span class="header-section-number">16.6.3</span> DAgger</h3>
+<p>DAgger(dataset aggregation)는 학습정책이 실제로 방문하는 상태에서 전문가의 행동을 추가로 질의하여 상태분포 이동을 줄인다.</p>
+<ol type="1">
+<li>초기 전문가 자료로 정책 <span class="math inline">\(\widehat\pi_1\)</span>을 학습한다.</li>
+<li>전문가 정책과 현재 학습정책을 혼합한 정책으로 환경을 실행한다.</li>
+<li>방문한 상태에서 전문가 행동을 질의한다.</li>
+<li>새 상태-전문가 행동 쌍을 누적 자료집합에 추가한다.</li>
+<li>누적자료로 정책을 다시 학습한다.</li>
+</ol>
+<p>반복 <span class="math inline">\(i\)</span>에서 실행정책은</p>
+<p><span id="eq-ch16-dagger-mixture-policy"><span class="math display">\[
+\pi_i
+=
+\beta_i\pi_E
++
+(1-\beta_i)\widehat\pi_i
+\tag{16.110}\]</span></span></p>
+<p>로 구성할 수 있으며, <span class="math inline">\(\beta_i\)</span>를 점차 줄여 학습정책이 방문하는 상태를 더 많이 수집한다. 누적자료는</p>
+<p><span id="eq-ch16-dagger-dataset"><span class="math display">\[
+\mathcal D_i
+=
+\mathcal D_{i-1}
+\cup
+\left\{
+(s,\pi_E(s)):s\sim d_{\pi_i}
+\right\}
+\tag{16.111}\]</span></span></p>
+<p>로 갱신한다.</p>
+<p>DAgger는 학습정책의 상태분포에서 전문가 레이블을 확보하므로 오차누적을 크게 줄일 수 있다. 그러나 전문가를 반복적으로 질의할 수 있어야 하고, 안전하지 않은 중간정책을 실제 환경에서 실행해야 할 수 있다는 한계가 있다.</p>
+</section>
+<section id="sec-ch16-inverse-rl" class="level3" data-number="16.6.4">
+<h3 data-number="16.6.4" class="anchored" data-anchor-id="sec-ch16-inverse-rl"><span class="header-section-number">16.6.4</span> 역강화 학습</h3>
+<p>행동복제는 전문가 행동을 직접 예측한다. 역강화 학습(inverse reinforcement learning, IRL)은 전문가 행동을 설명하는 보상함수를 먼저 추정한다. 보상모수를 <span class="math inline">\(\boldsymbol w\)</span>로 두고</p>
+<p><span id="eq-ch16-linear-reward-model"><span class="math display">\[
+r_{\boldsymbol w}(s,a)
+=
+\boldsymbol w^\top\boldsymbol\phi(s,a)
+\tag{16.112}\]</span></span></p>
+<p>와 같이 표현할 수 있다. 정책의 할인된 특성기대값은</p>
+<p><span id="eq-ch16-feature-expectation"><span class="math display">\[
+\boldsymbol\mu(\pi)
+=
+E_\pi
+\left[
+\sum_{t=0}^{\infty}
+\gamma^t
+\boldsymbol\phi(S_t,A_t)
+\right]
+\tag{16.113}\]</span></span></p>
+<p>이다. 이때 정책의 기대수익은</p>
+<p><span id="eq-ch16-return-feature-expectation"><span class="math display">\[
+J_{\boldsymbol w}(\pi)
+=
+\boldsymbol w^\top\boldsymbol\mu(\pi)
+\tag{16.114}\]</span></span></p>
+<p>가 된다. 견습학습(apprenticeship learning)은 전문가와 학습정책의 특성기대값 차이를 줄인다.</p>
+<p><span id="eq-ch16-apprenticeship-objective"><span class="math display">\[
+\min_\pi
+\left\|
+\boldsymbol\mu(\pi)-\boldsymbol\mu(\pi_E)
+\right\|_2.
+\tag{16.115}\]</span></span></p>
+<p>역강화 학습에는 식별성 문제가 있다. 동일한 전문가 정책을 최적으로 만드는 보상함수는 여러 개일 수 있고, 상수배나 잠재함수 기반 보상변환은 정책을 바꾸지 않을 수 있다. 따라서 보상의 단순성, 사전정보와 확률모형을 이용해 해를 제한해야 한다.</p>
+</section>
+<section id="sec-ch16-maxent-irl" class="level3" data-number="16.6.5">
+<h3 data-number="16.6.5" class="anchored" data-anchor-id="sec-ch16-maxent-irl"><span class="header-section-number">16.6.5</span> 최대엔트로피 역강화 학습</h3>
+<p>최대엔트로피 IRL은 전문가와 특성기대값이 비슷한 궤적 가운데 엔트로피가 큰 분포를 선택한다. 궤적확률은</p>
+<p><span id="eq-ch16-maxent-trajectory-distribution"><span class="math display">\[
+p_{\boldsymbol w}(\tau)
+=
+\frac{1}{Z(\boldsymbol w)}
+\exp
+\left\{
+\sum_t
+r_{\boldsymbol w}(S_t,A_t)
+\right\}
+\tag{16.116}\]</span></span></p>
+<p>로 정의한다. 로그우도는</p>
+<p><span id="eq-ch16-maxent-irl-loglikelihood"><span class="math display">\[
+\ell(\boldsymbol w)
+=
+\sum_{\tau\in\mathcal D_E}
+\log p_{\boldsymbol w}(\tau)
+\tag{16.117}\]</span></span></p>
+<p>이고, 경사는 전문가와 현재 모형의 특성기대값 차이가 된다.</p>
+<p><span id="eq-ch16-maxent-irl-gradient"><span class="math display">\[
+\nabla_{\boldsymbol w}\ell(\boldsymbol w)
+=
+\boldsymbol\mu(\pi_E)
+-
+\boldsymbol\mu(\pi_{\boldsymbol w}).
+\tag{16.118}\]</span></span></p>
+<p>최대엔트로피 원리는 관측되지 않은 선호를 임의로 확정하지 않고, 전문가의 확률적·다양한 행동을 표현한다.</p>
+</section>
+<section id="sec-ch16-gail" class="level3" data-number="16.6.6">
+<h3 data-number="16.6.6" class="anchored" data-anchor-id="sec-ch16-gail"><span class="header-section-number">16.6.6</span> 생성적 적대 모방학습</h3>
+<p>생성적 적대 모방학습(generative adversarial imitation learning, GAIL)은 보상함수를 명시적으로 복원하지 않고 전문가와 학습정책의 상태-행동 점유분포를 맞춘다. 판별자 <span class="math inline">\(D_\omega(s,a)\)</span>는 전문가 자료와 정책자료를 구분하고, 정책은 판별자를 속이도록 학습한다.</p>
+<p><span id="eq-ch16-gail-objective"><span class="math display">\[
+\min_\pi\max_D
+E_{(s,a)\sim\rho_E}
+[\log D(s,a)]
++
+E_{(s,a)\sim\rho_\pi}
+[\log\{1-D(s,a)\}]
+-
+\lambda\mathcal H(\pi).
+\tag{16.119}\]</span></span></p>
+<p>여기서 할인된 점유측도(occupancy measure)는</p>
+<p><span id="eq-ch16-occupancy-measure"><span class="math display">\[
+\rho_\pi(s,a)
+=
+(1-\gamma)
+\sum_{t=0}^{\infty}
+\gamma^t
+\Pr_\pi(S_t=s,A_t=a)
+\tag{16.120}\]</span></span></p>
+<p>로 정의한다. GAIL은 전문가의 상태-행동 방문분포를 재현하는 정책을 학습하지만, 환경과 반복적으로 상호작용해야 하며 적대적 최적화의 불안정성이 있다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch16-imitation-spectrum" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch16-imitation-spectrum-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="16-reinforcement-learning_files/figure-html/fig-ch16-imitation-spectrum-1.png" class="img-fluid figure-img" width="960">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch16-imitation-spectrum-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;16.9: 행동복제, 역강화 학습과 점유분포 일치의 관계
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch16-imitation-spectrum" class="quarto-xref">그림&nbsp;<span>16.9</span></a><!-- -->은 모방학습 방법의 차이를 보여준다. 행동복제는 가장 단순하지만 상태분포 이동에 취약하고, IRL과 GAIL은 순차적 의사결정 구조를 더 직접적으로 고려한다.</p>
+</section>
+<section id="sec-ch16-offline-rl" class="level3" data-number="16.6.7">
+<h3 data-number="16.6.7" class="anchored" data-anchor-id="sec-ch16-offline-rl"><span class="header-section-number">16.6.7</span> 오프라인 강화 학습과의 관계</h3>
+<p>오프라인 강화 학습(offline RL)은 고정된 로그자료</p>
+<p><span id="eq-ch16-offline-dataset"><span class="math display">\[
+\mathcal D
+=
+\{(S_i,A_i,R_i,S_i')\}_{i=1}^{N}
+\tag{16.121}\]</span></span></p>
+<p>만을 이용하여 정책을 학습한다. 모방학습은 전문가 행동을 재현하는 데 초점을 두지만, 오프라인 강화 학습은 보상정보를 이용해 자료생성 정책보다 더 나은 정책을 찾으려 한다.</p>
+<p>가장 큰 문제는 자료에서 거의 관측되지 않은 행동의 가치를 함수근사기가 과대평가하는 <strong>분포 밖 행동오차</strong>이다. 학습정책이 자료의 행동분포에서 멀어질수록 Q-값의 외삽오차가 커질 수 있다. 이를 완화하기 위해</p>
+<ul>
+<li>학습정책을 행동정책에 가깝게 제한한다.</li>
+<li>자료 밖 행동의 Q-값을 보수적으로 낮춘다.</li>
+<li>불확실성이 큰 행동을 회피한다.</li>
+<li>모형 앙상블로 전이불확실성을 추정한다.</li>
+</ul>
+<p>행동복제는 오프라인 정책의 강한 기준선이며, 안전한 초기정책 또는 정책제약으로 사용될 수 있다.</p>
+</section>
+<section id="sec-ch16-imperfect-experts" class="level3" data-number="16.6.8">
+<h3 data-number="16.6.8" class="anchored" data-anchor-id="sec-ch16-imperfect-experts"><span class="header-section-number">16.6.8</span> 전문가의 불완전성과 다중 전문가</h3>
+<p>실제 전문가 자료는 최적이지 않을 수 있다. 전문가마다 선호와 능력이 다르고, 동일 전문가도 상황에 따라 일관되지 않은 행동을 할 수 있다. 또한 전문가가 관찰한 정보 중 자료에 기록되지 않은 변수가 있으면 행동복제는 관측된 상태만으로 행동을 설명할 수 없다.</p>
+<p>다음 접근을 고려할 수 있다.</p>
+<ul>
+<li>전문가 식별자를 포함하거나 전문가별 정책을 계층적으로 모형화한다.</li>
+<li>시연의 품질에 따라 가중치를 부여한다.</li>
+<li>선호비교 또는 순위자료를 이용하여 보상을 학습한다.</li>
+<li>전문가 행동과 강화 학습 목적함수를 결합한다.</li>
+<li>확신도가 낮은 상태에서는 인간에게 판단을 요청한다.</li>
+</ul>
+<p>전문가의 행동을 모방하는 것이 윤리적·임상적으로 올바른 결과를 자동으로 보장하지 않는다. 역사적 편향과 비효율도 함께 학습될 수 있으므로 별도의 정책평가가 필요하다.</p>
+</section>
+<section id="sec-ch16-imitation-evaluation" class="level3" data-number="16.6.9">
+<h3 data-number="16.6.9" class="anchored" data-anchor-id="sec-ch16-imitation-evaluation"><span class="header-section-number">16.6.9</span> 모방학습의 평가</h3>
+<p>행동예측 정확도만으로는 모방정책의 순차적 성능을 충분히 평가할 수 없다. 다음 평가를 함께 수행해야 한다.</p>
+<ul>
+<li>보유 전문가 자료에서의 행동예측 손실</li>
+<li>환경에서의 평균 누적보상과 성공률</li>
+<li>전문가와 정책의 상태방문분포 차이</li>
+<li>실패상태, 제약위반과 안전사건의 빈도</li>
+<li>전문가 수준을 벗어난 상태에서의 불확실성</li>
+<li>서로 다른 초기상태와 환경변화에 대한 강건성</li>
+</ul>
+<p>가능하다면 독립된 시뮬레이터 또는 제한된 안전환경에서 정책을 평가하고, 실제 배포 전 인간 감독과 중단규칙을 마련해야 한다.</p>
+</section>
+</section>
+<section id="강화-학습의-실무-설계" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="강화-학습의-실무-설계">강화 학습의 실무 설계</h2>
+<section id="문제를-mdp로-변환하기" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="문제를-mdp로-변환하기">문제를 MDP로 변환하기</h3>
+<p>현실 문제를 강화 학습으로 해결하기 전에 다음 순서로 과업을 명확히 한다.</p>
+<ol type="1">
+<li>의사결정 시점과 에피소드의 시작·종료를 정의한다.</li>
+<li>미래결과를 예측하는 데 충분한 상태를 구성한다.</li>
+<li>실행 가능하고 안전한 행동공간을 정의한다.</li>
+<li>즉각적 보상과 최종 목표의 관계를 점검한다.</li>
+<li>할인율과 계획수평을 결정한다.</li>
+<li>온라인 상호작용, 시뮬레이터 또는 오프라인 자료의 이용 가능성을 확인한다.</li>
+</ol>
+<p>단일 시점의 예측으로 충분하거나 행동이 미래 자료분포를 변화시키지 않는다면 지도학습이나 문맥밴딧이 더 적절할 수 있다. 강화 학습은 순차적 효과가 실질적으로 중요할 때 사용해야 한다.</p>
+</section>
+<section id="알고리즘-선택" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="알고리즘-선택">알고리즘 선택</h3>
+<div id="tbl-ch16-method-selection" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch16-method-selection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;16.2: 문제 조건에 따른 강화 학습 방법의 선택
+</figcaption>
+<div aria-describedby="tbl-ch16-method-selection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>문제 조건</th>
+<th>우선 고려할 방법</th>
+<th>주의점</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>상태가 없고 즉각적 보상만 존재</td>
+<td><span class="math inline">\(k\)</span>-무장 또는 문맥적 밴딧</td>
+<td>장기 상태효과를 무시할 수 있어야 함</td>
+</tr>
+<tr class="even">
+<td>작은 유한 MDP와 알려진 모형</td>
+<td>정책반복, 가치반복</td>
+<td>상태 수 증가에 취약</td>
+</tr>
+<tr class="odd">
+<td>모형을 학습할 수 있고 상호작용이 비쌈</td>
+<td>모델 기반 RL, Dyna, MPC</td>
+<td>모형편향과 불확실성</td>
+</tr>
+<tr class="even">
+<td>작은 이산 상태-행동 공간</td>
+<td>SARSA, Q-학습</td>
+<td>충분한 탐색 필요</td>
+</tr>
+<tr class="odd">
+<td>고차원 관측과 이산 행동</td>
+<td>DQN 계열</td>
+<td>경험재현과 목표망 필요</td>
+</tr>
+<tr class="even">
+<td>연속 행동</td>
+<td>PPO, SAC, TD3</td>
+<td>행동범위와 안정성 관리</td>
+</tr>
+<tr class="odd">
+<td>전문가 시연이 풍부함</td>
+<td>행동복제, DAgger, GAIL</td>
+<td>상태분포 이동과 전문가 편향</td>
+</tr>
+<tr class="even">
+<td>고정 로그자료만 이용 가능</td>
+<td>오프라인 RL, 보수적 가치학습</td>
+<td>분포 밖 행동의 외삽오차</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="정책평가와-불확실성" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="정책평가와-불확실성">정책평가와 불확실성</h3>
+<p>강화 학습 실험은 단일 학습곡선으로 평가해서는 안 된다. 초기화, 탐색과 환경확률성 때문에 결과변동이 크므로 여러 무작위 시드에서 독립적으로 반복하고, 평균과 분산 또는 신뢰구간을 보고해야 한다.</p>
+<p>에피소드 수익의 표본평균은</p>
+<p><span id="eq-ch16-monte-carlo-policy-evaluation"><span class="math display">\[
+\widehat J(\pi)
+=
+\frac{1}{m}
+\sum_{i=1}^{m}G_0^{(i)}
+\tag{16.122}\]</span></span></p>
+<p>로 추정할 수 있다. 평가 중에는 학습을 중단하고 탐색정책과 최종 평가정책을 명확히 구분한다. 평균수익뿐 아니라 하위 분위수, 실패확률, 최악조건 성능과 제약위반을 함께 평가하는 것이 좋다.</p>
+<p>새 정책을 실제 환경에서 실행할 수 없으면 오프정책 평가가 필요하다. 궤적별 중요도 표본추정량은</p>
+<p><span id="eq-ch16-off-policy-is-estimator"><span class="math display">\[
+\widehat J_{\mathrm{IS}}(\pi)
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+\left[
+\prod_{t=0}^{T_i-1}
+\frac{\pi(A_{it}\mid S_{it})}
+{b(A_{it}\mid S_{it})}
+\right]
+G_0^{(i)}
+\tag{16.123}\]</span></span></p>
+<p>이다. 정책확률비가 크면 분산이 폭증할 수 있다. 자기정규화 중요도 표본추출, 단계별 보정과 이중강건 추정량을 사용할 수 있지만, 행동정책이 선택하지 않은 행동의 효과는 자료만으로 식별할 수 없다.</p>
+</section>
+<section id="안전성과-제약" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="안전성과-제약">안전성과 제약</h3>
+<p>안전이 중요한 문제에서는 기대수익 최대화만으로 충분하지 않다. 제약 MDP는 비용함수 <span class="math inline">\(C_j\)</span>에 대해</p>
+<p><span id="eq-ch16-constrained-mdp"><span class="math display">\[
+\max_\pi J_R(\pi)
+\quad\text{subject to}\quad
+J_{C_j}(\pi)
+\leq d_j,
+\qquad j=1,\ldots,m
+\tag{16.124}\]</span></span></p>
+<p>를 푼다. 라그랑지안은</p>
+<p><span id="eq-ch16-constrained-lagrangian"><span class="math display">\[
+\mathcal L(\pi,\boldsymbol\lambda)
+=
+J_R(\pi)
+-
+\sum_{j=1}^{m}
+\lambda_j
+\left[J_{C_j}(\pi)-d_j\right],
+\qquad \lambda_j\geq0
+\tag{16.125}\]</span></span></p>
+<p>로 구성할 수 있다.</p>
+<p>실제 안전설계에는 다음이 포함된다.</p>
+<ul>
+<li>위험행동을 차단하는 행동마스크와 안전필터</li>
+<li>불확실성이 큰 상태에서 보수적 행동 또는 인간 개입</li>
+<li>시뮬레이터와 단계적 배포</li>
+<li>성능저하와 분포이동 모니터링</li>
+<li>즉시 중단 가능한 복구정책</li>
+<li>정책변경의 감사기록과 재현성</li>
+</ul>
+</section>
+<section id="재현-가능한-실험" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="재현-가능한-실험">재현 가능한 실험</h3>
+<p>강화 학습 결과는 환경 버전, 종료조건, 보상 스케일, 관측 전처리와 평가정책에 민감하다. 최소한 다음 정보를 기록해야 한다.</p>
+<ul>
+<li>환경과 시뮬레이터 버전</li>
+<li>상태·행동·보상 정의</li>
+<li>할인율, 학습률과 탐색설정</li>
+<li>네트워크 구조와 초기화</li>
+<li>재현버퍼 크기와 배치크기</li>
+<li>목표망 갱신주기</li>
+<li>학습 전이 수와 평가 빈도</li>
+<li>무작위 시드별 결과</li>
+<li>최종 모형 선택규칙</li>
+</ul>
+<p>학습 중 가장 좋은 평가값을 사후적으로 선택하면 낙관적 편향이 생긴다. 개발환경과 최종 시험환경을 분리하고, 하이퍼파라미터 선택에 사용하지 않은 독립 평가를 유지해야 한다.</p>
+</section>
+</section>
+<section id="장-요약" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="장-요약">장 요약</h2>
+<p>강화 학습은 에이전트가 환경과 상호작용하면서 장기 누적보상을 최대화하는 정책을 학습하는 순차적 의사결정 방법이다. 마르코프 의사결정과정은 상태, 행동, 전이확률, 보상과 할인율로 과업을 표현한다. 정책은 상태에서 행동을 선택하고, 상태가치와 행동가치는 정책을 따를 때의 장기 기대수익을 나타낸다. 벨만 방정식은 현재 가치와 다음 상태 가치의 재귀적 관계를 제공한다.</p>
+<p><span class="math inline">\(k\)</span>-무장 밴딧은 상태전이가 없는 탐색과 활용 문제이다. <span class="math inline">\(\varepsilon\)</span>-탐욕, UCB와 톰프슨 표본추출은 서로 다른 방식으로 행동가치의 불확실성을 관리한다. 문맥밴딧은 현재 특성에 맞추어 행동을 개인화하지만 행동의 장기 상태효과는 고려하지 않는다.</p>
+<p>모델 기반 학습은 알려진 또는 추정된 환경모형을 이용해 계획한다. 정책반복과 가치반복은 작은 유한 MDP의 최적정책을 계산하고, Dyna와 모형예측제어는 실제 경험과 모형 기반 계획을 결합한다. 모델 기반 방법은 표본효율적이지만 모형편향이 장기계획에서 누적될 수 있다.</p>
+<p>모델 프리 방법은 환경모형 없이 경험 전이로부터 가치를 학습한다. 몬테카를로는 실제 종결수익을 사용하고, TD 학습은 다음 상태의 현재 추정값으로 부트스트래핑한다. SARSA는 현재 정책의 행동가치를 학습하며, Q-학습은 오프정책으로 최적 행동가치를 추정한다. 다단계 수익과 적격흔적은 편향·분산과 신용할당의 범위를 조절한다.</p>
+<p>상태공간이 크거나 연속형이면 가치함수와 정책을 모수화해야 한다. 선형 근사는 특성을 통해 상태 사이에 일반화하고, DQN은 신경망·경험재현·목표네트워크를 결합한다. 정책경사와 액터-크리틱은 정책을 직접 최적화하며, PPO와 SAC는 정책갱신의 안정성과 탐색을 강화한다.</p>
+<p>모방학습은 전문가 시연으로부터 정책을 학습한다. 행동복제는 간단하지만 상태분포 이동으로 오차가 누적될 수 있다. DAgger는 학습정책이 방문하는 상태에서 전문가 행동을 추가로 수집하고, 역강화 학습은 전문가 행동을 설명하는 보상함수를 추정한다. GAIL은 전문가와 학습정책의 상태-행동 점유분포를 일치시킨다.</p>
+<p>강화 학습의 실무적 성공은 알고리즘뿐 아니라 상태와 보상의 정의, 안전한 탐색, 독립적 정책평가, 불확실성 관리와 재현 가능한 실험설계에 달려 있다.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./15-rule-learning.html" class="pagination-link" aria-label="규칙 학습">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">규칙 학습</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./17-explainable-trustworthy-ml.html" class="pagination-link" aria-label="설명 가능한 머신러닝과 신뢰할 수 있는 예측">
+        <span class="nav-page-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">설명 가능한 머신러닝과 신뢰할 수 있는 예측</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

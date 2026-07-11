@@ -1,0 +1,2686 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>9&nbsp; 클러스터링 – 머신러닝</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./10-dimensionality-reduction.html" rel="next">
+<link href="./08-ensemble-learning.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-3d841e2d0dac331999ea63b9b6b417ac.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./09-clustering.html">III. 비지도학습과 표현학습</a></li><li class="breadcrumb-item"><a href="./09-clustering.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">클러스터링</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">머신러닝</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="리더 모드 전환">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">I. 머신러닝의 기초</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">머신러닝의 개념과 발전</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-model-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">모형 평가와 선택</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">II. 지도학습</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-linear-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">선형 모형</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-decision-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">의사결정 트리</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-neural-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">신경망</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-support-vector-machines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">서포트 벡터 머신</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-bayesian-classifiers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">베이지안 분류기</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-ensemble-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">앙상블 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">III. 비지도학습과 표현학습</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-clustering.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">클러스터링</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-dimensionality-reduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">차원 축소와 거리 척도 학습</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-feature-selection-sparse-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">특성 선택과 희소 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">IV. 학습이론과 불완전한 데이터</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-computational-learning-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">계산 학습 이론</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-semi-supervised-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">준지도 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">V. 구조화된 확률모형과 규칙</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-probabilistic-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">확률 그래피컬 모형</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-rule-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">규칙 학습</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">VI. 순차적 의사결정과 신뢰성</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="토글 섹션">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-reinforcement-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">강화 학습</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-explainable-trustworthy-ml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">설명 가능한 머신러닝과 신뢰할 수 있는 예측</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#sec-ch09-clustering-problem" id="toc-sec-ch09-clustering-problem" class="nav-link active" data-scroll-target="#sec-ch09-clustering-problem"><span class="header-section-number">9.1</span> 클러스터링 학습 문제</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch09-supervised-unsupervised" id="toc-sec-ch09-supervised-unsupervised" class="nav-link" data-scroll-target="#sec-ch09-supervised-unsupervised"><span class="header-section-number">9.1.1</span> 지도학습과 클러스터링의 차이</a></li>
+  <li><a href="#sec-ch09-cluster-concepts" id="toc-sec-ch09-cluster-concepts" class="nav-link" data-scroll-target="#sec-ch09-cluster-concepts"><span class="header-section-number">9.1.2</span> 클러스터의 여러 개념</a></li>
+  <li><a href="#sec-ch09-hard-soft-overlap" id="toc-sec-ch09-hard-soft-overlap" class="nav-link" data-scroll-target="#sec-ch09-hard-soft-overlap"><span class="header-section-number">9.1.3</span> 경성, 연성 및 중첩 클러스터링</a></li>
+  <li><a href="#sec-ch09-partition-hierarchy-graph" id="toc-sec-ch09-partition-hierarchy-graph" class="nav-link" data-scroll-target="#sec-ch09-partition-hierarchy-graph"><span class="header-section-number">9.1.4</span> 분할, 계층과 그래프 구조</a></li>
+  <li><a href="#sec-ch09-objective-inductive-bias" id="toc-sec-ch09-objective-inductive-bias" class="nav-link" data-scroll-target="#sec-ch09-objective-inductive-bias"><span class="header-section-number">9.1.5</span> 목적함수와 귀납적 편향</a></li>
+  <li><a href="#sec-ch09-preprocessing-representation" id="toc-sec-ch09-preprocessing-representation" class="nav-link" data-scroll-target="#sec-ch09-preprocessing-representation"><span class="header-section-number">9.1.6</span> 전처리와 표현의 영향</a></li>
+  <li><a href="#sec-ch09-number-of-clusters" id="toc-sec-ch09-number-of-clusters" class="nav-link" data-scroll-target="#sec-ch09-number-of-clusters"><span class="header-section-number">9.1.7</span> 클러스터 수의 문제</a></li>
+  <li><a href="#sec-ch09-high-dimensional-clustering" id="toc-sec-ch09-high-dimensional-clustering" class="nav-link" data-scroll-target="#sec-ch09-high-dimensional-clustering"><span class="header-section-number">9.1.8</span> 고차원 자료와 차원의 저주</a></li>
+  <li><a href="#sec-ch09-clustering-workflow" id="toc-sec-ch09-clustering-workflow" class="nav-link" data-scroll-target="#sec-ch09-clustering-workflow"><span class="header-section-number">9.1.9</span> 클러스터링 분석의 기본 절차</a></li>
+  </ul></li>
+  <li><a href="#sec-ch09-performance-measures" id="toc-sec-ch09-performance-measures" class="nav-link" data-scroll-target="#sec-ch09-performance-measures"><span class="header-section-number">9.2</span> 성능 척도</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch09-validation-challenge" id="toc-sec-ch09-validation-challenge" class="nav-link" data-scroll-target="#sec-ch09-validation-challenge"><span class="header-section-number">9.2.1</span> 클러스터링 평가의 어려움</a></li>
+  <li><a href="#sec-ch09-contingency-table" id="toc-sec-ch09-contingency-table" class="nav-link" data-scroll-target="#sec-ch09-contingency-table"><span class="header-section-number">9.2.2</span> 외부 평가를 위한 분할표</a></li>
+  <li><a href="#sec-ch09-purity" id="toc-sec-ch09-purity" class="nav-link" data-scroll-target="#sec-ch09-purity"><span class="header-section-number">9.2.3</span> 순도</a></li>
+  <li><a href="#sec-ch09-rand-ari" id="toc-sec-ch09-rand-ari" class="nav-link" data-scroll-target="#sec-ch09-rand-ari"><span class="header-section-number">9.2.4</span> Rand 지수와 조정 Rand 지수</a></li>
+  <li><a href="#sec-ch09-nmi" id="toc-sec-ch09-nmi" class="nav-link" data-scroll-target="#sec-ch09-nmi"><span class="header-section-number">9.2.5</span> 상호정보량과 정규화 상호정보량</a></li>
+  <li><a href="#sec-ch09-within-between-ss" id="toc-sec-ch09-within-between-ss" class="nav-link" data-scroll-target="#sec-ch09-within-between-ss"><span class="header-section-number">9.2.6</span> 클러스터 내 제곱합과 전체 변동</a></li>
+  <li><a href="#sec-ch09-silhouette" id="toc-sec-ch09-silhouette" class="nav-link" data-scroll-target="#sec-ch09-silhouette"><span class="header-section-number">9.2.7</span> 실루엣 계수</a></li>
+  <li><a href="#sec-ch09-calinski-harabasz" id="toc-sec-ch09-calinski-harabasz" class="nav-link" data-scroll-target="#sec-ch09-calinski-harabasz"><span class="header-section-number">9.2.8</span> Calinski-Harabasz 지수</a></li>
+  <li><a href="#sec-ch09-dunn-index" id="toc-sec-ch09-dunn-index" class="nav-link" data-scroll-target="#sec-ch09-dunn-index"><span class="header-section-number">9.2.9</span> Dunn 지수</a></li>
+  <li><a href="#sec-ch09-davies-bouldin" id="toc-sec-ch09-davies-bouldin" class="nav-link" data-scroll-target="#sec-ch09-davies-bouldin"><span class="header-section-number">9.2.10</span> Davies-Bouldin 지수</a></li>
+  <li><a href="#sec-ch09-gap-statistic" id="toc-sec-ch09-gap-statistic" class="nav-link" data-scroll-target="#sec-ch09-gap-statistic"><span class="header-section-number">9.2.11</span> Gap 통계량</a></li>
+  <li><a href="#sec-ch09-stability-evaluation" id="toc-sec-ch09-stability-evaluation" class="nav-link" data-scroll-target="#sec-ch09-stability-evaluation"><span class="header-section-number">9.2.12</span> 안정성 평가</a></li>
+  <li><a href="#sec-ch09-combining-validation" id="toc-sec-ch09-combining-validation" class="nav-link" data-scroll-target="#sec-ch09-combining-validation"><span class="header-section-number">9.2.13</span> 평가척도의 종합</a></li>
+  </ul></li>
+  <li><a href="#sec-ch09-distance-measures" id="toc-sec-ch09-distance-measures" class="nav-link" data-scroll-target="#sec-ch09-distance-measures"><span class="header-section-number">9.3</span> 거리 계산법</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch09-distance-similarity" id="toc-sec-ch09-distance-similarity" class="nav-link" data-scroll-target="#sec-ch09-distance-similarity"><span class="header-section-number">9.3.1</span> 거리와 유사도</a></li>
+  <li><a href="#sec-ch09-minkowski-distance" id="toc-sec-ch09-minkowski-distance" class="nav-link" data-scroll-target="#sec-ch09-minkowski-distance"><span class="header-section-number">9.3.2</span> 민코프스키 거리</a></li>
+  <li><a href="#sec-ch09-weighted-standardized-distance" id="toc-sec-ch09-weighted-standardized-distance" class="nav-link" data-scroll-target="#sec-ch09-weighted-standardized-distance"><span class="header-section-number">9.3.3</span> 가중 거리와 표준화 거리</a></li>
+  <li><a href="#sec-ch09-mahalanobis-distance" id="toc-sec-ch09-mahalanobis-distance" class="nav-link" data-scroll-target="#sec-ch09-mahalanobis-distance"><span class="header-section-number">9.3.4</span> 마할라노비스 거리</a></li>
+  <li><a href="#sec-ch09-cosine-correlation-distance" id="toc-sec-ch09-cosine-correlation-distance" class="nav-link" data-scroll-target="#sec-ch09-cosine-correlation-distance"><span class="header-section-number">9.3.5</span> 코사인 거리와 상관 거리</a></li>
+  <li><a href="#sec-ch09-binary-distance" id="toc-sec-ch09-binary-distance" class="nav-link" data-scroll-target="#sec-ch09-binary-distance"><span class="header-section-number">9.3.6</span> 이진 자료의 거리</a></li>
+  <li><a href="#sec-ch09-mixed-data-distance" id="toc-sec-ch09-mixed-data-distance" class="nav-link" data-scroll-target="#sec-ch09-mixed-data-distance"><span class="header-section-number">9.3.7</span> 범주형 및 혼합형 자료</a></li>
+  <li><a href="#sec-ch09-distance-missing" id="toc-sec-ch09-distance-missing" class="nav-link" data-scroll-target="#sec-ch09-distance-missing"><span class="header-section-number">9.3.8</span> 결측값이 있는 거리</a></li>
+  <li><a href="#sec-ch09-sequence-distance" id="toc-sec-ch09-sequence-distance" class="nav-link" data-scroll-target="#sec-ch09-sequence-distance"><span class="header-section-number">9.3.9</span> 시계열과 순차자료의 거리</a></li>
+  <li><a href="#sec-ch09-distance-concentration" id="toc-sec-ch09-distance-concentration" class="nav-link" data-scroll-target="#sec-ch09-distance-concentration"><span class="header-section-number">9.3.10</span> 거리 집중 현상</a></li>
+  <li><a href="#sec-ch09-distance-selection" id="toc-sec-ch09-distance-selection" class="nav-link" data-scroll-target="#sec-ch09-distance-selection"><span class="header-section-number">9.3.11</span> 거리 선택의 원칙</a></li>
+  </ul></li>
+  <li><a href="#sec-ch09-prototype-clustering" id="toc-sec-ch09-prototype-clustering" class="nav-link" data-scroll-target="#sec-ch09-prototype-clustering"><span class="header-section-number">9.4</span> 프로토타입 클러스터링</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch09-prototype-concept" id="toc-sec-ch09-prototype-concept" class="nav-link" data-scroll-target="#sec-ch09-prototype-concept"><span class="header-section-number">9.4.1</span> 프로토타입의 개념</a></li>
+  <li><a href="#sec-ch09-kmeans-objective" id="toc-sec-ch09-kmeans-objective" class="nav-link" data-scroll-target="#sec-ch09-kmeans-objective"><span class="header-section-number">9.4.2</span> k-평균 목적함수</a></li>
+  <li><a href="#sec-ch09-lloyd-algorithm" id="toc-sec-ch09-lloyd-algorithm" class="nav-link" data-scroll-target="#sec-ch09-lloyd-algorithm"><span class="header-section-number">9.4.3</span> Lloyd 알고리즘</a></li>
+  <li><a href="#sec-ch09-kmeans-initialization" id="toc-sec-ch09-kmeans-initialization" class="nav-link" data-scroll-target="#sec-ch09-kmeans-initialization"><span class="header-section-number">9.4.4</span> 초기값과 k-means++</a></li>
+  <li><a href="#sec-ch09-kmeans-geometry" id="toc-sec-ch09-kmeans-geometry" class="nav-link" data-scroll-target="#sec-ch09-kmeans-geometry"><span class="header-section-number">9.4.5</span> k-평균의 기하학</a></li>
+  <li><a href="#sec-ch09-kmeans-limitations" id="toc-sec-ch09-kmeans-limitations" class="nav-link" data-scroll-target="#sec-ch09-kmeans-limitations"><span class="header-section-number">9.4.6</span> k-평균의 한계</a></li>
+  <li><a href="#sec-ch09-kmedoids" id="toc-sec-ch09-kmedoids" class="nav-link" data-scroll-target="#sec-ch09-kmedoids"><span class="header-section-number">9.4.7</span> k-메도이드(k-medoids)</a></li>
+  <li><a href="#sec-ch09-fuzzy-cmeans" id="toc-sec-ch09-fuzzy-cmeans" class="nav-link" data-scroll-target="#sec-ch09-fuzzy-cmeans"><span class="header-section-number">9.4.8</span> 퍼지 c-평균</a></li>
+  <li><a href="#sec-ch09-mixture-clustering" id="toc-sec-ch09-mixture-clustering" class="nav-link" data-scroll-target="#sec-ch09-mixture-clustering"><span class="header-section-number">9.4.9</span> 혼합모형과 확률적 프로토타입</a></li>
+  <li><a href="#sec-ch09-scalable-kmeans" id="toc-sec-ch09-scalable-kmeans" class="nav-link" data-scroll-target="#sec-ch09-scalable-kmeans"><span class="header-section-number">9.4.10</span> 대규모 자료의 k-평균</a></li>
+  <li><a href="#sec-ch09-prototype-comparison" id="toc-sec-ch09-prototype-comparison" class="nav-link" data-scroll-target="#sec-ch09-prototype-comparison"><span class="header-section-number">9.4.11</span> 프로토타입 방법의 비교</a></li>
+  </ul></li>
+  <li><a href="#sec-ch09-density-clustering" id="toc-sec-ch09-density-clustering" class="nav-link" data-scroll-target="#sec-ch09-density-clustering"><span class="header-section-number">9.5</span> 밀도 클러스터링</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch09-density-view" id="toc-sec-ch09-density-view" class="nav-link" data-scroll-target="#sec-ch09-density-view"><span class="header-section-number">9.5.1</span> 밀도 기반 관점</a></li>
+  <li><a href="#sec-ch09-epsilon-neighborhood" id="toc-sec-ch09-epsilon-neighborhood" class="nav-link" data-scroll-target="#sec-ch09-epsilon-neighborhood"><span class="header-section-number">9.5.2</span> epsilon 이웃</a></li>
+  <li><a href="#sec-ch09-core-border-noise" id="toc-sec-ch09-core-border-noise" class="nav-link" data-scroll-target="#sec-ch09-core-border-noise"><span class="header-section-number">9.5.3</span> 핵심점, 경계점과 잡음점</a></li>
+  <li><a href="#sec-ch09-density-reachability" id="toc-sec-ch09-density-reachability" class="nav-link" data-scroll-target="#sec-ch09-density-reachability"><span class="header-section-number">9.5.4</span> 밀도 도달가능성(density reachability)과 밀도 연결성</a></li>
+  <li><a href="#sec-ch09-dbscan-algorithm" id="toc-sec-ch09-dbscan-algorithm" class="nav-link" data-scroll-target="#sec-ch09-dbscan-algorithm"><span class="header-section-number">9.5.5</span> DBSCAN 알고리즘</a></li>
+  <li><a href="#sec-ch09-dbscan-parameter-selection" id="toc-sec-ch09-dbscan-parameter-selection" class="nav-link" data-scroll-target="#sec-ch09-dbscan-parameter-selection"><span class="header-section-number">9.5.6</span> 매개변수 선택</a></li>
+  <li><a href="#sec-ch09-dbscan-strengths-limitations" id="toc-sec-ch09-dbscan-strengths-limitations" class="nav-link" data-scroll-target="#sec-ch09-dbscan-strengths-limitations"><span class="header-section-number">9.5.7</span> DBSCAN의 장점과 한계</a></li>
+  <li><a href="#sec-ch09-optics" id="toc-sec-ch09-optics" class="nav-link" data-scroll-target="#sec-ch09-optics"><span class="header-section-number">9.5.8</span> OPTICS</a></li>
+  <li><a href="#sec-ch09-hdbscan" id="toc-sec-ch09-hdbscan" class="nav-link" data-scroll-target="#sec-ch09-hdbscan"><span class="header-section-number">9.5.9</span> HDBSCAN</a></li>
+  <li><a href="#sec-ch09-mean-shift" id="toc-sec-ch09-mean-shift" class="nav-link" data-scroll-target="#sec-ch09-mean-shift"><span class="header-section-number">9.5.10</span> 평균이동 클러스터링</a></li>
+  <li><a href="#sec-ch09-density-method-comparison" id="toc-sec-ch09-density-method-comparison" class="nav-link" data-scroll-target="#sec-ch09-density-method-comparison"><span class="header-section-number">9.5.11</span> 밀도 기반 방법의 비교</a></li>
+  </ul></li>
+  <li><a href="#sec-ch09-hierarchical-clustering" id="toc-sec-ch09-hierarchical-clustering" class="nav-link" data-scroll-target="#sec-ch09-hierarchical-clustering"><span class="header-section-number">9.6</span> 계층 클러스터링</a>
+  <ul class="collapse">
+  <li><a href="#sec-ch09-hierarchical-structure" id="toc-sec-ch09-hierarchical-structure" class="nav-link" data-scroll-target="#sec-ch09-hierarchical-structure"><span class="header-section-number">9.6.1</span> 계층적 구조</a></li>
+  <li><a href="#sec-ch09-agglomerative-algorithm" id="toc-sec-ch09-agglomerative-algorithm" class="nav-link" data-scroll-target="#sec-ch09-agglomerative-algorithm"><span class="header-section-number">9.6.2</span> 병합형 알고리즘</a></li>
+  <li><a href="#sec-ch09-single-linkage" id="toc-sec-ch09-single-linkage" class="nav-link" data-scroll-target="#sec-ch09-single-linkage"><span class="header-section-number">9.6.3</span> 단일연결법</a></li>
+  <li><a href="#sec-ch09-complete-linkage" id="toc-sec-ch09-complete-linkage" class="nav-link" data-scroll-target="#sec-ch09-complete-linkage"><span class="header-section-number">9.6.4</span> 완전연결법</a></li>
+  <li><a href="#sec-ch09-average-linkage" id="toc-sec-ch09-average-linkage" class="nav-link" data-scroll-target="#sec-ch09-average-linkage"><span class="header-section-number">9.6.5</span> 평균연결법</a></li>
+  <li><a href="#sec-ch09-centroid-linkage" id="toc-sec-ch09-centroid-linkage" class="nav-link" data-scroll-target="#sec-ch09-centroid-linkage"><span class="header-section-number">9.6.6</span> 중심연결법</a></li>
+  <li><a href="#sec-ch09-ward-linkage" id="toc-sec-ch09-ward-linkage" class="nav-link" data-scroll-target="#sec-ch09-ward-linkage"><span class="header-section-number">9.6.7</span> Ward 연결법</a></li>
+  <li><a href="#sec-ch09-linkage-comparison" id="toc-sec-ch09-linkage-comparison" class="nav-link" data-scroll-target="#sec-ch09-linkage-comparison"><span class="header-section-number">9.6.8</span> 연결법의 비교</a></li>
+  <li><a href="#sec-ch09-lance-williams" id="toc-sec-ch09-lance-williams" class="nav-link" data-scroll-target="#sec-ch09-lance-williams"><span class="header-section-number">9.6.9</span> Lance-Williams 갱신식</a></li>
+  <li><a href="#sec-ch09-dendrogram-interpretation" id="toc-sec-ch09-dendrogram-interpretation" class="nav-link" data-scroll-target="#sec-ch09-dendrogram-interpretation"><span class="header-section-number">9.6.10</span> 덴드로그램 해석</a></li>
+  <li><a href="#sec-ch09-cophenetic-correlation" id="toc-sec-ch09-cophenetic-correlation" class="nav-link" data-scroll-target="#sec-ch09-cophenetic-correlation"><span class="header-section-number">9.6.11</span> 코페네틱 거리와 상관</a></li>
+  <li><a href="#sec-ch09-hierarchical-stability" id="toc-sec-ch09-hierarchical-stability" class="nav-link" data-scroll-target="#sec-ch09-hierarchical-stability"><span class="header-section-number">9.6.12</span> 계층의 안정성과 부트스트랩</a></li>
+  <li><a href="#sec-ch09-divisive-clustering" id="toc-sec-ch09-divisive-clustering" class="nav-link" data-scroll-target="#sec-ch09-divisive-clustering"><span class="header-section-number">9.6.13</span> 분할형 계층 클러스터링</a></li>
+  <li><a href="#sec-ch09-constrained-hierarchical" id="toc-sec-ch09-constrained-hierarchical" class="nav-link" data-scroll-target="#sec-ch09-constrained-hierarchical"><span class="header-section-number">9.6.14</span> 제약된 계층 클러스터링</a></li>
+  <li><a href="#sec-ch09-birch" id="toc-sec-ch09-birch" class="nav-link" data-scroll-target="#sec-ch09-birch"><span class="header-section-number">9.6.15</span> 대규모 자료와 BIRCH</a></li>
+  <li><a href="#sec-ch09-new-observation-assignment" id="toc-sec-ch09-new-observation-assignment" class="nav-link" data-scroll-target="#sec-ch09-new-observation-assignment"><span class="header-section-number">9.6.16</span> 새로운 관측값의 배정</a></li>
+  <li><a href="#sec-ch09-overall-method-comparison" id="toc-sec-ch09-overall-method-comparison" class="nav-link" data-scroll-target="#sec-ch09-overall-method-comparison"><span class="header-section-number">9.6.17</span> 주요 클러스터링 방법의 종합 비교</a></li>
+  <li><a href="#sec-ch09-practical-guidelines" id="toc-sec-ch09-practical-guidelines" class="nav-link" data-scroll-target="#sec-ch09-practical-guidelines"><span class="header-section-number">9.6.18</span> 실무적 선택 지침</a></li>
+  </ul></li>
+  <li><a href="#장-요약" id="toc-장-요약" class="nav-link" data-scroll-target="#장-요약">장 요약</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./09-clustering.html">III. 비지도학습과 표현학습</a></li><li class="breadcrumb-item"><a href="./09-clustering.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">클러스터링</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-ch09" class="quarto-section-identifier"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">클러스터링</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>클러스터링(clustering)은 목표변수나 정답 레이블이 주어지지 않은 자료에서 관측값들 사이의 유사성과 차이를 이용하여 내부 구조를 발견하는 비지도학습(unsupervised learning) 방법이다. 지도학습에서는 입력변수와 목표변수 사이의 관계를 학습하지만, 클러스터링에서는 관측값들이 어떤 방식으로 묶이는지 자체를 자료로부터 추론한다. 따라서 클러스터링의 결과는 자료에 이미 존재하는 절대적 정답이라기보다, 사용한 표현, 거리, 알고리즘과 해석 목적에 의해 결정되는 하나의 구조적 요약으로 이해해야 한다.</p>
+<p><span class="math inline">\(n\)</span>개의 관측값과 <span class="math inline">\(p\)</span>개의 특성으로 이루어진 자료를</p>
+<p><span id="eq-ch09-dataset"><span class="math display">\[
+\mathcal D
+=
+\{\mathbf x_1,\ldots,\mathbf x_n\},
+\qquad
+\mathbf x_i\in\mathbb R^p
+\tag{9.1}\]</span></span></p>
+<p>라고 하자. 가장 전형적인 클러스터링 문제는 관측값 집합을 <span class="math inline">\(K\)</span>개의 서로 겹치지 않는 부분집합으로 나누는 것이다.</p>
+<p><span id="eq-ch09-hard-partition"><span class="math display">\[
+\mathcal C
+=
+\{C_1,\ldots,C_K\},
+\qquad
+C_k\cap C_\ell=\varnothing\;(k\neq \ell),
+\qquad
+\bigcup_{k=1}^{K}C_k=\{1,\ldots,n\}
+\tag{9.2}\]</span></span></p>
+<p>이때 <span class="math inline">\(C_k\)</span>는 <span class="math inline">\(k\)</span>번째 클러스터에 포함된 관측값의 인덱스 집합이다. 관측값 <span class="math inline">\(i\)</span>의 클러스터 소속을 나타내는 지시변수는</p>
+<p><span id="eq-ch09-membership-indicator"><span class="math display">\[
+z_{ik}
+=
+\begin{cases}
+1, &amp; i\in C_k,\\
+0, &amp; i\notin C_k
+\end{cases},
+\qquad
+\sum_{k=1}^{K}z_{ik}=1
+\tag{9.3}\]</span></span></p>
+<p>로 표현할 수 있다.</p>
+<p>그러나 모든 클러스터링이 <a href="#eq-ch09-hard-partition" class="quarto-xref">방정식&nbsp;<span>9.2</span></a><!-- -->과 같은 경성 분할(hard partition)을 만드는 것은 아니다. 하나의 관측값이 여러 클러스터에 부분적으로 속할 수 있는 퍼지 클러스터링, 관측값의 소속확률을 추정하는 혼합모형, 일부 관측값을 잡음으로 분류하는 밀도 기반 방법, 여러 해상도의 중첩 구조를 나타내는 계층적 클러스터링도 있다.</p>
+<div class="callout callout-style-default callout-important callout-titled" title="클러스터링의 핵심 관점">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">중요</span>클러스터링의 핵심 관점
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>클러스터는 자료 안에 고정되어 있는 물체라기보다, <strong>어떤 특성을 사용하고, 어떻게 스케일을 조정하고, 어떤 유사성 개념과 알고리즘을 적용하는가</strong>에 따라 달라지는 분석적 구성물이다. 따라서 클러스터링에서는 알고리즘 선택만큼 문제 정의와 결과 검증이 중요하다.</p>
+</div>
+</div>
+<p>이 장에서는 클러스터링 학습 문제의 성격을 먼저 정리한 다음, 클러스터링 결과를 평가하는 방법, 거리와 유사도, 프로토타입 기반 클러스터링, 밀도 기반 클러스터링과 계층적 클러스터링을 차례로 설명한다.</p>
+<section id="sec-ch09-clustering-problem" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="sec-ch09-clustering-problem"><span class="header-section-number">9.1</span> 클러스터링 학습 문제</h2>
+<section id="sec-ch09-supervised-unsupervised" class="level3" data-number="9.1.1">
+<h3 data-number="9.1.1" class="anchored" data-anchor-id="sec-ch09-supervised-unsupervised"><span class="header-section-number">9.1.1</span> 지도학습과 클러스터링의 차이</h3>
+<p>지도학습에서는 관측값마다 목표값 <span class="math inline">\(y_i\)</span>가 주어지며, 학습의 목적은 새로운 입력 <span class="math inline">\(\mathbf x\)</span>에 대해 <span class="math inline">\(y\)</span>를 예측하는 함수 <span class="math inline">\(f\)</span>를 찾는 것이다. 이에 비해 클러스터링에서는 목표값이 없으므로 무엇이 좋은 결과인지 직접 정의해야 한다.</p>
+<p>지도학습의 경험위험은 일반적으로</p>
+<p><span id="eq-ch09-supervised-risk"><span class="math display">\[
+\widehat R_n(f)
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+L\{y_i,f(\mathbf x_i)\}
+\tag{9.4}\]</span></span></p>
+<p>와 같이 정답 <span class="math inline">\(y_i\)</span>에 대한 손실로 정의된다. 그러나 클러스터링에서는 <span class="math inline">\(y_i\)</span>가 없으므로 다음과 같은 대체 기준을 사용한다.</p>
+<ul>
+<li>클러스터 내부의 관측값은 서로 가까워야 한다.</li>
+<li>서로 다른 클러스터의 관측값은 충분히 멀어야 한다.</li>
+<li>자료의 국소적 밀도나 연결성이 클러스터 안에서 유지되어야 한다.</li>
+<li>작은 자료 변화에도 결과가 크게 달라지지 않아야 한다.</li>
+<li>분석 목적과 영역 지식에 비추어 해석 가능한 구조여야 한다.</li>
+</ul>
+<p>이러한 기준들은 서로 완전히 일치하지 않는다. 구형의 조밀한 집단을 선호하는 기준은 길게 휘어진 군집이나 밀도가 다른 군집을 제대로 찾지 못할 수 있다. 따라서 클러스터링 알고리즘은 특정한 클러스터 개념을 암묵적으로 전제한다.</p>
+</section>
+<section id="sec-ch09-cluster-concepts" class="level3" data-number="9.1.2">
+<h3 data-number="9.1.2" class="anchored" data-anchor-id="sec-ch09-cluster-concepts"><span class="header-section-number">9.1.2</span> 클러스터의 여러 개념</h3>
+<p>클러스터를 정의하는 대표적인 관점은 다음과 같다.</p>
+<section id="sec-ch09-center-based-clusters" class="level4">
+<h4 class="anchored" data-anchor-id="sec-ch09-center-based-clusters">중심 기반 클러스터</h4>
+<p>각 클러스터는 하나의 대표점 또는 중심으로 요약되고, 관측값은 가장 가까운 중심에 배정된다. <span class="math inline">\(k\)</span>-평균이 대표적이다. 중심 기반 클러스터(center-based cluster)는 대체로 볼록하고 구형에 가까운 집단을 잘 표현한다.</p>
+</section>
+<section id="sec-ch09-connectivity-clusters" class="level4">
+<h4 class="anchored" data-anchor-id="sec-ch09-connectivity-clusters">연결성 기반 클러스터(connectivity-based cluster)</h4>
+<p>서로 가까운 관측값들을 연쇄적으로 연결하여 클러스터를 구성한다. 계층적 군집화의 단일연결법이 대표적이다. 길게 늘어난 구조를 찾을 수 있지만, 잡음에 의해 서로 다른 집단이 연결되는 연쇄효과(chaining effect)가 발생할 수 있다.</p>
+</section>
+<section id="sec-ch09-density-clusters" class="level4">
+<h4 class="anchored" data-anchor-id="sec-ch09-density-clusters">밀도 기반 클러스터(density-based cluster)</h4>
+<p>고밀도 영역은 같은 클러스터로 보고, 저밀도 영역을 클러스터의 경계로 본다. DBSCAN은 임의의 모양을 가진 클러스터를 찾고 잡음을 별도로 분리할 수 있다.</p>
+</section>
+<section id="sec-ch09-distribution-clusters" class="level4">
+<h4 class="anchored" data-anchor-id="sec-ch09-distribution-clusters">분포 기반 클러스터(distribution-based cluster)</h4>
+<p>자료가 여러 확률분포의 혼합에서 생성되었다고 가정한다. 가우시안 혼합모형(Gaussian mixture model)에서는 각 혼합성분이 하나의 잠재집단을 나타낸다. 이 관점에서는 클러스터 소속을 확률로 표현할 수 있다.</p>
+</section>
+<section id="sec-ch09-conceptual-clusters" class="level4">
+<h4 class="anchored" data-anchor-id="sec-ch09-conceptual-clusters">개념 또는 목적 기반 클러스터</h4>
+<p>통계적 거리뿐 아니라 영역 지식, 규칙, 제약조건 또는 실제 의사결정 목적에 따라 클러스터를 정의한다. 예를 들어 의료자료에서는 치료전략이 달라지는 환자군이 의미 있는 클러스터일 수 있다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch09-cluster-shapes" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch09-cluster-shapes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="09-clustering_files/figure-html/fig-ch09-cluster-shapes-1.png" class="img-fluid figure-img" width="864">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch09-cluster-shapes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;9.1: 서로 다른 형태의 클러스터 구조
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch09-cluster-shapes" class="quarto-xref">그림&nbsp;<span>9.1</span></a><!-- -->는 클러스터가 하나의 기하학적 형태로만 정의될 수 없음을 보여준다. 첫 번째 자료에는 중심 기반 방법이 적합하지만, 두 번째 자료에서는 연결성 또는 밀도 기반 방법이 더 자연스럽다. 세 번째와 네 번째 자료에서는 밀도 차이와 중첩을 고려해야 한다.</p>
+</section>
+</section>
+<section id="sec-ch09-hard-soft-overlap" class="level3" data-number="9.1.3">
+<h3 data-number="9.1.3" class="anchored" data-anchor-id="sec-ch09-hard-soft-overlap"><span class="header-section-number">9.1.3</span> 경성, 연성 및 중첩 클러스터링</h3>
+<p>경성 클러스터링(hard clustering)에서는 각 관측값이 정확히 하나의 클러스터에 속한다. 연성 클러스터링(soft clustering)에서는 소속 정도를</p>
+<p><span id="eq-ch09-soft-membership"><span class="math display">\[
+u_{ik}\in[0,1],
+\qquad
+\sum_{k=1}^{K}\nu_{ik}=1
+\tag{9.5}\]</span></span></p>
+<p>로 표현한다. <span class="math inline">\(\nu_{ik}\)</span>는 클러스터 소속도(membership), 즉 퍼지 소속도 또는 사후 소속확률이 될 수 있다. 클러스터 사이에 명확한 경계가 없거나 여러 특성이 혼합된 관측값이 존재할 때 연성 클러스터링이 유용하다.</p>
+<p>중첩 클러스터링(overlapping clustering)에서는 하나의 관측값이 여러 클러스터에 동시에 속할 수 있으며, 반드시 소속도의 합이 1일 필요는 없다. 예를 들어 한 문서는 여러 주제를 동시에 포함할 수 있고, 한 유전자는 여러 생물학적 경로에 참여할 수 있다.</p>
+</section>
+<section id="sec-ch09-partition-hierarchy-graph" class="level3" data-number="9.1.4">
+<h3 data-number="9.1.4" class="anchored" data-anchor-id="sec-ch09-partition-hierarchy-graph"><span class="header-section-number">9.1.4</span> 분할, 계층과 그래프 구조</h3>
+<p>클러스터링 결과의 표현 형식도 다양하다.</p>
+<ul>
+<li><strong>분할형 구조</strong>: <span class="math inline">\(K\)</span>개의 서로 겹치지 않는 클러스터를 생성한다.</li>
+<li><strong>계층형 구조</strong>: 작은 클러스터가 큰 클러스터 안에 포함되는 중첩 구조를 생성한다.</li>
+<li><strong>그래프 구조</strong>: 관측값을 정점, 유사성을 간선으로 표현하고 커뮤니티를 탐색한다.</li>
+<li><strong>확률적 구조</strong>: 잠재 클래스 또는 혼합성분의 사후확률을 추정한다.</li>
+</ul>
+<p>같은 자료라도 분할형 알고리즘은 하나의 해상도만 제공하지만, 계층적 방법은 여러 수준에서 가능한 구조를 보여준다.</p>
+</section>
+<section id="sec-ch09-objective-inductive-bias" class="level3" data-number="9.1.5">
+<h3 data-number="9.1.5" class="anchored" data-anchor-id="sec-ch09-objective-inductive-bias"><span class="header-section-number">9.1.5</span> 목적함수와 귀납적 편향</h3>
+<p>대부분의 클러스터링 방법은 명시적 또는 암묵적인 목적함수를 최적화한다. 일반적인 형태는</p>
+<p><span id="eq-ch09-general-clustering-objective"><span class="math display">\[
+\widehat{\mathcal C}
+=
+\arg\min_{\mathcal C\in\mathfrak C}
+\left
+\{
+W(\mathcal C)
++
+\lambda P(\mathcal C)
+\right\}
+\tag{9.6}\]</span></span></p>
+<p>이다. 여기서 <span class="math inline">\(W(\mathcal C)\)</span>는 클러스터 내부의 비동질성을 측정하고, <span class="math inline">\(P(\mathcal C)\)</span>는 클러스터 수, 불균형, 복잡한 경계 또는 제약 위반에 대한 패널티다. <span class="math inline">\(\mathfrak C\)</span>는 허용되는 클러스터링의 집합이다.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="목적함수의 의미">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">노트</span>목적함수의 의미
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><a href="#eq-ch09-general-clustering-objective" class="quarto-xref">방정식&nbsp;<span>9.6</span></a><!-- -->의 마지막 줄에 나타나는 목적함수는 개념적 표현이다. 실제 알고리즘마다 <span class="math inline">\(W\)</span>, <span class="math inline">\(P\)</span>와 허용공간 <span class="math inline">\(\mathfrak C\)</span>의 정의가 다르며, 일부 방법은 명시적인 전역 목적함수를 갖지 않는다.</p>
+</div>
+</div>
+<p>클러스터링 방법의 귀납적 편향은 다음 요소에서 나타난다.</p>
+<ul>
+<li>거리 또는 유사도의 정의</li>
+<li>클러스터 모양에 대한 가정</li>
+<li>클러스터 수의 선택</li>
+<li>잡음과 이상치의 처리</li>
+<li>클러스터 크기와 밀도에 대한 가정</li>
+<li>변수의 스케일과 가중치</li>
+<li>초기값과 탐색 알고리즘</li>
+</ul>
+</section>
+<section id="sec-ch09-preprocessing-representation" class="level3" data-number="9.1.6">
+<h3 data-number="9.1.6" class="anchored" data-anchor-id="sec-ch09-preprocessing-representation"><span class="header-section-number">9.1.6</span> 전처리와 표현의 영향</h3>
+<p>클러스터링은 거리와 유사도에 크게 의존하므로 변수의 단위와 표현에 민감하다. 두 변수 <span class="math inline">\(x_1\)</span>과 <span class="math inline">\(x_2\)</span>의 단위가 크게 다르면 유클리드 거리(Euclidean distance)에서 변동 폭이 큰 변수가 결과를 지배한다. 표준화는</p>
+<p><span id="eq-ch09-standardization"><span class="math display">\[
+\widetilde x_{ij}
+=
+\frac{x_{ij}-\overline x_j}{s_j}
+\tag{9.7}\]</span></span></p>
+<p>와 같이 수행할 수 있다. 여기서 <span class="math inline">\(\overline x_j\)</span>와 <span class="math inline">\(s_j\)</span>는 <span class="math inline">\(j\)</span>번째 변수의 표본평균과 표본표준편차다.</p>
+<p>다만 모든 변수를 자동으로 표준화하는 것이 항상 옳지는 않다. 단위 자체가 중요하거나 변동이 큰 변수가 실제로 더 중요한 경우에는 표준화가 정보를 왜곡할 수 있다. 로그변환, 순위변환, 범주형 인코딩, 이상치 완화와 결측값 처리는 클러스터링 전에 분석 목적에 맞게 결정해야 한다.</p>
+</section>
+<section id="sec-ch09-number-of-clusters" class="level3" data-number="9.1.7">
+<h3 data-number="9.1.7" class="anchored" data-anchor-id="sec-ch09-number-of-clusters"><span class="header-section-number">9.1.7</span> 클러스터 수의 문제</h3>
+<p>많은 알고리즘은 클러스터 수 <span class="math inline">\(K\)</span>를 미리 지정해야 한다. 그러나 실제 자료에서 하나의 참된 <span class="math inline">\(K\)</span>가 존재하지 않을 수 있다. 해상도에 따라 큰 집단 안에 작은 하위집단이 존재할 수 있고, 연속적인 스펙트럼을 억지로 나누면 임의적인 경계가 만들어진다.</p>
+<p>클러스터 수 선택에는 다음 정보를 함께 사용한다.</p>
+<ul>
+<li>내부 타당도 지수</li>
+<li>외부 정보 또는 영역 지식</li>
+<li>재표본화 안정성</li>
+<li>시각화</li>
+<li>후속 분석에서의 유용성</li>
+<li>클러스터 해석 가능성</li>
+</ul>
+</section>
+<section id="sec-ch09-high-dimensional-clustering" class="level3" data-number="9.1.8">
+<h3 data-number="9.1.8" class="anchored" data-anchor-id="sec-ch09-high-dimensional-clustering"><span class="header-section-number">9.1.8</span> 고차원 자료와 차원의 저주</h3>
+<p>차원이 증가하면 관측값 사이의 거리가 비슷해지는 거리 집중(distance concentration) 현상이 나타난다. 또한 관련 없는 변수가 많으면 실제 군집 구조가 잡음에 묻힌다.</p>
+<p>고차원 클러스터링에서는 다음 전략을 고려할 수 있다.</p>
+<ul>
+<li>변수 선택</li>
+<li>주성분 분석이나 임베딩을 통한 차원 축소</li>
+<li>희소 클러스터링</li>
+<li>부분공간 클러스터링</li>
+<li>변수 가중 거리</li>
+<li>도메인 지식을 이용한 특성 구성</li>
+</ul>
+<p>다만 차원 축소 후의 클러스터가 원래 변수공간에서도 의미가 있는지 확인해야 한다. 시각화를 위해 2차원으로 축소한 결과와 실제 클러스터링에 사용할 표현을 구분하는 것이 중요하다.</p>
+</section>
+<section id="sec-ch09-clustering-workflow" class="level3" data-number="9.1.9">
+<h3 data-number="9.1.9" class="anchored" data-anchor-id="sec-ch09-clustering-workflow"><span class="header-section-number">9.1.9</span> 클러스터링 분석의 기본 절차</h3>
+<p>클러스터링 분석은 다음 순서로 진행하는 것이 바람직하다.</p>
+<ol type="1">
+<li>분석 목적과 클러스터의 의미를 정의한다.</li>
+<li>분석단위와 사용할 변수를 결정한다.</li>
+<li>결측값, 이상치, 단위와 분포를 점검한다.</li>
+<li>자료의 특성에 맞는 거리 또는 유사도를 선택한다.</li>
+<li>여러 클러스터링 방법과 하이퍼파라미터를 비교한다.</li>
+<li>내부 타당도, 외부 정보와 안정성을 함께 평가한다.</li>
+<li>클러스터별 특성을 요약하고 해석한다.</li>
+<li>독립자료나 새로운 시점에서 재현성을 확인한다.</li>
+<li>클러스터를 실제 의사결정에 사용할 경우 배정규칙을 명시한다.</li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled" title="탐색과 확증의 구분">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">노트</span>탐색과 확증의 구분
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>클러스터링으로 집단을 발견한 뒤 동일한 자료에서 집단 간 차이를 검정하면 선택과 검정이 같은 자료에 의존한다. 이 경우 보통의 <span class="math inline">\(p\)</span>값은 선택 불확실성을 반영하지 못한다. 가능하면 별도의 자료에서 클러스터 특성을 확인하거나, 클러스터링 자체를 탐색적 분석으로 명시해야 한다.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-ch09-performance-measures" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="sec-ch09-performance-measures"><span class="header-section-number">9.2</span> 성능 척도</h2>
+<section id="sec-ch09-validation-challenge" class="level3" data-number="9.2.1">
+<h3 data-number="9.2.1" class="anchored" data-anchor-id="sec-ch09-validation-challenge"><span class="header-section-number">9.2.1</span> 클러스터링 평가의 어려움</h3>
+<p>클러스터링에서는 정답 레이블이 없는 경우가 많으므로 단일한 성능척도로 알고리즘의 우수성을 판단하기 어렵다. 평가기준은 크게 네 종류로 나눌 수 있다.</p>
+<div id="tbl-ch09-validation-types" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch09-validation-types-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;9.1: 클러스터링 평가의 주요 유형
+</figcaption>
+<div aria-describedby="tbl-ch09-validation-types-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>평가 유형</th>
+<th>사용 정보</th>
+<th>대표 척도</th>
+<th>주요 목적</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>내부 평가(internal validation)</td>
+<td>자료와 군집결과</td>
+<td>실루엣, Calinski-Harabasz, Davies-Bouldin</td>
+<td>응집도와 분리도 평가</td>
+</tr>
+<tr class="even">
+<td>외부 평가(external validation)</td>
+<td>외부 정답 또는 기준분류</td>
+<td>ARI, NMI, purity</td>
+<td>알려진 분류와 일치도 평가</td>
+</tr>
+<tr class="odd">
+<td>상대 평가(relative validation)</td>
+<td>여러 <span class="math inline">\(K\)</span> 또는 알고리즘</td>
+<td>elbow, gap statistic</td>
+<td>대안 간 비교</td>
+</tr>
+<tr class="even">
+<td>안정성 평가(stability validation)</td>
+<td>재표본화 또는 교란자료</td>
+<td>Jaccard, consensus</td>
+<td>결과의 재현성 평가</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>좋은 클러스터링은 대체로 클러스터 내부가 동질적이고 클러스터 사이가 잘 분리되어야 한다. 그러나 길게 휘어진 클러스터, 밀도가 다른 클러스터 또는 중첩된 확률집단에서는 단순한 응집도와 분리도 기준이 적절하지 않을 수 있다.</p>
+</section>
+<section id="sec-ch09-contingency-table" class="level3" data-number="9.2.2">
+<h3 data-number="9.2.2" class="anchored" data-anchor-id="sec-ch09-contingency-table"><span class="header-section-number">9.2.2</span> 외부 평가를 위한 분할표</h3>
+<p>외부 기준 레이블 <span class="math inline">\(Y\in\{1,\ldots,G\}\)</span>와 클러스터 결과 <span class="math inline">\(Z\in\{1,\ldots,K\}\)</span>가 있다고 하자. 두 분할의 교차표를</p>
+<p><span id="eq-ch09-contingency-count"><span class="math display">\[
+N=(n_{gk}),
+\qquad
+n_{gk}
+=
+\#\{i:Y_i=g, Z_i=k\}
+\tag{9.8}\]</span></span></p>
+<p>로 정의한다. 행합과 열합은</p>
+<p><span id="eq-ch09-contingency-margins"><span class="math display">\[
+n_{g\cdot}=\sum_{k=1}^{K}n_{gk},
+\qquad
+n_{\cdot k}=\sum_{g=1}^{G}n_{gk}
+\tag{9.9}\]</span></span></p>
+<p>이다. 클러스터 번호는 임의적이므로 단순 정확도를 계산하기 전에 클러스터와 외부 클래스의 대응을 맞추어야 한다.</p>
+</section>
+<section id="sec-ch09-purity" class="level3" data-number="9.2.3">
+<h3 data-number="9.2.3" class="anchored" data-anchor-id="sec-ch09-purity"><span class="header-section-number">9.2.3</span> 순도</h3>
+<p>순도(purity)는 각 클러스터에서 가장 많은 외부 클래스의 관측값 수를 합하여 계산한다.</p>
+<p><span id="eq-ch09-purity"><span class="math display">\[
+\operatorname{Purity}
+=
+\frac{1}{n}
+\sum_{k=1}^{K}
+\max_g n_{gk}
+\tag{9.10}\]</span></span></p>
+<p>순도는 0과 1 사이이며 값이 클수록 외부 클래스와 잘 일치한다. 그러나 <span class="math inline">\(K\)</span>를 크게 하면 각 관측값을 별도 클러스터로 만들 수 있어 순도가 1에 가까워진다. 따라서 서로 다른 클러스터 수를 비교하는 데 단독으로 사용해서는 안 된다.</p>
+</section>
+<section id="sec-ch09-rand-ari" class="level3" data-number="9.2.4">
+<h3 data-number="9.2.4" class="anchored" data-anchor-id="sec-ch09-rand-ari"><span class="header-section-number">9.2.4</span> Rand 지수와 조정 Rand 지수</h3>
+<p>두 관측값의 모든 쌍을 고려하자. 두 분할에서 모두 같은 집단에 속한 쌍의 수를 <span class="math inline">\(a\)</span>, 두 분할에서 모두 다른 집단에 속한 쌍의 수를 <span class="math inline">\(b\)</span>, 한 분할에서만 같은 집단에 속한 쌍의 수를 <span class="math inline">\(c+d\)</span>라고 하면 Rand 지수는</p>
+<p><span id="eq-ch09-rand-index"><span class="math display">\[
+\operatorname{RI}
+=
+\frac{a+b}{a+b+c+d}
+\tag{9.11}\]</span></span></p>
+<p>이다. RI는 우연에 의한 일치도를 보정하지 않는다. 조정 Rand 지수(adjusted Rand index, ARI)는 기대 일치도를 보정한다.</p>
+<p><span id="eq-ch09-adjusted-rand-index"><span class="math display">\[
+\operatorname{ARI}
+=
+\frac{
+\displaystyle
+\sum_{g,k}{n_{gk}\choose 2}
+-
+\frac{
+\displaystyle
+\sum_g{n_{g\cdot}\choose 2}
+\sum_k{n_{\cdot k}\choose 2}
+}{{n\choose 2}}
+}{
+\displaystyle
+\frac{1}{2}
+\left[
+\sum_g{n_{g\cdot}\choose 2}
++
+\sum_k{n_{\cdot k}\choose 2}
+\right]
+-
+\frac{
+\displaystyle
+\sum_g{n_{g\cdot}\choose 2}
+\sum_k{n_{\cdot k}\choose 2}
+}{{n\choose 2}}
+}
+\tag{9.12}\]</span></span></p>
+<p>ARI는 완전한 일치에서 1이고, 무작위 분할의 기대값은 0이다. 음수도 가능하며 이는 우연보다 일치도가 낮음을 의미한다.</p>
+</section>
+<section id="sec-ch09-nmi" class="level3" data-number="9.2.5">
+<h3 data-number="9.2.5" class="anchored" data-anchor-id="sec-ch09-nmi"><span class="header-section-number">9.2.5</span> 상호정보량과 정규화 상호정보량</h3>
+<p>외부 클래스 <span class="math inline">\(Y\)</span>와 클러스터 <span class="math inline">\(Z\)</span>의 상호정보량은</p>
+<p><span id="eq-ch09-mutual-information"><span class="math display">\[
+I(Y;Z)
+=
+\sum_{g=1}^{G}
+\sum_{k=1}^{K}
+\frac{n_{gk}}{n}
+\log
+\left(
+\frac{n\,n_{gk}}{n_{g\cdot}n_{\cdot k}}
+\right)
+\tag{9.13}\]</span></span></p>
+<p>이다. 엔트로피를</p>
+<p><span id="eq-ch09-class-entropy"><span class="math display">\[
+H(Y)
+=
+-
+\sum_{g=1}^{G}
+\frac{n_{g\cdot}}{n}
+\log
+\left(
+\frac{n_{g\cdot}}{n}
+\right)
+\tag{9.14}\]</span></span></p>
+<p>로 정의하면 정규화 상호정보량(normalized mutual information, NMI)의 한 형태는</p>
+<p><span id="eq-ch09-normalized-mutual-information"><span class="math display">\[
+\operatorname{NMI}
+=
+\frac{I(Y;Z)}{\sqrt{H(Y)H(Z)}}
+\tag{9.15}\]</span></span></p>
+<p>이다. NMI는 클래스와 클러스터 사이의 정보 공유 정도를 측정하며 0과 1 사이의 값을 갖는다.</p>
+</section>
+<section id="sec-ch09-within-between-ss" class="level3" data-number="9.2.6">
+<h3 data-number="9.2.6" class="anchored" data-anchor-id="sec-ch09-within-between-ss"><span class="header-section-number">9.2.6</span> 클러스터 내 제곱합과 전체 변동</h3>
+<p>유클리드 자료에서 전체 평균을 <span class="math inline">\(\overline{\mathbf x}\)</span>, 클러스터 <span class="math inline">\(k\)</span>의 평균을 <span class="math inline">\(\boldsymbol\mu_k\)</span>라고 하자. 전체 제곱합은</p>
+<p><span id="eq-ch09-total-sum-squares"><span class="math display">\[
+\operatorname{TSS}
+=
+\sum_{i=1}^{n}
+\|\mathbf x_i-\overline{\mathbf x}\|_2^2
+\tag{9.16}\]</span></span></p>
+<p>이고, 클러스터 내 제곱합(within-cluster sum of squares)은</p>
+<p><span id="eq-ch09-within-sum-squares"><span class="math display">\[
+\operatorname{WSS}
+=
+\sum_{k=1}^{K}
+\sum_{i\in C_k}
+\|\mathbf x_i-\boldsymbol\mu_k\|_2^2
+\tag{9.17}\]</span></span></p>
+<p>이다. 클러스터 간 제곱합은</p>
+<p><span id="eq-ch09-between-sum-squares"><span class="math display">\[
+\operatorname{BSS}
+=
+\sum_{k=1}^{K}
+|C_k|
+\|\boldsymbol\mu_k-\overline{\mathbf x}\|_2^2
+\tag{9.18}\]</span></span></p>
+<p>이며 다음 분해가 성립한다.</p>
+<p><span id="eq-ch09-tss-decomposition"><span class="math display">\[
+\operatorname{TSS}
+=
+\operatorname{WSS}
++
+\operatorname{BSS}
+\tag{9.19}\]</span></span></p>
+<p><span class="math inline">\(K\)</span>가 증가하면 WSS는 단조 감소하므로 WSS 자체만으로 <span class="math inline">\(K\)</span>를 선택할 수 없다. 감소 폭이 급격히 작아지는 지점을 찾는 elbow 방법이 자주 사용된다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch09-elbow" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch09-elbow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="09-clustering_files/figure-html/fig-ch09-elbow-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch09-elbow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;9.2: 클러스터 수에 따른 군집 내 제곱합과 elbow
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch09-elbow" class="quarto-xref">그림&nbsp;<span>9.2</span></a><!-- -->에서는 <span class="math inline">\(K=3\)</span>까지 WSS가 크게 감소하고 이후 감소폭이 완만해진다. 그러나 elbow가 항상 뚜렷하게 나타나는 것은 아니며, 시각적 판단에 주관성이 개입된다.</p>
+</section>
+<section id="sec-ch09-silhouette" class="level3" data-number="9.2.7">
+<h3 data-number="9.2.7" class="anchored" data-anchor-id="sec-ch09-silhouette"><span class="header-section-number">9.2.7</span> 실루엣 계수</h3>
+<p>관측값 <span class="math inline">\(i\)</span>가 속한 클러스터 내부의 평균거리를</p>
+<p><span id="eq-ch09-silhouette-a"><span class="math display">\[
+a(i)
+=
+\frac{1}{|C_{z_i}|-1}
+\sum_{j\in C_{z_i},\,j\neq i}
+d(i,j)
+\tag{9.20}\]</span></span></p>
+<p>라고 하자. 다른 클러스터 <span class="math inline">\(C_k\)</span>까지의 평균거리는</p>
+<p><span id="eq-ch09-silhouette-cluster-distance"><span class="math display">\[
+d(i,C_k)
+=
+\frac{1}{|C_k|}
+\sum_{j\in C_k}d(i,j)
+\tag{9.21}\]</span></span></p>
+<p>이고, 그중 가장 작은 값을</p>
+<p><span id="eq-ch09-silhouette-b"><span class="math display">\[
+b(i)
+=
+\min_{k\neq z_i}d(i,C_k)
+\tag{9.22}\]</span></span></p>
+<p>로 정의한다. 관측값 <span class="math inline">\(i\)</span>의 실루엣 계수(silhouette coefficient)는</p>
+<p><span id="eq-ch09-silhouette"><span class="math display">\[
+s(i)
+=
+\frac{b(i)-a(i)}{\max\{a(i),b(i)\}}
+\tag{9.23}\]</span></span></p>
+<p>이다. <span class="math inline">\(s(i)\)</span>는 <span class="math inline">\(-1\)</span>과 1 사이의 값을 갖는다.</p>
+<ul>
+<li>1에 가까움: 현재 클러스터에 잘 속하고 다른 클러스터와 잘 분리됨</li>
+<li>0에 가까움: 클러스터 경계에 위치함</li>
+<li>음수: 다른 클러스터에 더 가까울 가능성이 있음</li>
+</ul>
+<p>전체 평균 실루엣은</p>
+<p><span id="eq-ch09-average-silhouette"><span class="math display">\[
+\overline s
+=
+\frac{1}{n}
+\sum_{i=1}^{n}s(i)
+\tag{9.24}\]</span></span></p>
+<p>로 계산한다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch09-silhouette-concept" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch09-silhouette-concept-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="09-clustering_files/figure-html/fig-ch09-silhouette-concept-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch09-silhouette-concept-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;9.3: 실루엣 계수의 구성요소
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch09-calinski-harabasz" class="level3" data-number="9.2.8">
+<h3 data-number="9.2.8" class="anchored" data-anchor-id="sec-ch09-calinski-harabasz"><span class="header-section-number">9.2.8</span> Calinski-Harabasz 지수</h3>
+<p>Calinski-Harabasz 지수는 클러스터 간 분산과 클러스터 내 분산의 비를 자유도로 보정한다.</p>
+<p><span id="eq-ch09-calinski-harabasz"><span class="math display">\[
+\operatorname{CH}(K)
+=
+\frac{\operatorname{BSS}/(K-1)}
+{\operatorname{WSS}/(n-K)}
+\tag{9.25}\]</span></span></p>
+<p>값이 클수록 클러스터가 잘 분리되어 있다고 판단한다. 이 지수는 유클리드 공간과 구형 클러스터에 특히 자연스럽다.</p>
+</section>
+<section id="sec-ch09-dunn-index" class="level3" data-number="9.2.9">
+<h3 data-number="9.2.9" class="anchored" data-anchor-id="sec-ch09-dunn-index"><span class="header-section-number">9.2.9</span> Dunn 지수</h3>
+<p>클러스터 사이 최소거리와 클러스터 내부 최대직경의 비로 Dunn 지수를 정의할 수 있다.</p>
+<p><span id="eq-ch09-dunn-index"><span class="math display">\[
+D
+=
+\frac{
+\displaystyle
+\min_{k\neq\ell}\delta(C_k,C_\ell)
+}{
+\displaystyle
+\max_k\Delta(C_k)
+}
+\tag{9.26}\]</span></span></p>
+<p>여기서 <span class="math inline">\(\delta(C_k,C_\ell)\)</span>는 두 클러스터 사이 거리, <span class="math inline">\(\Delta(C_k)\)</span>는 클러스터의 직경이다. 값이 클수록 분리도는 높고 내부 응집도는 좋다. 그러나 극단적인 관측값에 민감하다.</p>
+</section>
+<section id="sec-ch09-davies-bouldin" class="level3" data-number="9.2.10">
+<h3 data-number="9.2.10" class="anchored" data-anchor-id="sec-ch09-davies-bouldin"><span class="header-section-number">9.2.10</span> Davies-Bouldin 지수</h3>
+<p>클러스터 <span class="math inline">\(k\)</span>의 평균 산포를</p>
+<p><span id="eq-ch09-cluster-scatter"><span class="math display">\[
+S_k
+=
+\frac{1}{|C_k|}
+\sum_{i\in C_k}
+d(\mathbf x_i,\boldsymbol\mu_k)
+\tag{9.27}\]</span></span></p>
+<p>라고 하자. 두 클러스터의 유사도를</p>
+<p><span id="eq-ch09-db-pair-ratio"><span class="math display">\[
+R_{k\ell}
+=
+\frac{S_k+S_\ell}
+{d(\boldsymbol\mu_k,\boldsymbol\mu_\ell)}
+\tag{9.28}\]</span></span></p>
+<p>로 정의하면 Davies-Bouldin 지수는</p>
+<p><span id="eq-ch09-davies-bouldin"><span class="math display">\[
+\operatorname{DB}
+=
+\frac{1}{K}
+\sum_{k=1}^{K}
+\max_{\ell\neq k}R_{k\ell}
+\tag{9.29}\]</span></span></p>
+<p>이다. 값이 작을수록 군집 내 산포에 비해 군집 간 거리가 크다.</p>
+</section>
+<section id="sec-ch09-gap-statistic" class="level3" data-number="9.2.11">
+<h3 data-number="9.2.11" class="anchored" data-anchor-id="sec-ch09-gap-statistic"><span class="header-section-number">9.2.11</span> Gap 통계량</h3>
+<p>Gap 통계량은 관측자료의 WSS와 군집구조가 없는 기준분포에서 기대되는 WSS를 비교한다. <span class="math inline">\(K\)</span>개 클러스터의 로그 군집 내 산포를 <span class="math inline">\(\log W_K\)</span>라고 하면</p>
+<p><span id="eq-ch09-gap-statistic"><span class="math display">\[
+\operatorname{Gap}(K)
+=
+E^*\{\log W_K^*\}
+-
+\log W_K
+\tag{9.30}\]</span></span></p>
+<p>이다. <span class="math inline">\(E^*\)</span>는 기준분포에서의 기대값이다. 일반적인 선택규칙은 다음을 만족하는 가장 작은 <span class="math inline">\(K\)</span>를 선택하는 것이다.</p>
+<p><span id="eq-ch09-gap-selection"><span class="math display">\[
+\operatorname{Gap}(K)
+\geq
+\operatorname{Gap}(K+1)-s_{K+1}
+\tag{9.31}\]</span></span></p>
+<p>여기서 <span class="math inline">\(s_{K+1}\)</span>은 몬테카를로 표준오차를 보정한 값이다. Gap 통계량은 기준분포의 설정에 민감하므로 자료의 지지영역과 분포를 고려해야 한다.</p>
+</section>
+<section id="sec-ch09-stability-evaluation" class="level3" data-number="9.2.12">
+<h3 data-number="9.2.12" class="anchored" data-anchor-id="sec-ch09-stability-evaluation"><span class="header-section-number">9.2.12</span> 안정성 평가</h3>
+<p>안정성은 자료를 조금 바꾸어도 비슷한 클러스터가 재현되는지를 평가한다. 원자료에서 얻은 클러스터 <span class="math inline">\(C_k\)</span>와 재표본에서 가장 잘 대응되는 클러스터 <span class="math inline">\(C_k^{(b)}\)</span>의 Jaccard 유사도는</p>
+<p><span id="eq-ch09-cluster-jaccard"><span class="math display">\[
+J(C_k,C_k^{(b)})
+=
+\frac{|C_k\cap C_k^{(b)}|}
+{|C_k\cup C_k^{(b)}|}
+\tag{9.32}\]</span></span></p>
+<p>이다. 여러 재표본에서 평균을 계산하면 클러스터별 안정도를 얻을 수 있다.</p>
+<p>공동소속행렬(consensus matrix)은 관측값 쌍 <span class="math inline">\((i,j)\)</span>가 반복분석에서 같은 클러스터에 속한 비율로 정의된다.</p>
+<p><span id="eq-ch09-consensus-matrix"><span class="math display">\[
+M_{ij}
+=
+\frac{
+\displaystyle
+\sum_{b=1}^{B}
+I\{z_i^{(b)}=z_j^{(b)}\}
+I\{i,j\text{ 모두 표본 }b\text{에 포함}\}
+}{
+\displaystyle
+\sum_{b=1}^{B}
+I\{i,j\text{ 모두 표본 }b\text{에 포함}\}
+}
+\tag{9.33}\]</span></span></p>
+<p><span class="math inline">\(M_{ij}\)</span>가 1에 가까우면 두 관측값은 반복적으로 같은 클러스터에 속한다. 안정성이 높더라도 해석적으로 의미 없는 분할일 수 있고, 반대로 연속적인 구조를 강제로 나누면 안정성이 낮을 수 있다.</p>
+</section>
+<section id="sec-ch09-combining-validation" class="level3" data-number="9.2.13">
+<h3 data-number="9.2.13" class="anchored" data-anchor-id="sec-ch09-combining-validation"><span class="header-section-number">9.2.13</span> 평가척도의 종합</h3>
+<p>클러스터링 결과를 선택할 때 하나의 지수만 최대화하는 것은 위험하다. 다음 기준을 함께 고려해야 한다.</p>
+<ol type="1">
+<li>내부 응집도와 분리도</li>
+<li>재표본화 안정성</li>
+<li>영역 지식과의 일관성</li>
+<li>클러스터 크기의 현실성</li>
+<li>후속 분석이나 의사결정에서의 유용성</li>
+<li>새로운 자료에서의 재현성</li>
+<li>알고리즘과 하이퍼파라미터 변화에 대한 민감도</li>
+</ol>
+<div class="callout callout-style-default callout-warning callout-titled" title="정답 레이블의 해석">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">경고</span>정답 레이블의 해석
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>외부 레이블이 존재하더라도 그것이 클러스터링의 유일한 정답은 아닐 수 있다. 예를 들어 진단명으로 평가한 클러스터가 치료반응이나 예후 측면에서는 다른 구조를 보일 수 있다. 외부 평가척도는 분석 목적에 맞는 기준 레이블을 사용할 때 의미가 있다.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-ch09-distance-measures" class="level2" data-number="9.3">
+<h2 data-number="9.3" class="anchored" data-anchor-id="sec-ch09-distance-measures"><span class="header-section-number">9.3</span> 거리 계산법</h2>
+<section id="sec-ch09-distance-similarity" class="level3" data-number="9.3.1">
+<h3 data-number="9.3.1" class="anchored" data-anchor-id="sec-ch09-distance-similarity"><span class="header-section-number">9.3.1</span> 거리와 유사도</h3>
+<p>두 관측값 <span class="math inline">\(\mathbf x_i\)</span>와 <span class="math inline">\(\mathbf x_j\)</span>의 거리 <span class="math inline">\(d(\mathbf x_i,\mathbf x_j)\)</span>는 차이를 수치화한다. 수학적 거리(metric)는 다음 조건을 만족한다.</p>
+<ol type="1">
+<li>비음성: <span class="math inline">\(d(\mathbf x_i,\mathbf x_j)\geq0\)</span></li>
+<li>동일성: <span class="math inline">\(d(\mathbf x_i,\mathbf x_j)=0\)</span>이면 <span class="math inline">\(\mathbf x_i=\mathbf x_j\)</span></li>
+<li>대칭성: <span class="math inline">\(d(\mathbf x_i,\mathbf x_j)=d(\mathbf x_j,\mathbf x_i)\)</span></li>
+<li>삼각부등식: <span class="math inline">\(d(\mathbf x_i,\mathbf x_k)\leq d(\mathbf x_i,\mathbf x_j)+d(\mathbf x_j,\mathbf x_k)\)</span></li>
+</ol>
+<p>모든 비유사도(dissimilarity)가 이 조건을 만족하는 것은 아니다. 클러스터링 알고리즘에 따라 삼각부등식이 필수적이지 않을 수 있지만, 거리의 성질은 알고리즘의 해석과 계산에 영향을 준다.</p>
+<p>유사도 <span class="math inline">\(s(i,j)\)</span>는 두 관측값이 얼마나 비슷한지를 나타내며 값이 클수록 유사하다. 유사도와 거리는 상황에 따라</p>
+<p><span id="eq-ch09-similarity-to-distance"><span class="math display">\[
+d(i,j)=1-s(i,j)
+\tag{9.34}\]</span></span></p>
+<p>처럼 변환할 수 있지만, 변환된 값이 항상 수학적 거리를 이루는 것은 아니다.</p>
+</section>
+<section id="sec-ch09-minkowski-distance" class="level3" data-number="9.3.2">
+<h3 data-number="9.3.2" class="anchored" data-anchor-id="sec-ch09-minkowski-distance"><span class="header-section-number">9.3.2</span> 민코프스키 거리</h3>
+<p>민코프스키 거리(Minkowski distance)는</p>
+<p><span id="eq-ch09-minkowski-distance"><span class="math display">\[
+d_q(\mathbf x_i,\mathbf x_j)
+=
+\left(
+\sum_{r=1}^{p}
+|x_{ir}-x_{jr}|^q
+\right)^{1/q},
+\qquad q\geq1
+\tag{9.35}\]</span></span></p>
+<p>로 정의한다.</p>
+<ul>
+<li><span class="math inline">\(q=1\)</span>: 맨해튼 거리</li>
+<li><span class="math inline">\(q=2\)</span>: 유클리드 거리</li>
+<li><span class="math inline">\(q\rightarrow\infty\)</span>: 체비쇼프 거리</li>
+</ul>
+<p>유클리드 거리는 큰 차이에 더 큰 가중을 주며 구형의 등거리선을 만든다. 맨해튼 거리(Manhattan distance)는 절댓값 차이를 합하고 이상치의 영향이 상대적으로 작다. 체비쇼프 거리는 가장 큰 단일 변수 차이에 의해 결정된다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch09-minkowski-balls" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch09-minkowski-balls-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="09-clustering_files/figure-html/fig-ch09-minkowski-balls-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch09-minkowski-balls-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;9.4: 민코프스키 거리의 단위구
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch09-minkowski-balls" class="quarto-xref">그림&nbsp;<span>9.4</span></a><!-- -->에서 같은 거리 1을 갖는 점의 집합은 거리 정의에 따라 다른 모양을 갖는다. 이 기하학적 차이는 클러스터 경계와 최근접 이웃관계에 영향을 준다.</p>
+</section>
+<section id="sec-ch09-weighted-standardized-distance" class="level3" data-number="9.3.3">
+<h3 data-number="9.3.3" class="anchored" data-anchor-id="sec-ch09-weighted-standardized-distance"><span class="header-section-number">9.3.3</span> 가중 거리와 표준화 거리</h3>
+<p>변수마다 중요도가 다르면 가중 민코프스키 거리를 사용할 수 있다.</p>
+<p><span id="eq-ch09-weighted-minkowski"><span class="math display">\[
+d_q^{(w)}(\mathbf x_i,\mathbf x_j)
+=
+\left(
+\sum_{r=1}^{p}
+w_r|x_{ir}-x_{jr}|^q
+\right)^{1/q},
+\qquad w_r\geq0
+\tag{9.36}\]</span></span></p>
+<p>표준화 유클리드 거리는 각 변수 차이를 척도로 나눈다.</p>
+<p><span id="eq-ch09-standardized-euclidean"><span class="math display">\[
+d_{\mathrm{std}}(\mathbf x_i,\mathbf x_j)
+=
+\left[
+\sum_{r=1}^{p}
+\frac{(x_{ir}-x_{jr})^2}{s_r^2}
+\right]^{1/2}
+\tag{9.37}\]</span></span></p>
+<p>이는 각 변수의 분산이 서로 다를 때 유용하지만, 변수 간 상관은 반영하지 않는다.</p>
+</section>
+<section id="sec-ch09-mahalanobis-distance" class="level3" data-number="9.3.4">
+<h3 data-number="9.3.4" class="anchored" data-anchor-id="sec-ch09-mahalanobis-distance"><span class="header-section-number">9.3.4</span> 마할라노비스 거리</h3>
+<p>공분산행렬을 <span class="math inline">\(\boldsymbol\Sigma\)</span>라고 하면 마할라노비스 거리(Mahalanobis distance)는</p>
+<p><span id="eq-ch09-mahalanobis-distance"><span class="math display">\[
+d_M(\mathbf x_i,\mathbf x_j)
+=
+\left[
+(\mathbf x_i-\mathbf x_j)^\top
+\boldsymbol\Sigma^{-1}
+(\mathbf x_i-\mathbf x_j)
+\right]^{1/2}
+\tag{9.38}\]</span></span></p>
+<p>이다. 변수들의 스케일과 상관을 함께 보정한다. 동일한 마할라노비스 거리를 갖는 점들은 원자료 공간에서 타원형을 이룬다.</p>
+<p>고차원에서 <span class="math inline">\(p\)</span>가 <span class="math inline">\(n\)</span>에 가깝거나 더 크면 표본 공분산행렬이 불안정하거나 역행렬이 존재하지 않을 수 있다. 이 경우 축소 공분산, 대각 공분산, 저차원 표현 또는 규제된 역행렬을 사용해야 한다.</p>
+</section>
+<section id="sec-ch09-cosine-correlation-distance" class="level3" data-number="9.3.5">
+<h3 data-number="9.3.5" class="anchored" data-anchor-id="sec-ch09-cosine-correlation-distance"><span class="header-section-number">9.3.5</span> 코사인 거리와 상관 거리</h3>
+<p>코사인 유사도(cosine similarity)는 두 벡터 사이의 각도를 측정한다.</p>
+<p><span id="eq-ch09-cosine-similarity"><span class="math display">\[
+s_{\cos}(\mathbf x_i,\mathbf x_j)
+=
+\frac{\mathbf x_i^\top\mathbf x_j}
+{\|\mathbf x_i\|_2\|\mathbf x_j\|_2}
+\tag{9.39}\]</span></span></p>
+<p>코사인 거리는 흔히</p>
+<p><span id="eq-ch09-cosine-distance"><span class="math display">\[
+d_{\cos}(\mathbf x_i,\mathbf x_j)
+=
+1-s_{\cos}(\mathbf x_i,\mathbf x_j)
+\tag{9.40}\]</span></span></p>
+<p>로 정의한다. 문서-단어 자료처럼 벡터의 크기보다 방향이 중요한 경우에 적합하다.</p>
+<p>상관 거리(correlation distance)는 각 벡터에서 평균을 제거한 뒤 코사인 거리를 계산한 것과 같다.</p>
+<p><span id="eq-ch09-correlation-distance"><span class="math display">\[
+d_{\mathrm{cor}}(\mathbf x_i,\mathbf x_j)
+=
+1-\operatorname{cor}(\mathbf x_i,\mathbf x_j)
+\tag{9.41}\]</span></span></p>
+<p>유전자 발현자료에서는 절대 발현량보다 패턴의 유사성이 중요할 수 있어 상관 거리가 자주 사용된다. 음의 상관을 매우 다르다고 볼지, 반대 패턴으로서 의미 있게 볼지는 연구목적에 따라 달라진다.</p>
+</section>
+<section id="sec-ch09-binary-distance" class="level3" data-number="9.3.6">
+<h3 data-number="9.3.6" class="anchored" data-anchor-id="sec-ch09-binary-distance"><span class="header-section-number">9.3.6</span> 이진 자료의 거리</h3>
+<p>두 이진 벡터에서 다음 빈도를 정의하자.</p>
+<ul>
+<li><span class="math inline">\(a\)</span>: 두 벡터가 모두 1인 변수 수</li>
+<li><span class="math inline">\(b\)</span>: 첫 번째만 1인 변수 수</li>
+<li><span class="math inline">\(c\)</span>: 두 번째만 1인 변수 수</li>
+<li><span class="math inline">\(d\)</span>: 두 벡터가 모두 0인 변수 수</li>
+</ul>
+<p>단순 일치계수는</p>
+<p><span id="eq-ch09-simple-matching"><span class="math display">\[
+s_{\mathrm{SMC}}
+=
+\frac{a+d}{a+b+c+d}
+\tag{9.42}\]</span></span></p>
+<p>이고, Jaccard 유사도는 공동 부재 <span class="math inline">\(d\)</span>를 제외하여</p>
+<p><span id="eq-ch09-jaccard-binary"><span class="math display">\[
+s_J
+=
+\frac{a}{a+b+c}
+\tag{9.43}\]</span></span></p>
+<p>로 정의한다. 희귀한 사건의 존재가 중요하고 0-0 일치가 정보가 적을 때 Jaccard 유사도가 적합하다. 반면 0과 1이 대칭적인 상태라면 단순 일치계수가 자연스럽다.</p>
+<p>Hamming 거리는 서로 다른 위치의 수를 계산한다.</p>
+<p><span id="eq-ch09-hamming-distance"><span class="math display">\[
+d_H(\mathbf x_i,\mathbf x_j)
+=
+\sum_{r=1}^{p}I(x_{ir}\neq x_{jr})
+\tag{9.44}\]</span></span></p>
+</section>
+<section id="sec-ch09-mixed-data-distance" class="level3" data-number="9.3.7">
+<h3 data-number="9.3.7" class="anchored" data-anchor-id="sec-ch09-mixed-data-distance"><span class="header-section-number">9.3.7</span> 범주형 및 혼합형 자료</h3>
+<p>명목형 변수는 일치 여부로 거리성분을 정의할 수 있고, 순서형 변수는 순위를 <span class="math inline">\([0,1]\)</span> 구간으로 변환하여 수치형처럼 처리할 수 있다. Gower 비유사도는 변수별 비유사도를 같은 범위로 표준화한 뒤 평균한다.</p>
+<p><span id="eq-ch09-gower-distance"><span class="math display">\[
+d_G(i,j)
+=
+\frac{
+\displaystyle
+\sum_{r=1}^{p}w_{ijr}\delta_{ijr}
+}{
+\displaystyle
+\sum_{r=1}^{p}w_{ijr}
+}
+\tag{9.45}\]</span></span></p>
+<p>여기서 <span class="math inline">\(\delta_{ijr}\in[0,1]\)</span>은 변수 <span class="math inline">\(r\)</span>에서 두 관측값의 비유사도이고, <span class="math inline">\(w_{ijr}\)</span>은 해당 변수의 비교 가능 여부를 나타낸다. 수치형 변수에서는 보통 범위로 나눈 절대차를 사용한다.</p>
+<p><span id="eq-ch09-gower-numeric-component"><span class="math display">\[
+\delta_{ijr}
+=
+\frac{|x_{ir}-x_{jr}|}
+{\max_h x_{hr}-\min_h x_{hr}}
+\tag{9.46}\]</span></span></p>
+<p>Gower 거리는 수치형, 이진형, 명목형과 순서형 변수가 혼합된 자료에 유용하다.</p>
+</section>
+<section id="sec-ch09-distance-missing" class="level3" data-number="9.3.8">
+<h3 data-number="9.3.8" class="anchored" data-anchor-id="sec-ch09-distance-missing"><span class="header-section-number">9.3.8</span> 결측값이 있는 거리</h3>
+<p>관측값 쌍마다 함께 관측된 변수만 사용하면</p>
+<p><span id="eq-ch09-pairwise-missing-distance"><span class="math display">\[
+d_{ij}
+=
+\left[
+\frac{p}{|O_{ij}|}
+\sum_{r\in O_{ij}}
+(x_{ir}-x_{jr})^2
+\right]^{1/2}
+\tag{9.47}\]</span></span></p>
+<p>처럼 정의할 수 있다. <span class="math inline">\(O_{ij}\)</span>는 두 관측값에서 모두 관측된 변수 집합이다. <span class="math inline">\(p/|O_{ij}|\)</span>는 비교 가능한 변수가 적을 때 거리를 보정한다.</p>
+<p>그러나 관측값 쌍마다 다른 변수집합을 사용하면 거리의 비교 가능성과 삼각부등식이 깨질 수 있다. 결측기전이 체계적이면 단순한 쌍별 계산이 편향될 수 있으므로 다중대치, 모형기반 거리 또는 결측 자체를 정보로 사용하는 접근을 고려한다.</p>
+</section>
+<section id="sec-ch09-sequence-distance" class="level3" data-number="9.3.9">
+<h3 data-number="9.3.9" class="anchored" data-anchor-id="sec-ch09-sequence-distance"><span class="header-section-number">9.3.9</span> 시계열과 순차자료의 거리</h3>
+<p>길이가 같고 시간축이 정렬된 시계열에는 유클리드 거리를 사용할 수 있지만, 위상 차이나 속도 차이가 있으면 유사한 패턴도 멀게 측정된다. 동적 시간 워핑(dynamic time warping, DTW)은 두 시계열의 시간 인덱스를 비선형적으로 정렬하여 누적비용을 최소화한다.</p>
+<p>두 시계열 <span class="math inline">\(x_1,\ldots,x_T\)</span>와 <span class="math inline">\(y_1,\ldots,y_S\)</span>의 누적비용은 재귀적으로</p>
+<p><span id="eq-ch09-dtw-recurrence"><span class="math display">\[
+D(t,s)
+=
+|x_t-y_s|
++
+\min\{D(t-1,s),D(t,s-1),D(t-1,s-1)\}
+\tag{9.48}\]</span></span></p>
+<p>로 계산할 수 있다. 정렬 경로에 대한 제약이 없으면 과도한 왜곡이 발생할 수 있으므로 창 제약이나 패널티를 사용한다.</p>
+<p>문자열이나 사건순서에는 편집거리, 최장공통부분수열, 최적정렬거리 등을 사용할 수 있다.</p>
+</section>
+<section id="sec-ch09-distance-concentration" class="level3" data-number="9.3.10">
+<h3 data-number="9.3.10" class="anchored" data-anchor-id="sec-ch09-distance-concentration"><span class="header-section-number">9.3.10</span> 거리 집중 현상</h3>
+<p>고차원에서는 가장 가까운 이웃과 가장 먼 이웃의 거리가 상대적으로 비슷해진다. 거리 집중의 한 표현은</p>
+<p><span id="eq-ch09-distance-concentration"><span class="math display">\[
+\frac{d_{\max}-d_{\min}}{d_{\min}}
+\longrightarrow 0
+\tag{9.49}\]</span></span></p>
+<p>이다. 이 현상은 거리 기반 클러스터링의 분리력을 약화한다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch09-distance-concentration" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch09-distance-concentration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="09-clustering_files/figure-html/fig-ch09-distance-concentration-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch09-distance-concentration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;9.5: 차원 증가에 따른 최근접 거리와 최원거리의 상대적 차이
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch09-distance-concentration" class="quarto-xref">그림&nbsp;<span>9.5</span></a><!-- -->에서 차원이 커질수록 거리의 상대적 차이가 작아지는 경향을 확인할 수 있다. 실제 자료에서는 분포, 표본크기와 변수상관에 따라 정도가 달라진다.</p>
+</section>
+<section id="sec-ch09-distance-selection" class="level3" data-number="9.3.11">
+<h3 data-number="9.3.11" class="anchored" data-anchor-id="sec-ch09-distance-selection"><span class="header-section-number">9.3.11</span> 거리 선택의 원칙</h3>
+<p>거리함수는 자료형과 분석목적에 맞추어 선택해야 한다.</p>
+<div id="tbl-ch09-distance-selection" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch09-distance-selection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;9.2: 자료 특성에 따른 거리 선택
+</figcaption>
+<div aria-describedby="tbl-ch09-distance-selection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>자료 특성</th>
+<th>고려할 거리</th>
+<th>주요 주의점</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>연속형, 비슷한 단위</td>
+<td>유클리드</td>
+<td>이상치와 스케일에 민감</td>
+</tr>
+<tr class="even">
+<td>연속형, 상관 존재</td>
+<td>마할라노비스</td>
+<td>공분산 추정 안정성 필요</td>
+</tr>
+<tr class="odd">
+<td>희소한 고차원 벡터</td>
+<td>코사인</td>
+<td>벡터 크기 정보가 제거됨</td>
+</tr>
+<tr class="even">
+<td>이진 희귀사건</td>
+<td>Jaccard</td>
+<td>공동 부재를 무시함</td>
+</tr>
+<tr class="odd">
+<td>혼합형 자료</td>
+<td>Gower</td>
+<td>변수 가중치와 범위 설정 필요</td>
+</tr>
+<tr class="even">
+<td>순서·문자열</td>
+<td>편집거리, DTW</td>
+<td>계산량과 정렬 제약 필요</td>
+</tr>
+<tr class="odd">
+<td>이상치가 많음</td>
+<td>맨해튼, 강건 거리</td>
+<td>변수별 변환과 가중치 검토</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>거리 선택은 알고리즘 선택과 분리된 문제가 아니다. <span class="math inline">\(k\)</span>-평균은 제곱 유클리드 거리와 평균 중심을 전제로 하고, <span class="math inline">\(k\)</span>-메도이드는 임의의 비유사도 행렬을 사용할 수 있다. 계층적 군집화에서도 연결법에 따라 거리의 의미가 달라진다.</p>
+</section>
+</section>
+<section id="sec-ch09-prototype-clustering" class="level2" data-number="9.4">
+<h2 data-number="9.4" class="anchored" data-anchor-id="sec-ch09-prototype-clustering"><span class="header-section-number">9.4</span> 프로토타입 클러스터링</h2>
+<section id="sec-ch09-prototype-concept" class="level3" data-number="9.4.1">
+<h3 data-number="9.4.1" class="anchored" data-anchor-id="sec-ch09-prototype-concept"><span class="header-section-number">9.4.1</span> 프로토타입의 개념</h3>
+<p>프로토타입(prototype) 기반 클러스터링은 각 클러스터를 하나의 대표점 또는 대표객체로 요약한다. 관측값은 가장 가까운 프로토타입에 배정된다. 프로토타입이 평균이면 중심(centroid), 실제 관측값이면 메도이드(medoid), 확률분포의 모수이면 분포적 프로토타입으로 볼 수 있다.</p>
+<p>일반적인 목적함수는</p>
+<p><span id="eq-ch09-prototype-objective"><span class="math display">\[
+J
+=
+\sum_{i=1}^{n}
+\sum_{k=1}^{K}
+z_{ik}
+D(\mathbf x_i,\boldsymbol\theta_k)
+\tag{9.50}\]</span></span></p>
+<p>이다. <span class="math inline">\(\boldsymbol\theta_k\)</span>는 클러스터 <span class="math inline">\(k\)</span>의 프로토타입이고, <span class="math inline">\(D\)</span>는 관측값과 프로토타입 사이의 비유사도다.</p>
+</section>
+<section id="sec-ch09-kmeans-objective" class="level3" data-number="9.4.2">
+<h3 data-number="9.4.2" class="anchored" data-anchor-id="sec-ch09-kmeans-objective"><span class="header-section-number">9.4.2</span> k-평균 목적함수</h3>
+<p><span class="math inline">\(k\)</span>-평균은 제곱 유클리드 거리를 최소화한다.</p>
+<p><span id="eq-ch09-kmeans-objective"><span class="math display">\[
+J_{K}
+=
+\sum_{k=1}^{K}
+\sum_{i\in C_k}
+\|\mathbf x_i-\boldsymbol\mu_k\|_2^2
+\tag{9.51}\]</span></span></p>
+<p>여기서 <span class="math inline">\(\boldsymbol\mu_k\)</span>는 클러스터 <span class="math inline">\(k\)</span>의 평균이다.</p>
+<p>고정된 클러스터 <span class="math inline">\(C_k\)</span>에 대해 목적함수를 최소화하는 프로토타입이 평균임을 보일 수 있다. 클러스터 <span class="math inline">\(k\)</span>의 목적함수는</p>
+<p><span id="eq-ch09-kmeans-cluster-objective"><span class="math display">\[
+J_k(\boldsymbol\mu_k)
+=
+\sum_{i\in C_k}
+(\mathbf x_i-\boldsymbol\mu_k)^\top
+(\mathbf x_i-\boldsymbol\mu_k)
+\tag{9.52}\]</span></span></p>
+<p>이다. <span class="math inline">\(\boldsymbol\mu_k\)</span>에 대해 미분하면</p>
+<p><span id="eq-ch09-kmeans-derivative"><span class="math display">\[
+\frac{\partial J_k}{\partial\boldsymbol\mu_k}
+=
+-2\sum_{i\in C_k}(\mathbf x_i-\boldsymbol\mu_k)
+\tag{9.53}\]</span></span></p>
+<p>이고, 이를 0으로 두면</p>
+<p><span id="eq-ch09-kmeans-centroid"><span class="math display">\[
+\widehat{\boldsymbol\mu}_k
+=
+\frac{1}{|C_k|}
+\sum_{i\in C_k}\mathbf x_i
+\tag{9.54}\]</span></span></p>
+<p>를 얻는다.</p>
+</section>
+<section id="sec-ch09-lloyd-algorithm" class="level3" data-number="9.4.3">
+<h3 data-number="9.4.3" class="anchored" data-anchor-id="sec-ch09-lloyd-algorithm"><span class="header-section-number">9.4.3</span> Lloyd 알고리즘</h3>
+<p><span class="math inline">\(k\)</span>-평균의 전역 최적해를 정확히 찾는 것은 일반적으로 어렵다. Lloyd 알고리즘은 다음 두 단계를 반복하는 좌표하강법이다.</p>
+<section id="sec-ch09-kmeans-assignment-step" class="level4">
+<h4 class="anchored" data-anchor-id="sec-ch09-kmeans-assignment-step">배정 단계</h4>
+<p>현재 중심 <span class="math inline">\(\boldsymbol\mu_1,\ldots,\boldsymbol\mu_K\)</span>가 주어졌을 때 각 관측값을 가장 가까운 중심에 배정한다.</p>
+<p><span id="eq-ch09-kmeans-assignment"><span class="math display">\[
+z_i
+=
+\arg\min_{1\leq k\leq K}
+\|\mathbf x_i-\boldsymbol\mu_k\|_2^2
+\tag{9.55}\]</span></span></p>
+</section>
+<section id="sec-ch09-kmeans-update-step" class="level4">
+<h4 class="anchored" data-anchor-id="sec-ch09-kmeans-update-step">갱신 단계</h4>
+<p>각 클러스터의 중심을 배정된 관측값의 평균으로 갱신한다.</p>
+<p><span id="eq-ch09-kmeans-update"><span class="math display">\[
+\boldsymbol\mu_k
+\leftarrow
+\frac{1}{|C_k|}
+\sum_{i\in C_k}\mathbf x_i
+\tag{9.56}\]</span></span></p>
+<p>두 단계 모두 목적함수를 증가시키지 않으므로 알고리즘은 유한한 분할 중 하나에서 수렴한다. 그러나 전역 최적해가 아니라 초기값에 의존하는 국소해에 수렴할 수 있다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch09-kmeans-iterations" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch09-kmeans-iterations-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="09-clustering_files/figure-html/fig-ch09-kmeans-iterations-1.png" class="img-fluid figure-img" width="864">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch09-kmeans-iterations-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;9.6: k-평균 알고리즘의 배정과 중심 갱신
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-ch09-kmeans-initialization" class="level3" data-number="9.4.4">
+<h3 data-number="9.4.4" class="anchored" data-anchor-id="sec-ch09-kmeans-initialization"><span class="header-section-number">9.4.4</span> 초기값과 k-means++</h3>
+<p>단순 무작위 초기화에서는 중심이 한 영역에 몰릴 수 있다. k-means++는 첫 중심을 무작위로 선택한 뒤, 각 관측값이 현재 가장 가까운 중심까지 갖는 제곱거리 <span class="math inline">\(D_i^2\)</span>에 비례하여 다음 중심을 선택한다.</p>
+<p><span id="eq-ch09-kmeans-plus-probability"><span class="math display">\[
+P(\mathbf x_i\text{가 다음 중심})
+=
+\frac{D_i^2}
+{\sum_{j=1}^{n}D_j^2}
+\tag{9.57}\]</span></span></p>
+<p>서로 멀리 떨어진 초기 중심을 선택할 가능성이 높아져 일반적으로 수렴속도와 최종해가 개선된다. 실무에서는 서로 다른 초기값으로 여러 번 실행하고 가장 작은 목적함수를 갖는 결과를 선택한다.</p>
+</section>
+<section id="sec-ch09-kmeans-geometry" class="level3" data-number="9.4.5">
+<h3 data-number="9.4.5" class="anchored" data-anchor-id="sec-ch09-kmeans-geometry"><span class="header-section-number">9.4.5</span> k-평균의 기하학</h3>
+<p>관측값은 가장 가까운 중심에 배정되므로 각 클러스터는 중심에 대한 Voronoi 영역을 형성한다. 두 중심 <span class="math inline">\(\boldsymbol\mu_k\)</span>와 <span class="math inline">\(\boldsymbol\mu_\ell\)</span>의 경계는</p>
+<p><span id="eq-ch09-kmeans-boundary-start"><span class="math display">\[
+\|\mathbf x-\boldsymbol\mu_k\|_2^2
+=
+\|\mathbf x-\boldsymbol\mu_\ell\|_2^2
+\tag{9.58}\]</span></span></p>
+<p>를 만족하고, 정리하면</p>
+<p><span id="eq-ch09-kmeans-linear-boundary"><span class="math display">\[
+2\mathbf x^\top(\boldsymbol\mu_\ell-\boldsymbol\mu_k)
+=
+\|\boldsymbol\mu_\ell\|_2^2
+-
+\|\boldsymbol\mu_k\|_2^2
+\tag{9.59}\]</span></span></p>
+<p>가 된다. 따라서 중심 사이의 경계는 초평면이며, 각 클러스터 영역은 볼록다각형 또는 볼록다포체다. 이 때문에 <span class="math inline">\(k\)</span>-평균은 비볼록한 형태의 클러스터를 직접 표현하지 못한다.</p>
+</section>
+<section id="sec-ch09-kmeans-limitations" class="level3" data-number="9.4.6">
+<h3 data-number="9.4.6" class="anchored" data-anchor-id="sec-ch09-kmeans-limitations"><span class="header-section-number">9.4.6</span> k-평균의 한계</h3>
+<p><span class="math inline">\(k\)</span>-평균은 다음 조건에서 좋은 결과를 보인다.</p>
+<ul>
+<li>변수들이 연속형이고 적절히 스케일 조정되어 있음</li>
+<li>클러스터가 대체로 구형이고 볼록함</li>
+<li>클러스터의 크기와 분산이 크게 다르지 않음</li>
+<li>이상치가 많지 않음</li>
+</ul>
+<p>반면 다음 상황에서는 결과가 왜곡될 수 있다.</p>
+<ul>
+<li>비선형 또는 고리 모양 클러스터</li>
+<li>크기와 밀도가 매우 다른 클러스터</li>
+<li>범주형 또는 혼합형 자료</li>
+<li>심한 이상치</li>
+<li>관련 없는 변수가 많은 고차원 자료</li>
+<li>연속적인 잠재축을 인위적으로 분할하는 경우</li>
+</ul>
+</section>
+<section id="sec-ch09-kmedoids" class="level3" data-number="9.4.7">
+<h3 data-number="9.4.7" class="anchored" data-anchor-id="sec-ch09-kmedoids"><span class="header-section-number">9.4.7</span> k-메도이드(k-medoids)</h3>
+<p><span class="math inline">\(k\)</span>-메도이드는 각 클러스터의 대표로 실제 관측값을 사용한다. 목적함수는</p>
+<p><span id="eq-ch09-kmedoids-objective"><span class="math display">\[
+J_{\mathrm{medoid}}
+=
+\sum_{k=1}^{K}
+\sum_{i\in C_k}
+d(\mathbf x_i,\mathbf m_k)
+\tag{9.60}\]</span></span></p>
+<p>이며 <span class="math inline">\(\mathbf m_k\in\{\mathbf x_i:i\in C_k\}\)</span>다. 메도이드는 클러스터 안의 다른 관측값까지 총거리가 가장 작은 관측값이다.</p>
+<p><span id="eq-ch09-medoid-definition"><span class="math display">\[
+\mathbf m_k
+=
+\arg\min_{\mathbf x_j\in C_k}
+\sum_{i\in C_k}d(\mathbf x_i,\mathbf x_j)
+\tag{9.61}\]</span></span></p>
+<p><span class="math inline">\(k\)</span>-메도이드는 임의의 비유사도 행렬을 사용할 수 있고 평균보다 이상치에 강건하다. 대표적인 알고리즘인 PAM(partitioning around medoids)은 현재 메도이드와 비메도이드 관측값을 교환하여 목적함수를 줄이는 탐색을 수행한다. 계산량이 <span class="math inline">\(k\)</span>-평균보다 크므로 대규모 자료에서는 표본기반 방법이나 근사 알고리즘을 사용한다.</p>
+</section>
+<section id="sec-ch09-fuzzy-cmeans" class="level3" data-number="9.4.8">
+<h3 data-number="9.4.8" class="anchored" data-anchor-id="sec-ch09-fuzzy-cmeans"><span class="header-section-number">9.4.8</span> 퍼지 c-평균</h3>
+<p>퍼지 c-평균(fuzzy c-means)은 각 관측값이 여러 클러스터에 부분적으로 속하도록 한다. 목적함수는</p>
+<p><span id="eq-ch09-fuzzy-cmeans-objective"><span class="math display">\[
+J_m
+=
+\sum_{i=1}^{n}
+\sum_{k=1}^{K}
+\nu_{ik}^{m}
+\|\mathbf x_i-\boldsymbol\mu_k\|_2^2,
+\qquad m&gt;1
+\tag{9.62}\]</span></span></p>
+<p>이다. <span class="math inline">\(m\)</span>은 퍼지화 지수로, 값이 클수록 소속도가 균등해진다. 제약조건은</p>
+<p><span id="eq-ch09-fuzzy-membership-constraint"><span class="math display">\[
+\nu_{ik}\geq0,
+\qquad
+\sum_{k=1}^{K}\nu_{ik}=1
+\tag{9.63}\]</span></span></p>
+<p>이다. 소속도 갱신식은</p>
+<p><span id="eq-ch09-fuzzy-membership-update"><span class="math display">\[
+\nu_{ik}
+=
+\left[
+\sum_{\ell=1}^{K}
+\left(
+\frac{\|\mathbf x_i-\boldsymbol\mu_k\|_2}
+{\|\mathbf x_i-\boldsymbol\mu_\ell\|_2}
+\right)^{2/(m-1)}
+\right]^{-1}
+\tag{9.64}\]</span></span></p>
+<p>이고 중심은</p>
+<p><span id="eq-ch09-fuzzy-centroid-update"><span class="math display">\[
+\boldsymbol\mu_k
+=
+\frac{
+\sum_{i=1}^{n}\nu_{ik}^{m}\mathbf x_i
+}{
+\sum_{i=1}^{n}\nu_{ik}^{m}
+}
+\tag{9.65}\]</span></span></p>
+<p>로 갱신한다. 경계 관측값의 불확실성을 표현할 수 있지만, 여전히 유클리드 거리와 구형 구조에 의존한다.</p>
+</section>
+<section id="sec-ch09-mixture-clustering" class="level3" data-number="9.4.9">
+<h3 data-number="9.4.9" class="anchored" data-anchor-id="sec-ch09-mixture-clustering"><span class="header-section-number">9.4.9</span> 혼합모형과 확률적 프로토타입</h3>
+<p>가우시안 혼합모형은 자료밀도를</p>
+<p><span id="eq-ch09-gaussian-mixture"><span class="math display">\[
+p(\mathbf x)
+=
+\sum_{k=1}^{K}
+\pi_k
+\phi(\mathbf x;\boldsymbol\mu_k,\boldsymbol\Sigma_k)
+\tag{9.66}\]</span></span></p>
+<p>로 나타낸다. <span class="math inline">\(\pi_k\)</span>는 혼합비율이고, <span class="math inline">\(\phi\)</span>는 다변량 정규밀도다. 관측값 <span class="math inline">\(i\)</span>가 클러스터 <span class="math inline">\(k\)</span>에 속할 사후확률은</p>
+<p><span id="eq-ch09-mixture-posterior"><span class="math display">\[
+\tau_{ik}
+=
+\frac{
+\pi_k\phi(\mathbf x_i;\boldsymbol\mu_k,\boldsymbol\Sigma_k)
+}{
+\sum_{\ell=1}^{K}
+\pi_\ell\phi(\mathbf x_i;\boldsymbol\mu_\ell,\boldsymbol\Sigma_\ell)
+}
+\tag{9.67}\]</span></span></p>
+<p>이다. <span class="math inline">\(k\)</span>-평균과 달리 클러스터별 분산과 방향을 다르게 허용할 수 있으며, 소속 불확실성을 확률로 제공한다. 모수는 Chapter 7에서 설명한 EM 알고리즘으로 추정할 수 있다.</p>
+<p>공분산 구조를 어떻게 제한하는가에 따라 구형, 축정렬 타원형, 일반 타원형 클러스터를 표현할 수 있다. 그러나 정규성 가정, 특이 공분산, 초기값과 혼합성분 수 선택에 주의해야 한다.</p>
+</section>
+<section id="sec-ch09-scalable-kmeans" class="level3" data-number="9.4.10">
+<h3 data-number="9.4.10" class="anchored" data-anchor-id="sec-ch09-scalable-kmeans"><span class="header-section-number">9.4.10</span> 대규모 자료의 k-평균</h3>
+<p>표준 Lloyd 알고리즘의 한 반복 계산량은 대략</p>
+<p><span id="eq-ch09-kmeans-complexity"><span class="math display">\[
+O(nKp)
+\tag{9.68}\]</span></span></p>
+<p>이다. 대규모 자료에서는 다음 방법을 사용할 수 있다.</p>
+<ul>
+<li>미니배치 k-평균</li>
+<li>온라인 중심 갱신</li>
+<li>근사 최근접 중심 탐색</li>
+<li>분산 처리</li>
+<li>자료 축약 또는 공동집합(co-representative set)</li>
+</ul>
+<p>미니배치 k-평균은 작은 표본 <span class="math inline">\(B_t\)</span>만 사용하여 중심을 갱신한다.</p>
+<p><span id="eq-ch09-minibatch-kmeans-update"><span class="math display">\[
+\boldsymbol\mu_k^{(t+1)}
+=
+(1-\eta_{kt})\boldsymbol\mu_k^{(t)}
++
+\eta_{kt}\overline{\mathbf x}_{k,B_t}
+\tag{9.69}\]</span></span></p>
+<p>여기서 <span class="math inline">\(\eta_{kt}\)</span>는 학습률이고 <span class="math inline">\(\overline{\mathbf x}_{k,B_t}\)</span>는 미니배치에서 클러스터 <span class="math inline">\(k\)</span>에 배정된 관측값의 평균이다.</p>
+</section>
+<section id="sec-ch09-prototype-comparison" class="level3" data-number="9.4.11">
+<h3 data-number="9.4.11" class="anchored" data-anchor-id="sec-ch09-prototype-comparison"><span class="header-section-number">9.4.11</span> 프로토타입 방법의 비교</h3>
+<div id="tbl-ch09-prototype-method-comparison" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch09-prototype-method-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;9.3: 프로토타입 기반 클러스터링의 비교
+</figcaption>
+<div aria-describedby="tbl-ch09-prototype-method-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>방법</th>
+<th>프로토타입</th>
+<th>소속형태</th>
+<th>거리·분포 가정</th>
+<th>장점</th>
+<th>한계</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(k\)</span>-평균</td>
+<td>평균 중심</td>
+<td>경성</td>
+<td>제곱 유클리드</td>
+<td>빠르고 해석이 단순</td>
+<td>이상치와 비구형 구조에 민감</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(k\)</span>-메도이드</td>
+<td>실제 관측값</td>
+<td>경성</td>
+<td>임의 비유사도</td>
+<td>강건하고 혼합자료 가능</td>
+<td>계산량이 큼</td>
+</tr>
+<tr class="odd">
+<td>퍼지 c-평균</td>
+<td>가중 평균</td>
+<td>연성</td>
+<td>유클리드</td>
+<td>경계 불확실성 표현</td>
+<td>퍼지화 지수와 초기값에 민감</td>
+</tr>
+<tr class="even">
+<td>가우시안 혼합</td>
+<td>평균·공분산</td>
+<td>확률적</td>
+<td>혼합분포</td>
+<td>타원형 구조와 불확실성</td>
+<td>분포가정과 모형선택 필요</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+</section>
+<section id="sec-ch09-density-clustering" class="level2" data-number="9.5">
+<h2 data-number="9.5" class="anchored" data-anchor-id="sec-ch09-density-clustering"><span class="header-section-number">9.5</span> 밀도 클러스터링</h2>
+<section id="sec-ch09-density-view" class="level3" data-number="9.5.1">
+<h3 data-number="9.5.1" class="anchored" data-anchor-id="sec-ch09-density-view"><span class="header-section-number">9.5.1</span> 밀도 기반 관점</h3>
+<p>밀도 기반 클러스터링은 관측값이 많이 모인 고밀도 영역을 클러스터로 보고, 밀도가 낮은 영역을 클러스터 사이의 경계나 잡음으로 본다. 이 관점은 중심으로 요약하기 어려운 비볼록 형태의 클러스터에 적합하다.</p>
+<p>DBSCAN(density-based spatial clustering of applications with noise)은 대표적인 밀도 기반 알고리즘이다. 두 하이퍼파라미터를 사용한다.</p>
+<ul>
+<li><span class="math inline">\(\varepsilon\)</span>: 이웃을 정의하는 반경</li>
+<li><span class="math inline">\(\operatorname{MinPts}\)</span>: 핵심점이 되기 위한 최소 이웃 수</li>
+</ul>
+</section>
+<section id="sec-ch09-epsilon-neighborhood" class="level3" data-number="9.5.2">
+<h3 data-number="9.5.2" class="anchored" data-anchor-id="sec-ch09-epsilon-neighborhood"><span class="header-section-number">9.5.2</span> epsilon 이웃</h3>
+<p>점 <span class="math inline">\(\mathbf x_i\)</span>의 <span class="math inline">\(\varepsilon\)</span>-이웃은</p>
+<p><span id="eq-ch09-epsilon-neighborhood"><span class="math display">\[
+N_{\varepsilon}(\mathbf x_i)
+=
+\{\mathbf x_j:d(\mathbf x_i,\mathbf x_j)\leq\varepsilon\}
+\tag{9.70}\]</span></span></p>
+<p>이다.</p>
+</section>
+<section id="sec-ch09-core-border-noise" class="level3" data-number="9.5.3">
+<h3 data-number="9.5.3" class="anchored" data-anchor-id="sec-ch09-core-border-noise"><span class="header-section-number">9.5.3</span> 핵심점, 경계점과 잡음점</h3>
+<p>관측값은 다음과 같이 분류한다.</p>
+<ul>
+<li><strong>핵심점(core point)</strong>: <span id="eq-ch09-core-point"><span class="math display">\[
+|N_{\varepsilon}(\mathbf x_i)|\geq\operatorname{MinPts}
+\tag{9.71}\]</span></span></li>
+<li><strong>경계점(border point)</strong>: 자신은 핵심점이 아니지만 어떤 핵심점의 <span class="math inline">\(\varepsilon\)</span>-이웃에 포함됨</li>
+<li><strong>잡음점(noise point)</strong>: 핵심점도 경계점도 아님</li>
+</ul>
+<p>DBSCAN은 핵심점들의 연결성을 따라 클러스터를 확장하고, 고밀도 영역에서 떨어진 관측값은 잡음으로 남긴다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch09-dbscan-points" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch09-dbscan-points-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="09-clustering_files/figure-html/fig-ch09-dbscan-points-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch09-dbscan-points-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;9.7: DBSCAN의 핵심점, 경계점과 잡음점 개념
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-ch09-density-reachability" class="level3" data-number="9.5.4">
+<h3 data-number="9.5.4" class="anchored" data-anchor-id="sec-ch09-density-reachability"><span class="header-section-number">9.5.4</span> 밀도 도달가능성(density reachability)과 밀도 연결성</h3>
+<p>핵심점 <span class="math inline">\(\mathbf x_i\)</span>의 <span class="math inline">\(\varepsilon\)</span>-이웃에 <span class="math inline">\(\mathbf x_j\)</span>가 있으면 <span class="math inline">\(\mathbf x_j\)</span>는 <span class="math inline">\(\mathbf x_i\)</span>로부터 직접 밀도 도달가능(directly density-reachable)하다고 한다.</p>
+<p>점들의 연쇄</p>
+<p><span id="eq-ch09-density-chain"><span class="math display">\[
+\mathbf x_{i_1},\mathbf x_{i_2},\ldots,\mathbf x_{i_m}
+\tag{9.72}\]</span></span></p>
+<p>가 존재하고, 각 <span class="math inline">\(\mathbf x_{i_{r+1}}\)</span>가 <span class="math inline">\(\mathbf x_{i_r}\)</span>로부터 직접 밀도 도달가능하면 마지막 점은 첫 점으로부터 밀도 도달가능하다.</p>
+<p>두 점이 어떤 공통 핵심점으로부터 밀도 도달가능하면 밀도 연결(density-connected)되어 있다고 한다. 하나의 DBSCAN 클러스터는 서로 밀도 연결된 점들의 최대집합이다.</p>
+</section>
+<section id="sec-ch09-dbscan-algorithm" class="level3" data-number="9.5.5">
+<h3 data-number="9.5.5" class="anchored" data-anchor-id="sec-ch09-dbscan-algorithm"><span class="header-section-number">9.5.5</span> DBSCAN 알고리즘</h3>
+<p>DBSCAN은 다음 절차로 수행한다.</p>
+<ol type="1">
+<li>방문하지 않은 점을 하나 선택한다.</li>
+<li><span class="math inline">\(\varepsilon\)</span>-이웃의 크기를 계산한다.</li>
+<li>핵심점이면 새로운 클러스터를 만들고 이웃을 확장한다.</li>
+<li>이웃 안의 핵심점에서 다시 이웃을 확장한다.</li>
+<li>핵심점이 아니고 기존 클러스터에도 포함되지 않으면 잠정 잡음으로 표시한다.</li>
+<li>모든 점을 방문할 때까지 반복한다.</li>
+</ol>
+<p>공간 인덱스가 없으면 거리계산량은 대략 <span class="math inline">\(O(n^2)\)</span>이다. 낮은 차원에서 kd-tree나 ball-tree를 사용하면 탐색을 가속할 수 있지만, 고차원에서는 인덱스 효율이 떨어진다.</p>
+</section>
+<section id="sec-ch09-dbscan-parameter-selection" class="level3" data-number="9.5.6">
+<h3 data-number="9.5.6" class="anchored" data-anchor-id="sec-ch09-dbscan-parameter-selection"><span class="header-section-number">9.5.6</span> 매개변수 선택</h3>
+<p><span class="math inline">\(\operatorname{MinPts}\)</span>는 최소한 차원보다 큰 값을 사용하는 경험적 규칙이 있지만, 자료의 밀도와 잡음 수준에 따라 조정해야 한다. <span class="math inline">\(\varepsilon\)</span>는 각 관측값에서 <span class="math inline">\(k\)</span>번째 최근접 이웃까지 거리의 정렬곡선을 이용해 선택할 수 있다.</p>
+<p><span id="eq-ch09-kdistance"><span class="math display">\[
+r_i^{(k)}
+=
+\text{관측값 }i\text{에서 }k\text{번째 최근접 이웃까지 거리}
+\tag{9.73}\]</span></span></p>
+<p><span class="math inline">\(r_i^{(k)}\)</span>를 큰 순서 또는 작은 순서로 정렬하면 급격히 증가하는 지점이 고밀도 영역과 잡음의 경계 후보가 된다.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch09-kdistance" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch09-kdistance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="09-clustering_files/figure-html/fig-ch09-kdistance-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch09-kdistance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;9.8: DBSCAN의 epsilon 선택을 위한 k-거리 곡선
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><span class="math inline">\(\varepsilon\)</span>가 너무 작으면 많은 점이 잡음으로 분류되고 클러스터가 잘게 분리된다. 너무 크면 서로 다른 클러스터가 하나로 합쳐진다. 밀도가 다른 클러스터가 함께 존재하면 하나의 <span class="math inline">\(\varepsilon\)</span>로 모두 잘 찾기 어렵다.</p>
+</section>
+<section id="sec-ch09-dbscan-strengths-limitations" class="level3" data-number="9.5.7">
+<h3 data-number="9.5.7" class="anchored" data-anchor-id="sec-ch09-dbscan-strengths-limitations"><span class="header-section-number">9.5.7</span> DBSCAN의 장점과 한계</h3>
+<p>DBSCAN의 장점은 다음과 같다.</p>
+<ul>
+<li>클러스터 수를 미리 지정할 필요가 없다.</li>
+<li>비볼록한 임의 형태의 클러스터를 찾을 수 있다.</li>
+<li>잡음과 이상치를 별도로 식별한다.</li>
+<li>중심이나 분포형태를 가정하지 않는다.</li>
+</ul>
+<p>주요 한계는 다음과 같다.</p>
+<ul>
+<li>밀도가 크게 다른 클러스터를 동시에 찾기 어렵다.</li>
+<li>거리집중 때문에 고차원에서 성능이 저하된다.</li>
+<li><span class="math inline">\(\varepsilon\)</span>와 <span class="math inline">\(\operatorname{MinPts}\)</span> 선택에 민감하다.</li>
+<li>경계점은 처리 순서에 따라 인접 클러스터 중 하나에 배정될 수 있다.</li>
+<li>새로운 관측값의 배정규칙이 기본 알고리즘에 명시되어 있지 않다.</li>
+</ul>
+</section>
+<section id="sec-ch09-optics" class="level3" data-number="9.5.8">
+<h3 data-number="9.5.8" class="anchored" data-anchor-id="sec-ch09-optics"><span class="header-section-number">9.5.8</span> OPTICS</h3>
+<p>OPTICS(ordering points to identify the clustering structure)는 하나의 <span class="math inline">\(\varepsilon\)</span>에서 고정된 클러스터를 만드는 대신, 관측값을 밀도 구조에 따라 정렬하고 도달거리(reachability distance)를 계산한다.</p>
+<p>핵심거리(core distance)는 점 <span class="math inline">\(i\)</span>가 핵심점이 되기 위한 최소 반경이고, 점 <span class="math inline">\(j\)</span>가 핵심점 <span class="math inline">\(i\)</span>로부터 갖는 도달거리는</p>
+<p><span id="eq-ch09-optics-reachability"><span class="math display">\[
+\operatorname{reachdist}(j\mid i)
+=
+\max\{
+\operatorname{coredist}(i),
+d(i,j)
+\}
+\tag{9.74}\]</span></span></p>
+<p>로 정의된다. 도달거리 그림의 골짜기는 고밀도 클러스터를 나타낸다. 여러 밀도수준의 구조를 한 번의 정렬로 탐색할 수 있다는 장점이 있다.</p>
+</section>
+<section id="sec-ch09-hdbscan" class="level3" data-number="9.5.9">
+<h3 data-number="9.5.9" class="anchored" data-anchor-id="sec-ch09-hdbscan"><span class="header-section-number">9.5.9</span> HDBSCAN</h3>
+<p>HDBSCAN은 밀도수준이 변함에 따라 생성되고 소멸하는 클러스터의 계층구조를 만든다. 핵심거리와 상호도달거리(mutual reachability distance)를 사용한다.</p>
+<p><span id="eq-ch09-mutual-reachability"><span class="math display">\[
+d_{\mathrm{mreach}}(i,j)
+=
+\max\{
+\operatorname{coredist}(i),
+\operatorname{coredist}(j),
+d(i,j)
+\}
+\tag{9.75}\]</span></span></p>
+<p>이 거리로 최소신장트리를 구성하고, 밀도 임계값 변화에 따른 계층을 축약한 뒤 안정성이 높은 클러스터를 선택한다. HDBSCAN은 밀도가 다른 클러스터에 DBSCAN보다 유연하지만, 최소 클러스터 크기와 안정성 기준에 따라 결과가 달라진다.</p>
+</section>
+<section id="sec-ch09-mean-shift" class="level3" data-number="9.5.10">
+<h3 data-number="9.5.10" class="anchored" data-anchor-id="sec-ch09-mean-shift"><span class="header-section-number">9.5.10</span> 평균이동 클러스터링</h3>
+<p>평균이동(mean shift)은 커널 밀도추정의 모드를 찾는 방법이다. 커널 밀도추정량은</p>
+<p><span id="eq-ch09-kernel-density-estimate"><span class="math display">\[
+\widehat f_h(\mathbf x)
+=
+\frac{1}{nh^p}
+\sum_{i=1}^{n}
+K\left(
+\frac{\mathbf x-\mathbf x_i}{h}
+\right)
+\tag{9.76}\]</span></span></p>
+<p>이다. 현재 위치 주변 관측값의 가중평균으로 이동하는 평균이동 벡터는</p>
+<p><span id="eq-ch09-mean-shift-vector"><span class="math display">\[
+\mathbf m(\mathbf x)
+=
+\frac{
+\sum_{i=1}^{n}
+\mathbf x_i g(\|\mathbf x-\mathbf x_i\|^2/h^2)
+}{
+\sum_{i=1}^{n}
+g(\|\mathbf x-\mathbf x_i\|^2/h^2)
+}
+-
+\mathbf x
+\tag{9.77}\]</span></span></p>
+<p>로 나타낼 수 있다. 모든 점을 수렴한 밀도모드에 따라 묶는다. 대역폭 <span class="math inline">\(h\)</span>가 작으면 많은 국소모드가 생기고, 크면 서로 다른 구조가 합쳐진다.</p>
+</section>
+<section id="sec-ch09-density-method-comparison" class="level3" data-number="9.5.11">
+<h3 data-number="9.5.11" class="anchored" data-anchor-id="sec-ch09-density-method-comparison"><span class="header-section-number">9.5.11</span> 밀도 기반 방법의 비교</h3>
+<div id="tbl-ch09-density-method-comparison" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch09-density-method-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;9.4: 주요 밀도 기반 클러스터링 방법
+</figcaption>
+<div aria-describedby="tbl-ch09-density-method-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>방법</th>
+<th>핵심 아이디어</th>
+<th>주요 매개변수</th>
+<th>장점</th>
+<th>한계</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DBSCAN</td>
+<td>고정 반경의 밀도 연결</td>
+<td><span class="math inline">\(\varepsilon\)</span>, MinPts</td>
+<td>단순, 잡음 탐지, 임의 형태</td>
+<td>밀도 차이에 민감</td>
+</tr>
+<tr class="even">
+<td>OPTICS</td>
+<td>도달거리 순서화</td>
+<td>MinPts, 최대 반경</td>
+<td>여러 밀도수준 탐색</td>
+<td>결과 추출과 해석이 복잡</td>
+</tr>
+<tr class="odd">
+<td>HDBSCAN</td>
+<td>밀도계층과 안정성</td>
+<td>최소 클러스터 크기</td>
+<td>밀도 차이에 유연</td>
+<td>계산과 하이퍼파라미터 해석</td>
+</tr>
+<tr class="even">
+<td>평균이동</td>
+<td>밀도모드로 이동</td>
+<td>대역폭</td>
+<td>클러스터 수 자동 결정</td>
+<td>고차원과 대규모 자료에서 비용 큼</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+</section>
+<section id="sec-ch09-hierarchical-clustering" class="level2" data-number="9.6">
+<h2 data-number="9.6" class="anchored" data-anchor-id="sec-ch09-hierarchical-clustering"><span class="header-section-number">9.6</span> 계층 클러스터링</h2>
+<section id="sec-ch09-hierarchical-structure" class="level3" data-number="9.6.1">
+<h3 data-number="9.6.1" class="anchored" data-anchor-id="sec-ch09-hierarchical-structure"><span class="header-section-number">9.6.1</span> 계층적 구조</h3>
+<p>계층 클러스터링(hierarchical clustering)은 클러스터를 한 수준에서만 나누지 않고, 작은 집단이 더 큰 집단에 포함되는 중첩 구조를 만든다. 결과는 덴드로그램(dendrogram)으로 표현한다.</p>
+<p>계층 클러스터링은 크게 두 가지다.</p>
+<ul>
+<li><strong>병합형 클러스터링(agglomerative clustering)</strong>: 각 관측값을 하나의 클러스터로 시작하여 가장 가까운 클러스터를 반복적으로 병합한다.</li>
+<li><strong>분할형 클러스터링(divisive clustering)</strong>: 전체 관측값을 하나의 클러스터로 시작하여 반복적으로 나눈다.</li>
+</ul>
+<p>병합형 방법이 계산과 구현이 상대적으로 간단하여 널리 사용된다.</p>
+</section>
+<section id="sec-ch09-agglomerative-algorithm" class="level3" data-number="9.6.2">
+<h3 data-number="9.6.2" class="anchored" data-anchor-id="sec-ch09-agglomerative-algorithm"><span class="header-section-number">9.6.2</span> 병합형 알고리즘</h3>
+<p>병합형 계층 클러스터링의 기본 절차는 다음과 같다.</p>
+<ol type="1">
+<li>각 관측값을 하나의 클러스터로 둔다.</li>
+<li>모든 클러스터 쌍의 거리를 계산한다.</li>
+<li>가장 가까운 두 클러스터를 병합한다.</li>
+<li>새 클러스터와 나머지 클러스터 사이 거리를 갱신한다.</li>
+<li>하나의 클러스터만 남을 때까지 반복한다.</li>
+</ol>
+<p>초기 거리행렬을 계산하는 데 <span class="math inline">\(O(n^2)\)</span>의 저장공간이 필요하고, 순진한 구현의 계산량은 <span class="math inline">\(O(n^3)\)</span>에 이를 수 있다. 연결법과 자료구조를 이용한 효율적인 구현은 더 빠르지만, 매우 큰 자료에서는 여전히 부담이 된다.</p>
+</section>
+<section id="sec-ch09-single-linkage" class="level3" data-number="9.6.3">
+<h3 data-number="9.6.3" class="anchored" data-anchor-id="sec-ch09-single-linkage"><span class="header-section-number">9.6.3</span> 단일연결법</h3>
+<p>단일연결법은 두 클러스터 사이의 가장 가까운 관측값 쌍의 거리를 사용한다.</p>
+<p><span id="eq-ch09-single-linkage"><span class="math display">\[
+d_{\mathrm{single}}(A,B)
+=
+\min_{i\in A,\,j\in B}d(i,j)
+\tag{9.78}\]</span></span></p>
+<p>길게 이어진 비볼록 구조를 찾을 수 있지만, 소수의 연결점이나 잡음에 의해 클러스터가 연쇄적으로 합쳐지는 chaining 현상이 발생한다. 단일연결법은 최소신장트리와 밀접한 관련이 있다.</p>
+</section>
+<section id="sec-ch09-complete-linkage" class="level3" data-number="9.6.4">
+<h3 data-number="9.6.4" class="anchored" data-anchor-id="sec-ch09-complete-linkage"><span class="header-section-number">9.6.4</span> 완전연결법</h3>
+<p>완전연결법은 가장 먼 관측값 쌍의 거리를 사용한다.</p>
+<p><span id="eq-ch09-complete-linkage"><span class="math display">\[
+d_{\mathrm{complete}}(A,B)
+=
+\max_{i\in A,\,j\in B}d(i,j)
+\tag{9.79}\]</span></span></p>
+<p>직경이 작은 조밀한 클러스터를 선호하고 chaining을 줄인다. 그러나 이상치에 민감하고 크기가 큰 클러스터를 분리하는 경향이 있다.</p>
+</section>
+<section id="sec-ch09-average-linkage" class="level3" data-number="9.6.5">
+<h3 data-number="9.6.5" class="anchored" data-anchor-id="sec-ch09-average-linkage"><span class="header-section-number">9.6.5</span> 평균연결법</h3>
+<p>평균연결법은 모든 관측값 쌍의 평균거리를 사용한다.</p>
+<p><span id="eq-ch09-average-linkage"><span class="math display">\[
+d_{\mathrm{average}}(A,B)
+=
+\frac{1}{|A||B|}
+\sum_{i\in A}
+\sum_{j\in B}d(i,j)
+\tag{9.80}\]</span></span></p>
+<p>단일연결(single linkage)과 완전연결(complete linkage)의 중간적 특성을 가지며, 특정 극단쌍에 대한 의존이 작다. UPGMA(unweighted pair-group method using arithmetic averages)라고도 한다.</p>
+</section>
+<section id="sec-ch09-centroid-linkage" class="level3" data-number="9.6.6">
+<h3 data-number="9.6.6" class="anchored" data-anchor-id="sec-ch09-centroid-linkage"><span class="header-section-number">9.6.6</span> 중심연결법</h3>
+<p>중심연결법은 두 클러스터 중심 사이 거리를 사용한다.</p>
+<p><span id="eq-ch09-centroid-linkage"><span class="math display">\[
+d_{\mathrm{centroid}}(A,B)
+=
+\|\boldsymbol\mu_A-\boldsymbol\mu_B\|_2
+\tag{9.81}\]</span></span></p>
+<p>병합 후 중심이 이동하므로 이후 병합높이가 이전보다 낮아지는 역전(inversion)이 발생할 수 있다. 덴드로그램의 높이가 단조 증가하지 않을 수 있어 해석에 주의해야 한다.</p>
+</section>
+<section id="sec-ch09-ward-linkage" class="level3" data-number="9.6.7">
+<h3 data-number="9.6.7" class="anchored" data-anchor-id="sec-ch09-ward-linkage"><span class="header-section-number">9.6.7</span> Ward 연결법</h3>
+<p>Ward 방법은 두 클러스터를 병합했을 때 WSS가 가장 적게 증가하는 쌍을 선택한다. 클러스터 <span class="math inline">\(A\)</span>와 <span class="math inline">\(B\)</span>의 병합비용은</p>
+<p><span id="eq-ch09-ward-increase"><span class="math display">\[
+\Delta(A,B)
+=
+\frac{|A||B|}{|A|+|B|}
+\|\boldsymbol\mu_A-\boldsymbol\mu_B\|_2^2
+\tag{9.82}\]</span></span></p>
+<p>이다. Ward 방법은 <span class="math inline">\(k\)</span>-평균과 유사하게 작고 구형인 클러스터를 선호하며, 제곱 유클리드 거리에 기반한 해석이 자연스럽다.</p>
+</section>
+<section id="sec-ch09-linkage-comparison" class="level3" data-number="9.6.8">
+<h3 data-number="9.6.8" class="anchored" data-anchor-id="sec-ch09-linkage-comparison"><span class="header-section-number">9.6.8</span> 연결법의 비교</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ch09-linkage-dendrograms" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch09-linkage-dendrograms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="09-clustering_files/figure-html/fig-ch09-linkage-dendrograms-1.png" class="img-fluid figure-img" width="960">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch09-linkage-dendrograms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+그림&nbsp;9.9: 연결법에 따른 덴드로그램의 차이
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-ch09-linkage-dendrograms" class="quarto-xref">그림&nbsp;<span>9.9</span></a><!-- -->에서 같은 자료라도 연결법에 따라 병합순서와 높이가 달라진다. 단일연결은 연쇄구조를 빠르게 연결하고, 완전연결과 Ward 방법은 더 조밀한 하위집단을 형성하는 경향이 있다.</p>
+<div id="tbl-ch09-linkage-comparison" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch09-linkage-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;9.5: 계층 클러스터링 연결법의 비교
+</figcaption>
+<div aria-describedby="tbl-ch09-linkage-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>연결법</th>
+<th>클러스터 간 거리</th>
+<th>선호하는 구조</th>
+<th>주요 문제</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>단일연결</td>
+<td>최소 쌍거리</td>
+<td>길고 비볼록한 구조</td>
+<td>chaining</td>
+</tr>
+<tr class="even">
+<td>완전연결</td>
+<td>최대 쌍거리</td>
+<td>직경이 작은 조밀한 구조</td>
+<td>이상치에 민감</td>
+</tr>
+<tr class="odd">
+<td>평균연결</td>
+<td>평균 쌍거리</td>
+<td>균형 잡힌 구조</td>
+<td>계산량이 비교적 큼</td>
+</tr>
+<tr class="even">
+<td>중심연결</td>
+<td>중심 간 거리</td>
+<td>중심이 분리된 구조</td>
+<td>덴드로그램 역전</td>
+</tr>
+<tr class="odd">
+<td>Ward</td>
+<td>WSS 증가량</td>
+<td>구형·비슷한 크기</td>
+<td>유클리드 구조 의존</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-ch09-lance-williams" class="level3" data-number="9.6.9">
+<h3 data-number="9.6.9" class="anchored" data-anchor-id="sec-ch09-lance-williams"><span class="header-section-number">9.6.9</span> Lance-Williams 갱신식</h3>
+<p>여러 연결법은 두 클러스터 <span class="math inline">\(A\)</span>와 <span class="math inline">\(B\)</span>를 병합하여 <span class="math inline">\(A\cup B\)</span>를 만들었을 때 다른 클러스터 <span class="math inline">\(C\)</span>까지 거리를 다음 식으로 갱신할 수 있다.</p>
+<p><span id="eq-ch09-lance-williams"><span class="math display">\[
+d(A\cup B,C)
+=
+\alpha_A d(A,C)
++
+\alpha_B d(B,C)
++
+\beta d(A,B)
++
+\gamma|d(A,C)-d(B,C)|
+\tag{9.83}\]</span></span></p>
+<p>계수 <span class="math inline">\(\alpha_A,\alpha_B,\beta,\gamma\)</span>를 다르게 선택하면 단일연결, 완전연결, 평균연결(average linkage), 중심연결(centroid linkage)과 Ward 방법을 표현할 수 있다. 이 통합식은 전체 거리행렬을 다시 계산하지 않고 병합거리를 갱신할 수 있게 한다.</p>
+</section>
+<section id="sec-ch09-dendrogram-interpretation" class="level3" data-number="9.6.10">
+<h3 data-number="9.6.10" class="anchored" data-anchor-id="sec-ch09-dendrogram-interpretation"><span class="header-section-number">9.6.10</span> 덴드로그램 해석</h3>
+<p>덴드로그램에서 잎은 관측값 또는 초기 클러스터를 나타내고, 가지가 합쳐지는 높이는 병합거리 또는 병합비용을 나타낸다. 일정 높이 <span class="math inline">\(h\)</span>에서 수평선을 그어 잘라 클러스터를 얻을 수 있다.</p>
+<p><span id="eq-ch09-dendrogram-cut"><span class="math display">\[
+\widehat{\mathcal C}(h)
+=
+\text{덴드로그램을 높이 }h\text{에서 절단한 분할}
+\tag{9.84}\]</span></span></p>
+<p>클러스터 수 <span class="math inline">\(K\)</span>를 지정하여 정확히 <span class="math inline">\(K\)</span>개 가지로 자를 수도 있다. 큰 높이 차이가 나타나는 병합 직전이 자연스러운 절단 후보지만, 항상 명확한 간격이 존재하지는 않는다.</p>
+<p>덴드로그램의 좌우 순서는 병합구조를 보존하는 여러 배열 중 하나이므로, 가로축에서 가까워 보인다는 이유만으로 관측값이 반드시 가장 유사한 것은 아니다. 해석은 가지의 병합높이와 구조에 기반해야 한다.</p>
+</section>
+<section id="sec-ch09-cophenetic-correlation" class="level3" data-number="9.6.11">
+<h3 data-number="9.6.11" class="anchored" data-anchor-id="sec-ch09-cophenetic-correlation"><span class="header-section-number">9.6.11</span> 코페네틱 거리와 상관</h3>
+<p>두 관측값 <span class="math inline">\(i\)</span>와 <span class="math inline">\(j\)</span>의 코페네틱 거리(cophenetic distance) <span class="math inline">\(c_{ij}\)</span>는 덴드로그램에서 두 관측값이 처음 같은 클러스터로 합쳐지는 높이다. 원래 거리 <span class="math inline">\(d_{ij}\)</span>와 코페네틱 거리의 상관은</p>
+<p><span id="eq-ch09-cophenetic-correlation"><span class="math display">\[
+r_c
+=
+\operatorname{cor}\{d_{ij},c_{ij}\}_{i&lt;j}
+\tag{9.85}\]</span></span></p>
+<p>로 정의한다. 값이 클수록 덴드로그램이 원래 거리구조를 잘 보존한다. 그러나 높은 코페네틱 상관이 반드시 목적에 맞는 클러스터를 보장하지는 않는다.</p>
+</section>
+<section id="sec-ch09-hierarchical-stability" class="level3" data-number="9.6.12">
+<h3 data-number="9.6.12" class="anchored" data-anchor-id="sec-ch09-hierarchical-stability"><span class="header-section-number">9.6.12</span> 계층의 안정성과 부트스트랩</h3>
+<p>덴드로그램의 특정 가지가 재표본에서도 반복되는지 평가할 수 있다. 변수나 관측값을 부트스트랩한 뒤 같은 하위집단이 다시 나타나는 비율을 계산한다. 지지도가 낮은 가지는 자료의 작은 변화에 민감한 구조다.</p>
+<p>다만 관측값을 재표본하면 원자료의 개체가 중복되거나 빠지므로 가지 대응이 복잡하다. 유전자 발현자료처럼 변수 수가 많은 경우 변수 부트스트랩을 사용할 수 있고, 관측값이 모집단 표본인 경우 관측값 부트스트랩이나 부분표본을 사용할 수 있다.</p>
+</section>
+<section id="sec-ch09-divisive-clustering" class="level3" data-number="9.6.13">
+<h3 data-number="9.6.13" class="anchored" data-anchor-id="sec-ch09-divisive-clustering"><span class="header-section-number">9.6.13</span> 분할형 계층 클러스터링</h3>
+<p>분할형 방법은 전체 자료를 하나의 클러스터로 시작하여 이질성이 큰 클러스터를 반복적으로 분할한다. 각 단계에서 가장 분리도가 높은 관측값을 떼어내고 주변 관측값을 이동하는 방식이나, 이진 <span class="math inline">\(k\)</span>-평균을 반복하는 방식이 가능하다.</p>
+<p>분할형 방법은 상위수준의 큰 구조를 먼저 결정한다는 장점이 있지만, 가능한 모든 분할을 탐색하는 것은 계산적으로 어렵다. 병합형과 마찬가지로 한번 이루어진 분할을 되돌리지 않는 탐욕적 성격을 갖는다.</p>
+</section>
+<section id="sec-ch09-constrained-hierarchical" class="level3" data-number="9.6.14">
+<h3 data-number="9.6.14" class="anchored" data-anchor-id="sec-ch09-constrained-hierarchical"><span class="header-section-number">9.6.14</span> 제약된 계층 클러스터링</h3>
+<p>공간, 시간 또는 순서 정보가 있는 자료에서는 인접한 관측값만 병합하도록 제약할 수 있다. 예를 들어 염색체 위치, 지리적 구역, 시간구간처럼 순서가 중요한 경우 임의의 두 집단을 병합하면 해석하기 어려운 결과가 생긴다.</p>
+<p>must-link와 cannot-link 제약도 사용할 수 있다.</p>
+<ul>
+<li>must-link: 두 관측값은 같은 클러스터에 있어야 함</li>
+<li>cannot-link: 두 관측값은 같은 클러스터에 있으면 안 됨</li>
+</ul>
+<p>이러한 제약은 영역 지식을 반영하지만, 서로 충돌하거나 지나치게 강하면 가능한 분할이 없어질 수 있다.</p>
+</section>
+<section id="sec-ch09-birch" class="level3" data-number="9.6.15">
+<h3 data-number="9.6.15" class="anchored" data-anchor-id="sec-ch09-birch"><span class="header-section-number">9.6.15</span> 대규모 자료와 BIRCH</h3>
+<p>BIRCH는 대규모 자료를 클러스터 특성(cluster feature)으로 요약하는 CF-tree를 구성한다. 클러스터 특성은</p>
+<p><span id="eq-ch09-cluster-feature"><span class="math display">\[
+\operatorname{CF}
+=
+(N,\operatorname{LS},\operatorname{SS})
+\tag{9.86}\]</span></span></p>
+<p>로 표현한다. 여기서</p>
+<p><span id="eq-ch09-cluster-feature-components"><span class="math display">\[
+\operatorname{LS}=\sum_{i=1}^{N}\mathbf x_i,
+\qquad
+\operatorname{SS}=\sum_{i=1}^{N}\|\mathbf x_i\|_2^2
+\tag{9.87}\]</span></span></p>
+<p>이다. 이 요약량으로 중심, 반경과 직경을 계산할 수 있다. 자료를 한 번 또는 소수 번 순회하면서 압축한 뒤, 리프노드의 요약점에 추가 클러스터링을 적용한다.</p>
+<p>BIRCH는 메모리 효율이 높고 스트리밍 자료에 적합하지만, 삽입 순서와 임계값에 영향을 받고 비구형 구조에는 제한이 있다.</p>
+</section>
+<section id="sec-ch09-new-observation-assignment" class="level3" data-number="9.6.16">
+<h3 data-number="9.6.16" class="anchored" data-anchor-id="sec-ch09-new-observation-assignment"><span class="header-section-number">9.6.16</span> 새로운 관측값의 배정</h3>
+<p>계층 클러스터링은 기본적으로 훈련자료의 관계를 설명하는 탐색방법이며, 새로운 관측값에 대한 배정규칙을 직접 제공하지 않는다. 실제 운영에 사용하려면 다음 중 하나를 정의해야 한다.</p>
+<ul>
+<li>각 최종 클러스터의 중심에 가장 가까운 클러스터로 배정</li>
+<li>클러스터별 분류모형을 별도로 학습</li>
+<li>최근접 이웃의 클러스터를 사용</li>
+<li>확률모형으로 변환하여 사후확률을 계산</li>
+</ul>
+<p>이 과정은 탐색적 클러스터링 결과를 지도학습 문제로 변환하는 단계다. 새로운 자료의 분포가 달라지면 배정규칙이 불안정해질 수 있으므로 재검증이 필요하다.</p>
+</section>
+<section id="sec-ch09-overall-method-comparison" class="level3" data-number="9.6.17">
+<h3 data-number="9.6.17" class="anchored" data-anchor-id="sec-ch09-overall-method-comparison"><span class="header-section-number">9.6.17</span> 주요 클러스터링 방법의 종합 비교</h3>
+<div id="tbl-ch09-overall-clustering-comparison" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ch09-overall-clustering-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+표&nbsp;9.6: 주요 클러스터링 방법의 종합 비교
+</figcaption>
+<div aria-describedby="tbl-ch09-overall-clustering-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>방법</th>
+<th>필요한 입력</th>
+<th>클러스터 형태</th>
+<th>잡음 처리</th>
+<th>클러스터 수</th>
+<th>계산 특성</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(k\)</span>-평균</td>
+<td>수치형 자료</td>
+<td>구형·볼록</td>
+<td>민감</td>
+<td>사전 지정</td>
+<td>빠르고 확장성 높음</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(k\)</span>-메도이드</td>
+<td>비유사도 행렬</td>
+<td>거리함수에 의존</td>
+<td>비교적 강건</td>
+<td>사전 지정</td>
+<td>중간 규모에 적합</td>
+</tr>
+<tr class="odd">
+<td>가우시안 혼합</td>
+<td>수치형 자료</td>
+<td>타원형</td>
+<td>별도 성분 필요</td>
+<td>모형선택</td>
+<td>확률적 해석 가능</td>
+</tr>
+<tr class="even">
+<td>DBSCAN</td>
+<td>거리와 밀도 매개변수</td>
+<td>임의 형태</td>
+<td>명시적 잡음</td>
+<td>자동</td>
+<td>고차원에 불리</td>
+</tr>
+<tr class="odd">
+<td>HDBSCAN</td>
+<td>거리와 최소 크기</td>
+<td>다양한 밀도</td>
+<td>명시적 잡음</td>
+<td>자동</td>
+<td>계층과 안정성 제공</td>
+</tr>
+<tr class="even">
+<td>계층 클러스터링</td>
+<td>거리행렬과 연결법</td>
+<td>연결법에 의존</td>
+<td>민감</td>
+<td>사후 절단</td>
+<td>덴드로그램 제공</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-ch09-practical-guidelines" class="level3" data-number="9.6.18">
+<h3 data-number="9.6.18" class="anchored" data-anchor-id="sec-ch09-practical-guidelines"><span class="header-section-number">9.6.18</span> 실무적 선택 지침</h3>
+<p>클러스터링 방법을 선택할 때는 다음 질문을 순서대로 검토하는 것이 좋다.</p>
+<ol type="1">
+<li>분석단위는 무엇이며 어떤 의미의 집단을 찾고자 하는가?</li>
+<li>변수는 연속형, 범주형, 이진형, 시계열 또는 혼합형인가?</li>
+<li>변수 스케일과 결측값은 어떻게 처리할 것인가?</li>
+<li>클러스터가 중심, 연결성, 밀도 또는 분포 중 어떤 개념에 가까운가?</li>
+<li>잡음을 별도로 분리해야 하는가?</li>
+<li>클러스터 수를 미리 정할 수 있는가?</li>
+<li>소속 불확실성을 표현해야 하는가?</li>
+<li>새로운 관측값을 자동 배정해야 하는가?</li>
+<li>결과의 안정성과 외부 재현성을 어떻게 평가할 것인가?</li>
+<li>클러스터가 후속 의사결정에서 실제로 유용한가?</li>
+</ol>
+<div class="callout callout-style-default callout-important callout-titled" title="클러스터링 결과 보고의 원칙">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">중요</span>클러스터링 결과 보고의 원칙
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>클러스터링 결과를 보고할 때는 알고리즘 이름만 제시해서는 충분하지 않다. 사용한 변수, 전처리, 거리, 클러스터 수 선택법, 초기화, 난수시드, 하이퍼파라미터, 안정성 분석과 클러스터 해석 절차를 함께 기술해야 결과를 재현할 수 있다.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="장-요약" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="장-요약">장 요약</h2>
+<p>클러스터링은 레이블이 없는 자료에서 유사한 관측값들을 집단으로 묶는 비지도학습 문제다. 그러나 클러스터는 자료에 하나의 고정된 형태로 존재하는 것이 아니라 중심, 연결성, 밀도, 확률분포와 분석목적 등 서로 다른 관점으로 정의될 수 있다. 따라서 변수표현, 스케일, 거리와 알고리즘 선택이 결과에 직접 영향을 준다.</p>
+<p>클러스터링 평가는 내부 타당도, 외부 일치도, 상대 비교와 안정성의 여러 관점에서 수행해야 한다. 실루엣, Calinski-Harabasz, Dunn과 Davies-Bouldin 지수는 응집도와 분리도를 측정하고, ARI와 NMI는 외부 레이블과의 일치도를 평가한다. Elbow와 gap 통계량은 클러스터 수 선택을 지원하며, 재표본화와 consensus 행렬은 결과의 안정성을 평가한다. 어느 한 척도만으로 최종결과를 결정하지 않고 목적과 해석 가능성을 함께 고려해야 한다.</p>
+<p>거리함수는 클러스터링의 귀납적 편향을 결정한다. 유클리드, 맨해튼, 마할라노비스, 코사인, Jaccard와 Gower 거리는 서로 다른 자료형과 유사성 개념을 반영한다. 고차원에서는 거리 집중과 관련 없는 변수의 영향으로 거리 기반 구조가 약해질 수 있으므로 차원 축소, 변수 선택과 강건한 표현이 필요하다.</p>
+<p>프로토타입 기반 방법은 각 클러스터를 중심이나 대표객체로 요약한다. <span class="math inline">\(k\)</span>-평균은 제곱 유클리드 거리를 최소화하고 빠르게 계산되지만 구형 클러스터와 이상치에 민감하다. <span class="math inline">\(k\)</span>-메도이드는 실제 관측값을 대표로 사용하여 강건성과 거리 선택의 유연성을 높인다. 퍼지 c-평균과 혼합모형은 관측값의 소속 불확실성을 연성 또는 확률적으로 표현한다.</p>
+<p>밀도 기반 방법은 고밀도 영역을 클러스터로 정의하고 저밀도 영역을 경계나 잡음으로 본다. DBSCAN은 핵심점과 밀도 연결성을 이용하여 임의 모양의 클러스터를 찾지만 밀도 차이와 매개변수 선택에 민감하다. OPTICS와 HDBSCAN은 여러 밀도수준과 계층구조를 이용하여 이러한 한계를 완화하고, 평균이동은 커널 밀도의 모드를 중심으로 클러스터를 형성한다.</p>
+<p>계층 클러스터링은 관측값 사이의 중첩된 병합 또는 분할 구조를 덴드로그램으로 표현한다. 단일연결, 완전연결, 평균연결, 중심연결과 Ward 방법은 서로 다른 클러스터 형태를 선호한다. 덴드로그램은 여러 해상도의 구조를 제공하지만, 연결법과 거리 선택에 따라 결과가 달라지고 한번 이루어진 병합이나 분할을 되돌리지 못한다.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./08-ensemble-learning.html" class="pagination-link" aria-label="앙상블 학습">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">앙상블 학습</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./10-dimensionality-reduction.html" class="pagination-link" aria-label="차원 축소와 거리 척도 학습">
+        <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">차원 축소와 거리 척도 학습</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
