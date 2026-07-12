@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>2&nbsp; Key Statistical Concepts – Statistics for Health Data Science</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./03-regression-analysis.html" rel="next">
+<link href="./01-statistics-and-health-data.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-832e3d7b6b94ddcc90a000f8fabe51a9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./02-key-statistical-concepts.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Key Statistical Concepts</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Statistics for Health Data Science</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">머리말</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-statistics-and-health-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Statistics and Health Data</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-key-statistical-concepts.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Key Statistical Concepts</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-regression-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">회귀분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-binary-and-categorical-outcomes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Binary and Categorical Outcomes</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-count-outcomes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Count Outcomes</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-health-care-costs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Health Care Costs</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-bootstrap-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Bootstrap Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-causal-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Causal Inference</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-survey-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Survey Data Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Prediction</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#표본과-모집단" id="toc-표본과-모집단" class="nav-link active" data-scroll-target="#표본과-모집단"><span class="header-section-number">2.1</span> 표본과 모집단</a></li>
+  <li><a href="#통계학의-기본-요소" id="toc-통계학의-기본-요소" class="nav-link" data-scroll-target="#통계학의-기본-요소"><span class="header-section-number">2.2</span> 통계학의 기본 요소</a>
+  <ul class="collapse">
+  <li><a href="#확률변수" id="toc-확률변수" class="nav-link" data-scroll-target="#확률변수"><span class="header-section-number">2.2.1</span> 확률변수</a></li>
+  <li><a href="#종속변수와-독립변수" id="toc-종속변수와-독립변수" class="nav-link" data-scroll-target="#종속변수와-독립변수"><span class="header-section-number">2.2.2</span> 종속변수와 독립변수</a></li>
+  <li><a href="#확률분포" id="toc-확률분포" class="nav-link" data-scroll-target="#확률분포"><span class="header-section-number">2.2.3</span> 확률분포</a></li>
+  <li><a href="#모수와-통계모형" id="toc-모수와-통계모형" class="nav-link" data-scroll-target="#모수와-통계모형"><span class="header-section-number">2.2.4</span> 모수와 통계모형</a></li>
+  <li><a href="#추정과-추론" id="toc-추정과-추론" class="nav-link" data-scroll-target="#추정과-추론"><span class="header-section-number">2.2.5</span> 추정과 추론</a></li>
+  <li><a href="#변이-분산과-표준오차" id="toc-변이-분산과-표준오차" class="nav-link" data-scroll-target="#변이-분산과-표준오차"><span class="header-section-number">2.2.6</span> 변이, 분산과 표준오차</a></li>
+  <li><a href="#신뢰구간" id="toc-신뢰구간" class="nav-link" data-scroll-target="#신뢰구간"><span class="header-section-number">2.2.7</span> 신뢰구간</a></li>
+  <li><a href="#조건부-평균과-주변-평균" id="toc-조건부-평균과-주변-평균" class="nav-link" data-scroll-target="#조건부-평균과-주변-평균"><span class="header-section-number">2.2.8</span> 조건부 평균과 주변 평균</a></li>
+  <li><a href="#결합분포와-혼합분포" id="toc-결합분포와-혼합분포" class="nav-link" data-scroll-target="#결합분포와-혼합분포"><span class="header-section-number">2.2.9</span> 결합분포와 혼합분포</a></li>
+  <li><a href="#변수-변환" id="toc-변수-변환" class="nav-link" data-scroll-target="#변수-변환"><span class="header-section-number">2.2.10</span> 변수 변환</a></li>
+  </ul></li>
+  <li><a href="#보건의료-자료에서-자주-사용하는-확률분포" id="toc-보건의료-자료에서-자주-사용하는-확률분포" class="nav-link" data-scroll-target="#보건의료-자료에서-자주-사용하는-확률분포"><span class="header-section-number">2.3</span> 보건의료 자료에서 자주 사용하는 확률분포</a>
+  <ul class="collapse">
+  <li><a href="#베르누이분포와-이항분포" id="toc-베르누이분포와-이항분포" class="nav-link" data-scroll-target="#베르누이분포와-이항분포"><span class="header-section-number">2.3.1</span> 베르누이분포와 이항분포</a></li>
+  <li><a href="#다항분포" id="toc-다항분포" class="nav-link" data-scroll-target="#다항분포"><span class="header-section-number">2.3.2</span> 다항분포</a></li>
+  <li><a href="#포아송분포와-음이항분포" id="toc-포아송분포와-음이항분포" class="nav-link" data-scroll-target="#포아송분포와-음이항분포"><span class="header-section-number">2.3.3</span> 포아송분포와 음이항분포</a></li>
+  <li><a href="#정규분포" id="toc-정규분포" class="nav-link" data-scroll-target="#정규분포"><span class="header-section-number">2.3.4</span> 정규분포</a></li>
+  <li><a href="#감마분포와-로그정규분포" id="toc-감마분포와-로그정규분포" class="nav-link" data-scroll-target="#감마분포와-로그정규분포"><span class="header-section-number">2.3.5</span> 감마분포와 로그정규분포</a></li>
+  </ul></li>
+  <li><a href="#가설검정과-통계적-추론" id="toc-가설검정과-통계적-추론" class="nav-link" data-scroll-target="#가설검정과-통계적-추론"><span class="header-section-number">2.4</span> 가설검정과 통계적 추론</a>
+  <ul class="collapse">
+  <li><a href="#귀무가설과-대립가설" id="toc-귀무가설과-대립가설" class="nav-link" data-scroll-target="#귀무가설과-대립가설"><span class="header-section-number">2.4.1</span> 귀무가설과 대립가설</a></li>
+  <li><a href="#p값" id="toc-p값" class="nav-link" data-scroll-target="#p값"><span class="header-section-number">2.4.2</span> p값</a></li>
+  <li><a href="#제1종-오류-제2종-오류와-검정력" id="toc-제1종-오류-제2종-오류와-검정력" class="nav-link" data-scroll-target="#제1종-오류-제2종-오류와-검정력"><span class="header-section-number">2.4.3</span> 제1종 오류, 제2종 오류와 검정력</a></li>
+  <li><a href="#통계적-유의성과-실제적-중요성" id="toc-통계적-유의성과-실제적-중요성" class="nav-link" data-scroll-target="#통계적-유의성과-실제적-중요성"><span class="header-section-number">2.4.4</span> 통계적 유의성과 실제적 중요성</a></li>
+  <li><a href="#다중비교" id="toc-다중비교" class="nav-link" data-scroll-target="#다중비교"><span class="header-section-number">2.4.5</span> 다중비교</a></li>
+  <li><a href="#재현성과-강건성" id="toc-재현성과-강건성" class="nav-link" data-scroll-target="#재현성과-강건성"><span class="header-section-number">2.4.6</span> 재현성과 강건성</a></li>
+  </ul></li>
+  <li><a href="#r을-이용한-기본-분석" id="toc-r을-이용한-기본-분석" class="nav-link" data-scroll-target="#r을-이용한-기본-분석"><span class="header-section-number">2.5</span> R을 이용한 기본 분석</a>
+  <ul class="collapse">
+  <li><a href="#기술통계량과-분포-확인" id="toc-기술통계량과-분포-확인" class="nav-link" data-scroll-target="#기술통계량과-분포-확인"><span class="header-section-number">2.5.1</span> 기술통계량과 분포 확인</a></li>
+  <li><a href="#조건부-평균과-주변-평균-1" id="toc-조건부-평균과-주변-평균-1" class="nav-link" data-scroll-target="#조건부-평균과-주변-평균-1"><span class="header-section-number">2.5.2</span> 조건부 평균과 주변 평균</a></li>
+  <li><a href="#표준오차와-신뢰구간" id="toc-표준오차와-신뢰구간" class="nav-link" data-scroll-target="#표준오차와-신뢰구간"><span class="header-section-number">2.5.3</span> 표준오차와 신뢰구간</a></li>
+  <li><a href="#분포-가정의-비교" id="toc-분포-가정의-비교" class="nav-link" data-scroll-target="#분포-가정의-비교"><span class="header-section-number">2.5.4</span> 분포 가정의 비교</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Key Statistical Concepts</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="표본과-모집단" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="표본과-모집단"><span class="header-section-number">2.1</span> 표본과 모집단</h2>
+<p>통계학의 핵심 목적은 관찰한 <strong>표본(sample)</strong>을 이용하여 관심 대상 전체인 <strong>모집단(population)</strong>에 대해 추론하는 것이다. 보건의료 연구에서는 자료의 규모가 아무리 크더라도 연구 결과가 적용되는 모집단을 명확히 정의해야 한다. 표본의 크기와 분석 방법이 적절하더라도 목표 모집단이 불분명하면 결과의 해석과 일반화 가능성을 판단하기 어렵다.</p>
+<p>모집단은 연구자가 알고자 하는 대상의 집합이다. 모집단은 실제로 존재하는 유한한 집합일 수도 있고, 연구 목적에 따라 가상적으로 정의된 집합일 수도 있다. 예를 들어 특정 시점에 특정 지역에 거주한 모든 주민은 실제 모집단이며, 앞으로 동일한 치료를 받을 수 있는 모든 환자는 개념적 모집단이다. 중요한 점은 개별 대상이 해당 모집단에 속하는지를 명확한 기준으로 판단할 수 있어야 한다는 것이다.</p>
+<p><strong>부분모집단(subpopulation)</strong>은 모집단 안에서 일정한 조건을 만족하는 대상의 집합이다. 예를 들어 전체 유방암 환자 모집단에서 호르몬수용체 양성 환자, 또는 전체 성인 모집단에서 65세 이상 인구는 각각 부분모집단을 이룬다. 회귀분석은 공변량의 값으로 정의되는 여러 부분모집단의 평균 또는 확률을 비교하는 방법으로 이해할 수 있다.</p>
+<p>표본은 모집단에 관한 정보를 얻기 위해 실제로 관찰한 일부 대상이다. 이상적으로 표본은 확률적 표본추출을 통해 얻는다. 확률표본에서는 각 대상이 표본에 포함될 가능성이 알려져 있으므로 모집단 추론과 불확실성의 정량화가 가능하다. 그러나 많은 보건의료 연구는 단일 의료기관 환자, 특정 보험 가입자, 연구 참여에 동의한 사람과 같은 편의표본을 사용한다. 또한 암등록자료처럼 특정 지역에서 발생한 모든 사례를 수집하는 전수등록 자료도 있다.</p>
+<p>표본의 크기와 대표성은 서로 다른 개념이다. 매우 큰 표본이라도 특정 의료기관 이용자만 포함하면 일반 인구를 대표하지 못할 수 있다. 반대로 적절히 설계된 비교적 작은 확률표본은 모집단 추론에 더 유용할 수 있다. 따라서 자료분석 전에는 다음을 확인해야 한다.</p>
+<ul>
+<li>목표 모집단은 누구인가?</li>
+<li>표본은 어떤 절차로 선택되었는가?</li>
+<li>표본에 포함될 가능성이 대상마다 동일한가?</li>
+<li>비응답, 탈락, 보험 자격 변경 또는 기관 선택으로 인한 선택 편향이 있는가?</li>
+<li>분석 결과를 어느 범위까지 일반화할 수 있는가?</li>
+</ul>
+<p>보건의료 연구에서는 모집단을 다음 세 수준으로 구분하면 결과의 적용 범위를 더 명확히 설명할 수 있다.</p>
+<ul>
+<li><strong>목표 모집단(target population)</strong>: 연구 결과를 궁극적으로 적용하려는 전체 대상</li>
+<li><strong>자료원 모집단(source population)</strong>: 실제로 연구대상이 추출될 수 있었던 대상</li>
+<li><strong>연구 표본(study sample)</strong>: 선정·제외 기준, 동의, 추적과 자료완결성 조건을 거쳐 분석에 포함된 대상</li>
+</ul>
+<p>목표 모집단과 자료원 모집단의 차이는 주로 외적 타당도와 관련되고, 자료원 모집단과 연구 표본의 차이는 선택 편향과 관련된다. 대상 <span class="math inline">\(i\)</span>의 표본 포함 여부를 <span class="math inline">\(S_i\)</span>라 하고 <span class="math inline">\(S_i=1\)</span>이면 분석 표본에 포함되었다고 하자. 포함확률은</p>
+<p><span class="math display">\[
+\pi_i=P(S_i=1\mid X_i)
+\]</span></p>
+<p>로 표현할 수 있다. 포함확률이 대상의 특성 <span class="math inline">\(X_i\)</span>에 따라 달라지면 단순 표본평균은 목표 모집단 평균을 반영하지 못할 수 있다. 포함확률을 알거나 추정할 수 있다면 역확률가중 평균</p>
+<p><span class="math display">\[
+\widehat{\mu}_{w}
+=
+\frac{\sum_{i=1}^{n}w_iY_i}{\sum_{i=1}^{n}w_i},
+\qquad
+w_i=\frac{1}{\pi_i}
+\]</span></p>
+<p>을 사용할 수 있다. 이 가중치는 표본에서 과소대표된 대상에게 더 큰 비중을 부여한다. 다만 가중치는 관찰되거나 올바르게 모형화된 선택기전에 대해서만 보정할 수 있으며, 측정되지 않은 선택요인을 자동으로 해결하지는 않는다.</p>
+<p>표본크기는 주로 추정의 정밀도와 관련되고 대표성은 선택기전과 관련된다. 따라서 큰 자료라는 사실만으로 모집단 추론의 타당성이 보장되지는 않는다. 행정자료나 전자의무기록은 표본수가 매우 크더라도 의료이용 여부, 보험자격, 의료기관 접근성과 기록완결성에 의해 선택된 자료일 수 있다.</p>
+</section>
+<section id="통계학의-기본-요소" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="통계학의-기본-요소"><span class="header-section-number">2.2</span> 통계학의 기본 요소</h2>
+<section id="확률변수" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="확률변수"><span class="header-section-number">2.2.1</span> 확률변수</h3>
+<p><strong>확률변수(random variable)</strong>는 모집단의 각 대상에서 관찰되는 특성을 수치나 범주로 표현한 것이다. 보건의료 자료에서 확률변수의 예는 다음과 같다.</p>
+<ul>
+<li>수술 후 재입원 여부</li>
+<li>당뇨병 진단 여부</li>
+<li>처방받은 약물의 종류</li>
+<li>입원일수</li>
+<li>일정 기간의 외래 방문 횟수</li>
+<li>연간 의료비</li>
+<li>영상검사 시행 횟수</li>
+<li>환자보고 삶의 질 점수</li>
+</ul>
+<p>이론적 확률변수는 보통 대문자 <span class="math inline">\(X\)</span>, <span class="math inline">\(Y\)</span>로 나타내고, 실제 관찰값은 소문자 <span class="math inline">\(x\)</span>, <span class="math inline">\(y\)</span>로 나타낸다. 예를 들어 연령이라는 확률변수를 <span class="math inline">\(X\)</span>라고 할 때 특정 환자의 관찰 연령 62세는 <span class="math inline">\(x=62\)</span>로 표현한다.</p>
+<p>확률변수는 크게 범주형과 연속형으로 구분된다.</p>
+<ul>
+<li><strong>범주형 변수(categorical variable)</strong>는 유한하거나 셀 수 있는 범주를 갖는다. 성별, 혈액형, 질병 단계, 치료 유형 등이 이에 해당한다.</li>
+<li><strong>이산형 변수(discrete variable)</strong>는 가능한 값이 분리되어 있다. 방문 횟수나 입원 횟수와 같은 계수형 결과가 대표적이다.</li>
+<li><strong>연속형 변수(continuous variable)</strong>는 일정 구간에서 임의의 실수값을 가질 수 있다. 혈압, 체중, 의료비, 검사 수치 등이 이에 해당한다.</li>
+</ul>
+<p>실제 자료에서는 연속형 변수를 범주화하기도 한다. 예를 들어 체질량지수는 연속형 변수이지만 저체중, 정상, 과체중, 비만으로 구분할 수 있다. 그러나 범주화는 정보 손실과 통계적 검정력 감소를 초래할 수 있으므로 임상적으로 타당한 기준이 있는 경우에만 신중하게 사용해야 한다.</p>
+<p>확률변수는 가능한 값의 집합인 <strong>지지집합(support)</strong>과 함께 정의해야 한다. 재입원 여부의 지지집합은 <span class="math inline">\(\{0,1\}\)</span>이고, 방문 횟수는 <span class="math inline">\(\{0,1,2,\ldots\}\)</span>이며, 양의 의료비는 <span class="math inline">\((0,\infty)\)</span>이다. 지지집합은 사용할 수 있는 확률분포와 회귀모형을 제한한다. 예를 들어 음수가 될 수 없는 결과에 정규모형을 기계적으로 적용하면 음의 예측값이 생성될 수 있고, 0과 1 사이의 확률에 선형모형을 적용하면 범위를 벗어난 예측값이 생길 수 있다.</p>
+<p>이항 결과는 지시변수로 표현하면 계산이 단순해진다. 사건 <span class="math inline">\(A\)</span>의 지시변수는</p>
+<p><span class="math display">\[
+I(A)=
+\begin{cases}
+1, &amp; A\text{가 발생한 경우},\\
+0, &amp; A\text{가 발생하지 않은 경우}
+\end{cases}
+\]</span></p>
+<p>로 정의한다. 지시변수의 기댓값은</p>
+<p><span class="math display">\[
+E\{I(A)\}=P(A)
+\]</span></p>
+<p>이므로 사건 여부의 표본평균은 사건 발생비율과 같다. 이 성질을 이용하면 유병률, 위험도, 민감도와 특이도 같은 지표를 평균의 문제로 다룰 수 있다.</p>
+<p>변수의 측정척도도 분석방법과 해석을 결정한다. 명목척도는 범주의 순서가 없고, 서열척도는 순서만 있으며 범주 간 간격이 동일하다고 보장되지 않는다. 간격척도는 차이가 의미 있지만 절대적 0이 없고, 비율척도는 0과 비율 모두 해석 가능하다. 서열형 결과를 연속형처럼 처리하려면 범주 간 간격이 동일하다는 추가 가정이 필요하다.</p>
+</section>
+<section id="종속변수와-독립변수" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="종속변수와-독립변수"><span class="header-section-number">2.2.2</span> 종속변수와 독립변수</h3>
+<p>분석의 첫 단계는 연구 질문에 따라 <strong>종속변수(dependent variable)</strong>와 <strong>독립변수(independent variable)</strong>를 구분하는 것이다. 종속변수는 결과변수 또는 반응변수라고 하며 일반적으로 <span class="math inline">\(Y\)</span>로 표시한다. 독립변수는 설명변수, 예측변수, 공변량 또는 특성이라고 하며 <span class="math inline">\(X\)</span>로 표시한다.</p>
+<p>회귀분석의 중심 질문은 <span class="math inline">\(X\)</span>가 변할 때 <span class="math inline">\(Y\)</span>의 분포 또는 평균이 어떻게 달라지는가이다. 그러나 독립변수와 종속변수의 구분은 변수 자체의 고정된 속성이 아니라 연구 질문에 의해 결정된다. 운동과 불면의 관계를 연구할 때 운동이 불면을 줄이는지를 묻는다면 운동이 <span class="math inline">\(X\)</span>, 불면이 <span class="math inline">\(Y\)</span>이다. 반대로 불면이 운동 참여를 감소시키는지를 묻는다면 두 변수의 역할은 바뀐다.</p>
+<p>관찰자료에서는 강한 상관관계가 있다고 해서 한 변수를 자동으로 독립변수로 지정해서는 안 된다. 예를 들어 연간 입원 횟수와 연간 의료비는 강하게 관련되지만, 같은 기간에 측정되었다면 두 변수 모두 환자의 건강 상태와 의료 이용 과정에서 함께 발생한 결과일 수 있다. 이 경우 입원 횟수를 단순한 설명변수로 조정하면 관심 효과의 일부를 제거하거나 해석을 왜곡할 수 있다.</p>
+<p>설명변수의 통계적 역할은 인과 구조에 따라 달라진다.</p>
+<ul>
+<li><strong>노출 또는 처치(exposure or treatment)</strong>: 효과를 평가하려는 주된 변수</li>
+<li><strong>교란변수(confounder)</strong>: 노출과 결과에 모두 영향을 주어 두 변수의 관계를 왜곡하는 변수</li>
+<li><strong>매개변수(mediator)</strong>: 노출의 영향이 결과로 전달되는 경로에 위치한 변수</li>
+<li><strong>효과수정변수(effect modifier)</strong>: 노출 효과의 크기가 그 값에 따라 달라지는 변수</li>
+<li><strong>충돌변수(collider)</strong>: 둘 이상의 변수로부터 영향을 받는 공통 결과</li>
+</ul>
+<p>같은 변수도 연구 질문과 시간적 위치에 따라 역할이 달라질 수 있다. 예를 들어 치료 후 혈압은 치료가 심혈관 사건에 미치는 효과를 전달하는 매개변수일 수 있지만, 치료 전 혈압은 교란변수일 수 있다. 따라서 공변량 선택은 단순한 단변량 <span class="math inline">\(p\)</span>값이나 자동 변수선택보다 임상 지식, 시간적 선후관계와 인과도에 근거해야 한다. 매개변수나 충돌변수를 무조건 조정하면 관심 있는 총효과를 제거하거나 새로운 편향을 유발할 수 있다.</p>
+</section>
+<section id="확률분포" class="level3" data-number="2.2.3">
+<h3 data-number="2.2.3" class="anchored" data-anchor-id="확률분포"><span class="header-section-number">2.2.3</span> 확률분포</h3>
+<p>확률변수의 <strong>분포(distribution)</strong>는 그 변수가 가능한 값을 어떤 확률로 갖는지를 나타낸다. 범주형 변수의 분포는 각 범주의 확률로 정의된다. 가능한 범주가 <span class="math inline">\(K\)</span>개이고 각 확률이 <span class="math inline">\(p_1,\ldots,p_K\)</span>라면</p>
+<p><span class="math display">\[
+\sum_{k=1}^{K}p_k=1
+\]</span></p>
+<p>을 만족한다.</p>
+<p>연속형 확률변수에서는 한 점의 확률이 아니라 구간의 확률을 다룬다. <strong>확률밀도함수(probability density function, PDF)</strong>를 <span class="math inline">\(f(y)\)</span>라고 하면 <span class="math inline">\(a\)</span>와 <span class="math inline">\(b\)</span> 사이에 값이 존재할 확률은</p>
+<p><span class="math display">\[
+P(a&lt;Y\le b)=\int_a^b f(y)\,dy
+\]</span></p>
+<p>이다. 밀도함수 전체 아래의 면적은 1이다.</p>
+<p>밀도함수의 값 <span class="math inline">\(f(y)\)</span> 자체는 확률이 아니다. 연속형 변수에서는 보통 <span class="math inline">\(P(Y=y)=0\)</span>이고, 실제 확률은 밀도를 구간에 대해 적분한 면적으로 얻는다. 반면 이산형 변수에서는 <strong>확률질량함수(probability mass function, PMF)</strong></p>
+<p><span class="math display">\[
+p(y)=P(Y=y),
+\qquad
+p(y)\ge0,
+\qquad
+\sum_y p(y)=1
+\]</span></p>
+<p>를 사용한다.</p>
+<p><strong>누적분포함수(cumulative distribution function, CDF)</strong>는 주어진 값 이하일 확률을 나타낸다.</p>
+<p><span class="math display">\[
+F(y)=P(Y\le y)=\int_{-\infty}^{y}f(t)\,dt
+\]</span></p>
+<p>분포의 형태는 대칭성, 치우침, 꼬리의 두께, 봉우리의 수에 따라 기술할 수 있다.</p>
+<ul>
+<li><strong>대칭분포</strong>에서는 중심을 기준으로 양쪽 형태가 유사하다.</li>
+<li><strong>오른쪽 치우친 분포</strong>에서는 소수의 큰 값 때문에 오른쪽 꼬리가 길다.</li>
+<li><strong>두꺼운 꼬리 분포</strong>에서는 극단값이 정규분포보다 자주 나타난다.</li>
+<li><strong>단봉분포</strong>는 하나의 주요 봉우리를 갖고, 다봉분포는 여러 봉우리를 갖는다.</li>
+</ul>
+<p>분포의 대표적인 위치 요약은 평균과 중앙값이다. 확률변수 <span class="math inline">\(Y\)</span>의 평균 또는 기댓값은</p>
+<p><span class="math display">\[
+E(Y)=\int_{-\infty}^{\infty}y f(y)\,dy
+\]</span></p>
+<p>이며 이산형 변수에서는</p>
+<p><span class="math display">\[
+E(Y)=\sum_y yP(Y=y)
+\]</span></p>
+<p>이다. 중앙값은 누적확률이 0.5가 되는 값이다. 대칭분포에서는 평균과 중앙값이 대체로 일치하지만 오른쪽 치우친 분포에서는 평균이 중앙값보다 크다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/inpatient-cost-distribution.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:92.0%"></p>
+</figure>
+</div>
+<p>그림의 의료비 분포는 소수의 매우 큰 값 때문에 긴 오른쪽 꼬리를 보인다. 이러한 상황에서 평균은 모집단의 전체 비용 부담을 나타내는 데 중요하지만, 전형적인 개인의 비용을 표현할 때는 중앙값이 더 적절할 수 있다. 어떤 요약치를 사용할지는 연구 질문에 따라 결정해야 한다.</p>
+<p>누적분포함수로부터 분위수를 정의할 수 있다. <span class="math inline">\(q\)</span>분위수는</p>
+<p><span class="math display">\[
+y_q=F^{-1}(q)=\inf\{y:F(y)\ge q\}
+\]</span></p>
+<p>이다. 중앙값은 <span class="math inline">\(q=0.5\)</span>, 제1사분위수와 제3사분위수는 각각 <span class="math inline">\(q=0.25\)</span>와 <span class="math inline">\(q=0.75\)</span>인 분위수다. 분포의 중앙 50% 폭은</p>
+<p><span class="math display">\[
+\operatorname{IQR}=Q_{0.75}-Q_{0.25}
+\]</span></p>
+<p>로 정의한다. 표준편차는 모든 관측값의 크기를 사용하므로 극단값에 민감한 반면, 사분위범위는 순서에 기초하여 치우친 분포에 더 강건하다.</p>
+<p>의료비 그림에서 평균이 중앙값보다 오른쪽에 위치하는 것은 일부 고비용 환자가 산술평균을 끌어올렸기 때문이다. 평균은 분포의 무게중심이므로 전체 비용부담과 예산영향을 나타내는 데 중요하고, 중앙값은 전형적인 개인의 비용 수준을 나타내는 데 유용하다. 그림의 긴 오른쪽 꼬리는 평균과 표준편차를 함께 제시하더라도 분포 전체를 충분히 설명하지 못할 수 있음을 보여준다.</p>
+<p>확률변수의 함수에 대한 기댓값은</p>
+<p><span class="math display">\[
+E\{g(Y)\}
+=
+\int g(y)f(y)\,dy
+\]</span></p>
+<p>로 계산한다. 일반적으로 <span class="math inline">\(E\{g(Y)\}\)</span>와 <span class="math inline">\(g\{E(Y)\}\)</span>는 같지 않다. 이 차이는 로그변환 결과의 재변환, 위험비의 지수화, 비선형 예측값의 평균을 해석할 때 반복해서 나타난다.</p>
+</section>
+<section id="모수와-통계모형" class="level3" data-number="2.2.4">
+<h3 data-number="2.2.4" class="anchored" data-anchor-id="모수와-통계모형"><span class="header-section-number">2.2.4</span> 모수와 통계모형</h3>
+<p>분포족은 여러 가능한 분포를 포함하며, <strong>모수(parameter)</strong>는 그중 특정 분포를 결정한다. 예를 들어 정규분포는 평균 <span class="math inline">\(\mu\)</span>와 분산 <span class="math inline">\(\sigma^2\)</span>에 의해 정의된다.</p>
+<p><span class="math display">\[
+Y\sim N(\mu,\sigma^2)
+\]</span></p>
+<p>모수적 방법은 분포족을 가정하고 표본을 이용하여 모수를 추정한다. 반면 비모수적 방법은 특정 분포족을 강하게 가정하지 않는다. 비모수적이라는 표현은 아무 가정도 없다는 뜻이 아니라 분포의 형태에 대한 가정이 상대적으로 약하다는 뜻이다.</p>
+<p><strong>통계모형(statistical model)</strong>은 자료 생성 과정에 대한 수학적 가정의 집합이다. 모형에는 다음이 포함될 수 있다.</p>
+<ul>
+<li>결과변수의 분포</li>
+<li>평균과 공변량의 관계</li>
+<li>분산 구조</li>
+<li>관측치 간 독립성 또는 상관 구조</li>
+<li>시간, 군집, 층화, 반복측정 구조</li>
+<li>결측과 검열에 대한 가정</li>
+</ul>
+<p>동일한 연구 질문에 하나의 유일한 모형만 존재하는 경우는 드물다. 좋은 모형은 자료의 핵심 구조를 충분히 반영하면서도 연구 질문에 직접 답하고, 해석 가능하며, 불필요하게 복잡하지 않아야 한다.</p>
+<p>모수 <span class="math inline">\(\theta\)</span>에 의해 분포가 결정된다고 할 때 독립 관측자료 <span class="math inline">\(y_1,\ldots,y_n\)</span>의 <strong>우도함수(likelihood function)</strong>는</p>
+<p><span class="math display">\[
+L(\theta;y)
+=
+\prod_{i=1}^{n}f(y_i\mid\theta)
+\]</span></p>
+<p>로 정의한다. 우도는 모수가 주어졌을 때 자료가 관찰될 가능성을 나타내는 식을, 관찰자료를 고정한 채 모수의 함수로 해석한 것이다. 수치 계산에서는 곱을 합으로 바꾼 로그우도</p>
+<p><span class="math display">\[
+\ell(\theta;y)
+=
+\sum_{i=1}^{n}\log f(y_i\mid\theta)
+\]</span></p>
+<p>를 주로 사용한다. 최대우도추정량은 로그우도를 가장 크게 하는 모수값이다.</p>
+<p>모형을 사용하여 모수를 추정하려면 <strong>식별가능성(identifiability)</strong>이 필요하다. 서로 다른 모수값이 동일한 관측자료 분포를 만든다면 자료만으로 어느 값이 옳은지 구분할 수 없다. 식별가능성 문제는 표본을 늘려도 해결되지 않는다는 점에서 단순한 정밀도 부족과 다르다. 보건의료 관찰자료에서 인과효과를 추정할 때 필요한 무측정 교란 없음, 양의 확률과 일관성 같은 가정도 넓은 의미에서 관측자료로 효과를 식별하기 위한 조건이다.</p>
+<p>모형은 현실 자체가 아니라 현실의 특정 측면을 단순화한 표현이다. 따라서 모형의 유용성은 모든 세부를 완벽하게 재현하는지가 아니라 연구 질문에 필요한 구조를 얼마나 적절하게 보존하는지로 평가해야 한다.</p>
+</section>
+<section id="추정과-추론" class="level3" data-number="2.2.5">
+<h3 data-number="2.2.5" class="anchored" data-anchor-id="추정과-추론"><span class="header-section-number">2.2.5</span> 추정과 추론</h3>
+<p><strong>추정(estimation)</strong>은 표본을 사용하여 모집단의 모수나 분포 특성을 계산하는 과정이다. 표본평균은 모집단 평균의 추정량이고, 표본중앙값은 모집단 중앙값의 추정량이다.</p>
+<p>표본 <span class="math inline">\(Y_1,\ldots,Y_n\)</span>의 평균은</p>
+<p><span class="math display">\[
+\bar{Y}=\frac{1}{n}\sum_{i=1}^{n}Y_i
+\]</span></p>
+<p>이며, 모집단 평균 <span class="math inline">\(\mu\)</span>의 대표적인 점추정량이다.</p>
+<p><strong>통계적 추론(statistical inference)</strong>은 추정량과 그 불확실성을 이용하여 모집단에 관한 결론을 내리는 과정이다. 점추정량만 제시하면 표본에 따른 변동을 알 수 없으므로 표준오차, 신뢰구간, 가설검정 결과를 함께 제시한다.</p>
+<p>확률변수로 표현된 계산 규칙을 <strong>추정량(estimator)</strong>이라 하고, 실제 자료를 대입해 얻은 수치를 <strong>추정값(estimate)</strong>이라 한다. 예를 들어 <span class="math inline">\(\bar Y\)</span>는 추정량이고 특정 표본에서 얻은 6.4는 추정값이다.</p>
+<p>추정량의 반복표본 성질은 다음과 같이 평가한다. 추정량 <span class="math inline">\(\widehat\theta\)</span>의 편향은</p>
+<p><span class="math display">\[
+\operatorname{Bias}(\widehat\theta)
+=
+E(\widehat\theta)-\theta
+\]</span></p>
+<p>이고 평균제곱오차는</p>
+<p><span class="math display">\[
+\operatorname{MSE}(\widehat\theta)
+=
+E\left[(\widehat\theta-\theta)^2\right]
+=
+\operatorname{Var}(\widehat\theta)
++
+\operatorname{Bias}(\widehat\theta)^2
+\]</span></p>
+<p>이다. 평균제곱오차는 분산과 편향을 동시에 평가하므로 약간의 편향을 허용하여 분산을 크게 줄이는 추정량이 더 우수할 수 있다.</p>
+<p>표본크기가 증가할수록 <span class="math inline">\(\widehat\theta\)</span>가 참값 <span class="math inline">\(\theta\)</span>에 가까워지는 성질을 <strong>일치성(consistency)</strong>이라 한다. 또한 적절히 표준화한 추정량의 분포가 정규분포에 가까워지는 성질을 <strong>점근정규성(asymptotic normality)</strong>이라 한다. 많은 회귀계수의 Wald 신뢰구간과 검정은 이 점근정규성에 근거한다.</p>
+</section>
+<section id="변이-분산과-표준오차" class="level3" data-number="2.2.6">
+<h3 data-number="2.2.6" class="anchored" data-anchor-id="변이-분산과-표준오차"><span class="header-section-number">2.2.6</span> 변이, 분산과 표준오차</h3>
+<p>확률변수 <span class="math inline">\(Y\)</span>의 분산은 평균으로부터의 제곱편차의 기댓값이다.</p>
+<p><span class="math display">\[
+\operatorname{Var}(Y)=E\left[(Y-E(Y))^2\right]
+\]</span></p>
+<p>표준편차는 분산의 제곱근이다.</p>
+<p><span class="math display">\[
+\operatorname{SD}(Y)=\sqrt{\operatorname{Var}(Y)}
+\]</span></p>
+<p>표본에서 모집단 분산을 추정할 때는</p>
+<p><span class="math display">\[
+s^2
+=
+\frac{1}{n-1}\sum_{i=1}^{n}(Y_i-\bar Y)^2
+\]</span></p>
+<p>을 사용한다. 분모가 <span class="math inline">\(n\)</span>이 아니라 <span class="math inline">\(n-1\)</span>인 이유는 표본평균을 같은 자료에서 추정하면서 자유도 하나를 사용했기 때문이다. 독립·동일분포 표본에서 이 식은 모집단 분산의 불편추정량이다.</p>
+<p>표준편차는 개인 관측값의 변이를 나타낸다. 이에 비해 <strong>표준오차(standard error)</strong>는 추정량의 표본 간 변이를 나타낸다. 동일한 모집단에서 같은 방법으로 표본을 반복 추출해 추정량을 계산하면 추정값은 매번 조금씩 달라진다. 이 추정량의 표준편차가 표준오차이다.</p>
+<p>독립이고 동일한 분포를 따르는 표본에서 표본평균의 표준오차는</p>
+<p><span class="math display">\[
+\operatorname{SE}(\bar{Y})=\frac{\sigma}{\sqrt{n}}
+\]</span></p>
+<p>이고 실제로는 <span class="math inline">\(\sigma\)</span> 대신 표본표준편차 <span class="math inline">\(s\)</span>를 사용한다.</p>
+<p><span class="math display">\[
+\widehat{\operatorname{SE}}(\bar{Y})=\frac{s}{\sqrt{n}}
+\]</span></p>
+<p>표본크기가 커질수록 표준오차는 <span class="math inline">\(1/\sqrt{n}\)</span>의 비율로 감소한다. 표본크기를 두 배로 늘려도 표준오차가 절반이 되는 것은 아니며, 표준오차를 절반으로 줄이려면 대략 네 배의 표본이 필요하다.</p>
+<p>표준오차는 자료의 변이뿐 아니라 추정방법과 모형에 의존한다. 동일한 점추정값을 산출하는 두 모형도 분산 가정이나 상관구조가 다르면 표준오차가 달라질 수 있다.</p>
+<p>독립성 가정이 깨지면 표본평균의 분산은 단순히 <span class="math inline">\(\sigma^2/n\)</span>이 아니다. 일반적으로</p>
+<p><span class="math display">\[
+\operatorname{Var}(\bar Y)
+=
+\frac{1}{n^2}
+\left[
+\sum_{i=1}^{n}\operatorname{Var}(Y_i)
++
+2\sum_{i&lt;j}\operatorname{Cov}(Y_i,Y_j)
+\right]
+\]</span></p>
+<p>이다. 동일 병원 환자나 같은 대상의 반복측정값처럼 관측값 사이에 양의 상관이 있으면 공분산 항이 양수가 되어 표준오차가 증가한다. 이 구조를 무시하면 신뢰구간이 지나치게 좁아지고 제1종 오류가 증가한다.</p>
+<p>군집크기가 대략 <span class="math inline">\(m\)</span>이고 군집내상관계수가 <span class="math inline">\(\rho\)</span>일 때 단순한 설계효과는</p>
+<p><span class="math display">\[
+\operatorname{DEFF}\approx1+(m-1)\rho
+\]</span></p>
+<p>로 표현된다. 유효표본크기는 대략 <span class="math inline">\(n/\operatorname{DEFF}\)</span>이므로 관측 대상 수가 많더라도 군집내상관이 크면 실제 정보량은 크게 감소한다.</p>
+</section>
+<section id="신뢰구간" class="level3" data-number="2.2.7">
+<h3 data-number="2.2.7" class="anchored" data-anchor-id="신뢰구간"><span class="header-section-number">2.2.7</span> 신뢰구간</h3>
+<p>신뢰구간은 추정량의 불확실성을 구간으로 표현한다. 정규근사를 사용할 수 있을 때 95% 신뢰구간은 일반적으로</p>
+<p><span class="math display">\[
+\widehat{\theta}\pm 1.96\operatorname{SE}(\widehat{\theta})
+\]</span></p>
+<p>형태로 계산한다. 표본이 작고 분산을 표본에서 추정하는 경우에는 표준정규분포 대신 <span class="math inline">\(t\)</span>분포의 임계값을 사용한다.</p>
+<p>95% 신뢰구간의 빈도주의적 해석은 같은 표본추출과 추정 절차를 무한히 반복할 때 생성되는 구간의 약 95%가 참 모수를 포함한다는 것이다. 이미 계산된 특정 구간에 대해 참 모수가 95% 확률로 포함된다고 해석하는 것은 고전적 빈도주의 해석과 다르다.</p>
+<p>정규근사 신뢰구간은 다음의 확률명제에서 유도된다.</p>
+<p><span class="math display">\[
+P\left(
+-1.96
+\le
+\frac{\widehat\theta-\theta}
+{\operatorname{SE}(\widehat\theta)}
+\le
+1.96
+\right)
+\approx0.95
+\]</span></p>
+<p>이를 <span class="math inline">\(\theta\)</span>에 대해 정리하면</p>
+<p><span class="math display">\[
+P\left(
+\widehat\theta-1.96\operatorname{SE}(\widehat\theta)
+\le \theta \le
+\widehat\theta+1.96\operatorname{SE}(\widehat\theta)
+\right)
+\approx0.95
+\]</span></p>
+<p>가 된다. 신뢰구간의 폭은 표준오차에 비례하므로 표본크기, 자료의 변이, 군집 구조와 추정방법의 효율성에 영향을 받는다. 구간이 좁다는 것은 정밀도가 높다는 뜻이지 편향이 작다는 뜻은 아니다. 선택 편향이나 측정오차가 있으면 매우 좁은 구간도 잘못된 값 주변에 형성될 수 있다.</p>
+<p>양측 유의수준 0.05의 Wald 검정과 95% Wald 신뢰구간은 서로 대응한다. 귀무가설값 <span class="math inline">\(\theta_0\)</span>가 신뢰구간에 포함되지 않으면 동일한 표준오차를 사용한 양측 검정의 <span class="math inline">\(p\)</span>값은 0.05보다 작다. 작은 표본, 비대칭 분포, 정확검정, 프로파일 우도 또는 부트스트랩 구간에서는 이 관계가 정확히 일치하지 않을 수 있다.</p>
+</section>
+<section id="조건부-평균과-주변-평균" class="level3" data-number="2.2.8">
+<h3 data-number="2.2.8" class="anchored" data-anchor-id="조건부-평균과-주변-평균"><span class="header-section-number">2.2.8</span> 조건부 평균과 주변 평균</h3>
+<p>보건의료 연구에서는 공변량 <span class="math inline">\(X\)</span>의 값으로 정의되는 부분모집단의 결과 평균에 관심을 갖는다. <strong>조건부 평균(conditional mean)</strong>은</p>
+<p><span class="math display">\[
+E(Y\mid X=x)
+\]</span></p>
+<p>으로 나타내며, <span class="math inline">\(X=x\)</span>인 대상에서 결과 <span class="math inline">\(Y\)</span>의 평균이다.</p>
+<p>반면 <strong>주변 평균(marginal mean)</strong>은 <span class="math inline">\(X\)</span>에 대해 평균낸 전체 모집단의 평균이다.</p>
+<p><span class="math display">\[
+E(Y)=E_X\{E(Y\mid X)\}
+\]</span></p>
+<p><span class="math inline">\(X\)</span>가 범주형이고 가능한 값이 <span class="math inline">\(x_1,\ldots,x_K\)</span>라면</p>
+<p><span class="math display">\[
+E(Y)=\sum_{k=1}^{K}E(Y\mid X=x_k)P(X=x_k)
+\]</span></p>
+<p>이다.</p>
+<p>다음 표는 자기평가 건강상태에 따른 연간 총 의료비의 조건부 평균을 예시한다.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>자기평가 건강상태</th>
+<th style="text-align: right;">표본수</th>
+<th style="text-align: right;">평균 의료비</th>
+<th style="text-align: right;">구성비</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>매우 좋음</td>
+<td style="text-align: right;">3,775</td>
+<td style="text-align: right;">3,617</td>
+<td style="text-align: right;">0.1615</td>
+</tr>
+<tr class="even">
+<td>좋음</td>
+<td style="text-align: right;">7,790</td>
+<td style="text-align: right;">4,597</td>
+<td style="text-align: right;">0.3333</td>
+</tr>
+<tr class="odd">
+<td>보통</td>
+<td style="text-align: right;">7,235</td>
+<td style="text-align: right;">6,087</td>
+<td style="text-align: right;">0.3095</td>
+</tr>
+<tr class="even">
+<td>나쁨</td>
+<td style="text-align: right;">3,374</td>
+<td style="text-align: right;">9,539</td>
+<td style="text-align: right;">0.1444</td>
+</tr>
+<tr class="odd">
+<td>매우 나쁨</td>
+<td style="text-align: right;">1,199</td>
+<td style="text-align: right;">15,052</td>
+<td style="text-align: right;">0.0513</td>
+</tr>
+</tbody>
+</table>
+<p>주변 평균은 각 조건부 평균에 해당 집단의 구성비를 곱해 합산한다.</p>
+<p><span class="math display">\[
+E(Y)=\sum_k E(Y\mid X=x_k)P(X=x_k)
+\]</span></p>
+<p>조건부 효과와 주변 효과는 일반적으로 같지 않다. 특히 비선형 모형에서는 회귀계수로 표현되는 조건부 효과와 모집단 평균 확률의 차이로 표현되는 주변 효과가 상당히 다를 수 있다.</p>
+<p>주변 평균 식은 <strong>반복기댓값의 법칙(law of iterated expectations)</strong>이다. 이를 회귀모형과 결합한 것이 표준화 또는 g-계산이다. 처치 <span class="math inline">\(A\)</span>와 공변량 <span class="math inline">\(X\)</span>가 있을 때 처치수준 <span class="math inline">\(a\)</span>에서의 표준화 평균은</p>
+<p><span class="math display">\[
+\widehat\mu(a)
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+\widehat E(Y\mid A=a,X=X_i)
+\]</span></p>
+<p>로 계산한다. 각 대상의 공변량은 그대로 두고 모든 대상이 처치 <span class="math inline">\(a\)</span>를 받았다고 가정한 예측값을 평균한다. 두 처치수준의 차이 <span class="math inline">\(\widehat\mu(1)-\widehat\mu(0)\)</span>는 목표 모집단의 평균 결과 차이로 해석할 수 있다.</p>
+<p>선형모형에서는 상호작용이 없고 같은 공변량 분포를 사용할 때 조건부 평균차와 주변 평균차가 일치하는 경우가 많다. 그러나 로지스틱 회귀의 오즈비처럼 비선형 연결함수를 사용하는 효과척도는 교란이 없더라도 조건부 효과와 주변 효과가 다를 수 있다. 이를 <strong>비축약성(non-collapsibility)</strong>이라 한다. 따라서 조정 오즈비와 표준화 위험차는 서로 다른 질문에 답하며, 하나를 다른 하나의 단순한 보정값으로 해석해서는 안 된다.</p>
+</section>
+<section id="결합분포와-혼합분포" class="level3" data-number="2.2.9">
+<h3 data-number="2.2.9" class="anchored" data-anchor-id="결합분포와-혼합분포"><span class="header-section-number">2.2.9</span> 결합분포와 혼합분포</h3>
+<p>둘 이상의 확률변수를 함께 고려할 때 <strong>결합분포(joint distribution)</strong>를 사용한다. 두 변수 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>의 결합분포는 가능한 모든 조합 <span class="math inline">\((x,y)\)</span>의 확률을 기술한다.</p>
+<p>주변분포는 결합분포에서 다른 변수를 합하거나 적분하여 얻는다.</p>
+<p><span class="math display">\[
+P(Y=y)=\sum_x P(X=x,Y=y)
+\]</span></p>
+<p>연속형 변수에서는 합 대신 적분을 사용한다.</p>
+<p>조건부분포는 결합확률을 조건 사건의 확률로 나누어 정의한다.</p>
+<p><span class="math display">\[
+P(Y=y\mid X=x)=\frac{P(X=x,Y=y)}{P(X=x)}
+\]</span></p>
+<p>두 변수가 독립이면</p>
+<p><span class="math display">\[
+P(X=x,Y=y)=P(X=x)P(Y=y)
+\]</span></p>
+<p>이 성립한다.</p>
+<p><strong>혼합분포(mixture distribution)</strong>는 서로 다른 부분집단의 분포가 결합된 형태다. 전체 모집단이 건강상태가 양호한 집단과 중증질환 집단으로 구성되어 있다면 의료비 분포는 두 집단 분포의 혼합으로 나타날 수 있다.</p>
+<p><span class="math display">\[
+f_Y(y)=\sum_{k=1}^{K}\pi_k f_k(y),\qquad \sum_{k=1}^{K}\pi_k=1
+\]</span></p>
+<p>여기서 <span class="math inline">\(\pi_k\)</span>는 <span class="math inline">\(k\)</span>번째 잠재집단의 비율이고 <span class="math inline">\(f_k(y)\)</span>는 그 집단의 분포다. 의료비 자료에서 0의 질량과 양의 연속분포가 결합된 이부분 구조도 혼합분포의 중요한 예이다.</p>
+<p>두 변수의 선형적 연관성은 공분산과 상관계수로 요약할 수 있다.</p>
+<p><span class="math display">\[
+\operatorname{Cov}(X,Y)
+=
+E\{(X-E(X))(Y-E(Y))\}
+\]</span></p>
+<p><span class="math display">\[
+\rho_{XY}
+=
+\frac{\operatorname{Cov}(X,Y)}
+{\operatorname{SD}(X)\operatorname{SD}(Y)}
+\]</span></p>
+<p>독립이면 공분산은 0이지만 공분산이 0이라고 해서 일반적으로 독립인 것은 아니다. 상관계수는 선형적 의존성만 표현하므로 U자형 관계나 부분집단 혼합으로 생긴 복잡한 관계를 놓칠 수 있다.</p>
+<p>전체 변이는 조건부 분포를 이용하여 집단 내부 변이와 집단 간 변이로 분해할 수 있다. <strong>총분산의 법칙</strong>은</p>
+<p><span class="math display">\[
+\operatorname{Var}(Y)
+=
+E\{\operatorname{Var}(Y\mid X)\}
++
+\operatorname{Var}\{E(Y\mid X)\}
+\]</span></p>
+<p>이다. 첫 항은 부분집단 내부의 평균 변이이고, 둘째 항은 부분집단 평균 사이의 변이다. 전체 의료비 변이가 큰 이유가 각 질환군 내부의 개인차 때문인지 질환군 간 평균 차이 때문인지 구분할 때 유용하다.</p>
+<p>혼합분포의 평균과 분산은</p>
+<p><span class="math display">\[
+E(Y)=\sum_{k=1}^{K}\pi_k\mu_k
+\]</span></p>
+<p><span class="math display">\[
+\operatorname{Var}(Y)
+=
+\sum_{k=1}^{K}\pi_k\sigma_k^2
++
+\sum_{k=1}^{K}\pi_k(\mu_k-\mu)^2
+\]</span></p>
+<p>로 표현된다. 두 번째 식은 전체 변이가 성분 내부 변이와 성분평균 간 변이의 합임을 보여준다. 서로 다른 임상 아형이 섞여 있으면 각 아형 내부 분산이 작더라도 전체 분포는 넓거나 다봉형이 될 수 있다.</p>
+<p>0의 질량과 양의 연속분포가 결합된 의료비 자료에서 <span class="math inline">\(P(Y=0)=\pi_0\)</span>라 하면</p>
+<p><span class="math display">\[
+E(Y)=(1-\pi_0)E(Y\mid Y&gt;0)
+\]</span></p>
+<p>이다. 전체 평균은 비용 발생확률과 비용이 발생한 대상의 평균 비용이 함께 결정한다.</p>
+</section>
+<section id="변수-변환" class="level3" data-number="2.2.10">
+<h3 data-number="2.2.10" class="anchored" data-anchor-id="변수-변환"><span class="header-section-number">2.2.10</span> 변수 변환</h3>
+<p>변수 변환은 자료의 척도를 바꾸어 분포의 형태를 개선하거나 관계를 더 단순하게 표현하는 방법이다. 가장 흔한 변환은 로그변환이다.</p>
+<p><span class="math display">\[
+Y^*=\log(Y)
+\]</span></p>
+<p>로그변환은 큰 값을 상대적으로 더 많이 압축하므로 오른쪽 치우친 분포를 완화한다. 0이 포함된 경우에는 문맥에 따라</p>
+<p><span class="math display">\[
+Y^*=\log(Y+c)
+\]</span></p>
+<p>와 같이 양의 상수 <span class="math inline">\(c\)</span>를 더할 수 있다. 그러나 <span class="math inline">\(c\)</span>의 선택은 해석에 영향을 줄 수 있으므로 기계적으로 사용해서는 안 된다.</p>
+<p>변환의 목적은 단순히 정규성을 만드는 데만 있지 않다. 로그변환은 절대 차이보다 비율 차이가 중요한 상황에서 자연스러운 척도를 제공한다. 예를 들어</p>
+<p><span class="math display">\[
+\log(Y_1)-\log(Y_0)=\log\left(\frac{Y_1}{Y_0}\right)
+\]</span></p>
+<p>이므로 로그척도에서의 차이는 원척도에서의 비율과 연결된다.</p>
+<p>변환 후 결과를 원척도로 되돌릴 때는 비선형성 때문에 주의해야 한다. 일반적으로</p>
+<p><span class="math display">\[
+E\{g(Y)\}\ne g\{E(Y)\}
+\]</span></p>
+<p>이다. 따라서 로그값의 평균을 지수화한 값이 원자료의 산술평균과 같지 않다.</p>
+<p>비선형 변환과 기댓값의 순서를 바꿀 수 없는 이유는 Jensen 부등식과 관련된다. 지수함수는 볼록함수이므로</p>
+<p><span class="math display">\[
+E(e^X)\ge e^{E(X)}
+\]</span></p>
+<p>이다. 따라서 로그값의 평균을 지수화한 값은 원척도 산술평균보다 일반적으로 작다.</p>
+<p>비선형 변환된 추정량의 분산은 <strong>델타 방법(delta method)</strong>으로 근사할 수 있다. <span class="math inline">\(\widehat\theta\)</span>의 분산이 <span class="math inline">\(V\)</span>이고 <span class="math inline">\(g\)</span>가 미분 가능하면</p>
+<p><span class="math display">\[
+\operatorname{Var}\{g(\widehat\theta)\}
+\approx
+\left[g'(\theta)\right]^2V
+\]</span></p>
+<p>이다. 예를 들어 로그위험비 <span class="math inline">\(\widehat\beta\)</span>를 위험비 <span class="math inline">\(e^{\widehat\beta}\)</span>로 변환하면</p>
+<p><span class="math display">\[
+\operatorname{SE}(e^{\widehat\beta})
+\approx
+e^{\widehat\beta}\operatorname{SE}(\widehat\beta)
+\]</span></p>
+<p>이다. 다만 변환 후 분포가 비대칭이면 위험비 척도에서 대칭형 표준오차 구간을 만드는 것보다 로그척도에서 신뢰구간을 계산한 뒤 양 끝점을 지수화하는 것이 더 안정적이다.</p>
+</section>
+</section>
+<section id="보건의료-자료에서-자주-사용하는-확률분포" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="보건의료-자료에서-자주-사용하는-확률분포"><span class="header-section-number">2.3</span> 보건의료 자료에서 자주 사용하는 확률분포</h2>
+<section id="베르누이분포와-이항분포" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="베르누이분포와-이항분포"><span class="header-section-number">2.3.1</span> 베르누이분포와 이항분포</h3>
+<p>이항 결과 <span class="math inline">\(Y\)</span>가 사건 발생이면 1, 비발생이면 0을 갖는다고 하자. 사건 발생확률을 <span class="math inline">\(p\)</span>라고 하면</p>
+<p><span class="math display">\[
+P(Y=y)=p^y(1-p)^{1-y},\qquad y\in\{0,1\}
+\]</span></p>
+<p>이며 이를 베르누이분포라고 한다.</p>
+<p><span class="math display">\[
+Y\sim \operatorname{Bernoulli}(p)
+\]</span></p>
+<p>평균과 분산은</p>
+<p><span class="math display">\[
+E(Y)=p,\qquad \operatorname{Var}(Y)=p(1-p)
+\]</span></p>
+<p>이다. 이항변수의 평균은 곧 사건 발생확률이다.</p>
+<p>서로 독립인 베르누이 확률변수 <span class="math inline">\(Y_1,\ldots,Y_n\)</span>의 합</p>
+<p><span class="math display">\[
+S=\sum_{i=1}^{n}Y_i
+\]</span></p>
+<p>은 이항분포를 따른다.</p>
+<p><span class="math display">\[
+S\sim \operatorname{Binomial}(n,p)
+\]</span></p>
+<p>확률질량함수는</p>
+<p><span class="math display">\[
+P(S=s)={n\choose s}p^s(1-p)^{n-s},\qquad s=0,1,\ldots,n
+\]</span></p>
+<p>이고 평균과 분산은</p>
+<p><span class="math display">\[
+E(S)=np,\qquad \operatorname{Var}(S)=np(1-p)
+\]</span></p>
+<p>이다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/binomial-distributions.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:88.0%"></p>
+</figure>
+</div>
+<p>이항분포는 시행 횟수 <span class="math inline">\(n\)</span>이 고정되고 각 시행이 독립이며 동일한 사건확률 <span class="math inline">\(p\)</span>를 가질 때 적절하다. 동일한 의료진이나 의료기관에 속한 환자는 서로 유사할 수 있으므로 군집이 존재하면 독립성 가정이 위반될 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">20</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, <span class="fu">dbinom</span>(x, <span class="at">size =</span> <span class="dv">20</span>, <span class="at">prob =</span> <span class="fl">0.1</span>), <span class="at">type =</span> <span class="st">"h"</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"사건 수"</span>, <span class="at">ylab =</span> <span class="st">"확률"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(x, <span class="fu">dbinom</span>(x, <span class="at">size =</span> <span class="dv">20</span>, <span class="at">prob =</span> <span class="fl">0.1</span>), <span class="at">pch =</span> <span class="dv">16</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02-key-statistical-concepts_files/figure-html/ch02-binomial-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>관측된 사건 수가 <span class="math inline">\(s\)</span>일 때 이항우도는</p>
+<p><span class="math display">\[
+L(p;s)
+\propto
+p^s(1-p)^{n-s}
+\]</span></p>
+<p>이다. 로그우도를 미분하여 0으로 두면 최대우도추정량</p>
+<p><span class="math display">\[
+\widehat p=\frac{s}{n}=\bar Y
+\]</span></p>
+<p>을 얻는다. 독립 이항표본에서</p>
+<p><span class="math display">\[
+\operatorname{Var}(\widehat p)
+=
+\frac{p(1-p)}{n}
+\]</span></p>
+<p>이므로 추정 표준오차는</p>
+<p><span class="math display">\[
+\widehat{\operatorname{SE}}(\widehat p)
+=
+\sqrt{\frac{\widehat p(1-\widehat p)}{n}}
+\]</span></p>
+<p>이다. 사건이 매우 드물거나 표본이 작으면 정규근사 Wald 구간이 0보다 작거나 1보다 커질 수 있으므로 Wilson 구간이나 정확 이항구간이 더 적절할 수 있다.</p>
+<p>이항분포 그림에서 <span class="math inline">\(p\)</span>가 작으면 분포가 0에 가까운 사건 수에 집중되고 오른쪽으로 치우친다. <span class="math inline">\(p=0.5\)</span>에 가까워질수록 대칭에 가까워지며, 분산 <span class="math inline">\(np(1-p)\)</span>는 <span class="math inline">\(p=0.5\)</span>에서 가장 크다. 시행 횟수 <span class="math inline">\(n\)</span>이 증가하면 사건 수의 가능한 범위는 넓어지지만 사건 비율 <span class="math inline">\(S/n\)</span>의 표준오차는 감소한다.</p>
+</section>
+<section id="다항분포" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="다항분포"><span class="header-section-number">2.3.2</span> 다항분포</h3>
+<p>결과가 <span class="math inline">\(K\)</span>개의 범주 중 하나를 갖고 각 범주의 확률이 <span class="math inline">\(p_1,\ldots,p_K\)</span>라고 하자.</p>
+<p><span class="math display">\[
+\sum_{k=1}^{K}p_k=1
+\]</span></p>
+<p>한 대상의 결과는 범주형 분포를 따르며, <span class="math inline">\(n\)</span>명의 독립 관측에서 각 범주의 빈도 <span class="math inline">\((N_1,\ldots,N_K)\)</span>는 다항분포를 따른다.</p>
+<p><span class="math display">\[
+(N_1,\ldots,N_K)\sim \operatorname{Multinomial}(n;p_1,\ldots,p_K)
+\]</span></p>
+<p>확률질량함수는</p>
+<p><span class="math display">\[
+P(N_1=n_1,\ldots,N_K=n_K)
+=
+\frac{n!}{n_1!\cdots n_K!}
+\prod_{k=1}^{K}p_k^{n_k}
+\]</span></p>
+<p>이다. 각 범주의 기대빈도는 <span class="math inline">\(np_k\)</span>이며, 서로 다른 범주의 빈도는 총합이 <span class="math inline">\(n\)</span>으로 고정되어 있으므로 음의 공분산을 갖는다.</p>
+<p><span class="math display">\[
+\operatorname{Var}(N_k)=np_k(1-p_k)
+\]</span></p>
+<p><span class="math display">\[
+\operatorname{Cov}(N_j,N_k)=-np_jp_k,\qquad j\ne k
+\]</span></p>
+<p>한 범주의 빈도가 증가하면 총합이 <span class="math inline">\(n\)</span>으로 고정되어 있으므로 다른 범주의 빈도는 감소해야 한다. 이 제약이 서로 다른 범주의 빈도 사이에 음의 공분산을 만든다.</p>
+<p>각 대상 <span class="math inline">\(i\)</span>의 범주를 <span class="math inline">\(K\)</span>개의 지시변수 <span class="math inline">\(Y_{ik}=I(Y_i=k)\)</span>로 표현하면</p>
+<p><span class="math display">\[
+\sum_{k=1}^{K}Y_{ik}=1,
+\qquad
+E(Y_{ik})=p_k
+\]</span></p>
+<p>이다. 표본 범주비율 <span class="math inline">\(\widehat p_k=N_k/n\)</span>에 대해서는</p>
+<p><span class="math display">\[
+\operatorname{Cov}(\widehat p_j,\widehat p_k)
+=
+-\frac{p_jp_k}{n},
+\qquad j\ne k
+\]</span></p>
+<p>가 성립한다. 따라서 범주별 비율을 서로 독립인 이항결과처럼 분석하면 공분산 구조를 무시하게 된다. 다항 로지스틱 회귀는 이 구조를 공변량에 따라 달라지는 범주확률로 확장한다.</p>
+</section>
+<section id="포아송분포와-음이항분포" class="level3" data-number="2.3.3">
+<h3 data-number="2.3.3" class="anchored" data-anchor-id="포아송분포와-음이항분포"><span class="header-section-number">2.3.3</span> 포아송분포와 음이항분포</h3>
+<p>포아송분포는 일정한 시간, 공간 또는 인구 규모에서 발생한 사건 수를 모형화한다. 사건 수 <span class="math inline">\(Y\)</span>가 평균 발생수 <span class="math inline">\(\lambda\)</span>를 갖는 포아송분포를 따르면</p>
+<p><span class="math display">\[
+Y\sim \operatorname{Poisson}(\lambda)
+\]</span></p>
+<p>이고</p>
+<p><span class="math display">\[
+P(Y=y)=\frac{e^{-\lambda}\lambda^y}{y!},\qquad y=0,1,2,\ldots
+\]</span></p>
+<p>이다. 포아송분포의 중요한 특성은 평균과 분산이 같다는 것이다.</p>
+<p><span class="math display">\[
+E(Y)=\lambda,\qquad \operatorname{Var}(Y)=\lambda
+\]</span></p>
+<p>포아송분포는 사건 수뿐 아니라 <strong>발생률(rate)</strong>을 모형화할 때 중요하다. 대상 <span class="math inline">\(i\)</span>의 관찰시간 또는 위험노출량을 <span class="math inline">\(t_i\)</span>, 단위 노출당 발생률을 <span class="math inline">\(r_i\)</span>라 하면</p>
+<p><span class="math display">\[
+Y_i\sim\operatorname{Poisson}(t_ir_i)
+\]</span></p>
+<p>로 둘 수 있다. 로그를 취하면</p>
+<p><span class="math display">\[
+\log E(Y_i)=\log t_i+\log r_i
+\]</span></p>
+<p>가 되므로 포아송 회귀에서는 <span class="math inline">\(\log t_i\)</span>를 계수가 1로 고정된 <strong>오프셋(offset)</strong>으로 포함한다. 관찰기간이 다른 환자의 사건 수를 직접 비교하면 노출시간 차이를 효과 차이로 오해할 수 있다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/poisson-distributions.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:88.0%"></p>
+</figure>
+</div>
+<p>실제 보건의료 계수자료는 포아송분포보다 변이가 큰 경우가 많다. 이를 <strong>과산포(overdispersion)</strong>라고 한다.</p>
+<p><span class="math display">\[
+\operatorname{Var}(Y)&gt;E(Y)
+\]</span></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/observed-vs-poisson-visits.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:88.0%"></p>
+</figure>
+</div>
+<p>과산포는 개인별 사건 발생성향이 다르거나, 반복 사건 간 의존성이 존재하거나, 설명되지 않은 군집 구조가 있을 때 발생한다. 개인별 포아송 평균이 감마분포를 따른다고 가정하여 혼합하면 음이항분포가 유도된다.</p>
+<p>음이항분포의 대표적인 평균-분산 관계는</p>
+<p><span class="math display">\[
+E(Y)=\mu,
+\qquad
+\operatorname{Var}(Y)=\mu+\alpha\mu^2
+\]</span></p>
+<p>이다. <span class="math inline">\(\alpha&gt;0\)</span>는 과산포 모수이며 <span class="math inline">\(\alpha\to0\)</span>이면 포아송분포에 가까워진다.</p>
+<p>포아송–감마 혼합을 통해 음이항분포가 유도되는 과정을 살펴보자. 개인 <span class="math inline">\(i\)</span>의 잠재 발생률을 <span class="math inline">\(\Lambda_i\)</span>라 하고</p>
+<p><span class="math display">\[
+Y_i\mid\Lambda_i\sim\operatorname{Poisson}(\Lambda_i),
+\qquad
+\Lambda_i\sim\operatorname{Gamma}(a,b)
+\]</span></p>
+<p>라고 하자. 총기댓값과 총분산의 법칙을 적용하면</p>
+<p><span class="math display">\[
+E(Y_i)=E(\Lambda_i)
+\]</span></p>
+<p><span class="math display">\[
+\operatorname{Var}(Y_i)
+=
+E(\Lambda_i)+\operatorname{Var}(\Lambda_i)
+\]</span></p>
+<p>가 된다. 개인별 잠재 발생률의 변이가 포아송 평균에 추가되어 과산포가 발생한다. 잠재 발생률을 적분하여 제거하면 사건 수의 주변분포가 음이항분포가 된다.</p>
+<p>관찰자료와 포아송 모의분포를 비교한 그림에서 관찰자료는 같은 평균의 포아송분포보다 0과 큰 방문 횟수가 동시에 많다. 이는 중심만 이동한 것이 아니라 개인 간 발생성향의 이질성 때문에 분포의 양쪽 끝이 함께 증가했음을 보여준다.</p>
+<p>과산포와 <strong>제로과잉(zero inflation)</strong>은 구분해야 한다. 음이항분포 자체도 0을 많이 생성할 수 있지만, 구조적으로 사건이 발생할 수 없는 집단과 사건 발생 가능 집단이 혼합되어 있다면 제로과잉 포아송 또는 허들모형이 더 자연스러울 수 있다. 모형 선택은 0의 임상적 의미와 자료 생성 과정을 고려해야 한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>poisson_count <span class="ot">&lt;-</span> <span class="fu">rpois</span>(<span class="dv">5000</span>, <span class="at">lambda =</span> mu)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>negative_binomial_count <span class="ot">&lt;-</span> <span class="fu">rnbinom</span>(<span class="dv">5000</span>, <span class="at">mu =</span> mu, <span class="at">size =</span> <span class="fl">0.8</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">poisson_mean =</span> <span class="fu">mean</span>(poisson_count),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">poisson_var =</span> <span class="fu">var</span>(poisson_count),</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">nb_mean =</span> <span class="fu">mean</span>(negative_binomial_count),</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">nb_var =</span> <span class="fu">var</span>(negative_binomial_count)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>poisson_mean  poisson_var      nb_mean       nb_var 
+    1.984200     1.928336     2.035000     7.224820 </code></pre>
+</div>
+</div>
+</section>
+<section id="정규분포" class="level3" data-number="2.3.4">
+<h3 data-number="2.3.4" class="anchored" data-anchor-id="정규분포"><span class="header-section-number">2.3.4</span> 정규분포</h3>
+<p>정규분포는 평균 <span class="math inline">\(\mu\)</span>를 중심으로 대칭이며 표준편차 <span class="math inline">\(\sigma\)</span>가 퍼짐을 결정한다.</p>
+<p><span class="math display">\[
+Y\sim N(\mu,\sigma^2)
+\]</span></p>
+<p>밀도함수는</p>
+<p><span class="math display">\[
+f(y)=\frac{1}{\sqrt{2\pi\sigma^2}}
+\exp\left[-\frac{(y-\mu)^2}{2\sigma^2}\right]
+\]</span></p>
+<p>이다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/normal-distributions.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:88.0%"></p>
+</figure>
+</div>
+<p>정규분포에서는 약 68%가 <span class="math inline">\(\mu\pm\sigma\)</span> 안에, 약 95%가 <span class="math inline">\(\mu\pm1.96\sigma\)</span> 안에 존재한다. 표준화 변수는</p>
+<p><span class="math display">\[
+Z=\frac{Y-\mu}{\sigma}
+\]</span></p>
+<p>이며 평균 0, 분산 1을 갖는다.</p>
+<p>정규분포가 중요한 이유는 모든 보건의료 결과가 정규분포를 따르기 때문이 아니라 <strong>중심극한정리(central limit theorem)</strong> 때문이다. 독립 확률변수의 합 또는 평균은 일정한 조건에서 표본크기가 커질수록 정규분포에 가까워진다.</p>
+<p><span class="math display">\[
+\frac{\bar{Y}-\mu}{\sigma/\sqrt{n}}
+\xrightarrow{d}N(0,1)
+\]</span></p>
+<p>이 성질은 표본평균과 많은 회귀계수 추정량의 신뢰구간 및 가설검정에 사용된다. 중심극한정리는 모집단 자료가 정규분포라는 뜻이 아니라 추정량의 표본분포가 정규분포에 가까워진다는 뜻이다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="dv">5000</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>sample_means <span class="ot">&lt;-</span> <span class="fu">replicate</span>(B, <span class="fu">mean</span>(<span class="fu">rexp</span>(n, <span class="at">rate =</span> <span class="dv">1</span>)))</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(sample_means, <span class="at">breaks =</span> <span class="dv">35</span>, <span class="at">probability =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"표본평균"</span>, <span class="at">main =</span> <span class="st">"오른쪽 치우친 모집단에서 표본평균의 분포"</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="at">mean =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">sqrt</span>(n)), <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02-key-statistical-concepts_files/figure-html/ch02-clt-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>정규분포 그림에서 평균이 같은 세 곡선은 중심 위치는 동일하지만 표준편차가 커질수록 봉우리가 낮아지고 꼬리가 넓어진다. 밀도 아래 전체 면적은 항상 1이므로 분포가 넓어질수록 중앙부의 높이는 낮아져야 한다. 표준편차는 단순한 관측범위가 아니라 평균 주변에 값이 얼마나 밀집하는지를 나타낸다.</p>
+<p>중심극한정리의 수렴 속도는 모집단 분포의 치우침과 꼬리 두께에 따라 달라진다. 의료비처럼 극단적으로 치우치고 큰 값이 자주 나타나는 자료에서는 <span class="math inline">\(n=30\)</span>이라는 경험적 기준만으로 정규근사를 보장할 수 없다. 관측치가 강하게 의존하거나 분산이 존재하지 않는 분포에서는 표준적인 중심극한정리가 적용되지 않을 수 있다.</p>
+<p>R 예제에서 개별 관측값은 오른쪽으로 치우친 지수분포를 따르지만, 50개 관측값의 평균을 반복 계산한 분포는 평균 1 주변에서 대칭적인 형태를 보인다. 중첩된 정규곡선은 이론적 표준오차 <span class="math inline">\(1/\sqrt{50}\)</span>을 사용한 근사이며, 히스토그램과 곡선의 유사성이 중심극한정리의 작동을 시각적으로 보여준다.</p>
+</section>
+<section id="감마분포와-로그정규분포" class="level3" data-number="2.3.5">
+<h3 data-number="2.3.5" class="anchored" data-anchor-id="감마분포와-로그정규분포"><span class="header-section-number">2.3.5</span> 감마분포와 로그정규분포</h3>
+<p>감마분포는 0보다 큰 연속형 결과를 모형화하며 의료비, 재원일수, 생존시간과 같이 오른쪽으로 치우친 자료에 유용하다. 형상모수 <span class="math inline">\(\alpha\)</span>와 비율모수 <span class="math inline">\(\beta\)</span>를 사용하는 감마분포의 밀도함수는</p>
+<p><span class="math display">\[
+f(y)=\frac{\beta^\alpha}{\Gamma(\alpha)}
+y^{\alpha-1}e^{-\beta y},\qquad y&gt;0
+\]</span></p>
+<p>이다.</p>
+<p>평균과 분산은</p>
+<p><span class="math display">\[
+E(Y)=\frac{\alpha}{\beta},
+\qquad
+\operatorname{Var}(Y)=\frac{\alpha}{\beta^2}
+\]</span></p>
+<p>이다.</p>
+<p>감마분포의 변동계수는</p>
+<p><span class="math display">\[
+\operatorname{CV}(Y)
+=
+\frac{\sqrt{\operatorname{Var}(Y)}}{E(Y)}
+=
+\frac{1}{\sqrt{\alpha}}
+\]</span></p>
+<p>이다. 형상모수 <span class="math inline">\(\alpha\)</span>가 클수록 상대적 변이가 작고 분포가 대칭에 가까워진다. 감마분포 그림에서 형상모수가 작은 곡선은 0 부근에서 높고 오른쪽 꼬리가 길며, 형상모수가 증가하면 완만한 단봉형으로 변한다. 비율모수 <span class="math inline">\(\beta\)</span>는 값의 전반적인 수평척도를 조절한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/gamma-distributions.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:88.0%"></p>
+</figure>
+</div>
+<p>로그정규분포는 로그변환한 값이 정규분포를 따르는 분포다. 즉</p>
+<p><span class="math display">\[
+\log(Y)\sim N(\mu,\sigma^2)
+\]</span></p>
+<p>이면 <span class="math inline">\(Y\)</span>는 로그정규분포를 따른다. 밀도함수는</p>
+<p><span class="math display">\[
+f(y)=\frac{1}{y\sigma\sqrt{2\pi}}
+\exp\left[-\frac{(\log y-\mu)^2}{2\sigma^2}\right],\qquad y&gt;0
+\]</span></p>
+<p>이다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/lognormal-distributions.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:88.0%"></p>
+</figure>
+</div>
+<p>로그정규분포 그림에서 로그척도의 표준편차가 증가하면 원척도의 오른쪽 꼬리가 급격히 길어진다. 로그척도에서는 평균을 중심으로 대칭이지만 지수변환은 큰 양의 편차를 작은 음의 편차보다 훨씬 크게 확대한다. 이 비대칭적 확대가 원척도에서 평균과 중앙값의 차이를 만든다.</p>
+<p>로그정규분포의 중앙값과 평균은 서로 다르다.</p>
+<p><span class="math display">\[
+\operatorname{Median}(Y)=e^\mu
+\]</span></p>
+<p><span class="math display">\[
+E(Y)=\exp\left(\mu+\frac{1}{2}\sigma^2\right)
+\]</span></p>
+<p>따라서 로그변환한 의료비의 평균을 단순히 지수화하면 원척도의 평균이 아니라 중앙값에 해당한다. 이 차이는 로그척도 분산이 클수록 커진다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 21%">
+<col style="width: 28%">
+<col style="width: 28%">
+<col style="width: 21%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>의료비 유형</th>
+<th style="text-align: right;">원척도 산술평균</th>
+<th style="text-align: right;">로그값 평균의 지수화</th>
+<th>두 값의 차이가 생기는 이유</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>총 의료비</td>
+<td style="text-align: right;">큰 값의 영향을 크게 받음</td>
+<td style="text-align: right;">기하평균에 가까움</td>
+<td>긴 오른쪽 꼬리</td>
+</tr>
+<tr class="even">
+<td>외래 의료비</td>
+<td style="text-align: right;">산술평균이 대체로 더 큼</td>
+<td style="text-align: right;">극단값 영향이 감소</td>
+<td>로그변환의 압축 효과</td>
+</tr>
+<tr class="odd">
+<td>입원 의료비</td>
+<td style="text-align: right;">차이가 매우 클 수 있음</td>
+<td style="text-align: right;">전형적 양의 비용 수준</td>
+<td>매우 두꺼운 꼬리</td>
+</tr>
+</tbody>
+</table>
+<p>로그정규 모형에서 평균을 원척도로 복원하려면 <span class="math inline">\(\sigma^2/2\)</span> 보정 또는 스미어링 추정과 같은 재변환 방법이 필요하다.</p>
+<p>로그선형모형</p>
+<p><span class="math display">\[
+\log Y_i=X_i^\top\beta+\varepsilon_i
+\]</span></p>
+<p>에서 <span class="math inline">\(\varepsilon_i\sim N(0,\sigma^2)\)</span>이면</p>
+<p><span class="math display">\[
+E(Y_i\mid X_i)
+=
+\exp(X_i^\top\beta)
+\exp\left(\frac{\sigma^2}{2}\right)
+\]</span></p>
+<p>이다. 따라서 단순한 <span class="math inline">\(\exp(X_i^\top\widehat\beta)\)</span>는 조건부 중앙값에 가깝고 조건부 평균을 얻으려면 분산 보정이 필요하다.</p>
+<p>오차의 정규성을 강하게 가정하고 싶지 않다면 Duan의 스미어링 계수</p>
+<p><span class="math display">\[
+\widehat S
+=
+\frac{1}{n}\sum_{i=1}^{n}\exp(\widehat\varepsilon_i)
+\]</span></p>
+<p>를 사용하여</p>
+<p><span class="math display">\[
+\widehat E(Y\mid X)
+=
+\exp(X^\top\widehat\beta)\widehat S
+\]</span></p>
+<p>로 재변환할 수 있다. 오차분산이 공변량에 따라 달라지는 이분산성이 있으면 하나의 공통 스미어링 계수로 충분하지 않을 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rlnorm</span>(<span class="dv">5000</span>, <span class="at">meanlog =</span> <span class="dv">8</span>, <span class="at">sdlog =</span> <span class="fl">1.2</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">arithmetic_mean =</span> <span class="fu">mean</span>(y),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">median =</span> <span class="fu">median</span>(y),</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">exp_mean_log =</span> <span class="fu">exp</span>(<span class="fu">mean</span>(<span class="fu">log</span>(y)))</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>arithmetic_mean          median    exp_mean_log 
+       5989.402        2969.242        2952.278 </code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="가설검정과-통계적-추론" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="가설검정과-통계적-추론"><span class="header-section-number">2.4</span> 가설검정과 통계적 추론</h2>
+<section id="귀무가설과-대립가설" class="level3" data-number="2.4.1">
+<h3 data-number="2.4.1" class="anchored" data-anchor-id="귀무가설과-대립가설"><span class="header-section-number">2.4.1</span> 귀무가설과 대립가설</h3>
+<p>가설검정은 표본자료를 바탕으로 모집단에 관한 명제를 평가하는 절차다. 일반적으로 검정은 <strong>귀무가설(null hypothesis)</strong> <span class="math inline">\(H_0\)</span>와 <strong>대립가설(alternative hypothesis)</strong> <span class="math inline">\(H_1\)</span>로 구성된다.</p>
+<p>예를 들어 두 집단의 평균 의료비가 같은지를 검정한다면</p>
+<p><span class="math display">\[
+H_0:\mu_1-\mu_0=0
+\]</span></p>
+<p><span class="math display">\[
+H_1:\mu_1-\mu_0\ne0
+\]</span></p>
+<p>으로 설정할 수 있다.</p>
+<p>검정통계량은 추정값이 귀무가설의 값에서 표준오차 단위로 얼마나 떨어져 있는지를 나타낸다.</p>
+<p><span class="math display">\[
+T=\frac{\widehat{\theta}-\theta_0}{\operatorname{SE}(\widehat{\theta})}
+\]</span></p>
+<p>검정통계량은 귀무가설 아래에서의 표본분포와 함께 정의되어야 한다. 양측 검정은 효과의 방향을 사전에 특정하지 않고, 단측 검정은 한 방향의 효과만을 대립가설로 둔다. 단측 검정은 반대 방향의 큰 효과를 증거로 인정하지 않으므로 자료를 확인한 뒤 임의로 선택해서는 안 된다.</p>
+<p>가설은 분석 전에 임상적으로 해석 가능한 모수에 대해 설정해야 한다. 평균 차이, 위험비, 오즈비와 생존확률 차이는 모두 서로 다른 귀무가설을 구성한다. 단순히 “두 집단에 차이가 없다”라고 표현하면 어떤 효과척도에서의 차이인지 불분명하다.</p>
+</section>
+<section id="p값" class="level3" data-number="2.4.2">
+<h3 data-number="2.4.2" class="anchored" data-anchor-id="p값"><span class="header-section-number">2.4.2</span> p값</h3>
+<p><span class="math inline">\(p\)</span>값은 귀무가설이 참이라고 가정할 때 관찰된 검정통계량과 같거나 더 극단적인 결과가 나타날 확률이다.</p>
+<p><span class="math display">\[
+p=P_{H_0}(|T|\ge |t_{\text{obs}}|)
+\]</span></p>
+<p><span class="math inline">\(p\)</span>값은 귀무가설이 참일 확률이 아니며, 연구 결과가 우연일 확률도 아니다. <span class="math inline">\(p\)</span>값은 귀무가설 아래에서 현재 자료가 얼마나 이례적인지를 나타낸다.</p>
+<p>작은 <span class="math inline">\(p\)</span>값은 자료가 귀무가설과 잘 맞지 않는다는 증거를 제공하지만 효과의 크기나 임상적 중요성을 나타내지 않는다. 표본이 매우 크면 매우 작은 효과도 작은 <span class="math inline">\(p\)</span>값을 가질 수 있다. 반대로 표본이 작으면 임상적으로 중요한 차이가 있어도 불확실성이 커서 <span class="math inline">\(p\)</span>값이 클 수 있다.</p>
+<p>양측 정규근사 검정에서는</p>
+<p><span class="math display">\[
+p
+=
+2\left[1-\Phi\left(|t_{\text{obs}}|\right)\right]
+\]</span></p>
+<p>로 계산한다. 여기서 <span class="math inline">\(\Phi\)</span>는 표준정규 누적분포함수다. 같은 효과크기라도 표준오차가 작아지면 검정통계량의 절댓값이 커지고 <span class="math inline">\(p\)</span>값은 작아진다. 따라서 <span class="math inline">\(p\)</span>값은 효과크기와 정보량이 결합된 지표이지 효과크기만의 척도가 아니다.</p>
+<p><span class="math inline">\(p\)</span>값은 표본추출, 독립성, 분포와 모형 가정이 적절하다는 조건에서 해석해야 한다. 잘못된 독립성 가정, 자료를 본 뒤의 가설 변경, 선택적 보고, 반복적인 중간분석과 자료의존적 변수선택은 명목상 <span class="math inline">\(p\)</span>값의 의미를 훼손할 수 있다.</p>
+</section>
+<section id="제1종-오류-제2종-오류와-검정력" class="level3" data-number="2.4.3">
+<h3 data-number="2.4.3" class="anchored" data-anchor-id="제1종-오류-제2종-오류와-검정력"><span class="header-section-number">2.4.3</span> 제1종 오류, 제2종 오류와 검정력</h3>
+<p>귀무가설이 참인데 이를 기각하는 오류를 제1종 오류라고 하며 그 확률을 <span class="math inline">\(\alpha\)</span>로 표시한다.</p>
+<p><span class="math display">\[
+\alpha=P(\text{reject }H_0\mid H_0\text{ true})
+\]</span></p>
+<p>대립가설이 참인데 귀무가설을 기각하지 못하는 오류를 제2종 오류라고 하며 그 확률을 <span class="math inline">\(\beta\)</span>로 표시한다.</p>
+<p><span class="math display">\[
+\beta=P(\text{do not reject }H_0\mid H_1\text{ true})
+\]</span></p>
+<p>검정력은 실제 효과가 있을 때 이를 발견할 확률이다.</p>
+<p><span class="math display">\[
+\operatorname{Power}=1-\beta
+\]</span></p>
+<p>검정력은 효과크기, 표본크기, 자료의 변이, 유의수준과 분석방법에 의해 결정된다. 연구 설계 단계에서 임상적으로 의미 있는 최소 효과를 정하고 필요한 표본크기를 계산하는 것이 중요하다.</p>
+<p>두 독립집단의 평균 차이 <span class="math inline">\(\Delta=\mu_1-\mu_0\)</span>를 같은 크기의 집단에서 비교하고 공통 표준편차를 <span class="math inline">\(\sigma\)</span>라 하면 표준화 효과크기는</p>
+<p><span class="math display">\[
+d=\frac{\Delta}{\sigma}
+\]</span></p>
+<p>이다. 대략적인 표본수는 각 집단당</p>
+<p><span class="math display">\[
+n
+\approx
+\frac{2(z_{1-\alpha/2}+z_{1-\beta})^2\sigma^2}{\Delta^2}
+\]</span></p>
+<p>로 표현된다. 목표 차이 <span class="math inline">\(\Delta\)</span>가 절반이 되면 필요한 표본수는 약 네 배가 된다. 탈락, 군집, 비순응, 사건률 감소와 다중비교가 예상되면 추가적인 보정이 필요하다.</p>
+<p>검정력이 낮은 연구에서 유의하지 않은 결과는 효과가 없다는 증거라기보다 자료가 여러 가능성을 구분하기에 부족하다는 뜻일 수 있다. 이 경우 신뢰구간이 임상적으로 중요한 효과를 포함하는지 확인해야 한다.</p>
+</section>
+<section id="통계적-유의성과-실제적-중요성" class="level3" data-number="2.4.4">
+<h3 data-number="2.4.4" class="anchored" data-anchor-id="통계적-유의성과-실제적-중요성"><span class="header-section-number">2.4.4</span> 통계적 유의성과 실제적 중요성</h3>
+<p>분석 결과는 효과크기, 신뢰구간, 임상적 또는 정책적 의미를 중심으로 해석해야 한다. 다음 두 결과를 비교해 보자.</p>
+<ul>
+<li>평균 비용 차이 100원, 95% 신뢰구간 80원에서 120원, <span class="math inline">\(p&lt;0.001\)</span></li>
+<li>평균 비용 차이 100만원, 95% 신뢰구간 -10만원에서 210만원, <span class="math inline">\(p=0.07\)</span></li>
+</ul>
+<p>첫 결과는 통계적으로 매우 명확하지만 실제 의미가 작을 수 있다. 둘째 결과는 통계적 불확실성이 크지만 잠재적 효과가 중요할 수 있다. 따라서 <span class="math inline">\(p\)</span>값만으로 연구 결과를 이분법적으로 판단해서는 안 된다.</p>
+<p>실제적 중요성을 평가하려면 사전에 <strong>최소 임상적으로 중요한 차이(minimal clinically important difference, MCID)</strong> 또는 정책적으로 의미 있는 임계값을 정할 수 있다. 효과추정치의 신뢰구간 전체가 이 임계값보다 큰 경우에는 통계적·임상적 중요성을 함께 지지한다. 반대로 신뢰구간이 0과 MCID를 모두 포함하면 효과 없음, 작은 효과와 중요한 효과를 자료가 구분하지 못하는 상태다.</p>
+<p>상대효과와 절대효과의 의미도 구분해야 한다. 상대위험 0.8은 기저위험이 50%일 때 절대위험 10%포인트 감소를 의미하지만 기저위험이 1%일 때는 0.2%포인트 감소에 불과하다. 보건의료 의사결정에서는 상대위험과 함께 절대위험차, 치료필요수와 비용차를 제시하는 것이 중요하다.</p>
+</section>
+<section id="다중비교" class="level3" data-number="2.4.5">
+<h3 data-number="2.4.5" class="anchored" data-anchor-id="다중비교"><span class="header-section-number">2.4.5</span> 다중비교</h3>
+<p>여러 가설을 동시에 검정하면 적어도 하나의 거짓 양성이 발생할 확률이 증가한다. 서로 독립인 <span class="math inline">\(k\)</span>개의 검정을 각각 유의수준 <span class="math inline">\(\alpha\)</span>로 수행할 때 적어도 한 번 제1종 오류가 발생할 확률은</p>
+<p><span class="math display">\[
+1-(1-\alpha)^k
+\]</span></p>
+<p>이다. <span class="math inline">\(\alpha=0.05\)</span>일 때 5개의 검정에서는 약 0.226, 10개의 검정에서는 약 0.401이다.</p>
+<p>다중비교를 조정하는 대표적인 방법은 다음과 같다.</p>
+<ul>
+<li>Bonferroni 보정: 각 검정의 기준을 <span class="math inline">\(\alpha/k\)</span>로 설정</li>
+<li>Holm 방법: 정렬된 <span class="math inline">\(p\)</span>값에 단계적으로 기준 적용</li>
+<li>거짓발견률(false discovery rate) 조절: 대규모 탐색적 분석에서 발견된 결과 중 거짓 양성의 기대 비율을 통제</li>
+</ul>
+<p>다중비교 보정은 연구 목적과 가설 구조를 고려하여 선택해야 한다. 사전에 명확한 주요 가설을 정의하고 탐색적 분석과 확증적 분석을 구분하는 것이 가장 중요하다.</p>
+<p>다중비교에서 통제하려는 오류의 종류를 먼저 정해야 한다. <strong>가족별 오류율(family-wise error rate, FWER)</strong>은 하나 이상의 제1종 오류가 발생할 확률이다.</p>
+<p><span class="math display">\[
+\operatorname{FWER}=P(V\ge1)
+\]</span></p>
+<p>여기서 <span class="math inline">\(V\)</span>는 거짓 양성의 수다. <strong>거짓발견률(false discovery rate, FDR)</strong>은 발견된 결과 중 거짓 양성이 차지하는 비율의 기댓값이다.</p>
+<p><span class="math display">\[
+\operatorname{FDR}
+=E\left\{\frac{V}{\max(R,1)}\right\}
+\]</span></p>
+<p>여기서 <span class="math inline">\(R\)</span>은 전체 기각 수다. FWER는 단 하나의 거짓 양성도 엄격히 제한해야 하는 확증적 연구에 적합하고, FDR은 많은 후보 중 후속 검증 대상을 찾는 오믹스 연구에 자주 사용된다.</p>
+<p>Bonferroni 방법은 검정들 사이의 의존성과 관계없이 FWER를 통제하지만 검정 수가 많고 검정들이 강하게 상관되어 있으면 보수적일 수 있다. Holm 방법은 Bonferroni보다 일반적으로 강력하면서도 FWER를 통제한다. Benjamini–Hochberg 방법은 독립 또는 특정한 양의 의존 구조에서 FDR을 통제한다. 방법의 선택은 가장 작은 조정 <span class="math inline">\(p\)</span>값을 주는지가 아니라 거짓 양성의 비용과 연구 목적에 따라 결정해야 한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>raw_p <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">10</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">raw_p =</span> raw_p,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">bonferroni =</span> <span class="fu">p.adjust</span>(raw_p, <span class="at">method =</span> <span class="st">"bonferroni"</span>),</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">holm =</span> <span class="fu">p.adjust</span>(raw_p, <span class="at">method =</span> <span class="st">"holm"</span>),</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">fdr =</span> <span class="fu">p.adjust</span>(raw_p, <span class="at">method =</span> <span class="st">"BH"</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        raw_p bonferroni      holm       fdr
+1  0.69867347  1.0000000 1.0000000 0.7763039
+2  0.55653051  1.0000000 1.0000000 0.7260079
+3  0.14013996  1.0000000 1.0000000 0.7006998
+4  0.28572331  1.0000000 1.0000000 0.7143083
+5  0.55536901  1.0000000 1.0000000 0.7260079
+6  0.02513115  0.2513115 0.2513115 0.2513115
+7  0.46623055  1.0000000 1.0000000 0.7260079
+8  0.86101069  1.0000000 1.0000000 0.8610107
+9  0.25250118  1.0000000 1.0000000 0.7143083
+10 0.58080634  1.0000000 1.0000000 0.7260079</code></pre>
+</div>
+</div>
+</section>
+<section id="재현성과-강건성" class="level3" data-number="2.4.6">
+<h3 data-number="2.4.6" class="anchored" data-anchor-id="재현성과-강건성"><span class="header-section-number">2.4.6</span> 재현성과 강건성</h3>
+<p><strong>재현성(reproducibility)</strong>은 동일한 자료와 분석코드로 같은 결과를 얻을 수 있는지를 의미하고, <strong>반복가능성 또는 재현 연구의 일관성(replicability)</strong>은 새로운 표본이나 독립 자료에서 유사한 결론이 얻어지는지를 의미한다. <strong>강건성(robustness)</strong>은 합리적인 분석 선택이나 모형 가정을 바꾸어도 핵심 결론이 유지되는지를 나타낸다. 세 개념은 관련되어 있지만 동일하지 않다.</p>
+<p>강건성을 확인하려면 대상 정의, 노출기간, 결과 정의, 결측처리, 함수형태, 공변량 집합과 분산추정법을 체계적으로 바꾸어 결과의 민감도를 살펴야 한다. 단, 서로 다른 분석이 실제로 동일한 추정대상에 답하고 있는지도 확인해야 한다.</p>
+<p><span class="math inline">\(p\)</span>값도 표본자료의 함수이므로 표본이 달라지면 달라진다. 한 연구의 <span class="math inline">\(p\)</span>값이 0.049이고 다른 연구에서 0.051이라고 해서 두 연구의 과학적 결론이 본질적으로 다르다고 볼 수 없다. 결과의 재현성을 높이기 위해서는 다음을 함께 보고해야 한다.</p>
+<ul>
+<li>효과크기와 방향</li>
+<li>신뢰구간</li>
+<li>표본과 변수 정의</li>
+<li>결측자료 처리방법</li>
+<li>모형 가정과 진단 결과</li>
+<li>대안적 모형을 이용한 민감도 분석</li>
+<li>분석 코드와 재현 가능한 데이터 처리 절차</li>
+</ul>
+</section>
+</section>
+<section id="r을-이용한-기본-분석" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="r을-이용한-기본-분석"><span class="header-section-number">2.5</span> R을 이용한 기본 분석</h2>
+<p>이 절의 코드는 본 장의 주요 개념을 재현할 수 있도록 독립적으로 실행 가능하게 구성한다.</p>
+<section id="기술통계량과-분포-확인" class="level3" data-number="2.5.1">
+<h3 data-number="2.5.1" class="anchored" data-anchor-id="기술통계량과-분포-확인"><span class="header-section-number">2.5.1</span> 기술통계량과 분포 확인</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>health_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">age =</span> <span class="fu">round</span>(<span class="fu">runif</span>(<span class="dv">1000</span>, <span class="dv">20</span>, <span class="dv">80</span>)),</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">diabetes =</span> <span class="fu">rbinom</span>(<span class="dv">1000</span>, <span class="dv">1</span>, <span class="fl">0.18</span>),</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">visits =</span> <span class="fu">rnbinom</span>(<span class="dv">1000</span>, <span class="at">mu =</span> <span class="dv">4</span>, <span class="at">size =</span> <span class="fl">1.2</span>),</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">cost =</span> <span class="fu">ifelse</span>(</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rbinom</span>(<span class="dv">1000</span>, <span class="dv">1</span>, <span class="fl">0.20</span>) <span class="sc">==</span> <span class="dv">1</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rlnorm</span>(<span class="dv">1000</span>, <span class="at">meanlog =</span> <span class="fl">8.2</span>, <span class="at">sdlog =</span> <span class="fl">1.1</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(health_data, <span class="fu">c</span>(</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean_cost =</span> <span class="fu">mean</span>(cost),</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">median_cost =</span> <span class="fu">median</span>(cost),</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">sd_cost =</span> <span class="fu">sd</span>(cost),</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">zero_fraction =</span> <span class="fu">mean</span>(cost <span class="sc">==</span> <span class="dv">0</span>),</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean_visits =</span> <span class="fu">mean</span>(visits),</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">variance_visits =</span> <span class="fu">var</span>(visits)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>))</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      mean_cost     median_cost         sd_cost   zero_fraction     mean_visits variance_visits 
+     5394.05845      2453.35427      8934.18196         0.23000         3.82800        17.22564 </code></pre>
+</div>
+</div>
+<p>위 모의자료에서 <code>cost</code>는 0의 질량과 오른쪽으로 치우친 양의 값이 결합된 결과이고, <code>visits</code>는 음이항분포에서 생성된 계수자료다. 따라서 비용은 평균·중앙값·0의 비율을 함께 보고, 방문 횟수는 평균과 분산을 비교해야 한다. <code>variance_visits</code>가 <code>mean_visits</code>보다 크다면 포아송분포의 등산포 가정이 자료와 맞지 않을 가능성을 시사한다.</p>
+</section>
+<section id="조건부-평균과-주변-평균-1" class="level3" data-number="2.5.2">
+<h3 data-number="2.5.2" class="anchored" data-anchor-id="조건부-평균과-주변-평균-1"><span class="header-section-number">2.5.2</span> 조건부 평균과 주변 평균</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>conditional_mean <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  cost <span class="sc">~</span> diabetes,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> health_data,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">FUN =</span> mean</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>conditional_mean</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  diabetes     cost
+1        0 5478.899
+2        1 4985.640</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 관찰된 당뇨병 분포를 이용한 주변 평균</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>p_diabetes <span class="ot">&lt;-</span> <span class="fu">prop.table</span>(<span class="fu">table</span>(health_data<span class="sc">$</span>diabetes))</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>weighted_mean <span class="ot">&lt;-</span> <span class="fu">sum</span>(conditional_mean<span class="sc">$</span>cost <span class="sc">*</span> <span class="fu">as.numeric</span>(p_diabetes))</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">weighted_marginal_mean =</span> weighted_mean,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">direct_sample_mean =</span> <span class="fu">mean</span>(health_data<span class="sc">$</span>cost)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>weighted_marginal_mean     direct_sample_mean 
+              5394.058               5394.058 </code></pre>
+</div>
+</div>
+<p>직접 표본평균과 집단별 조건부 평균을 구성비로 가중한 값이 같은 것은 반복기댓값의 법칙을 표본자료에서 확인한 것이다. 여기서는 관찰된 당뇨병 구성비를 사용했기 때문에 현재 표본의 주변 평균을 얻는다. 다른 목표 모집단의 당뇨병 유병률을 가중치로 사용하면 그 모집단에 표준화된 평균을 계산할 수 있다.</p>
+</section>
+<section id="표준오차와-신뢰구간" class="level3" data-number="2.5.3">
+<h3 data-number="2.5.3" class="anchored" data-anchor-id="표준오차와-신뢰구간"><span class="header-section-number">2.5.3</span> 표준오차와 신뢰구간</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(health_data)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>mean_cost <span class="ot">&lt;-</span> <span class="fu">mean</span>(health_data<span class="sc">$</span>cost)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>se_cost <span class="ot">&lt;-</span> <span class="fu">sd</span>(health_data<span class="sc">$</span>cost) <span class="sc">/</span> <span class="fu">sqrt</span>(n)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>ci_cost <span class="ot">&lt;-</span> mean_cost <span class="sc">+</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>) <span class="sc">*</span> <span class="fu">qnorm</span>(<span class="fl">0.975</span>) <span class="sc">*</span> se_cost</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">mean =</span> mean_cost, <span class="at">standard_error =</span> se_cost,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">lower_95 =</span> ci_cost[<span class="dv">1</span>], <span class="at">upper_95 =</span> ci_cost[<span class="dv">2</span>])</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          mean standard_error       lower_95       upper_95 
+     5394.0584       282.5236      4840.3223      5947.7946 </code></pre>
+</div>
+</div>
+<p>코드의 <code>se_cost</code>는 개별 의료비의 표준편차가 아니라 표본평균의 표준오차다. <code>qnorm(0.975)</code>는 표준정규분포의 97.5번째 백분위수로 약 1.96이며 양쪽 꼬리에 각각 2.5%를 남긴다.</p>
+<p>의료비와 같이 강하게 치우친 자료에서는 정규근사 신뢰구간이 불안정할 수 있다. 이후 장에서는 부트스트랩을 이용하여 평균, 중앙값, 복잡한 주변효과의 불확실성을 계산한다.</p>
+</section>
+<section id="분포-가정의-비교" class="level3" data-number="2.5.4">
+<h3 data-number="2.5.4" class="anchored" data-anchor-id="분포-가정의-비교"><span class="header-section-number">2.5.4</span> 분포 가정의 비교</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>positive_cost <span class="ot">&lt;-</span> health_data<span class="sc">$</span>cost[health_data<span class="sc">$</span>cost <span class="sc">&gt;</span> <span class="dv">0</span>]</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(positive_cost, <span class="at">breaks =</span> <span class="dv">35</span>,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"양의 의료비: 원척도"</span>, <span class="at">xlab =</span> <span class="st">"의료비"</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">log</span>(positive_cost), <span class="at">breaks =</span> <span class="dv">35</span>,</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"양의 의료비: 로그척도"</span>, <span class="at">xlab =</span> <span class="st">"log(의료비)"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02-key-statistical-concepts_files/figure-html/ch02-distribution-check-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>원척도와 변환척도 모두를 확인해야 한다. 왼쪽 그림은 실제 비용의 규모, 극단값과 꼬리의 길이를 보여주고, 오른쪽 그림은 상대적 차이와 곱셈적 변이를 더 잘 드러낸다. 로그척도에서 대칭성이 개선되더라도 이것만으로 로그정규 모형이 옳다고 결론내릴 수는 없다. 원척도의 평균을 해석하려면 재변환 편향과 이분산성을 함께 고려해야 한다.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./01-statistics-and-health-data.html" class="pagination-link" aria-label="Statistics and Health Data">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Statistics and Health Data</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./03-regression-analysis.html" class="pagination-link" aria-label="회귀분석">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">회귀분석</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
