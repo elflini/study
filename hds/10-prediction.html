@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>10&nbsp; Prediction – Statistics for Health Data Science</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./09-survey-data-analysis.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-832e3d7b6b94ddcc90a000f8fabe51a9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./10-prediction.html"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Prediction</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Statistics for Health Data Science</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">머리말</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-statistics-and-health-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Statistics and Health Data</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-key-statistical-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Key Statistical Concepts</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-regression-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">회귀분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-binary-and-categorical-outcomes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Binary and Categorical Outcomes</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-count-outcomes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Count Outcomes</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-health-care-costs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Health Care Costs</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-bootstrap-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Bootstrap Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-causal-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Causal Inference</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-survey-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Survey Data Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-prediction.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Prediction</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#설명과-예측" id="toc-설명과-예측" class="nav-link active" data-scroll-target="#설명과-예측"><span class="header-section-number">10.1</span> 설명과 예측</a>
+  <ul class="collapse">
+  <li><a href="#예측대상과-손실함수" id="toc-예측대상과-손실함수" class="nav-link" data-scroll-target="#예측대상과-손실함수"><span class="header-section-number">10.1.1</span> 예측대상과 손실함수</a></li>
+  <li><a href="#설명모형과-예측모형의-차이" id="toc-설명모형과-예측모형의-차이" class="nav-link" data-scroll-target="#설명모형과-예측모형의-차이"><span class="header-section-number">10.1.2</span> 설명모형과 예측모형의 차이</a></li>
+  <li><a href="#인과변수와-예측변수" id="toc-인과변수와-예측변수" class="nav-link" data-scroll-target="#인과변수와-예측변수"><span class="header-section-number">10.1.3</span> 인과변수와 예측변수</a></li>
+  </ul></li>
+  <li><a href="#과적합과-편향-분산-상충" id="toc-과적합과-편향-분산-상충" class="nav-link" data-scroll-target="#과적합과-편향-분산-상충"><span class="header-section-number">10.2</span> 과적합과 편향-분산 상충</a>
+  <ul class="collapse">
+  <li><a href="#과적합" id="toc-과적합" class="nav-link" data-scroll-target="#과적합"><span class="header-section-number">10.2.1</span> 과적합</a></li>
+  <li><a href="#낙관적-편향과-유효-자유도" id="toc-낙관적-편향과-유효-자유도" class="nav-link" data-scroll-target="#낙관적-편향과-유효-자유도"><span class="header-section-number">10.2.2</span> 낙관적 편향과 유효 자유도</a></li>
+  <li><a href="#일반화오차" id="toc-일반화오차" class="nav-link" data-scroll-target="#일반화오차"><span class="header-section-number">10.2.3</span> 일반화오차</a></li>
+  <li><a href="#편향-분산-분해" id="toc-편향-분산-분해" class="nav-link" data-scroll-target="#편향-분산-분해"><span class="header-section-number">10.2.4</span> 편향-분산 분해</a></li>
+  </ul></li>
+  <li><a href="#예측자료의-분할" id="toc-예측자료의-분할" class="nav-link" data-scroll-target="#예측자료의-분할"><span class="header-section-number">10.3</span> 예측자료의 분할</a>
+  <ul class="collapse">
+  <li><a href="#학습자료와-평가자료" id="toc-학습자료와-평가자료" class="nav-link" data-scroll-target="#학습자료와-평가자료"><span class="header-section-number">10.3.1</span> 학습자료와 평가자료</a></li>
+  <li><a href="#독립성-구조를-반영한-분할" id="toc-독립성-구조를-반영한-분할" class="nav-link" data-scroll-target="#독립성-구조를-반영한-분할"><span class="header-section-number">10.3.2</span> 독립성 구조를 반영한 분할</a></li>
+  <li><a href="#층화-분할" id="toc-층화-분할" class="nav-link" data-scroll-target="#층화-분할"><span class="header-section-number">10.3.3</span> 층화 분할</a></li>
+  </ul></li>
+  <li><a href="#예측성능-평가" id="toc-예측성능-평가" class="nav-link" data-scroll-target="#예측성능-평가"><span class="header-section-number">10.4</span> 예측성능 평가</a>
+  <ul class="collapse">
+  <li><a href="#연속형-결과" id="toc-연속형-결과" class="nav-link" data-scroll-target="#연속형-결과"><span class="header-section-number">10.4.1</span> 연속형 결과</a></li>
+  <li><a href="#이분형-결과" id="toc-이분형-결과" class="nav-link" data-scroll-target="#이분형-결과"><span class="header-section-number">10.4.2</span> 이분형 결과</a></li>
+  <li><a href="#판별력과-보정도" id="toc-판별력과-보정도" class="nav-link" data-scroll-target="#판별력과-보정도"><span class="header-section-number">10.4.3</span> 판별력과 보정도</a></li>
+  <li><a href="#임계값과-임상적-유용성" id="toc-임계값과-임상적-유용성" class="nav-link" data-scroll-target="#임계값과-임상적-유용성"><span class="header-section-number">10.4.4</span> 임계값과 임상적 유용성</a></li>
+  </ul></li>
+  <li><a href="#교차검증" id="toc-교차검증" class="nav-link" data-scroll-target="#교차검증"><span class="header-section-number">10.5</span> 교차검증</a>
+  <ul class="collapse">
+  <li><a href="#k-겹-교차검증" id="toc-k-겹-교차검증" class="nav-link" data-scroll-target="#k-겹-교차검증"><span class="header-section-number">10.5.1</span> <span class="math inline">\(K\)</span>-겹 교차검증</a></li>
+  <li><a href="#반복-교차검증" id="toc-반복-교차검증" class="nav-link" data-scroll-target="#반복-교차검증"><span class="header-section-number">10.5.2</span> 반복 교차검증</a></li>
+  <li><a href="#중첩-교차검증" id="toc-중첩-교차검증" class="nav-link" data-scroll-target="#중첩-교차검증"><span class="header-section-number">10.5.3</span> 중첩 교차검증</a></li>
+  </ul></li>
+  <li><a href="#규제회귀" id="toc-규제회귀" class="nav-link" data-scroll-target="#규제회귀"><span class="header-section-number">10.6</span> 규제회귀</a>
+  <ul class="collapse">
+  <li><a href="#릿지-회귀" id="toc-릿지-회귀" class="nav-link" data-scroll-target="#릿지-회귀"><span class="header-section-number">10.6.1</span> 릿지 회귀</a></li>
+  <li><a href="#lasso" id="toc-lasso" class="nav-link" data-scroll-target="#lasso"><span class="header-section-number">10.6.2</span> LASSO</a></li>
+  <li><a href="#elastic-net" id="toc-elastic-net" class="nav-link" data-scroll-target="#elastic-net"><span class="header-section-number">10.6.3</span> Elastic net</a></li>
+  </ul></li>
+  <li><a href="#회귀나무와-분류나무" id="toc-회귀나무와-분류나무" class="nav-link" data-scroll-target="#회귀나무와-분류나무"><span class="header-section-number">10.7</span> 회귀나무와 분류나무</a>
+  <ul class="collapse">
+  <li><a href="#재귀적-이분할" id="toc-재귀적-이분할" class="nav-link" data-scroll-target="#재귀적-이분할"><span class="header-section-number">10.7.1</span> 재귀적 이분할</a></li>
+  <li><a href="#나무의-가지치기" id="toc-나무의-가지치기" class="nav-link" data-scroll-target="#나무의-가지치기"><span class="header-section-number">10.7.2</span> 나무의 가지치기</a></li>
+  <li><a href="#회귀나무" id="toc-회귀나무" class="nav-link" data-scroll-target="#회귀나무"><span class="header-section-number">10.7.3</span> 회귀나무</a></li>
+  <li><a href="#분류나무" id="toc-분류나무" class="nav-link" data-scroll-target="#분류나무"><span class="header-section-number">10.7.4</span> 분류나무</a></li>
+  </ul></li>
+  <li><a href="#앙상블-방법과-랜덤-포레스트" id="toc-앙상블-방법과-랜덤-포레스트" class="nav-link" data-scroll-target="#앙상블-방법과-랜덤-포레스트"><span class="header-section-number">10.8</span> 앙상블 방법과 랜덤 포레스트</a>
+  <ul class="collapse">
+  <li><a href="#배깅" id="toc-배깅" class="nav-link" data-scroll-target="#배깅"><span class="header-section-number">10.8.1</span> 배깅</a></li>
+  <li><a href="#랜덤-포레스트" id="toc-랜덤-포레스트" class="nav-link" data-scroll-target="#랜덤-포레스트"><span class="header-section-number">10.8.2</span> 랜덤 포레스트</a></li>
+  <li><a href="#out-of-bag-평가" id="toc-out-of-bag-평가" class="nav-link" data-scroll-target="#out-of-bag-평가"><span class="header-section-number">10.8.3</span> Out-of-bag 평가</a></li>
+  <li><a href="#변수-중요도" id="toc-변수-중요도" class="nav-link" data-scroll-target="#변수-중요도"><span class="header-section-number">10.8.4</span> 변수 중요도</a></li>
+  </ul></li>
+  <li><a href="#희귀사건-예측" id="toc-희귀사건-예측" class="nav-link" data-scroll-target="#희귀사건-예측"><span class="header-section-number">10.9</span> 희귀사건 예측</a></li>
+  <li><a href="#예측모형의-개발과-보고" id="toc-예측모형의-개발과-보고" class="nav-link" data-scroll-target="#예측모형의-개발과-보고"><span class="header-section-number">10.10</span> 예측모형의 개발과 보고</a>
+  <ul class="collapse">
+  <li><a href="#외부검증과-자료분포-변화" id="toc-외부검증과-자료분포-변화" class="nav-link" data-scroll-target="#외부검증과-자료분포-변화"><span class="header-section-number">10.10.1</span> 외부검증과 자료분포 변화</a></li>
+  <li><a href="#하위집단-성능과-불확실성" id="toc-하위집단-성능과-불확실성" class="nav-link" data-scroll-target="#하위집단-성능과-불확실성"><span class="header-section-number">10.10.2</span> 하위집단 성능과 불확실성</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Prediction</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="설명과-예측" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="설명과-예측"><span class="header-section-number">10.1</span> 설명과 예측</h2>
+<p>보건의료 데이터 분석의 목적은 크게 <strong>설명(explanation)</strong>과 <strong>예측(prediction)</strong>으로 나눌 수 있다. 설명을 위한 분석은 결과가 발생하는 기전과 변수 사이의 관계를 밝히는 데 초점을 둔다. 연구자는 임상적 또는 역학적 개념모형을 설정하고, 교란변수와 매개변수를 구분하며, 회귀계수와 신뢰구간을 이용하여 가설을 검정한다.</p>
+<p>예측을 위한 분석의 질문은 다르다. 예측에서는 새로운 환자에게서 아직 관찰되지 않은 결과를 얼마나 정확하게 추정할 수 있는지가 핵심이다. 예를 들어 다음은 모두 예측 문제이다.</p>
+<ul>
+<li>향후 1년 이내 입원할 환자는 누구인가?</li>
+<li>암 치료 후 재발 위험이 높은 환자는 누구인가?</li>
+<li>다음 해 의료비는 어느 정도가 될 것인가?</li>
+<li>중환자실에서 상태가 악화할 가능성이 큰 환자는 누구인가?</li>
+</ul>
+<p>설명모형에서는 변수의 임상적 의미와 계수의 해석 가능성이 중요하지만, 예측모형에서는 독립된 자료에서의 예측오차가 가장 중요한 평가 기준이다. 예측변수 <span class="math inline">\(X\)</span>가 결과 <span class="math inline">\(Y\)</span>를 생성하는 기전을 완전히 이해하지 못하더라도, <span class="math inline">\(X\)</span>로부터 <span class="math inline">\(Y\)</span>를 안정적으로 예측할 수 있다면 유용한 예측 알고리즘이 될 수 있다. 다만 예측모형이 학습한 관계는 자료가 수집된 환경에 의존한다. 진료지침, 검사장비, 환자구성 또는 결과 측정방식이 달라지면 같은 알고리즘의 성능도 달라질 수 있다. 따라서 예측은 단순히 함수를 적합하는 문제가 아니라, <strong>어떤 대상자에게 어느 시점의 결과를 예측할 것인지</strong>를 먼저 정의하는 문제이다.</p>
+<section id="예측대상과-손실함수" class="level3" data-number="10.1.1">
+<h3 data-number="10.1.1" class="anchored" data-anchor-id="예측대상과-손실함수"><span class="header-section-number">10.1.1</span> 예측대상과 손실함수</h3>
+<p>예측모형의 수학적 대상은 조건부 분포</p>
+<p><span class="math display">\[
+F_{Y\mid X}(y\mid x)=P(Y\le y\mid X=x)
+\]</span></p>
+<p>이다. 이 조건부 분포 전체를 정확히 추정할 수 있다면 평균, 중앙값, 분위수, 사건확률과 예측구간을 모두 구할 수 있다. 실제 분석에서는 사용 목적에 따라 조건부 분포의 특정 요약량을 예측한다.</p>
+<p>예측값은 손실함수(loss function)에 따라 달라진다. 새로운 관측치의 손실을 <span class="math inline">\(L\{Y,a(X)\}\)</span>라고 할 때 최적 예측함수는</p>
+<p><span class="math display">\[
+a^*(x)=\arg\min_a E\{L(Y,a)\mid X=x\}
+\]</span></p>
+<p>로 정의된다. 제곱손실을 사용하면 최적 예측값은 조건부 평균이다.</p>
+<p><span class="math display">\[
+\arg\min_a E\{(Y-a)^2\mid X=x\}=E(Y\mid X=x).
+\]</span></p>
+<p>절대손실을 사용하면 조건부 중앙값이 최적이고, 이분형 결과의 로그손실을 사용하면 최적 예측값은 실제 조건부 사건확률 <span class="math inline">\(P(Y=1\mid X=x)\)</span>이다. 따라서 RMSE, MAE와 로그손실은 단순한 평가수치가 아니라 서로 다른 예측대상을 정의한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-10-1-black-box.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:68.0%"></p>
+</figure>
+</div>
+<p>그림의 검은 상자는 예측함수 <span class="math inline">\(\hat f\)</span>를 나타낸다. 입력변수에서 결과로 이어지는 생물학적 경로를 모두 해석하지 않더라도 예측은 가능하지만, 상자에 들어가는 변수는 반드시 예측시점에 이용 가능해야 한다. 결과가 발생한 뒤에만 알 수 있는 정보가 입력에 포함되면 자료 누출(data leakage)이 발생하여 실제 적용 성능이 크게 과장된다.</p>
+<p>전통적 회귀모형은 자료생성기전을 명시적으로 표현하려는 <strong>모형 중심 문화(models culture)</strong>에 가깝다. 반면 기계학습 알고리즘은 예측변수와 결과 사이의 복잡한 함수를 자료에서 직접 학습하는 <strong>알고리즘 중심 문화(algorithms culture)</strong>에 가깝다. 두 접근은 서로 배타적이지 않다. 선형회귀나 로지스틱 회귀도 예측에 사용할 수 있고, 기계학습 알고리즘의 결과도 변수 중요도나 부분의존도와 같은 도구로 해석할 수 있다. 그러나 분석의 일차 목적이 설명인지 예측인지에 따라 모형 구축과 평가 방식은 달라져야 한다.</p>
+</section>
+<section id="설명모형과-예측모형의-차이" class="level3" data-number="10.1.2">
+<h3 data-number="10.1.2" class="anchored" data-anchor-id="설명모형과-예측모형의-차이"><span class="header-section-number">10.1.2</span> 설명모형과 예측모형의 차이</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>구분</th>
+<th>설명 중심 분석</th>
+<th>예측 중심 분석</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>주요 질문</td>
+<td>어떤 요인이 결과와 관련되는가?</td>
+<td>새로운 대상자의 결과를 얼마나 정확히 예측하는가?</td>
+</tr>
+<tr class="even">
+<td>중심 대상</td>
+<td>회귀계수, 효과크기, 신뢰구간</td>
+<td>예측값, 예측오차, 판별력과 보정도</td>
+</tr>
+<tr class="odd">
+<td>변수 선택</td>
+<td>이론, 선행연구, 인과구조</td>
+<td>검증자료에서의 예측성능</td>
+</tr>
+<tr class="even">
+<td>모형 복잡도</td>
+<td>해석 가능성과 가정의 타당성 중시</td>
+<td>일반화오차를 최소화하도록 조정</td>
+</tr>
+<tr class="odd">
+<td>최종 평가자료</td>
+<td>전체 표본 또는 추론 표본</td>
+<td>학습에 사용하지 않은 독립 평가자료</td>
+</tr>
+<tr class="even">
+<td>과적합의 영향</td>
+<td>계수와 표준오차 왜곡</td>
+<td>새로운 자료에서 예측성능 저하</td>
+</tr>
+</tbody>
+</table>
+<p>단계적 변수선택(stepwise selection)은 자동화된 회귀모형 구축의 오래된 예이다. 그러나 동일 자료에서 변수를 선택하고 계수의 유의성을 다시 평가하면 다중비교와 선택편향으로 인해 회귀계수는 과장되고 표준오차는 과소평가될 수 있다. 예측이 목적이라면 선택된 모형의 성능을 독립된 자료나 교차검증으로 평가해야 한다.</p>
+</section>
+<section id="인과변수와-예측변수" class="level3" data-number="10.1.3">
+<h3 data-number="10.1.3" class="anchored" data-anchor-id="인과변수와-예측변수"><span class="header-section-number">10.1.3</span> 인과변수와 예측변수</h3>
+<p>좋은 예측변수가 반드시 결과의 원인은 아니다. 예를 들어 특정 검사가 중증도를 반영한다면 결과를 잘 예측할 수 있지만, 그 검사를 변화시킨다고 결과가 개선된다는 뜻은 아니다. 반대로 강한 인과효과를 갖는 변수라도 측정오차가 크거나 대상자 간 변이가 작으면 개인 수준 예측에는 크게 기여하지 않을 수 있다.</p>
+<p>예측모형의 변수 선택에서는 다음 세 시점을 구분해야 한다.</p>
+<ul>
+<li><strong>예측시점(index time)</strong>: 예측값을 산출하는 시점</li>
+<li><strong>예측기간(prediction horizon)</strong>: 결과를 관찰할 미래 구간</li>
+<li><strong>변수 측정창(look-back window)</strong>: 예측변수를 구성하는 과거 구간</li>
+</ul>
+<p>예측기간 중에 측정된 처치, 검사결과 또는 진단코드를 예측변수로 사용하면 미래 정보가 학습자료에 유입된다. 한 환자의 반복기록이 학습자료와 평가자료에 동시에 포함되는 경우에도 환자 특성이 공유되어 성능이 과대평가될 수 있다. 따라서 자료 분할은 관측행이 아니라 예측이 실제 적용될 단위에서 수행해야 한다.</p>
+</section>
+</section>
+<section id="과적합과-편향-분산-상충" class="level2" data-number="10.2">
+<h2 data-number="10.2" class="anchored" data-anchor-id="과적합과-편향-분산-상충"><span class="header-section-number">10.2</span> 과적합과 편향-분산 상충</h2>
+<section id="과적합" class="level3" data-number="10.2.1">
+<h3 data-number="10.2.1" class="anchored" data-anchor-id="과적합"><span class="header-section-number">10.2.1</span> 과적합</h3>
+<p>과적합(overfitting)은 학습자료의 체계적 신호뿐 아니라 우연한 잡음까지 모형이 학습하는 현상이다. 지나치게 복잡한 모형은 학습자료에서는 매우 작은 오차를 보이지만 새로운 자료에서는 오차가 커질 수 있다.</p>
+<p>체질량지수(BMI)를 연령으로 예측한다고 하자. 연령을 두 구간으로 나눈 모형은 지나치게 단순하여 연령에 따른 BMI의 비선형 변화를 충분히 포착하지 못한다. 반대로 연령을 79개의 한 살 단위 구간으로 나누면 각 구간의 표본수가 작아져 예측곡선이 불규칙해진다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-10-2-bmi-age-two-models.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:82.0%"></p>
+</figure>
+</div>
+<p>왼쪽과 오른쪽 모형의 차이는 단순한 곡선 모양의 차이가 아니다. 구간 수가 적으면 서로 다른 연령의 대상자에게 거의 같은 값을 부여하여 체계적 패턴을 놓치고, 구간 수가 지나치게 많으면 각 구간 평균이 소수 관측치에 의존하여 크게 흔들린다. 모형 복잡도는 예측함수가 자료의 국소적 변동을 얼마나 따라가는지를 결정한다.</p>
+<p>같은 복잡한 모형을 독립된 자료에 적용하면 학습자료에서 보였던 불규칙성이 재현되지 않는다. 이는 학습자료의 우연한 변동을 신호로 오인했기 때문이다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-10-3-train-test-bmi.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:82.0%"></p>
+</figure>
+</div>
+<p>학습자료와 평가자료의 곡선 차이는 과적합의 직접적인 시각화이다. 특정 연령에서 학습자료의 평균이 우연히 높았기 때문에 만들어진 굴곡은 독립 자료에서 같은 방향으로 나타날 이유가 없다. 평가자료의 오차는 이러한 비재현성까지 포함하므로 학습오차보다 실제 적용성능에 가깝다.</p>
+</section>
+<section id="낙관적-편향과-유효-자유도" class="level3" data-number="10.2.2">
+<h3 data-number="10.2.2" class="anchored" data-anchor-id="낙관적-편향과-유효-자유도"><span class="header-section-number">10.2.2</span> 낙관적 편향과 유효 자유도</h3>
+<p>학습자료는 모형을 선택하는 데 사용되었기 때문에 같은 자료에서 계산한 오차는 구조적으로 작다. 이를 낙관적 편향(optimism)이라고 한다. 선형 평활모형에서 적합값을</p>
+<p><span class="math display">\[
+\widehat{\mathbf y}=\mathbf S\mathbf y
+\]</span></p>
+<p>로 표현할 수 있을 때 <span class="math inline">\(\operatorname{tr}(\mathbf S)\)</span>를 유효 자유도(effective degrees of freedom)라고 한다. 오차분산이 <span class="math inline">\(\sigma^2\)</span>인 단순한 조건에서는 평균 학습오차의 낙관성 크기가 대략</p>
+<p><span class="math display">\[
+\frac{2\sigma^2}{n}\operatorname{tr}(\mathbf S)
+\]</span></p>
+<p>에 비례한다. 즉, 같은 표본크기에서 더 유연한 모형일수록 학습오차와 새로운 자료의 오차 사이의 간격이 커진다. 규제, 가지치기와 앙상블 방법은 서로 다른 방식으로 이 유효 복잡도를 조절한다.</p>
+</section>
+<section id="일반화오차" class="level3" data-number="10.2.3">
+<h3 data-number="10.2.3" class="anchored" data-anchor-id="일반화오차"><span class="header-section-number">10.2.3</span> 일반화오차</h3>
+<p>예측모형의 목표는 관찰된 학습자료에 대한 오차가 아니라 새로운 자료에 대한 <strong>일반화오차(generalization error)</strong>를 최소화하는 것이다. 연속형 결과에서 제곱오차를 사용하면 새로운 관측치 <span class="math inline">\((X_{new},Y_{new})\)</span>에 대한 기대예측오차는</p>
+<p><span class="math display">\[
+R(f)
+=
+E\left[\{Y_{new}-\hat f(X_{new})\}^2\right]
+\]</span></p>
+<p>로 정의할 수 있다. 여기서 <span class="math inline">\(\hat f\)</span>는 학습자료로 추정한 예측함수이다.</p>
+<p>관측자료에서 계산한 학습오차는</p>
+<p><span class="math display">\[
+\widehat R_{train}
+=
+\frac{1}{n}\sum_{i=1}^{n}
+\{y_i-\hat f(x_i)\}^2
+\]</span></p>
+<p>이다. 모형이 복잡해질수록 학습오차는 일반적으로 감소하지만, 일반화오차가 반드시 감소하는 것은 아니다.</p>
+</section>
+<section id="편향-분산-분해" class="level3" data-number="10.2.4">
+<h3 data-number="10.2.4" class="anchored" data-anchor-id="편향-분산-분해"><span class="header-section-number">10.2.4</span> 편향-분산 분해</h3>
+<p>점 <span class="math inline">\(x_0\)</span>에서의 제곱예측오차는 다음과 같이 분해할 수 있다.</p>
+<p><span class="math display">\[
+E\left[\{Y-\hat f(x_0)\}^2\mid X=x_0\right]
+=
+\sigma^2
++
+\left[E\{\hat f(x_0)\}-f(x_0)\right]^2
++
+\operatorname{Var}\{\hat f(x_0)\}.
+\]</span></p>
+<p>첫째 항 <span class="math inline">\(\sigma^2\)</span>는 결과 자체의 불가약 오차(irreducible error)이다. 둘째 항은 예측함수의 편향 제곱이고, 셋째 항은 학습표본이 달라질 때 예측값이 변하는 정도인 분산이다. 여기서 기댓값과 분산은 동일한 모집단에서 학습표본을 반복하여 추출한다고 가정할 때의 변동을 의미한다.</p>
+<p>분해식은 <span class="math inline">\(Y=f(x_0)+\varepsilon\)</span>와 <span class="math inline">\(E(\varepsilon\mid X)=0\)</span>을 이용하면 얻을 수 있다.</p>
+<p><span class="math display">\[
+\begin{aligned}
+E\{(Y-\hat f)^2\mid X=x_0\}
+&amp;=E\{(f+\varepsilon-\hat f)^2\}\\
+&amp;=E\{(\hat f-f)^2\}+E(\varepsilon^2)\\
+&amp;=\{E(\hat f)-f\}^2+\operatorname{Var}(\hat f)+\sigma^2.
+\end{aligned}
+\]</span></p>
+<p>교차항이 사라지는 이유는 새로운 관측치의 오차가 학습자료와 독립이고 평균이 0이기 때문이다. 이 분해는 제곱손실에서 성립하며, 분류오차나 절대손실에서는 같은 형태로 정확히 분해되지 않는다.</p>
+<p>단순한 모형은 일반적으로 편향이 크고 분산이 작다. 복잡한 모형은 편향이 작지만 분산이 커질 수 있다. 예측모형의 복잡도는 두 요소 사이의 균형을 이루도록 선택해야 한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-10-4-standardized-mse.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:76.0%"></p>
+</figure>
+</div>
+<p>그림에서 학습오차는 복잡도가 증가할수록 계속 감소하지만 평가오차는 어느 지점 이후 다시 증가한다. 평가오차가 최소가 되는 지점은 편향을 더 줄여 얻는 이득과 추정분산 증가로 인한 손실이 균형을 이루는 복잡도이다. 이 위치는 자료마다 달라지므로 교차검증과 같은 재표본추출 절차로 추정해야 한다.</p>
+</section>
+</section>
+<section id="예측자료의-분할" class="level2" data-number="10.3">
+<h2 data-number="10.3" class="anchored" data-anchor-id="예측자료의-분할"><span class="header-section-number">10.3</span> 예측자료의 분할</h2>
+<section id="학습자료와-평가자료" class="level3" data-number="10.3.1">
+<h3 data-number="10.3.1" class="anchored" data-anchor-id="학습자료와-평가자료"><span class="header-section-number">10.3.1</span> 학습자료와 평가자료</h3>
+<p>예측모형은 일반적으로 자료를 학습자료(training data)와 평가자료(test data)로 나누어 개발한다.</p>
+<ol type="1">
+<li>학습자료에서 모형의 계수와 복잡도 조정모수를 추정한다.</li>
+<li>모형 구축이 완료된 뒤 평가자료에 적용한다.</li>
+<li>평가자료의 실제 결과와 예측값을 비교하여 최종 성능을 산출한다.</li>
+</ol>
+<p>평가자료는 모형 적합, 변수 선택, 조정모수 선택에 사용해서는 안 된다. 평가자료를 반복적으로 확인하면서 모형을 수정하면 평가자료가 사실상 학습자료의 일부가 되어 성능이 낙관적으로 추정된다.</p>
+<p>엄밀히는 자료를 세 역할로 구분할 수 있다. 학습자료는 계수 추정에, 검증자료(validation data)는 조정모수와 모형 선택에, 평가자료는 최종 성능평가에 사용한다. 표본이 충분하지 않다면 검증자료의 역할을 교차검증이 대신하고, 별도의 평가자료는 마지막에 한 번만 사용한다. 전처리도 이 구분에 포함된다. 결측치 대치, 표준화, 변수선택, 특징생성과 차원축소는 각 학습분할 안에서 추정한 뒤 해당 검증분할에 적용해야 한다. 전체 자료에서 먼저 전처리하면 결과변수를 직접 사용하지 않았더라도 정보가 섞일 수 있다.</p>
+<p>자료 분할 비율은 표본크기와 사건 수에 따라 달라진다. 충분히 큰 자료에서는 70:30 또는 80:20 분할이 흔히 사용된다. 표본이 작거나 사건이 드문 경우에는 단순 분할이 불안정할 수 있으므로 반복 교차검증이나 중첩 교차검증을 고려해야 한다. 분할비율보다 중요한 것은 각 분할에 충분한 사건과 예측변수 변이가 남는지 확인하는 것이다.</p>
+</section>
+<section id="독립성-구조를-반영한-분할" class="level3" data-number="10.3.2">
+<h3 data-number="10.3.2" class="anchored" data-anchor-id="독립성-구조를-반영한-분할"><span class="header-section-number">10.3.2</span> 독립성 구조를 반영한 분할</h3>
+<p>무작위 행 단위 분할은 관측치가 독립이고 동일한 분포에서 추출되었다는 가정에 가깝다. 실제 보건의료 자료에서는 다음과 같은 분할이 더 적절할 수 있다.</p>
+<ul>
+<li>반복측정 자료: 환자 단위 분할</li>
+<li>다기관 자료: 기관 단위 분할 또는 기관 외부검증</li>
+<li>시간 순서가 있는 자료: 과거 자료로 학습하고 미래 자료로 평가</li>
+<li>가족 또는 지역 군집자료: 군집 단위 분할</li>
+</ul>
+<p>이 원칙을 지키지 않으면 동일 환자의 고유한 패턴이나 동일 기관의 기록관행이 양쪽 자료에 공유되어 일반화성능이 과장된다.</p>
+</section>
+<section id="층화-분할" class="level3" data-number="10.3.3">
+<h3 data-number="10.3.3" class="anchored" data-anchor-id="층화-분할"><span class="header-section-number">10.3.3</span> 층화 분할</h3>
+<p>이분형 결과에서 사건이 드문 경우 무작위 분할만 사용하면 학습자료나 평가자료의 사건비율이 크게 달라질 수 있다. 층화 분할(stratified split)은 결과 범주별로 표본을 나누어 두 자료에서 사건비율을 유사하게 유지한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1500</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>pred_dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">age =</span> <span class="fu">runif</span>(n, <span class="dv">20</span>, <span class="dv">85</span>),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">sex =</span> <span class="fu">factor</span>(<span class="fu">sample</span>(<span class="fu">c</span>(<span class="st">"여성"</span>, <span class="st">"남성"</span>), n, <span class="at">replace =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">bmi =</span> <span class="fu">rnorm</span>(n, <span class="dv">25</span>, <span class="fl">4.5</span>),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">hypertension =</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.32</span>),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">prior_cost =</span> <span class="fu">rgamma</span>(n, <span class="at">shape =</span> <span class="dv">2</span>, <span class="at">scale =</span> <span class="dv">2500</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>lp <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">5</span> <span class="sc">+</span> <span class="fl">0.035</span> <span class="sc">*</span> pred_dat<span class="sc">$</span>age <span class="sc">+</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.45</span> <span class="sc">*</span> (pred_dat<span class="sc">$</span>sex <span class="sc">==</span> <span class="st">"남성"</span>) <span class="sc">+</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.04</span> <span class="sc">*</span> (pred_dat<span class="sc">$</span>bmi <span class="sc">-</span> <span class="dv">25</span>) <span class="sc">+</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.65</span> <span class="sc">*</span> pred_dat<span class="sc">$</span>hypertension <span class="sc">+</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.00008</span> <span class="sc">*</span> pred_dat<span class="sc">$</span>prior_cost</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>pred_dat<span class="sc">$</span>hospitalized <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fu">plogis</span>(lp))</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>train_id <span class="ot">&lt;-</span> <span class="fu">unlist</span>(</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lapply</span>(<span class="fu">split</span>(<span class="fu">seq_len</span>(<span class="fu">nrow</span>(pred_dat)), pred_dat<span class="sc">$</span>hospitalized), <span class="cf">function</span>(idx) {</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sample</span>(idx, <span class="at">size =</span> <span class="fu">floor</span>(<span class="fl">0.7</span> <span class="sc">*</span> <span class="fu">length</span>(idx)))</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>train_dat <span class="ot">&lt;-</span> pred_dat[train_id, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>test_dat  <span class="ot">&lt;-</span> pred_dat[<span class="sc">-</span>train_id, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.table</span>(<span class="fu">table</span>(train_dat<span class="sc">$</span>hospitalized))</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+       0        1 
+0.884652 0.115348 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.table</span>(<span class="fu">table</span>(test_dat<span class="sc">$</span>hospitalized))</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+        0         1 
+0.8847007 0.1152993 </code></pre>
+</div>
+</div>
+<p>층화 분할은 사건비율을 유사하게 유지하지만 연령, 기관, 추적시점 또는 다른 중요 예측변수의 분포까지 같게 만드는 것은 아니다. 평가자료는 학습자료와 완전히 같아야 하는 자료가 아니라, 실제 적용대상을 대표해야 하는 자료이다. 따라서 분할 후에는 사건 수뿐 아니라 주요 예측변수의 범위와 결측률도 함께 확인한다.</p>
+</section>
+</section>
+<section id="예측성능-평가" class="level2" data-number="10.4">
+<h2 data-number="10.4" class="anchored" data-anchor-id="예측성능-평가"><span class="header-section-number">10.4</span> 예측성능 평가</h2>
+<section id="연속형-결과" class="level3" data-number="10.4.1">
+<h3 data-number="10.4.1" class="anchored" data-anchor-id="연속형-결과"><span class="header-section-number">10.4.1</span> 연속형 결과</h3>
+<p>관측값 <span class="math inline">\(y_i\)</span>와 예측값 <span class="math inline">\(\hat y_i\)</span>의 차이를 잔차 또는 예측오차라 한다.</p>
+<p><span class="math display">\[
+e_i=y_i-\hat y_i.
+\]</span></p>
+<p>평균제곱오차(mean squared error, MSE)는</p>
+<p><span class="math display">\[
+\operatorname{MSE}
+=
+\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat y_i)^2
+\]</span></p>
+<p>이며, 큰 오차에 더 큰 벌점을 부과한다. 평균제곱근오차(root mean squared error, RMSE)는</p>
+<p><span class="math display">\[
+\operatorname{RMSE}=\sqrt{\operatorname{MSE}}
+\]</span></p>
+<p>로 결과와 같은 단위를 가진다.</p>
+<p>평균절대오차(mean absolute error, MAE)는</p>
+<p><span class="math display">\[
+\operatorname{MAE}
+=
+\frac{1}{n}\sum_{i=1}^{n}|y_i-\hat y_i|
+\]</span></p>
+<p>이며 이상치의 영향을 MSE보다 적게 받는다. 제곱손실은 큰 오차를 제곱하여 강조하므로 조건부 평균을 목표로 하고, 절대손실은 선형적으로 벌점을 부과하므로 조건부 중앙값을 목표로 한다. 비용자료처럼 오른쪽 꼬리가 긴 결과에서는 RMSE와 MAE가 서로 다른 임상적 질문에 답할 수 있다. 예측오차의 방향을 확인하려면 평균오차</p>
+<p><span class="math display">\[
+\operatorname{ME}=\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat y_i)
+\]</span></p>
+<p>도 함께 볼 수 있다. <span class="math inline">\(\operatorname{ME}&gt;0\)</span>이면 평균적으로 과소예측하고, <span class="math inline">\(\operatorname{ME}&lt;0\)</span>이면 과대예측한다.</p>
+<p>결정계수는 기준모형인 표본평균 예측과 비교하여 설명되지 않은 제곱오차의 감소를 나타낸다.</p>
+<p><span class="math display">\[
+R^2
+=
+1-
+\frac{\sum_{i=1}^{n}(y_i-\hat y_i)^2}
+{\sum_{i=1}^{n}(y_i-\bar y)^2}.
+\]</span></p>
+<p>평가자료에서는 <span class="math inline">\(R^2\)</span>가 음수가 될 수도 있다. 이는 모형이 단순히 평가자료의 평균을 예측하는 것보다 성능이 낮다는 뜻이다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-10-5-ten-group-predictions.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:78.0%"></p>
+</figure>
+</div>
+<p>그림처럼 예측값을 구간으로 나누어 관측평균과 비교하면 예측수준별 체계적 편향을 확인할 수 있다. 그러나 구간 수와 경계에 따라 모양이 달라지고, 각 구간 내부의 정보가 손실되므로 평활 보정곡선과 보정절편·기울기를 함께 제시하는 것이 좋다.</p>
+</section>
+<section id="이분형-결과" class="level3" data-number="10.4.2">
+<h3 data-number="10.4.2" class="anchored" data-anchor-id="이분형-결과"><span class="header-section-number">10.4.2</span> 이분형 결과</h3>
+<p>이분형 결과에서는 예측확률 <span class="math inline">\(\hat p_i=P(Y_i=1\mid X_i)\)</span>를 평가한다. 임계값 <span class="math inline">\(c\)</span>를 정하면</p>
+<p><span class="math display">\[
+\hat Y_i=
+\begin{cases}
+1, &amp; \hat p_i\ge c,\\
+0, &amp; \hat p_i&lt;c
+\end{cases}
+\]</span></p>
+<p>로 분류할 수 있다.</p>
+<p>정확도(accuracy)는 전체 대상자 중 올바르게 분류된 비율이다. 그러나 사건이 드물면 정확도만으로 모형을 평가하면 안 된다. 사건률이 5%인 자료에서 모든 환자를 비사건으로 예측해도 정확도는 95%이다.</p>
+<p>민감도와 특이도는</p>
+<p><span class="math display">\[
+\operatorname{Sensitivity}
+=
+\frac{TP}{TP+FN},
+\qquad
+\operatorname{Specificity}
+=
+\frac{TN}{TN+FP}
+\]</span></p>
+<p>이다. 양성예측도와 음성예측도는</p>
+<p><span class="math display">\[
+\operatorname{PPV}
+=
+\frac{TP}{TP+FP},
+\qquad
+\operatorname{NPV}
+=
+\frac{TN}{TN+FN}
+\]</span></p>
+<p>이다.</p>
+<p>ROC 곡선은 모든 임계값에서 민감도와 <span class="math inline">\(1-\)</span>특이도를 표시한다. ROC 곡선 아래 면적(AUC)은 임의로 선택한 사건 대상자의 예측확률이 비사건 대상자의 예측확률보다 클 확률로 해석할 수 있다. AUC는 예측확률의 순서만 사용하므로 모든 확률에 단조변환을 적용해도 변하지 않는다. 따라서 사건위험을 체계적으로 두 배 과대예측해도 순위가 유지되면 AUC는 높을 수 있다.</p>
+<p>양성예측도는 사건 유병률 <span class="math inline">\(\pi=P(Y=1)\)</span>에 의존한다. 민감도 <span class="math inline">\(Se\)</span>와 특이도 <span class="math inline">\(Sp\)</span>가 주어졌을 때</p>
+<p><span class="math display">\[
+\operatorname{PPV}
+=
+\frac{Se\,\pi}{Se\,\pi+(1-Sp)(1-\pi)}.
+\]</span></p>
+<p>같은 모형이라도 사건률이 낮은 기관에 적용하면 PPV가 감소할 수 있다. 희귀사건에서는 ROC 곡선이 양호해 보여도 양성예측도가 낮을 수 있으므로 정밀도-재현율 곡선을 함께 확인한다.</p>
+<p>예측확률 자체를 평가할 때 Brier 점수는</p>
+<p><span class="math display">\[
+\operatorname{Brier}
+=
+\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat p_i)^2
+\]</span></p>
+<p>로 정의한다. Brier 점수는 판별력과 보정도의 영향을 모두 받으며 작을수록 좋다. 로그손실은</p>
+<p><span class="math display">\[
+\operatorname{LogLoss}
+=-\frac{1}{n}\sum_{i=1}^{n}
+\left[y_i\log(\hat p_i)+(1-y_i)\log(1-\hat p_i)\right]
+\]</span></p>
+<p>로 정의한다. Brier 점수와 로그손실은 모두 적절 점수규칙(proper scoring rule)이다. 즉, 실제 사건확률을 정직하게 예측할 때 기대손실이 최소가 된다. 로그손실은 0 또는 1에 가까운 확신에 찬 오예측에 매우 큰 벌점을 부과한다.</p>
+<p>보정구간을 사용하면 Brier 점수는 개념적으로 불확실성, 해상도와 신뢰성으로 분해할 수 있다.</p>
+<p><span class="math display">\[
+\operatorname{Brier}
+=\operatorname{Uncertainty}
+-\operatorname{Resolution}
++\operatorname{Reliability}.
+\]</span></p>
+<p>불확실성은 결과 자체의 변동, 해상도는 서로 다른 위험집단을 구분하는 능력, 신뢰성은 예측확률과 관측률의 불일치를 뜻한다. 따라서 좋은 모형은 신뢰성 오차가 작고 위험집단 간 관측률 차이가 커야 한다.</p>
+</section>
+<section id="판별력과-보정도" class="level3" data-number="10.4.3">
+<h3 data-number="10.4.3" class="anchored" data-anchor-id="판별력과-보정도"><span class="header-section-number">10.4.3</span> 판별력과 보정도</h3>
+<p>판별력(discrimination)은 높은 위험과 낮은 위험의 대상자를 얼마나 잘 구분하는지를 나타낸다. AUC 또는 C-index가 대표적인 지표이다.</p>
+<p>보정도(calibration)는 예측확률과 실제 발생률의 일치 정도이다. 예측확률이 0.20인 대상자 집단에서 실제 사건률도 약 20%라면 잘 보정된 모형이다. 보정절편이 0이고 보정기울기가 1에 가까울수록 이상적이다.</p>
+<p><span class="math display">\[
+\operatorname{logit}\{P(Y=1)\}
+=
+\alpha+\beta\operatorname{logit}(\hat p).
+\]</span></p>
+<p><span class="math inline">\(\alpha&lt;0\)</span>이면 전반적으로 위험을 과대예측하고, <span class="math inline">\(\alpha&gt;0\)</span>이면 과소예측하는 경향이 있다. 보정절편만 평가할 때에는 기울기를 1로 고정한</p>
+<p><span class="math display">\[
+\operatorname{logit}\{P(Y=1)\}=\alpha+\operatorname{offset}\{\operatorname{logit}(\hat p)\}
+\]</span></p>
+<p>을 적합한다. <span class="math inline">\(\beta&lt;1\)</span>은 예측값이 지나치게 극단적이라는 신호이며 과적합과 관련될 수 있다. 반대로 <span class="math inline">\(\beta&gt;1\)</span>은 예측값의 범위가 충분히 넓지 않아 위험 차이를 과소표현하는 상태와 관련될 수 있다.</p>
+<p>판별력과 보정도는 서로 대체할 수 없다. AUC가 높은 모형도 절대위험을 잘못 예측할 수 있고, 모든 환자에게 비슷한 위험을 주는 모형은 평균 사건률에 잘 맞더라도 판별력이 낮다. 임상적 의사결정에서는 두 속성에 더해 예측값을 사용했을 때의 이득과 손실을 평가해야 한다.</p>
+</section>
+<section id="임계값과-임상적-유용성" class="level3" data-number="10.4.4">
+<h3 data-number="10.4.4" class="anchored" data-anchor-id="임계값과-임상적-유용성"><span class="header-section-number">10.4.4</span> 임계값과 임상적 유용성</h3>
+<p>위양성 비용을 <span class="math inline">\(C_{FP}\)</span>, 위음성 비용을 <span class="math inline">\(C_{FN}\)</span>이라고 하면, 완전히 알려진 비용구조에서 사건으로 분류할 최적 확률임계값은</p>
+<p><span class="math display">\[
+c^*=\frac{C_{FP}}{C_{FP}+C_{FN}}
+\]</span></p>
+<p>이다. 위음성의 손실이 매우 크면 임계값은 낮아져 민감도를 우선하게 된다. 실제 의료의사결정에서는 비용뿐 아니라 치료효과, 부작용과 환자선호도도 포함해야 한다.</p>
+<p>결정곡선분석의 순편익(net benefit)은 임계값 <span class="math inline">\(p_t\)</span>에서</p>
+<p><span class="math display">\[
+\operatorname{NB}(p_t)
+=\frac{TP}{n}-\frac{FP}{n}\frac{p_t}{1-p_t}
+\]</span></p>
+<p>로 표현할 수 있다. 두 번째 항은 임계값이 암묵적으로 나타내는 위양성과 위음성의 상대손실을 반영한다. 높은 AUC가 반드시 높은 순편익을 보장하지 않으므로 적용 목적에 맞는 임계값 범위에서 평가해야 한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fit_logit <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  hospitalized <span class="sc">~</span> age <span class="sc">+</span> sex <span class="sc">+</span> bmi <span class="sc">+</span> hypertension <span class="sc">+</span> <span class="fu">log1p</span>(prior_cost),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>(),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> train_dat</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>p_test <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_logit, <span class="at">newdata =</span> test_dat, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>y_test <span class="ot">&lt;-</span> test_dat<span class="sc">$</span>hospitalized</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>pred_class <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(p_test <span class="sc">&gt;=</span> <span class="fl">0.5</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>accuracy <span class="ot">&lt;-</span> <span class="fu">mean</span>(pred_class <span class="sc">==</span> y_test)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>sensitivity <span class="ot">&lt;-</span> <span class="fu">sum</span>(pred_class <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> y_test <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">/</span> <span class="fu">sum</span>(y_test <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>specificity <span class="ot">&lt;-</span> <span class="fu">sum</span>(pred_class <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;</span> y_test <span class="sc">==</span> <span class="dv">0</span>) <span class="sc">/</span> <span class="fu">sum</span>(y_test <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>brier <span class="ot">&lt;-</span> <span class="fu">mean</span>((y_test <span class="sc">-</span> p_test)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">accuracy =</span> accuracy,</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">sensitivity =</span> sensitivity,</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">specificity =</span> specificity,</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">brier =</span> brier</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   accuracy sensitivity specificity       brier 
+ 0.88470067  0.00000000  1.00000000  0.09610924 </code></pre>
+</div>
+</div>
+<p>성능지표도 표본에 따라 변하는 추정량이다. 최종 평가에서는 AUC, Brier 점수, 보정절편과 보정기울기에 신뢰구간을 제시하는 것이 바람직하다. 같은 환자에서 여러 지표를 계산하므로 환자 단위 부트스트랩을 사용하면 지표의 표본변동을 함께 반영할 수 있다.</p>
+</section>
+</section>
+<section id="교차검증" class="level2" data-number="10.5">
+<h2 data-number="10.5" class="anchored" data-anchor-id="교차검증"><span class="header-section-number">10.5</span> 교차검증</h2>
+<section id="k-겹-교차검증" class="level3" data-number="10.5.1">
+<h3 data-number="10.5.1" class="anchored" data-anchor-id="k-겹-교차검증"><span class="header-section-number">10.5.1</span> <span class="math inline">\(K\)</span>-겹 교차검증</h3>
+<p>평가자료는 최종 평가에 한 번만 사용하는 것이 원칙이다. 학습자료 안에서 모형 복잡도나 조정모수를 선택하기 위해 교차검증(cross-validation)을 사용한다.</p>
+<p><span class="math inline">\(K\)</span>-겹 교차검증의 절차는 다음과 같다.</p>
+<ol type="1">
+<li>학습자료를 크기가 비슷한 <span class="math inline">\(K\)</span>개의 겹으로 나눈다.</li>
+<li>한 겹을 검증자료로 두고 나머지 <span class="math inline">\(K-1\)</span>개 겹으로 모형을 적합한다.</li>
+<li>제외한 겹에서 예측오차를 계산한다.</li>
+<li>각 겹이 한 번씩 검증자료가 되도록 과정을 반복한다.</li>
+<li><span class="math inline">\(K\)</span>개의 검증오차를 평균한다.</li>
+</ol>
+<p>관측치 <span class="math inline">\(i\)</span>가 속한 겹을 <span class="math inline">\(k(i)\)</span>라 하고, 해당 겹을 제외하여 적합한 예측함수를 <span class="math inline">\(\hat f^{-k(i)}\)</span>라고 하면 교차검증 MSE는</p>
+<p><span class="math display">\[
+\operatorname{CV}_{K}
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+\left\{y_i-\hat f^{-k(i)}(x_i)\right\}^2
+\]</span></p>
+<p>이다.</p>
+<p>일반적으로 <span class="math inline">\(K=5\)</span> 또는 <span class="math inline">\(K=10\)</span>을 많이 사용한다. <span class="math inline">\(K\)</span>가 작으면 계산량은 적지만 학습자료가 줄어 편향이 커질 수 있다. <span class="math inline">\(K=n\)</span>인 leave-one-out cross-validation은 각 반복에서 한 관측치만 제외하므로 편향은 작지만 계산량과 분산이 커질 수 있다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-10-6-cross-validation.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:78.0%"></p>
+</figure>
+</div>
+<p>그림에서 각 관측치는 정확히 한 번 검증자료가 되고 나머지 반복에서는 학습자료에 포함된다. 따라서 모든 관측치에 학습외 예측값(out-of-fold prediction)이 하나씩 생성된다. 이 예측값을 모으면 학습자료 전체에 대한 내부검증 성능과 보정곡선을 계산할 수 있다. 다만 서로 다른 겹의 예측값은 서로 다른 모형에서 생성되었으므로 하나의 최종모형 예측값과 동일하지는 않다.</p>
+<p>교차검증에서 가장 흔한 오류는 전체 자료에서 전처리와 변수선택을 완료한 뒤 겹만 나누는 것이다. 올바른 절차에서는 각 반복의 학습부분에서 대치, 표준화, 특징선택과 조정모수 탐색을 모두 수행하고 그 결과를 제외된 겹에 적용한다.</p>
+</section>
+<section id="반복-교차검증" class="level3" data-number="10.5.2">
+<h3 data-number="10.5.2" class="anchored" data-anchor-id="반복-교차검증"><span class="header-section-number">10.5.2</span> 반복 교차검증</h3>
+<p>한 번의 <span class="math inline">\(K\)</span>-겹 분할 결과는 우연한 자료분할에 영향을 받는다. 반복 교차검증은 서로 다른 무작위 분할로 <span class="math inline">\(K\)</span>-겹 교차검증을 여러 번 수행하고 성능의 평균과 분포를 요약한다. 반복에서 얻은 성능값들은 같은 관측치를 재사용하므로 서로 독립이 아니다. 따라서 단순히 반복값의 표준편차를 <span class="math inline">\(\sqrt{R}\)</span>로 나누어 일반적인 표준오차로 해석해서는 안 된다. 반복 교차검증의 주된 목적은 자료분할에 대한 민감도를 확인하고 평균 성능을 안정화하는 것이다.</p>
+<p>시간자료에서는 무작위 겹보다 과거에서 미래로 이동하는 순방향 검증이 적절하다. 군집자료에서는 같은 환자나 기관의 관측치가 서로 다른 겹에 나뉘지 않도록 grouped cross-validation을 사용한다.</p>
+</section>
+<section id="중첩-교차검증" class="level3" data-number="10.5.3">
+<h3 data-number="10.5.3" class="anchored" data-anchor-id="중첩-교차검증"><span class="header-section-number">10.5.3</span> 중첩 교차검증</h3>
+<p>예측모형의 성능을 편향 없이 평가하려면 조정모수 선택과 성능 평가를 분리해야 한다. 중첩 교차검증(nested cross-validation)은 외부 겹에서 평가자료를 정하고, 각 외부 학습자료 안에서 다시 내부 교차검증을 수행하여 조정모수를 선택한다.</p>
+<p>외부 반복마다 다음 절차가 수행된다.</p>
+<ol type="1">
+<li>외부 학습자료와 외부 평가자료를 분리한다.</li>
+<li>외부 학습자료 안에서 내부 교차검증으로 최적 조정모수를 선택한다.</li>
+<li>선택된 조정모수로 외부 학습자료 전체에서 모형을 다시 적합한다.</li>
+<li>외부 평가자료에서 예측성능을 계산한다.</li>
+</ol>
+<p>표본이 작거나 변수 선택과 조정모수 탐색이 복잡할수록 중첩 교차검증이 중요하다. 내부 교차검증에서 가장 높은 성능을 보인 조정모수 자체는 선택의 혜택을 받으므로, 그 내부 성능값을 최종 성능으로 보고하면 낙관적이다. 외부 겹은 조정모수 선택과 완전히 분리되어 이 선택 편향을 평가한다.</p>
+<p>중첩 교차검증의 외부 성능은 여러 외부모형의 평균 성능이다. 실제 배포모형은 모든 개발자료에서 내부 절차로 조정모수를 다시 선택한 뒤 적합한다. 따라서 외부 교차검증은 배포모형의 계수를 제공하는 절차가 아니라, 동일한 개발 알고리즘이 새로운 표본에서 보일 성능을 추정하는 절차이다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>K <span class="ot">&lt;-</span> <span class="dv">5</span>L</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>fold_id <span class="ot">&lt;-</span> <span class="fu">integer</span>(<span class="fu">nrow</span>(train_dat))</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 사건 범주 안에서 겹을 배정하여 각 겹의 사건비율을 안정화한다.</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (g <span class="cf">in</span> <span class="fu">sort</span>(<span class="fu">unique</span>(train_dat<span class="sc">$</span>hospitalized))) {</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  idx <span class="ot">&lt;-</span> <span class="fu">which</span>(train_dat<span class="sc">$</span>hospitalized <span class="sc">==</span> g)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  fold_id[idx] <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">rep</span>(<span class="fu">seq_len</span>(K), <span class="at">length.out =</span> <span class="fu">length</span>(idx)))</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>cv_brier <span class="ot">&lt;-</span> <span class="fu">numeric</span>(K)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="fu">seq_len</span>(K)) {</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  fit_k <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    hospitalized <span class="sc">~</span> age <span class="sc">+</span> sex <span class="sc">+</span> bmi <span class="sc">+</span> hypertension <span class="sc">+</span> <span class="fu">log1p</span>(prior_cost),</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">family =</span> <span class="fu">binomial</span>(),</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> train_dat[fold_id <span class="sc">!=</span> k, , <span class="at">drop =</span> <span class="cn">FALSE</span>]</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  p_k <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    fit_k,</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">newdata =</span> train_dat[fold_id <span class="sc">==</span> k, , <span class="at">drop =</span> <span class="cn">FALSE</span>],</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">type =</span> <span class="st">"response"</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>  y_k <span class="ot">&lt;-</span> train_dat<span class="sc">$</span>hospitalized[fold_id <span class="sc">==</span> k]</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>  cv_brier[k] <span class="ot">&lt;-</span> <span class="fu">mean</span>((y_k <span class="sc">-</span> p_k)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(cv_brier)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.09741955</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="규제회귀" class="level2" data-number="10.6">
+<h2 data-number="10.6" class="anchored" data-anchor-id="규제회귀"><span class="header-section-number">10.6</span> 규제회귀</h2>
+<p>변수의 수가 많거나 예측변수 사이의 상관이 높으면 표준 회귀계수의 분산이 커지고 모형이 불안정해질 수 있다. 규제회귀(regularized regression)는 적합오차에 회귀계수의 크기에 대한 벌점항을 추가하여 계수를 축소한다. 계수에 약간의 편향을 도입하는 대신 분산을 더 크게 줄일 수 있다면 전체 예측오차는 감소한다. 이는 편향-분산 상충을 직접 이용하는 방법이다.</p>
+<p>일반화선형모형에서는 잔차제곱합 대신 음의 로그우도를 사용한다.</p>
+<p><span class="math display">\[
+\widehat{\boldsymbol\beta}
+=\arg\min_{\boldsymbol\beta}
+\left[-\ell(\boldsymbol\beta)+\lambda P(\boldsymbol\beta)\right].
+\]</span></p>
+<p><span class="math inline">\(P(\boldsymbol\beta)\)</span>가 계수 크기를 제한하여 자료가 약하게 지지하는 방향의 계수를 축소한다.</p>
+<section id="릿지-회귀" class="level3" data-number="10.6.1">
+<h3 data-number="10.6.1" class="anchored" data-anchor-id="릿지-회귀"><span class="header-section-number">10.6.1</span> 릿지 회귀</h3>
+<p>선형회귀에서 릿지 회귀(ridge regression)는</p>
+<p><span class="math display">\[
+\widehat{\boldsymbol\beta}^{ridge}
+=
+\arg\min_{\boldsymbol\beta}
+\left[
+\sum_{i=1}^{n}
+\left(y_i-\beta_0-\sum_{j=1}^{p}x_{ij}\beta_j\right)^2
++
+\lambda\sum_{j=1}^{p}\beta_j^2
+\right]
+\]</span></p>
+<p>를 최소화한다. <span class="math inline">\(\lambda\ge 0\)</span>은 벌점의 크기를 조절한다. <span class="math inline">\(\lambda=0\)</span>이면 표준 최소제곱 회귀와 같고, <span class="math inline">\(\lambda\)</span>가 커질수록 계수는 0에 가까워진다. 중심화된 설계행렬에서 릿지 추정량은</p>
+<p><span class="math display">\[
+\widehat{\boldsymbol\beta}^{ridge}
+=(\mathbf X^T\mathbf X+\lambda\mathbf I)^{-1}\mathbf X^T\mathbf y
+\]</span></p>
+<p>로 표현된다. 다중공선성 때문에 <span class="math inline">\(\mathbf X^T\mathbf X\)</span>의 일부 고유값이 매우 작더라도 <span class="math inline">\(\lambda\)</span>를 더하면 역행렬 계산이 안정화된다. 릿지는 계수를 정확히 0으로 만들지는 않으므로 모든 변수를 유지하면서 불안정성을 줄이는 데 적합하다.</p>
+<p>베이지안 관점에서 릿지는 계수에 평균 0의 정규 사전분포를 부여한 사후최빈값과 연결된다. 이는 큰 계수보다 작은 계수를 사전에 더 그럴듯하게 보되, 자료가 충분히 강하면 큰 계수도 허용한다는 의미이다.</p>
+</section>
+<section id="lasso" class="level3" data-number="10.6.2">
+<h3 data-number="10.6.2" class="anchored" data-anchor-id="lasso"><span class="header-section-number">10.6.2</span> LASSO</h3>
+<p>LASSO(least absolute shrinkage and selection operator)는</p>
+<p><span class="math display">\[
+\widehat{\boldsymbol\beta}^{lasso}
+=
+\arg\min_{\boldsymbol\beta}
+\left[
+\sum_{i=1}^{n}
+\left(y_i-\beta_0-\sum_{j=1}^{p}x_{ij}\beta_j\right)^2
++
+\lambda\sum_{j=1}^{p}|\beta_j|
+\right]
+\]</span></p>
+<p>를 최소화한다. 절댓값 벌점은 일부 계수를 정확히 0으로 만들 수 있으므로 변수 선택 기능을 갖는다. 기하학적으로 <span class="math inline">\(L_1\)</span> 제약영역은 좌표축 방향의 꼭짓점을 가지므로 최적해가 축 위에 놓이기 쉽다. 베이지안 관점에서는 평균 0의 라플라스 사전분포와 연결된다.</p>
+<p>LASSO가 선택한 변수와 계수는 표본 변화에 민감할 수 있다. 특히 강하게 상관된 변수군에서는 그중 하나만 임의로 선택하는 경향이 있다. 선택 후 동일 자료의 일반적인 표준오차와 p값을 그대로 해석하면 선택과정을 반영하지 못한다.</p>
+</section>
+<section id="elastic-net" class="level3" data-number="10.6.3">
+<h3 data-number="10.6.3" class="anchored" data-anchor-id="elastic-net"><span class="header-section-number">10.6.3</span> Elastic net</h3>
+<p>Elastic net은 릿지와 LASSO 벌점을 결합한다.</p>
+<p><span class="math display">\[
+\widehat{\boldsymbol\beta}
+=
+\arg\min_{\boldsymbol\beta}
+\left[
+L(\boldsymbol\beta)
++
+\lambda
+\left(
+\alpha\sum_{j=1}^{p}|\beta_j|
++
+\frac{1-\alpha}{2}\sum_{j=1}^{p}\beta_j^2
+\right)
+\right]
+\]</span></p>
+<p>여기서 <span class="math inline">\(\alpha=1\)</span>이면 LASSO, <span class="math inline">\(\alpha=0\)</span>이면 릿지 회귀이다. 상관된 예측변수가 여러 개 있을 때 elastic net은 LASSO보다 안정적으로 변수군을 유지할 수 있다. <span class="math inline">\(\lambda\)</span>는 전체 축소의 강도를, <span class="math inline">\(\alpha\)</span>는 <span class="math inline">\(L_1\)</span>과 <span class="math inline">\(L_2\)</span> 벌점의 상대적 비중을 결정하므로 두 조정모수 모두 재표본추출 절차 안에서 선택해야 한다.</p>
+<p>규제회귀에서는 변수의 측정단위가 벌점에 영향을 주므로 일반적으로 예측변수를 표준화한다.</p>
+<p><span class="math display">\[
+z_{ij}
+=
+\frac{x_{ij}-\bar x_j}{s_j}.
+\]</span></p>
+<p>절편은 대개 벌점에서 제외한다. 최적 <span class="math inline">\(\lambda\)</span>는 교차검증으로 선택한다. 최소 교차검증오차를 주는 <code>lambda.min</code>은 예측성능을 우선하고, 최소오차의 1 표준오차 범위 안에서 가장 큰 벌점을 선택하는 <code>lambda.1se</code>는 더 단순하고 강하게 축소된 모형을 제공한다. 두 선택의 차이는 단순성, 안정성과 예측오차 사이의 판단이다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-10-7-regularized-bmi.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:82.0%"></p>
+</figure>
+</div>
+<p>그림에서 벌점이 증가하면 복잡한 곡선의 굴곡이 완화된다. 규제는 모든 형태를 동일하게 단순화하는 것이 아니라, 자료가 약하게 지지하는 고변동 성분을 더 크게 축소한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-10-8-logistic-coefficients.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:84.0%"></p>
+</figure>
+</div>
+<p>계수경로 그림은 <span class="math inline">\(\lambda\)</span>가 커질 때 각 표준화 계수가 0으로 수축되는 과정을 보여준다. LASSO에서는 일부 경로가 정확히 0에 도달하므로 선택된 변수 집합이 <span class="math inline">\(\lambda\)</span>에 따라 달라진다. 상관된 변수의 경로가 교차하거나 불안정하게 움직이면 선택 자체의 불확실성이 크다는 신호이다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">"glmnet"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  x_train <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    hospitalized <span class="sc">~</span> age <span class="sc">+</span> sex <span class="sc">+</span> bmi <span class="sc">+</span> hypertension <span class="sc">+</span> <span class="fu">log1p</span>(prior_cost),</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> train_dat</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  )[, <span class="sc">-</span><span class="dv">1</span>, drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  x_test <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    hospitalized <span class="sc">~</span> age <span class="sc">+</span> sex <span class="sc">+</span> bmi <span class="sc">+</span> hypertension <span class="sc">+</span> <span class="fu">log1p</span>(prior_cost),</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> test_dat</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  )[, <span class="sc">-</span><span class="dv">1</span>, drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  y_train <span class="ot">&lt;-</span> train_dat<span class="sc">$</span>hospitalized</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  cv_lasso <span class="ot">&lt;-</span> glmnet<span class="sc">::</span><span class="fu">cv.glmnet</span>(</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> x_train,</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> y_train,</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">family =</span> <span class="st">"binomial"</span>,</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="dv">1</span>,</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">nfolds =</span> <span class="dv">5</span>,</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">type.measure =</span> <span class="st">"deviance"</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>  p_lasso <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(cv_lasso, <span class="at">newx =</span> x_test, <span class="at">s =</span> <span class="st">"lambda.min"</span>, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">lambda_min =</span> cv_lasso<span class="sc">$</span>lambda.min,</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">test_brier =</span> <span class="fu">mean</span>((test_dat<span class="sc">$</span>hospitalized <span class="sc">-</span> p_lasso)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">"glmnet 패키지가 설치되지 않아 규제회귀 예제를 실행하지 않았습니다."</span>)</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  lambda_min   test_brier 
+0.0006846786 0.0961066076 </code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="회귀나무와-분류나무" class="level2" data-number="10.7">
+<h2 data-number="10.7" class="anchored" data-anchor-id="회귀나무와-분류나무"><span class="header-section-number">10.7</span> 회귀나무와 분류나무</h2>
+<section id="재귀적-이분할" class="level3" data-number="10.7.1">
+<h3 data-number="10.7.1" class="anchored" data-anchor-id="재귀적-이분할"><span class="header-section-number">10.7.1</span> 재귀적 이분할</h3>
+<p>의사결정나무(tree)는 예측변수 공간을 반복적으로 둘로 나누어 비슷한 결과를 가진 관측치를 같은 말단노드에 배치한다. 연속형 결과를 예측하면 회귀나무(regression tree), 범주형 결과를 예측하면 분류나무(classification tree)라고 한다.</p>
+<p>회귀나무에서 영역 <span class="math inline">\(R_m\)</span>의 예측값은 해당 영역에 속한 결과의 평균이다.</p>
+<p><span class="math display">\[
+\hat c_m
+=
+\frac{1}{N_m}\sum_{x_i\in R_m}y_i.
+\]</span></p>
+<p>예측변수 <span class="math inline">\(X_j\)</span>와 분할점 <span class="math inline">\(s\)</span>를 사용하면 두 영역은</p>
+<p><span class="math display">\[
+R_1(j,s)=\{X:X_j&lt;s\},
+\qquad
+R_2(j,s)=\{X:X_j\ge s\}
+\]</span></p>
+<p>로 정의된다. 최적 분할은 다음 잔차제곱합을 최소화하도록 선택한다.</p>
+<p><span class="math display">\[
+\min_{j,s}
+\left[
+\min_{c_1}\sum_{x_i\in R_1(j,s)}(y_i-c_1)^2
++
+\min_{c_2}\sum_{x_i\in R_2(j,s)}(y_i-c_2)^2
+\right].
+\]</span></p>
+<p>이 과정을 각 하위영역에서 반복하는 것이 재귀적 이분할(recursive binary splitting)이다. 각 단계는 현재 노드에서 가장 큰 즉시 오차감소를 주는 분할을 선택하는 탐욕적 알고리즘이다. 초기에 선택한 분할을 이후 단계에서 되돌리지 않으므로 전체 가능한 나무 중 전역 최적해를 보장하지는 않는다.</p>
+<p>분할 <span class="math inline">\((j,s)\)</span>의 개선량은 부모노드 오차에서 두 자식노드 오차를 뺀 값으로 표현할 수 있다.</p>
+<p><span class="math display">\[
+\Delta(j,s)
+=RSS_{parent}-\{RSS_{left}(j,s)+RSS_{right}(j,s)\}.
+\]</span></p>
+<p><span class="math inline">\(\Delta(j,s)\)</span>가 큰 분할일수록 결과가 서로 다른 두 집단을 만든다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-10-9-regression-tree-bmi.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:76.0%"></p>
+</figure>
+</div>
+<p>나무 그림의 각 내부노드는 분할규칙을, 말단노드는 최종 예측값을 나타낸다. 위쪽 분할일수록 더 많은 관측치의 예측경로를 결정하므로 영향이 크다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-10-10-tree-predictions-bmi.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:76.0%"></p>
+</figure>
+</div>
+<p>회귀나무의 예측함수는 말단영역 안에서 상수이므로 계단형으로 나타난다. 분할점 바로 양쪽의 대상자는 특성이 거의 같아도 서로 다른 예측값을 받을 수 있다. 이는 해석은 쉽지만 부드러운 생물학적 관계를 표현하는 데에는 한계가 있음을 보여준다.</p>
+</section>
+<section id="나무의-가지치기" class="level3" data-number="10.7.2">
+<h3 data-number="10.7.2" class="anchored" data-anchor-id="나무의-가지치기"><span class="header-section-number">10.7.2</span> 나무의 가지치기</h3>
+<p>충분히 큰 나무는 학습자료에 과적합될 수 있다. 비용-복잡도 가지치기(cost-complexity pruning)는 말단노드 수에 벌점을 부과한다.</p>
+<p><span class="math display">\[
+C_{\alpha}(T)
+=
+\sum_{m=1}^{|T|}
+\sum_{x_i\in R_m}(y_i-\hat c_m)^2
++
+\alpha |T|.
+\]</span></p>
+<p><span class="math inline">\(|T|\)</span>는 말단노드 수이고 <span class="math inline">\(\alpha\)</span>는 복잡도 벌점이다. 교차검증으로 <span class="math inline">\(\alpha\)</span>를 선택하면 예측오차와 나무 크기 사이의 균형을 정할 수 있다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-10-11-tree-size-performance.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
+</figure>
+</div>
+<p>나무 크기가 증가하면 학습오차는 감소하지만 교차검증오차는 일정 지점 이후 증가할 수 있다. 가지치기는 큰 나무를 먼저 만든 뒤, 교차검증으로 선택한 복잡도에 맞추어 약한 분할부터 제거한다. 이 방식은 초기에 성장을 너무 일찍 멈추어 중요한 후속 분할을 놓치는 위험을 줄인다.</p>
+</section>
+<section id="회귀나무" class="level3" data-number="10.7.3">
+<h3 data-number="10.7.3" class="anchored" data-anchor-id="회귀나무"><span class="header-section-number">10.7.3</span> 회귀나무</h3>
+<p>의료비를 예측하는 회귀나무는 이전 연도의 총의료비, 연령, 주관적 건강상태와 보험상태 같은 변수를 순차적으로 분할할 수 있다. 나무는 비선형성과 변수 사이의 상호작용을 자동으로 표현한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-10-12-regression-tree-costs.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:88.0%"></p>
+</figure>
+</div>
+<p>의료비 나무에서 말단노드 평균은 오른쪽 꼬리와 극단비용의 영향을 크게 받을 수 있다. 최소 말단노드 크기를 충분히 확보하고, 필요하면 감마 이탈도나 절대오차와 같이 결과분포에 더 적합한 손실함수를 고려한다.</p>
+</section>
+<section id="분류나무" class="level3" data-number="10.7.4">
+<h3 data-number="10.7.4" class="anchored" data-anchor-id="분류나무"><span class="header-section-number">10.7.4</span> 분류나무</h3>
+<p>분류나무에서는 각 노드의 사건비율을 예측확률로 사용할 수 있다. 노드 <span class="math inline">\(m\)</span>에서 범주 <span class="math inline">\(k\)</span>의 비율은</p>
+<p><span class="math display">\[
+\hat p_{mk}
+=
+\frac{1}{N_m}\sum_{x_i\in R_m}I(y_i=k)
+\]</span></p>
+<p>이다. 이분형 결과에서 지니 불순도(Gini impurity)는</p>
+<p><span class="math display">\[
+G_m
+=
+\sum_{k=1}^{2}\hat p_{mk}(1-\hat p_{mk})
+=
+1-\sum_{k=1}^{2}\hat p_{mk}^2
+\]</span></p>
+<p>로 정의된다. 엔트로피는</p>
+<p><span class="math display">\[
+D_m
+=
+-\sum_{k=1}^{2}\hat p_{mk}\log(\hat p_{mk})
+\]</span></p>
+<p>이다. 분류나무는 분할 전후의 불순도 감소가 가장 큰 변수와 분할점을 선택한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-10-13-classification-tree-hospitalization.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+<p>분류나무의 말단노드 사건비율은 예측확률이지만, 노드의 표본수가 작으면 0 또는 1에 가까운 불안정한 값이 생길 수 있다. 분류정확도를 높이는 분할이 반드시 확률보정을 개선하는 것은 아니므로, 최소 노드 크기와 가지치기를 조정한 뒤 독립자료에서 보정도를 별도로 확인한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">"rpart"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  tree_fit <span class="ot">&lt;-</span> rpart<span class="sc">::</span><span class="fu">rpart</span>(</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">factor</span>(hospitalized) <span class="sc">~</span> age <span class="sc">+</span> sex <span class="sc">+</span> bmi <span class="sc">+</span> hypertension <span class="sc">+</span> prior_cost,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> train_dat,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"class"</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">control =</span> rpart<span class="sc">::</span><span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="fl">0.005</span>, <span class="at">minbucket =</span> <span class="dv">20</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  tree_prob <span class="ot">&lt;-</span> <span class="fu">predict</span>(tree_fit, <span class="at">newdata =</span> test_dat, <span class="at">type =</span> <span class="st">"prob"</span>)[, <span class="st">"1"</span>]</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">test_brier =</span> <span class="fu">mean</span>((test_dat<span class="sc">$</span>hospitalized <span class="sc">-</span> tree_prob)<span class="sc">^</span><span class="dv">2</span>),</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">test_accuracy =</span> <span class="fu">mean</span>((tree_prob <span class="sc">&gt;=</span> <span class="fl">0.5</span>) <span class="sc">==</span> test_dat<span class="sc">$</span>hospitalized)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">"rpart 패키지가 설치되지 않아 나무모형 예제를 실행하지 않았습니다."</span>)</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   test_brier test_accuracy 
+    0.1020054     0.8847007 </code></pre>
+</div>
+</div>
+<p>나무모형은 해석이 직관적이고 비선형성과 상호작용을 자동으로 처리한다. 반면 작은 자료 변화에도 나무 구조가 크게 달라질 수 있고, 단일 나무의 예측성능은 다른 알고리즘보다 낮을 수 있다.</p>
+</section>
+</section>
+<section id="앙상블-방법과-랜덤-포레스트" class="level2" data-number="10.8">
+<h2 data-number="10.8" class="anchored" data-anchor-id="앙상블-방법과-랜덤-포레스트"><span class="header-section-number">10.8</span> 앙상블 방법과 랜덤 포레스트</h2>
+<section id="배깅" class="level3" data-number="10.8.1">
+<h3 data-number="10.8.1" class="anchored" data-anchor-id="배깅"><span class="header-section-number">10.8.1</span> 배깅</h3>
+<p>배깅(bagging)은 학습자료에서 여러 부트스트랩 표본을 만들고 각 표본에 예측모형을 적합한 뒤 예측값을 평균한다. 회귀문제에서 <span class="math inline">\(B\)</span>개 나무의 예측은</p>
+<p><span class="math display">\[
+\hat f_{bag}(x)
+=
+\frac{1}{B}\sum_{b=1}^{B}\hat f^{*(b)}(x)
+\]</span></p>
+<p>이다. 분류문제에서는 각 나무의 다수결 또는 예측확률 평균을 사용한다. 여러 고분산 모형을 평균하면 전체 분산을 줄일 수 있다. 각 나무의 분산이 <span class="math inline">\(\sigma_T^2\)</span>이고 서로 다른 두 나무의 평균 상관이 <span class="math inline">\(\rho\)</span>라면 <span class="math inline">\(B\)</span>개 나무 평균의 분산은 대략</p>
+<p><span class="math display">\[
+\operatorname{Var}\{\hat f_{bag}(x)\}
+=\sigma_T^2\left[\rho+\frac{1-\rho}{B}\right].
+\]</span></p>
+<p><span class="math inline">\(B\)</span>를 늘리면 두 번째 항은 감소하지만 상관에 의한 첫 번째 항은 남는다. 따라서 나무 수를 늘리는 것만으로는 충분하지 않고, 개별 나무 사이의 상관을 낮추는 것이 중요하다.</p>
+</section>
+<section id="랜덤-포레스트" class="level3" data-number="10.8.2">
+<h3 data-number="10.8.2" class="anchored" data-anchor-id="랜덤-포레스트"><span class="header-section-number">10.8.2</span> 랜덤 포레스트</h3>
+<p>배깅한 나무들은 강한 예측변수가 모든 나무의 상단 분할에 반복적으로 선택되면 서로 높은 상관을 가질 수 있다. 랜덤 포레스트(random forest)는 각 분할에서 전체 <span class="math inline">\(p\)</span>개 예측변수를 모두 검토하지 않고 무작위로 선택한 <span class="math inline">\(m\)</span>개 변수만 후보로 사용한다.</p>
+<p>알고리즘은 다음과 같다.</p>
+<ol type="1">
+<li>원자료에서 크기 <span class="math inline">\(n\)</span>의 부트스트랩 표본을 <span class="math inline">\(B\)</span>개 생성한다.</li>
+<li>각 부트스트랩 표본에서 큰 나무를 성장시킨다.</li>
+<li>각 노드의 분할마다 <span class="math inline">\(p\)</span>개 변수 중 <span class="math inline">\(m\)</span>개를 무작위로 선택한다.</li>
+<li>선택된 <span class="math inline">\(m\)</span>개 변수 중 최적 분할을 찾는다.</li>
+<li>회귀에서는 나무 예측값의 평균, 분류에서는 확률 평균이나 다수결을 사용한다.</li>
+</ol>
+<p>분류에서는 흔히 <span class="math inline">\(m\approx\sqrt p\)</span>, 회귀에서는 <span class="math inline">\(m\approx p/3\)</span>을 초기값으로 사용한다. 그러나 최종 값은 교차검증이나 out-of-bag 오차로 조정하는 것이 좋다.</p>
+</section>
+<section id="out-of-bag-평가" class="level3" data-number="10.8.3">
+<h3 data-number="10.8.3" class="anchored" data-anchor-id="out-of-bag-평가"><span class="header-section-number">10.8.3</span> Out-of-bag 평가</h3>
+<p>각 부트스트랩 표본에는 원자료 관측치의 약 63.2%가 적어도 한 번 포함된다. 나머지 약 36.8%는 해당 나무를 적합하는 데 사용되지 않으며 out-of-bag(OOB) 관측치가 된다. 각 관측치는 자신을 포함하지 않은 나무들로 예측할 수 있으므로 별도의 검증자료 없이 내부 예측오차를 계산할 수 있다. OOB 예측은 조정모수 선택과 내부 성능평가에 편리하지만, 같은 개발자료의 반복 재사용에 기반하므로 외부검증을 대체하지는 않는다. OOB 오차를 보면서 변수와 조정모수를 반복적으로 바꾸면 그 오차에도 선택 낙관성이 생길 수 있다.</p>
+</section>
+<section id="변수-중요도" class="level3" data-number="10.8.4">
+<h3 data-number="10.8.4" class="anchored" data-anchor-id="변수-중요도"><span class="header-section-number">10.8.4</span> 변수 중요도</h3>
+<p>순열 중요도(permutation importance)는 OOB 자료에서 특정 예측변수의 값을 무작위로 섞기 전후의 예측오차 차이를 측정한다.</p>
+<p><span class="math display">\[
+VI_j
+=
+\operatorname{Error}_{perm(j)}
+-
+\operatorname{Error}_{original}.
+\]</span></p>
+<p>변수 <span class="math inline">\(X_j\)</span>가 중요하면 값을 섞었을 때 예측성능이 크게 저하된다. 그러나 중요도는 인과효과가 아니며, 상관된 변수들 사이에 중요도가 분산되거나 편향될 수 있다. 한 변수를 섞으면 다른 변수와의 현실적인 상관구조가 깨질 수 있으므로, 강한 상관이 있는 경우 조건부 순열 중요도나 변수군 단위 중요도를 고려할 수 있다.</p>
+<p>불순도 감소 기반 중요도는 가능한 분할점이 많은 연속형 변수나 범주 수가 많은 변수에 유리할 수 있다. 순열 중요도는 이러한 편향을 일부 줄이지만 변수 간 대체가능성의 영향을 받는다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-10-14-random-forest-importance.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:82.0%"></p>
+</figure>
+</div>
+<p>그림의 중요도는 해당 변수가 예측에 사용된 정도를 나타내며 효과의 방향을 보여주지 않는다. 중요도가 높은 변수에 대해 부분의존도, 누적국소효과 또는 개별조건부기대 곡선을 추가하면 평균적인 예측관계의 방향과 비선형성을 살펴볼 수 있다. 다만 이 역시 관찰된 예측관계이지 인과효과는 아니다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">"randomForest"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  rf_fit <span class="ot">&lt;-</span> randomForest<span class="sc">::</span><span class="fu">randomForest</span>(</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">factor</span>(hospitalized) <span class="sc">~</span> age <span class="sc">+</span> sex <span class="sc">+</span> bmi <span class="sc">+</span> hypertension <span class="sc">+</span> prior_cost,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> train_dat,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">ntree =</span> <span class="dv">300</span>,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">importance =</span> <span class="cn">TRUE</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  rf_prob <span class="ot">&lt;-</span> <span class="fu">predict</span>(rf_fit, <span class="at">newdata =</span> test_dat, <span class="at">type =</span> <span class="st">"prob"</span>)[, <span class="st">"1"</span>]</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">oob_error =</span> <span class="fu">tail</span>(rf_fit<span class="sc">$</span>err.rate[, <span class="st">"OOB"</span>], <span class="dv">1</span>),</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">test_brier =</span> <span class="fu">mean</span>((test_dat<span class="sc">$</span>hospitalized <span class="sc">-</span> rf_prob)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">"randomForest 패키지가 설치되지 않아 랜덤 포레스트 예제를 실행하지 않았습니다."</span>)</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> oob_error test_brier 
+ 0.1210677  0.1022188 </code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="희귀사건-예측" class="level2" data-number="10.9">
+<h2 data-number="10.9" class="anchored" data-anchor-id="희귀사건-예측"><span class="header-section-number">10.9</span> 희귀사건 예측</h2>
+<p>의료결과에서는 사망, 재입원 또는 중증 합병증처럼 사건률이 낮은 경우가 많다. 희귀사건 자료에서는 정확도가 높더라도 임상적으로 중요한 사건을 거의 탐지하지 못할 수 있다.</p>
+<p>희귀사건 예측에서는 다음을 함께 고려한다. 사건 수가 적으면 단순히 비사건 수가 많은 것만으로 복잡한 모형을 안정적으로 학습할 수 없다. 예측정보는 주로 사건과 비사건의 대비에서 나오므로, 전체 표본크기와 함께 사건 수, 후보모수 수와 예측확률의 범위를 확인해야 한다.</p>
+<p>희귀사건의 정밀도-재현율 곡선에서 무정보 분류기의 평균 정밀도는 사건률 <span class="math inline">\(\pi\)</span>이다. 따라서 PR-AUC는 사건률과 함께 해석해야 하며, 서로 다른 모집단의 PR-AUC를 직접 비교할 때에는 기저 사건률 차이를 고려해야 한다.</p>
+<p>희귀사건 예측에서는 다음을 함께 고려한다.</p>
+<ul>
+<li>사건 수가 충분한지 확인한다.</li>
+<li>정확도보다 민감도, 특이도, 정밀도-재현율 곡선과 Brier 점수를 함께 보고한다.</li>
+<li>임계값은 0.5로 고정하지 않고 임상적 비용과 목적에 따라 선택한다.</li>
+<li>학습자료에서만 과소표집, 과대표집 또는 합성표본 방법을 적용한다.</li>
+<li>평가자료의 실제 사건비율은 변경하지 않는다.</li>
+<li>표본추출을 바꾸었다면 예측확률의 재보정이 필요할 수 있다.</li>
+</ul>
+<p>민감도와 양성예측도 사이의 조화를 나타내는 <span class="math inline">\(F_1\)</span> 점수는</p>
+<p><span class="math display">\[
+F_1
+=
+2\frac{\operatorname{PPV}\times\operatorname{Sensitivity}}
+{\operatorname{PPV}+\operatorname{Sensitivity}}
+\]</span></p>
+<p>이다. 그러나 <span class="math inline">\(F_1\)</span> 점수는 진음성을 반영하지 않으므로 단독으로 사용하지 않는다. 또한 <span class="math inline">\(F_1\)</span>은 확률예측의 보정도를 평가하지 않으며 선택한 임계값과 사건률에 의존한다.</p>
+<p>학습자료에서 사건을 과대표집하거나 비사건을 과소표집하면 표본 내 사건률이 실제 적용 모집단과 달라진다. 조건부 분포 <span class="math inline">\(P(X\mid Y)\)</span>가 보존되는 단순 사건-대조군 표집에서, 학습표본의 사건률을 <span class="math inline">\(\pi_s\)</span>, 목표 모집단 사건률을 <span class="math inline">\(\pi\)</span>라고 하면 확률의 절편 보정은</p>
+<p><span class="math display">\[
+\operatorname{logit}(p_{target})
+=\operatorname{logit}(p_{sample})
++\log\frac{\pi}{1-\pi}
+-\log\frac{\pi_s}{1-\pi_s}
+\]</span></p>
+<p>로 표현할 수 있다. 실제로는 표집설계와 모형 오지정 때문에 이 보정만으로 충분하지 않을 수 있으므로, 실제 사건률을 유지한 검증자료에서 재보정한다. 합성표본이나 과소표집은 반드시 학습분할 안에서만 수행해야 한다.</p>
+</section>
+<section id="예측모형의-개발과-보고" class="level2" data-number="10.10">
+<h2 data-number="10.10" class="anchored" data-anchor-id="예측모형의-개발과-보고"><span class="header-section-number">10.10</span> 예측모형의 개발과 보고</h2>
+<p>보건의료 예측연구에서는 알고리즘의 종류보다 분석설계와 평가의 엄격성이 더 중요하다. 예측모형 개발은 단일 적합식이 아니라 원자료 입력에서 최종 예측값 산출까지의 전체 파이프라인을 정의하는 과정이다. 파이프라인에는 대상자 선정, 시간원점 설정, 결측처리, 변수변환, 변수선택, 조정모수 선택, 모형적합과 확률보정이 모두 포함된다. 내부검증에서는 이 전체 과정을 반복해야 한다.</p>
+<p>예측모형을 개발할 때에는 다음 요소를 명시해야 한다.</p>
+<ul>
+<li>대상 모집단과 예측시점</li>
+<li>결과의 정의와 예측기간</li>
+<li>예측시점에 실제로 이용 가능한 변수만 사용했는지 여부</li>
+<li>결측자료 처리 방법</li>
+<li>자료 분할과 교차검증 방법</li>
+<li>변수 선택과 조정모수 결정 과정</li>
+<li>최종 평가자료에서의 성능</li>
+<li>판별력과 보정도</li>
+<li>임계값 선택의 임상적 근거</li>
+<li>외부검증 여부</li>
+</ul>
+<p>시간의 흐름이 있는 자료에서는 미래 자료가 학습자료에 섞이지 않도록 해야 한다. 여러 병원 자료를 사용하는 경우 한 환자의 기록이 학습자료와 평가자료에 동시에 포함되지 않도록 환자 단위로 분할한다. 기관 간 일반화가 목적이라면 일부 기관 전체를 외부 평가자료로 두는 것이 더 엄격한 검증이 된다.</p>
+<section id="외부검증과-자료분포-변화" class="level3" data-number="10.10.1">
+<h3 data-number="10.10.1" class="anchored" data-anchor-id="외부검증과-자료분포-변화"><span class="header-section-number">10.10.1</span> 외부검증과 자료분포 변화</h3>
+<p>외부자료에서 성능이 달라지는 원인은 하나가 아니다. 예측변수의 분포가 달라지는 공변량 이동(covariate shift), 같은 예측변수에서 사건률이 달라지는 결과발생 이동, 변수와 결과의 관계 자체가 달라지는 개념 이동을 구분할 수 있다.</p>
+<p><span class="math display">\[
+P_{dev}(X)\ne P_{new}(X),\qquad
+P_{dev}(Y)\ne P_{new}(Y),\qquad
+P_{dev}(Y\mid X)\ne P_{new}(Y\mid X)
+\]</span></p>
+<p>은 각각 다른 종류의 변화를 나타낸다. 첫 번째 변화만 있고 조건부 관계가 안정적이면 재가중으로 일부 보정할 수 있지만, 조건부 관계가 변하면 모형 갱신이 필요하다.</p>
+<p>외부자료에서 평균위험만 달라지고 상대적 예측구조가 유지된다면 보정절편을 갱신할 수 있다. 예측값의 극단성까지 달라졌다면</p>
+<p><span class="math display">\[
+\operatorname{logit}(p_{new})
+=\alpha+\beta\operatorname{logit}(p_{old})
+\]</span></p>
+<p>을 이용한 로지스틱 재보정을 고려한다. 더 큰 변화에서는 일부 계수를 다시 추정하거나 새로운 변수를 포함하는 모형 갱신이 필요하다. 갱신 강도가 커질수록 새로운 자료에서 다시 과적합할 위험도 커진다.</p>
+</section>
+<section id="하위집단-성능과-불확실성" class="level3" data-number="10.10.2">
+<h3 data-number="10.10.2" class="anchored" data-anchor-id="하위집단-성능과-불확실성"><span class="header-section-number">10.10.2</span> 하위집단 성능과 불확실성</h3>
+<p>전체 성능이 양호해도 연령, 성별, 질환중증도 또는 기관별 보정도가 다를 수 있다. 하위집단 평가에서는 단순히 AUC만 비교하지 않고 사건률, 보정절편, 보정기울기와 임상적으로 사용하는 임계값에서의 오류율을 함께 확인한다. 표본이 작은 하위집단의 성능차이는 변동성이 크므로 신뢰구간 없이 순위만 비교해서는 안 된다.</p>
+<p>최종 모형을 배포하기 전에는 학습과 내부검증에서 확정한 분석절차를 그대로 유지하여 외부자료에 적용해야 한다. 외부검증에서 성능이 낮아지면 모집단 차이, 측정방식의 차이, 사건률 변화와 진료환경 변화를 점검한다. 재보정이나 모형 갱신이 필요할 수 있지만, 갱신 후에는 다시 독립 검증이 필요하다. 배포 이후에도 입력변수 분포, 결측률, 사건률과 보정도의 시간적 변화를 관찰해야 한다. 이는 모형을 한 번 완성된 도구가 아니라 변화하는 진료환경 속의 측정시스템으로 다루는 관점이다.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./09-survey-data-analysis.html" class="pagination-link" aria-label="Survey Data Analysis">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Survey Data Analysis</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>7&nbsp; Bootstrap Methods – Statistics for Health Data Science</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./08-causal-inference.html" rel="next">
+<link href="./06-health-care-costs.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-832e3d7b6b94ddcc90a000f8fabe51a9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./07-bootstrap-methods.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Bootstrap Methods</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Statistics for Health Data Science</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">머리말</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-statistics-and-health-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Statistics and Health Data</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-key-statistical-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Key Statistical Concepts</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-regression-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">회귀분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-binary-and-categorical-outcomes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Binary and Categorical Outcomes</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-count-outcomes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Count Outcomes</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-health-care-costs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Health Care Costs</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-bootstrap-methods.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Bootstrap Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-causal-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Causal Inference</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-survey-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Survey Data Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Prediction</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#통계적-불확실성과-추론" id="toc-통계적-불확실성과-추론" class="nav-link active" data-scroll-target="#통계적-불확실성과-추론"><span class="header-section-number">7.1</span> 통계적 불확실성과 추론</a></li>
+  <li><a href="#부트스트랩의-기본-원리" id="toc-부트스트랩의-기본-원리" class="nav-link" data-scroll-target="#부트스트랩의-기본-원리"><span class="header-section-number">7.2</span> 부트스트랩의 기본 원리</a>
+  <ul class="collapse">
+  <li><a href="#경험적-분포" id="toc-경험적-분포" class="nav-link" data-scroll-target="#경험적-분포"><span class="header-section-number">7.2.1</span> 경험적 분포</a></li>
+  <li><a href="#부트스트랩-알고리즘" id="toc-부트스트랩-알고리즘" class="nav-link" data-scroll-target="#부트스트랩-알고리즘"><span class="header-section-number">7.2.2</span> 부트스트랩 알고리즘</a></li>
+  <li><a href="#왜-복원추출하는가" id="toc-왜-복원추출하는가" class="nav-link" data-scroll-target="#왜-복원추출하는가"><span class="header-section-number">7.2.3</span> 왜 복원추출하는가</a></li>
+  </ul></li>
+  <li><a href="#중앙값의-부트스트랩-표준오차" id="toc-중앙값의-부트스트랩-표준오차" class="nav-link" data-scroll-target="#중앙값의-부트스트랩-표준오차"><span class="header-section-number">7.3</span> 중앙값의 부트스트랩 표준오차</a></li>
+  <li><a href="#회귀모형에서의-부트스트랩" id="toc-회귀모형에서의-부트스트랩" class="nav-link" data-scroll-target="#회귀모형에서의-부트스트랩"><span class="header-section-number">7.4</span> 회귀모형에서의 부트스트랩</a>
+  <ul class="collapse">
+  <li><a href="#회귀계수의-표준오차" id="toc-회귀계수의-표준오차" class="nav-link" data-scroll-target="#회귀계수의-표준오차"><span class="header-section-number">7.4.1</span> 회귀계수의 표준오차</a></li>
+  <li><a href="#주변가산효과" id="toc-주변가산효과" class="nav-link" data-scroll-target="#주변가산효과"><span class="header-section-number">7.4.2</span> 주변가산효과</a></li>
+  </ul></li>
+  <li><a href="#부분-모형의-주변효과" id="toc-부분-모형의-주변효과" class="nav-link" data-scroll-target="#부분-모형의-주변효과"><span class="header-section-number">7.5</span> 2부분 모형의 주변효과</a></li>
+  <li><a href="#부트스트랩-신뢰구간" id="toc-부트스트랩-신뢰구간" class="nav-link" data-scroll-target="#부트스트랩-신뢰구간"><span class="header-section-number">7.6</span> 부트스트랩 신뢰구간</a>
+  <ul class="collapse">
+  <li><a href="#정규근사-신뢰구간" id="toc-정규근사-신뢰구간" class="nav-link" data-scroll-target="#정규근사-신뢰구간"><span class="header-section-number">7.6.1</span> 정규근사 신뢰구간</a></li>
+  <li><a href="#백분위수-신뢰구간" id="toc-백분위수-신뢰구간" class="nav-link" data-scroll-target="#백분위수-신뢰구간"><span class="header-section-number">7.6.2</span> 백분위수 신뢰구간</a></li>
+  <li><a href="#기본-부트스트랩-신뢰구간" id="toc-기본-부트스트랩-신뢰구간" class="nav-link" data-scroll-target="#기본-부트스트랩-신뢰구간"><span class="header-section-number">7.6.3</span> 기본 부트스트랩 신뢰구간</a></li>
+  <li><a href="#학생화-부트스트랩-신뢰구간" id="toc-학생화-부트스트랩-신뢰구간" class="nav-link" data-scroll-target="#학생화-부트스트랩-신뢰구간"><span class="header-section-number">7.6.4</span> 학생화 부트스트랩 신뢰구간</a></li>
+  <li><a href="#bca-신뢰구간" id="toc-bca-신뢰구간" class="nav-link" data-scroll-target="#bca-신뢰구간"><span class="header-section-number">7.6.5</span> BCa 신뢰구간</a></li>
+  </ul></li>
+  <li><a href="#부트스트랩-가설검정" id="toc-부트스트랩-가설검정" class="nav-link" data-scroll-target="#부트스트랩-가설검정"><span class="header-section-number">7.7</span> 부트스트랩 가설검정</a></li>
+  <li><a href="#순열검정과의-차이" id="toc-순열검정과의-차이" class="nav-link" data-scroll-target="#순열검정과의-차이"><span class="header-section-number">7.8</span> 순열검정과의 차이</a></li>
+  <li><a href="#부트스트랩의-변형" id="toc-부트스트랩의-변형" class="nav-link" data-scroll-target="#부트스트랩의-변형"><span class="header-section-number">7.9</span> 부트스트랩의 변형</a>
+  <ul class="collapse">
+  <li><a href="#모수적-부트스트랩" id="toc-모수적-부트스트랩" class="nav-link" data-scroll-target="#모수적-부트스트랩"><span class="header-section-number">7.9.1</span> 모수적 부트스트랩</a></li>
+  <li><a href="#잔차-부트스트랩" id="toc-잔차-부트스트랩" class="nav-link" data-scroll-target="#잔차-부트스트랩"><span class="header-section-number">7.9.2</span> 잔차 부트스트랩</a></li>
+  <li><a href="#와일드-부트스트랩" id="toc-와일드-부트스트랩" class="nav-link" data-scroll-target="#와일드-부트스트랩"><span class="header-section-number">7.9.3</span> 와일드 부트스트랩</a></li>
+  <li><a href="#군집-부트스트랩" id="toc-군집-부트스트랩" class="nav-link" data-scroll-target="#군집-부트스트랩"><span class="header-section-number">7.9.4</span> 군집 부트스트랩</a></li>
+  <li><a href="#층화-부트스트랩" id="toc-층화-부트스트랩" class="nav-link" data-scroll-target="#층화-부트스트랩"><span class="header-section-number">7.9.5</span> 층화 부트스트랩</a></li>
+  <li><a href="#시계열과-블록-부트스트랩" id="toc-시계열과-블록-부트스트랩" class="nav-link" data-scroll-target="#시계열과-블록-부트스트랩"><span class="header-section-number">7.9.6</span> 시계열과 블록 부트스트랩</a></li>
+  <li><a href="#복합표본조사의-부트스트랩" id="toc-복합표본조사의-부트스트랩" class="nav-link" data-scroll-target="#복합표본조사의-부트스트랩"><span class="header-section-number">7.9.7</span> 복합표본조사의 부트스트랩</a></li>
+  </ul></li>
+  <li><a href="#반복수와-몬테카를로-오차" id="toc-반복수와-몬테카를로-오차" class="nav-link" data-scroll-target="#반복수와-몬테카를로-오차"><span class="header-section-number">7.10</span> 반복수와 몬테카를로 오차</a></li>
+  <li><a href="#부트스트랩을-사용하기-어려운-상황" id="toc-부트스트랩을-사용하기-어려운-상황" class="nav-link" data-scroll-target="#부트스트랩을-사용하기-어려운-상황"><span class="header-section-number">7.11</span> 부트스트랩을 사용하기 어려운 상황</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Bootstrap Methods</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="통계적-불확실성과-추론" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="통계적-불확실성과-추론"><span class="header-section-number">7.1</span> 통계적 불확실성과 추론</h2>
+<p>표본자료를 이용하여 모집단의 특성을 추정하면 표본추출 과정에서 비롯되는 불확실성이 필연적으로 발생한다. 같은 모집단에서 같은 설계로 표본을 반복해서 추출하면 표본평균, 중앙값, 회귀계수와 같은 추정량은 매번 조금씩 달라진다. 빈도주의 통계학에서는 이러한 반복표본에서 나타나는 추정량의 변동을 이용하여 불확실성을 정의한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-7-1-estimation-flow.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:62.0%"></p>
+</figure>
+</div>
+<p>이 그림은 모집단에서 표본이 추출되고, 표본으로부터 통계량이 계산되며, 다시 그 통계량을 이용하여 모집단의 특성을 추론하는 과정을 나타낸다. 여기서 불확실성은 관측값 자체가 우연하다는 사실뿐 아니라, <strong>표본을 선택하는 과정</strong>과 <strong>추정량을 계산하는 과정</strong>에 의해 함께 결정된다. 동일한 모집단과 동일한 분석법을 사용하더라도 다른 표본이 선택되면 추정값은 달라질 수 있다. 따라서 표준오차는 관측된 한 표본 안의 산포가 아니라, 동일한 연구절차를 반복했을 때 추정량이 얼마나 변하는지를 나타낸다.</p>
+<p>관심 있는 모집단 모수를 <span class="math inline">\(\theta\)</span>라고 하고, 표본에서 계산한 추정량을 <span class="math inline">\(\widehat\theta\)</span>라고 하자. 동일한 표본추출과 추정 절차를 반복했을 때 얻어지는 추정량의 분포를 <strong>표본분포(sampling distribution)</strong>라고 한다. 추정량의 분산과 표준오차는 각각</p>
+<p><span class="math display">\[
+\operatorname{Var}(\widehat\theta)
+=
+E\left[\{\widehat\theta-E(\widehat\theta)\}^2\right]
+\]</span></p>
+<p>및</p>
+<p><span class="math display">\[
+\operatorname{SE}(\widehat\theta)
+=
+\sqrt{\operatorname{Var}(\widehat\theta)}
+\]</span></p>
+<p>로 정의된다. 표준오차가 작을수록 동일한 절차를 반복했을 때 추정값이 좁은 범위에 모이며, 추정의 정밀도가 높다. 그러나 정밀도가 높다고 해서 반드시 정확한 추정은 아니다. 추정량의 평균이 참값에서 벗어나 있으면 표준오차가 작더라도 체계적 편향이 존재할 수 있다. 추정량의 전체 오차는 평균제곱오차(mean squared error, MSE)로 정리할 수 있다.</p>
+<p><span class="math display">\[
+\operatorname{MSE}(\widehat\theta)
+=
+E\left[(\widehat\theta-\theta)^2\right]
+=
+\operatorname{Var}(\widehat\theta)
++
+\operatorname{Bias}(\widehat\theta)^2
+\]</span></p>
+<p>따라서 불확실성 평가에서는 변동뿐 아니라 편향도 함께 고려해야 한다. 부트스트랩은 주로 추정량의 변동과 유한표본 편향을 추정하지만, 표본선택 편향이나 측정오류처럼 관측자료 자체에 내재한 체계적 편향을 자동으로 제거하지는 않는다.</p>
+<p>전통적인 통계추론은 정규성, 독립성 또는 큰 표본에서의 점근적 성질을 이용하여 표준오차와 신뢰구간의 공식을 유도한다. 그러나 중앙값, 분위수, 복잡한 주변효과, 2부분 모형에서 결합된 효과처럼 추정량의 분포가 복잡한 경우에는 해석적 공식을 구하기 어렵다. 부트스트랩은 이때 관측표본을 경험적 모집단으로 간주하고 재표본추출을 반복하여 표본분포를 근사한다. 이를 보다 엄밀하게 쓰면, 추정량을 분포 <span class="math inline">\(F\)</span>의 함수 <span class="math inline">\(T(F)\)</span>로 보고 미지의 <span class="math inline">\(F\)</span>를 경험적 분포 <span class="math inline">\(\widehat F_n\)</span>으로 대체하는 <strong>플러그인 원리(plug-in principle)</strong>를 사용한다. 원래 표본분포가</p>
+<p><span class="math display">\[
+\mathcal L_F\left(\widehat\theta-\theta\right)
+\]</span></p>
+<p>라면, 부트스트랩은 관측자료에 조건부인 분포</p>
+<p><span class="math display">\[
+\mathcal L_{\widehat F_n}\left(\widehat\theta^*-\widehat\theta\mid X_1,\ldots,X_n\right)
+\]</span></p>
+<p>를 이용하여 이를 근사한다. 여기서 <span class="math inline">\(\mathcal L\)</span>은 확률분포를 의미한다. 부트스트랩의 타당성은 이 두 분포가 표본크기가 커질수록 가까워지는지에 달려 있다.</p>
+</section>
+<section id="부트스트랩의-기본-원리" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="부트스트랩의-기본-원리"><span class="header-section-number">7.2</span> 부트스트랩의 기본 원리</h2>
+<section id="경험적-분포" class="level3" data-number="7.2.1">
+<h3 data-number="7.2.1" class="anchored" data-anchor-id="경험적-분포"><span class="header-section-number">7.2.1</span> 경험적 분포</h3>
+<p>관측값이 <span class="math inline">\(x_1,\ldots,x_n\)</span>일 때 경험적 분포함수는</p>
+<p><span class="math display">\[
+\widehat F_n(x)
+=
+\frac{1}{n}\sum_{i=1}^{n}I(x_i\le x)
+\]</span></p>
+<p>이다. 경험적 분포는 각 관측값에 동일한 확률 <span class="math inline">\(1/n\)</span>을 부여한다. 비모수 부트스트랩은 미지의 모집단 분포 <span class="math inline">\(F\)</span>를 <span class="math inline">\(\widehat F_n\)</span>으로 대체한 후, 이 경험적 분포에서 크기 <span class="math inline">\(n\)</span>의 표본을 복원추출한다.</p>
+<p>경험적 분포함수는 각 관측값에서 크기 <span class="math inline">\(1/n\)</span>만큼 증가하는 계단함수이다. 독립이고 동일한 분포를 따르는 표본에서는 글리벤코–칸텔리 정리에 의해</p>
+<p><span class="math display">\[
+\sup_x\left|\widehat F_n(x)-F(x)\right|
+\xrightarrow{p}0
+\]</span></p>
+<p>가 성립한다. 즉 표본크기가 증가하면 경험적 분포가 전체 구간에서 모집단 분포에 가까워진다. 이 성질은 경험적 분포를 모집단 분포의 대용물로 사용하는 기본 근거이다. 다만 추정량이 분포의 작은 변화에 지나치게 민감하거나 경계에서 정의되는 비정규 문제에서는 경험적 분포의 수렴만으로 일반 부트스트랩의 타당성이 보장되지는 않는다.</p>
+<p>원자료가 오른쪽으로 치우치고 0이 많은 의료비 자료라면 정규근사에 의존한 표준오차가 부정확할 수 있다. 다음 그림은 전체 자료와 그중 일부를 무작위로 추출한 표본에서 총의료비의 로그분포가 유사함을 보여준다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-7-2-cost-histograms.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:82.0%"></p>
+</figure>
+</div>
+<p>그림에서 표본의 히스토그램은 모집단 역할을 하는 전체 자료의 오른쪽 꼬리와 0 부근의 질량을 대체로 재현하지만, 완전히 동일하지는 않다. 부트스트랩은 바로 이 표본을 다시 경험적 모집단으로 사용한다. 따라서 원표본에서 우연히 관측되지 않은 매우 큰 비용이나 드문 하위집단은 비모수 부트스트랩에서도 새롭게 생성되지 않는다. 부트스트랩이 표본추출 변동을 근사할 수는 있지만, 원표본이 포착하지 못한 모집단의 구조를 복원하지는 못한다는 점이 중요하다.</p>
+</section>
+<section id="부트스트랩-알고리즘" class="level3" data-number="7.2.2">
+<h3 data-number="7.2.2" class="anchored" data-anchor-id="부트스트랩-알고리즘"><span class="header-section-number">7.2.2</span> 부트스트랩 알고리즘</h3>
+<p>관심 통계량을 <span class="math inline">\(T=T(X_1,\ldots,X_n)\)</span>이라 하자. 비모수 부트스트랩 절차는 다음과 같다.</p>
+<ol type="1">
+<li>원표본에서 크기 <span class="math inline">\(n\)</span>의 부트스트랩 표본 <span class="math inline">\(X_1^{*(b)},\ldots,X_n^{*(b)}\)</span>을 복원추출한다.</li>
+<li>각 부트스트랩 표본에서 통계량 <span class="math inline">\(T^{*(b)}\)</span>를 계산한다.</li>
+<li>이 과정을 <span class="math inline">\(b=1,\ldots,B\)</span>에 대해 반복한다.</li>
+<li><span class="math inline">\(T^{*(1)},\ldots,T^{*(B)}\)</span>의 분포를 이용하여 표준오차, 편향, 신뢰구간 또는 검정통계량의 귀무분포를 추정한다.</li>
+</ol>
+<p>부트스트랩 표준오차는</p>
+<p><span class="math display">\[
+\widehat{\operatorname{SE}}_{\mathrm{boot}}(\widehat\theta)
+=
+\sqrt{
+\frac{1}{B-1}
+\sum_{b=1}^{B}
+\left(\widehat\theta^{*(b)}-\overline{\widehat\theta^*}\right)^2
+}
+\]</span></p>
+<p>이고,</p>
+<p><span class="math display">\[
+\overline{\widehat\theta^*}
+=
+\frac{1}{B}\sum_{b=1}^{B}\widehat\theta^{*(b)}
+\]</span></p>
+<p>이다. 부트스트랩 편향 추정량은</p>
+<p><span class="math display">\[
+\widehat{\operatorname{Bias}}_{\mathrm{boot}}
+=
+\overline{\widehat\theta^*}-\widehat\theta
+\]</span></p>
+<p>로 계산한다. 편향교정 점추정량을 단순하게 구성하면</p>
+<p><span class="math display">\[
+\widehat\theta_{\mathrm{bc}}
+=
+\widehat\theta-\widehat{\operatorname{Bias}}_{\mathrm{boot}}
+=
+2\widehat\theta-\overline{\widehat\theta^*}
+\]</span></p>
+<p>가 된다. 그러나 편향 추정 자체도 불확실하며, 편향교정이 분산을 증가시킬 수 있으므로 점추정량을 기계적으로 교정하기보다는 편향의 크기와 방향을 진단하는 목적으로 사용하는 경우가 많다.</p>
+<p>각 부트스트랩 표본에서 원자료의 관측값이 선택된 횟수를 <span class="math inline">\(N_1^*,\ldots,N_n^*\)</span>라고 하면</p>
+<p><span class="math display">\[
+(N_1^*,\ldots,N_n^*)
+\sim
+\operatorname{Multinomial}\left(n;\frac1n,\ldots,\frac1n\right)
+\]</span></p>
+<p>이다. 따라서 비모수 부트스트랩은 관측값을 직접 다시 나열하는 방법뿐 아니라, 각 관측값에 다항분포 가중치를 부여하는 방법으로도 이해할 수 있다. 이러한 표현은 가중 부트스트랩과 베이지안 부트스트랩을 이해하는 기초가 된다.</p>
+</section>
+<section id="왜-복원추출하는가" class="level3" data-number="7.2.3">
+<h3 data-number="7.2.3" class="anchored" data-anchor-id="왜-복원추출하는가"><span class="header-section-number">7.2.3</span> 왜 복원추출하는가</h3>
+<p>복원추출을 하지 않고 크기 <span class="math inline">\(n\)</span>의 표본을 다시 뽑으면 원표본과 동일한 관측값이 한 번씩 포함되어 통계량도 변하지 않는다. 복원추출을 하면 어떤 관측값은 여러 번 포함되고 어떤 관측값은 빠지면서, 원표본을 경험적 모집단으로 보았을 때 가능한 표본 간 변동을 재현할 수 있다.</p>
+<p>한 관측값이 특정 부트스트랩 표본에 포함되지 않을 확률은</p>
+<p><span class="math display">\[
+\left(1-\frac{1}{n}\right)^n
+\longrightarrow e^{-1}\approx0.368
+\]</span></p>
+<p>이다. 따라서 큰 표본에서 하나의 부트스트랩 표본에는 원자료의 서로 다른 관측값 약 63.2%가 포함된다. 나머지 약 36.8%는 해당 반복에서 제외되며, 이를 <strong>out-of-bag 관측값</strong>이라고 한다. 이 성질은 배깅과 랜덤포레스트의 내부 성능평가에도 이용된다.</p>
+<p>각 관측값의 부트스트랩 선택횟수는 주변적으로</p>
+<p><span class="math display">\[
+N_i^*\sim\operatorname{Binomial}\left(n,\frac1n\right)
+\]</span></p>
+<p>이고, <span class="math inline">\(n\)</span>이 크면 평균과 분산이 약 1인 포아송분포에 가까워진다. 따라서 어떤 관측값은 한 번도 선택되지 않고, 일부 관측값은 여러 번 반복되어 표본 간 변동을 만들어낸다.</p>
+</section>
+</section>
+<section id="중앙값의-부트스트랩-표준오차" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="중앙값의-부트스트랩-표준오차"><span class="header-section-number">7.3</span> 중앙값의 부트스트랩 표준오차</h2>
+<p>평균의 표준오차는 독립표본에서 <span class="math inline">\(s/\sqrt n\)</span>으로 쉽게 계산되지만, 중앙값의 표준오차는 모집단 밀도의 형태에 의존한다. 모집단 중앙값을 <span class="math inline">\(m\)</span>이라 하고 <span class="math inline">\(m\)</span> 부근의 밀도함수 값이 <span class="math inline">\(f(m)&gt;0\)</span>이면, 연속분포에서 표본중앙값은 점근적으로</p>
+<p><span class="math display">\[
+\sqrt n(\widehat m-m)
+\xrightarrow{d}
+N\left(0,\frac{1}{4f(m)^2}\right)
+\]</span></p>
+<p>을 따른다. 따라서</p>
+<p><span class="math display">\[
+\operatorname{SE}(\widehat m)
+\approx
+\frac{1}{2\sqrt n f(m)}
+\]</span></p>
+<p>이다. 중앙값 주변의 밀도가 높으면 작은 자료변화에도 중앙값이 거의 움직이지 않으므로 표준오차가 작고, 밀도가 낮으면 표준오차가 커진다. 실제로 <span class="math inline">\(f(m)\)</span>을 안정적으로 추정하기 어렵기 때문에 부트스트랩이 유용하다.</p>
+<p>다만 0이 매우 많은 반연속 자료에서는 중앙값이 0의 점질량에 걸릴 수 있다. 이 경우 중앙값의 표본분포가 이산적이거나 비정규적일 수 있으며, 부트스트랩 분포에 동일한 값이 반복되어 나타난다. 따라서 표준오차뿐 아니라 부트스트랩 분포의 형태와 신뢰구간의 경계도 함께 확인해야 한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-7-3-bootstrap-medians.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:82.0%"></p>
+</figure>
+</div>
+<p>그림의 부트스트랩 중앙값 분포는 원자료에서 가능한 중앙값의 반복표본 변동을 근사한다. 분포의 중심이 원표본 중앙값과 일치하지 않으면 유한표본 편향의 가능성을 시사하고, 분포가 한쪽으로 치우치거나 계단형이면 정규근사 신뢰구간보다 백분위수 또는 BCa 구간을 고려할 근거가 된다.</p>
+<p>다음 코드는 0이 많고 오른쪽으로 치우친 의료비 자료를 생성한 뒤 중앙값의 부트스트랩 표준오차를 계산한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>zero_cost <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="fl">0.19</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>positive_cost <span class="ot">&lt;-</span> <span class="fu">rgamma</span>(n, <span class="at">shape =</span> <span class="fl">1.35</span>, <span class="at">scale =</span> <span class="dv">5200</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>cost <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(zero_cost <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">0</span>, positive_cost)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>median_hat <span class="ot">&lt;-</span> <span class="fu">median</span>(cost)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>boot_median <span class="ot">&lt;-</span> <span class="fu">numeric</span>(B)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (b <span class="cf">in</span> <span class="fu">seq_len</span>(B)) {</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  index_b <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(n, <span class="at">size =</span> n, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  boot_median[b] <span class="ot">&lt;-</span> <span class="fu">median</span>(cost[index_b])</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>boot_se_median <span class="ot">&lt;-</span> <span class="fu">sd</span>(boot_median)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>boot_bias_median <span class="ot">&lt;-</span> <span class="fu">mean</span>(boot_median) <span class="sc">-</span> median_hat</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">estimate =</span> median_hat,</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">bootstrap_se =</span> boot_se_median,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">bootstrap_bias =</span> boot_bias_median</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      estimate   bootstrap_se bootstrap_bias 
+    3909.69947      137.08669       12.48316 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  boot_median,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="dv">35</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"중앙의료비의 부트스트랩 분포"</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"부트스트랩 중앙값"</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> median_hat, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-bootstrap-methods_files/figure-html/bootstrap-median-ch07-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>부트스트랩이 신뢰할 만한 결과를 주려면 원표본이 모집단을 적절히 대표해야 하고, 재표본추출 횟수가 충분해야 하며, 부트스트랩 과정이 원래의 표본설계를 반영해야 한다. 층화표본이면 층 안에서 재표본추출하고, 군집표본이면 개인이 아니라 군집을 재표본추출해야 한다.</p>
+<p>부트스트랩의 타당성은 추정량의 <strong>정규성 여부 자체</strong>보다, 경험적 분포의 작은 변화가 추정량의 작은 변화로 이어지는지에 더 직접적으로 관련된다. 평균, 회귀계수와 매끄러운 주변효과는 일반적으로 부트스트랩이 잘 작동하는 반면, 표본 최댓값, 변화점, 경계에 있는 분산성분, 변수를 선택한 직후의 계수처럼 비정규적이고 비매끄러운 추정량에서는 일반 <span class="math inline">\(n\)</span>-중-<span class="math inline">\(n\)</span> 부트스트랩이 실패할 수 있다.</p>
+</section>
+<section id="회귀모형에서의-부트스트랩" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="회귀모형에서의-부트스트랩"><span class="header-section-number">7.4</span> 회귀모형에서의 부트스트랩</h2>
+<section id="회귀계수의-표준오차" class="level3" data-number="7.4.1">
+<h3 data-number="7.4.1" class="anchored" data-anchor-id="회귀계수의-표준오차"><span class="header-section-number">7.4.1</span> 회귀계수의 표준오차</h3>
+<p>회귀모형에서는 관측 단위를 행 단위로 복원추출한 뒤 각 표본에서 동일한 모형을 다시 적합한다. 이를 <strong>관측쌍 부트스트랩(case or pairs bootstrap)</strong>이라고 한다. 공변량과 결과의 결합분포를 함께 재표본추출하므로 공변량을 확률변수로 보는 무작위 설계에 자연스럽고, 이분산성에도 비교적 강건하다.</p>
+<p>반면 실험처럼 공변량 행렬 <span class="math inline">\(\mathbf X\)</span>를 고정된 설계로 간주하면, 관측쌍 부트스트랩은 원래 연구가 조건부로 삼은 <span class="math inline">\(\mathbf X\)</span>까지 바꾸게 된다. 이 경우에는 잔차 부트스트랩, 모수적 부트스트랩 또는 와일드 부트스트랩이 더 적절할 수 있다. 즉 회귀 부트스트랩의 재표본 단위는 단순한 계산 선택이 아니라, 추론이 조건부인지 주변적(unconditional)인지에 대한 선택이다.</p>
+<p>로지스틱 회귀계수처럼 최대우도이론에 의한 표준오차가 제공되는 경우에도 부트스트랩 결과와 비교하여 점근적 근사의 적절성을 확인할 수 있다. 최대우도추정량이 정규조건을 만족하면</p>
+<p><span class="math display">\[
+\sqrt n(\widehat{\boldsymbol\beta}-\boldsymbol\beta)
+\xrightarrow{d}
+N\left(\mathbf 0,\mathbf I(\boldsymbol\beta)^{-1}\right)
+\]</span></p>
+<p>이고, 부트스트랩은 조건부 분포</p>
+<p><span class="math display">\[
+\sqrt n(\widehat{\boldsymbol\beta}^*-\widehat{\boldsymbol\beta})\mid\text{data}
+\]</span></p>
+<p>를 이용하여 이 표본분포를 근사한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-7-4-bootstrap-coefficients.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:82.0%"></p>
+</figure>
+</div>
+<p>그림에서 각 계수의 부트스트랩 분포가 대칭이고 종 모양이면 모형 기반 정규근사가 대체로 적절할 가능성이 높다. 반대로 분포가 크게 비대칭이거나 극단값이 많으면 작은 표본, 희귀사건, 완전분리 또는 영향력이 큰 관측값을 점검해야 한다.</p>
+<p>의료비가 0일 확률을 나이와 성별로 설명하는 로지스틱 회귀를 생각하자. 개인 <span class="math inline">\(i\)</span>의 의료비가 0이면 <span class="math inline">\(Y_i=1\)</span>, 그렇지 않으면 <span class="math inline">\(Y_i=0\)</span>으로 두면</p>
+<p><span class="math display">\[
+\operatorname{logit}(\pi_i)
+=
+\beta_0+\beta_1\operatorname{age}_i+\beta_2\operatorname{female}_i
+\]</span></p>
+<p>이고</p>
+<p><span class="math display">\[
+\pi_i
+=
+\frac{\exp(\beta_0+\beta_1\operatorname{age}_i+\beta_2\operatorname{female}_i)}
+{1+\exp(\beta_0+\beta_1\operatorname{age}_i+\beta_2\operatorname{female}_i)}
+\]</span></p>
+<p>이다. 표본 전체에서 비용이 0일 평균확률은</p>
+<p><span class="math display">\[
+\overline\pi
+=
+\frac{1}{m}\sum_{i=1}^{m}\pi_i
+\]</span></p>
+<p>로 계산한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2027</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>age <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">runif</span>(n, <span class="dv">18</span>, <span class="dv">85</span>))</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>female <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.52</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>p_zero <span class="ot">&lt;-</span> <span class="fu">plogis</span>(<span class="fl">0.70</span> <span class="sc">-</span> <span class="fl">0.043</span> <span class="sc">*</span> age <span class="sc">-</span> <span class="fl">0.78</span> <span class="sc">*</span> female)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>no_cost <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, p_zero)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>reg_dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(no_cost, age, female)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>fit_zero <span class="ot">&lt;-</span> <span class="fu">glm</span>(no_cost <span class="sc">~</span> age <span class="sc">+</span> female, <span class="at">family =</span> <span class="fu">binomial</span>(), <span class="at">data =</span> reg_dat)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">summary</span>(fit_zero))</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               Estimate  Std. Error    z value     Pr(&gt;|z|)
+(Intercept)  0.55932214 0.182811383   3.059559 2.216634e-03
+age         -0.04025615 0.003710241 -10.850010 1.994037e-27
+female      -0.76140450 0.130840902  -5.819316 5.908907e-09</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>B_reg <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>boot_coef <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA_real_</span>, <span class="at">nrow =</span> B_reg, <span class="at">ncol =</span> <span class="fu">length</span>(<span class="fu">coef</span>(fit_zero)))</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(boot_coef) <span class="ot">&lt;-</span> <span class="fu">names</span>(<span class="fu">coef</span>(fit_zero))</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (b <span class="cf">in</span> <span class="fu">seq_len</span>(B_reg)) {</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  idx <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(<span class="fu">nrow</span>(reg_dat), <span class="fu">nrow</span>(reg_dat), <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  fit_b <span class="ot">&lt;-</span> <span class="fu">glm</span>(no_cost <span class="sc">~</span> age <span class="sc">+</span> female, <span class="at">family =</span> <span class="fu">binomial</span>(), <span class="at">data =</span> reg_dat[idx, ])</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  boot_coef[b, ] <span class="ot">&lt;-</span> <span class="fu">coef</span>(fit_b)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">model_based =</span> <span class="fu">coef</span>(<span class="fu">summary</span>(fit_zero))[, <span class="st">"Std. Error"</span>],</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">bootstrap =</span> <span class="fu">apply</span>(boot_coef, <span class="dv">2</span>, sd)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            (Intercept)         age    female
+model_based   0.1828114 0.003710241 0.1308409
+bootstrap     0.1823515 0.003654019 0.1291034</code></pre>
+</div>
+</div>
+</section>
+<section id="주변가산효과" class="level3" data-number="7.4.2">
+<h3 data-number="7.4.2" class="anchored" data-anchor-id="주변가산효과"><span class="header-section-number">7.4.2</span> 주변가산효과</h3>
+<p>비선형 연결함수를 사용하는 일반화선형모형에서는 회귀계수가 결과확률의 직접적인 차이를 나타내지 않는다. 성별의 주변가산효과를 구하려면 모든 사람의 성별을 여성으로 설정한 예측확률 <span class="math inline">\(\widehat\pi_{1i}\)</span>와 남성으로 설정한 예측확률 <span class="math inline">\(\widehat\pi_{0i}\)</span>를 계산한 뒤 평균차이를 구한다.</p>
+<p><span class="math display">\[
+\widehat{\operatorname{MAE}}
+=
+\frac{1}{m}\sum_{i=1}^{m}
+\left(\widehat\pi_{1i}-\widehat\pi_{0i}\right)
+\]</span></p>
+<p>이 추정량은 회귀계수 하나의 함수가 아니라, 적합된 모든 계수와 분석표본의 공변량 분포를 동시에 사용하는 복합 함수이다. 델타 방법으로 표준오차를 구하려면 계수벡터에 대한 기울기를 계산해야 하지만, 부트스트랩에서는 각 반복마다 모형 적합과 표준화 과정을 모두 다시 수행하면 된다. 즉 불확실성의 원천은 회귀계수 추정뿐 아니라 표준화에 사용된 공변량 분포의 표본변동까지 포함한다.</p>
+<p>인과적 해석을 하려면 여성과 남성으로 인위적으로 설정한 두 잠재결과가 교환가능하다는 가정, 양성(positivity), 일관성 및 올바른 모형 지정이 추가로 필요하다. 이러한 가정이 없으면 이 값은 보정된 예측확률의 평균차이로 해석해야 한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-7-5-mae-sex.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:76.0%"></p>
+</figure>
+</div>
+<p>그림은 성별 상태를 바꾸어 계산한 두 표준화 확률의 차이를 부트스트랩 반복마다 다시 추정한 분포를 보여준다. 분포의 폭은 회귀계수와 공변량 분포의 결합된 불확실성을 반영한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>marginal_effect_sex <span class="ot">&lt;-</span> <span class="cf">function</span>(data) {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(no_cost <span class="sc">~</span> age <span class="sc">+</span> female, <span class="at">family =</span> <span class="fu">binomial</span>(), <span class="at">data =</span> data)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  dat_1 <span class="ot">&lt;-</span> data</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  dat_0 <span class="ot">&lt;-</span> data</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  dat_1<span class="sc">$</span>female <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  dat_0<span class="sc">$</span>female <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  p_1 <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit, <span class="at">newdata =</span> dat_1, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  p_0 <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit, <span class="at">newdata =</span> dat_0, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(p_1 <span class="sc">-</span> p_0)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>mae_hat <span class="ot">&lt;-</span> <span class="fu">marginal_effect_sex</span>(reg_dat)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>B_mae <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>boot_mae <span class="ot">&lt;-</span> <span class="fu">numeric</span>(B_mae)</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (b <span class="cf">in</span> <span class="fu">seq_len</span>(B_mae)) {</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  idx <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(<span class="fu">nrow</span>(reg_dat), <span class="fu">nrow</span>(reg_dat), <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  boot_mae[b] <span class="ot">&lt;-</span> <span class="fu">marginal_effect_sex</span>(reg_dat[idx, ])</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">estimate =</span> mae_hat, <span class="at">bootstrap_se =</span> <span class="fu">sd</span>(boot_mae))</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    estimate bootstrap_se 
+ -0.09288246   0.01608870 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  boot_mae,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="dv">35</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"성별 주변가산효과의 부트스트랩 분포"</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"주변가산효과"</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> mae_hat, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-bootstrap-methods_files/figure-html/bootstrap-mae-ch07-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="부분-모형의-주변효과" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="부분-모형의-주변효과"><span class="header-section-number">7.5</span> 2부분 모형의 주변효과</h2>
+<p>비용자료의 2부분 모형에서는 첫 번째 부분이 양의 비용 발생확률 <span class="math inline">\(p_i\)</span>를, 두 번째 부분이 양의 비용의 조건부 평균 <span class="math inline">\(\mu_i\)</span>를 모형화한다. 전체 기대비용은</p>
+<p><span class="math display">\[
+E(Y_i\mid\mathbf X_i)=p_i\mu_i
+\]</span></p>
+<p>이다. 당뇨병의 주변가산효과는 각 사람에 대해 당뇨병 상태를 1과 0으로 바꾸어 두 부분의 예측값을 다시 계산한 뒤</p>
+<p><span class="math display">\[
+\widehat{\operatorname{MAE}}_{\mathrm{diabetes}}
+=
+\frac{1}{n}\sum_{i=1}^{n}
+\left(\widehat p_{1i}\widehat\mu_{1i}
+-
+\widehat p_{0i}\widehat\mu_{0i}\right)
+\]</span></p>
+<p>로 구한다.</p>
+<p>2부분 모형의 전체 평균은 두 추정량의 곱이므로 불확실성은 단순히 각 부분의 분산을 더해서 얻을 수 없다. 한 사람의 자료가 비용 발생모형과 양의 비용모형에 동시에 기여하기 때문에 두 부분의 추정량 사이에 공분산이 존재한다. 일반적으로</p>
+<p><span class="math display">\[
+\operatorname{Var}(\widehat p\widehat\mu)
+\approx
+\mu^2\operatorname{Var}(\widehat p)
++p^2\operatorname{Var}(\widehat\mu)
++2p\mu\operatorname{Cov}(\widehat p,\widehat\mu)
+\]</span></p>
+<p>이다. 개인 단위로 전체 자료를 재표본추출하고 두 부분을 같은 반복 안에서 다시 적합하면 이 공분산이 자동으로 보존된다. 반대로 첫 번째 부분과 두 번째 부분을 서로 독립적으로 재표본추출하면 전체 효과의 불확실성을 잘못 추정할 수 있다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-7-6-mae-diabetes.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:76.0%"></p>
+</figure>
+</div>
+<p>그림의 분포는 당뇨병이 비용발생확률과 양의 비용 모두에 미치는 영향이 결합된 전체 평균비용 차이의 표본변동을 나타낸다. 한쪽 꼬리가 길다면 비용분포의 극단값 또는 양의 비용 부분의 불안정성이 전체 효과에 전달된 결과일 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2028</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>n_cost <span class="ot">&lt;-</span> <span class="dv">1800</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>cost_dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">age =</span> <span class="fu">round</span>(<span class="fu">runif</span>(n_cost, <span class="dv">18</span>, <span class="dv">85</span>)),</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">female =</span> <span class="fu">rbinom</span>(n_cost, <span class="dv">1</span>, <span class="fl">0.52</span>),</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">diabetes =</span> <span class="fu">rbinom</span>(n_cost, <span class="dv">1</span>, <span class="fl">0.14</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>p_pos <span class="ot">&lt;-</span> <span class="fu">plogis</span>(<span class="sc">-</span><span class="fl">0.45</span> <span class="sc">+</span> <span class="fl">0.022</span> <span class="sc">*</span> (cost_dat<span class="sc">$</span>age <span class="sc">-</span> <span class="dv">18</span>) <span class="sc">+</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>                  <span class="fl">0.30</span> <span class="sc">*</span> cost_dat<span class="sc">$</span>female <span class="sc">+</span> <span class="fl">0.90</span> <span class="sc">*</span> cost_dat<span class="sc">$</span>diabetes)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>positive <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n_cost, <span class="dv">1</span>, p_pos)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>mu_pos <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fl">7.35</span> <span class="sc">+</span> <span class="fl">0.016</span> <span class="sc">*</span> (cost_dat<span class="sc">$</span>age <span class="sc">-</span> <span class="dv">18</span>) <span class="sc">+</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>                <span class="fl">0.12</span> <span class="sc">*</span> cost_dat<span class="sc">$</span>female <span class="sc">+</span> <span class="fl">0.68</span> <span class="sc">*</span> cost_dat<span class="sc">$</span>diabetes)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>cost_dat<span class="sc">$</span>cost <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>cost_dat<span class="sc">$</span>cost[positive <span class="sc">==</span> <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">rgamma</span>(</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(positive <span class="sc">==</span> <span class="dv">1</span>),</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">shape =</span> <span class="fl">2.3</span>,</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">scale =</span> mu_pos[positive <span class="sc">==</span> <span class="dv">1</span>] <span class="sc">/</span> <span class="fl">2.3</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>marginal_diabetes_cost <span class="ot">&lt;-</span> <span class="cf">function</span>(data) {</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>  data<span class="sc">$</span>positive <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(data<span class="sc">$</span>cost <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>  fit_part1 <span class="ot">&lt;-</span> <span class="fu">glm</span>(positive <span class="sc">~</span> age <span class="sc">+</span> female <span class="sc">+</span> diabetes,</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>                   <span class="at">family =</span> <span class="fu">binomial</span>(), <span class="at">data =</span> data)</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>  fit_part2 <span class="ot">&lt;-</span> <span class="fu">glm</span>(cost <span class="sc">~</span> age <span class="sc">+</span> female <span class="sc">+</span> diabetes,</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>                   <span class="at">family =</span> <span class="fu">Gamma</span>(<span class="at">link =</span> <span class="st">"log"</span>),</span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>                   <span class="at">data =</span> data[data<span class="sc">$</span>cost <span class="sc">&gt;</span> <span class="dv">0</span>, ])</span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>  dat_1 <span class="ot">&lt;-</span> data</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>  dat_0 <span class="ot">&lt;-</span> data</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>  dat_1<span class="sc">$</span>diabetes <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>  dat_0<span class="sc">$</span>diabetes <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>  pred_1 <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_part1, dat_1, <span class="at">type =</span> <span class="st">"response"</span>) <span class="sc">*</span></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(fit_part2, dat_1, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>  pred_0 <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_part1, dat_0, <span class="at">type =</span> <span class="st">"response"</span>) <span class="sc">*</span></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(fit_part2, dat_0, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(pred_1 <span class="sc">-</span> pred_0)</span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>mae_diabetes <span class="ot">&lt;-</span> <span class="fu">marginal_diabetes_cost</span>(cost_dat)</span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>B_cost <span class="ot">&lt;-</span> <span class="dv">300</span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>boot_cost_effect <span class="ot">&lt;-</span> <span class="fu">numeric</span>(B_cost)</span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (b <span class="cf">in</span> <span class="fu">seq_len</span>(B_cost)) {</span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>  idx <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(<span class="fu">nrow</span>(cost_dat), <span class="fu">nrow</span>(cost_dat), <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>  boot_cost_effect[b] <span class="ot">&lt;-</span> <span class="fu">marginal_diabetes_cost</span>(cost_dat[idx, ])</span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(</span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a>  <span class="at">estimate =</span> mae_diabetes,</span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>  <span class="at">bootstrap_se =</span> <span class="fu">sd</span>(boot_cost_effect)</span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    estimate bootstrap_se 
+   3272.0109     296.4036 </code></pre>
+</div>
+</div>
+<p>복잡한 모형을 부트스트랩할 때에는 일부 재표본에서 모형이 수렴하지 않거나 특정 범주가 사라질 수 있다. 실제 분석에서는 <code>tryCatch()</code>를 사용해 실패한 반복을 기록하고, 실패 비율과 원인을 함께 확인해야 한다. 실패한 반복을 단순히 제거하면 성공하기 쉬운 표본만 남아 분포가 선택될 수 있다. 따라서 실패율이 높다면 반복수를 늘리는 것보다 모형 단순화, 벌점추정, 층화 재표본추출 또는 자료 희소성 문제의 해결이 우선이다.</p>
+</section>
+<section id="부트스트랩-신뢰구간" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="부트스트랩-신뢰구간"><span class="header-section-number">7.6</span> 부트스트랩 신뢰구간</h2>
+<section id="정규근사-신뢰구간" class="level3" data-number="7.6.1">
+<h3 data-number="7.6.1" class="anchored" data-anchor-id="정규근사-신뢰구간"><span class="header-section-number">7.6.1</span> 정규근사 신뢰구간</h3>
+<p>부트스트랩 분포가 대체로 대칭이고 정규분포에 가까우면</p>
+<p><span class="math display">\[
+\widehat\theta
+\pm
+z_{1-\alpha/2}
+\widehat{\operatorname{SE}}_{\mathrm{boot}}(\widehat\theta)
+\]</span></p>
+<p>를 사용할 수 있다. 95% 신뢰구간에서는 <span class="math inline">\(z_{0.975}=1.96\)</span>이다.</p>
+</section>
+<section id="백분위수-신뢰구간" class="level3" data-number="7.6.2">
+<h3 data-number="7.6.2" class="anchored" data-anchor-id="백분위수-신뢰구간"><span class="header-section-number">7.6.2</span> 백분위수 신뢰구간</h3>
+<p>부트스트랩 추정량의 경험적 분위수를 직접 사용하는 방법이다.</p>
+<p><span class="math display">\[
+\left[
+\widehat\theta^*_{(\alpha/2)},
+\widehat\theta^*_{(1-\alpha/2)}
+\right]
+\]</span></p>
+<p>분포가 비대칭일 때 정규근사보다 자연스러운 구간을 만들 수 있다. 백분위수 구간은 단조변환에 대해 불변이라는 장점이 있다. 예를 들어 <span class="math inline">\(\theta\)</span>의 백분위수 구간을 지수변환하면 <span class="math inline">\(\exp(\theta)\)</span>의 백분위수 구간과 일치한다. 다만 부트스트랩 분포가 원추정량 주변에서 편향되어 있으면 포함확률이 충분하지 않을 수 있다.</p>
+</section>
+<section id="기본-부트스트랩-신뢰구간" class="level3" data-number="7.6.3">
+<h3 data-number="7.6.3" class="anchored" data-anchor-id="기본-부트스트랩-신뢰구간"><span class="header-section-number">7.6.3</span> 기본 부트스트랩 신뢰구간</h3>
+<p>부트스트랩 오차 <span class="math inline">\(\widehat\theta^*-\widehat\theta\)</span>의 분위수를 반전시켜</p>
+<p><span class="math display">\[
+\left[
+2\widehat\theta-\widehat\theta^*_{(1-\alpha/2)},
+2\widehat\theta-\widehat\theta^*_{(\alpha/2)}
+\right]
+\]</span></p>
+<p>로 계산한다.</p>
+</section>
+<section id="학생화-부트스트랩-신뢰구간" class="level3" data-number="7.6.4">
+<h3 data-number="7.6.4" class="anchored" data-anchor-id="학생화-부트스트랩-신뢰구간"><span class="header-section-number">7.6.4</span> 학생화 부트스트랩 신뢰구간</h3>
+<p>학생화(studentized) 또는 부트스트랩-<span class="math inline">\(t\)</span> 구간은 각 부트스트랩 표본에서 표준오차까지 다시 추정하여</p>
+<p><span class="math display">\[
+T^{*(b)}
+=
+\frac{\widehat\theta^{*(b)}-\widehat\theta}
+{\widehat{\operatorname{SE}}^{*(b)}}
+\]</span></p>
+<p>의 분포를 만든다. 이 분포의 <span class="math inline">\(\alpha/2\)</span> 및 <span class="math inline">\(1-\alpha/2\)</span> 분위수를 각각 <span class="math inline">\(t^*_{\alpha/2}\)</span>와 <span class="math inline">\(t^*_{1-\alpha/2}\)</span>라고 하면</p>
+<p><span class="math display">\[
+\left[
+\widehat\theta-t^*_{1-\alpha/2}\widehat{\operatorname{SE}}(\widehat\theta),
+\widehat\theta-t^*_{\alpha/2}\widehat{\operatorname{SE}}(\widehat\theta)
+\right]
+\]</span></p>
+<p>을 사용한다. 추정량의 분산이 모수값에 따라 달라지는 경우 유리할 수 있지만, 각 반복 안에서 다시 표준오차를 계산해야 하므로 계산량이 크고 중첩 부트스트랩이 필요할 수 있다.</p>
+</section>
+<section id="bca-신뢰구간" class="level3" data-number="7.6.5">
+<h3 data-number="7.6.5" class="anchored" data-anchor-id="bca-신뢰구간"><span class="header-section-number">7.6.5</span> BCa 신뢰구간</h3>
+<p><strong>편향교정 및 가속 신뢰구간(bias-corrected and accelerated interval, BCa)</strong>은 부트스트랩 분포의 위치 편향과 추정량의 비선형성을 모두 보정한다. 편향교정값은</p>
+<p><span class="math display">\[
+z_0
+=
+\Phi^{-1}
+\left[
+\frac{\#(\widehat\theta^{*(b)}&lt;\widehat\theta)}{B}
+\right]
+\]</span></p>
+<p>로 계산한다. <span class="math inline">\(z_0&gt;0\)</span>이면 부트스트랩 추정량의 절반 이상이 원추정량보다 작아 원추정량이 부트스트랩 분포의 오른쪽에 위치한다는 뜻이다.</p>
+<p>가속도 <span class="math inline">\(a\)</span>는 관측값 하나씩을 제외한 잭나이프 추정량 <span class="math inline">\(\widehat\theta_{(-i)}\)</span>를 이용한다.</p>
+<p><span class="math display">\[
+\overline{\theta}_{(-\cdot)}
+=
+\frac1n\sum_{i=1}^n\widehat\theta_{(-i)}
+\]</span></p>
+<p><span class="math display">\[
+a
+=
+\frac{
+\sum_{i=1}^n
+\left(\overline{\theta}_{(-\cdot)}-\widehat\theta_{(-i)}\right)^3
+}{
+6\left[
+\sum_{i=1}^n
+\left(\overline{\theta}_{(-\cdot)}-\widehat\theta_{(-i)}\right)^2
+\right]^{3/2}
+}
+\]</span></p>
+<p>조정된 분위수 수준은</p>
+<p><span class="math display">\[
+\alpha_j^*
+=
+\Phi\left[
+z_0+
+\frac{z_0+z_{\alpha_j}}{1-a(z_0+z_{\alpha_j})}
+\right],
+\qquad \alpha_1=\alpha/2,\quad \alpha_2=1-\alpha/2
+\]</span></p>
+<p>이며, 최종 BCa 구간은 부트스트랩 분포의 <span class="math inline">\(\alpha_1^*\)</span>와 <span class="math inline">\(\alpha_2^*\)</span> 분위수로 구성한다. BCa 구간은 계산이 더 복잡하지만 비대칭 분포나 편향된 추정량에서 백분위수 구간보다 포함확률이 개선되는 경우가 많다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>alpha <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>ci_normal <span class="ot">&lt;-</span> median_hat <span class="sc">+</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>) <span class="sc">*</span> <span class="fu">qnorm</span>(<span class="dv">1</span> <span class="sc">-</span> alpha <span class="sc">/</span> <span class="dv">2</span>) <span class="sc">*</span> boot_se_median</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>ci_percentile <span class="ot">&lt;-</span> <span class="fu">unname</span>(</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">quantile</span>(boot_median, <span class="at">probs =</span> <span class="fu">c</span>(alpha <span class="sc">/</span> <span class="dv">2</span>, <span class="dv">1</span> <span class="sc">-</span> alpha <span class="sc">/</span> <span class="dv">2</span>))</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>q_boot <span class="ot">&lt;-</span> <span class="fu">quantile</span>(</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  boot_median,</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">probs =</span> <span class="fu">c</span>(alpha <span class="sc">/</span> <span class="dv">2</span>, <span class="dv">1</span> <span class="sc">-</span> alpha <span class="sc">/</span> <span class="dv">2</span>),</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">names =</span> <span class="cn">FALSE</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>ci_basic <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span> <span class="sc">*</span> median_hat <span class="sc">-</span> q_boot[<span class="dv">2</span>],</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span> <span class="sc">*</span> median_hat <span class="sc">-</span> q_boot[<span class="dv">1</span>]</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">normal =</span> ci_normal,</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">percentile =</span> ci_percentile,</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">basic =</span> ci_basic</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               [,1]     [,2]
+normal     3641.014 4178.384
+percentile 3679.328 4174.763
+basic      3644.636 4140.071</code></pre>
+</div>
+</div>
+<p>부트스트랩 분포가 심하게 비대칭이거나 경계에 가까운 통계량에서는 신뢰구간 방법에 따라 결과가 달라질 수 있다. 정규구간은 단순하지만 대칭성을 가정하고, 백분위수 구간은 변환불변성이 있으나 편향에 민감하며, 기본구간은 오차분포의 대칭성을 반전하고, 학생화 구간과 BCa 구간은 더 높은 계산비용으로 분산 변화와 비대칭성을 보정한다. 따라서 추정값과 표준오차만 보고하지 말고 부트스트랩 분포를 시각화하고 여러 구간의 민감도를 비교하는 것이 바람직하다.</p>
+</section>
+</section>
+<section id="부트스트랩-가설검정" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="부트스트랩-가설검정"><span class="header-section-number">7.7</span> 부트스트랩 가설검정</h2>
+<p>부트스트랩은 귀무가설이 참일 때의 자료생성 구조를 반영하도록 표본을 재구성한 뒤 검정통계량의 귀무분포를 근사하는 데 사용할 수 있다. 핵심은 단순히 원자료를 재표본추출하는 것이 아니라, 귀무가설을 만족시키도록 중심화하거나 제한된 모형에서 잔차를 생성하는 것이다. 원자료를 그대로 재표본추출하면 대립가설 아래에서 관측된 집단차이까지 재현되므로 귀무분포가 아니라 추정량의 일반 표본분포를 얻게 된다.</p>
+<p>두 집단 평균의 차이를 검정한다고 하자.</p>
+<p><span class="math display">\[
+H_0:\mu_1-\mu_0=0
+\]</span></p>
+<p>관측 검정통계량을</p>
+<p><span class="math display">\[
+Q_{\mathrm{obs}}=\overline Y_1-\overline Y_0
+\]</span></p>
+<p>로 두자. 두 집단 자료의 관측평균을 각각 <span class="math inline">\(\overline Y_1\)</span>과 <span class="math inline">\(\overline Y_0\)</span>라 하면, 귀무가설을 만족하는 중심화 자료는</p>
+<p><span class="math display">\[
+Y_{ij}^{0}=Y_{ij}-\overline Y_j+\overline Y
+\]</span></p>
+<p>처럼 구성할 수 있다. 각 집단 안에서 <span class="math inline">\(Y_{ij}^{0}\)</span>를 복원추출하면 두 집단의 평균은 공통평균 <span class="math inline">\(\overline Y\)</span>를 갖지만 집단별 분산과 분포형태는 유지된다. 이 방식은 두 집단의 분산이 다를 수 있는 상황에서 단순히 자료를 합친 뒤 재표본추출하는 것보다 적절하다.</p>
+<p>귀무가설 아래에서 생성한 부트스트랩 통계량을 <span class="math inline">\(Q^{*(1)},\ldots,Q^{*(B)}\)</span>라 하면 양측 <span class="math inline">\(p\)</span>값은</p>
+<p><span class="math display">\[
+\widehat p
+=
+\frac{1+\sum_{b=1}^{B}I(|Q^{*(b)}|\ge|Q_{\mathrm{obs}}|)}{B+1}
+\]</span></p>
+<p>로 계산할 수 있다. 분자와 분모에 1을 더하면 유한한 반복수에서 <span class="math inline">\(p\)</span>값이 정확히 0이 되는 것을 방지한다.</p>
+</section>
+<section id="순열검정과의-차이" class="level2" data-number="7.8">
+<h2 data-number="7.8" class="anchored" data-anchor-id="순열검정과의-차이"><span class="header-section-number">7.8</span> 순열검정과의 차이</h2>
+<p>순열검정은 귀무가설 아래에서 집단표지가 교환가능하다는 가정을 이용해 표지를 무작위로 섞는다. 부트스트랩은 관측분포에서 복원추출하여 표본분포를 근사하고, 순열검정은 귀무가설 아래에서 표지의 가능한 재배열을 이용하여 검정통계량의 분포를 만든다.</p>
+<p>교환가능성은 단순히 독립성만을 뜻하지 않는다. 귀무가설 아래에서 어떤 관측값에 어떤 집단표지를 붙여도 결합분포가 변하지 않아야 한다. 무작위배정 임상시험에서는 배정기전이 이 조건의 근거가 되지만, 관찰연구에서는 공변량 분포가 집단마다 다를 수 있으므로 무조건적인 표지 순열이 타당하지 않을 수 있다. 이 경우 층화 순열, 잔차 순열 또는 회귀모형 기반 검정을 고려해야 한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-7-7-bootstrap-permutation.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:82.0%"></p>
+</figure>
+</div>
+<p>그림에서 부트스트랩 분포는 추정량이 반복표본에서 어떻게 변하는지를 나타내고, 순열분포는 집단효과가 없다는 귀무가설 아래에서 검정통계량이 얼마나 극단적일 수 있는지를 나타낸다. 두 분포의 목적이 다르므로 같은 재표본추출 방법으로 대체할 수 없다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2029</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>group <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">each =</span> <span class="dv">80</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">80</span>, <span class="fl">10.0</span>, <span class="fl">2.5</span>), <span class="fu">rnorm</span>(<span class="dv">80</span>, <span class="fl">11.1</span>, <span class="fl">2.5</span>))</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>q_obs <span class="ot">&lt;-</span> <span class="fu">mean</span>(y[group <span class="sc">==</span> <span class="dv">1</span>]) <span class="sc">-</span> <span class="fu">mean</span>(y[group <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>B_test <span class="ot">&lt;-</span> <span class="dv">3000</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>q_perm <span class="ot">&lt;-</span> <span class="fu">numeric</span>(B_test)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (b <span class="cf">in</span> <span class="fu">seq_len</span>(B_test)) {</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  group_b <span class="ot">&lt;-</span> <span class="fu">sample</span>(group, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  q_perm[b] <span class="ot">&lt;-</span> <span class="fu">mean</span>(y[group_b <span class="sc">==</span> <span class="dv">1</span>]) <span class="sc">-</span> <span class="fu">mean</span>(y[group_b <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>p_perm <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">sum</span>(<span class="fu">abs</span>(q_perm) <span class="sc">&gt;=</span> <span class="fu">abs</span>(q_obs))) <span class="sc">/</span> (B_test <span class="sc">+</span> <span class="dv">1</span>)</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">observed_difference =</span> q_obs, <span class="at">permutation_p_value =</span> p_perm)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>observed_difference permutation_p_value 
+         0.97297699          0.02565811 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  q_perm,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="dv">40</span>,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"귀무가설 아래 순열분포"</span>,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"평균차이"</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fu">abs</span>(q_obs), <span class="fu">abs</span>(q_obs)), <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-bootstrap-methods_files/figure-html/permutation-test-ch07-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>두 집단의 분포가 귀무가설 아래에서 완전히 동일하고 관측값이 독립이면 순열검정은 유한표본에서도 정확한 검정이 될 수 있다. 반면 부트스트랩 검정은 일반적으로 근사적이며, 귀무가설을 반영하는 재표본추출 방법을 올바르게 설계해야 한다.</p>
+</section>
+<section id="부트스트랩의-변형" class="level2" data-number="7.9">
+<h2 data-number="7.9" class="anchored" data-anchor-id="부트스트랩의-변형"><span class="header-section-number">7.9</span> 부트스트랩의 변형</h2>
+<section id="모수적-부트스트랩" class="level3" data-number="7.9.1">
+<h3 data-number="7.9.1" class="anchored" data-anchor-id="모수적-부트스트랩"><span class="header-section-number">7.9.1</span> 모수적 부트스트랩</h3>
+<p>모수적 부트스트랩은 적합된 확률모형 <span class="math inline">\(F_{\widehat\eta}\)</span>에서 새 자료를 생성한다. 예를 들어 포아송 회귀를 적합했다면 각 개인에 대해</p>
+<p><span class="math display">\[
+Y_i^*\sim\operatorname{Poisson}(\widehat\mu_i)
+\]</span></p>
+<p>를 생성한 뒤 같은 모형을 다시 적합한다. 이때 공변량은 일반적으로 관측값에 고정하고 결과만 생성하므로, 추론은 주어진 공변량 설계에 조건부이다. 모수적 부트스트랩은 희귀사건, 작은 표본, 분산성분 또는 복잡한 검정통계량의 유한표본 귀무분포를 근사하는 데 유용하다. 모형이 올바르면 비모수 부트스트랩보다 효율적일 수 있지만, 포아송 과산포나 잘못된 꼬리분포처럼 분포 가정이 틀리면 부트스트랩 결과도 같은 방향으로 왜곡된다.</p>
+</section>
+<section id="잔차-부트스트랩" class="level3" data-number="7.9.2">
+<h3 data-number="7.9.2" class="anchored" data-anchor-id="잔차-부트스트랩"><span class="header-section-number">7.9.2</span> 잔차 부트스트랩</h3>
+<p>선형회귀에서 공변량은 고정한 채 중심화한 잔차를 복원추출하여</p>
+<p><span class="math display">\[
+Y_i^*=\widehat Y_i+e_i^*
+\]</span></p>
+<p>를 생성한다. 최소제곱 잔차는 모자행렬의 대각원소 <span class="math inline">\(h_{ii}\)</span>가 큰 관측값에서 분산이 작아지므로, 단순 잔차 대신</p>
+<p><span class="math display">\[
+\widetilde e_i=\frac{e_i}{\sqrt{1-h_{ii}}}
+\]</span></p>
+<p>와 같이 레버리지를 보정한 잔차를 사용할 수 있다. 잔차 부트스트랩은 오차가 독립이고 동일한 분포를 가지며 등분산이라는 가정에 의존한다. 이분산성이 있으면 잔차를 섞는 과정이 공변량 수준별 분산구조를 파괴하므로 관측쌍 부트스트랩 또는 와일드 부트스트랩이 더 적합하다.</p>
+</section>
+<section id="와일드-부트스트랩" class="level3" data-number="7.9.3">
+<h3 data-number="7.9.3" class="anchored" data-anchor-id="와일드-부트스트랩"><span class="header-section-number">7.9.3</span> 와일드 부트스트랩</h3>
+<p>와일드 부트스트랩은</p>
+<p><span class="math display">\[
+Y_i^*=\widehat Y_i+v_i e_i
+\]</span></p>
+<p>처럼 잔차에 평균 0, 분산 1인 무작위 가중치 <span class="math inline">\(v_i\)</span>를 곱한다. 가장 단순한 라데마허 가중치는</p>
+<p><span class="math display">\[
+P(v_i=1)=P(v_i=-1)=\frac12
+\]</span></p>
+<p>이다. 이 방식은 각 관측값의 잔차 크기는 유지하면서 부호를 무작위화하므로 공변량에 따른 이분산 구조를 보존한다. 작은 표본에서는 레버리지 보정 잔차와 Mammen 가중치 등을 사용할 수 있다. 와일드 부트스트랩은 이분산 선형회귀에서 회귀계수의 불확실성과 가설검정을 수행하는 데 특히 유용하다.</p>
+</section>
+<section id="군집-부트스트랩" class="level3" data-number="7.9.4">
+<h3 data-number="7.9.4" class="anchored" data-anchor-id="군집-부트스트랩"><span class="header-section-number">7.9.4</span> 군집 부트스트랩</h3>
+<p>같은 병원, 학교, 가구 또는 환자 안의 반복측정치는 서로 독립이 아니다. 이때 관측값 하나씩이 아니라 독립 단위인 군집 전체를 재표본추출해야 한다. 군집 수가 <span class="math inline">\(G\)</span>개이면 <span class="math inline">\(G\)</span>개 군집을 복원추출하고, 선택된 군집에 속한 모든 관측값을 함께 포함한다.</p>
+<p>군집 <span class="math inline">\(g\)</span>의 자료를 <span class="math inline">\(\mathcal D_g\)</span>라 하면 군집 부트스트랩 표본은</p>
+<p><span class="math display">\[
+\mathcal D^*=\{\mathcal D_{g_1^*},\ldots,\mathcal D_{g_G^*}\}
+\]</span></p>
+<p>처럼 구성된다. 같은 군집이 여러 번 선택되면 해당 군집의 모든 관측값도 함께 반복된다. 군집 내 표본크기가 아니라 <strong>독립 군집 수 <span class="math inline">\(G\)</span></strong>가 점근근사의 핵심 표본크기이다. 군집 수가 적으면 일반 군집 부트스트랩의 신뢰구간이 불안정할 수 있으며, 와일드 군집 부트스트랩이나 소표본 보정을 고려해야 한다.</p>
+</section>
+<section id="층화-부트스트랩" class="level3" data-number="7.9.5">
+<h3 data-number="7.9.5" class="anchored" data-anchor-id="층화-부트스트랩"><span class="header-section-number">7.9.5</span> 층화 부트스트랩</h3>
+<p>원표본이 층화되어 있거나 결과가 드문 이분형 자료에서 사건군과 비사건군의 비율을 유지해야 한다면 각 층 안에서 별도로 복원추출한다. 층 <span class="math inline">\(h\)</span>의 표본크기가 <span class="math inline">\(n_h\)</span>이면 각 반복에서 같은 층 안에서 <span class="math inline">\(n_h\)</span>개를 복원추출한다. 이는 재표본에서 중요한 하위집단이 사라지는 것을 막고 원래 설계를 더 충실히 재현한다. 단, 사건군과 비사건군을 결과에 따라 인위적으로 고정하면 원래의 무작위 표본추출이 아니라 조건부 설계를 근사하게 되므로 추론목적과 일치하는지 확인해야 한다.</p>
+</section>
+<section id="시계열과-블록-부트스트랩" class="level3" data-number="7.9.6">
+<h3 data-number="7.9.6" class="anchored" data-anchor-id="시계열과-블록-부트스트랩"><span class="header-section-number">7.9.6</span> 시계열과 블록 부트스트랩</h3>
+<p>시계열에서는 인접 관측값의 상관을 보존해야 하므로 개별 시점을 독립적으로 재표본추출할 수 없다. 길이 <span class="math inline">\(\ell\)</span>의 연속 구간을 블록으로 정의하고 블록 단위로 복원추출하는 <strong>이동블록 부트스트랩(moving block bootstrap)</strong>을 사용할 수 있다. 블록 길이가 너무 짧으면 장기 의존성을 잃고, 너무 길면 독립적인 블록 수가 줄어 분산이 커진다. 원형 블록 부트스트랩, 정상 부트스트랩과 잔차 기반 시계열 부트스트랩은 경계 처리와 블록 길이 선택을 개선한 변형이다.</p>
+</section>
+<section id="복합표본조사의-부트스트랩" class="level3" data-number="7.9.7">
+<h3 data-number="7.9.7" class="anchored" data-anchor-id="복합표본조사의-부트스트랩"><span class="header-section-number">7.9.7</span> 복합표본조사의 부트스트랩</h3>
+<p>복합표본조사에서는 층화, 다단계 군집추출, 불균등 선택확률과 조사 가중치를 함께 재현해야 한다. 단순히 조사대상자를 행 단위로 복원추출하면 설계분산을 잘못 추정할 수 있다. 실무에서는 Rao–Wu 재척도 부트스트랩, 반복가중치 또는 기관이 제공한 replicate weight를 사용한다. 각 반복에서는 원가중치 대신 부트스트랩 반복가중치를 적용하여 동일한 추정량을 다시 계산한다.</p>
+</section>
+</section>
+<section id="반복수와-몬테카를로-오차" class="level2" data-number="7.10">
+<h2 data-number="7.10" class="anchored" data-anchor-id="반복수와-몬테카를로-오차"><span class="header-section-number">7.10</span> 반복수와 몬테카를로 오차</h2>
+<p>부트스트랩 결과 자체도 유한한 <span class="math inline">\(B\)</span>에 따른 몬테카를로 오차를 갖는다. 표준오차를 대략적으로 확인하는 탐색 단계에서는 <span class="math inline">\(B=500\)</span> 또는 <span class="math inline">\(1000\)</span>이 가능하지만, 최종 신뢰구간의 꼬리 분위수를 안정적으로 추정하려면 보통 수천 회 이상의 반복이 필요하다.</p>
+<p>부트스트랩 표준오차 추정량의 상대적 몬테카를로 오차는 정규근사 아래에서 대략</p>
+<p><span class="math display">\[
+\frac{1}{\sqrt{2(B-1)}}
+\]</span></p>
+<p>수준이다. <span class="math inline">\(B=1000\)</span>이면 약 2.2%, <span class="math inline">\(B=5000\)</span>이면 약 1.0%이다.</p>
+<p>백분위수 <span class="math inline">\(q_\alpha\)</span>의 경험적 위치를 결정하는 부트스트랩 반복 수는 이항분포와 연결된다. <span class="math inline">\(B\)</span>개 반복 중 <span class="math inline">\(q_\alpha\)</span>보다 작은 값의 수는 근사적으로 <span class="math inline">\(\operatorname{Binomial}(B,\alpha)\)</span>이므로 분위수 순위의 표준편차는</p>
+<p><span class="math display">\[
+\sqrt{B\alpha(1-\alpha)}
+\]</span></p>
+<p>수준이다. 특히 2.5%와 97.5% 꼬리 분위수는 중앙부보다 적은 반복값으로 결정되므로 표준오차 추정보다 더 많은 반복이 필요하다. 최종 분석에서는 서로 다른 난수시드 또는 증가된 <span class="math inline">\(B\)</span>에서 신뢰구간 끝점이 안정적인지 확인하는 것이 좋다.</p>
+<p>재현 가능한 분석을 위해 난수시드를 고정하고, 병렬연산을 사용하면 병렬 난수생성 방식도 명시해야 한다. 반복수, 재표본 단위, 층화 또는 군집 처리, 실패한 모형 적합의 수와 신뢰구간 계산법을 분석보고서에 기록해야 한다.</p>
+</section>
+<section id="부트스트랩을-사용하기-어려운-상황" class="level2" data-number="7.11">
+<h2 data-number="7.11" class="anchored" data-anchor-id="부트스트랩을-사용하기-어려운-상황"><span class="header-section-number">7.11</span> 부트스트랩을 사용하기 어려운 상황</h2>
+<p>부트스트랩은 매우 일반적이지만 모든 문제에서 자동으로 타당하지는 않다.</p>
+<ul>
+<li>표본이 매우 작고 모집단을 제대로 대표하지 못하면 경험적 분포도 부정확하다.</li>
+<li>표본의 최댓값이나 최솟값처럼 분포의 경계에 민감한 통계량은 일반 비모수 부트스트랩이 일관되지 않을 수 있다. 경험적 분포의 상한은 관측된 최댓값을 넘지 못하므로 모집단에서 더 큰 값이 나올 가능성을 재현할 수 없기 때문이다.</li>
+<li>시계열이나 공간자료처럼 관측값에 의존성이 있으면 독립적인 행 단위 재표본추출은 타당하지 않다. 블록 부트스트랩 등 의존구조를 보존하는 방법이 필요하다.</li>
+<li>복잡표본조사에서는 가중치, 층화와 군집설계를 무시한 부트스트랩이 분산을 잘못 추정한다.</li>
+<li>모형선택을 먼저 수행한 뒤 선택된 모형만 부트스트랩하면 선택 불확실성이 누락된다. 변수선택을 포함한 전체 분석절차를 각 반복에서 다시 수행해야 한다.</li>
+<li>희귀사건 자료에서는 일부 표본에서 사건이 전혀 없거나 완전분리가 발생할 수 있다.</li>
+<li>변화점, 임계값, 혼합모형의 경계 분산, 최대값과 같이 표준적인 <span class="math inline">\(\sqrt n\)</span> 수렴률을 따르지 않는 비정규 문제에서는 일반 부트스트랩의 근사분포가 잘못될 수 있다.</li>
+<li>매우 영향력 있는 소수 관측값이 추정량을 지배하면, 해당 관측값이 여러 번 선택된 반복에서 극단적인 추정치가 발생할 수 있다. 이는 계산오류가 아니라 자료의 불안정성을 드러내는 신호일 수 있다.</li>
+</ul>
+<p>일반 부트스트랩이 실패하는 비정규 문제에서는 크기 <span class="math inline">\(m&lt;n\)</span>의 표본을 뽑는 <span class="math inline">\(m\)</span>-중-<span class="math inline">\(n\)</span> 부트스트랩이나 비복원 부분표본추출(subsampling)을 고려할 수 있다. 이때 <span class="math inline">\(m\to\infty\)</span>이면서 <span class="math inline">\(m/n\to0\)</span>이 되도록 선택하지만, 유한표본에서 <span class="math inline">\(m\)</span>의 선택이 결과에 영향을 주므로 민감도 분석이 필요하다.</p>
+<p>부트스트랩의 핵심은 단순히 <code>sample(..., replace = TRUE)</code>를 반복하는 데 있지 않다. 실제 자료가 생성되고 표본이 선택되며 통계량이 계산된 전체 과정을 부트스트랩 반복 안에서 가능한 한 충실히 재현하는 데 있다.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./06-health-care-costs.html" class="pagination-link" aria-label="Health Care Costs">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Health Care Costs</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./08-causal-inference.html" class="pagination-link" aria-label="Causal Inference">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Causal Inference</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

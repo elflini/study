@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>9&nbsp; Survey Data Analysis – Statistics for Health Data Science</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./10-prediction.html" rel="next">
+<link href="./08-causal-inference.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-832e3d7b6b94ddcc90a000f8fabe51a9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./09-survey-data-analysis.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Survey Data Analysis</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Statistics for Health Data Science</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">머리말</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-statistics-and-health-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Statistics and Health Data</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-key-statistical-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Key Statistical Concepts</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-regression-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">회귀분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-binary-and-categorical-outcomes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Binary and Categorical Outcomes</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-count-outcomes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Count Outcomes</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-health-care-costs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Health Care Costs</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-bootstrap-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Bootstrap Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-causal-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Causal Inference</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-survey-data-analysis.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Survey Data Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Prediction</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#보건의료-조사자료의-역할" id="toc-보건의료-조사자료의-역할" class="nav-link active" data-scroll-target="#보건의료-조사자료의-역할"><span class="header-section-number">9.1</span> 보건의료 조사자료의 역할</a></li>
+  <li><a href="#보건조사의-측정-특성" id="toc-보건조사의-측정-특성" class="nav-link" data-scroll-target="#보건조사의-측정-특성"><span class="header-section-number">9.2</span> 보건조사의 측정 특성</a>
+  <ul class="collapse">
+  <li><a href="#무응답-편향" id="toc-무응답-편향" class="nav-link" data-scroll-target="#무응답-편향"><span class="header-section-number">9.2.1</span> 무응답 편향</a></li>
+  <li><a href="#회상-편향" id="toc-회상-편향" class="nav-link" data-scroll-target="#회상-편향"><span class="header-section-number">9.2.2</span> 회상 편향</a></li>
+  <li><a href="#사회적-바람직성-편향" id="toc-사회적-바람직성-편향" class="nav-link" data-scroll-target="#사회적-바람직성-편향"><span class="header-section-number">9.2.3</span> 사회적 바람직성 편향</a></li>
+  <li><a href="#표본오차와-비표본오차" id="toc-표본오차와-비표본오차" class="nav-link" data-scroll-target="#표본오차와-비표본오차"><span class="header-section-number">9.2.4</span> 표본오차와 비표본오차</a></li>
+  </ul></li>
+  <li><a href="#대표적인-보건조사" id="toc-대표적인-보건조사" class="nav-link" data-scroll-target="#대표적인-보건조사"><span class="header-section-number">9.3</span> 대표적인 보건조사</a></li>
+  <li><a href="#조사설계의-기본-요소" id="toc-조사설계의-기본-요소" class="nav-link" data-scroll-target="#조사설계의-기본-요소"><span class="header-section-number">9.4</span> 조사설계의 기본 요소</a>
+  <ul class="collapse">
+  <li><a href="#표본틀과-포함확률" id="toc-표본틀과-포함확률" class="nav-link" data-scroll-target="#표본틀과-포함확률"><span class="header-section-number">9.4.1</span> 표본틀과 포함확률</a></li>
+  <li><a href="#단순무작위추출" id="toc-단순무작위추출" class="nav-link" data-scroll-target="#단순무작위추출"><span class="header-section-number">9.4.2</span> 단순무작위추출</a></li>
+  </ul></li>
+  <li><a href="#층화추출" id="toc-층화추출" class="nav-link" data-scroll-target="#층화추출"><span class="header-section-number">9.5</span> 층화추출</a>
+  <ul class="collapse">
+  <li><a href="#비례배분과-최적배분" id="toc-비례배분과-최적배분" class="nav-link" data-scroll-target="#비례배분과-최적배분"><span class="header-section-number">9.5.1</span> 비례배분과 최적배분</a></li>
+  <li><a href="#불균등-층화와-가중치" id="toc-불균등-층화와-가중치" class="nav-link" data-scroll-target="#불균등-층화와-가중치"><span class="header-section-number">9.5.2</span> 불균등 층화와 가중치</a></li>
+  </ul></li>
+  <li><a href="#군집추출" id="toc-군집추출" class="nav-link" data-scroll-target="#군집추출"><span class="header-section-number">9.6</span> 군집추출</a>
+  <ul class="collapse">
+  <li><a href="#군집-내-상관" id="toc-군집-내-상관" class="nav-link" data-scroll-target="#군집-내-상관"><span class="header-section-number">9.6.1</span> 군집 내 상관</a></li>
+  <li><a href="#단계-군집평균" id="toc-단계-군집평균" class="nav-link" data-scroll-target="#단계-군집평균"><span class="header-section-number">9.6.2</span> 1단계 군집평균</a></li>
+  </ul></li>
+  <li><a href="#다단계-층화-군집설계" id="toc-다단계-층화-군집설계" class="nav-link" data-scroll-target="#다단계-층화-군집설계"><span class="header-section-number">9.7</span> 다단계 층화 군집설계</a></li>
+  <li><a href="#조사-가중치" id="toc-조사-가중치" class="nav-link" data-scroll-target="#조사-가중치"><span class="header-section-number">9.8</span> 조사 가중치</a>
+  <ul class="collapse">
+  <li><a href="#기본가중치" id="toc-기본가중치" class="nav-link" data-scroll-target="#기본가중치"><span class="header-section-number">9.8.1</span> 기본가중치</a></li>
+  <li><a href="#무응답-조정" id="toc-무응답-조정" class="nav-link" data-scroll-target="#무응답-조정"><span class="header-section-number">9.8.2</span> 무응답 조정</a></li>
+  <li><a href="#사후층화와-보정" id="toc-사후층화와-보정" class="nav-link" data-scroll-target="#사후층화와-보정"><span class="header-section-number">9.8.3</span> 사후층화와 보정</a></li>
+  <li><a href="#가중치의-변동과-설계효과" id="toc-가중치의-변동과-설계효과" class="nav-link" data-scroll-target="#가중치의-변동과-설계효과"><span class="header-section-number">9.8.4</span> 가중치의 변동과 설계효과</a></li>
+  </ul></li>
+  <li><a href="#설계효과와-분산추정" id="toc-설계효과와-분산추정" class="nav-link" data-scroll-target="#설계효과와-분산추정"><span class="header-section-number">9.9</span> 설계효과와 분산추정</a>
+  <ul class="collapse">
+  <li><a href="#taylor-선형화" id="toc-taylor-선형화" class="nav-link" data-scroll-target="#taylor-선형화"><span class="header-section-number">9.9.1</span> Taylor 선형화</a></li>
+  <li><a href="#반복가중치-방법" id="toc-반복가중치-방법" class="nav-link" data-scroll-target="#반복가중치-방법"><span class="header-section-number">9.9.2</span> 반복가중치 방법</a></li>
+  <li><a href="#단일-psu-층과-분산추정" id="toc-단일-psu-층과-분산추정" class="nav-link" data-scroll-target="#단일-psu-층과-분산추정"><span class="header-section-number">9.9.3</span> 단일 PSU 층과 분산추정</a></li>
+  </ul></li>
+  <li><a href="#조사자료의-기술통계" id="toc-조사자료의-기술통계" class="nav-link" data-scroll-target="#조사자료의-기술통계"><span class="header-section-number">9.10</span> 조사자료의 기술통계</a></li>
+  <li><a href="#r에서-조사설계-지정" id="toc-r에서-조사설계-지정" class="nav-link" data-scroll-target="#r에서-조사설계-지정"><span class="header-section-number">9.11</span> R에서 조사설계 지정</a></li>
+  <li><a href="#조사-가중-회귀분석" id="toc-조사-가중-회귀분석" class="nav-link" data-scroll-target="#조사-가중-회귀분석"><span class="header-section-number">9.12</span> 조사 가중 회귀분석</a></li>
+  <li><a href="#당뇨병과-의료비의-예" id="toc-당뇨병과-의료비의-예" class="nav-link" data-scroll-target="#당뇨병과-의료비의-예"><span class="header-section-number">9.13</span> 당뇨병과 의료비의 예</a></li>
+  <li><a href="#부분모집단-분석" id="toc-부분모집단-분석" class="nav-link" data-scroll-target="#부분모집단-분석"><span class="header-section-number">9.14</span> 부분모집단 분석</a></li>
+  <li><a href="#결측자료와-조사설계" id="toc-결측자료와-조사설계" class="nav-link" data-scroll-target="#결측자료와-조사설계"><span class="header-section-number">9.15</span> 결측자료와 조사설계</a></li>
+  <li><a href="#결과-보고-원칙" id="toc-결과-보고-원칙" class="nav-link" data-scroll-target="#결과-보고-원칙"><span class="header-section-number">9.16</span> 결과 보고 원칙</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Survey Data Analysis</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="보건의료-조사자료의-역할" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="보건의료-조사자료의-역할"><span class="header-section-number">9.1</span> 보건의료 조사자료의 역할</h2>
+<p>보건의료 연구에서는 표본에서 얻은 정보를 이용하여 모집단의 질병부담, 의료이용, 건강행태, 의료비와 같은 특성을 추정한다. 지금까지의 분석에서는 표본이 모집단에서 독립적으로 같은 확률로 추출된 단순확률표본이라고 가정하였다. 그러나 실제 국가 단위 보건조사는 비용과 조사 효율을 고려하여 층화, 군집화, 다단계 추출과 불균등 추출확률을 함께 사용한다.</p>
+<p>복합표본조사(complex sample survey)의 분석에서는 관측된 값뿐 아니라 <strong>어떻게 표본이 추출되었는가</strong>가 추정량과 표준오차를 결정한다. 조사설계를 무시하면 모집단 평균이나 비율이 편향될 수 있고, 표준오차가 지나치게 작거나 크게 계산될 수 있다.</p>
+<p>조사자료 분석의 핵심은 다음 세 요소를 함께 반영하는 것이다.</p>
+<p>복합표본조사에서는 먼저 <strong>무엇을 무작위로 보는가</strong>를 명확히 해야 한다. 설계기반 추론(design-based inference)은 유한한 모집단의 값 <span class="math inline">\(y_1,\ldots,y_N\)</span>을 고정된 것으로 보고, 표본추출지시변수 <span class="math inline">\(I_i=I(i\in s)\)</span>의 무작위성만을 이용한다. 이에 비해 모형기반 추론(model-based inference)은 모집단의 관측값 자체를 확률모형에서 생성된 것으로 본다. 국가보건조사의 공식 추정은 주로 설계기반 관점을 사용하지만, 회귀분석과 예측에서는 설계기반 분산과 통계모형을 결합한 모형보조(model-assisted) 접근이 널리 사용된다.</p>
+<p>예를 들어 모집단 평균</p>
+<p><span class="math display">\[
+\bar Y_U=\frac{1}{N}\sum_{i=1}^{N}y_i
+\]</span></p>
+<p>은 이미 존재하는 유한모집단의 기술적 특성이다. 표본조사의 목적은 새로운 확률변수의 모수를 추정하는 것이라기보다, 표본추출설계가 유도하는 불확실성을 이용해 이 유한모집단 특성을 추정하는 데 있다. 따라서 같은 관측자료라도 어떤 설계에서 추출되었는지에 따라 표준오차와 신뢰구간이 달라진다.</p>
+<ul>
+<li><strong>층화(stratification)</strong>: 모집단을 상호 배타적인 층으로 나누고 각 층에서 독립적으로 표본을 추출한다.</li>
+<li><strong>군집화(clustering)</strong>: 개인이 아니라 지역, 학교, 병원 또는 가구와 같은 군집을 먼저 추출한다.</li>
+<li><strong>가중치(weighting)</strong>: 각 조사대상자의 추출확률, 무응답 조정과 사후층화 정보를 반영한다.</li>
+</ul>
+</section>
+<section id="보건조사의-측정-특성" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="보건조사의-측정-특성"><span class="header-section-number">9.2</span> 보건조사의 측정 특성</h2>
+<p>보건조사는 행정자료만으로는 얻기 어려운 건강상태, 증상, 건강행태, 의료접근성, 삶의 질과 만족도 등을 직접 측정할 수 있다. 반면 자기보고 자료에는 여러 유형의 비표본오차가 발생할 수 있다.</p>
+<section id="무응답-편향" class="level3" data-number="9.2.1">
+<h3 data-number="9.2.1" class="anchored" data-anchor-id="무응답-편향"><span class="header-section-number">9.2.1</span> 무응답 편향</h3>
+<p>표본으로 선택된 사람이 조사에 응답하지 않고, 응답자와 비응답자가 관심 결과에서 체계적으로 다르면 무응답 편향(non-response bias)이 발생한다. 예를 들어 건강이 매우 나쁜 사람은 조사에 참여하기 어려울 수 있고, 의료서비스에 불만이 큰 사람은 만족도 조사에 더 적극적으로 응답할 수 있다.</p>
+<p>무응답은 조사설계 단계의 추적조사, 응답 방식의 다양화와 인센티브를 통해 줄일 수 있다. 분석 단계에서는 응답확률의 역수를 이용한 무응답 조정이나 보조정보를 이용한 가중치 보정을 사용할 수 있다.</p>
+</section>
+<section id="회상-편향" class="level3" data-number="9.2.2">
+<h3 data-number="9.2.2" class="anchored" data-anchor-id="회상-편향"><span class="header-section-number">9.2.2</span> 회상 편향</h3>
+<p>과거의 질병, 치료, 의료이용 또는 건강행태를 정확히 기억하지 못하거나, 결과 상태에 따라 기억의 정확성이 달라지는 경우 회상 편향(recall bias)이 생긴다. 최근 사건이나 중요한 사건은 비교적 잘 기억하지만, 오래된 외래방문이나 경미한 증상은 과소보고될 수 있다.</p>
+</section>
+<section id="사회적-바람직성-편향" class="level3" data-number="9.2.3">
+<h3 data-number="9.2.3" class="anchored" data-anchor-id="사회적-바람직성-편향"><span class="header-section-number">9.2.3</span> 사회적 바람직성 편향</h3>
+<p>흡연, 음주, 식습관, 안전벨트 착용, 성행동처럼 사회적 평가가 개입될 수 있는 문항에서는 응답자가 실제 행동보다 사회적으로 바람직한 방향으로 답할 수 있다. 익명성 보장, 중립적인 질문 문구와 자기기입 방식은 이러한 편향을 완화하는 데 도움이 된다.</p>
+</section>
+<section id="표본오차와-비표본오차" class="level3" data-number="9.2.4">
+<h3 data-number="9.2.4" class="anchored" data-anchor-id="표본오차와-비표본오차"><span class="header-section-number">9.2.4</span> 표본오차와 비표본오차</h3>
+<p>표본오차(sampling error)는 모집단의 일부만 조사하기 때문에 생기는 무작위 변동이며, 조사설계를 반영한 분산과 표준오차로 정량화할 수 있다. 반면 측정오차, 비응답, 자료처리 오류와 조사틀의 불완전성은 비표본오차(non-sampling error)이다. 표본크기가 커지면 표본오차는 줄어들지만 비표본오차가 자동으로 감소하는 것은 아니다.</p>
+<p>이 구분은 전체조사오차(total survey error) 관점에서 더 체계적으로 이해할 수 있다. 목표모집단과 표본틀이 일치하지 않으면 포괄오차(coverage error)가 생기고, 표본틀에서 표본을 뽑는 과정에는 표본오차가 발생한다. 선택된 대상자가 응답하지 않으면 단위무응답오차가, 일부 문항에만 답하지 않으면 문항무응답오차가 생긴다. 이후 질문 이해, 기억, 조사원 효과, 코딩과 자료처리에서도 오차가 추가될 수 있다.</p>
+<p>응답지시변수를 <span class="math inline">\(R_i\)</span>라고 하면 응답자 평균은 일반적으로</p>
+<p><span class="math display">\[
+E(Y_i\mid R_i=1)
+\]</span></p>
+<p>을 반영한다. 이것이 목표모집단 평균 <span class="math inline">\(E(Y_i)\)</span>과 같으려면 응답이 결과와 무관하거나, 관측된 보조변수 <span class="math inline">\(X_i\)</span>를 조건으로</p>
+<p><span class="math display">\[
+R_i \perp Y_i \mid X_i
+\]</span></p>
+<p>와 같은 설명가능한 무응답 가정이 필요하다. 무응답 가중치와 다중대치는 이 가정을 자료와 보조정보를 이용해 구현하는 방법이지, 무응답 편향을 자동으로 제거하는 절차는 아니다.</p>
+</section>
+</section>
+<section id="대표적인-보건조사" class="level2" data-number="9.3">
+<h2 data-number="9.3" class="anchored" data-anchor-id="대표적인-보건조사"><span class="header-section-number">9.3</span> 대표적인 보건조사</h2>
+<p>미국의 대표적인 보건조사에는 National Health Interview Survey(NHIS), National Health and Nutrition Examination Survey(NHANES), Medical Expenditure Panel Survey(MEPS)가 있다.</p>
+<p>NHIS는 매년 실시되는 가구면접조사로 질병, 건강행태, 보험보장과 의료접근성을 폭넓게 측정한다. NHANES는 면접에 신체검사와 혈액검사를 결합하여 혈압, 체질량지수와 당화혈색소 같은 객관적 지표를 제공한다. MEPS는 의료이용과 의료비를 정교하게 조사하는 패널조사로, NHIS 표본의 일부를 추적하여 개인과 가구 수준의 종단정보를 수집한다.</p>
+<p>이들 조사는 단순무작위표본이 아니라 층화와 다단계 군집추출을 사용하며, 각 자료에는 층, 1차 추출단위와 가중치 변수가 함께 제공된다.</p>
+</section>
+<section id="조사설계의-기본-요소" class="level2" data-number="9.4">
+<h2 data-number="9.4" class="anchored" data-anchor-id="조사설계의-기본-요소"><span class="header-section-number">9.4</span> 조사설계의 기본 요소</h2>
+<section id="표본틀과-포함확률" class="level3" data-number="9.4.1">
+<h3 data-number="9.4.1" class="anchored" data-anchor-id="표본틀과-포함확률"><span class="header-section-number">9.4.1</span> 표본틀과 포함확률</h3>
+<p>표본틀(sampling frame)은 표본을 추출할 수 있는 모집단 단위의 목록이다. 모집단 단위 <span class="math inline">\(i\)</span>가 표본에 포함될 확률을 포함확률(inclusion probability)이라 하고</p>
+<p><span class="math display">\[
+\pi_i=P(i\in s)
+\]</span></p>
+<p>로 나타낸다. 단순무작위추출에서는 모든 단위의 포함확률이 같지만, 복합조사에서는 특정 하위집단을 과대표집하기 때문에 포함확률이 서로 다를 수 있다.</p>
+<p>두 단위 <span class="math inline">\(i\)</span>와 <span class="math inline">\(j\)</span>가 동시에 표본에 포함될 확률은</p>
+<p><span class="math display">\[
+\pi_{ij}=P(i\in s, j\in s)
+\]</span></p>
+<p>이다. 복합설계의 분산은 개별 포함확률뿐 아니라 결합포함확률에도 의존한다.</p>
+<p>표본포함지시변수 <span class="math inline">\(I_i\)</span>를 사용하면</p>
+<p><span class="math display">\[
+E_d(I_i)=\pi_i,
+\qquad
+\operatorname{Cov}_d(I_i,I_j)=\pi_{ij}-\pi_i\pi_j
+\]</span></p>
+<p>이다. 아래첨자 <span class="math inline">\(d\)</span>는 값 <span class="math inline">\(y_i\)</span>를 고정하고 표본설계에 대해서만 기댓값과 분산을 계산한다는 뜻이다. 이 관계는 Horvitz–Thompson 추정량의 불편성과 설계분산을 유도하는 출발점이다.</p>
+<p>모집단 총계 <span class="math inline">\(T_Y=\sum_{i=1}^{N}y_i\)</span>의 Horvitz–Thompson 추정량을</p>
+<p><span class="math display">\[
+\widehat T_{HT}=\sum_{i=1}^{N}\frac{I_i y_i}{\pi_i}
+\]</span></p>
+<p>라고 하면</p>
+<p><span class="math display">\[
+E_d(\widehat T_{HT})
+=\sum_{i=1}^{N}\frac{E_d(I_i)y_i}{\pi_i}
+=\sum_{i=1}^{N}y_i
+=T_Y
+\]</span></p>
+<p>이므로 설계불편이다. 그 분산은</p>
+<p><span class="math display">\[
+\operatorname{Var}_d(\widehat T_{HT})
+=
+\sum_{i=1}^{N}\sum_{j=1}^{N}
+(\pi_{ij}-\pi_i\pi_j)
+\frac{y_i}{\pi_i}
+\frac{y_j}{\pi_j}
+\]</span></p>
+<p>로 표현된다. 따라서 군집추출처럼 두 단위가 함께 뽑힐 가능성이 큰 설계에서는 <span class="math inline">\(\pi_{ij}\)</span>가 분산에 직접 영향을 준다.</p>
+</section>
+<section id="단순무작위추출" class="level3" data-number="9.4.2">
+<h3 data-number="9.4.2" class="anchored" data-anchor-id="단순무작위추출"><span class="header-section-number">9.4.2</span> 단순무작위추출</h3>
+<p>크기 <span class="math inline">\(N\)</span>인 모집단에서 크기 <span class="math inline">\(n\)</span>의 표본을 복원 없이 같은 확률로 추출하면 각 단위의 포함확률은</p>
+<p><span class="math display">\[
+\pi_i=\frac{n}{N}
+\]</span></p>
+<p>이고 기본가중치는</p>
+<p><span class="math display">\[
+w_i=\frac{1}{\pi_i}=\frac{N}{n}
+\]</span></p>
+<p>이다.</p>
+<p>모집단 평균 <span class="math inline">\(\bar Y_U\)</span>의 표본평균 추정량은</p>
+<p><span class="math display">\[
+\bar y
+=
+\frac{1}{n}\sum_{i\in s}y_i
+\]</span></p>
+<p>이며, 유한모집단 보정을 포함한 분산은</p>
+<p><span class="math display">\[
+\operatorname{Var}(\bar y)
+=
+\left(1-\frac{n}{N}\right)\frac{S_Y^2}{n}
+\]</span></p>
+<p>이다. 여기서 <span class="math inline">\(1-n/N\)</span>은 유한모집단 보정(finite population correction, FPC)이다. 표본추출률 <span class="math inline">\(n/N\)</span>이 매우 작으면 이 항은 거의 1이 된다.</p>
+<p>유한모집단 보정은 복원 없이 추출할 때 이미 선택된 단위가 다시 선택될 수 없다는 음의 의존성을 반영한다. 복원추출이라면 각 추출은 독립이므로 분산이 <span class="math inline">\(S_Y^2/n\)</span>이지만, 비복원추출에서는 표본이 모집단 전체에 가까워질수록 남아 있는 불확실성이 줄어든다. <span class="math inline">\(n=N\)</span>이면 전수조사이므로</p>
+<p><span class="math display">\[
+1-\frac{n}{N}=0
+\]</span></p>
+<p>이고 표본오차도 0이 된다. 다단계 설계에서는 각 단계의 추출률이 작지 않을 때 단계별 FPC를 지정해야 하며, 최종 개인 수준의 전체 추출률만으로는 충분하지 않을 수 있다.</p>
+</section>
+</section>
+<section id="층화추출" class="level2" data-number="9.5">
+<h2 data-number="9.5" class="anchored" data-anchor-id="층화추출"><span class="header-section-number">9.5</span> 층화추출</h2>
+<p>층화추출은 모집단을 <span class="math inline">\(H\)</span>개의 서로 겹치지 않는 층으로 분할한 뒤 각 층에서 독립적으로 표본을 추출한다. 층 <span class="math inline">\(h\)</span>의 모집단 크기와 표본크기를 각각 <span class="math inline">\(N_h\)</span>, <span class="math inline">\(n_h\)</span>라고 하면</p>
+<p><span class="math display">\[
+N=\sum_{h=1}^{H}N_h,
+\qquad
+n=\sum_{h=1}^{H}n_h
+\]</span></p>
+<p>이다.</p>
+<p>층별 평균을</p>
+<p><span class="math display">\[
+\bar y_h
+=
+\frac{1}{n_h}\sum_{i\in s_h}y_{hi}
+\]</span></p>
+<p>라고 할 때 모집단 평균의 층화추정량은</p>
+<p><span class="math display">\[
+\bar y_{st}
+=
+\sum_{h=1}^{H}W_h\bar y_h,
+\qquad
+W_h=\frac{N_h}{N}
+\]</span></p>
+<p>이다.</p>
+<p>층별 단순무작위추출을 가정하면 분산은</p>
+<p><span class="math display">\[
+\operatorname{Var}(\bar y_{st})
+=
+\sum_{h=1}^{H}
+W_h^2
+\left(1-\frac{n_h}{N_h}\right)
+\frac{S_h^2}{n_h}
+\]</span></p>
+<p>로 주어진다. 층 내부가 동질적이고 층 사이가 이질적일수록 층화는 단순무작위추출보다 분산을 줄일 수 있다.</p>
+<p>층화추정량의 불편성은 층별 표본평균이 각 층 평균 <span class="math inline">\(\bar Y_h\)</span>의 불편추정량이라는 사실에서 바로 따른다.</p>
+<p><span class="math display">\[
+E_d(\bar y_{st})
+=
+\sum_{h=1}^{H}W_hE_d(\bar y_h)
+=
+\sum_{h=1}^{H}W_h\bar Y_h
+=
+\bar Y_U
+\]</span></p>
+<p>층화가 분산을 줄이는 핵심은 전체 변동을 층 내 변동과 층 간 변동으로 분해하는 데 있다.</p>
+<p><span class="math display">\[
+S_Y^2
+\approx
+\sum_{h=1}^{H}W_hS_h^2
++
+\sum_{h=1}^{H}W_h(\bar Y_h-\bar Y_U)^2
+\]</span></p>
+<p>비례배분 층화추출은 두 번째 항인 층 간 차이를 표본오차의 원천에서 제거한다. 따라서 층화변수가 결과와 강하게 관련될수록 효율이 높아진다. 반대로 층을 지나치게 세분화하여 층당 PSU가 하나만 남으면 분산추정이 어려워질 수 있다.</p>
+<section id="비례배분과-최적배분" class="level3" data-number="9.5.1">
+<h3 data-number="9.5.1" class="anchored" data-anchor-id="비례배분과-최적배분"><span class="header-section-number">9.5.1</span> 비례배분과 최적배분</h3>
+<p>비례배분에서는 모집단에서 각 층이 차지하는 비율과 같은 비율로 표본을 배분한다.</p>
+<p><span class="math display">\[
+n_h=n\frac{N_h}{N}
+\]</span></p>
+<p>층별 조사비용이 같고 층별 표준편차가 다를 때 Neyman 배분은</p>
+<p><span class="math display">\[
+n_h
+=
+n\frac{N_hS_h}{\sum_{k=1}^{H}N_kS_k}
+\]</span></p>
+<p>을 사용한다. 변동이 큰 층에 더 많은 표본을 배분함으로써 주어진 전체 표본크기에서 분산을 최소화한다.</p>
+<p>층별 단위조사비용이 <span class="math inline">\(c_h\)</span>로 서로 다르면 비용을 고려한 최적배분은</p>
+<p><span class="math display">\[
+n_h
+\propto
+\frac{N_hS_h}{\sqrt{c_h}}
+\]</span></p>
+<p>가 된다. 즉 변동이 크고 모집단 규모가 큰 층에는 더 많이 배분하되, 조사비용이 큰 층에는 상대적으로 적게 배분한다. Neyman 배분은 조사 <strong>설계 단계</strong>에서 사용하는 원리이고, 사후층화는 표본을 얻은 뒤 알려진 모집단 분포에 맞추는 <strong>분석 단계</strong>의 가중치 보정이라는 점에서 구분된다.</p>
+</section>
+<section id="불균등-층화와-가중치" class="level3" data-number="9.5.2">
+<h3 data-number="9.5.2" class="anchored" data-anchor-id="불균등-층화와-가중치"><span class="header-section-number">9.5.2</span> 불균등 층화와 가중치</h3>
+<p>희귀질환자, 특정 연령대 또는 소수집단을 충분히 확보하기 위해 일부 층을 과대표집할 수 있다. 이 경우 조사자료에서 관측된 단순비율은 모집단 비율과 다를 수 있으므로 반드시 설계가중치를 적용해야 한다.</p>
+<p>층 <span class="math inline">\(h\)</span>에서의 포함확률과 기본가중치는</p>
+<p><span class="math display">\[
+\pi_{hi}=\frac{n_h}{N_h},
+\qquad
+w_{hi}=\frac{N_h}{n_h}
+\]</span></p>
+<p>이다.</p>
+</section>
+</section>
+<section id="군집추출" class="level2" data-number="9.6">
+<h2 data-number="9.6" class="anchored" data-anchor-id="군집추출"><span class="header-section-number">9.6</span> 군집추출</h2>
+<p>군집추출에서는 개인을 직접 추출하지 않고 자연적으로 형성된 집단을 먼저 추출한다. 전국조사에서는 지역이나 조사구를 1차 추출단위(primary sampling unit, PSU)로 선택하고, 그 안에서 가구와 개인을 순차적으로 추출하는 경우가 많다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-9-1-sampling-designs.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:86.0%"></p>
+</figure>
+</div>
+<p>그림에서 단순무작위추출은 모집단 전체의 개인이 직접 추출단위가 되는 반면, 군집추출은 먼저 몇 개의 집단을 선택한 뒤 그 안의 개인을 조사한다. 군집 안의 관측값이 서로 비슷하면 같은 군집에서 개인을 더 많이 조사해도 새로운 정보의 증가가 제한된다. 반면 서로 다른 군집을 추가로 선택하면 새로운 환경과 특성을 포함할 가능성이 커지므로, 총 표본수가 같을 때는 군집 수를 늘리는 것이 군집당 표본수를 늘리는 것보다 효율적인 경우가 많다.</p>
+<p>1단계 군집추출에서는 선택된 군집 안의 모든 단위를 조사한다. 2단계 군집추출에서는 군집을 먼저 뽑은 뒤 각 선택 군집 안에서 다시 일부 단위를 추출한다. 층화와 달리 군집추출은 주로 조사비용과 이동비용을 줄이기 위해 사용한다.</p>
+<section id="군집-내-상관" class="level3" data-number="9.6.1">
+<h3 data-number="9.6.1" class="anchored" data-anchor-id="군집-내-상관"><span class="header-section-number">9.6.1</span> 군집 내 상관</h3>
+<p>같은 군집에 속한 사람들은 지역환경, 의료기관, 사회경제적 조건이나 가족 특성을 공유하므로 결과가 서로 유사할 수 있다. 군집 내 상관계수(intraclass correlation coefficient, ICC)를 <span class="math inline">\(\rho\)</span>라고 하고 군집크기가 모두 <span class="math inline">\(m\)</span>이라고 하면 군집화에 따른 대표적인 설계효과는</p>
+<p><span class="math display">\[
+\operatorname{DEFF}_{cluster}
+\approx
+1+(m-1)\rho
+\]</span></p>
+<p>이다. <span class="math inline">\(\rho&gt;0\)</span>이면 동일한 표본크기의 단순무작위표본보다 유효정보량이 작아진다.</p>
+<p>유효표본크기(effective sample size)는 근사적으로</p>
+<p><span class="math display">\[
+n_{eff}
+\approx
+\frac{n}{\operatorname{DEFF}}
+\]</span></p>
+<p>로 나타낼 수 있다.</p>
+<p>이 식은 다음과 같은 교환가능한 상관구조에서 유도할 수 있다. 군집 <span class="math inline">\(j\)</span>의 관측값을</p>
+<p><span class="math display">\[
+Y_{ij}=\mu+u_j+\varepsilon_{ij}
+\]</span></p>
+<p>로 나타내고 <span class="math inline">\(\operatorname{Var}(u_j)=\sigma_u^2\)</span>, <span class="math inline">\(\operatorname{Var}(\varepsilon_{ij})=\sigma_e^2\)</span>라 하면</p>
+<p><span class="math display">\[
+\rho
+=
+\frac{\sigma_u^2}{\sigma_u^2+\sigma_e^2}
+\]</span></p>
+<p>이다. 군집평균의 분산에는 한 개인의 분산뿐 아니라 서로 다른 두 개인의 공분산이 <span class="math inline">\(m(m-1)\)</span>개 포함되므로 <span class="math inline">\(1+(m-1)\rho\)</span>가 나타난다.</p>
+<p>군집크기가 동일하지 않을 때는 평균 군집크기 <span class="math inline">\(\bar m\)</span>과 군집크기의 변동계수 <span class="math inline">\(CV_m\)</span>을 이용하여</p>
+<p><span class="math display">\[
+\operatorname{DEFF}_{cluster}
+\approx
+1+
+\left[\{1+CV_m^2\}\bar m-1\right]\rho
+\]</span></p>
+<p>로 근사할 수 있다. 큰 군집이 소수 존재하면 동일한 평균 군집크기에서도 설계효과가 더 커질 수 있다.</p>
+</section>
+<section id="단계-군집평균" class="level3" data-number="9.6.2">
+<h3 data-number="9.6.2" class="anchored" data-anchor-id="단계-군집평균"><span class="header-section-number">9.6.2</span> 1단계 군집평균</h3>
+<p>군집 <span class="math inline">\(j\)</span>의 크기를 <span class="math inline">\(M_j\)</span>, 군집합계를 <span class="math inline">\(t_j=\sum_{i=1}^{M_j}y_{ji}\)</span>라고 하자. 군집을 같은 확률로 추출하고 선택된 군집의 모든 단위를 조사하면 모집단 총계는 군집합계의 평균을 확대하여 추정할 수 있다.</p>
+<p><span class="math display">\[
+\widehat T_Y
+=
+\frac{J}{m}\sum_{j\in s}t_j
+\]</span></p>
+<p>여기서 <span class="math inline">\(J\)</span>는 모집단 군집 수, <span class="math inline">\(m\)</span>은 선택된 군집 수이다. 군집크기가 서로 크게 다르면 확률비례크기추출(probability proportional to size, PPS)을 고려해야 한다.</p>
+<p>PPS에서는 군집 <span class="math inline">\(j\)</span>의 1단계 포함확률을 군집크기 <span class="math inline">\(M_j\)</span>에 비례하게 둔다.</p>
+<p><span class="math display">\[
+\pi_j
+\propto
+M_j
+\]</span></p>
+<p>그 뒤 각 선택 군집에서 같은 수의 개인을 추출하면, 큰 군집은 선택될 가능성이 높지만 그 안에서 개인이 선택될 조건부 확률은 낮아진다. 두 확률의 곱이 일정하게 설계되면 개인 수준에서 자기가중설계(self-weighting design)가 될 수 있다. 다만 실제 최종가중치는 무응답과 보정 과정을 거치므로 동일하지 않을 수 있다.</p>
+</section>
+</section>
+<section id="다단계-층화-군집설계" class="level2" data-number="9.7">
+<h2 data-number="9.7" class="anchored" data-anchor-id="다단계-층화-군집설계"><span class="header-section-number">9.7</span> 다단계 층화 군집설계</h2>
+<p>국가조사는 층화와 군집추출을 결합한다. 각 층에서 여러 PSU를 선택한 뒤, PSU 안에서 가구나 개인을 추가로 추출한다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/fig-9-2-stratified-two-stage.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:88.0%"></p>
+</figure>
+</div>
+<p>그림은 층화가 표본의 대표성과 정밀도를 확보하는 수평적 분할이라면, 다단계 추출은 조사비용을 줄이기 위한 단계적 선택임을 보여준다. 같은 층에 속한 PSU는 서로 비교 가능한 1단계 추출단위이고, 분산은 개인 간 변동이 아니라 먼저 층 내 PSU 간 변동을 이용해 추정된다. 따라서 개인 수가 매우 많더라도 실제 독립적인 설계정보의 수는 PSU 수에 더 가깝다.</p>
+<p>개인 <span class="math inline">\(i\)</span>가 속한 PSU가 1단계에서 선택될 조건부 확률을 <span class="math inline">\(\pi_{1hji}\)</span>, 선택된 PSU 안에서 개인이 2단계에서 선택될 조건부 확률을 <span class="math inline">\(\pi_{2hji}\)</span>라고 하면 전체 포함확률은</p>
+<p><span class="math display">\[
+\pi_{hji}
+=
+\pi_{1hji}\pi_{2hji}
+\]</span></p>
+<p>이고 기본가중치는</p>
+<p><span class="math display">\[
+w_{hji}
+=
+\frac{1}{\pi_{hji}}
+=
+\frac{1}{\pi_{1hji}\pi_{2hji}}
+\]</span></p>
+<p>이다. 단계가 더 많으면 각 단계의 조건부 추출확률을 모두 곱한다.</p>
+<p>복합설계에서 층 안에 적어도 두 개의 PSU가 있어야 층 내 군집간 변동을 직접 추정할 수 있다. 단일 PSU 층이 존재하면 자료 제공기관이 제시한 결합층 또는 분산추정 규칙을 적용해야 한다.</p>
+<p>Taylor 선형화에서 사용하는 대표적인 설계 자유도는</p>
+<p><span class="math display">\[
+\operatorname{df}_{design}
+=
+G-H
+\]</span></p>
+<p>이다. 여기서 <span class="math inline">\(G\)</span>는 전체 PSU 수, <span class="math inline">\(H\)</span>는 층 수이다. 대규모 개인 표본이라도 PSU 수가 적으면 자유도가 작으므로 정규분포 대신 이 자유도를 갖는 <span class="math inline">\(t\)</span> 분포를 사용한 신뢰구간이 더 적절하다. 단일 PSU 층을 임의로 독립관측처럼 처리하면 군집 간 변동을 추정할 수 없어 표준오차가 왜곡된다.</p>
+</section>
+<section id="조사-가중치" class="level2" data-number="9.8">
+<h2 data-number="9.8" class="anchored" data-anchor-id="조사-가중치"><span class="header-section-number">9.8</span> 조사 가중치</h2>
+<section id="기본가중치" class="level3" data-number="9.8.1">
+<h3 data-number="9.8.1" class="anchored" data-anchor-id="기본가중치"><span class="header-section-number">9.8.1</span> 기본가중치</h3>
+<p>Horvitz-Thompson 총계추정량은 각 관측값을 포함확률의 역수로 가중한다.</p>
+<p><span class="math display">\[
+\widehat T_{HT}
+=
+\sum_{i\in s}\frac{y_i}{\pi_i}
+=
+\sum_{i\in s}w_iy_i
+\]</span></p>
+<p>모집단 크기의 추정량은</p>
+<p><span class="math display">\[
+\widehat N
+=
+\sum_{i\in s}w_i
+\]</span></p>
+<p>이고 가중평균은 비율추정량의 형태로</p>
+<p><span class="math display">\[
+\widehat{\bar Y}
+=
+\frac{\sum_{i\in s}w_iy_i}
+{\sum_{i\in s}w_i}
+\]</span></p>
+<p>로 계산한다.</p>
+<p>가중평균은 두 Horvitz–Thompson 총계의 비인 Hájek 비율추정량이다.</p>
+<p><span class="math display">\[
+\widehat{\bar Y}_{H}
+=
+\frac{\widehat T_Y}{\widehat T_1}
+\]</span></p>
+<p>분모 <span class="math inline">\(\widehat T_1=\sum_iw_i\)</span>도 확률변수이므로 유한표본에서 정확히 불편하지는 않지만, 알려진 또는 추정된 모집단 크기로 정규화함으로써 보통 Horvitz–Thompson 평균보다 안정적이다. 1차 Taylor 전개를 적용하면 비율 <span class="math inline">\(R=T_Y/T_X\)</span>의 선형화 변수는</p>
+<p><span class="math display">\[
+z_i
+=
+\frac{y_i-Rx_i}{T_X}
+\]</span></p>
+<p>가 된다. 즉 비율추정량의 분산은 원자료 <span class="math inline">\(y_i\)</span>가 아니라 잔차형 변수 <span class="math inline">\(y_i-Rx_i\)</span>의 총계분산으로 근사된다.</p>
+</section>
+<section id="무응답-조정" class="level3" data-number="9.8.2">
+<h3 data-number="9.8.2" class="anchored" data-anchor-id="무응답-조정"><span class="header-section-number">9.8.2</span> 무응답 조정</h3>
+<p>조정셀 <span class="math inline">\(g\)</span> 안에서 표본대상자 수가 <span class="math inline">\(n_g\)</span>, 응답자 수가 <span class="math inline">\(r_g\)</span>이면 단순한 무응답 조정계수는</p>
+<p><span class="math display">\[
+a_g=\frac{n_g}{r_g}
+\]</span></p>
+<p>이고 조정가중치는</p>
+<p><span class="math display">\[
+w_i^{NR}=w_i^{base}a_g
+\]</span></p>
+<p>이다. 실제 조사에서는 응답성향모형이나 세분화된 가중치 등급을 사용할 수 있다.</p>
+<p>응답확률을 <span class="math inline">\(p_i=P(R_i=1\mid X_i)\)</span>라고 하면 응답자에 대한 역응답확률 가중치는</p>
+<p><span class="math display">\[
+w_i^{NR}
+=
+\frac{w_i^{base}}{\widehat p_i}
+\]</span></p>
+<p>형태로 쓸 수 있다. 이 조정이 편향을 줄이려면 응답확률모형에 결과와 응답 모두에 관련된 보조변수가 포함되어야 하고, 모든 대상자의 응답확률이 0보다 충분히 커야 한다. 응답확률이 매우 작은 대상자는 큰 가중치를 만들기 때문에, 무응답 편향 감소와 분산 증가 사이의 상충이 생긴다.</p>
+</section>
+<section id="사후층화와-보정" class="level3" data-number="9.8.3">
+<h3 data-number="9.8.3" class="anchored" data-anchor-id="사후층화와-보정"><span class="header-section-number">9.8.3</span> 사후층화와 보정</h3>
+<p>표본의 가중분포를 알려진 모집단 보조변수의 분포에 맞추기 위해 사후층화(post-stratification), raking 또는 calibration을 적용한다. 보정가중치 <span class="math inline">\(w_i^*\)</span>는 알려진 모집단 총계 <span class="math inline">\(X\)</span>에 대해</p>
+<p><span class="math display">\[
+\sum_{i\in s}w_i^*x_i=X
+\]</span></p>
+<p>을 만족하도록 정한다.</p>
+<p>이 과정은 표본의 대표성을 개선하고 보조변수가 결과와 관련되어 있으면 분산도 감소시킬 수 있다. 그러나 극단적인 가중치를 만들 수 있으므로 가중치 절단 또는 평활화가 사용되기도 한다.</p>
+<p>보정은 원래 설계가중치 <span class="math inline">\(d_i\)</span>에서 너무 멀리 벗어나지 않으면서 보정방정식을 만족하도록 가중치를 선택하는 최적화 문제로 나타낼 수 있다. 예를 들어 카이제곱 거리를 사용하면</p>
+<p><span class="math display">\[
+\min_{w_i^*}
+\sum_{i\in s}
+\frac{(w_i^*-d_i)^2}{d_iq_i}
+\quad
+\text{subject to}
+\quad
+\sum_{i\in s}w_i^*x_i=X
+\]</span></p>
+<p>를 푼다. 해는 일반화회귀(generalized regression, GREG) 추정량과 연결된다. 보조변수 <span class="math inline">\(X\)</span>가 결과 <span class="math inline">\(Y\)</span>를 잘 설명하면 보정 후 잔차변동이 줄어 분산이 감소한다.</p>
+<p>사후층화는 범주 조합별 모집단 수를 모두 알고 있을 때 각 셀의 가중합을 맞춘다. Raking은 성별, 연령, 지역처럼 주변분포만 알려진 경우 각 주변분포를 반복적으로 맞춘다. Calibration은 이보다 더 일반적인 틀로 연속형 보조변수 총계도 사용할 수 있다.</p>
+</section>
+<section id="가중치의-변동과-설계효과" class="level3" data-number="9.8.4">
+<h3 data-number="9.8.4" class="anchored" data-anchor-id="가중치의-변동과-설계효과"><span class="header-section-number">9.8.4</span> 가중치의 변동과 설계효과</h3>
+<p>가중치가 크게 다르면 일부 관측치가 추정량에 과도한 영향을 미친다. Kish의 가중치 설계효과는</p>
+<p><span class="math display">\[
+\operatorname{DEFF}_{w}
+\approx
+1+CV(w)^2
+\]</span></p>
+<p>로 근사할 수 있다. 여기서 <span class="math inline">\(CV(w)=s_w/\bar w\)</span>이다. 가중치만을 고려한 유효표본크기는</p>
+<p><span class="math display">\[
+n_{eff,w}
+=
+\frac{(\sum_iw_i)^2}{\sum_iw_i^2}
+\]</span></p>
+<p>이다.</p>
+<p>Kish 식은 가중치가 결과와 무관하고 단순무작위표본에서 가중치 변동만 추가된다는 근사에 기초한다. 실제 설계효과는 층화, 군집화, 가중치와 결과의 관계가 함께 결정하므로 변수와 추정량마다 다를 수 있다. 또한 가중치를 일정한 상수로 나누는 정규화는 평균이나 회귀계수 같은 비율형 추정량의 점추정을 바꾸지 않지만, 모집단 총계 추정에는 원래 척도의 가중치가 필요하다.</p>
+<p>가중치 절단은 극단적 가중치를 줄여 분산을 감소시키지만 보정방정식과 설계불편성을 훼손할 수 있다. 따라서 절단 전후의 추정치, 표준오차, 유효표본크기와 보조변수 균형을 함께 비교해야 한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>w <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">0.55</span>))</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>cv_w <span class="ot">&lt;-</span> <span class="fu">sd</span>(w) <span class="sc">/</span> <span class="fu">mean</span>(w)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>de_w <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> cv_w<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>n_eff <span class="ot">&lt;-</span> <span class="fu">sum</span>(w)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="fu">sum</span>(w<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean_weight =</span> <span class="fu">mean</span>(w),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">cv_weight =</span> cv_w,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">weight_design_effect =</span> de_w,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">effective_sample_size =</span> n_eff</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          mean_weight             cv_weight  weight_design_effect 
+             1.170556              0.598412              1.358097 
+effective_sample_size 
+           736.518685 </code></pre>
+</div>
+</div>
+<p>이 출력에서 <code>weight_design_effect</code>가 1보다 크면 가중치 변동만으로도 분산이 증가할 가능성이 있음을 뜻한다. <code>effective_sample_size</code>는 명목 표본수 1,000명 중 균등가중 표본 몇 명과 비슷한 정보량을 갖는지를 근사한다. 이는 특정 결과변수의 실제 설계효과가 아니라 가중치 분포만을 요약한 진단값이다.</p>
+</section>
+</section>
+<section id="설계효과와-분산추정" class="level2" data-number="9.9">
+<h2 data-number="9.9" class="anchored" data-anchor-id="설계효과와-분산추정"><span class="header-section-number">9.9</span> 설계효과와 분산추정</h2>
+<p>설계효과(design effect)는 실제 조사설계에서의 분산을 같은 크기의 단순무작위표본 분산과 비교한 값이다.</p>
+<p><span class="math display">\[
+\operatorname{DEFF}
+=
+\frac{\operatorname{Var}_{design}(\widehat\theta)}
+{\operatorname{Var}_{SRS}(\widehat\theta)}
+\]</span></p>
+<p><span class="math inline">\(\operatorname{DEFF}&gt;1\)</span>이면 복합설계가 단순무작위추출보다 분산을 증가시켰고, <span class="math inline">\(\operatorname{DEFF}&lt;1\)</span>이면 층화나 보조정보 활용으로 분산이 감소했음을 의미한다.</p>
+<p>설계효과의 제곱근</p>
+<p><span class="math display">\[
+\operatorname{DEFT}=\sqrt{\operatorname{DEFF}}
+\]</span></p>
+<p>는 단순무작위추출 표준오차에 곱해지는 배율로 해석할 수 있다. 예를 들어 <span class="math inline">\(\operatorname{DEFF}=2.25\)</span>이면 표준오차는 단순무작위추출보다 약 <span class="math inline">\(1.5\)</span>배 크다. 설계효과는 하나의 조사 전체에 고정된 값이 아니라 결과변수, 부분모집단과 추정량에 따라 달라진다.</p>
+<section id="taylor-선형화" class="level3" data-number="9.9.1">
+<h3 data-number="9.9.1" class="anchored" data-anchor-id="taylor-선형화"><span class="header-section-number">9.9.1</span> Taylor 선형화</h3>
+<p>비율, 회귀계수와 같은 비선형 추정량 <span class="math inline">\(\widehat\theta=g(\widehat T)\)</span>은 Taylor 전개를 통해 선형화한다.</p>
+<p><span class="math display">\[
+\widehat\theta
+\approx
+g(T)
++
+\nabla g(T)^T(\widehat T-T)
+\]</span></p>
+<p>따라서 선형화된 변수의 조사설계 분산을 계산하여 원래 추정량의 분산을 근사한다. 많은 조사분석 소프트웨어의 기본 분산추정법이다.</p>
+<p>예를 들어 가중비율 또는 평균과 같은 비율추정량</p>
+<p><span class="math display">\[
+\widehat R
+=
+\frac{\widehat T_Y}{\widehat T_X}
+\]</span></p>
+<p>에 대한 1차 Taylor 전개는</p>
+<p><span class="math display">\[
+\widehat R-R
+\approx
+\frac{1}{T_X}
+\left[
+(\widehat T_Y-T_Y)
+-
+R(\widehat T_X-T_X)
+\right]
+\]</span></p>
+<p>따라서 선형화 잔차 <span class="math inline">\(e_i=y_i-Rx_i\)</span>의 총계분산을 추정하면 된다. 이 원리는 회귀계수, 오즈비, 표준화 평균과 같은 복잡한 통계량에도 동일하게 적용된다.</p>
+</section>
+<section id="반복가중치-방법" class="level3" data-number="9.9.2">
+<h3 data-number="9.9.2" class="anchored" data-anchor-id="반복가중치-방법"><span class="header-section-number">9.9.2</span> 반복가중치 방법</h3>
+<p>복잡한 설계에서는 jackknife repeated replication(JRR), balanced repeated replication(BRR)과 bootstrap 반복가중치를 사용할 수 있다. <span class="math inline">\(R\)</span>개의 반복추정량을 <span class="math inline">\(\widehat\theta^{(r)}\)</span>라고 하면 일반적인 반복분산은</p>
+<p><span class="math display">\[
+\widehat{\operatorname{Var}}(\widehat\theta)
+=
+\sum_{r=1}^{R}c_r
+\left(\widehat\theta^{(r)}-\widehat\theta\right)^2
+\]</span></p>
+<p>형태를 갖는다. 계수 <span class="math inline">\(c_r\)</span>는 반복가중치 생성방법에 따라 달라진다.</p>
+<p>JRR은 한 번에 한 PSU를 제외하고 나머지 가중치를 조정하여 반복표본을 만든다. BRR은 각 층에 두 개의 PSU가 있을 때 Hadamard 행렬을 이용해 층마다 하나의 PSU를 선택하는 균형 반복을 구성한다. Fay의 BRR은 제외되는 PSU의 가중치를 완전히 0으로 만들지 않고 일부를 남겨 추정의 불안정을 줄인다. 조사 bootstrap은 설계의 각 추출단계를 모방하여 PSU를 재표본추출하거나 제공기관이 미리 생성한 반복가중치를 사용한다.</p>
+<p>반복가중치는 단순한 계산 편의가 아니라 표본설계와 가중치 보정과정을 함께 복제해야 한다. 공식자료가 반복가중치를 제공한다면 사용자가 원자료에서 임의로 일반 bootstrap을 수행하는 것보다 제공된 가중치를 사용하는 것이 바람직하다.</p>
+</section>
+<section id="단일-psu-층과-분산추정" class="level3" data-number="9.9.3">
+<h3 data-number="9.9.3" class="anchored" data-anchor-id="단일-psu-층과-분산추정"><span class="header-section-number">9.9.3</span> 단일 PSU 층과 분산추정</h3>
+<p>층 안에 PSU가 하나뿐이면 층 내 PSU 간 변동을 계산할 수 없다. 가능한 처리에는 유사한 층과 결합, 중심화된 전체 평균 변동 사용, 보수적인 평균분산 대입 등이 있지만 결과는 서로 다를 수 있다. 가장 우선되는 원칙은 자료 제공기관이 정한 결합층 또는 반복가중치를 따르는 것이다. 소프트웨어 옵션으로 문제를 숨기기보다 어떤 규칙을 사용했는지 보고해야 한다.</p>
+</section>
+</section>
+<section id="조사자료의-기술통계" class="level2" data-number="9.10">
+<h2 data-number="9.10" class="anchored" data-anchor-id="조사자료의-기술통계"><span class="header-section-number">9.10</span> 조사자료의 기술통계</h2>
+<p>조사자료에서 비율, 평균, 총계와 분산은 모두 가중치와 설계를 반영해야 한다.</p>
+<p>이분형 변수 <span class="math inline">\(y_i\in\{0,1\}\)</span>의 가중비율은</p>
+<p><span class="math display">\[
+\widehat P
+=
+\frac{\sum_iw_iy_i}{\sum_iw_i}
+\]</span></p>
+<p>이고 가중총계는</p>
+<p><span class="math display">\[
+\widehat T
+=
+\sum_iw_iy_i
+\]</span></p>
+<p>이다.</p>
+<p>단순 가중평균만 계산하고 층과 군집을 무시하면 점추정은 같을 수 있지만 표준오차는 올바르지 않다. 조사분석 함수는 가중치뿐 아니라 층과 PSU를 함께 지정해야 한다.</p>
+<p>비율이 0이나 1에 가까울 때 대칭적인 Wald 신뢰구간</p>
+<p><span class="math display">\[
+\widehat P
+\pm
+z_{1-\alpha/2}SE(\widehat P)
+\]</span></p>
+<p>은 <span class="math inline">\([0,1]\)</span> 범위를 벗어날 수 있다. 조사자료에서는 로짓 변환이나 다른 범위보존 변환을 적용한 뒤 역변환하는 방법이 더 안정적일 수 있다. 또한 자유도가 작으면 <span class="math inline">\(z\)</span> 분위수 대신 설계 자유도에 따른 <span class="math inline">\(t\)</span> 분위수를 사용한다.</p>
+<p>가중 중앙값과 분위수는 가중 경험분포</p>
+<p><span class="math display">\[
+\widehat F_w(y)
+=
+\frac{\sum_{i\in s}w_iI(Y_i\le y)}{\sum_{i\in s}w_i}
+\]</span></p>
+<p>의 역함수로 정의된다. 분위수의 표준오차는 평균보다 비선형적이므로 Taylor 선형화 또는 반복가중치 방법이 특히 유용하다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>H <span class="ot">&lt;-</span> <span class="dv">8</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>psu_per_stratum <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>persons_per_psu <span class="ot">&lt;-</span> <span class="dv">45</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>survey_dat <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">stratum =</span> <span class="fu">seq_len</span>(H),</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">psu_in_stratum =</span> <span class="fu">seq_len</span>(psu_per_stratum),</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">person =</span> <span class="fu">seq_len</span>(persons_per_psu)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>survey_dat<span class="sc">$</span>psu <span class="ot">&lt;-</span> <span class="fu">interaction</span>(</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  survey_dat<span class="sc">$</span>stratum,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  survey_dat<span class="sc">$</span>psu_in_stratum,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">drop =</span> <span class="cn">TRUE</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(survey_dat)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>psu_effect <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(H <span class="sc">*</span> psu_per_stratum, <span class="dv">0</span>, <span class="fl">0.45</span>)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>survey_dat<span class="sc">$</span>age <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">runif</span>(n, <span class="dv">18</span>, <span class="dv">85</span>))</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>survey_dat<span class="sc">$</span>female <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.53</span>)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>survey_dat<span class="sc">$</span>weight <span class="ot">&lt;-</span> <span class="fu">runif</span>(n, <span class="dv">450</span>, <span class="dv">1900</span>)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>survey_dat<span class="sc">$</span>diabetes <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  n,</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span>,</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plogis</span>(<span class="sc">-</span><span class="fl">5.0</span> <span class="sc">+</span> <span class="fl">0.055</span> <span class="sc">*</span> survey_dat<span class="sc">$</span>age <span class="sc">+</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>           <span class="fl">0.15</span> <span class="sc">*</span> survey_dat<span class="sc">$</span>female <span class="sc">+</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>           psu_effect[<span class="fu">as.integer</span>(survey_dat<span class="sc">$</span>psu)])</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>survey_dat<span class="sc">$</span>cost <span class="ot">&lt;-</span> <span class="fu">exp</span>(</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  <span class="fl">7.4</span> <span class="sc">+</span> <span class="fl">0.017</span> <span class="sc">*</span> survey_dat<span class="sc">$</span>age <span class="sc">+</span> <span class="fl">0.18</span> <span class="sc">*</span> survey_dat<span class="sc">$</span>female <span class="sc">+</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="fl">0.72</span> <span class="sc">*</span> survey_dat<span class="sc">$</span>diabetes <span class="sc">+</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="fl">0.25</span> <span class="sc">*</span> psu_effect[<span class="fu">as.integer</span>(survey_dat<span class="sc">$</span>psu)] <span class="sc">+</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.65</span>)</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(survey_dat)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  stratum psu_in_stratum person psu age female    weight diabetes     cost
+1       1              1      1 1.1  45      0 1485.6763        0 5920.936
+2       2              1      1 2.1  24      1 1384.0882        0 4442.714
+3       3              1      1 3.1  60      1  535.0384        0 7092.590
+4       4              1      1 4.1  49      1 1258.2244        0 1232.808
+5       5              1      1 5.1  56      1 1718.0131        1 6947.024
+6       6              1      1 6.1  62      0 1438.1490        0 4419.641</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>weighted_mean <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  survey_dat,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(weight <span class="sc">*</span> cost) <span class="sc">/</span> <span class="fu">sum</span>(weight)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>weighted_prevalence <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  survey_dat,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(weight <span class="sc">*</span> diabetes) <span class="sc">/</span> <span class="fu">sum</span>(weight)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>weighted_total_diabetes <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  survey_dat,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(weight <span class="sc">*</span> diabetes)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean_cost =</span> weighted_mean,</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">diabetes_prevalence =</span> weighted_prevalence,</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">population_diabetes =</span> weighted_total_diabetes</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          mean_cost diabetes_prevalence population_diabetes 
+       6.554442e+03        1.579336e-01        2.666095e+05 </code></pre>
+</div>
+</div>
+<p><code>mean_cost</code>와 <code>diabetes_prevalence</code>는 가중치의 공통 배율에 영향을 받지 않는 비율형 추정량이지만, <code>population_diabetes</code>는 가중치 합이 나타내는 모집단 규모에 직접 의존한다. 이 코드만으로는 층화와 군집을 반영한 표준오차를 얻을 수 없으므로, 아래의 조사설계 객체를 이용한 함수가 필요하다.</p>
+</section>
+<section id="r에서-조사설계-지정" class="level2" data-number="9.11">
+<h2 data-number="9.11" class="anchored" data-anchor-id="r에서-조사설계-지정"><span class="header-section-number">9.11</span> R에서 조사설계 지정</h2>
+<p>R의 <code>survey</code> 패키지는 층, 군집, 가중치와 유한모집단 보정을 반영한 분석을 제공한다. 패키지가 설치된 경우 다음과 같이 조사설계 객체를 만든다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">"survey"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  survey_dat <span class="ot">&lt;-</span> survey_dat[<span class="fu">order</span>(survey_dat<span class="sc">$</span>stratum, survey_dat<span class="sc">$</span>psu), ]</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  des <span class="ot">&lt;-</span> survey<span class="sc">::</span><span class="fu">svydesign</span>(</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">ids =</span> <span class="sc">~</span>psu,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strata =</span> <span class="sc">~</span>stratum,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">weights =</span> <span class="sc">~</span>weight,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> survey_dat,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">nest =</span> <span class="cn">TRUE</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  survey<span class="sc">::</span><span class="fu">svymean</span>(<span class="sc">~</span>cost <span class="sc">+</span> diabetes, <span class="at">design =</span> des)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  survey<span class="sc">::</span><span class="fu">svytotal</span>(<span class="sc">~</span>diabetes, <span class="at">design =</span> des)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">"survey 패키지가 설치되지 않아 조사설계 예제를 실행하지 않았습니다."</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          total    SE
+diabetes 266610 22209</code></pre>
+</div>
+</div>
+<p><code>svymean()</code>은 가중 평균과 함께 층 내 PSU 간 변동에서 계산한 설계기반 표준오차를 반환한다. 이분형 변수 <code>diabetes</code>의 평균은 가중 유병률이다. <code>svytotal()</code>은 같은 유병률에 가중 모집단 규모를 결합하여 모집단 환자 수를 추정하므로, 총계용 가중치가 올바른 척도로 제공되어야 한다.</p>
+<p><code>ids</code>에는 PSU 또는 다단계 군집변수를 지정하고, <code>strata</code>에는 층 변수를, <code>weights</code>에는 최종 조사 가중치를 지정한다. PSU 번호가 층마다 반복되는 경우 <code>nest = TRUE</code>를 사용하는 것이 안전하다.</p>
+<p>자료에 단계별 모집단 크기 또는 추출률이 제공되면 <code>fpc</code>에 지정할 수 있다. 이미 최종가중치와 반복가중치에 FPC가 반영되어 있는지는 자료 설명서를 확인해야 한다. 임의로 FPC를 추가하면 분산을 이중으로 감소시킬 수 있다.</p>
+<p>위 예제의 <code>weight</code>는 함수 사용법을 보여주기 위해 생성한 모의 가중치이다. 실제 조사에서는 분석대상, 조사연도, 검사 또는 설문영역에 맞는 공식 최종가중치를 선택해야 하며, 서로 다른 조사주기를 결합할 때는 자료 제공기관의 지침에 따라 가중치를 재조정해야 한다.</p>
+</section>
+<section id="조사-가중-회귀분석" class="level2" data-number="9.12">
+<h2 data-number="9.12" class="anchored" data-anchor-id="조사-가중-회귀분석"><span class="header-section-number">9.12</span> 조사 가중 회귀분석</h2>
+<p>조사자료의 회귀분석은 일반 회귀모형의 평균구조를 유지하면서 분산을 조사설계에 맞게 추정한다. 선형 회귀의 평균모형은</p>
+<p><span class="math display">\[
+E(Y_i\mid X_i)=X_i^T\beta
+\]</span></p>
+<p>이고 조사 가중 추정방정식은 개념적으로</p>
+<p><span class="math display">\[
+\sum_{i\in s}w_iX_i(Y_i-X_i^T\beta)=0
+\]</span></p>
+<p>을 푼다. 분산은 독립관측을 가정한 일반 모형기반 분산이 아니라 층과 PSU를 반영한 설계기반 샌드위치 분산으로 계산한다.</p>
+<p>이를 보다 일반적으로 쓰면 조사 가중 추정방정식은</p>
+<p><span class="math display">\[
+U(\beta)
+=
+\sum_{i\in s}w_i
+D_i^T V_i^{-1}
+\{Y_i-\mu_i(\beta)\}
+=0
+\]</span></p>
+<p>이다. 여기서 <span class="math inline">\(D_i=\partial\mu_i/\partial\beta^T\)</span>이고 <span class="math inline">\(V_i\)</span>는 작업분산이다. 추정된 계수의 분산은</p>
+<p><span class="math display">\[
+\widehat{\operatorname{Var}}(\widehat\beta)
+=
+A^{-1}BA^{-1}
+\]</span></p>
+<p>형태의 설계기반 샌드위치로 계산한다. <span class="math inline">\(A\)</span>는 추정방정식의 기울기, <span class="math inline">\(B\)</span>는 층 내 PSU 점수합의 변동을 반영한다.</p>
+<p>따라서 <code>svyglm()</code>의 적합은 일반적인 최대우도추정과 완전히 같지 않다. 평균모형은 일반화선형모형과 같지만, 가중 점수방정식과 설계기반 분산을 사용하는 의사우도 또는 모형보조 추정으로 이해하는 것이 적절하다.</p>
+<p>이분형 결과에는 조사 가중 로지스틱 회귀를 사용할 수 있다.</p>
+<p><span class="math display">\[
+\operatorname{logit}\{P(Y_i=1\mid X_i)\}
+=
+X_i^T\beta
+\]</span></p>
+<p>계수의 지수값은 공변량을 보정한 조건부 오즈비로 해석하지만, 표준오차와 신뢰구간은 조사설계를 반영한다.</p>
+<p>가중회귀의 계수는 목표모집단에서 가중된 평균관계를 설명한다. 비선형 모형에서는 조건부 오즈비가 모집단 평균 위험차이와 같지 않으므로, 정책적 해석이 목적이면 각 대상자에 대해 노출상태별 예측확률을 계산하고 조사 가중평균한 표준화 위험을 함께 제시하는 것이 좋다.</p>
+<p><span class="math display">\[
+\widehat\mu(a)
+=
+\frac{\sum_iw_i\widehat m(a,X_i)}{\sum_iw_i},
+\qquad
+\widehat{RD}=\widehat\mu(1)-\widehat\mu(0)
+\]</span></p>
+<p>이 계산은 회귀모형의 비선형성과 목표모집단의 공변량 분포를 동시에 반영한다. 다만 관찰자료에서 이를 인과효과로 해석하려면 조사대표성 외에 교환가능성, 양성성과 일관성 가정이 추가로 필요하다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">"survey"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>) <span class="sc">&amp;&amp;</span> <span class="fu">exists</span>(<span class="st">"des"</span>)) {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  fit_cost <span class="ot">&lt;-</span> survey<span class="sc">::</span><span class="fu">svyglm</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">log</span>(cost) <span class="sc">~</span> diabetes <span class="sc">+</span> age <span class="sc">+</span> female,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">design =</span> des</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  fit_diabetes <span class="ot">&lt;-</span> survey<span class="sc">::</span><span class="fu">svyglm</span>(</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    diabetes <span class="sc">~</span> age <span class="sc">+</span> female,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">design =</span> des,</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">family =</span> <span class="fu">quasibinomial</span>()</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(fit_cost)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(fit_diabetes)</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+svyglm(formula = diabetes ~ age + female, design = des, family = quasibinomial())
+
+Survey design:
+survey::svydesign(ids = ~psu, strata = ~stratum, weights = ~weight, 
+    data = survey_dat, nest = TRUE)
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -4.498293   0.306814 -14.661 7.77e-13 ***
+age          0.048885   0.004621  10.579 4.29e-10 ***
+female       0.046249   0.141466   0.327    0.747    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for quasibinomial family taken to be 1.036402)
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+</div>
+<p><code>fit_cost</code>의 계수는 로그비용의 조건부 평균 차이를 나타낸다. 원래 비용척도의 평균비 또는 평균차이가 목적이라면 재변환 또는 로그 연결 감마모형과 표준화 예측을 고려해야 한다. <code>fit_diabetes</code>의 연령계수는 연령 1세 증가에 따른 조건부 로그 오즈 변화이며, 지수화하면 오즈비가 된다. 두 모형 모두 계수의 점추정뿐 아니라 설계 자유도와 PSU 기반 표준오차를 함께 해석해야 한다.</p>
+<p>조사 가중 로지스틱 회귀에서는 <code>binomial()</code>보다 <code>quasibinomial()</code>을 사용하면 비정수 가중치에 대한 불필요한 경고를 피할 수 있다. 계수 추정 자체는 동일하지만 분산은 조사설계 기반으로 계산된다.</p>
+</section>
+<section id="당뇨병과-의료비의-예" class="level2" data-number="9.13">
+<h2 data-number="9.13" class="anchored" data-anchor-id="당뇨병과-의료비의-예"><span class="header-section-number">9.13</span> 당뇨병과 의료비의 예</h2>
+<p>보건의료비는 오른쪽으로 크게 치우치고 0이 포함될 수 있으므로 단일 선형회귀보다 2부분 모형이 적합한 경우가 많다. 조사설계에서 2부분 모형은 다음 두 식으로 구성된다.</p>
+<p>첫 번째 부분은 양의 비용이 발생할 확률을 추정한다.</p>
+<p><span class="math display">\[
+\operatorname{logit}\{P(Y_i&gt;0\mid X_i)\}
+=
+X_i^T\alpha
+\]</span></p>
+<p>두 번째 부분은 양의 비용이 있는 사람에서 평균비용을 추정한다.</p>
+<p><span class="math display">\[
+\log E(Y_i\mid Y_i&gt;0,X_i)
+=
+X_i^T\beta
+\]</span></p>
+<p>따라서 주변 평균비용은</p>
+<p><span class="math display">\[
+E(Y_i\mid X_i)
+=
+P(Y_i&gt;0\mid X_i)
+E(Y_i\mid Y_i&gt;0,X_i)
+\]</span></p>
+<p>이다.</p>
+<p>당뇨병의 평균 비용차이를 구하려면 각 대상자의 당뇨병 상태를 1과 0으로 각각 설정한 뒤 두 부분의 예측값을 결합하고 조사 가중평균을 계산한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>survey_dat<span class="sc">$</span>positive_cost <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(<span class="fu">runif</span>(<span class="fu">nrow</span>(survey_dat)) <span class="sc">&lt;</span> <span class="fl">0.88</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>survey_dat<span class="sc">$</span>total_cost <span class="ot">&lt;-</span> survey_dat<span class="sc">$</span>cost <span class="sc">*</span> survey_dat<span class="sc">$</span>positive_cost</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">"survey"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  des_cost <span class="ot">&lt;-</span> survey<span class="sc">::</span><span class="fu">svydesign</span>(</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">ids =</span> <span class="sc">~</span>psu,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">strata =</span> <span class="sc">~</span>stratum,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">weights =</span> <span class="sc">~</span>weight,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> survey_dat,</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">nest =</span> <span class="cn">TRUE</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  part1 <span class="ot">&lt;-</span> survey<span class="sc">::</span><span class="fu">svyglm</span>(</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    positive_cost <span class="sc">~</span> diabetes <span class="sc">+</span> age <span class="sc">+</span> female,</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">design =</span> des_cost,</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">family =</span> <span class="fu">quasibinomial</span>()</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>  part2 <span class="ot">&lt;-</span> survey<span class="sc">::</span><span class="fu">svyglm</span>(</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    total_cost <span class="sc">~</span> diabetes <span class="sc">+</span> age <span class="sc">+</span> female,</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">design =</span> <span class="fu">subset</span>(des_cost, positive_cost <span class="sc">==</span> <span class="dv">1</span>),</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">family =</span> <span class="fu">Gamma</span>(<span class="at">link =</span> <span class="st">"log"</span>)</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>  d1 <span class="ot">&lt;-</span> survey_dat</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>  d0 <span class="ot">&lt;-</span> survey_dat</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>  d1<span class="sc">$</span>diabetes <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>  d0<span class="sc">$</span>diabetes <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>  p1 <span class="ot">&lt;-</span> <span class="fu">predict</span>(part1, <span class="at">newdata =</span> d1, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>  p0 <span class="ot">&lt;-</span> <span class="fu">predict</span>(part1, <span class="at">newdata =</span> d0, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>  m1 <span class="ot">&lt;-</span> <span class="fu">predict</span>(part2, <span class="at">newdata =</span> d1, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>  m0 <span class="ot">&lt;-</span> <span class="fu">predict</span>(part2, <span class="at">newdata =</span> d0, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>  y1 <span class="ot">&lt;-</span> p1 <span class="sc">*</span> m1</span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>  y0 <span class="ot">&lt;-</span> p0 <span class="sc">*</span> m0</span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>  mu1 <span class="ot">&lt;-</span> <span class="fu">weighted.mean</span>(y1, survey_dat<span class="sc">$</span>weight)</span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>  mu0 <span class="ot">&lt;-</span> <span class="fu">weighted.mean</span>(y0, survey_dat<span class="sc">$</span>weight)</span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(</span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_cost_diabetes =</span> mu1,</span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_cost_no_diabetes =</span> mu0,</span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">incremental_cost =</span> mu1 <span class="sc">-</span> mu0,</span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">cost_ratio =</span> mu1 <span class="sc">/</span> mu0</span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   mean_cost_diabetes mean_cost_no_diabetes      incremental_cost 
+           9274.56490            4957.19465            4317.37025 
+           cost_ratio 
+              1.87093 </code></pre>
+</div>
+</div>
+<p>위 계산의 점추정은 설계가중치를 반영하지만, 주변효과의 표준오차는 두 모형의 추정불확실성을 동시에 반영해야 한다. 반복가중치가 제공되면 각 반복가중치마다 두 모형과 주변예측을 다시 계산하는 방법이 자연스럽다. 반복가중치가 없으면 PSU 단위의 설계기반 bootstrap을 고려할 수 있다.</p>
+<p>두 부분 모형에서 대상자 <span class="math inline">\(i\)</span>의 예측평균을</p>
+<p><span class="math display">\[
+\widehat\mu_i(a)
+=
+\widehat p_i(a)\widehat m_i^+(a)
+\]</span></p>
+<p>라고 하면 미분은 곱의 법칙에 따라</p>
+<p><span class="math display">\[
+d\mu_i
+=
+m_i^+dp_i+p_i dm_i^+
+\]</span></p>
+<p>가 된다. 따라서 전체 주변효과의 분산에는 발생확률 모형과 양의 비용 모형의 분산뿐 아니라 두 모형 추정량의 공분산이 포함된다. 두 모형을 별도로 적합한 뒤 표준오차를 단순 합성하면 이 공분산을 놓칠 수 있으므로, 전체 분석절차를 반복하는 replicate-weight 방법이 자연스럽다.</p>
+</section>
+<section id="부분모집단-분석" class="level2" data-number="9.14">
+<h2 data-number="9.14" class="anchored" data-anchor-id="부분모집단-분석"><span class="header-section-number">9.14</span> 부분모집단 분석</h2>
+<p>조사자료에서 특정 하위집단만 분석할 때는 원자료를 단순히 삭제하지 않고 설계객체에서 부분모집단(subpopulation 또는 domain)을 정의해야 한다. 표본에 남아 있는 다른 관측치는 직접 점추정에 기여하지 않더라도 올바른 분산추정에 필요한 설계정보를 제공할 수 있다.</p>
+<p>부분모집단 지시변수를 <span class="math inline">\(D_i\)</span>라고 하면 영역총계는</p>
+<p><span class="math display">\[
+T_{Y,D}
+=
+\sum_{i=1}^{N}D_iY_i
+\]</span></p>
+<p>이고 Horvitz–Thompson 추정량은</p>
+<p><span class="math display">\[
+\widehat T_{Y,D}
+=
+\sum_{i\in s}w_iD_iY_i
+\]</span></p>
+<p>이다. 영역 밖 관측치는 점추정 기여가 0이지만, PSU별 합계의 변동을 계산할 때 표본설계 구조를 유지한다. 원자료에서 영역 밖 관측치를 먼저 삭제하면 일부 층에서 PSU가 사라져 분산이 과소 또는 과대 추정될 수 있다.</p>
+<p>예를 들어 65세 이상만 분석할 때는 다음과 같이 처리한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">"survey"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>) <span class="sc">&amp;&amp;</span> <span class="fu">exists</span>(<span class="st">"des"</span>)) {</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  older_des <span class="ot">&lt;-</span> <span class="fu">subset</span>(des, age <span class="sc">&gt;=</span> <span class="dv">65</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  survey<span class="sc">::</span><span class="fu">svymean</span>(<span class="sc">~</span>cost <span class="sc">+</span> diabetes, <span class="at">design =</span> older_des)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               mean       SE
+cost     9951.74193 502.4074
+diabetes    0.32013   0.0256</code></pre>
+</div>
+</div>
+<p>부분모집단의 실제 표본크기와 가중 모집단크기를 함께 보고하는 것이 바람직하다.</p>
+</section>
+<section id="결측자료와-조사설계" class="level2" data-number="9.15">
+<h2 data-number="9.15" class="anchored" data-anchor-id="결측자료와-조사설계"><span class="header-section-number">9.15</span> 결측자료와 조사설계</h2>
+<p>가중치는 단위무응답을 어느 정도 조정하지만 문항무응답까지 자동으로 해결하지는 않는다. 완전사례분석은 결측기전이 결과 및 공변량과 관련되면 편향될 수 있다.</p>
+<p>단위무응답 가중치와 문항결측 대치는 서로 다른 문제를 다룬다. 최종가중치가 응답자와 비응답자의 차이를 보정하더라도, 응답자 내부에서 특정 문항이 결측이면 해당 분석변수의 완전사례가 다시 선택된 부분표본이 된다. 대치모형에는 분석모형의 변수뿐 아니라 무응답과 관련된 보조변수, 층, PSU와 가중치 정보를 포함하여 표본설계와 결측기전의 관계를 보존해야 한다.</p>
+<p>다중대치(multiple imputation)를 사용할 때는 대치모형에 층, PSU, 가중치 또는 이들과 관련된 보조변수를 포함하여 조사설계를 반영해야 한다. 각 대치자료에서 같은 조사설계 분석을 수행한 뒤 Rubin의 규칙으로 결합한다.</p>
+<p>대치자료 <span class="math inline">\(m=1,\ldots,M\)</span>에서 추정량과 분산을 각각 <span class="math inline">\(\widehat\theta_m\)</span>, <span class="math inline">\(U_m\)</span>이라 하면</p>
+<p><span class="math display">\[
+\bar\theta
+=
+\frac{1}{M}\sum_{m=1}^{M}\widehat\theta_m
+\]</span></p>
+<p><span class="math display">\[
+\bar U
+=
+\frac{1}{M}\sum_{m=1}^{M}U_m
+\]</span></p>
+<p><span class="math display">\[
+B
+=
+\frac{1}{M-1}\sum_{m=1}^{M}
+(\widehat\theta_m-\bar\theta)^2
+\]</span></p>
+<p>이고 전체분산은</p>
+<p><span class="math display">\[
+T
+=
+\bar U+
+\left(1+\frac{1}{M}\right)B
+\]</span></p>
+<p>이다.</p>
+<p>여기서 <span class="math inline">\(\bar U\)</span>는 각 대치자료 안에서의 조사설계 분산이고, <span class="math inline">\(B\)</span>는 결측값을 다르게 채움으로써 생기는 대치 간 변동이다. 따라서 각 대치자료에서 층·PSU·가중치를 무시한 일반분산을 계산한 뒤 Rubin의 규칙만 적용해서는 조사설계 불확실성이 올바르게 반영되지 않는다. 대치 수가 적거나 결측정보 비율이 크고 설계 자유도도 작으면 신뢰구간의 자유도 보정이 중요하다.</p>
+</section>
+<section id="결과-보고-원칙" class="level2" data-number="9.16">
+<h2 data-number="9.16" class="anchored" data-anchor-id="결과-보고-원칙"><span class="header-section-number">9.16</span> 결과 보고 원칙</h2>
+<p>조사자료 분석 결과에는 다음 정보가 함께 제시되어야 한다.</p>
+<ul>
+<li>조사명, 조사연도와 목표모집단</li>
+<li>층화, 군집과 추출단계의 개요</li>
+<li>최종 가중치의 구성과 적용 여부</li>
+<li>표본수와 가중 모집단수</li>
+<li>분산추정 방법</li>
+<li>사용한 조사분석 소프트웨어와 주요 옵션</li>
+<li>부분모집단 정의와 결측자료 처리방법</li>
+<li>점추정치, 설계기반 표준오차 또는 95% 신뢰구간</li>
+<li>조사설계를 무시한 분석과의 차이가 중요한 경우 그 영향</li>
+</ul>
+<p>가중치가 적용된 결과를 단순히 “표본의 평균”이나 “표본의 비율”이라고 표현하면 해석이 모호해진다. 해당 추정치가 목표모집단을 대표하도록 가중된 추정량인지 명확히 밝혀야 한다.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./08-causal-inference.html" class="pagination-link" aria-label="Causal Inference">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Causal Inference</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./10-prediction.html" class="pagination-link" aria-label="Prediction">
+        <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Prediction</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
