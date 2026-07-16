@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>8&nbsp; 정확추론: 변수 제거 – 확률적 그래프 모형</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./09-exact-inference-clique-trees.html" rel="next">
+<link href="./07-exponential-family.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-a522afb83bf8ae494942cf1b0ac9d4c3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./08-exact-inference-variable-elimination.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">정확추론: 변수 제거</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">확률적 그래프 모형</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">기초 개념</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-bayesian-network-representation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">베이즈 네트워크 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-undirected-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">무방향 그래픽 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-local-probabilistic-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">국소 확률 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-template-based-representations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">템플릿 기반 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-gaussian-network-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">가우시안 네트워크 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-exponential-family.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">지수족</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-exact-inference-variable-elimination.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">정확추론: 변수 제거</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-exact-inference-clique-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">정확추론: 클리크 트리</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-inference-as-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">최적화로서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-particle-based-approximate-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">입자 기반 근사추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-map-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">MAP 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-inference-in-hybrid-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">혼합 네트워크에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-inference-in-temporal-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">시간 모형에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-learning-graphical-models-overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">그래프모형 학습 개요</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-parameter-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">모수추정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-structure-learning-bayesian-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">베이지안 네트워크의 구조학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-partially-observed-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">부분관측 자료</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./19-learning-undirected-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">무방향 그래프모형의 학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20-causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">인과성</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21-utilities-and-decisions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">효용과 의사결정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22-structured-decision-problems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">구조화된 의사결정 문제</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./23-epilogue.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">맺음말: 왜 확률적 그래프 모형인가?</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#계산복잡도-분석" id="toc-계산복잡도-분석" class="nav-link active" data-scroll-target="#계산복잡도-분석"><span class="header-section-number">8.1</span> 계산복잡도 분석</a>
+  <ul>
+  <li><a href="#정확추론의-복잡도" id="toc-정확추론의-복잡도" class="nav-link" data-scroll-target="#정확추론의-복잡도"><span class="header-section-number">8.1.1</span> 정확추론의 복잡도</a>
+  <ul class="collapse">
+  <li><a href="#증명" id="toc-증명" class="nav-link" data-scroll-target="#증명"><span class="header-section-number">8.1.1.1</span> 증명</a></li>
+  </ul></li>
+  <li><a href="#근사추론의-복잡도" id="toc-근사추론의-복잡도" class="nav-link" data-scroll-target="#근사추론의-복잡도"><span class="header-section-number">8.1.2</span> 근사추론의 복잡도</a>
+  <ul class="collapse">
+  <li><a href="#증명의-핵심" id="toc-증명의-핵심" class="nav-link" data-scroll-target="#증명의-핵심"><span class="header-section-number">8.1.2.1</span> 증명의 핵심</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#변수-제거의-기본-아이디어" id="toc-변수-제거의-기본-아이디어" class="nav-link" data-scroll-target="#변수-제거의-기본-아이디어"><span class="header-section-number">8.2</span> 변수 제거의 기본 아이디어</a></li>
+  <li><a href="#변수-제거" id="toc-변수-제거" class="nav-link" data-scroll-target="#변수-제거"><span class="header-section-number">8.3</span> 변수 제거</a>
+  <ul>
+  <li><a href="#기본-제거" id="toc-기본-제거" class="nav-link" data-scroll-target="#기본-제거"><span class="header-section-number">8.3.1</span> 기본 제거</a>
+  <ul class="collapse">
+  <li><a href="#인자-주변화" id="toc-인자-주변화" class="nav-link" data-scroll-target="#인자-주변화"><span class="header-section-number">8.3.1.1</span> 인자 주변화</a></li>
+  <li><a href="#합-곱-변수-제거-알고리즘" id="toc-합-곱-변수-제거-알고리즘" class="nav-link" data-scroll-target="#합-곱-변수-제거-알고리즘"><span class="header-section-number">8.3.1.2</span> 합-곱 변수 제거 알고리즘</a></li>
+  <li><a href="#예제---확장-student-네트워크" id="toc-예제---확장-student-네트워크" class="nav-link" data-scroll-target="#예제---확장-student-네트워크"><span class="header-section-number">8.3.1.3</span> 예제 - 확장 Student 네트워크</a></li>
+  <li><a href="#중간-인자의-의미" id="toc-중간-인자의-의미" class="nav-link" data-scroll-target="#중간-인자의-의미"><span class="header-section-number">8.3.1.4</span> 중간 인자의 의미</a></li>
+  </ul></li>
+  <li><a href="#증거-처리" id="toc-증거-처리" class="nav-link" data-scroll-target="#증거-처리"><span class="header-section-number">8.3.2</span> 증거 처리</a></li>
+  <li><a href="#네트워크-다항식" id="toc-네트워크-다항식" class="nav-link" data-scroll-target="#네트워크-다항식"><span class="header-section-number">8.3.3</span> 네트워크 다항식</a></li>
+  </ul></li>
+  <li><a href="#복잡도와-그래프-구조-변수-제거" id="toc-복잡도와-그래프-구조-변수-제거" class="nav-link" data-scroll-target="#복잡도와-그래프-구조-변수-제거"><span class="header-section-number">8.4</span> 복잡도와 그래프 구조: 변수 제거</a>
+  <ul>
+  <li><a href="#단순-계산량-분석" id="toc-단순-계산량-분석" class="nav-link" data-scroll-target="#단순-계산량-분석"><span class="header-section-number">8.4.1</span> 단순 계산량 분석</a></li>
+  <li><a href="#그래프이론적-분석" id="toc-그래프이론적-분석" class="nav-link" data-scroll-target="#그래프이론적-분석"><span class="header-section-number">8.4.2</span> 그래프이론적 분석</a>
+  <ul class="collapse">
+  <li><a href="#인자집합과-무방향-그래프" id="toc-인자집합과-무방향-그래프" class="nav-link" data-scroll-target="#인자집합과-무방향-그래프"><span class="header-section-number">8.4.2.1</span> 인자집합과 무방향 그래프</a></li>
+  <li><a href="#제거를-그래프-변환으로-보기" id="toc-제거를-그래프-변환으로-보기" class="nav-link" data-scroll-target="#제거를-그래프-변환으로-보기"><span class="header-section-number">8.4.2.2</span> 제거를 그래프 변환으로 보기</a></li>
+  <li><a href="#유도그래프" id="toc-유도그래프" class="nav-link" data-scroll-target="#유도그래프"><span class="header-section-number">8.4.2.3</span> 유도그래프</a></li>
+  <li><a href="#증명-1" id="toc-증명-1" class="nav-link" data-scroll-target="#증명-1"><span class="header-section-number">8.4.2.4</span> 증명</a></li>
+  </ul></li>
+  <li><a href="#제거순서-찾기" id="toc-제거순서-찾기" class="nav-link" data-scroll-target="#제거순서-찾기"><span class="header-section-number">8.4.3</span> 제거순서 찾기</a>
+  <ul class="collapse">
+  <li><a href="#현그래프" id="toc-현그래프" class="nav-link" data-scroll-target="#현그래프"><span class="header-section-number">8.4.3.1</span> 현그래프</a></li>
+  <li><a href="#폴리트리" id="toc-폴리트리" class="nav-link" data-scroll-target="#폴리트리"><span class="header-section-number">8.4.3.2</span> 폴리트리</a></li>
+  <li><a href="#min-fill-min-size와-min-weight-탐색" id="toc-min-fill-min-size와-min-weight-탐색" class="nav-link" data-scroll-target="#min-fill-min-size와-min-weight-탐색"><span class="header-section-number">8.4.3.3</span> Min-Fill, Min-Size와 Min-Weight 탐색</a></li>
+  <li><a href="#변수-제거순서의-실증-비교" id="toc-변수-제거순서의-실증-비교" class="nav-link" data-scroll-target="#변수-제거순서의-실증-비교"><span class="header-section-number">8.4.3.4</span> 변수 제거순서의 실증 비교</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#조건화" id="toc-조건화" class="nav-link" data-scroll-target="#조건화"><span class="header-section-number">8.5</span> 조건화</a>
+  <ul>
+  <li><a href="#조건화-알고리즘" id="toc-조건화-알고리즘" class="nav-link" data-scroll-target="#조건화-알고리즘"><span class="header-section-number">8.5.1</span> 조건화 알고리즘</a></li>
+  <li><a href="#조건화와-변수-제거의-관계" id="toc-조건화와-변수-제거의-관계" class="nav-link" data-scroll-target="#조건화와-변수-제거의-관계"><span class="header-section-number">8.5.2</span> 조건화와 변수 제거의 관계</a>
+  <ul class="collapse">
+  <li><a href="#예제---불필요한-반복" id="toc-예제---불필요한-반복" class="nav-link" data-scroll-target="#예제---불필요한-반복"><span class="header-section-number">8.5.2.1</span> 예제 - 불필요한 반복</a></li>
+  </ul></li>
+  <li><a href="#그래프이론적-분석-1" id="toc-그래프이론적-분석-1" class="nav-link" data-scroll-target="#그래프이론적-분석-1"><span class="header-section-number">8.5.3</span> 그래프이론적 분석</a>
+  <ul class="collapse">
+  <li><a href="#예제" id="toc-예제" class="nav-link" data-scroll-target="#예제"><span class="header-section-number">8.5.3.1</span> 예제</a></li>
+  </ul></li>
+  <li><a href="#개선된-조건화" id="toc-개선된-조건화" class="nav-link" data-scroll-target="#개선된-조건화"><span class="header-section-number">8.5.4</span> 개선된 조건화</a>
+  <ul class="collapse">
+  <li><a href="#조건화와-제거의-교대" id="toc-조건화와-제거의-교대" class="nav-link" data-scroll-target="#조건화와-제거의-교대"><span class="header-section-number">8.5.4.1</span> 조건화와 제거의 교대</a></li>
+  <li><a href="#예제-1" id="toc-예제-1" class="nav-link" data-scroll-target="#예제-1"><span class="header-section-number">8.5.4.2</span> 예제</a></li>
+  <li><a href="#네트워크-분해" id="toc-네트워크-분해" class="nav-link" data-scroll-target="#네트워크-분해"><span class="header-section-number">8.5.4.3</span> 네트워크 분해</a></li>
+  <li><a href="#예제-2" id="toc-예제-2" class="nav-link" data-scroll-target="#예제-2"><span class="header-section-number">8.5.4.4</span> 예제</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#구조화된-cpd를-이용한-추론" id="toc-구조화된-cpd를-이용한-추론" class="nav-link" data-scroll-target="#구조화된-cpd를-이용한-추론"><span class="header-section-number">8.6</span> 구조화된 CPD를 이용한 추론</a>
+  <ul>
+  <li><a href="#인과영향-독립성" id="toc-인과영향-독립성" class="nav-link" data-scroll-target="#인과영향-독립성"><span class="header-section-number">8.6.1</span> 인과영향 독립성</a>
+  <ul class="collapse">
+  <li><a href="#noisy-or-분해" id="toc-noisy-or-분해" class="nav-link" data-scroll-target="#noisy-or-분해"><span class="header-section-number">8.6.1.1</span> Noisy-or 분해</a></li>
+  <li><a href="#일반적인-분해" id="toc-일반적인-분해" class="nav-link" data-scroll-target="#일반적인-분해"><span class="header-section-number">8.6.1.2</span> 일반적인 분해</a></li>
+  <li><a href="#예제---일반화선형모형" id="toc-예제---일반화선형모형" class="nav-link" data-scroll-target="#예제---일반화선형모형"><span class="header-section-number">8.6.1.3</span> 예제 - 일반화선형모형</a></li>
+  <li><a href="#전역구조의-영향" id="toc-전역구조의-영향" class="nav-link" data-scroll-target="#전역구조의-영향"><span class="header-section-number">8.6.1.4</span> 전역구조의 영향</a></li>
+  <li><a href="#예제-3" id="toc-예제-3" class="nav-link" data-scroll-target="#예제-3"><span class="header-section-number">8.6.1.5</span> 예제</a></li>
+  <li><a href="#이질적-인수분해" id="toc-이질적-인수분해" class="nav-link" data-scroll-target="#이질적-인수분해"><span class="header-section-number">8.6.1.6</span> 이질적 인수분해</a></li>
+  </ul></li>
+  <li><a href="#상황특이적-독립성" id="toc-상황특이적-독립성" class="nav-link" data-scroll-target="#상황특이적-독립성"><span class="header-section-number">8.6.2</span> 상황특이적 독립성</a>
+  <ul class="collapse">
+  <li><a href="#규칙-기반-변수-제거" id="toc-규칙-기반-변수-제거" class="nav-link" data-scroll-target="#규칙-기반-변수-제거"><span class="header-section-number">8.6.2.1</span> 규칙 기반 변수 제거</a></li>
+  <li><a href="#예제---cpd를-규칙으로-변환" id="toc-예제---cpd를-규칙으로-변환" class="nav-link" data-scroll-target="#예제---cpd를-규칙으로-변환"><span class="header-section-number">8.6.2.2</span> 예제 - CPD를 규칙으로 변환</a></li>
+  <li><a href="#예제---변수-d-제거" id="toc-예제---변수-d-제거" class="nav-link" data-scroll-target="#예제---변수-d-제거"><span class="header-section-number">8.6.2.3</span> 예제 - 변수 <span class="math inline">\(D\)</span> 제거</a></li>
+  <li><a href="#csi를-이용한-조건화" id="toc-csi를-이용한-조건화" class="nav-link" data-scroll-target="#csi를-이용한-조건화"><span class="header-section-number">8.6.2.4</span> CSI를 이용한 조건화</a></li>
+  <li><a href="#예제-4" id="toc-예제-4" class="nav-link" data-scroll-target="#예제-4"><span class="header-section-number">8.6.2.5</span> 예제</a></li>
+  </ul></li>
+  <li><a href="#논의" id="toc-논의" class="nav-link" data-scroll-target="#논의"><span class="header-section-number">8.6.3</span> 논의</a>
+  <ul class="collapse">
+  <li><a href="#국소구조를-이용한-추론의-실증결과" id="toc-국소구조를-이용한-추론의-실증결과" class="nav-link" data-scroll-target="#국소구조를-이용한-추론의-실증결과"><span class="header-section-number">8.6.3.1</span> 국소구조를 이용한 추론의 실증결과</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-exact-inference-variable-elimination" class="quarto-section-identifier"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">정확추론: 변수 제거</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>확률그래프모형에서 <strong>추론(inference)</strong>은 관측된 증거를 바탕으로 관심변수의 확률분포를 계산하는 과정이다. 이 장에서는 그래프의 구조, 그래프가 표현하는 조건부독립성, 그리고 결합분포의 인수분해가 추론을 얼마나 크게 단순화하는지를 살펴본다. 복잡한 네트워크라 하더라도 구조가 적절하면 정확추론이 실질적으로 가능하다.</p>
+<p>가장 대표적인 질의는 다음의 <strong>조건부확률 질의(conditional probability query)</strong>이다. <span class="math display">\[
+P(Y\mid E=e).
+\]</span> 조건부확률의 정의에 의해 <span class="math display">\[
+P(Y\mid E=e)=\frac{P(Y,e)}{P(e)}.
+\]</span> 질의변수도 증거변수도 아닌 나머지 변수를 <span class="math display">\[
+W=\mathcal X-Y-E
+\]</span> 라고 두면, 임의의 <span class="math inline">\(y\)</span>에 대해 <span class="math display">\[
+P(y,e)=\sum_w P(y,e,w).
+\]</span> 또한 <span class="math display">\[
+P(e)=\sum_yP(y,e).
+\]</span> 따라서 먼저 <span class="math inline">\(P(Y,e)\)</span>라는 비정규화 벡터를 계산한 뒤 그 성분의 합 <span class="math inline">\(P(e)\)</span>로 나누면 <span class="math inline">\(P(Y\mid e)\)</span>를 얻는다. 이 마지막 과정을 <strong>재정규화(renormalization)</strong>라고 한다.</p>
+<section id="계산복잡도-분석" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="계산복잡도-분석"><span class="header-section-number">8.1</span> 계산복잡도 분석</h2>
+<p>원칙적으로 그래프모형이 주어지면 결합분포를 완전히 생성한 뒤 원하는 연산을 수행할 수 있다. 조건부확률 질의에서는 결합분포를 합산하고, MAP 질의에서는 최대확률 할당을 찾으며, marginal MAP에서는 두 연산을 혼합한다. 그러나 결합분포의 크기는 변수 수에 지수적으로 증가하므로, 이 방식은 그래프모형이 제공하는 압축표현의 이점을 잃게 한다.</p>
+<p>불행하게도 최악의 경우 이러한 지수적 폭발은 거의 피할 수 없다. 베이즈 네트워크와 마르코프 네트워크의 일반적인 정확추론은 NP-hard이며, 근사추론도 적절한 정확도 보장을 요구하면 NP-hard하다. 다만 최악의 경우의 난해성이 모든 실제 네트워크가 어렵다는 뜻은 아니다. 이후에서 보듯이 실제 응용의 계산가능성은 그래프의 구체적인 연결구조에 크게 좌우된다.</p>
+<section id="정확추론의-복잡도" class="level3" data-number="8.1.1">
+<h3 data-number="8.1.1" class="anchored" data-anchor-id="정확추론의-복잡도"><span class="header-section-number">8.1.1</span> 정확추론의 복잡도</h3>
+<p>베이즈 네트워크의 부호화는 DAG 구조와 각 노드의 CPD를 포함한다고 가정한다. 여기서는 CPD가 최악의 경우 완전한 표로 표현되어 있으며, <span class="math inline">\(X_i\)</span>의 표 크기는 <span class="math display">\[
+|\operatorname{Val}(\{X_i\}\cup Pa_{X_i})|
+\]</span> 라고 본다.</p>
+<p>먼저 다음 결정문제를 정의한다.</p>
+<blockquote class="blockquote">
+<p><strong>BN-Pr-DP</strong><br>
+베이즈 네트워크 <span class="math inline">\(B\)</span>, 변수 <span class="math inline">\(X\)</span>, 값 <span class="math inline">\(x\in\operatorname{Val}(X)\)</span>가 주어졌을 때 <span class="math inline">\(P_B(X=x)&gt;0\)</span>인지 판정하라.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정리 - BN-Pr-DP의 복잡도</strong><br>
+BN-Pr-DP는 NP-완전이다.</p>
+</blockquote>
+<section id="증명" class="level4" data-number="8.1.1.1">
+<h4 data-number="8.1.1.1" class="anchored" data-anchor-id="증명"><span class="header-section-number">8.1.1.1</span> 증명</h4>
+<p><strong>NP에 속함.</strong> 완전할당 <span class="math inline">\(\xi\)</span>를 추측한 뒤 <span class="math inline">\(X=x\)</span>인지와 <span class="math inline">\(P(\xi)&gt;0\)</span>인지 확인한다. 베이즈 네트워크의 연쇄법칙에 의해 <span class="math display">\[
+P(\xi)=\prod_iP(x_i\mid pa_i)
+\]</span> 이므로, 특정 완전할당의 확률은 네트워크 크기에 선형인 시간에 계산할 수 있다.</p>
+<p><strong>NP-hard.</strong> 3-SAT 문제를 베이즈 네트워크 추론으로 환원한다. 명제변수 <span class="math inline">\(q_1,\ldots,q_n\)</span> 각각에 대해 이진 루트노드 <span class="math inline">\(Q_k\)</span>를 만들고 <span class="math inline">\(P(Q_k=1)=0.5\)</span>로 둔다. 각 절 <span class="math inline">\(C_i\)</span>에는 그 절에 등장하는 명제변수를 부모로 연결하고, 절의 참·거짓을 정확히 계산하는 결정적 CPD를 부여한다. 절당 리터럴이 최대 3개이므로 CPD의 크기는 상수이다.</p>
+<p>모든 절이 참일 때만 <span class="math inline">\(X=1\)</span>이 되게 해야 한다. <span class="math inline">\(C_1,\ldots,C_m\)</span>을 한꺼번에 <span class="math inline">\(X\)</span>의 부모로 두면 <span class="math inline">\(X\)</span>의 CPD가 지수적으로 커지므로, 이항 AND 게이트 <span class="math inline">\(A_1,\ldots,A_{m-2}\)</span>를 연쇄적으로 사용한다. 최종적으로 <span class="math inline">\(X\)</span>는 모든 절의 AND가 된다.</p>
+<div id="fig-sat-inference-reduction" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sat-inference-reduction-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-sat-inference-reduction.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sat-inference-reduction-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.1: 3-SAT를 베이즈 네트워크 추론으로 환원하는 네트워크 구조
+</figcaption>
+</figure>
+</div>
+<p><a href="#fig-sat-inference-reduction" class="quarto-xref">그림&nbsp;<span>8.1</span></a> 은 3-SAT를 베이즈 네트워크 추론으로 환원하는 구조를 보여준다. 위층의 <span class="math inline">\(Q_k\)</span>는 명제변수, 중간층의 <span class="math inline">\(C_i\)</span>는 절, 아래층의 <span class="math inline">\(A_i\)</span>와 <span class="math inline">\(X\)</span>는 AND 연산을 구현한다.</p>
+<p>주어진 명제할당이 식 <span class="math inline">\(\varphi\)</span>를 만족할 때 그리고 그때에만 <span class="math inline">\(X=1\)</span>이다. 각 명제할당의 사전확률이 <span class="math inline">\(2^{-n}\)</span>이므로 <span class="math display">\[
+P_{B_\varphi}(X=1)
+=
+\frac{\text{$\varphi$를 만족하는 할당 수}}{2^n}.
+\]</span> 따라서 <span class="math inline">\(P(X=1)&gt;0\)</span>을 판정할 수 있다면 3-SAT의 만족가능성을 판정할 수 있다. 네트워크는 원래 식의 길이에 다항인 크기로 구성되므로 환원이 성립한다. <span class="math inline">\(\square\)</span></p>
+<p>수치적 확률값을 직접 계산하는 문제를 다음과 같이 정의한다.</p>
+<blockquote class="blockquote">
+<p><strong>BN-Pr</strong><br>
+베이즈 네트워크 <span class="math inline">\(B\)</span>, 변수 <span class="math inline">\(X\)</span>, 값 <span class="math inline">\(x\)</span>가 주어졌을 때 <span class="math inline">\(P_B(X=x)\)</span>를 계산하라.</p>
+</blockquote>
+<p>이 문제는 만족하는 할당의 개수를 확률가중치와 함께 세는 문제이다. NP가 해의 존재를 묻는 복잡도 클래스라면, <strong>#P</strong>는 조건을 만족하는 해의 수를 묻는 계산문제를 다룬다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 확률계산의 복잡도</strong><br>
+BN-Pr는 #P-완전이다.</p>
+</blockquote>
+<p>증명의 핵심은 앞의 SAT 환원에서 <span class="math inline">\(2^nP(X=1)\)</span>이 원래 논리식의 만족할당 수와 정확히 같다는 점이다. 따라서 이 확률을 계산할 수 있으면 #SAT를 풀 수 있으므로 #P-hard이다. 반대로 각 완전할당의 확률은 네트워크 크기에 다항인 시간에 계산할 수 있으므로, 적절한 정수 가중치 표현을 사용하면 계산문제는 #P에 속한다.</p>
+</section>
+</section>
+<section id="근사추론의-복잡도" class="level3" data-number="8.1.2">
+<h3 data-number="8.1.2" class="anchored" data-anchor-id="근사추론의-복잡도"><span class="header-section-number">8.1.2</span> 근사추론의 복잡도</h3>
+<p>정확추론이 어렵다면 확률을 약간 부정확하게 계산하면 쉬워질 수 있는지를 묻게 된다. 이를 논하려면 근사의 정확도를 정의해야 한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 절대오차</strong><br>
+추정값 <span class="math inline">\(\rho\)</span>가 <span class="math inline">\(P(y\mid e)\)</span>에 대해 절대오차 <span class="math inline">\(\epsilon\)</span>을 가진다는 것은 <span class="math display">\[
+|P(y\mid e)-\rho|\le\epsilon
+\]</span> 임을 뜻한다.</p>
+</blockquote>
+<p>절대오차는 확률의 규모를 반영하지 않는다. 예를 들어 실제확률이 <span class="math inline">\(10^{-5}\)</span>인 희귀질환에서 <span class="math inline">\(10^{-4}\)</span>의 절대오차는 심각하지만, 확률이 0.3인 사건에서는 매우 작은 오차일 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 상대오차</strong><br>
+추정값 <span class="math inline">\(\rho\)</span>가 <span class="math inline">\(P(y\mid e)\)</span>에 대해 상대오차 <span class="math inline">\(\epsilon\)</span>을 가진다는 것은 <span class="math display">\[
+\frac{\rho}{1+\epsilon}
+\le
+P(y\mid e)
+\le
+\rho(1+\epsilon)
+\]</span> 임을 뜻한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정리 - 상대오차 근사의 난해성</strong><br>
+임의의 고정된 <span class="math inline">\(\epsilon&gt;0\)</span>에 대해 <span class="math inline">\(P_B(X=x)\)</span>를 상대오차 <span class="math inline">\(\epsilon\)</span> 이내로 근사하는 문제는 NP-hard이다.</p>
+</blockquote>
+<p><strong>증명.</strong> 앞의 BN-Pr-DP 복잡도 정리에서 사용한 구성에서 참확률은 정확히 0이거나 양수이다. 상대오차를 보장하는 추정값은 실제확률이 0이면 0이어야 하고, 양수이면 양수여야 한다. 따라서 근사값의 양수 여부만으로 SAT를 판정할 수 있다. <span class="math inline">\(\square\)</span></p>
+<p>이 결과는 매우 큰 상대오차를 허용해도 성립한다. 즉 확률이 정확히 0인지 아닌지를 구분하는 요구 자체가 강하다.</p>
+<p>증거가 없는 <span class="math inline">\(P(X=x)\)</span>의 고정 절대오차 근사는 무작위 다항시간 알고리즘으로 가능할 수 있다. 그러나 증거가 들어간 조건부확률에서는 상황이 다시 어려워진다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 증거가 있는 절대오차 근사의 난해성</strong><br>
+모든 <span class="math inline">\(\epsilon\in(0,1/2)\)</span>에 대해 <span class="math inline">\(P_B(X=x\mid e)\)</span>를 절대오차 <span class="math inline">\(\epsilon\)</span> 이내로 근사하는 문제는 NP-hard이다.</p>
+</blockquote>
+<section id="증명의-핵심" class="level4" data-number="8.1.2.1">
+<h4 data-number="8.1.2.1" class="anchored" data-anchor-id="증명의-핵심"><span class="header-section-number">8.1.2.1</span> 증명의 핵심</h4>
+<p>앞의 SAT 환원 네트워크에서 <span class="math inline">\(X=1\)</span>을 증거로 둔다. <span class="math inline">\(P(Q_1\mid X=1)\)</span>을 근사하여 더 높은 확률의 값을 선택하고, 그 값을 고정한 뒤 <span class="math inline">\(Q_2,\ldots,Q_n\)</span>에 대해 같은 작업을 반복한다. 식이 만족가능하다면 각 단계에서 적어도 하나의 값은 조건부확률이 양수이며, 어떤 값이 불가능하면 확률이 0, 가능한 반대값은 1이 된다. 절대오차가 <span class="math inline">\(1/2\)</span>보다 작으면 0과 1을 확실히 구분할 수 있다. 따라서 최종할당이 원식을 만족하는지를 검사하여 SAT를 풀 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>주의</strong><br>
+근사추론이 실제로 유용하지 않다는 뜻은 아니다. 정리는 모든 입력에서 보장되는 최악의 경우의 정확도에 관한 것이다. 실제 알고리즘은 특정 구조, 확률값, 질의 또는 평균적 성능을 이용해 효과적으로 작동할 수 있다.</p>
+</blockquote>
+</section>
+</section>
+</section>
+<section id="변수-제거의-기본-아이디어" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="변수-제거의-기본-아이디어"><span class="header-section-number">8.2</span> 변수 제거의 기본 아이디어</h2>
+<p>연쇄 <span class="math display">\[
+A\rightarrow B\rightarrow C\rightarrow D
+\]</span> 를 생각하자. 먼저 <span class="math display">\[
+P(B)=\sum_aP(a)P(B\mid a)
+\]</span> 를 계산할 수 있다. 이어서 <span class="math display">\[
+P(C)=\sum_bP(b)P(C\mid b)
+\]</span> 를 계산하고, 같은 방식으로 <span class="math inline">\(P(D)\)</span>를 구한다. 각 변수의 상태 수가 <span class="math inline">\(k\)</span>이고 연쇄길이가 <span class="math inline">\(n\)</span>이면 한 단계의 비용은 <span class="math inline">\(O(k^2)\)</span>이고 전체는 <span class="math inline">\(O(nk^2)\)</span>이다. 반면 결합분포의 완전열거는 <span class="math inline">\(k^n\)</span>개의 할당을 다룬다.</p>
+<p>핵심은 결합분포 <span class="math display">\[
+P(A,B,C,D)
+=P(A)P(B\mid A)P(C\mid B)P(D\mid C)
+\]</span> 에서 반복되는 부분식을 한 번만 계산해 저장하는 것이다. 예를 들어 <span class="math display">\[
+\tau_1(B)=\sum_A P(A)P(B\mid A)=P(B)
+\]</span> 를 먼저 계산한 후 <span class="math display">\[
+\tau_2(C)=\sum_B \tau_1(B)P(C\mid B)=P(C)
+\]</span> 를 계산하면 된다. 마지막으로 <span class="math display">\[
+P(D)=\sum_C\tau_2(C)P(D\mid C).
+\]</span> 이는 전형적인 <strong>동적계획법(dynamic programming)</strong>이다. 바깥에서 안쪽으로 완전열거하는 대신 가장 안쪽의 합부터 계산하고 그 결과를 캐시한다.</p>
+<blockquote class="blockquote">
+<p><strong>핵심 요약</strong><br>
+변수 제거가 지수적 결합분포 생성을 피하는 이유는 두 가지이다.<br>
+1. 네트워크 인수분해 때문에 각 부분식이 소수의 변수에만 의존한다.<br>
+2. 동일한 부분식을 한 번 계산하여 재사용한다.</p>
+</blockquote>
+</section>
+<section id="변수-제거" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="변수-제거"><span class="header-section-number">8.3</span> 변수 제거</h2>
+<p>변수 제거는 인자들의 집합을 입력으로 받아 인자곱과 주변화를 반복하는 일반 알고리즘이다. 따라서 베이즈 네트워크와 마르코프 네트워크에 동일하게 적용된다.</p>
+<section id="기본-제거" class="level3" data-number="8.3.1">
+<h3 data-number="8.3.1" class="anchored" data-anchor-id="기본-제거"><span class="header-section-number">8.3.1</span> 기본 제거</h3>
+<section id="인자-주변화" class="level4" data-number="8.3.1.1">
+<h4 data-number="8.3.1.1" class="anchored" data-anchor-id="인자-주변화"><span class="header-section-number">8.3.1.1</span> 인자 주변화</h4>
+<blockquote class="blockquote">
+<p><strong>정의 - 인자 주변화</strong><br>
+<span class="math inline">\(\phi(X,Y)\)</span>가 변수집합 <span class="math inline">\(X\cup\{Y\}\)</span> 위의 인자라 하자. <span class="math inline">\(Y\)</span>를 <span class="math inline">\(\phi\)</span>에서 주변화한 인자 <span class="math display">\[
+\psi(X)=\sum_Y\phi(X,Y)
+\]</span> 를 <span class="math inline">\(\sum_Y\phi\)</span>라고 한다. 이 연산을 <span class="math inline">\(Y\)</span>를 <strong>합하여 제거한다(summing out)</strong>고도 한다.</p>
+</blockquote>
+<div id="fig-factor-marginalization" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-factor-marginalization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-factor-marginalization.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-factor-marginalization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.2: 인자 주변화: <span class="math inline">\(B\)</span>를 합하여 제거하는 예
+</figcaption>
+</figure>
+</div>
+<p><a href="#fig-factor-marginalization" class="quarto-xref">그림&nbsp;<span>8.2</span></a> 에서 동일한 <span class="math inline">\(A,C\)</span> 값을 갖는 행들끼리 <span class="math inline">\(B\)</span>의 여러 값을 합하여 새로운 인자 <span class="math inline">\(\psi(A,C)\)</span>를 만든다.</p>
+<p>인자곱과 합은 수의 곱과 합처럼 교환법칙과 결합법칙을 만족한다. 특히 <span class="math inline">\(X\notin\operatorname{Scope}[\phi_1]\)</span>이면 <span class="math display">\[
+\sum_X(\phi_1\phi_2)
+=
+\phi_1\sum_X\phi_2.
+\]</span> 이 분배법칙이 변수 제거의 수학적 핵심이다.</p>
+</section>
+<section id="합-곱-변수-제거-알고리즘" class="level4" data-number="8.3.1.2">
+<h4 data-number="8.3.1.2" class="anchored" data-anchor-id="합-곱-변수-제거-알고리즘"><span class="header-section-number">8.3.1.2</span> 합-곱 변수 제거 알고리즘</h4>
+<pre class="text"><code>알고리즘: 합-곱 변수 제거
+
+Sum-Product-VE(Φ, Z, ≺)
+  Z1,...,Zk를 ≺에 따른 제거순서로 둔다.
+  for i = 1,...,k:
+      Φ &lt;- Sum-Product-Eliminate-Var(Φ, Zi)
+  return Φ에 남은 모든 인자의 곱
+
+Sum-Product-Eliminate-Var(Φ, Z)
+  Φ'  &lt;- Z를 포함하는 모든 인자
+  Φ'' &lt;- Φ - Φ'
+  ψ   &lt;- Φ'에 속한 모든 인자의 곱
+  τ   &lt;- sum_Z ψ
+  return Φ'' ∪ {τ}</code></pre>
+<p>알고리즘은 한 변수를 제거할 때 그 변수를 포함하는 인자를 모두 곱한 뒤, 그 곱에서 해당 변수를 합하여 제거한다. 새로 얻은 인자를 인자집합에 다시 넣고 다음 변수를 처리한다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 합-곱 변수 제거의 정확성</strong><br>
+<span class="math inline">\(\Phi\)</span>가 변수집합 <span class="math inline">\(\mathcal X\)</span> 위의 인자집합이고, <span class="math inline">\(Y\subset\mathcal X\)</span>가 질의변수, <span class="math inline">\(Z=\mathcal X-Y\)</span>라 하자. 임의의 제거순서 <span class="math inline">\(\prec\)</span>에 대해 합-곱 변수 제거 알고리즘은 <span class="math display">\[
+\phi^*(Y)
+=
+\sum_Z\prod_{\phi\in\Phi}\phi
+\]</span> 를 반환한다.</p>
+</blockquote>
+<p>증명은 앞의 분배법칙을 반복적으로 적용해 각 합을 안쪽으로 이동하는 것이다. 중요한 제약은 변수 <span class="math inline">\(Z\)</span>를 합하기 전에 <span class="math inline">\(Z\)</span>를 포함하는 모든 인자가 곱해져 있어야 한다는 점이다.</p>
+<p>베이즈 네트워크에서는 초기 인자집합을 <span class="math display">\[
+\Phi=\{P(X_i\mid Pa_{X_i}):i=1,\ldots,n\}
+\]</span> 로 둔다. 마르코프 네트워크에서는 클리크 퍼텐셜을 초기 인자로 사용한다. 마르코프 네트워크의 결과는 비정규화 인자이므로 마지막에 정규화한다.</p>
+</section>
+<section id="예제---확장-student-네트워크" class="level4" data-number="8.3.1.3">
+<h4 data-number="8.3.1.3" class="anchored" data-anchor-id="예제---확장-student-네트워크"><span class="header-section-number">8.3.1.3</span> 예제 - 확장 Student 네트워크</h4>
+<div id="fig-extended-student-ve" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-extended-student-ve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-extended-student-ve.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-extended-student-ve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.3: 변수 제거를 설명하기 위한 확장 Student 베이즈 네트워크
+</figcaption>
+</figure>
+</div>
+<p>확장 Student 네트워크는 다음과 같이 인수분해된다. <span class="math display">\[
+\begin{aligned}
+P(C,D,I,G,S,L,J,H)
+={}&amp;P(C)P(D\mid C)P(I)P(G\mid I,D)P(S\mid I)\\
+&amp;\times P(L\mid G)P(J\mid L,S)P(H\mid G,J).
+\end{aligned}
+\]</span> <span class="math inline">\(P(J)\)</span>를 계산하며 제거순서를 <span class="math display">\[
+C,D,I,H,G,S,L
+\]</span> 로 선택하자.</p>
+<ol type="1">
+<li><p><span class="math inline">\(C\)</span> 제거: <span class="math display">\[
+\psi_1(C,D)=\phi_C(C)\phi_D(D,C),\qquad
+\tau_1(D)=\sum_C\psi_1(C,D).
+\]</span></p></li>
+<li><p><span class="math inline">\(D\)</span> 제거: <span class="math display">\[
+\psi_2(G,I,D)=\phi_G(G,I,D)\tau_1(D),\qquad
+\tau_2(G,I)=\sum_D\psi_2.
+\]</span></p></li>
+<li><p><span class="math inline">\(I\)</span> 제거: <span class="math display">\[
+\psi_3(G,I,S)=\phi_I(I)\phi_S(S,I)\tau_2(G,I),\qquad
+\tau_3(G,S)=\sum_I\psi_3.
+\]</span></p></li>
+<li><p><span class="math inline">\(H\)</span> 제거: <span class="math display">\[
+\tau_4(G,J)=\sum_H\phi_H(H,G,J)=1.
+\]</span> 이는 조건부확률표가 각 <span class="math inline">\(G,J\)</span>에서 1로 합해지기 때문이다.</p></li>
+<li><p><span class="math inline">\(G\)</span> 제거: <span class="math display">\[
+\psi_5(G,J,L,S)=\tau_4(G,J)\tau_3(G,S)\phi_L(L,G),
+\]</span> <span class="math display">\[
+\tau_5(J,L,S)=\sum_G\psi_5.
+\]</span></p></li>
+<li><p><span class="math inline">\(S\)</span> 제거: <span class="math display">\[
+\tau_6(J,L)=\sum_S\tau_5(J,L,S)\phi_J(J,L,S).
+\]</span></p></li>
+<li><p><span class="math inline">\(L\)</span> 제거: <span class="math display">\[
+\tau_7(J)=\sum_L\tau_6(J,L).
+\]</span> <strong>제거 단계의 요약</strong></p></li>
+<li><p><span class="math inline">\(C\)</span> 제거: <span class="math inline">\(\phi_C\)</span>와 <span class="math inline">\(\phi_D\)</span>를 곱한 뒤 <span class="math inline">\(C\)</span>를 합산하여 <span class="math inline">\(\tau_1(D)\)</span>를 만든다.</p></li>
+<li><p><span class="math inline">\(D\)</span> 제거: <span class="math inline">\(\phi_G\)</span>와 <span class="math inline">\(\tau_1\)</span>을 곱한 뒤 <span class="math inline">\(D\)</span>를 합산하여 <span class="math inline">\(\tau_2(G,I)\)</span>를 만든다.</p></li>
+<li><p><span class="math inline">\(I\)</span> 제거: <span class="math inline">\(\phi_I\)</span>, <span class="math inline">\(\phi_S\)</span>, <span class="math inline">\(\tau_2\)</span>를 곱한 뒤 <span class="math inline">\(I\)</span>를 합산하여 <span class="math inline">\(\tau_3(G,S)\)</span>를 만든다.</p></li>
+<li><p><span class="math inline">\(H\)</span> 제거: <span class="math inline">\(\phi_H\)</span>에서 <span class="math inline">\(H\)</span>를 합산하여 <span class="math inline">\(\tau_4(G,J)\)</span>를 만든다. 이 인자는 모든 항이 1이다.</p></li>
+<li><p><span class="math inline">\(G\)</span> 제거: <span class="math inline">\(\tau_4\)</span>, <span class="math inline">\(\tau_3\)</span>, <span class="math inline">\(\phi_L\)</span>을 곱한 뒤 <span class="math inline">\(G\)</span>를 합산하여 <span class="math inline">\(\tau_5(J,L,S)\)</span>를 만든다.</p></li>
+<li><p><span class="math inline">\(S\)</span> 제거: <span class="math inline">\(\tau_5\)</span>와 <span class="math inline">\(\phi_J\)</span>를 곱한 뒤 <span class="math inline">\(S\)</span>를 합산하여 <span class="math inline">\(\tau_6(J,L)\)</span>를 만든다.</p></li>
+<li><p><span class="math inline">\(L\)</span> 제거: <span class="math inline">\(\tau_6\)</span>에서 <span class="math inline">\(L\)</span>을 합산하여 최종 인자 <span class="math inline">\(\tau_7(J)=P(J)\)</span>를 얻는다.</p></li>
+</ol>
+<p>다른 제거순서 <span class="math inline">\(G,I,S,L,H,C,D\)</span>를 사용해도 최종답은 동일하지만, 첫 단계부터 <span class="math inline">\(G,I,D,L,J,H\)</span>의 여섯 변수를 포함하는 거대한 인자가 생긴다. 따라서 <strong>정확성은 제거순서에 무관하지만 계산량은 제거순서에 강하게 의존한다.</strong></p>
+</section>
+<section id="중간-인자의-의미" class="level4" data-number="8.3.1.4">
+<h4 data-number="8.3.1.4" class="anchored" data-anchor-id="중간-인자의-의미"><span class="header-section-number">8.3.1.4</span> 중간 인자의 의미</h4>
+<p>중간 인자가 원래 네트워크의 주변확률 또는 조건부확률과 일치하는 경우가 많지만 항상 그런 것은 아니다. <a href="#fig-intermediate-factor-interpretation" class="quarto-xref">그림&nbsp;<span>8.4</span></a> (a)에서 <span class="math inline">\(X\)</span>를 제거하여 <span class="math display">\[
+\tau(A,B,C)
+=
+\sum_X P(X)P(A\mid X)P(C\mid B,X)
+\]</span> 를 얻어도, 원래 네트워크에서 이는 <span class="math inline">\(P(A,C\mid B)\)</span>가 아니다. <span class="math inline">\(P(B\mid A)\)</span>가 아직 곱해지지 않았기 때문이다. 그러나 같은 국소 CPD들을 다른 방향으로 배치한 <a href="#fig-intermediate-factor-interpretation" class="quarto-xref">그림&nbsp;<span>8.4</span></a> (b)의 네트워크에서는 이 인자를 조건부확률로 해석할 수 있다.</p>
+<div id="fig-intermediate-factor-interpretation" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-intermediate-factor-interpretation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-intermediate-factor-interpretation.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-intermediate-factor-interpretation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.4: 변수 제거의 중간 인자를 조건부확률로 해석하는 두 네트워크
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>학습 보충</strong><br>
+변수 제거의 중간 인자는 계산을 위해 정의된 함수이다. 각 인자에 확률적 의미를 억지로 부여하기보다는, 인자의 scope와 수치값이 최종 합-곱식을 정확히 보존하는지에 초점을 두는 것이 안전하다.</p>
+</blockquote>
+</section>
+</section>
+<section id="증거-처리" class="level3" data-number="8.3.2">
+<h3 data-number="8.3.2" class="anchored" data-anchor-id="증거-처리"><span class="header-section-number">8.3.2</span> 증거 처리</h3>
+<p>증거 <span class="math inline">\(E=e\)</span>가 주어지면 각 인자에서 증거변수를 해당 값으로 고정하여 <strong>인자 축소(factor reduction)</strong>를 수행한다. 축소된 인자들의 곱은 정규화되지 않은 <span class="math inline">\(P(\mathcal X-E,e)\)</span>를 나타낸다.</p>
+<pre class="text"><code>알고리즘: 조건부확률 계산을 위한 변수 제거
+
+Cond-Prob-VE(K, Y, E=e)
+  Φ &lt;- 네트워크 K의 인자들
+  각 φ를 φ[E=e]로 축소한다.
+  제거순서 ≺를 선택한다.
+  Z &lt;- X - Y - E
+  φ* &lt;- Sum-Product-VE(Φ, Z, ≺)
+  α &lt;- sum_y φ*(y)
+  return α, φ*/α</code></pre>
+<p>여기서 <span class="math inline">\(\phi^*(Y)=P(Y,e)\)</span>이고 <span class="math inline">\(\alpha=P(e)\)</span>이다.</p>
+<p>예를 들어 <span class="math inline">\(I=i^1\)</span>, <span class="math inline">\(H=h^0\)</span>가 관측되면 <span class="math inline">\(I,H\)</span>는 제거할 필요가 없다. <span class="math inline">\(I\)</span>를 관측함으로써 <span class="math inline">\(G\)</span>와 <span class="math inline">\(S\)</span>가 조건부독립이 되므로, 두 변수를 동시에 포함하는 중간 인자가 생성되지 않을 수 있다. 증거는 단순히 변수 수를 줄이는 것뿐 아니라 그래프의 연결성도 약화시켜 계산을 크게 단순화할 수 있다.</p>
+</section>
+<section id="네트워크-다항식" class="level3" data-number="8.3.3">
+<h3 data-number="8.3.3" class="anchored" data-anchor-id="네트워크-다항식"><span class="header-section-number">8.3.3</span> 네트워크 다항식</h3>
+<p>완전표 인자집합 <span class="math inline">\(\Phi\)</span>에 대해 각 인자값을 나타내는 모수 <span class="math inline">\(\theta_{x_c}\)</span>와 각 변수값의 지시변수 <span class="math inline">\(\lambda_{x_i}\)</span>를 도입한다. 네트워크 다항식은 <span class="math display">\[
+f_\Phi(\theta,\lambda)
+=
+\sum_{x_1,\ldots,x_n}
+\left(
+\prod_{\phi_c\in\Phi}\theta_{x_c}
+\prod_{i=1}^n\lambda_{x_i}
+\right).
+\]</span> 증거 <span class="math inline">\(Y=y\)</span>에 대해 관측과 일치하는 <span class="math inline">\(\lambda\)</span>는 1, 불일치하는 값의 <span class="math inline">\(\lambda\)</span>는 0으로 두면 <span class="math display">\[
+f_\Phi(\theta,\lambda^y)=\widetilde P_\Phi(Y=y\mid\theta).
+\]</span> 또한 <span class="math display">\[
+\frac{\partial f_\Phi(\theta,\lambda^y)}{\partial\lambda_{x_i}}
+=
+\widetilde P_\Phi(x_i,y_{-i}\mid\theta),
+\]</span> <span class="math display">\[
+\frac{\partial f_\Phi(\theta,\lambda^y)}{\partial\theta_{x_c}}
+=
+\frac{\widetilde P_\Phi(y,x_c\mid\theta)}{\theta_{x_c}}.
+\]</span> 따라서 네트워크 다항식의 미분은 증거 철회, 증거 변경, 모수 민감도 분석에 사용할 수 있다. 다항식을 완전히 전개하면 지수적으로 크지만, 변수 제거에서 수행한 산술연산을 계산회로로 저장하면 변수 제거와 같은 크기의 압축표현을 얻을 수 있다.</p>
+</section>
+</section>
+<section id="복잡도와-그래프-구조-변수-제거" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="복잡도와-그래프-구조-변수-제거"><span class="header-section-number">8.4</span> 복잡도와 그래프 구조: 변수 제거</h2>
+<p>변수 제거의 계산량은 제거과정에서 생성되는 <strong>중간 인자(intermediate factor)</strong>의 크기에 의해 지배된다. 이 절에서는 이 크기를 그래프의 성질과 연결한다.</p>
+<section id="단순-계산량-분석" class="level3" data-number="8.4.1">
+<h3 data-number="8.4.1" class="anchored" data-anchor-id="단순-계산량-분석"><span class="header-section-number">8.4.1</span> 단순 계산량 분석</h3>
+<p>초기 인자 수를 <span class="math inline">\(m\)</span>, 제거변수 수를 <span class="math inline">\(n\)</span>이라 하자. 변수 <span class="math inline">\(X_i\)</span>를 제거할 때 곱해지는 인자의 곱을 <span class="math inline">\(\psi_i\)</span>라 하고, 그 표의 원소 수를 <span class="math inline">\(N_i\)</span>, <span class="math inline">\(N_{\max}=\max_iN_i\)</span>라 하자.</p>
+<p>각 초기 인자와 새로 생성된 인자는 정확히 한 번 어떤 곱 인자에 포함된다. 전체 곱셈 수는 대략 <span class="math display">\[
+O((m+n)N_{\max})=O(mN_{\max})
+\]</span> 이고, 각 제거단계의 합산은 <span class="math inline">\(\psi_i\)</span>의 원소를 한 번씩 방문하므로 전체 덧셈 수도 <span class="math inline">\(O(nN_{\max})\)</span>이다.</p>
+<p>각 변수의 상태 수가 최대 <span class="math inline">\(v\)</span>이고 <span class="math inline">\(\psi_i\)</span>의 scope에 <span class="math inline">\(k_i\)</span>개 변수가 있으면 <span class="math display">\[
+N_i\le v^{k_i}.
+\]</span> 따라서 계산비용은 중간 인자의 변수 수에 지수적으로 증가한다.</p>
+</section>
+<section id="그래프이론적-분석" class="level3" data-number="8.4.2">
+<h3 data-number="8.4.2" class="anchored" data-anchor-id="그래프이론적-분석"><span class="header-section-number">8.4.2</span> 그래프이론적 분석</h3>
+<section id="인자집합과-무방향-그래프" class="level4" data-number="8.4.2.1">
+<h4 data-number="8.4.2.1" class="anchored" data-anchor-id="인자집합과-무방향-그래프"><span class="header-section-number">8.4.2.1</span> 인자집합과 무방향 그래프</h4>
+<blockquote class="blockquote">
+<p><strong>정의 - 인자그래프 <span class="math inline">\(H_\Phi\)</span></strong><br>
+인자집합 <span class="math inline">\(\Phi\)</span>에 대해 <span class="math display">\[
+\operatorname{Scope}[\Phi]
+=
+\bigcup_{\phi\in\Phi}\operatorname{Scope}[\phi]
+\]</span> 라 하자. <span class="math inline">\(H_\Phi\)</span>는 이 변수들을 노드로 하고, 어떤 인자 <span class="math inline">\(\phi\in\Phi\)</span>의 scope에 <span class="math inline">\(X_i,X_j\)</span>가 함께 들어갈 때 그리고 그때에만 <span class="math inline">\(X_i-X_j\)</span> 간선을 갖는 무방향 그래프이다.</p>
+</blockquote>
+<p>즉 각 인자의 scope는 <span class="math inline">\(H_\Phi\)</span>에서 완전부분그래프를 형성한다.</p>
+<blockquote class="blockquote">
+<p><strong>명제</strong><br>
+<span class="math display">\[
+P(X)=\frac1Z\prod_{\phi\in\Phi}\phi
+\]</span> 로 정의되는 분포에 대해 <span class="math inline">\(H_\Phi\)</span>는 이 분포의 최소 마르코프 네트워크 I-map이며, <span class="math inline">\(\Phi\)</span>는 그 네트워크의 한 모수화이다.</p>
+</blockquote>
+<p>베이즈 네트워크의 CPD들을 인자로 사용하고 증거가 없다면 <span class="math inline">\(H_\Phi\)</span>는 원 DAG의 <strong>도덕화 그래프(moralized graph)</strong>와 같다. 증거가 있으면 관측변수가 인자에서 사라지고, 축소된 인자들의 곱의 분할함수는 <span class="math inline">\(P(e)\)</span>가 된다.</p>
+</section>
+<section id="제거를-그래프-변환으로-보기" class="level4" data-number="8.4.2.2">
+<h4 data-number="8.4.2.2" class="anchored" data-anchor-id="제거를-그래프-변환으로-보기"><span class="header-section-number">8.4.2.2</span> 제거를 그래프 변환으로 보기</h4>
+<p>변수 <span class="math inline">\(X\)</span>를 제거할 때 <span class="math inline">\(X\)</span>를 포함하는 모든 인자가 곱해진다. 이 곱 인자의 scope는 <span class="math inline">\(X\)</span>와 현재 이웃변수들로 구성된다. 이후 <span class="math inline">\(X\)</span>를 합하여 제거하면 이웃변수들만 남는 새 인자가 생성된다. 그래프 관점에서는 다음 두 작업이다.</p>
+<ol type="1">
+<li><span class="math inline">\(X\)</span>의 모든 현재 이웃을 서로 연결한다.</li>
+<li><span class="math inline">\(X\)</span>와 <span class="math inline">\(X\)</span>에 인접한 간선을 제거한다.</li>
+</ol>
+<p>이때 새로 추가되는 이웃 간의 간선을 <strong>채움간선(fill edge)</strong>이라고 한다.</p>
+<div id="fig-elimination-graph-transformation" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-elimination-graph-transformation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-elimination-graph-transformation.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-elimination-graph-transformation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.5: Student 예제에서 변수 제거에 따른 그래프 변환
+</figcaption>
+</figure>
+</div>
+<p><a href="#fig-elimination-graph-transformation" class="quarto-xref">그림&nbsp;<span>8.5</span></a> 은 Student 예제에서 <span class="math inline">\(C,D,I\)</span>를 차례로 제거한 뒤의 그래프를 보여준다. <span class="math inline">\(I\)</span> 제거 시 <span class="math inline">\(G-S\)</span> 채움간선이 생긴다.</p>
+</section>
+<section id="유도그래프" class="level4" data-number="8.4.2.3">
+<h4 data-number="8.4.2.3" class="anchored" data-anchor-id="유도그래프"><span class="header-section-number">8.4.2.3</span> 유도그래프</h4>
+<blockquote class="blockquote">
+<p><strong>정의 - 유도그래프</strong><br>
+인자집합 <span class="math inline">\(\Phi\)</span>와 제거순서 <span class="math inline">\(\prec\)</span>에 대해 <span class="math inline">\(I_{\Phi,\prec}\)</span>는 변수 제거 동안 생성되는 어떤 중간 곱 인자 <span class="math inline">\(\psi\)</span>의 scope에 두 변수 <span class="math inline">\(X_i,X_j\)</span>가 함께 등장할 때 간선 <span class="math inline">\(X_i-X_j\)</span>를 갖는 무방향 그래프이다.</p>
+</blockquote>
+<p>베이즈 네트워크 <span class="math inline">\(G\)</span>의 CPD 인자에서 생성한 유도그래프는 <span class="math inline">\(I_{G,\prec}\)</span>, 마르코프 네트워크 <span class="math inline">\(H\)</span>의 퍼텐셜에서 생성한 유도그래프는 <span class="math inline">\(I_{H,\prec}\)</span>라고 쓴다.</p>
+<div id="fig-induced-graph-clique-tree" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-induced-graph-clique-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-induced-graph-clique-tree.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-induced-graph-clique-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.6: Student 예제의 유도그래프, 최대클리크와 클리크 트리
+</figcaption>
+</figure>
+</div>
+<p><a href="#fig-induced-graph-clique-tree" class="quarto-xref">그림&nbsp;<span>8.6</span></a> 은 Student 예제의 유도그래프, 그 안의 최대클리크, 그리고 클리크 트리를 보여준다. 최대클리크는 <span class="math display">\[
+\{C,D\},\quad
+\{D,I,G\},\quad
+\{I,G,S\},\quad
+\{G,J,L,S\},\quad
+\{G,H,J\}
+\]</span> 이다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 중간 인자와 유도그래프의 클리크</strong><br>
+1. 변수 제거에서 생성되는 모든 인자의 scope는 <span class="math inline">\(I_{\Phi,\prec}\)</span>의 클리크이다.<br>
+2. <span class="math inline">\(I_{\Phi,\prec}\)</span>의 모든 최대클리크는 계산 중 생성되는 어떤 중간 곱 인자의 scope이다.</p>
+</blockquote>
+</section>
+<section id="증명-1" class="level4" data-number="8.4.2.4">
+<h4 data-number="8.4.2.4" class="anchored" data-anchor-id="증명-1"><span class="header-section-number">8.4.2.4</span> 증명</h4>
+<p>첫째, 인자 <span class="math inline">\(\psi(Y_1,\ldots,Y_k)\)</span>가 생성되었다면 정의상 모든 <span class="math inline">\(Y_i,Y_j\)</span>는 유도그래프에서 연결되므로 scope는 클리크이다.</p>
+<p>둘째, 최대클리크 <span class="math inline">\(Y=\{Y_1,\ldots,Y_k\}\)</span>에서 제거순서상 가장 먼저 제거되는 변수를 <span class="math inline">\(Y_1\)</span>이라 하자. <span class="math inline">\(Y_1\)</span>이 제거된 뒤에는 <span class="math inline">\(Y_1\)</span>에 새 간선이 추가될 수 없으므로, <span class="math inline">\(Y_1\)</span>과 나머지 <span class="math inline">\(Y_i\)</span>의 간선은 제거 이전부터 존재한다. 따라서 <span class="math inline">\(Y_1\)</span> 제거 시 <span class="math inline">\(Y_1\)</span>을 포함하는 모든 인자를 곱하면 <span class="math inline">\(Y\)</span> 전체를 포함하는 인자가 생긴다. 더 많은 변수가 포함된다면 <span class="math inline">\(Y\)</span>가 최대클리크라는 가정에 모순이다. <span class="math inline">\(\square\)</span></p>
+<blockquote class="blockquote">
+<p><strong>정의 - 유도폭과 트리폭</strong><br>
+유도그래프의 <strong>폭(width)</strong>은 가장 큰 클리크의 노드 수에서 1을 뺀 값이다. 제거순서 <span class="math inline">\(\prec\)</span>의 <strong>유도폭(induced width)</strong>은 <span class="math display">\[
+w_{K,\prec}=w(I_{K,\prec})
+\]</span> 이다. 그래프 <span class="math inline">\(K\)</span>의 <strong>트리폭(tree-width)</strong>은 <span class="math display">\[
+w_K^*=\min_{\prec}w(I_{K,\prec})
+\]</span> 이다.</p>
+</blockquote>
+<p>모든 변수가 <span class="math inline">\(v\)</span>개 이하의 값을 가지면 최적 변수 제거의 시간과 공간은 대략 <span class="math display">\[
+O(nv^{w_K^*+1})
+\]</span> 형태로 증가한다. 트리폭은 노드 수보다 네트워크의 추론 난이도를 더 직접적으로 설명한다.</p>
+</section>
+</section>
+<section id="제거순서-찾기" class="level3" data-number="8.4.3">
+<h3 data-number="8.4.3" class="anchored" data-anchor-id="제거순서-찾기"><span class="header-section-number">8.4.3</span> 제거순서 찾기</h3>
+<blockquote class="blockquote">
+<p><strong>정리 - 최적 제거순서의 난해성</strong><br>
+그래프 <span class="math inline">\(H\)</span>와 정수 <span class="math inline">\(K\)</span>가 주어졌을 때 유도폭이 <span class="math inline">\(K\)</span> 이하인 제거순서가 존재하는지 판정하는 문제는 NP-완전이다.</p>
+</blockquote>
+<p>따라서 최적 제거순서를 찾는 문제도 NP-hard하다. 이는 추론 자체가 NP-hard라는 결과와 별개이다. 최적순서를 알고 있어도 그래프의 최소 트리폭이 크면 추론은 여전히 지수시간을 요구한다.</p>
+<section id="현그래프" class="level4" data-number="8.4.3.1">
+<h4 data-number="8.4.3.1" class="anchored" data-anchor-id="현그래프"><span class="header-section-number">8.4.3.1</span> 현그래프</h4>
+<p>무방향 그래프의 길이 4 이상인 모든 순환에 두 비인접 노드를 연결하는 현(chord)이 있으면 <strong>현그래프(chordal graph)</strong>이다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 유도그래프의 현그래프성</strong><br>
+모든 유도그래프는 현그래프이다.</p>
+</blockquote>
+<p><strong>증명.</strong> 유도그래프에 현이 없는 순환 <span class="math inline">\(X_1-X_2-\cdots-X_k-X_1\)</span>, <span class="math inline">\(k&gt;3\)</span>이 있다고 하자. 이 중 가장 먼저 제거되는 변수를 <span class="math inline">\(X_1\)</span>이라 하면, 제거 당시 <span class="math inline">\(X_2\)</span>와 <span class="math inline">\(X_k\)</span>는 모두 <span class="math inline">\(X_1\)</span>의 이웃이므로 <span class="math inline">\(X_2-X_k\)</span> 채움간선이 추가된다. 이는 순환에 현이 없다는 가정과 모순이다. <span class="math inline">\(\square\)</span></p>
+<blockquote class="blockquote">
+<p><strong>정리 - 현그래프의 완전 제거순서</strong><br>
+모든 현그래프에는 채움간선을 전혀 추가하지 않는 제거순서가 존재한다.</p>
+</blockquote>
+<p>클리크 트리의 잎 클리크에서 이웃 클리크와 공유하지 않는 변수를 차례로 제거하면 된다. 잎 클리크 안의 변수 이웃들은 이미 모두 서로 연결되어 있으므로 제거해도 새 채움간선이 필요 없다.</p>
+<pre class="text"><code>알고리즘: 최대 카디널리티 탐색
+
+Max-Cardinality(H)
+  모든 노드를 미표시로 초기화한다.
+  for k = |X|, ..., 1:
+      표시된 이웃의 수가 가장 많은 미표시 노드 X를 선택한다.
+      π(X) &lt;- k
+      X를 표시한다.
+  return π</code></pre>
+<p>실제 제거는 <span class="math inline">\(\pi\)</span>가 작은 순서로 수행한다. 현그래프에서는 이 순서가 채움간선을 추가하지 않는다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 최대 카디널리티 탐색의 성질</strong><br>
+현그래프 <span class="math inline">\(H\)</span>에 최대 카디널리티 탐색을 적용해 얻은 순위 <span class="math inline">\(\pi\)</span>에 따라 증가순으로 변수를 제거하면 채움간선이 생기지 않는다.</p>
+</blockquote>
+</section>
+<section id="폴리트리" class="level4" data-number="8.4.3.2">
+<h4 data-number="8.4.3.2" class="anchored" data-anchor-id="폴리트리"><span class="header-section-number">8.4.3.2</span> 폴리트리</h4>
+<p>폴리트리는 임의의 두 노드 사이에 경로가 최대 하나인 DAG이다. 폴리트리의 도덕화 그래프에서 최대클리크는 대체로 어떤 노드와 그 부모들로 구성된 family이다. 따라서 CPD를 완전표로 표현했을 때 추론비용은 CPD 총크기에 선형이다.</p>
+<p>초기 베이즈 네트워크 문헌에서 폴리트리 메시지 전달이 매우 중요했기 때문에, 폴리트리와 일반네트워크 사이에 날카로운 계산가능성 경계가 있다는 오해가 생겼다. 실제로는 추론복잡도는 폴리트리 여부가 아니라 유도그래프 최대클리크의 크기에 따라 연속적으로 변한다.</p>
+</section>
+<section id="min-fill-min-size와-min-weight-탐색" class="level4" data-number="8.4.3.3">
+<h4 data-number="8.4.3.3" class="anchored" data-anchor-id="min-fill-min-size와-min-weight-탐색"><span class="header-section-number">8.4.3.3</span> Min-Fill, Min-Size와 Min-Weight 탐색</h4>
+<pre class="text"><code>알고리즘: 탐욕적 제거순서 탐색
+
+Greedy-Ordering(H, s)
+  모든 노드를 미표시로 초기화한다.
+  for k = 1,...,|X|:
+      비용 s(H,X)를 최소화하는 미표시 변수 X를 선택한다.
+      π(X) &lt;- k
+      X의 모든 이웃을 서로 연결한다.
+      X를 표시한다.
+  return π</code></pre>
+<p>대표적인 휴리스틱은 다음과 같다.</p>
+<ul>
+<li><strong>Min-Neighbors:</strong> 현재 이웃 수가 가장 적은 노드를 선택한다.</li>
+<li><strong>Min-Weight:</strong> 이웃변수들의 상태수 곱이 가장 작은 노드를 선택한다.</li>
+<li><strong>Min-Fill:</strong> 제거할 때 추가되는 채움간선 수가 가장 적은 노드를 선택한다.</li>
+<li><strong>Weighted-Min-Fill:</strong> 추가되는 각 채움간선의 양끝 변수 상태수 곱을 합한 비용이 가장 작은 노드를 선택한다.</li>
+</ul>
+<p>어느 휴리스틱도 모든 그래프에서 다른 휴리스틱을 지배하지 않는다. 상태수의 차이가 크면 Weighted-Min-Fill이 특히 유리한 경우가 많다. 실제 구현에서는 여러 탐욕적 또는 확률적 탐색을 반복하고, 생성되는 인자 크기의 총합이 가장 작은 순서를 선택할 수 있다.</p>
+</section>
+<section id="변수-제거순서의-실증-비교" class="level4" data-number="8.4.3.4">
+<h4 data-number="8.4.3.4" class="anchored" data-anchor-id="변수-제거순서의-실증-비교"><span class="header-section-number">8.4.3.4</span> 변수 제거순서의 실증 비교</h4>
+<div id="fig-ordering-heuristics-benchmark" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ordering-heuristics-benchmark-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-ordering-heuristics-benchmark.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ordering-heuristics-benchmark-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.7: 변수 제거순서 선택 휴리스틱의 계산비용 비교
+</figcaption>
+</figure>
+</div>
+<p>Fishelson과 Geiger의 벤치마크 비교에서는 24개에서 1,000개 이상의 노드를 가진 여러 네트워크에서 Min-Neighbors, Min-Weight, Min-Fill, Weighted-Min-Fill의 확률적 버전을 비교하였다. 더 긴 탐색시간은 대체로 더 좋은 순서를 찾았지만 개선폭은 항상 크지 않았다. 휴리스틱에 따라 계산비용이 거의 한 자릿수 배까지 차이났고, 전반적으로 Min-Fill과 Weighted-Min-Fill이 가장 안정적인 성능을 보였다. 제거순서 탐색비용은 실제 추론비용보다 훨씬 작으므로, 큰 네트워크에서는 여러 휴리스틱을 실행해 가장 좋은 순서를 고르는 것이 실용적이다.</p>
+</section>
+</section>
+</section>
+<section id="조건화" class="level2" data-number="8.5">
+<h2 data-number="8.5" class="anchored" data-anchor-id="조건화"><span class="header-section-number">8.5</span> 조건화</h2>
+<p><strong>조건화(conditioning)</strong>는 일부 변수의 값을 경우별로 고정한 뒤 단순해진 네트워크에서 변수 제거를 수행하고, 각 경우의 결과를 합하는 방법이다. 산술연산 수만 보면 변수 제거보다 유리하지 않지만, 큰 중간 인자를 저장하지 않아도 되므로 중요한 시간-공간 절충을 제공한다.</p>
+<section id="조건화-알고리즘" class="level3" data-number="8.5.1">
+<h3 data-number="8.5.1" class="anchored" data-anchor-id="조건화-알고리즘"><span class="header-section-number">8.5.1</span> 조건화 알고리즘</h3>
+<p>인자집합 <span class="math inline">\(\Phi\)</span>와 조건화변수집합 <span class="math inline">\(U\)</span>에 대해 <span class="math display">\[
+\widetilde P_\Phi(Y)
+=
+\sum_{u\in\operatorname{Val}(U)}
+\widetilde P_\Phi(Y,u).
+\]</span> 각 <span class="math inline">\(u\)</span>에서 인자를 축소한 네트워크 <span class="math inline">\(H_{\Phi[u]}\)</span>에 변수 제거를 적용한다.</p>
+<pre class="text"><code>알고리즘: 조건화
+
+Sum-Product-Conditioning(Φ, Y, U)
+  for each u in Val(U):
+      Φu &lt;- {φ[U=u] : φ in Φ}
+      HΦu를 구성한다.
+      (αu, φu(Y)) &lt;- Cond-Prob-VE(HΦu, Y, 빈 증거)
+  φ*(Y) &lt;- sum_u αu φu(Y)
+  return φ*(Y)</code></pre>
+<p>각 부분네트워크의 분할함수를 <span class="math inline">\(Z_{\Phi[u]}\)</span>라 하면 <span class="math display">\[
+Z_\Phi=\sum_uZ_{\Phi[u]}.
+\]</span> #### 예제</p>
+<p>Student 네트워크에서 <span class="math inline">\(G=g^1\)</span>을 관측하고 <span class="math inline">\(P(J)\)</span>를 계산한다고 하자. <span class="math inline">\(S\)</span>의 각 값에 조건화하면 더 단순한 네트워크에서 <span class="math inline">\(J\)</span>의 인자를 계산할 수 있다. 조건화된 네트워크가 두 개의 연결성분으로 분리되더라도, <span class="math inline">\(J\)</span>를 포함하지 않는 성분을 무시해서는 안 된다. 그 성분을 모두 합한 값은 각 <span class="math inline">\(s\)</span>에서 서로 다른 상수배가 될 수 있으며, 여러 <span class="math inline">\(s\)</span>의 결과를 합하기 전에 상대가중치를 결정하기 때문이다.</p>
+<p>폴리트리가 되도록 순환을 끊는 변수집합에 조건화하는 고전적 방법을 <strong>cutset conditioning</strong>이라 한다.</p>
+</section>
+<section id="조건화와-변수-제거의-관계" class="level3" data-number="8.5.2">
+<h3 data-number="8.5.2" class="anchored" data-anchor-id="조건화와-변수-제거의-관계"><span class="header-section-number">8.5.2</span> 조건화와 변수 제거의 관계</h3>
+<p>조건화는 일부 합을 바깥쪽에서 경우별로 전개하고, 각 경우 내부의 나머지 합을 변수 제거로 계산한다. 변수 제거는 모든 합을 안쪽부터 수행하고 중간결과를 캐시한다. 두 방법은 궁극적으로 같은 합과 곱을 계산하지만 캐시의 정도가 다르다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 조건화와 변수 제거의 연산량 비교</strong><br>
+조건화변수집합이 <span class="math inline">\(U\)</span>, 나머지 제거변수집합이 <span class="math inline">\(Z\)</span>이고, 각 조건화된 네트워크에서 제거순서가 <span class="math inline">\(\prec\)</span>라 하자. <span class="math inline">\(Z\)</span>의 순서를 유지하면서 모든 <span class="math inline">\(U\)</span>를 마지막에 제거하는 순서 <span class="math inline">\(\prec^+\)</span>를 구성할 수 있다. 조건화가 수행하는 산술연산 수는 <span class="math inline">\(\prec^+\)</span>를 사용한 변수 제거의 연산 수보다 작지 않다.</p>
+</blockquote>
+<p>조건화는 <span class="math inline">\(U\)</span>의 각 값마다 <span class="math inline">\(U\)</span>와 무관한 계산도 반복할 수 있기 때문이다.</p>
+<section id="예제---불필요한-반복" class="level4" data-number="8.5.2.1">
+<h4 data-number="8.5.2.1" class="anchored" data-anchor-id="예제---불필요한-반복"><span class="header-section-number">8.5.2.1</span> 예제 - 불필요한 반복</h4>
+<div id="fig-conditioning-repeated-computation" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-conditioning-repeated-computation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-conditioning-repeated-computation.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-conditioning-repeated-computation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.8: 조건화가 불필요한 반복계산을 수행하는 네트워크
+</figcaption>
+</figure>
+</div>
+<p><a href="#fig-conditioning-repeated-computation" class="quarto-xref">그림&nbsp;<span>8.8</span></a> (a)에서 <span class="math inline">\(A_k\)</span>에 조건화하면 긴 연쇄 <span class="math inline">\(A_1\to\cdots\to A_{k-1}\)</span>의 동일한 계산을 <span class="math inline">\(A_k\)</span>의 값마다 반복한다. (b)에서 매 두 번째 <span class="math inline">\(A_i\)</span>에 조건화하여 모든 루프를 끊으면 조건화비용은 <span class="math inline">\(k\)</span>에 지수적이지만, 이 네트워크의 유도폭은 2이므로 변수 제거는 <span class="math inline">\(k\)</span>에 선형이다.</p>
+<p>그럼에도 조건화를 사용하는 이유는 다음과 같다.</p>
+<ol type="1">
+<li><strong>메모리 절약:</strong> 각 조건화 경우를 독립적으로 처리하고 결과만 누적하므로 큰 중간 인자를 저장하지 않는다.</li>
+<li><strong>근사화 가능성:</strong> 모든 <span class="math inline">\(u\)</span>를 열거하지 않고 중요한 일부 경우만 계산하는 근사알고리즘으로 확장할 수 있다.</li>
+</ol>
+</section>
+</section>
+<section id="그래프이론적-분석-1" class="level3" data-number="8.5.3">
+<h3 data-number="8.5.3" class="anchored" data-anchor-id="그래프이론적-분석-1"><span class="header-section-number">8.5.3</span> 그래프이론적 분석</h3>
+<p>조건화변수 <span class="math inline">\(U\)</span>의 값을 고정하는 여러 계산을 하나로 묶어 생각하면, <span class="math inline">\(U\)</span>가 모든 현재 인자에 추가된 것처럼 볼 수 있다. 그래프에서는 <span class="math inline">\(U\)</span>와 모든 다른 변수 사이에 <strong>조건화 간선(conditioning edge)</strong>을 추가하는 것에 해당한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 조건화 유도그래프</strong><br>
+인자집합 <span class="math inline">\(\Phi\)</span>, 조건화변수집합 <span class="math inline">\(U\)</span>, 나머지 변수의 제거순서 <span class="math inline">\(\prec\)</span>에 대해 <span class="math inline">\(I_{\Phi,\prec,U}\)</span>는 다음 간선을 포함한다.<br>
+- 모든 <span class="math inline">\(U\in U\)</span>와 다른 모든 변수 사이의 조건화 간선<br>
+- 변수 제거 중 같은 중간 인자에 등장하는 변수 사이의 인자 간선</p>
+</blockquote>
+<section id="예제" class="level4" data-number="8.5.3.1">
+<h4 data-number="8.5.3.1" class="anchored" data-anchor-id="예제"><span class="header-section-number">8.5.3.1</span> 예제</h4>
+<div id="fig-conditioning-induced-graph" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-conditioning-induced-graph-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-conditioning-induced-graph.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-conditioning-induced-graph-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.9: 조건화와 제거를 함께 사용한 Student 예제의 유도그래프
+</figcaption>
+</figure>
+</div>
+<p>Student 네트워크에서 <span class="math inline">\(L\)</span>에 조건화하고 <span class="math inline">\(C,D,I,H,G,S\)</span> 순으로 제거하면, 점선은 <span class="math inline">\(L\)</span>과 다른 모든 변수 사이의 조건화 간선이고 실선은 인자 또는 제거과정에서 생긴 간선이다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 조건화의 시간복잡도</strong><br>
+변수의 최대 상태수가 <span class="math inline">\(v\)</span>이고, 조건화 간선과 인자 간선을 모두 사용한 유도그래프의 최대클리크 크기가 <span class="math inline">\(m\)</span>이면 조건화 알고리즘의 실행시간은 <span class="math display">\[
+O(nv^m)
+\]</span> 이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정리 - 조건화의 공간복잡도</strong><br>
+인자 간선만 사용한 그래프의 최대클리크 크기가 <span class="math inline">\(m_f\)</span>이면 공간복잡도는 <span class="math display">\[
+O(nv^{m_f})
+\]</span> 이다.</p>
+</blockquote>
+<p>변수 제거는 시간과 공간 모두 전체 유도클리크 크기에 지수적이지만, 조건화는 조건화변수의 값을 외부 반복으로 처리하므로 저장공간은 작은 인자클리크에 의해서만 결정된다.</p>
+</section>
+</section>
+<section id="개선된-조건화" class="level3" data-number="8.5.4">
+<h3 data-number="8.5.4" class="anchored" data-anchor-id="개선된-조건화"><span class="header-section-number">8.5.4</span> 개선된 조건화</h3>
+<section id="조건화와-제거의-교대" class="level4" data-number="8.5.4.1">
+<h4 data-number="8.5.4.1" class="anchored" data-anchor-id="조건화와-제거의-교대"><span class="header-section-number">8.5.4.1</span> 조건화와 제거의 교대</h4>
+<p>조건화 전에 <span class="math inline">\(U\)</span>와 무관한 변수를 먼저 제거하면 반복계산을 줄일 수 있다. <a href="#fig-conditioning-repeated-computation" class="quarto-xref">그림&nbsp;<span>8.8</span></a> (a)에서는 <span class="math inline">\(A_1,\ldots,A_{k-1}\)</span>를 한 번 제거한 뒤 <span class="math inline">\(A_k\)</span>에 조건화하고, 이후 <span class="math inline">\(B,C\)</span>를 제거하는 것이 낫다. 일반적으로 제거와 조건화를 임의의 순서로 교대하는 <strong>재귀적 조건화(recursive conditioning)</strong>를 구성할 수 있다.</p>
+</section>
+<section id="예제-1" class="level4" data-number="8.5.4.2">
+<h4 data-number="8.5.4.2" class="anchored" data-anchor-id="예제-1"><span class="header-section-number">8.5.4.2</span> 예제</h4>
+<p><span class="math inline">\(P(D)\)</span>를 계산하는 합을 <span class="math display">\[
+\sum_{A_k}\sum_B\sum_C\sum_{A_1}\cdots\sum_{A_{k-1}}
+P(A_1,\ldots,A_k,B,C,D)
+\]</span> 로 쓴다. 안쪽의 <span class="math inline">\(A_{k-1},\ldots,A_1\)</span>을 먼저 제거한 뒤 <span class="math inline">\(A_k\)</span>의 값별로 네트워크를 나누고, 각 부분문제에서 <span class="math inline">\(B,C\)</span>를 제거한다.</p>
+</section>
+<section id="네트워크-분해" class="level4" data-number="8.5.4.3">
+<h4 data-number="8.5.4.3" class="anchored" data-anchor-id="네트워크-분해"><span class="header-section-number">8.5.4.3</span> 네트워크 분해</h4>
+<p>조건화 후 인자그래프가 독립된 연결성분들로 분리되면 각 성분을 별도로 계산하고 결과를 곱할 수 있다. 이후의 조건화변수는 관련된 성분에만 적용해야 한다.</p>
+</section>
+<section id="예제-2" class="level4" data-number="8.5.4.4">
+<h4 data-number="8.5.4.4" class="anchored" data-anchor-id="예제-2"><span class="header-section-number">8.5.4.4</span> 예제</h4>
+<p><a href="#fig-conditioning-repeated-computation" class="quarto-xref">그림&nbsp;<span>8.8</span></a> (b)에서 <span class="math inline">\(A_2\)</span>에 조건화하면 위쪽 <span class="math inline">\(A_1,B_1,C_1\)</span> 성분과 아래쪽 나머지 성분이 분리된다. 이후 <span class="math inline">\(A_3\)</span>에 조건화하더라도 위쪽 성분은 영향을 받지 않으므로 다시 계산할 이유가 없다. 각 분기에서 연결성분을 검사하고 부분문제를 재귀적으로 처리하면 표준 조건화의 대규모 중복을 피할 수 있다.</p>
+</section>
+</section>
+</section>
+<section id="구조화된-cpd를-이용한-추론" class="level2" data-number="8.6">
+<h2 data-number="8.6" class="anchored" data-anchor-id="구조화된-cpd를-이용한-추론"><span class="header-section-number">8.6</span> 구조화된 CPD를 이용한 추론</h2>
+<p>지금까지는 네트워크의 전역 그래프구조만 이용했다. 그러나 제5장에서 다룬 noisy-or, 인과영향 독립성, 트리 CPD, 규칙 CPD에는 CPD 내부의 더 세밀한 구조가 있다. 이를 추론에 활용하면 같은 그래프에서도 계산비용을 크게 줄일 수 있다.</p>
+<p>이 절은 두 유형을 다룬다.</p>
+<ol type="1">
+<li><strong>인과영향 독립성(independence of causal influence, ICI)</strong></li>
+<li><strong>상황특이적 독립성(context-specific independence, CSI)</strong></li>
+</ol>
+<p>연속변수가 포함된 네트워크의 추론은 제14장에서 다룬다.</p>
+<section id="인과영향-독립성" class="level3" data-number="8.6.1">
+<h3 data-number="8.6.1" class="anchored" data-anchor-id="인과영향-독립성"><span class="header-section-number">8.6.1</span> 인과영향 독립성</h3>
+<section id="noisy-or-분해" class="level4" data-number="8.6.1.1">
+<h4 data-number="8.6.1.1" class="anchored" data-anchor-id="noisy-or-분해"><span class="header-section-number">8.6.1.1</span> Noisy-or 분해</h4>
+<p>이진변수 <span class="math inline">\(Y\)</span>가 네 이진부모 <span class="math inline">\(X_1,X_2,X_3,X_4\)</span>의 noisy-or CPD를 가진다고 하자. 완전표 CPD를 그대로 이용하면 부모들의 결합인자를 만든 뒤 <span class="math inline">\(Y\)</span>의 CPD를 곱해야 한다. 최적순서에서도 곱셈 수는</p>
+<ul>
+<li><span class="math inline">\(P(X_1)P(X_2)\)</span>: 4회</li>
+<li><span class="math inline">\(P(X_1,X_2)P(X_3)\)</span>: 8회</li>
+<li><span class="math inline">\(P(X_1,X_2,X_3)P(X_4)\)</span>: 16회</li>
+<li><span class="math inline">\(P(X_1,X_2,X_3,X_4)P(Y\mid X_1,\ldots,X_4)\)</span>: 32회</li>
+</ul>
+<p>로 총 60회이며, <span class="math inline">\(X_1,\ldots,X_4\)</span>를 합하는 데 30회의 덧셈이 필요하다.</p>
+<p>Noisy-or는 각 원인 <span class="math inline">\(X_i\)</span>가 독립적인 잡음변수 <span class="math inline">\(Z_i\)</span>를 거쳐 결과에 영향을 주고, <span class="math inline">\(Y\)</span>는 <span class="math inline">\(Z_1\lor\cdots\lor Z_4\)</span>의 결정적 OR로 표현된다. 그러나 <span class="math inline">\(P(Y\mid Z_1,\ldots,Z_4)\)</span>를 여전히 완전표로 저장하면 이점이 없다. 결정적 OR를 작은 이항 OR들의 트리 또는 연쇄로 분해해야 한다.</p>
+<div id="fig-noisy-or-factorizations" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-noisy-or-factorizations-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-noisy-or-factorizations.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-noisy-or-factorizations-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.10: Noisy-OR CPD의 여러 분해 방식
+</figcaption>
+</figure>
+</div>
+<p><a href="#fig-noisy-or-factorizations" class="quarto-xref">그림&nbsp;<span>8.10</span></a> 는 (a) 표준 noisy-or 분해, (b) 결정적 OR의 트리분해, (c) 잡음까지 통합한 트리분해, (d) 연쇄분해를 보여준다.</p>
+<p>트리분해에서 <span class="math inline">\(X_1,X_2\)</span>를 제거하는 비용은 <span class="math display">\[
+\psi_1(X_1,X_2,O_1)=P(X_1)P(O_1\mid X_1,X_2)
+\]</span> 의 8회 곱셈, <span class="math inline">\(X_1\)</span> 합산 4회, <span class="math inline">\(P(X_2)\)</span> 곱셈 4회, <span class="math inline">\(X_2\)</span> 합산 2회이다. <span class="math inline">\(X_3,X_4\)</span>와 <span class="math inline">\(O_1,O_2\)</span>에서도 같은 비용이 들어 총 36회 곱셈과 18회 덧셈으로 줄어든다.</p>
+<p>연쇄분해에서도 각 <span class="math inline">\(X_i\)</span> 제거와 각 중간 OR 변수 제거가 작은 인자로 이루어져 총 40회 곱셈과 20회 덧셈이 필요하다. 원래 완전표보다 훨씬 작다.</p>
+</section>
+<section id="일반적인-분해" class="level4" data-number="8.6.1.2">
+<h4 data-number="8.6.1.2" class="anchored" data-anchor-id="일반적인-분해"><span class="header-section-number">8.6.1.2</span> 일반적인 분해</h4>
+<p>대칭적 ICI CPD에서 부모별 잡음효과를 <span class="math inline">\(Z_1,\ldots,Z_k\)</span>라 하고 결합연산을 <span class="math inline">\(\star\)</span>라 하면 <span class="math display">\[
+Z=Z_1\star Z_2\star\cdots\star Z_k
+\]</span> 이다. <span class="math inline">\(\star\)</span>가 결합법칙과 교환법칙을 만족하면 <span class="math inline">\(k-1\)</span>개의 중간변수 <span class="math inline">\(O_1,\ldots,O_{k-1}\)</span>를 도입하여 이항 연산들의 트리 또는 연쇄로 계산할 수 있다. 각 중간변수는 정확히 두 부모를 갖고, 각 입력 또는 중간결과는 다음 연산 하나에만 사용되게 한다.</p>
+<p>분해 후에는 작은 CPD들을 가진 확장 네트워크에 표준 변수 제거를 적용한다. 하지만 항상 이득인 것은 아니다. 중간변수의 상태수가 커질 수 있기 때문이다.</p>
+</section>
+<section id="예제---일반화선형모형" class="level4" data-number="8.6.1.3">
+<h4 data-number="8.6.1.3" class="anchored" data-anchor-id="예제---일반화선형모형"><span class="header-section-number">8.6.1.3</span> 예제 - 일반화선형모형</h4>
+<p><span class="math inline">\(X_1,\ldots,X_k\)</span>가 이진이고 <span class="math inline">\(Y\)</span>의 CPD가 <span class="math display">\[
+g\left(w_0+\sum_{i=1}^kw_iX_i\right)
+\]</span> 형태이며 <span class="math inline">\(w_0=0\)</span>, 모든 <span class="math inline">\(w_i=w\)</span>라 하자. 충분한 중간합 <span class="math inline">\(Z\)</span>의 값은 <span class="math inline">\(0,1,\ldots,k\)</span>이므로 상태수가 <span class="math inline">\(k+1\)</span>이다. 원래 표 CPD는 <span class="math inline">\(2^k\)</span>로 증가하지만 분해된 인자의 크기는 대략 <span class="math inline">\(k^3\)</span>로 증가한다. 큰 <span class="math inline">\(k\)</span>에서는 분해가 유리할 수 있으나, 상태수가 증가하는 다른 조건에서는 이점이 줄어들 수 있다.</p>
+</section>
+<section id="전역구조의-영향" class="level4" data-number="8.6.1.4">
+<h4 data-number="8.6.1.4" class="anchored" data-anchor-id="전역구조의-영향"><span class="header-section-number">8.6.1.4</span> 전역구조의 영향</h4>
+<p>같은 ICI 연산도 어떤 부모들을 먼저 묶느냐에 따라 전체 네트워크에서의 계산비용이 달라진다.</p>
+</section>
+<section id="예제-3" class="level4" data-number="8.6.1.5">
+<h4 data-number="8.6.1.5" class="anchored" data-anchor-id="예제-3"><span class="header-section-number">8.6.1.5</span> 예제</h4>
+<p><a href="#fig-noisy-or-factorizations" class="quarto-xref">그림&nbsp;<span>8.10</span></a> (c)에서 <span class="math inline">\(X_1,X_2\)</span>가 공통부모 <span class="math inline">\(A\)</span>를 가지면, <span class="math inline">\(A\)</span> 제거로 생기는 <span class="math inline">\(\tau_0(X_1,X_2)\)</span>와 첫 번째 중간 OR <span class="math inline">\(O_1\)</span>이 정확히 맞물린다. 반면 <span class="math inline">\(X_1,X_3\)</span>가 공통부모를 가지는데 분해는 <span class="math inline">\(X_1,X_2\)</span>를 먼저 묶으면, 공통부모 제거에서 생긴 인자와 OR 분해의 묶음이 어긋나 더 큰 중간 인자가 생성된다.</p>
+<p>따라서 ICI CPD의 국소분해는 그 CPD만 보고 정할 것이 아니라, 전역 그래프와 제거순서를 함께 고려해야 한다.</p>
+</section>
+<section id="이질적-인수분해" class="level4" data-number="8.6.1.6">
+<h4 data-number="8.6.1.6" class="anchored" data-anchor-id="이질적-인수분해"><span class="header-section-number">8.6.1.6</span> 이질적 인수분해</h4>
+<p>고정된 보조변수 분해 대신, 결합분포를 일반 곱 인자와 ICI 결합연산용 인자로 동시에 분해할 수 있다. 어떤 인자는 곱셈으로, 어떤 인자는 OR, MAX 또는 해당 ICI 연산으로 결합한다. <strong>이질적 변수 제거(heterogeneous variable elimination)</strong>는 전역 제거순서 안에서 ICI 구성요소들을 언제 재결합할지도 동적으로 결정한다. 이 방식은 고정된 트리·연쇄분해보다 유연하지만 특수한 알고리즘이 필요하다.</p>
+</section>
+</section>
+<section id="상황특이적-독립성" class="level3" data-number="8.6.2">
+<h3 data-number="8.6.2" class="anchored" data-anchor-id="상황특이적-독립성"><span class="header-section-number">8.6.2</span> 상황특이적 독립성</h3>
+<p>트리 CPD 또는 규칙 CPD에서는 특정 부모값의 문맥에서 일부 부모가 더 이상 영향을 주지 않는다. 이를 이용하는 두 방법이 있다.</p>
+<ol type="1">
+<li>CPD를 보조변수 네트워크로 미리 분해한 뒤 표준 변수 제거를 사용한다.</li>
+<li>표 대신 규칙을 직접 조작하는 특수 변수 제거를 사용한다.</li>
+</ol>
+<section id="규칙-기반-변수-제거" class="level4" data-number="8.6.2.1">
+<h4 data-number="8.6.2.1" class="anchored" data-anchor-id="규칙-기반-변수-제거"><span class="header-section-number">8.6.2.1</span> 규칙 기반 변수 제거</h4>
+<p>규칙은 <span class="math display">\[
+\rho=\langle c;p\rangle
+\]</span> 형태이며, <span class="math inline">\(c\)</span>는 변수값의 문맥, <span class="math inline">\(p\)</span>는 그 문맥에서의 인자값이다. 하나의 CPD를 이루는 규칙들은 서로 배타적이고 전체공간을 포괄한다.</p>
+<div id="fig-rule-based-tree-cpd" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-rule-based-tree-cpd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-rule-based-tree-cpd.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rule-based-tree-cpd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.11: 규칙 기반 구조를 가진 베이즈 네트워크와 <span class="math inline">\(D\)</span>의 트리 CPD
+</figcaption>
+</figure>
+</div>
+<p><a href="#fig-rule-based-tree-cpd" class="quarto-xref">그림&nbsp;<span>8.11</span></a> (a)의 네트워크에서 <span class="math inline">\(D\)</span>의 CPD는 (b)의 트리로 표현된다. <span class="math inline">\(B=b^0\)</span>이면 <span class="math inline">\(D\)</span>는 <span class="math inline">\(A\)</span>와 무관하고, <span class="math inline">\(B=b^1\)</span>일 때만 <span class="math inline">\(A\)</span>에 의존한다.</p>
+</section>
+<section id="예제---cpd를-규칙으로-변환" class="level4" data-number="8.6.2.2">
+<h4 data-number="8.6.2.2" class="anchored" data-anchor-id="예제---cpd를-규칙으로-변환"><span class="header-section-number">8.6.2.2</span> 예제 - CPD를 규칙으로 변환</h4>
+<p><span class="math inline">\(D\)</span>의 트리 CPD는 다음 여섯 규칙으로 바뀐다. <span class="math display">\[
+\begin{array}{lll}
+\rho_1=\langle b^0,d^0;1-q_1\rangle,
+&amp;\rho_2=\langle b^0,d^1;q_1\rangle,\\
+\rho_3=\langle a^0,b^1,d^0;1-q_2\rangle,
+&amp;\rho_4=\langle a^0,b^1,d^1;q_2\rangle,\\
+\rho_5=\langle a^1,b^1,d^0;1-q_3\rangle,
+&amp;\rho_6=\langle a^1,b^1,d^1;q_3\rangle.
+\end{array}
+\]</span> <span class="math inline">\(E\)</span>의 CPD도 규칙집합으로 표현할 수 있다. 전체 결합분포의 규칙 멀티집합을 <span class="math inline">\(R\)</span>이라 하면 완전할당 <span class="math inline">\(\xi\)</span>의 확률은 <span class="math display">\[
+P(\xi)
+=
+\prod_{\langle c;p\rangle\in R:\,\xi\sim c}p,
+\]</span> 여기서 <span class="math inline">\(\xi\sim c\)</span>는 두 할당이 공통변수에서 같은 값을 갖는다는 뜻이다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 규칙곱</strong><br>
+동일한 문맥 <span class="math inline">\(c\)</span>를 가진 규칙 <span class="math inline">\(\rho_1=\langle c;p_1\rangle\)</span>, <span class="math inline">\(\rho_2=\langle c;p_2\rangle\)</span>의 곱은 <span class="math display">\[
+\rho_1\rho_2=\langle c;p_1p_2\rangle
+\]</span> 이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정의 - 규칙합</strong><br>
+<span class="math inline">\(\operatorname{Val}(Y)=\{y^1,\ldots,y^k\}\)</span>이고 <span class="math display">\[
+\rho_i=\langle c,Y=y^i;p_i\rangle
+\]</span> 라면 <span class="math display">\[
+\sum_Y\{\rho_1,\ldots,\rho_k\}
+=
+\left\langle c;\sum_{i=1}^kp_i\right\rangle.
+\]</span> 규칙곱은 문맥이 같아야 하고 규칙합은 <span class="math inline">\(Y\)</span>의 모든 값을 같은 나머지 문맥에서 포괄해야 한다. 이를 만들기 위해 규칙을 더 세분한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정의 - 규칙분할</strong><br>
+<span class="math inline">\(\rho=\langle c;p\rangle\)</span>와 변수 <span class="math inline">\(Y\)</span>에 대해, <span class="math inline">\(Y\in\operatorname{Scope}[c]\)</span>이면 분할결과는 <span class="math inline">\(\{\rho\}\)</span>이다. 그렇지 않으면 <span class="math display">\[
+\operatorname{Split}(\rho\angle Y)
+=
+\{\langle c,Y=y;p\rangle:y\in\operatorname{Val}(Y)\}.
+\]</span> #### 예제 - 필요한 부분만 분할</p>
+</blockquote>
+<p><span class="math inline">\(\rho_2=\langle b^0,d^1;q_1\rangle\)</span>를 <span class="math inline">\(\rho_{14}=\langle a^1,b^0,c^1,d^1,e^1;p_5\rangle\)</span>와 곱한다고 하자. <span class="math inline">\(A,C,E\)</span>의 모든 조합으로 무조건 분할하면 8개의 규칙이 생긴다. 그러나 목표문맥과 양립하지 않는 분기는 더 분할할 필요가 없다. 재귀적으로 목표문맥을 따라가면 4개의 규칙만으로 상호배타적·완전한 분할을 유지할 수 있다.</p>
+<pre class="text"><code>알고리즘: 규칙분할
+
+Rule-Split(ρ=&lt;c;p&gt;, c')
+  if c와 c'가 양립하지 않으면 return {ρ}
+  if Scope[c']가 Scope[c]에 포함되면 return {ρ}
+  Y &lt;- Scope[c'] - Scope[c]에서 한 변수 선택
+  R &lt;- Split(ρ angle Y)
+  return R의 각 규칙을 c'에 대해 재귀적으로 Rule-Split한 합집합</code></pre>
+</section>
+<section id="예제---변수-d-제거" class="level4" data-number="8.6.2.3">
+<h4 data-number="8.6.2.3" class="anchored" data-anchor-id="예제---변수-d-제거"><span class="header-section-number">8.6.2.3</span> 예제 - 변수 <span class="math inline">\(D\)</span> 제거</h4>
+<p><span class="math inline">\(D\)</span>를 포함하는 규칙들을 <span class="math inline">\(R^+\)</span>에 모은다. 처음에는 바로 곱하거나 합할 수 있는 규칙이 없으므로 양립하는 규칙쌍의 문맥을 서로 맞추도록 분할한다. 예를 들어 <span class="math inline">\(D=d^0\)</span>인 두 규칙을 공통문맥 <span class="math inline">\(a^0,b^1,e^0\)</span>으로 정렬하여 곱하면 <span class="math display">\[
+\langle a^0,b^1,d^0,e^0;(1-q_2)(1-p_1)\rangle
+\]</span> 을 얻는다. <span class="math inline">\(D=d^1\)</span>인 대응규칙도 같은 문맥으로 만든 뒤 두 값을 합하면 <span class="math display">\[
+\langle a^0,b^1,e^1;(1-q_2)p_1+q_2p_2\rangle
+\]</span> 처럼 <span class="math inline">\(D\)</span>가 제거된 규칙이 된다. 모든 상호배타적 문맥에서 이 과정을 반복한다.</p>
+<pre class="text"><code>알고리즘: 규칙집합의 합-곱 변수 제거
+
+Rule-Sum-Product-Eliminate-Var(R, Y)
+  R+ &lt;- Y를 포함하는 규칙들
+  R- &lt;- R - R+
+  while R+가 비어 있지 않음:
+      가능한 작업 하나를 수행한다.
+
+      [규칙합]
+      같은 문맥 c에서 Y의 모든 값을 포괄하는 규칙집합 Rc를 선택하고
+      sum_Y Rc를 R-에 넣은 뒤 Rc를 R+에서 제거한다.
+
+      [규칙곱]
+      동일한 문맥의 두 규칙을 곱으로 교체한다.
+
+      [규칙곱을 위한 분할]
+      양립하지만 문맥이 다른 두 규칙을 서로의 문맥에 맞게 분할한다.
+
+      [규칙합을 위한 분할]
+      Y의 서로 다른 값을 가지면서 나머지 문맥이 양립하는 규칙들을
+      공통문맥으로 분할한다.
+
+  return R-</code></pre>
+<p>표 CPD의 각 행을 규칙으로 바꿔 이 알고리즘을 적용하면 표 기반 변수 제거와 동일한 산술연산을 수행한다. 차이는 CSI가 있을 때 여러 표 행을 하나의 짧은 규칙으로 유지할 수 있다는 점이다.</p>
+<p>알고리즘의 정확성은 다음 불변식으로 보인다.</p>
+<blockquote class="blockquote">
+<p>아직 제거되지 않은 변수집합을 <span class="math inline">\(W\)</span>라 하자. <span class="math inline">\(\operatorname{Scope}[c]\subseteq W\)</span>인 문맥 <span class="math inline">\(c\)</span>의 확률은 현재 규칙집합 <span class="math inline">\(R\)</span> 중 <span class="math inline">\(c\)</span>와 양립하는 모든 규칙의 값을 곱하여 얻을 수 있다.</p>
+</blockquote>
+<p>규칙분할, 규칙곱과 규칙합은 이 불변식을 보존한다.</p>
+</section>
+<section id="csi를-이용한-조건화" class="level4" data-number="8.6.2.4">
+<h4 data-number="8.6.2.4" class="anchored" data-anchor-id="csi를-이용한-조건화"><span class="header-section-number">8.6.2.4</span> CSI를 이용한 조건화</h4>
+<p>표 CPD에서는 변수 <span class="math inline">\(U\)</span>의 어느 값에 조건화하든 보통 같은 그래프구조가 남는다. CSI가 있으면 값에 따라 의존성이 사라져 각 분기의 그래프가 달라질 수 있다.</p>
+<div id="fig-csi-conditioning-branches" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-csi-conditioning-branches-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-csi-conditioning-branches.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-csi-conditioning-branches-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.12: CSI가 있는 네트워크에서 <span class="math inline">\(A\)</span>의 값에 따른 조건화 그래프
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="예제-4" class="level4" data-number="8.6.2.5">
+<h4 data-number="8.6.2.5" class="anchored" data-anchor-id="예제-4"><span class="header-section-number">8.6.2.5</span> 예제</h4>
+<p><a href="#fig-rule-based-tree-cpd" class="quarto-xref">그림&nbsp;<span>8.11</span></a> 의 네트워크에서 <span class="math inline">\(A=a^0\)</span>으로 조건화하면 <span class="math inline">\(E\)</span>의 축소 CPD가 <span class="math inline">\(C\)</span>와 무관해져 <a href="#fig-csi-conditioning-branches" class="quarto-xref">그림&nbsp;<span>8.12</span></a> (a)의 단순한 그래프가 된다. 반면 <span class="math inline">\(A=a^1\)</span>에서는 의존성이 유지되어 (b)의 더 복잡한 그래프가 남는다. 따라서 <span class="math inline">\(a^0\)</span> 분기에서는 조건화를 중단하고 바로 제거를 수행하며, <span class="math inline">\(a^1\)</span> 분기에서만 추가 조건화를 계속할 수 있다.</p>
+<p>즉 CSI가 있는 조건화에서는 각 값의 분기마다 다음 조건화변수, 제거순서, 중단시점을 별도로 선택할 수 있다.</p>
+</section>
+</section>
+<section id="논의" class="level3" data-number="8.6.3">
+<h3 data-number="8.6.3" class="anchored" data-anchor-id="논의"><span class="header-section-number">8.6.3</span> 논의</h3>
+<p>국소구조를 이용하는 방법은 두 부류이다.</p>
+<ul>
+<li><strong>전처리 분해:</strong> 보조변수를 도입하여 작은 표 CPD의 네트워크로 바꾸고 표준 변수 제거를 사용한다.</li>
+<li><strong>특수 인자 알고리즘:</strong> 규칙, 이질적 인자와 같은 구조화된 자료구조를 직접 조작한다.</li>
+</ul>
+<p>특수 알고리즘은 추론 도중 전역상황에 맞추어 구조를 더 유연하게 활용하므로 잠재적으로 계산량이 더 작다. 그러나 일반 패키지를 사용할 수 없고, 규칙자료구조의 연산 오버헤드가 표 연산보다 클 수 있다. 표 기반 구현은 메모리배치, 벡터화, 캐싱 등 강력한 최적화를 사용한다.</p>
+<section id="국소구조를-이용한-추론의-실증결과" class="level4" data-number="8.6.3.1">
+<h4 data-number="8.6.3.1" class="anchored" data-anchor-id="국소구조를-이용한-추론의-실증결과"><span class="header-section-number">8.6.3.1</span> 국소구조를 이용한 추론의 실증결과</h4>
+<p>CPCS 의료네트워크의 일부를 사용한 비교에서 표 기반 VE, noisy-or 트리분해, noisy-or 연쇄분해, 이질적 인수분해를 비교하였다. noisy-or와 noisy-max가 많은 네트워크에서는 모든 구조활용 방법이 큰 이득을 보였고, 이질적 인수분해가 제거순서를 동적으로 조정할 수 있어 가장 좋은 성능을 보였다.</p>
+<p>규칙 기반 추론 실험에서는 32개 변수와 11,018개 표 원소를 가진 네트워크를 유사한 값끼리 병합하여 5,834개 규칙으로 줄였다. CSI가 실제로 많은 질의에서는 규칙 기반 추론이 크게 빨랐지만, CSI의 도움을 거의 받지 못하는 질의에서는 규칙연산 오버헤드 때문에 표준 VE가 더 빨랐다.</p>
+<blockquote class="blockquote">
+<p><strong>결론</strong><br>
+국소구조가 광범위하게 존재하거나, 특정한 구조를 전문 알고리즘이 효율적으로 처리할 수 있을 때 구조화된 추론이 가치가 있다.</p>
+</blockquote>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./07-exponential-family.html" class="pagination-link" aria-label="지수족">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">지수족</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./09-exact-inference-clique-trees.html" class="pagination-link" aria-label="정확추론: 클리크 트리">
+        <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">정확추론: 클리크 트리</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

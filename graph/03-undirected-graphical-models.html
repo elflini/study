@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>3&nbsp; 무방향 그래픽 모형 – 확률적 그래프 모형</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./04-local-probabilistic-models.html" rel="next">
+<link href="./02-bayesian-network-representation.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-a522afb83bf8ae494942cf1b0ac9d4c3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03-undirected-graphical-models.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">무방향 그래픽 모형</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">확률적 그래프 모형</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">기초 개념</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-bayesian-network-representation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">베이즈 네트워크 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-undirected-graphical-models.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">무방향 그래픽 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-local-probabilistic-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">국소 확률 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-template-based-representations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">템플릿 기반 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-gaussian-network-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">가우시안 네트워크 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-exponential-family.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">지수족</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-exact-inference-variable-elimination.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">정확추론: 변수 제거</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-exact-inference-clique-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">정확추론: 클리크 트리</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-inference-as-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">최적화로서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-particle-based-approximate-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">입자 기반 근사추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-map-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">MAP 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-inference-in-hybrid-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">혼합 네트워크에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-inference-in-temporal-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">시간 모형에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-learning-graphical-models-overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">그래프모형 학습 개요</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-parameter-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">모수추정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-structure-learning-bayesian-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">베이지안 네트워크의 구조학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-partially-observed-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">부분관측 자료</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./19-learning-undirected-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">무방향 그래프모형의 학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20-causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">인과성</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21-utilities-and-decisions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">효용과 의사결정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22-structured-decision-problems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">구조화된 의사결정 문제</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./23-epilogue.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">맺음말: 왜 확률적 그래프 모형인가?</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#오개념-예제" id="toc-오개념-예제" class="nav-link active" data-scroll-target="#오개념-예제"><span class="header-section-number">3.1</span> 오개념 예제</a></li>
+  <li><a href="#모수화" id="toc-모수화" class="nav-link" data-scroll-target="#모수화"><span class="header-section-number">3.2</span> 모수화</a>
+  <ul>
+  <li><a href="#요인" id="toc-요인" class="nav-link" data-scroll-target="#요인"><span class="header-section-number">3.2.1</span> 요인</a></li>
+  <li><a href="#깁스-분포와-마르코프-네트워크" id="toc-깁스-분포와-마르코프-네트워크" class="nav-link" data-scroll-target="#깁스-분포와-마르코프-네트워크"><span class="header-section-number">3.2.2</span> 깁스 분포와 마르코프 네트워크</a></li>
+  <li><a href="#기본-독립성" id="toc-기본-독립성" class="nav-link" data-scroll-target="#기본-독립성"><span class="header-section-number">3.2.3</span> 기본 독립성</a>
+  <ul class="collapse">
+  <li><a href="#건전성" id="toc-건전성" class="nav-link" data-scroll-target="#건전성"><span class="header-section-number">3.2.3.1</span> 건전성</a></li>
+  <li><a href="#완전성" id="toc-완전성" class="nav-link" data-scroll-target="#완전성"><span class="header-section-number">3.2.3.2</span> 완전성</a></li>
+  </ul></li>
+  <li><a href="#독립성의-세-가지-마르코프-성질" id="toc-독립성의-세-가지-마르코프-성질" class="nav-link" data-scroll-target="#독립성의-세-가지-마르코프-성질"><span class="header-section-number">3.2.4</span> 독립성의 세 가지 마르코프 성질</a>
+  <ul class="collapse">
+  <li><a href="#쌍별-및-국소-마르코프-가정" id="toc-쌍별-및-국소-마르코프-가정" class="nav-link" data-scroll-target="#쌍별-및-국소-마르코프-가정"><span class="header-section-number">3.2.4.1</span> 쌍별 및 국소 마르코프 가정</a></li>
+  <li><a href="#마르코프-성질-사이의-관계" id="toc-마르코프-성질-사이의-관계" class="nav-link" data-scroll-target="#마르코프-성질-사이의-관계"><span class="header-section-number">3.2.4.2</span> 마르코프 성질 사이의 관계</a></li>
+  </ul></li>
+  <li><a href="#분포에서-그래프로" id="toc-분포에서-그래프로" class="nav-link" data-scroll-target="#분포에서-그래프로"><span class="header-section-number">3.2.5</span> 분포에서 그래프로</a></li>
+  </ul></li>
+  <li><a href="#모수화-다시-보기" id="toc-모수화-다시-보기" class="nav-link" data-scroll-target="#모수화-다시-보기"><span class="header-section-number">3.3</span> 모수화 다시 보기</a>
+  <ul>
+  <li><a href="#세밀한-모수화" id="toc-세밀한-모수화" class="nav-link" data-scroll-target="#세밀한-모수화"><span class="header-section-number">3.3.1</span> 세밀한 모수화</a>
+  <ul class="collapse">
+  <li><a href="#요인그래프" id="toc-요인그래프" class="nav-link" data-scroll-target="#요인그래프"><span class="header-section-number">3.3.1.1</span> 요인그래프</a></li>
+  <li><a href="#로그선형-모형" id="toc-로그선형-모형" class="nav-link" data-scroll-target="#로그선형-모형"><span class="header-section-number">3.3.1.2</span> 로그선형 모형</a></li>
+  <li><a href="#세-표현의-역할" id="toc-세-표현의-역할" class="nav-link" data-scroll-target="#세-표현의-역할"><span class="header-section-number">3.3.1.3</span> 세 표현의 역할</a></li>
+  </ul></li>
+  <li><a href="#과잉모수화" id="toc-과잉모수화" class="nav-link" data-scroll-target="#과잉모수화"><span class="header-section-number">3.3.2</span> 과잉모수화</a>
+  <ul class="collapse">
+  <li><a href="#중복-제거" id="toc-중복-제거" class="nav-link" data-scroll-target="#중복-제거"><span class="header-section-number">3.3.2.1</span> 중복 제거</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#베이즈-네트워크와-마르코프-네트워크" id="toc-베이즈-네트워크와-마르코프-네트워크" class="nav-link" data-scroll-target="#베이즈-네트워크와-마르코프-네트워크"><span class="header-section-number">3.4</span> 베이즈 네트워크와 마르코프 네트워크</a>
+  <ul>
+  <li><a href="#베이즈-네트워크에서-마르코프-네트워크로" id="toc-베이즈-네트워크에서-마르코프-네트워크로" class="nav-link" data-scroll-target="#베이즈-네트워크에서-마르코프-네트워크로"><span class="header-section-number">3.4.1</span> 베이즈 네트워크에서 마르코프 네트워크로</a>
+  <ul class="collapse">
+  <li><a href="#d-분리의-건전성" id="toc-d-분리의-건전성" class="nav-link" data-scroll-target="#d-분리의-건전성"><span class="header-section-number">3.4.1.1</span> d-분리의 건전성</a></li>
+  </ul></li>
+  <li><a href="#마르코프-네트워크에서-베이즈-네트워크로" id="toc-마르코프-네트워크에서-베이즈-네트워크로" class="nav-link" data-scroll-target="#마르코프-네트워크에서-베이즈-네트워크로"><span class="header-section-number">3.4.2</span> 마르코프 네트워크에서 베이즈 네트워크로</a></li>
+  <li><a href="#현그래프" id="toc-현그래프" class="nav-link" data-scroll-target="#현그래프"><span class="header-section-number">3.4.3</span> 현그래프</a></li>
+  </ul></li>
+  <li><a href="#부분방향-모형" id="toc-부분방향-모형" class="nav-link" data-scroll-target="#부분방향-모형"><span class="header-section-number">3.5</span> 부분방향 모형</a>
+  <ul>
+  <li><a href="#조건부-확률장" id="toc-조건부-확률장" class="nav-link" data-scroll-target="#조건부-확률장"><span class="header-section-number">3.5.1</span> 조건부 확률장</a>
+  <ul class="collapse">
+  <li><a href="#crf의-표현과-의미" id="toc-crf의-표현과-의미" class="nav-link" data-scroll-target="#crf의-표현과-의미"><span class="header-section-number">3.5.1.1</span> CRF의 표현과 의미</a></li>
+  <li><a href="#방향-의존성과-무방향-의존성" id="toc-방향-의존성과-무방향-의존성" class="nav-link" data-scroll-target="#방향-의존성과-무방향-의존성"><span class="header-section-number">3.5.1.2</span> 방향 의존성과 무방향 의존성</a></li>
+  </ul></li>
+  <li><a href="#체인그래프-모형" id="toc-체인그래프-모형" class="nav-link" data-scroll-target="#체인그래프-모형"><span class="header-section-number">3.5.2</span> 체인그래프 모형</a>
+  <ul class="collapse">
+  <li><a href="#분해" id="toc-분해" class="nav-link" data-scroll-target="#분해"><span class="header-section-number">3.5.2.1</span> 분해</a></li>
+  <li><a href="#체인그래프의-독립성" id="toc-체인그래프의-독립성" class="nav-link" data-scroll-target="#체인그래프의-독립성"><span class="header-section-number">3.5.2.2</span> 체인그래프의 독립성</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-undirected-graphical-models" class="quarto-section-identifier"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">무방향 그래픽 모형</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>앞 장까지는 방향 그래픽 모형, 즉 <strong>베이즈 네트워크(Bayesian network)</strong>만 다루었다. 베이즈 네트워크는 많은 현실 영역에서 그래프 구조와 모수가 자연스러운 의미를 갖기 때문에 매우 유용하다. 그러나 모든 상호작용에 원인과 결과의 방향을 부여할 수 있는 것은 아니다. 이 장에서는 <strong>무방향 그래프(undirected graph)</strong>에 기반한 또 하나의 중요한 확률 그래픽 모형을 다룬다.</p>
+<p>무방향 모형은 다음과 같은 경우 특히 유용하다.</p>
+<ul>
+<li>변수 사이 상호작용이 대칭적이어서 자연스러운 방향을 정하기 어려운 경우</li>
+<li>공간적으로 인접한 픽셀이나 격자 위치처럼 상호작용 자체가 핵심인 경우</li>
+<li>여러 중첩된 특징이나 제약을 하나의 분포에 곱셈적으로 결합하려는 경우</li>
+<li>방향 모형의 독립성이나 추론을 더 단순한 무방향 관점에서 분석하려는 경우</li>
+</ul>
+<p>이 장에서는 방향간선과 무방향간선을 함께 허용하는 통합 모형도 소개한다. 다만 앞 장과 달리 이 장의 일부 결과는 이산 상태공간 또는 양의 분포라는 추가 조건을 필요로 한다.</p>
+<section id="오개념-예제" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="오개념-예제"><span class="header-section-number">3.1</span> 오개념 예제</h2>
+<p>앞 장에서 살펴본 오개념(Misconception) 예제를 다시 생각하자. 네 학생 Alice, Bob, Charles, Debbie가 다음의 네 쌍으로만 만나 과제를 함께 공부한다.</p>
+<p><span class="math display">\[
+(A,B),\quad(B,C),\quad(C,D),\quad(D,A).
+\]</span></p>
+<p>우리가 나타내고 싶은 핵심 독립성은</p>
+<p><span class="math display">\[
+(A\perp C\mid B,D)
+\]</span></p>
+<p>및</p>
+<p><span class="math display">\[
+(B\perp D\mid A,C)
+\]</span></p>
+<p>이며 그 밖의 독립성은 가정하지 않는다. Alice와 Charles는 직접 만나지 않기 때문에 Bob과 Debbie의 상태가 주어지면 서로 독립이고, 마찬가지로 Bob과 Debbie도 Alice와 Charles가 주어지면 독립이다.</p>
+<p>이 독립성 구조는 베이즈 네트워크로 자연스럽게 표현되지 않는다. 모든 간선에 방향을 정하면 원래 원하지 않았던 독립성이 추가되거나, 필요한 독립성 중 적어도 하나를 놓치게 된다. 반면 네 학생의 상호작용은 방향적이라기보다 대칭적이다. 따라서 직접 상호작용하는 쌍만 무방향간선으로 연결한 그래프가 더 자연스럽다.</p>
+<p>이러한 무방향 그래픽 모형을 <strong>마르코프 네트워크(Markov network)</strong> 또는 <strong>마르코프 확률장(Markov random field, MRF)</strong>이라고 한다. 노드는 확률변수를 나타내고, 간선은 다른 변수가 매개하지 않는 직접적인 확률적 상호작용을 나타낸다.</p>
+<p>방향이 없으므로 <span class="math inline">\(P(A\mid B)\)</span>와 같이 한 변수를 다른 변수에 조건화한 CPD를 기본 모수로 사용하는 것은 자연스럽지 않다. 대신 서로 관련된 값들이 얼마나 잘 양립하는지를 나타내는 대칭적인 함수를 사용한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 요인</strong><br>
+확률변수 집합 <span class="math inline">\(\mathbf{D}\)</span>에 대해 <strong>요인(factor)</strong> <span class="math inline">\(\phi\)</span>는 <span class="math display">\[
+\phi:Val(\mathbf{D})\to\mathbb{R}
+\]</span> 인 함수이다. 모든 항목이 음이 아니면 비음수 요인이라고 한다. 변수집합 <span class="math inline">\(\mathbf{D}\)</span>를 요인의 <strong>범위(scope)</strong>라 하고 <span class="math inline">\(Scope[\phi]\)</span>로 표시한다. 별도 언급이 없으면 이 장에서는 비음수 요인만 사용한다.</p>
+</blockquote>
+<p>오개념 예제에서는 <span class="math inline">\(A\)</span>와 <span class="math inline">\(B\)</span> 사이에</p>
+<p><span class="math display">\[
+\phi_1(A,B):Val(A,B)\to\mathbb{R}_+
+\]</span></p>
+<p>를 둔다. 값 <span class="math inline">\(\phi_1(a,b)\)</span>가 클수록 해당 값 조합이 더 양립 가능하고 더 큰 확률질량을 받는다. <span class="quarto-unresolved-ref">?fig-misconception-factors의</span> 첫 요인은 Alice와 Bob이 서로 동의하는 경우에 큰 값을 부여하며, 둘 다 옳은 경우에 둘 다 틀린 경우보다 더 큰 값을 부여한다. 또한 둘이 불일치할 때 Alice만 오개념을 가진 경우와 Bob만 오개념을 가진 경우에 서로 다른 가중치를 줄 수 있다.</p>
+<p><img src="figures/fig-misconception-factors.svg" id="fig-misconception-factors" class="img-fluid" alt="그림 삽입 위치"> 나머지 상호작용 쌍 <span class="math inline">\(\{B,C\}\)</span>, <span class="math inline">\(\{C,D\}\)</span>, <span class="math inline">\(\{D,A\}\)</span>에도 각각 요인을 정의한다. 예를 들어 <span class="math inline">\(\phi_3(C,D)\)</span>는 Charles와 Debbie가 자주 논쟁하여 서로 다른 상태를 갖는 경우에 더 큰 가중치를 주도록 설정할 수 있다.</p>
+<p>국소 상호작용을 전역 결합분포로 만들기 위해 베이즈 네트워크와 마찬가지로 요인들을 곱한다. 그러나 CPD들의 곱과 달리 일반 요인의 곱은 자동으로 합이 1이 되지 않는다. 따라서</p>
+<p><span class="math display">\[
+P(a,b,c,d)
+=\frac{1}{Z}\phi_1(a,b)\phi_2(b,c)\phi_3(c,d)\phi_4(d,a),
+\]</span></p>
+<p>여기서</p>
+<p><span class="math display">\[
+Z=\sum_{a,b,c,d}
+\phi_1(a,b)\phi_2(b,c)\phi_3(c,d)\phi_4(d,a)
+\]</span></p>
+<p>로 정규화한다. <span class="math inline">\(Z\)</span>를 <strong>분할함수(partition function)</strong>라고 한다. 이 명칭은 통계물리학의 마르코프 확률장과 깁스 분포에서 유래한다. <span class="math inline">\(Z\)</span>는 모수들의 함수이며 이후 학습에서 중요한 역할을 한다.</p>
+<p><span class="quarto-unresolved-ref">?fig-misconception-distribution는</span> 네 요인의 곱으로 얻은 비정규화 측도와 이를 <span class="math inline">\(Z=7{,}201{,}840\)</span>으로 나누어 얻은 결합분포를 보여 준다. 예를 들어 상태 <span class="math inline">\((a^1,b^1,c^0,d^1)\)</span>의 비정규화 가중치는</p>
+<p><span class="math display">\[
+10\times1\times100\times100=100{,}000
+\]</span></p>
+<p>이다.</p>
+<p><img src="figures/fig-misconception-distribution.svg" id="fig-misconception-distribution" class="img-fluid" alt="그림 삽입 위치"> 이 결합분포에서는 주변화하여</p>
+<p><span class="math display">\[
+P(b^1)\approx0.732,\qquad P(b^0)\approx0.268
+\]</span></p>
+<p>을 얻는다. 반면 Charles가 오개념을 갖지 않았다는 <span class="math inline">\(c^0\)</span>를 관측하면</p>
+<p><span class="math display">\[
+P(b^1\mid c^0)\approx0.06
+\]</span></p>
+<p>으로 크게 감소한다.</p>
+<p>이 표현의 장점은 국소 상호작용을 유연하게 바꿀 수 있다는 데 있다. <span class="math inline">\(A\)</span>와 <span class="math inline">\(B\)</span>의 관계를 변경하려면 다른 요인을 다시 정규화하거나 수정하지 않고 <span class="math inline">\(\phi_1(A,B)\)</span>만 바꾸면 된다. 반면 특정 요인 변화가 최종 주변확률에 미치는 영향은 여러 요인의 상호작용과 분할함수 때문에 직관적으로 이해하기 어려울 수 있다.</p>
+<p>요인분해와 조건부독립성 사이에는 밀접한 관계가 있다. 기초 개념 장에서 확인한 요인분해 성질에 따르면</p>
+<p><span class="math display">\[
+P\models(\mathbf{X}\perp\mathbf{Y}\mid\mathbf{Z})
+\]</span></p>
+<p>인 것과 분포를</p>
+<p><span class="math display">\[
+P(\mathbf{X},\mathbf{Y},\mathbf{Z})
+=\phi_1(\mathbf{X},\mathbf{Z})\phi_2(\mathbf{Y},\mathbf{Z})
+\]</span></p>
+<p>로 쓸 수 있는 것은 동치이다. 오개념 예제의 곱을 두 부분으로 묶으면</p>
+<p><span class="math display">\[
+P(A,B,C,D)
+=
+\left[\frac{1}{Z}\phi_1(A,B)\phi_2(B,C)\right]
+\left[\phi_3(C,D)\phi_4(A,D)\right]
+\]</span></p>
+<p>이므로</p>
+<p><span class="math display">\[
+(B\perp D\mid A,C)
+\]</span></p>
+<p>을 얻는다. 대칭적으로</p>
+<p><span class="math display">\[
+(A\perp C\mid B,D)
+\]</span></p>
+<p>도 얻는다. 이는 무방향 그래프에서 조건화한 노드들이 모든 경로를 막는다는 분리(separation)의 직관과 정확히 일치한다.</p>
+</section>
+<section id="모수화" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="모수화"><span class="header-section-number">3.2</span> 모수화</h2>
+<p>무방향 그래픽 모형에서도 그래프 구조에 모수를 부착하여 분포를 정의해야 한다. 베이즈 네트워크의 CPD와 달리 마르코프 네트워크의 요인은 그 자체가 확률이나 조건부확률이 아니다. 따라서 사람이 직접 해석하거나 전문가에게서 값을 유도하기가 더 어렵고, 데이터에서 추정하는 문제도 일반적으로 더 어렵다.</p>
+<section id="요인" class="level3" data-number="3.2.1">
+<h3 data-number="3.2.1" class="anchored" data-anchor-id="요인"><span class="header-section-number">3.2.1</span> 요인</h3>
+<p>요인은 결합분포와 CPD를 모두 포함하는 더 일반적인 개념이다.</p>
+<ul>
+<li><span class="math inline">\(P(\mathbf{D})\)</span>는 <span class="math inline">\(\mathbf{D}\)</span> 위의 요인이다.</li>
+<li><span class="math inline">\(P(X\mid\mathbf{U})\)</span>도 <span class="math inline">\(\{X\}\cup\mathbf{U}\)</span> 위의 요인이다.</li>
+<li>그러나 결합분포는 모든 항목의 합이 1이어야 하고, CPD는 각 부모값마다 자식의 확률합이 1이어야 하지만, 일반 요인에는 이러한 정규화 제약이 없다.</li>
+</ul>
+<p>완전그래프의 각 간선에 쌍별 요인만 두면 임의의 결합분포를 표현할 수 있을까? 일반적으로 그렇지 않다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 쌍별 요인의 표현력 한계</strong><br>
+<span class="math inline">\(n\)</span>개의 이진변수에 대한 완전 무방향그래프를 생각하자. 각 간선 요인은 네 개의 값을 가지므로 전체 모수 수는 대략 <span class="math inline">\(4\binom{n}{2}\)</span>이다. 그러나 임의의 결합분포에는 <span class="math inline">\(2^n-1\)</span>개의 독립 모수가 필요하다. 쌍별 요인은 두 변수 사이의 상호작용만 표현하며 세 변수 이상이 함께 만드는 고차 상호작용을 모두 나타낼 수 없다.</p>
+</blockquote>
+<p>따라서 임의의 변수 부분집합에 대한 요인을 허용해야 한다. 이를 위해 요인곱을 정의한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 요인곱</strong><br>
+서로 겹치지 않는 변수집합 <span class="math inline">\(\mathbf{X},\mathbf{Y},\mathbf{Z}\)</span>와 요인 <span class="math inline">\(\phi_1(\mathbf{X},\mathbf{Y})\)</span>, <span class="math inline">\(\phi_2(\mathbf{Y},\mathbf{Z})\)</span>가 있다고 하자. 요인곱 <span class="math inline">\(\phi_1\times\phi_2\)</span>는 <span class="math display">\[
+\psi(\mathbf{X},\mathbf{Y},\mathbf{Z})
+=\phi_1(\mathbf{X},\mathbf{Y})\phi_2(\mathbf{Y},\mathbf{Z})
+\]</span> 로 정의되는 요인이다.</p>
+</blockquote>
+<p>공통변수 <span class="math inline">\(\mathbf{Y}\)</span>의 동일한 값끼리 맞추어 곱하는 것이 핵심이다. <span class="quarto-unresolved-ref">?fig-factor-product은</span> <span class="math inline">\(\phi_1(A,B)\)</span>와 <span class="math inline">\(\phi_2(B,C)\)</span>의 항목을 같은 <span class="math inline">\(B\)</span> 값에 따라 결합하여 <span class="math inline">\(A,B,C\)</span> 위의 새 요인을 만드는 과정을 보여 준다.</p>
+<p><img src="figures/fig-factor-product.svg" id="fig-factor-product" class="img-fluid" alt="그림 삽입 위치"> 베이즈 네트워크의 연쇄법칙도 요인곱의 특수한 경우이다. <span class="math inline">\(\phi_{X_i}(X_i,Pa_{X_i})=P(X_i\mid Pa_{X_i})\)</span>라고 두면</p>
+<p><span class="math display">\[
+P(X_1,\ldots,X_n)=\prod_i\phi_{X_i}.
+\]</span></p>
+</section>
+<section id="깁스-분포와-마르코프-네트워크" class="level3" data-number="3.2.2">
+<h3 data-number="3.2.2" class="anchored" data-anchor-id="깁스-분포와-마르코프-네트워크"><span class="header-section-number">3.2.2</span> 깁스 분포와 마르코프 네트워크</h3>
+<blockquote class="blockquote">
+<p><strong>정의 - 깁스 분포</strong><br>
+요인집합 <span class="math display">\[
+\Phi=\{\phi_1(\mathbf{D}_1),\ldots,\phi_m(\mathbf{D}_m)\}
+\]</span> 에 의해 모수화되는 <strong>깁스 분포(Gibbs distribution)</strong>는 <span class="math display">\[
+P_\Phi(X_1,\ldots,X_n)=\frac{1}{Z}\widetilde P_\Phi(X_1,\ldots,X_n)
+\]</span> 로 정의한다. 여기서 <span class="math display">\[
+\widetilde P_\Phi=\phi_1(\mathbf{D}_1)\times\cdots\times\phi_m(\mathbf{D}_m)
+\]</span> 는 비정규화 측도이고, <span class="math display">\[
+Z=\sum_{X_1,\ldots,X_n}\widetilde P_\Phi(X_1,\ldots,X_n)
+\]</span> 는 분할함수이다.</p>
+</blockquote>
+<p>개별 요인을 그 범위의 주변분포로 해석해서는 안 된다. 요인은 전체 결합분포에 대한 하나의 기여일 뿐이며, 최종 분포는 모든 요인의 곱과 정규화를 함께 반영한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 요인과 주변분포의 차이</strong><br>
+<span class="quarto-unresolved-ref">?fig-misconception-factors의</span> <span class="math inline">\(\phi_1(A,B)\)</span>에서는 <span class="math inline">\((a^0,b^0)\)</span>가 가장 큰 값이지만, 전체 네 요인을 곱한 분포의 <span class="math inline">\(P(A,B)\)</span>에서는 <span class="math inline">\((a^0,b^1)\)</span>이 가장 가능성이 높다. <span class="math inline">\(B\)</span>와 <span class="math inline">\(C\)</span>는 일치하고, <span class="math inline">\(C\)</span>와 <span class="math inline">\(D\)</span>는 불일치하며, <span class="math inline">\(D\)</span>와 <span class="math inline">\(A\)</span>는 일치하는 경향이 강하기 때문에 전체적으로 <span class="math inline">\(A\)</span>와 <span class="math inline">\(B\)</span>가 불일치하는 배치가 선호된다. 다른 요인들의 영향이 <span class="math inline">\(\phi_1\)</span>의 국소 선호를 압도한 것이다.</p>
+</blockquote>
+<p>요인의 범위에 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>가 함께 나타나면 두 변수 사이에 직접 상호작용이 도입된다. 따라서 그래프에도 <span class="math inline">\(X-Y\)</span> 간선을 두어야 한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 마르코프 네트워크 분해</strong><br>
+<span class="math inline">\(P_\Phi\)</span>가 요인 <span class="math inline">\(\Phi=\{\phi_k(\mathbf{D}_k)\}\)</span>로 정의되어 있다고 하자. 모든 <span class="math inline">\(\mathbf{D}_k\)</span>가 무방향그래프 <span class="math inline">\(H\)</span>의 완전 부분그래프이면 <span class="math inline">\(P_\Phi\)</span>가 <span class="math inline">\(H\)</span>에 따라 분해된다고 한다. 마르코프 네트워크의 요인을 흔히 <strong>클리크 퍼텐셜(clique potential)</strong>이라고 한다.</p>
+</blockquote>
+<p>모든 완전 부분그래프는 어떤 최대 클리크에 포함되므로 원칙적으로 최대 클리크마다 하나의 퍼텐셜만 두어도 표현력은 유지된다. 여러 작은 요인을 같은 최대 클리크에 배정한 뒤 곱하면 하나의 클리크 퍼텐셜이 된다. <span class="quarto-unresolved-ref">?fig-markov-cliques의</span> (a)의 최대 클리크는 네 간선 쌍이고, <span class="quarto-unresolved-ref">?fig-markov-cliques의</span> (b)의 최대 클리크는 <span class="math inline">\(\{A,B,D\}\)</span>와 <span class="math inline">\(\{B,C,D\}\)</span>이다.</p>
+<p><img src="figures/fig-markov-cliques.svg" id="fig-markov-cliques" class="img-fluid" alt="그림 삽입 위치"> &gt; <strong>주의 - 최대 클리크 모수화가 구조를 가릴 수 있다</strong><br>
+&gt; 최대 클리크 하나로 모든 작은 요인을 합치는 것은 이론적으로 손실이 없지만 원래 요인분해의 세밀한 구조를 숨긴다. 예를 들어 모든 변수쌍에 요인이 있는 완전 쌍별 네트워크는 그래프상 하나의 큰 클리크이지만, 실제 모수 수는 <span class="math inline">\(O(n^2)\)</span>이다. 이를 하나의 최대 클리크 표로 합치면 <span class="math inline">\(O(2^n)\)</span> 크기로 보이게 된다.</p>
+<blockquote class="blockquote">
+<p><strong>상자 - 개념: 쌍별 마르코프 네트워크</strong><br>
+<strong>쌍별 마르코프 네트워크(pairwise Markov network)</strong>는 모든 요인이 단일변수 또는 변수쌍에만 정의되는 모형이다. 그래프 <span class="math inline">\(H\)</span>에 대해 노드 퍼텐셜 <span class="math display">\[
+\{\phi(X_i):i=1,\ldots,n\}
+\]</span> 과 간선 퍼텐셜 <span class="math display">\[
+\{\phi(X_i,X_j):(X_i,X_j)\in H\}
+\]</span> 을 사용하며, 전체 분포는 이 퍼텐셜들의 정규화된 곱이다. 구조가 단순하고 간선 상호작용이 많은 응용에서 자연스럽기 때문에 널리 사용된다. 특히 <span class="quarto-unresolved-ref">?fig-grid-pairwise-mrf과</span> 같은 격자 MRF는 영상처리에서 자주 나타난다. 표현은 간단하지만 격자에 많은 루프가 있어 정확추론은 어려울 수 있다.</p>
+</blockquote>
+<p><img src="figures/fig-grid-pairwise-mrf.svg" id="fig-grid-pairwise-mrf" class="img-fluid" alt="그림 삽입 위치"> ### 축소 마르코프 네트워크</p>
+<p>일부 변수 <span class="math inline">\(\mathbf{U}\)</span>가 <span class="math inline">\(\mathbf{u}\)</span>로 관측되었을 때 조건부분포를 만들려면 결합분포에서 관측과 일치하지 않는 항목을 제거하고 나머지를 다시 정규화한다. 깁스 분포에서는 각 요인에서 <span class="math inline">\(\mathbf{u}\)</span>와 일치하지 않는 항목을 제거하는 방식으로 같은 작업을 수행할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 요인 축소</strong><br>
+<span class="math inline">\(\phi(\mathbf{Y})\)</span>가 요인이고 <span class="math inline">\(\mathbf{U}=\mathbf{u}\)</span>가 <span class="math inline">\(\mathbf{U}\subseteq\mathbf{Y}\)</span>의 값 할당이라고 하자. 문맥 <span class="math inline">\(\mathbf{U}=\mathbf{u}\)</span>에 대한 요인의 축소를 <span class="math inline">\(\phi[\mathbf{u}]\)</span>로 쓰고, <span class="math display">\[
+\phi[\mathbf{u}](\mathbf{y}')=\phi(\mathbf{y}',\mathbf{u}),
+\qquad \mathbf{Y}'=\mathbf{Y}-\mathbf{U}
+\]</span> 로 정의한다. <span class="math inline">\(\mathbf{U}\)</span>의 일부만 요인의 범위에 포함되면 교집합에 해당하는 변수만 고정한다.</p>
+</blockquote>
+<p><span class="quarto-unresolved-ref">?fig-reduced-factor는</span> <span class="quarto-unresolved-ref">?fig-factor-product에서</span> 만든 <span class="math inline">\(A,B,C\)</span> 요인을 <span class="math inline">\(C=c^1\)</span>로 고정하여 <span class="math inline">\(A,B\)</span> 위의 요인으로 축소한 결과이다.</p>
+<p><img src="figures/fig-reduced-factor.svg" id="fig-reduced-factor" class="img-fluid" alt="그림 삽입 위치"> &gt; <strong>정의 - 축소 깁스 분포</strong><br>
+&gt; <span class="math inline">\(P_\Phi\)</span>가 요인집합 <span class="math inline">\(\Phi=\{\phi_1,\ldots,\phi_K\}\)</span>로 정의되고 <span class="math inline">\(\mathbf{u}\)</span>가 문맥일 때, <strong>축소 깁스 분포</strong> <span class="math inline">\(P_{\Phi[\mathbf{u}]}\)</span>는 &gt; <span class="math display">\[
+&gt; \Phi[\mathbf{u}]=\{\phi_1[\mathbf{u}],\ldots,\phi_K[\mathbf{u}]\}
+&gt; \]</span> &gt; 로 정의되는 깁스 분포이다.</p>
+<blockquote class="blockquote">
+<p><strong>명제</strong><br>
+<span class="math inline">\(P_\Phi(\mathbf{X})\)</span>가 깁스 분포이고 <span class="math inline">\(\mathbf{W}=\mathbf{X}-\mathbf{U}\)</span>이면 <span class="math display">\[
+P_{\Phi[\mathbf{u}]}(\mathbf{W})=P_\Phi(\mathbf{W}\mid\mathbf{u}).
+\]</span></p>
+</blockquote>
+<p>관측에 필요한 재정규화는 축소된 깁스 분포의 분할함수에 자동으로 포함된다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 축소 마르코프 네트워크</strong><br>
+<span class="math inline">\(H\)</span>가 <span class="math inline">\(\mathbf{X}\)</span> 위의 마르코프 네트워크이고 <span class="math inline">\(\mathbf{U}=\mathbf{u}\)</span>가 관측 문맥이라고 하자. 축소 네트워크 <span class="math inline">\(H[\mathbf{u}]\)</span>는 노드집합 <span class="math inline">\(\mathbf{W}=\mathbf{X}-\mathbf{U}\)</span> 위의 그래프로, 원래 <span class="math inline">\(H\)</span>에서 두 미관측 노드 사이에 있던 간선만 유지한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>명제</strong><br>
+<span class="math inline">\(P_\Phi\)</span>가 <span class="math inline">\(H\)</span>에 따라 분해되면 축소 분포 <span class="math inline">\(P_{\Phi[\mathbf{u}]}\)</span>는 <span class="math inline">\(H[\mathbf{u}]\)</span>에 따라 분해된다.</p>
+</blockquote>
+<p>이는 베이즈 네트워크의 조건화와 중요한 차이가 있다. 무방향그래프에서는 조건화가 관측노드와 그 간선을 제거할 뿐 새로운 간선을 활성화하지 않는다. 베이즈 네트워크에서는 공통결과 또는 그 자손을 관측하면 v-구조가 활성화되어 새로운 의존성이 생길 수 있다.</p>
+<p><span class="quarto-unresolved-ref">?fig-reduced-markov-network의</span> (a)의 확장된 학생 예제 네트워크에서 <span class="math inline">\(G=g\)</span>를 관측하면 (b)와 같이, 여기에 <span class="math inline">\(S=s\)</span>도 관측하면 (c)와 같이 그래프가 크게 단순해진다.</p>
+<p><img src="figures/fig-reduced-markov-network.svg" id="fig-reduced-markov-network" class="img-fluid" alt="그림 삽입 위치"> &gt; <strong>상자 - 사례연구: 컴퓨터 비전의 마르코프 네트워크</strong><br>
+&gt; 컴퓨터 비전에서는 마르코프 네트워크를 흔히 MRF라고 부르며 영상 분할, 잡음 제거, 흐림 복원, 스테레오 깊이 추정, 객체 인식 등에 사용한다. 전형적인 모형은 픽셀 또는 슈퍼픽셀을 노드로 하고 인접한 위치를 간선으로 연결한 쌍별 MRF이다. 에너지 표현을 사용하여 낮은 에너지가 더 높은 확률을 뜻하게 하는 경우가 많다. &gt; &gt; <strong>영상 잡음 제거:</strong> 각 노드 퍼텐셜은 추정 픽셀값 <span class="math inline">\(x_i\)</span>와 관측값 <span class="math inline">\(y_i\)</span>의 차이를 벌점화한다. 간선 퍼텐셜은 인접 픽셀의 불연속을 벌점화하여 매끄러움을 유도한다. 실제 물체 경계까지 지나치게 평활화하지 않도록 &gt; <span class="math display">\[
+&gt; \epsilon(x_i,x_j)=\min(c\lVert x_i-x_j\rVert_p,\,\operatorname{dist}_{\max})
+&gt; \]</span> &gt; 와 같은 절단 노름을 사용할 수 있다. &gt; &gt; <strong>스테레오 재구성:</strong> 변수값은 깊이나 시차를 나타낸다. 노드 퍼텐셜은 좌우 영상에서 해당 픽셀의 깊이를 개별적으로 평가하고, 간선 퍼텐셜은 인접 깊이의 연속성을 선호한다. 영상 경사가 큰 곳에서는 물체 경계일 가능성이 높으므로 불연속 벌점을 줄일 수 있다. &gt; &gt; <strong>영상 분할:</strong> 각 픽셀 또는 슈퍼픽셀에 하늘, 도로, 자동차, 풀과 같은 클래스 라벨을 부여한다. 노드 퍼텐셜은 색, 질감, 위치, 국소 분류기 출력 등을 이용하고, 간선 퍼텐셜은 인접 영역이 같은 클래스일 가능성이나 특정 클래스의 상대적 위치를 표현한다. 예를 들어 하늘은 다른 영역보다 위에, 자동차는 도로 위에 나타나는 경향을 반영할 수 있다. &gt; &gt; <span class="quarto-unresolved-ref">?fig-computer-vision-mrf은</span> 노드 퍼텐셜만 사용해 슈퍼픽셀을 독립적으로 분류한 결과와 인접 슈퍼픽셀 간 상호작용을 포함한 쌍별 MRF 결과를 비교한다. 후자가 공간적 일관성을 활용하여 더 나은 분할을 만든다.</p>
+<p><img src="figures/fig-computer-vision-mrf.svg" id="fig-computer-vision-mrf" class="img-fluid" alt="그림 삽입 위치"> ## 마르코프 네트워크의 독립성</p>
+<p>앞 절에서는 무방향그래프가 오개념 예제의 상호작용 구조와 잘 맞는다는 직관을 제시하였다. 이제 무방향그래프가 어떤 독립성 가정을 나타내는지 형식적으로 정의한다.</p>
+</section>
+<section id="기본-독립성" class="level3" data-number="3.2.3">
+<h3 data-number="3.2.3" class="anchored" data-anchor-id="기본-독립성"><span class="header-section-number">3.2.3</span> 기본 독립성</h3>
+<p>마르코프 네트워크에서 확률적 영향은 무방향 경로를 따라 흐르며, 경로 중간의 변수를 관측하면 그 흐름이 차단된다고 생각할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 활성 경로</strong><br>
+<span class="math inline">\(H\)</span>가 마르코프 네트워크이고 <span class="math display">\[
+X_1-X_2-\cdots-X_k
+\]</span> 가 <span class="math inline">\(H\)</span>의 경로라고 하자. 관측변수 집합이 <span class="math inline">\(\mathbf{Z}\subseteq\mathbf{X}\)</span>일 때, 경로 위의 어느 <span class="math inline">\(X_i\)</span>도 <span class="math inline">\(\mathbf{Z}\)</span>에 속하지 않으면 이 경로가 <span class="math inline">\(\mathbf{Z}\)</span>에 주어져 <strong>활성(active)</strong>이라고 한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정의 - 분리와 전역 독립성</strong><br>
+<span class="math inline">\(\mathbf{Z}\)</span>가 주어졌을 때 <span class="math inline">\(\mathbf{X}\)</span>의 어떤 노드와 <span class="math inline">\(\mathbf{Y}\)</span>의 어떤 노드 사이에도 활성 경로가 없으면 <span class="math inline">\(\mathbf{Z}\)</span>가 <span class="math inline">\(\mathbf{X}\)</span>와 <span class="math inline">\(\mathbf{Y}\)</span>를 <strong>분리</strong>한다고 하고 <span class="math display">\[
+sep_H(\mathbf{X};\mathbf{Y}\mid\mathbf{Z})
+\]</span> 로 쓴다. <span class="math inline">\(H\)</span>가 나타내는 전역 독립성은 <span class="math display">\[
+\mathcal{I}(H)=
+\{(\mathbf{X}\perp\mathbf{Y}\mid\mathbf{Z}):
+sep_H(\mathbf{X};\mathbf{Y}\mid\mathbf{Z})\}
+\]</span> 이다.</p>
+</blockquote>
+<p>분리는 조건집합에 대해 단조적이다. 즉</p>
+<p><span class="math display">\[
+sep_H(\mathbf{X};\mathbf{Y}\mid\mathbf{Z})
+\]</span></p>
+<p>이면 <span class="math inline">\(\mathbf{Z}'\supseteq\mathbf{Z}\)</span>인 모든 <span class="math inline">\(\mathbf{Z}'\)</span>에 대해서도</p>
+<p><span class="math display">\[
+sep_H(\mathbf{X};\mathbf{Y}\mid\mathbf{Z}')
+\]</span></p>
+<p>이다. 더 많은 노드를 관측하면 기존의 경로를 추가로 막을 수 있지만 막혀 있던 경로를 다시 열 수는 없다. 따라서 무방향그래프의 구조가 나타내는 독립성은 본질적으로 단조적이다. 이는 공통결과를 관측할 때 독립이 의존으로 바뀌는 베이즈 네트워크의 원인 간 추론과 대조된다.</p>
+<section id="건전성" class="level4" data-number="3.2.3.1">
+<h4 data-number="3.2.3.1" class="anchored" data-anchor-id="건전성"><span class="header-section-number">3.2.3.1</span> 건전성</h4>
+<p>분리 기준이 건전하다는 것은 그래프에서 분리된 두 변수집합이 실제 분포에서도 조건부독립이라는 뜻이다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 분리 기준의 건전성</strong><br>
+분포 <span class="math inline">\(P\)</span>가 마르코프 네트워크 <span class="math inline">\(H\)</span>에 따라 깁스 분해되면 <span class="math inline">\(H\)</span>는 <span class="math inline">\(P\)</span>의 I-지도이다. 즉 <span class="math display">\[
+\mathcal{I}(H)\subseteq\mathcal{I}(P).
+\]</span></p>
+</blockquote>
+<p><strong>증명.</strong> 서로 겹치지 않는 <span class="math inline">\(\mathbf{X},\mathbf{Y},\mathbf{Z}\)</span>에 대해 <span class="math inline">\(\mathbf{Z}\)</span>가 <span class="math inline">\(\mathbf{X}\)</span>와 <span class="math inline">\(\mathbf{Y}\)</span>를 분리한다고 하자. 먼저</p>
+<p><span class="math display">\[
+\mathbf{X}\cup\mathbf{Y}\cup\mathbf{Z}=\mathcal{X}
+\]</span></p>
+<p>인 경우를 생각한다. <span class="math inline">\(\mathbf{X}\)</span>와 <span class="math inline">\(\mathbf{Y}\)</span> 사이에 직접간선이 없으므로 <span class="math inline">\(H\)</span>의 각 클리크는 <span class="math inline">\(\mathbf{X}\cup\mathbf{Z}\)</span> 또는 <span class="math inline">\(\mathbf{Y}\cup\mathbf{Z}\)</span> 중 하나에 완전히 포함된다. 따라서 요인의 곱을 두 집합으로 나누어</p>
+<p><span class="math display">\[
+P(\mathcal{X})
+=\frac{1}{Z}f(\mathbf{X},\mathbf{Z})g(\mathbf{Y},\mathbf{Z})
+\]</span></p>
+<p>로 쓸 수 있다. 기초 개념 장의 요인분해 성질에 의해</p>
+<p><span class="math display">\[
+P\models(\mathbf{X}\perp\mathbf{Y}\mid\mathbf{Z})
+\]</span></p>
+<p>이다.</p>
+<p>이제 <span class="math inline">\(\mathbf{X}\cup\mathbf{Y}\cup\mathbf{Z}\)</span>에 포함되지 않는 변수집합을 <span class="math inline">\(\mathbf{U}\)</span>라 하자. <span class="math inline">\(\mathbf{U}\)</span>를 <span class="math inline">\(\mathbf{U}_1,\mathbf{U}_2\)</span>로 나누어 <span class="math inline">\(\mathbf{Z}\)</span>가 <span class="math inline">\(\mathbf{X}\cup\mathbf{U}_1\)</span>과 <span class="math inline">\(\mathbf{Y}\cup\mathbf{U}_2\)</span>를 분리하도록 할 수 있다. 앞의 결과로</p>
+<p><span class="math display">\[
+(\mathbf{X},\mathbf{U}_1\perp\mathbf{Y},\mathbf{U}_2\mid\mathbf{Z})
+\]</span></p>
+<p>를 얻고, 분해(decomposition) 성질을 적용하면 원하는 독립성이 따른다. <span class="math inline">\(\square\)</span></p>
+<p>역방향, 즉 그래프의 독립성을 만족하면 해당 그래프에 따라 분해된다는 결과는 <strong>Hammersley-Clifford 정리</strong>이다. 베이즈 네트워크에서는 이 결과가 일반적으로 성립했지만, 무방향 모형에서는 분포가 양수라는 조건이 필요하다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - Hammersley-Clifford 정리</strong><br>
+<span class="math inline">\(P\)</span>가 <span class="math inline">\(\mathcal{X}\)</span> 위의 양의 분포이고, <span class="math inline">\(H\)</span>가 <span class="math inline">\(P\)</span>의 I-지도이면 <span class="math inline">\(P\)</span>는 <span class="math inline">\(H\)</span>에 따라 분해되는 깁스 분포이다.</p>
+</blockquote>
+<p>증명에는 분포로부터 클리크 요인을 구성하는 정준 모수화가 필요하므로 뒤의 정준 모수화 절에서 제시한다.</p>
+<p>따라서 양의 분포에 대해서는</p>
+<p><span class="math display">\[
+P\text{가 }H\text{에 따라 분해된다}
+\quad\Longleftrightarrow\quad
+H\text{가 }P\text{의 I-지도이다}.
+\]</span></p>
+<p>양수성 조건은 제거할 수 없다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 비양의 분포의 반례</strong><br>
+네 이진변수 <span class="math inline">\(X_1,X_2,X_3,X_4\)</span>에 대해 다음 여덟 상태에 각각 <span class="math inline">\(1/8\)</span>을 주고 나머지에는 0을 주는 분포를 생각하자. <span class="math display">\[
+\begin{array}{llll}
+(0,0,0,0),&amp;(1,0,0,0),&amp;(1,1,0,0),&amp;(1,1,1,0),\\
+(0,0,0,1),&amp;(0,0,1,1),&amp;(0,1,1,1),&amp;(1,1,1,1).
+\end{array}
+\]</span> <span class="math inline">\(H\)</span>를 순환 <span class="math display">\[
+X_1-X_2-X_3-X_4-X_1
+\]</span> 로 두면 이 분포는 <span class="math inline">\(H\)</span>의 전역 독립성을 만족한다. 예를 들어 <span class="math inline">\(X_2=x_2^1,X_4=x_4^0\)</span>가 주어졌을 때 양의 확률을 갖는 상태에서는 <span class="math inline">\(X_1=x_1^1\)</span>로 고정되므로 <span class="math inline">\(X_1\)</span>은 <span class="math inline">\(X_3\)</span>과 조건부독립이다. 다른 조건값도 비슷하다. 그러나 이 분포는 <span class="math inline">\(H\)</span>의 클리크 요인으로 분해되지 않는다. 0 확률이 만드는 결정적 제약이 분리 기준을 만족시키면서도 요인분해를 방해하는 사례이다.</p>
+</blockquote>
+</section>
+<section id="완전성" class="level4" data-number="3.2.3.2">
+<h4 data-number="3.2.3.2" class="anchored" data-anchor-id="완전성"><span class="header-section-number">3.2.3.2</span> 완전성</h4>
+<p>강한 의미의 완전성, 즉 경로로 연결된 변수들이 모든 분해분포에서 반드시 의존한다는 주장은 성립하지 않는다. 특정 모수값에서는 우연한 추가 독립성이 생길 수 있기 때문이다. 그러나 다음의 약한 완전성은 성립한다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 분리 기준의 완전성</strong><br>
+<span class="math inline">\(H\)</span>에서 <span class="math inline">\(\mathbf{X}\)</span>와 <span class="math inline">\(\mathbf{Y}\)</span>가 <span class="math inline">\(\mathbf{Z}\)</span>에 의해 분리되지 않으면, <span class="math inline">\(H\)</span>에 따라 분해되면서 <span class="math inline">\(\mathbf{X}\)</span>와 <span class="math inline">\(\mathbf{Y}\)</span>가 <span class="math inline">\(\mathbf{Z}\)</span>에 주어져 의존하는 분포 <span class="math inline">\(P\)</span>가 적어도 하나 존재한다.</p>
+</blockquote>
+<p><strong>증명의 구성.</strong> 모든 변수를 이진으로 두어도 충분하다. <span class="math inline">\(X=U_1-U_2-\cdots-U_k=Y\)</span>라는 차단되지 않은 최소 경로를 고른다. 각 인접쌍 <span class="math inline">\(U_i,U_{i+1}\)</span>를 포함하는 클리크 <span class="math inline">\(C_i\)</span>에 대해 매우 큰 <span class="math inline">\(W\)</span>를 사용하여</p>
+<p><span class="math display">\[
+\phi_i(C_i)=
+\begin{cases}
+W,&amp;U_i=U_{i+1},\\
+1,&amp;U_i\ne U_{i+1}
+\end{cases}
+\]</span></p>
+<p>로 둔다. 경로의 최소성 때문에 서로 다른 인접쌍은 서로 다른 클리크에서 처리할 수 있다. 다른 클리크 퍼텐셜은 모두 1로 둔다. 그러면 경로를 따라 같은 값을 선호하는 강한 상관이 전달되어 <span class="math inline">\(U_1\)</span>과 <span class="math inline">\(U_k\)</span>가 의존한다. 이 구성은 경로 양끝의 의존성을 실제로 만들어 내며, 그 세부 논증은 같은 값 선호가 경로를 따라 전달된다는 사실을 전개하면 얻을 수 있다.</p>
+<p>베이즈 네트워크와 마찬가지로 모수공간에서 측도 0인 예외집합을 제외한 거의 모든 분해분포에 대해</p>
+<p><span class="math display">\[
+\mathcal{I}(P)=\mathcal{I}(H)
+\]</span></p>
+<p>가 성립한다. 따라서 그래프 분리로 얻지 못하는 추가 독립성은 일반적으로 특별한 모수적 상쇄에서만 나타난다.</p>
+</section>
+</section>
+<section id="독립성의-세-가지-마르코프-성질" class="level3" data-number="3.2.4">
+<h3 data-number="3.2.4" class="anchored" data-anchor-id="독립성의-세-가지-마르코프-성질"><span class="header-section-number">3.2.4</span> 독립성의 세 가지 마르코프 성질</h3>
+<p>베이즈 네트워크에는 국소 독립성과 d-분리에 의한 전역 독립성이 있었고 두 정의가 동등했다. 마르코프 네트워크에는 서로 다른 세 수준의 독립성 정의가 있다.</p>
+<section id="쌍별-및-국소-마르코프-가정" class="level4" data-number="3.2.4.1">
+<h4 data-number="3.2.4.1" class="anchored" data-anchor-id="쌍별-및-국소-마르코프-가정"><span class="header-section-number">3.2.4.1</span> 쌍별 및 국소 마르코프 가정</h4>
+<blockquote class="blockquote">
+<p><strong>정의 - 쌍별 독립성</strong><br>
+<span class="math inline">\(H\)</span>의 직접간선으로 연결되지 않은 모든 변수쌍 <span class="math inline">\(X,Y\)</span>에 대해 <span class="math display">\[
+\mathcal{I}_p(H)=
+\{(X\perp Y\mid\mathcal{X}-\{X,Y\}):X-Y\notin H\}
+\]</span> 를 <span class="math inline">\(H\)</span>의 <strong>쌍별 독립성(pairwise independencies)</strong>이라 한다.</p>
+</blockquote>
+<p>즉 직접 연결되지 않은 두 변수는 나머지 모든 변수가 주어지면 독립이라고 가정한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 마르코프 경계와 국소 독립성</strong><br>
+무방향그래프 <span class="math inline">\(H\)</span>에서 <span class="math inline">\(X\)</span>의 이웃집합을 <span class="math inline">\(MB_H(X)\)</span>로 쓰고 <span class="math inline">\(X\)</span>의 <strong>마르코프 경계(Markov blanket)</strong>라 한다. 국소 독립성은 <span class="math display">\[
+\mathcal{I}_\ell(H)=
+\{(X\perp\mathcal{X}-\{X\}-MB_H(X)\mid MB_H(X)):X\in\mathcal{X}\}
+\]</span> 이다.</p>
+</blockquote>
+<p>즉 한 노드의 이웃을 모두 알고 나면 그 노드는 그래프의 나머지 모든 노드와 독립이다. 이웃이 확률적 영향의 완전한 방패가 된다.</p>
+</section>
+<section id="마르코프-성질-사이의-관계" class="level4" data-number="3.2.4.2">
+<h4 data-number="3.2.4.2" class="anchored" data-anchor-id="마르코프-성질-사이의-관계"><span class="header-section-number">3.2.4.2</span> 마르코프 성질 사이의 관계</h4>
+<p>일반 분포에서는</p>
+<p><span class="math display">\[
+\mathcal{I}_p(H)
+\quad\text{가 가장 약하고},\quad
+\mathcal{I}_\ell(H)
+\quad\text{가 그보다 강하며},\quad
+\mathcal{I}(H)
+\quad\text{가 가장 강하다}.
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>명제</strong><br>
+<span class="math inline">\(P\models\mathcal{I}_\ell(H)\)</span>이면 <span class="math inline">\(P\models\mathcal{I}_p(H)\)</span>이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>명제</strong><br>
+<span class="math inline">\(P\models\mathcal{I}(H)\)</span>이면 <span class="math inline">\(P\models\mathcal{I}_\ell(H)\)</span>이다.</p>
+</blockquote>
+<p>첫 명제는 국소 독립성에 약한 합집합과 분해 성질을 적용하여 얻는다. 둘째 명제는 <span class="math inline">\(X\)</span>의 이웃이 <span class="math inline">\(X\)</span>와 나머지 노드를 그래프에서 분리한다는 사실에서 직접 따른다.</p>
+<p>역방향은 일반적으로 거짓이지만 양의 분포에서는 교집합(intersection) 성질을 사용할 수 있어 모두 동등해진다.</p>
+<blockquote class="blockquote">
+<p><strong>정리</strong><br>
+<span class="math inline">\(P\)</span>가 양의 분포이고 <span class="math inline">\(P\models\mathcal{I}_p(H)\)</span>이면 <span class="math inline">\(P\models\mathcal{I}(H)\)</span>이다.</p>
+</blockquote>
+<p><strong>증명의 핵심.</strong> 목표는 모든 서로 겹치지 않는 <span class="math inline">\(\mathbf{X},\mathbf{Y},\mathbf{Z}\)</span>에 대해</p>
+<p><span class="math display">\[
+sep_H(\mathbf{X};\mathbf{Y}\mid\mathbf{Z})
+\Longrightarrow
+P\models(\mathbf{X}\perp\mathbf{Y}\mid\mathbf{Z})
+\]</span></p>
+<p>을 보이는 것이다. <span class="math inline">\(|\mathbf{Z}|\)</span>에 대한 하향 귀납법을 사용한다. <span class="math inline">\(|\mathbf{Z}|=n-2\)</span>인 경우는 쌍별 독립성의 정의이다. 귀납단계에서 <span class="math inline">\(\mathbf{Y}=\mathbf{Y}'\cup\{A\}\)</span>로 나누고, 더 큰 조건집합에 대한 독립성을 귀납가정으로 얻은 뒤 양수성으로 보장되는 교집합 성질</p>
+<p><span class="math display">\[
+(\mathbf{X}\perp\mathbf{Y}'\mid\mathbf{Z},A)
+\ \&amp;\
+(\mathbf{X}\perp A\mid\mathbf{Z},\mathbf{Y}')
+\Longrightarrow
+(\mathbf{X}\perp\mathbf{Y}',A\mid\mathbf{Z})
+\]</span></p>
+<p>을 적용한다. 전체 변수집합을 덮지 않는 경우도 같은 방식으로 보조변수를 포함해 증명한다.</p>
+<blockquote class="blockquote">
+<p><strong>따름정리</strong><br>
+양의 분포 <span class="math inline">\(P\)</span>에 대해서는 다음이 동등하다.</p>
+<ol type="1">
+<li><span class="math inline">\(P\models\mathcal{I}_\ell(H)\)</span></li>
+<li><span class="math inline">\(P\models\mathcal{I}_p(H)\)</span></li>
+<li><span class="math inline">\(P\models\mathcal{I}(H)\)</span></li>
+</ol>
+</blockquote>
+<p>비양의 분포에서는 결정적 관계가 이러한 동등성을 깨뜨린다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 국소 독립성이 전역 독립성을 보장하지 않는 경우</strong><br>
+임의의 분포 <span class="math inline">\(P(X_1,\ldots,X_n)\)</span>에 대해 복제변수 <span class="math inline">\(X_i'\)</span>를 만들고 <span class="math inline">\(X_i'=X_i\)</span>가 결정적으로 성립하도록 한다. <span class="math inline">\(X_i-X_i'\)</span> 간선만 가진 그래프를 만들면 각 <span class="math inline">\(X_i\)</span>는 복제변수 <span class="math inline">\(X_i'\)</span>가 주어졌을 때 나머지와 독립이므로 국소 독립성을 만족한다. 그러나 원래 <span class="math inline">\(X_i\)</span> 사이에는 임의의 의존성이 있을 수 있으므로 그래프의 전역 독립성은 만족하지 않을 수 있다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - 쌍별 독립성이 국소 독립성을 보장하지 않는 경우</strong><br>
+각 <span class="math inline">\(X_i\)</span>에 대해 두 복제 <span class="math inline">\(X_i',X_i''\)</span>를 만들고 모두 <span class="math inline">\(X_i\)</span>와 같게 한다. 빈 그래프를 사용해도 <span class="math inline">\(X_i\)</span>와 <span class="math inline">\(X_i'\)</span>는 나머지 변수 중 <span class="math inline">\(X_i''\)</span>가 주어지므로 조건부독립이고, 다른 모든 쌍도 비슷하게 쌍별 독립성을 만족할 수 있다. 그러나 국소 및 전역 독립성은 일반적으로 성립하지 않는다.</p>
+</blockquote>
+</section>
+</section>
+<section id="분포에서-그래프로" class="level3" data-number="3.2.5">
+<h3 data-number="3.2.5" class="anchored" data-anchor-id="분포에서-그래프로"><span class="header-section-number">3.2.5</span> 분포에서 그래프로</h3>
+<p>완전그래프는 어떤 분포에도 I-지도이므로 단순한 I-지도 개념만으로는 분포의 구조를 드러내지 못한다. 따라서 앞 장에서 정의한 <strong>최소 I-지도(minimal I-map)</strong> 개념을 사용한다.</p>
+<p>양의 분포에 대해서는 쌍별 독립성을 이용해 최소 I-지도를 직접 만들 수 있다. 두 변수 <span class="math inline">\(X,Y\)</span>에 대해</p>
+<p><span class="math display">\[
+P\not\models(X\perp Y\mid\mathcal{X}-\{X,Y\})
+\]</span></p>
+<p>이면 <span class="math inline">\(X-Y\)</span> 간선을 둔다. 이 그래프는 분포가 만족하지 않는 쌍별 독립성을 주장하지 않으며, 어떤 간선을 제거하면 거짓 독립성을 추가하게 된다.</p>
+<p>국소 관점에서는 분포 자체에서 마르코프 경계를 정의할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 분포에서의 마르코프 경계</strong><br>
+<span class="math inline">\(X\notin\mathbf{U}\)</span>이고 <span class="math display">\[
+(X\perp\mathcal{X}-\{X\}-\mathbf{U}\mid\mathbf{U})\in\mathcal{I}(P)
+\]</span> 를 만족하는 최소 변수집합 <span class="math inline">\(\mathbf{U}\)</span>를 분포 <span class="math inline">\(P\)</span>에서 <span class="math inline">\(X\)</span>의 마르코프 경계 <span class="math inline">\(MB_P(X)\)</span>라 한다.</p>
+</blockquote>
+<p>각 <span class="math inline">\(Y\in MB_P(X)\)</span>에 대해 <span class="math inline">\(X-Y\)</span> 간선을 추가하여 그래프를 만들 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 쌍별 구성의 유일성</strong><br>
+<span class="math inline">\(P\)</span>가 양의 분포이고 위의 쌍별 비독립 조건이 성립하는 모든 쌍에 간선을 둔 그래프를 <span class="math inline">\(H\)</span>라 하자. 그러면 <span class="math inline">\(H\)</span>는 <span class="math inline">\(P\)</span>의 유일한 최소 I-지도이다.</p>
+</blockquote>
+<p><strong>증명.</strong> 구성상 <span class="math inline">\(P\)</span>는 <span class="math inline">\(H\)</span>의 쌍별 독립성을 만족하고, 양수성에 의해 전역 독립성도 만족하므로 <span class="math inline">\(H\)</span>는 I-지도이다. 어떤 간선을 제거하면 실제로 성립하지 않는 쌍별 독립성을 주장하므로 최소이다. 다른 I-지도도 위의 쌍별 비독립 조건이 성립하는 모든 간선을 반드시 포함해야 하므로 더 작을 수 없다. <span class="math inline">\(\square\)</span></p>
+<blockquote class="blockquote">
+<p><strong>정리 - 마르코프 경계 구성</strong><br>
+<span class="math inline">\(P\)</span>가 양의 분포일 때 각 노드 <span class="math inline">\(X\)</span>에 대해 위의 마르코프 경계 조건을 만족하는 최소집합 <span class="math inline">\(MB_P(X)\)</span>를 구하고, 모든 <span class="math inline">\(Y\in MB_P(X)\)</span>에 대해 간선을 추가하면 앞의 쌍별 구성과 같은 유일한 최소 I-지도를 얻는다.</p>
+</blockquote>
+<p>양수성이 없으면 두 구성 모두 실패할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 비양의 분포의 모호한 마르코프 경계</strong><br>
+네 이진변수 <span class="math inline">\(A,B,C,D\)</span>가 모두 같은 값을 갖는 두 상태 <span class="math display">\[
+P(a^1,b^1,c^1,d^1)=0.5,\qquad
+P(a^0,b^0,c^0,d^0)=0.5
+\]</span> 에만 양의 확률을 갖는다고 하자. <span class="quarto-unresolved-ref">?fig-nonpositive-imap의</span> 두 간선 <span class="math inline">\(A-B\)</span>, <span class="math inline">\(C-D\)</span>만 있는 그래프는 각 노드의 국소 마르코프 경계 조건을 만족할 수 있지만, <span class="math inline">\(A\)</span>와 <span class="math inline">\(C\)</span>가 실제로 완전히 연관되어 있으므로 전역 I-지도는 아니다. 쌍별 구성은 나머지 변수가 주어지면 모든 쌍이 자명하게 독립이 되어 빈 그래프를 만들지만, 역시 I-지도가 아니다.</p>
+</blockquote>
+<p><img src="figures/fig-nonpositive-imap.svg" id="fig-nonpositive-imap" class="img-fluid" alt="그림 삽입 위치"> 이 예에서 한 변수의 정보가 다른 결정적 복제변수로 완전히 대체될 수 있어 마르코프 경계가 유일하지 않다. 양의 분포에서는 이런 결정적 모호성이 제거되고 유일성이 복원된다.</p>
+<p>모든 양의 분포가 마르코프 네트워크 완전지도를 갖는 것은 아니다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - v-구조 분포의 무방향 완전지도 부재</strong><br>
+<span class="math inline">\(I\to G\leftarrow D\)</span>라는 베이즈 네트워크 분포를 생각하자. <span class="math inline">\(I\)</span>와 <span class="math inline">\(G\)</span>, <span class="math inline">\(D\)</span>와 <span class="math inline">\(G\)</span> 사이에는 간선이 필요하다. 그러나 <span class="math inline">\(I-D\)</span> 간선을 제거하면 무방향그래프는 <span class="math inline">\((I\perp D\mid G)\)</span>를 주장하는데, v-구조에서는 오히려 <span class="math inline">\(G\)</span>를 관측하면 <span class="math inline">\(I\)</span>와 <span class="math inline">\(D\)</span>가 의존한다. 따라서 유일한 최소 무방향 I-지도는 완전그래프이고, 원래의 주변 독립성 <span class="math inline">\((I\perp D)\)</span>를 표현하지 못한다.</p>
+</blockquote>
+<p>이 사례는 방향그래프와 무방향그래프가 서로 다른 독립성 언어이며 어느 하나가 다른 하나를 완전히 포함하지 않는다는 사실을 보여 준다.</p>
+</section>
+</section>
+<section id="모수화-다시-보기" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="모수화-다시-보기"><span class="header-section-number">3.3</span> 모수화 다시 보기</h2>
+<p>마르코프 네트워크의 독립성 의미를 이해했으므로, 이제 무방향 모형의 모수화를 더 세밀하게 표현하는 방법과 과잉모수화 문제를 살펴본다.</p>
+<section id="세밀한-모수화" class="level3" data-number="3.3.1">
+<h3 data-number="3.3.1" class="anchored" data-anchor-id="세밀한-모수화"><span class="header-section-number">3.3.1</span> 세밀한 모수화</h3>
+<section id="요인그래프" class="level4" data-number="3.3.1.1">
+<h4 data-number="3.3.1.1" class="anchored" data-anchor-id="요인그래프"><span class="header-section-number">3.3.1.1</span> 요인그래프</h4>
+<p>마르코프 네트워크 그래프만으로는 실제 깁스 모수화의 모든 구조를 볼 수 없다. 특히 요인이 최대 클리크 전체에 정의되는지, 그보다 작은 부분집합에 정의되는지 구별되지 않는다.</p>
+<p>예를 들어 모든 변수쌍에 쌍별 요인이 있는 완전 네트워크를 생각하자. 이 분포의 실제 모수화는 <span class="math inline">\(O(n^2)\)</span>개의 작은 요인으로 구성되지만, 마르코프 네트워크의 최대 클리크는 변수 전체이므로 하나의 지수 크기 퍼텐셜처럼 보인다. 독립성 구조는 같지만 계산과 저장의 구조는 매우 다르다.</p>
+<p>이를 명시적으로 나타내는 표현이 <strong>요인그래프(factor graph)</strong>이다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 요인그래프</strong><br>
+요인그래프 <span class="math inline">\(\mathcal{F}\)</span>는 두 종류의 노드를 갖는 무방향 이분그래프이다.</p>
+<ul>
+<li>타원형 <strong>변수노드</strong></li>
+<li>사각형 <strong>요인노드</strong> <span class="math inline">\(V_\phi\)</span></li>
+</ul>
+<p>간선은 변수노드와 요인노드 사이에만 존재한다. 각 요인노드 <span class="math inline">\(V_\phi\)</span>는 정확히 하나의 요인 <span class="math inline">\(\phi\)</span>와 대응하고, <span class="math inline">\(Scope[\phi]\)</span>는 그래프에서 <span class="math inline">\(V_\phi\)</span>의 이웃 변수집합이다. 분포가 이러한 요인의 곱으로 표현되면 <span class="math inline">\(\mathcal{F}\)</span>에 따라 분해된다고 한다.</p>
+</blockquote>
+<p><span class="quarto-unresolved-ref">?fig-factor-graph의</span> (a)는 <span class="math inline">\(A,B,C\)</span> 전체에 정의된 하나의 요인을, (b)는 세 개의 쌍별 요인을 나타낸다. 두 요인그래프가 유도하는 마르코프 네트워크는 모두 <span class="math inline">\(A,B,C\)</span> 완전그래프이지만 실제 요인 구조는 다르다.</p>
+<p><img src="figures/fig-factor-graph.svg" id="fig-factor-graph" class="img-fluid" alt="그림 삽입 위치"> 요인그래프의 더 세밀한 구조는 새로운 조건부독립성을 추가하지는 않지만, 추론 알고리즘에서 곱셈과 메시지 전달의 단위를 결정하므로 매우 중요하다.</p>
+</section>
+<section id="로그선형-모형" class="level4" data-number="3.3.1.2">
+<h4 data-number="3.3.1.2" class="anchored" data-anchor-id="로그선형-모형"><span class="header-section-number">3.3.1.2</span> 로그선형 모형</h4>
+<p>요인을 전체 표로 저장해도 특정 값 조합에만 적용되는 문맥특이 구조를 충분히 드러내지 못할 수 있다. 이를 위해 양의 요인을 로그공간으로 변환한다.</p>
+<p><span class="math display">\[
+\phi(\mathbf{D})=\exp[-\epsilon(\mathbf{D})],
+\]</span></p>
+<p>여기서</p>
+<p><span class="math display">\[
+\epsilon(\mathbf{D})=-\ln\phi(\mathbf{D})
+\]</span></p>
+<p>를 <strong>에너지 함수(energy function)</strong>라고 한다. 통계물리학에서 상태의 확률이 에너지에 반비례하는 데서 명칭이 유래한다. 전체 분포는</p>
+<p><span class="math display">\[
+P(X_1,\ldots,X_n)
+\propto
+\exp\left[-\sum_{i=1}^{m}\epsilon_i(\mathbf{D}_i)\right]
+\]</span></p>
+<p>로 쓸 수 있다. 이 표현은 분포가 양수임을 자동으로 보장하고, 에너지 모수는 실수 전체에서 값을 가질 수 있다.</p>
+<p><span class="quarto-unresolved-ref">?fig-energy-functions는</span> <span class="quarto-unresolved-ref">?fig-misconception-factors의</span> 퍼텐셜을 에너지로 바꾼 것이다. 퍼텐셜 1은 에너지 0이 되고, 큰 퍼텐셜은 더 작은 음의 에너지로 변환된다.</p>
+<p><img src="figures/fig-energy-functions.svg" id="fig-energy-functions" class="img-fluid" alt="그림 삽입 위치"> &gt; <strong>정의 - 특징</strong><br>
+&gt; 변수집합 <span class="math inline">\(\mathbf{D}\)</span>에 대한 <strong>특징(feature)</strong> <span class="math inline">\(f(\mathbf{D})\)</span>는 &gt; <span class="math display">\[
+&gt; f:Val(\mathbf{D})\to\mathbb{R}
+&gt; \]</span> &gt; 인 함수이다. 비음수일 필요가 없다는 점을 제외하면 요인과 같은 형태이다. 특정 사건에서 1, 그 밖에서 0을 갖는 특징을 <strong>지시특징(indicator feature)</strong>이라고 한다.</p>
+<p>특징은 특정 상호작용을 완전한 표보다 훨씬 간결하게 표현할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 동일 라벨 선호의 특징 표현</strong><br>
+<span class="math inline">\(A_1,A_2\)</span>가 각각 <span class="math inline">\(\ell\)</span>개의 값을 갖고 두 변수가 같은 값을 취하는 경우만 선호한다고 하자. <span class="math display">\[
+\epsilon(A_1,A_2)=
+\begin{cases}
+-3,&amp;A_1=A_2,\\
+0,&amp;\text{그 밖의 경우}.
+\end{cases}
+\]</span> 전체 표는 <span class="math inline">\(\ell^2\)</span>개 항목을 필요로 하지만, 사건 <span class="math inline">\(A_1=A_2\)</span>의 지시특징 <span class="math inline">\(f(A_1,A_2)\)</span> 하나를 사용하면 <span class="math display">\[
+\epsilon(A_1,A_2)=-3f(A_1,A_2)
+\]</span> 로 표현된다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정의 - 로그선형 모형</strong><br>
+마르코프 네트워크 <span class="math inline">\(H\)</span>에 대한 로그선형 모형은 다음으로 구성된다.</p>
+<ul>
+<li>각 범위 <span class="math inline">\(\mathbf{D}_i\)</span>가 <span class="math inline">\(H\)</span>의 완전 부분그래프인 특징집합 <span class="math display">\[
+\mathcal{F}=\{f_1(\mathbf{D}_1),\ldots,f_k(\mathbf{D}_k)\}
+\]</span></li>
+<li>특징가중치 <span class="math inline">\(w_1,\ldots,w_k\)</span></li>
+</ul>
+<p>분포는 <span class="math display">\[
+P(X_1,\ldots,X_n)
+=\frac{1}{Z}
+\exp\left[-\sum_{i=1}^{k}w_if_i(\mathbf{D}_i)\right]
+\]</span> 로 정의한다.</p>
+</blockquote>
+<p>같은 범위에 여러 특징을 둘 수 있으므로 일반 표 퍼텐셜도 모두 로그선형 모형으로 표현할 수 있다. 반대로 큰 범주의 변수나 텍스트와 같이 희소한 특징을 갖는 문제에서는 로그선형 표현이 훨씬 간결하다.</p>
+</section>
+<section id="세-표현의-역할" class="level4" data-number="3.3.1.3">
+<h4 data-number="3.3.1.3" class="anchored" data-anchor-id="세-표현의-역할"><span class="header-section-number">3.3.1.3</span> 세 표현의 역할</h4>
+<p>마르코프 네트워크, 요인그래프, 로그선형 모형은 같은 분포를 서로 다른 해상도로 나타낸다.</p>
+<ol type="1">
+<li><strong>마르코프 네트워크:</strong> 클리크 수준의 곱과 독립성 구조를 보여 준다.</li>
+<li><strong>요인그래프:</strong> 실제로 어떤 작은 요인들이 곱해지는지 보여 준다.</li>
+<li><strong>로그선형 모형:</strong> 각 요인 안의 특징과 가중치까지 보여 준다.</li>
+</ol>
+<p>독립성 질의에는 마르코프 네트워크가 적절하고, 추론에는 요인그래프가 유용하며, 수작업 모형화나 데이터 학습에는 특징 기반 표현이 유용하다.</p>
+<blockquote class="blockquote">
+<p><strong>상자 - 개념: Ising 모형과 Boltzmann 기계</strong><br>
+<strong>Ising 모형</strong>은 통계물리학에서 상호작용하는 원자의 스핀을 설명하기 위해 제안된 가장 오래된 마르코프 네트워크 중 하나이다. 각 변수는 <span class="math display">\[
+X_i\in\{-1,+1\}
+\]</span> 의 값을 가지며, 간선 에너지는 <span class="math display">\[
+\epsilon_{i,j}(x_i,x_j)=w_{i,j}x_ix_j
+\]</span> 로 둔다. 단일노드 편향 <span class="math inline">\(u_i\)</span>도 포함하면 <span class="math display">\[
+P(\boldsymbol{\xi})
+=\frac{1}{Z}
+\exp\left[-\sum_{i&lt;j}w_{i,j}x_ix_j-\sum_i u_ix_i\right].
+\]</span></p>
+<p>원문의 부호규약에 따르면 <span class="math inline">\(w_{i,j}&gt;0\)</span>일 때 같은 스핀의 에너지 기여와 다른 스핀의 기여가 달라져 특정 정렬을 선호하고, <span class="math inline">\(w_{i,j}&lt;0\)</span>이면 반대 정렬을 선호한다. <span class="math inline">\(w_{i,j}=0\)</span>이면 직접 상호작용이 없다. 모든 가중치를 온도 모수로 조절하면 스핀의 혼합상태와 한 방향으로 치우친 상태 사이에 <strong>상전이(phase transition)</strong>가 나타날 수 있다.</p>
+<p><strong>Boltzmann 분포</strong>는 보통 <span class="math inline">\(X_i\in\{0,1\}\)</span>을 사용하면서 같은 이차 에너지 형식을 사용한다. 0을 -1로 치환하면 Ising 표현으로 바꿀 수 있다. Boltzmann 기계가 주목받은 이유는 한 노드의 이웃이 주어졌을 때 활성확률이 이웃들의 가중합에 대한 시그모이드가 되어 신경세포의 단순한 활성모형과 닮았기 때문이다. 각 노드를 이웃에 따라 반복적으로 재표본화하는 과정은 확률적 순환 신경망으로 볼 수 있다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>상자 - 개념: Metric MRF</strong><br>
+라벨링 MRF에서는 각 노드 <span class="math inline">\(X_i\)</span>에 라벨 <span class="math inline">\(v_k\in\mathcal{V}\)</span>를 부여한다. 노드 에너지 <span class="math inline">\(\epsilon_i(x_i)\)</span>는 개별 라벨 선호를, 간선 에너지 <span class="math inline">\(\epsilon_{i,j}(x_i,x_j)\)</span>는 이웃 라벨의 평활성을 나타낸다. MAP 문제에서는 분할함수를 무시하고 <span class="math display">\[
+E(x_1,\ldots,x_n)
+=\sum_i\epsilon_i(x_i)+\sum_{(i,j)\in E}\epsilon_{i,j}(x_i,x_j)
+\]</span> 를 최소화한다.</p>
+<p>이진 Ising형 라벨링에서는 <span class="math display">\[
+\epsilon_{i,j}(x_i,x_j)=
+\begin{cases}
+0,&amp;x_i=x_j,\\
+\lambda_{i,j},&amp;x_i\ne x_j,
+\end{cases}
+\]</span> 로 둔다. 다중라벨로 일반화한 것이 Potts 모형이다.</p>
+<p>라벨 사이 거리 <span class="math inline">\(\mu(v_k,v_l)\)</span>가 다음을 만족하면 metric이다.</p>
+<ul>
+<li><span class="math inline">\(\mu(v_k,v_l)=0\)</span>인 것과 <span class="math inline">\(k=l\)</span>은 동치이다.</li>
+<li><span class="math inline">\(\mu(v_k,v_l)=\mu(v_l,v_k)\)</span>이다.</li>
+<li>삼각부등식 <span class="math display">\[
+\mu(v_k,v_l)+\mu(v_l,v_m)\ge\mu(v_k,v_m)
+\]</span> 을 만족한다.</li>
+</ul>
+<p>반사성과 대칭성만 만족하면 semimetric이라 한다. 간선 에너지를 이 거리로 정의한 모형이 metric 또는 semimetric MRF이다. 영상에서는 흔히 <span class="math display">\[
+\epsilon(x_i,x_j)
+=\min(c\lVert x_i-x_j\rVert_p,\operatorname{dist}_{\max})
+\]</span> 와 같은 절단 <span class="math inline">\(p\)</span>-노름을 사용한다.</p>
+</blockquote>
+</section>
+</section>
+<section id="과잉모수화" class="level3" data-number="3.3.2">
+<h3 data-number="3.3.2" class="anchored" data-anchor-id="과잉모수화"><span class="header-section-number">3.3.2</span> 과잉모수화</h3>
+<p>마르코프 네트워크는 일반적으로 <strong>과잉모수화(overparameterized)</strong>되어 있다. 같은 분포를 여러 서로 다른 퍼텐셜 집합으로 나타낼 수 있다.</p>
+<p>가장 단순하게, <span class="math inline">\(n\)</span>개의 이진변수 전체가 하나의 클리크이면 퍼텐셜 표에는 <span class="math inline">\(2^n\)</span>개 수가 있지만 결합분포에는 <span class="math inline">\(2^n-1\)</span>개의 독립 모수만 있다. 더 미묘한 중복은 서로 겹치는 클리크에서 생긴다. <span class="math inline">\(\{A,B\}\)</span>와 <span class="math inline">\(\{B,C\}\)</span> 두 클리크가 있으면 <span class="math inline">\(B\)</span>의 단일변수 효과를 첫 요인, 둘째 요인 또는 두 요인에 나누어 넣을 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 에너지 이동</strong><br>
+<span class="quarto-unresolved-ref">?fig-energy-functions의</span> <span class="math inline">\(\epsilon_1(A,B)\)</span>에서 <span class="math inline">\(B=b^0\)</span>인 모든 항목에 1을 빼고, <span class="math inline">\(\epsilon_2(B,C)\)</span>의 <span class="math inline">\(B=b^0\)</span>인 모든 항목에 1을 더해도 각 완전상태에서 두 에너지의 합은 바뀌지 않는다. 따라서 최종 분포도 동일하다.</p>
+</blockquote>
+<p><img src="figures/fig-equivalent-energies.svg" id="fig-equivalent-energies" class="img-fluid" alt="그림 삽입 위치"> #### 정준 모수화</p>
+<p><strong>정준 모수화(canonical parameterization)</strong>는 양의 깁스 분포에 대해 이러한 모호성을 제거하는 자연스러운 방법이다. 양수성이 있으므로 모든 상태 <span class="math inline">\(\boldsymbol{\xi}\)</span>에 대해</p>
+<p><span class="math display">\[
+\ell(\boldsymbol{\xi})=\ln P(\boldsymbol{\xi})
+\]</span></p>
+<p>를 정의할 수 있다.</p>
+<p>정준 모수화는 그래프의 모든 클리크와 그 부분집합에 에너지 함수를 배정한다. 먼저 임의의 기준상태</p>
+<p><span class="math display">\[
+\boldsymbol{\xi}^*=(x_1^*,\ldots,x_n^*)
+\]</span></p>
+<p>를 고정한다. <span class="math inline">\(\mathbf{Z}\subseteq\mathbf{D}\)</span>와 <span class="math inline">\(\mathbf{d}\)</span>가 주어질 때 <span class="math inline">\((\mathbf{d}_{\mathbf{Z}},\boldsymbol{\xi}^*_{-\mathbf{Z}})\)</span>는 <span class="math inline">\(\mathbf{Z}\)</span>의 값만 <span class="math inline">\(\mathbf{d}\)</span>에서 가져오고 나머지는 기준상태 값으로 채운 완전상태이다.</p>
+<blockquote class="blockquote">
+<p><strong>정준 에너지 함수</strong><br>
+클리크 <span class="math inline">\(\mathbf{D}\)</span>에 대해 <span class="math display">\[
+\epsilon^*_{\mathbf{D}}(\mathbf{d})
+=\sum_{\mathbf{Z}\subseteq\mathbf{D}}
+(-1)^{|\mathbf{D}-\mathbf{Z}|}
+\ell(\mathbf{d}_{\mathbf{Z}},\boldsymbol{\xi}^*_{-\mathbf{Z}})
+\]</span> 로 정의한다.</p>
+</blockquote>
+<p>이 식은 포함-배제 원리를 사용한다. 예를 들어 세 변수의 고차 상호작용에서 모든 쌍별 기여를 빼고, 그 과정에서 너무 많이 빠진 단일변수 기여를 다시 더하여 순수한 세 변수 상호작용만 남긴다.</p>
+<p><span class="quarto-unresolved-ref">?fig-canonical-energies은</span> 오개념 예제에서 <span class="math inline">\((a^0,b^0,c^0,d^0)\)</span>를 기준상태로 한 정준 에너지를 보여 준다. 작은 부분집합의 효과를 별도로 떼어냈기 때문에 많은 항목이 0이 된다.</p>
+<p><img src="figures/fig-canonical-energies.svg" id="fig-canonical-energies" class="img-fluid" alt="그림 삽입 위치"> 예를 들어</p>
+<p><span class="math display">\[
+\epsilon_1^*(a^1,b^1)
+=\ell(a^1,b^1,c^0,d^0)
+-\ell(a^1,b^0,c^0,d^0)
+-\ell(a^0,b^1,c^0,d^0)
++\ell(a^0,b^0,c^0,d^0)
+\]</span></p>
+<p>으로 계산된다. 정준 모수는 유일하지만 사람이 해석하기 쉽지는 않다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 정준 모수화의 등가성</strong><br>
+<span class="math inline">\(P\)</span>가 <span class="math inline">\(H\)</span> 위의 양의 깁스 분포이고 각 클리크 <span class="math inline">\(\mathbf{D}_i\)</span>의 정준 에너지를 위의 정준 에너지 정의로 정하면 <span class="math display">\[
+P(\boldsymbol{\xi})
+=\exp\left[\sum_i\epsilon^*_{\mathbf{D}_i}
+(\boldsymbol{\xi}\langle\mathbf{D}_i\rangle)\right]
+\]</span> 로 원래 분포를 복원할 수 있다. 원문의 에너지 부호규약에 따라 지수 내부의 부호가 정의와 일관되게 해석되어야 한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정리 - Hammersley-Clifford 정리의 증명</strong><br>
+<span class="math inline">\(P\)</span>가 양의 분포이고 <span class="math inline">\(H\)</span>가 <span class="math inline">\(P\)</span>의 I-지도이면 <span class="math inline">\(P\)</span>는 <span class="math inline">\(H\)</span>에 따라 분해되는 깁스 분포이다.</p>
+</blockquote>
+<p><strong>증명.</strong> <span class="math inline">\(H\)</span>의 클리크 여부와 상관없이 모든 변수 부분집합 <span class="math inline">\(\mathbf{D}\)</span>에 위의 정준 에너지 함수를 정의하면 앞의 정준 모수화에 사용된 포함-배제 논리로 <span class="math inline">\(P\)</span>를 정확히 복원한다. 이제 <span class="math inline">\(\mathbf{D}\)</span>가 <span class="math inline">\(H\)</span>의 클리크가 아니면 그 에너지가 항상 0임을 보이면 된다.</p>
+<p><span class="math inline">\(\mathbf{D}\)</span> 안에 간선으로 연결되지 않은 <span class="math inline">\(X,Y\)</span>가 있다고 하자. 정준합을 <span class="math inline">\(X,Y\)</span>의 포함 여부에 따라 네 항으로 묶으면 각 <span class="math inline">\(\mathbf{W}\subseteq\mathbf{D}-\{X,Y\}\)</span>에 대해</p>
+<p><span class="math display">\[
+\ell(\sigma_{\mathbf{W}})
+-\ell(\sigma_{\mathbf{W}\cup\{X\}})
+-\ell(\sigma_{\mathbf{W}\cup\{Y\}})
++\ell(\sigma_{\mathbf{W}\cup\{X,Y\}})
+\]</span></p>
+<p>이 나타난다. <span class="math inline">\(H\)</span>가 I-지도이므로 비인접한 <span class="math inline">\(X,Y\)</span>에 대해</p>
+<p><span class="math display">\[
+X\perp Y\mid\mathcal{X}-\{X,Y\}
+\]</span></p>
+<p>가 성립한다. 이를 조건부확률비로 쓰면 위 네 로그항의 합이 0이 된다. 따라서 비클리크 범위의 모든 정준 에너지는 0이고, 남는 요인은 모두 <span class="math inline">\(H\)</span>의 클리크에만 정의된다. 그러므로 <span class="math inline">\(P\)</span>는 <span class="math inline">\(H\)</span>에 따라 깁스 분해된다. <span class="math inline">\(\square\)</span></p>
+<p>양의 분포에서는 다음 네 조건이 모두 동등하다.</p>
+<ol type="1">
+<li><span class="math inline">\(P\)</span>가 <span class="math inline">\(H\)</span>에 따라 깁스 분해된다.</li>
+<li><span class="math inline">\(P\)</span>가 <span class="math inline">\(H\)</span>의 쌍별 독립성을 만족한다.</li>
+<li><span class="math inline">\(P\)</span>가 <span class="math inline">\(H\)</span>의 국소 독립성을 만족한다.</li>
+<li><span class="math inline">\(P\)</span>가 <span class="math inline">\(H\)</span>의 전역 독립성을 만족한다.</li>
+</ol>
+<section id="중복-제거" class="level4" data-number="3.3.2.1">
+<h4 data-number="3.3.2.1" class="anchored" data-anchor-id="중복-제거"><span class="header-section-number">3.3.2.1</span> 중복 제거</h4>
+<p>특징 기반 표현에서는 선형대수로 중복을 완전히 제거할 수 있다.</p>
+<p>특징 <span class="math inline">\(f_1,\ldots,f_k\)</span>가 <strong>선형종속</strong>이라는 것은 모두 0이 아닌 계수의 조합이 존재하여 모든 상태 <span class="math inline">\(\boldsymbol{\xi}\)</span>에 대해</p>
+<p><span class="math display">\[
+\alpha_0+\sum_i\alpha_if_i(\boldsymbol{\xi})=0
+\]</span></p>
+<p>이 되는 것을 말한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 한 요인 안의 선형종속</strong><br>
+<span class="math inline">\(A,B\)</span>의 네 상태에 대한 지시특징을 <span class="math inline">\(f_{a,b}(A,B)\)</span>라 하자. 정확히 하나의 상태만 참이므로 <span class="math display">\[
+f_{a^0,b^0}+f_{a^0,b^1}+f_{a^1,b^0}+f_{a^1,b^1}=1.
+\]</span> 따라서 네 특징은 상수항과 함께 선형종속이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - 겹치는 요인 사이의 선형종속</strong><br>
+<span class="math inline">\(f_{a^0,b^0}+f_{a^1,b^0}\)</span>는 <span class="math inline">\(B=b^0\)</span>의 지시함수이고, <span class="math inline">\(f_{b^0,c^0}+f_{b^0,c^1}\)</span>도 같은 함수이다. 따라서 <span class="math display">\[
+f_{a^0,b^0}+f_{a^1,b^0}
+-f_{b^0,c^0}-f_{b^0,c^1}=0.
+\]</span></p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>명제 - 선형종속과 동일 분포</strong><br>
+가중치 <span class="math inline">\(\mathbf{w}\)</span>를 가진 로그선형 모형이 <span class="math inline">\(P\)</span>를 나타내고 위의 선형종속 관계가 성립하면 <span class="math display">\[
+w_i'=w_i+\alpha_i
+\]</span> 로 바꾼 가중치도 같은 분포를 나타낸다.</p>
+</blockquote>
+<p><strong>증명.</strong> 새 에너지는 기존 에너지에 모든 상태에서 동일한 상수 <span class="math inline">\(-\alpha_0\)</span>만 더한다. 이 상수배는 분할함수에서 소거되므로 정규화된 분포는 변하지 않는다. <span class="math inline">\(\square\)</span></p>
+<p>선형종속 특징집합을 <strong>중복(redundant)</strong>이라고 한다. 반대로 비중복 특징집합에서는 서로 다른 가중치가 서로 다른 분포를 정의한다.</p>
+<blockquote class="blockquote">
+<p><strong>명제</strong><br>
+특징집합 <span class="math inline">\(f_1,\ldots,f_k\)</span>가 비중복이고 <span class="math inline">\(\mathbf{w}\ne\mathbf{w}'\)</span>이면 <span class="math display">\[
+P_{\mathbf{w}}\ne P_{\mathbf{w}'}.
+\]</span></p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - 오개념 모형의 비중복 특징</strong><br>
+네 쌍별 요인 각각의 네 상태를 지시하는 16개 특징을 16개 완전상태에서 평가한 행렬의 계수를 조사하면 독립적인 차원을 구할 수 있다. 정준 모수화에서 0이 아닌 가중치를 갖는 특징들은 원래 표현과 같은 표현력을 가지면서 중복을 제거한 하나의 기저를 제공한다. 새 특징을 추가하면 기존 특징과 선형관계가 생긴다. 예를 들어 <span class="math display">\[
+f_{a^1,b^0}+f_{a^1,b^1}-f_{a^1}=0
+\]</span> 이다.</p>
+</blockquote>
+</section>
+</section>
+</section>
+<section id="베이즈-네트워크와-마르코프-네트워크" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="베이즈-네트워크와-마르코프-네트워크"><span class="header-section-number">3.4</span> 베이즈 네트워크와 마르코프 네트워크</h2>
+<p>베이즈 네트워크와 마르코프 네트워크는 모두 분포의 독립성을 표현하지만 표현 가능한 독립성의 종류가 다르다. v-구조의 비단조적 독립성은 방향그래프가 자연스럽게 표현하지만 무방향그래프는 표현하지 못한다. 반대로 대칭적인 순환 분리구조는 무방향그래프가 간결하게 나타내지만 DAG로 옮길 때 추가 간선이 필요할 수 있다.</p>
+<section id="베이즈-네트워크에서-마르코프-네트워크로" class="level3" data-number="3.4.1">
+<h3 data-number="3.4.1" class="anchored" data-anchor-id="베이즈-네트워크에서-마르코프-네트워크로"><span class="header-section-number">3.4.1</span> 베이즈 네트워크에서 마르코프 네트워크로</h3>
+<p>베이즈 네트워크 <span class="math inline">\(B\)</span>의 각 CPD</p>
+<p><span class="math display">\[
+P(X_i\mid Pa_{X_i})
+\]</span></p>
+<p>는 범위 <span class="math inline">\(\{X_i\}\cup Pa_{X_i}\)</span>의 합법적인 요인이다. 따라서 모든 CPD를 요인으로 보면 <span class="math inline">\(P_B\)</span>는 분할함수 <span class="math inline">\(Z=1\)</span>인 깁스 분포가 된다.</p>
+<p>더 중요하게, 증거 <span class="math inline">\(\mathbf{E}=\mathbf{e}\)</span>를 조건화한 베이즈 네트워크도 깁스 분포이다.</p>
+<blockquote class="blockquote">
+<p><strong>명제</strong><br>
+<span class="math inline">\(B\)</span>가 <span class="math inline">\(\mathcal{X}\)</span> 위의 베이즈 네트워크이고 <span class="math inline">\(\mathbf{E}=\mathbf{e}\)</span>를 관측했다고 하자. <span class="math inline">\(\mathbf{W}=\mathcal{X}-\mathbf{E}\)</span>이면 <span class="math display">\[
+P_B(\mathbf{W}\mid\mathbf{e})
+\]</span> 는 다음 축소요인으로 정의되는 깁스 분포이다. <span class="math display">\[
+\phi_{X_i}=P_B(X_i\mid Pa_{X_i})[\mathbf{E}=\mathbf{e}].
+\]</span> 이 깁스 분포의 분할함수는 <span class="math inline">\(P_B(\mathbf{e})\)</span>이다.</p>
+</blockquote>
+<p>이 결과는 베이즈 네트워크의 추론을 일반 요인곱과 정규화 문제로 통합하는 중요한 연결이다.</p>
+<p>베이즈 네트워크의 한 가족 <span class="math inline">\(\{X_i\}\cup Pa_{X_i}\)</span>는 하나의 요인 범위이므로, 이를 무방향그래프로 표현하려면 자식과 모든 부모를 연결하고 부모들끼리도 연결해야 한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 도덕화 그래프</strong><br>
+베이즈 네트워크 구조 <span class="math inline">\(G\)</span>의 <strong>도덕화 그래프(moral graph)</strong> <span class="math inline">\(M[G]\)</span>는 다음 간선을 갖는 무방향그래프이다.</p>
+<ol type="1">
+<li><span class="math inline">\(G\)</span>에서 직접 방향간선으로 연결된 두 노드를 무방향간선으로 연결한다.</li>
+<li>같은 자식의 부모인 두 노드를 서로 연결한다.</li>
+</ol>
+<p>둘째 과정을 흔히 “부모를 결혼시킨다”라고 표현하여 moralization이라는 이름이 붙었다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>따름정리</strong><br>
+<span class="math inline">\(G\)</span>의 임의의 베이즈 네트워크 모수화 <span class="math inline">\(B\)</span>에 대해 <span class="math inline">\(M[G]\)</span>는 <span class="math inline">\(P_B\)</span>의 I-지도이다.</p>
+</blockquote>
+<p>분포의 모수화를 보지 않고 독립성만으로도 같은 결과를 얻을 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>명제 - BN의 마르코프 경계</strong><br>
+<span class="math inline">\(G\)</span>가 베이즈 네트워크이면 한 노드 <span class="math inline">\(X\)</span>의 마르코프 경계는 <span class="math display">\[
+MB_G(X)=Pa_X\cup Ch_X\cup
+\{\text{$X$의 자식들의 다른 부모}\}
+\]</span> 이다. 이 집합은 <span class="math inline">\(X\)</span>를 나머지 모든 변수로부터 d-분리하는 최소집합이다. 따라서 <span class="math inline">\(M[G]\)</span>는 <span class="math inline">\(G\)</span>의 최소 무방향 I-지도이다.</p>
+</blockquote>
+<p>도덕화는 일반적으로 독립성 정보를 잃는다. 예를 들어</p>
+<p><span class="math display">\[
+X\to Z\leftarrow Y
+\]</span></p>
+<p>에서 원래 <span class="math inline">\(X\perp Y\)</span>이지만, 도덕화하면 <span class="math inline">\(X-Y\)</span> 간선이 추가되어 이 주변 독립성이 그래프에 나타나지 않는다.</p>
+<p>반면 모든 v-구조의 부모 사이에 이미 덮개간선이 있는 DAG, 즉 비도덕성이 없는 <strong>도덕적 그래프(moral DAG)</strong>에서는 추가 간선이 생기지 않는다.</p>
+<blockquote class="blockquote">
+<p><strong>명제</strong><br>
+방향그래프 <span class="math inline">\(G\)</span>가 도덕적이면 도덕화 그래프 <span class="math inline">\(M[G]\)</span>는 <span class="math inline">\(G\)</span>의 완전지도이다.</p>
+</blockquote>
+<p><strong>증명 개요.</strong> <span class="math inline">\(M[G]\)</span>가 I-지도라는 것은 이미 보였다. 반대 포함을 보이기 위해 <span class="math inline">\(G\)</span>에서는 d-분리되지만 <span class="math inline">\(M[G]\)</span>에서는 분리되지 않는 최소 경로가 있다고 가정한다. 이 경로가 <span class="math inline">\(G\)</span>에서 막히려면 v-구조가 있어야 한다. 그러나 <span class="math inline">\(G\)</span>가 도덕적이면 그 v-구조의 두 부모 사이에 간선이 있어 최소 경로를 지름길로 줄일 수 있으므로 모순이다. <span class="math inline">\(\square\)</span></p>
+<p>실제 DAG에서 도덕성은 매우 강한 조건이다. 한 v-구조를 덮기 위해 간선을 추가하면 그 간선이 다시 다른 v-구조를 만들 수 있어 추가 연결이 연쇄적으로 필요할 수 있다.</p>
+<section id="d-분리의-건전성" class="level4" data-number="3.4.1.1">
+<h4 data-number="3.4.1.1" class="anchored" data-anchor-id="d-분리의-건전성"><span class="header-section-number">3.4.1.1</span> d-분리의 건전성</h4>
+<p>무방향 분리의 건전성을 이용하면 베이즈 네트워크 d-분리의 건전성을 증명할 수 있다. 단순히 전체 DAG를 도덕화하면 비활성 v-구조까지 연결되므로 먼저 질의에 관련 없는 자손 없는 노드를 제거해야 한다.</p>
+<p><span class="math inline">\(\mathbf{U}\)</span>의 <strong>상향폐포(upward closure)</strong>는 <span class="math inline">\(\mathbf{U}\)</span>와 그 모든 조상을 포함한다. <span class="math inline">\(G^+[\mathbf{U}]\)</span>는 이 상향폐포가 유도하는 부분 DAG이다.</p>
+<blockquote class="blockquote">
+<p><strong>명제 - d-분리의 무방향 판정</strong><br>
+서로 겹치지 않는 <span class="math inline">\(\mathbf{X},\mathbf{Y},\mathbf{Z}\)</span>에 대해 <span class="math display">\[
+\mathbf{U}=\mathbf{X}\cup\mathbf{Y}\cup\mathbf{Z},
+\qquad
+G'=G^+[\mathbf{U}],
+\qquad
+H=M[G']
+\]</span> 라 하자. 그러면 <span class="math display">\[
+d\text{-}sep_G(\mathbf{X};\mathbf{Y}\mid\mathbf{Z})
+\quad\Longleftrightarrow\quad
+sep_H(\mathbf{X};\mathbf{Y}\mid\mathbf{Z}).
+\]</span></p>
+</blockquote>
+<p>조상 부분그래프를 취하면 관측된 자손이 없는 v-구조는 제거되고, 남은 v-구조는 모두 활성화 가능하므로 부모를 연결한 도덕화 그래프의 경로와 원래 DAG의 활성 trail이 대응한다.</p>
+<p><span class="quarto-unresolved-ref">?fig-moralized-dsep의</span> (a)의 확장 학생 네트워크에서 <span class="math inline">\(D\)</span>와 <span class="math inline">\(I\)</span>의 독립성을 <span class="math inline">\(L\)</span>이 주어졌을 때 검사하면 <span class="math inline">\(G^+[D,I,L]\)</span>에는 <span class="math inline">\(G\)</span>가 포함되고 도덕화 과정에서 <span class="math inline">\(D-I\)</span> 간선이 생겨 분리되지 않는다. 반면 <span class="math inline">\(S,A\)</span>가 주어진 질의에서는 필요한 조상부분그래프에 <span class="math inline">\(G\)</span>가 포함되지 않아 <span class="math inline">\(D\)</span>와 <span class="math inline">\(I\)</span>가 분리된다.</p>
+<p><img src="figures/fig-moralized-dsep.svg" id="fig-moralized-dsep" class="img-fluid" alt="그림 삽입 위치"> &gt; <strong>정리 - d-분리의 건전성</strong><br>
+&gt; 분포 <span class="math inline">\(P_B\)</span>가 DAG <span class="math inline">\(G\)</span>에 따라 분해되면 <span class="math inline">\(G\)</span>는 <span class="math inline">\(P_B\)</span>의 I-지도이다.</p>
+<p><strong>증명.</strong> <span class="math inline">\((\mathbf{X}\perp\mathbf{Y}\mid\mathbf{Z})\in\mathcal{I}(G)\)</span>라고 하자. d-분리의 무방향 판정 명제에 의해 조상부분그래프의 도덕화 그래프 <span class="math inline">\(H\)</span>에서 <span class="math inline">\(\mathbf{Z}\)</span>가 <span class="math inline">\(\mathbf{X}\)</span>와 <span class="math inline">\(\mathbf{Y}\)</span>를 분리한다. 상향폐포 위의 베이즈 네트워크 분포는 <span class="math inline">\(H\)</span>에 따라 깁스 분해된다. 앞에서 증명한 무방향 분리의 건전성을 적용하면 해당 부분분포에서 조건부독립성이 성립하고, 이 부분분포는 원래 <span class="math inline">\(P_B\)</span>의 같은 변수들에 대한 주변분포와 같으므로 원래 분포에서도 독립성이 성립한다. <span class="math inline">\(\square\)</span></p>
+</section>
+</section>
+<section id="마르코프-네트워크에서-베이즈-네트워크로" class="level3" data-number="3.4.2">
+<h3 data-number="3.4.2" class="anchored" data-anchor-id="마르코프-네트워크에서-베이즈-네트워크로"><span class="header-section-number">3.4.2</span> 마르코프 네트워크에서 베이즈 네트워크로</h3>
+<p>무방향그래프를 DAG의 최소 I-지도로 바꾸는 일은 반대 방향보다 어렵다. 순환구조를 비순환 방향그래프로 만들려면 추가 간선이 필요하며, 그 결과 부모집합과 CPD가 크게 증가할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 비현그래프의 DAG I-지도</strong><br>
+<span class="quarto-unresolved-ref">?fig-markov-to-dag의</span> (a)의 여섯 노드 순환형 마르코프 네트워크를 변수순서 <span class="math display">\[
+A,B,C,D,E,F
+\]</span> 에 따라 DAG로 구성하자. <span class="math inline">\(C\)</span>를 추가할 때 <span class="math inline">\(A\)</span>뿐 아니라 <span class="math inline">\(B\)</span>도 부모가 되어야 하고, <span class="math inline">\(D\)</span>에는 <span class="math inline">\(B,C\)</span>, <span class="math inline">\(E\)</span>에는 <span class="math inline">\(C,D\)</span>가 부모로 필요하다. 최종 DAG는 <span class="quarto-unresolved-ref">?fig-markov-to-dag의</span> (b)처럼 순환 내부에 여러 대각간선이 추가된 삼각화 구조가 된다.</p>
+</blockquote>
+<p><img src="figures/fig-markov-to-dag.svg" id="fig-markov-to-dag" class="img-fluid" alt="그림 삽입 위치"> 다른 변수순서를 사용해도 본질적인 현상은 피할 수 없다.</p>
+<blockquote class="blockquote">
+<p><strong>정리</strong><br>
+<span class="math inline">\(H\)</span>가 마르코프 네트워크이고 <span class="math inline">\(G\)</span>가 <span class="math inline">\(H\)</span>의 최소 베이즈 네트워크 I-지도이면 <span class="math inline">\(G\)</span>에는 비도덕성이 존재할 수 없다.</p>
+</blockquote>
+<p><strong>증명.</strong> <span class="math inline">\(G\)</span>의 위상순서를 <span class="math inline">\(X_1,\ldots,X_n\)</span>이라 하자. 반대로 <span class="math inline">\(X_i\to X_j\leftarrow X_k\)</span>가 비도덕성이고 <span class="math inline">\(i&lt;k&lt;j\)</span>라고 하자. 최소성 때문에 <span class="math inline">\(X_i\)</span>와 <span class="math inline">\(X_j\)</span> 사이, <span class="math inline">\(X_k\)</span>와 <span class="math inline">\(X_j\)</span> 사이에는 <span class="math inline">\(X_j\)</span>의 나머지 부모로 막히지 않는 <span class="math inline">\(H\)</span>의 경로가 있어야 한다. <span class="math inline">\(X_k\)</span>를 추가할 때 선택된 부모집합은 <span class="math inline">\(X_i\)</span>와 <span class="math inline">\(X_k\)</span> 사이의 모든 경로를 막아야 하므로 두 경로군 중 하나 전체를 차단해야 한다. 예를 들어 <span class="math inline">\(X_j\)</span>와 <span class="math inline">\(X_k\)</span> 사이를 모두 막는다면, 이후 <span class="math inline">\(X_j\)</span>의 최소 부모집합을 선택할 때 <span class="math inline">\(X_k\)</span>는 <span class="math inline">\(X_j\)</span>에서 출발하는 차단되지 않은 경로의 첫 노드가 될 수 없어 부모가 될 수 없다. 이는 <span class="math inline">\(X_k\to X_j\)</span>와 모순이다. <span class="math inline">\(\square\)</span></p>
+<p>길이 4 이상의 현이 없는 순환을 어떤 DAG로 방향화하면 반드시 비도덕성이 생긴다. 따라서 다음이 따른다.</p>
+<blockquote class="blockquote">
+<p><strong>따름정리</strong><br>
+마르코프 네트워크 <span class="math inline">\(H\)</span>의 모든 최소 DAG I-지도 <span class="math inline">\(G\)</span>는 반드시 <strong>현그래프(chordal graph)</strong>이다.</p>
+</blockquote>
+<p>무방향그래프에 간선을 추가해 모든 길이 4 이상의 순환에 현을 만들고 그래프를 현그래프로 바꾸는 과정을 <strong>삼각화(triangulation)</strong>라고 한다. 간선 추가는 독립성 정보를 제거한다. <span class="quarto-unresolved-ref">?fig-markov-to-dag에서는</span> 원래 성립하던</p>
+<p><span class="math display">\[
+(C\perp D\mid A,F)
+\]</span></p>
+<p>같은 독립성이 DAG I-지도에서 사라질 수 있다. 무방향에서 방향으로의 변환은 경우에 따라 매우 많은 간선을 추가하고 지수 크기의 가족을 만들 수 있다.</p>
+</section>
+<section id="현그래프" class="level3" data-number="3.4.3">
+<h3 data-number="3.4.3" class="anchored" data-anchor-id="현그래프"><span class="header-section-number">3.4.3</span> 현그래프</h3>
+<p>어떤 독립성 구조가 베이즈 네트워크와 마르코프 네트워크 양쪽에서 모두 정확히 표현될 수 있는가? 그 교집합이 바로 무방향 <strong>현그래프(chordal graph)</strong>이다.</p>
+<blockquote class="blockquote">
+<p><strong>정리</strong><br>
+<span class="math inline">\(H\)</span>가 비현 마르코프 네트워크이면 <span class="math display">\[
+\mathcal{I}(H)=\mathcal{I}(G)
+\]</span> 를 만족하는 베이즈 네트워크 <span class="math inline">\(G\)</span>는 존재하지 않는다.</p>
+</blockquote>
+<p><strong>증명.</strong> <span class="math inline">\(H\)</span>의 어떤 DAG I-지도도 최소 DAG I-지도가 현그래프라는 따름정리에 의해 현그래프여야 하므로 <span class="math inline">\(H\)</span>에 없는 간선을 포함한다. 추가 간선은 적어도 하나의 분리 독립성을 제거하므로 완전지도가 될 수 없다. <span class="math inline">\(\square\)</span></p>
+<p>현그래프는 최대 클리크를 노드로 하는 나무로 분해할 수 있다. 이것이 이후 정확추론에서 핵심이 되는 <strong>클리크 트리(clique tree)</strong>이다.</p>
+<p>연결된 무방향그래프 <span class="math inline">\(H\)</span>의 최대 클리크를 <span class="math inline">\(\mathbf{C}_1,\ldots,\mathbf{C}_k\)</span>라 하자. 이 클리크들을 노드로 하는 임의의 트리 <span class="math inline">\(T\)</span>를 생각한다. 트리에서 인접한 두 클리크의 교집합</p>
+<p><span class="math display">\[
+\mathbf{S}_{i,j}=\mathbf{C}_i\cap\mathbf{C}_j
+\]</span></p>
+<p>를 <strong>분리집합(sepset)</strong>이라 한다. 간선 <span class="math inline">\((i,j)\)</span>를 끊었을 때 <span class="math inline">\(\mathbf{C}_i\)</span> 쪽 클리크들에 나타나는 모든 변수를 <span class="math inline">\(\mathbf{W}_{\langle i,j\rangle}\)</span>, 반대쪽을 <span class="math inline">\(\mathbf{W}_{\langle j,i\rangle}\)</span>라 한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 클리크 트리</strong><br>
+트리 <span class="math inline">\(T\)</span>가 <span class="math inline">\(H\)</span>의 클리크 트리라는 것은 다음을 뜻한다.</p>
+<ol type="1">
+<li><span class="math inline">\(T\)</span>의 각 노드는 <span class="math inline">\(H\)</span>의 클리크이고, <span class="math inline">\(H\)</span>의 모든 최대 클리크가 <span class="math inline">\(T\)</span>의 노드로 나타난다.</li>
+<li>각 분리집합 <span class="math inline">\(\mathbf{S}_{i,j}\)</span>가 <span class="math inline">\(H\)</span>에서 <span class="math display">\[
+\mathbf{W}_{\langle i,j\rangle}-\mathbf{S}_{i,j}
+\]</span> 와 <span class="math display">\[
+\mathbf{W}_{\langle j,i\rangle}-\mathbf{S}_{i,j}
+\]</span> 를 분리한다.</li>
+</ol>
+</blockquote>
+<p>즉 클리크 트리의 한 간선에 있는 교집합을 조건화하면 양쪽 하위트리의 변수들이 독립이 된다.</p>
+<blockquote class="blockquote">
+<p><strong>예제</strong><br>
+<span class="quarto-unresolved-ref">?fig-markov-to-dag의</span> (b)의 DAG에는 비도덕성이 없으므로 도덕화하면 방향만 제거한 같은 골격을 얻는다. 최대 클리크는 <span class="math display">\[
+\{A,B,C\},\{B,C,D\},\{C,D,E\},\{D,E,F\}
+\]</span> 이고, 이 순서의 사슬이 클리크 트리를 이룬다. 인접 클리크 교집합 <span class="math inline">\(\{B,C\}\)</span>, <span class="math inline">\(\{C,D\}\)</span>, <span class="math inline">\(\{D,E\}\)</span>가 각각 양쪽을 분리한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정리</strong><br>
+모든 무방향 현그래프 <span class="math inline">\(H\)</span>는 클리크 트리 <span class="math inline">\(T\)</span>를 갖는다.</p>
+</blockquote>
+<p><strong>증명.</strong> 노드 수에 대한 귀납법을 사용한다. 단일 클리크이면 자명하다. 서로 인접하지 않은 두 노드 <span class="math inline">\(X_1,X_2\)</span>를 고르고 이들을 분리하는 최소집합 <span class="math inline">\(\mathbf{S}\)</span>를 택한다. <span class="math inline">\(\mathbf{S}\)</span>를 제거하면 <span class="math inline">\(X_1\)</span>과 <span class="math inline">\(X_2\)</span>를 포함하는 서로 다른 연결성분이 생긴다. 나머지 성분을 두 쪽 <span class="math inline">\(\mathbf{W}_1,\mathbf{W}_2\)</span>로 나눈다.</p>
+<p>먼저 <span class="math inline">\(\mathbf{S}\)</span>가 완전 부분그래프임을 보인다. <span class="math inline">\(Z_1,Z_2\in\mathbf{S}\)</span>를 고르면 최소성 때문에 각각 다른 분리노드를 지나지 않는 <span class="math inline">\(X_1\)</span>-<span class="math inline">\(X_2\)</span> 경로 위에 있어야 한다. <span class="math inline">\(\mathbf{W}_1\)</span> 쪽과 <span class="math inline">\(\mathbf{W}_2\)</span> 쪽에서 각각 <span class="math inline">\(Z_1\)</span>과 <span class="math inline">\(Z_2\)</span>를 잇는 최소경로를 만들 수 있고 두 경로를 합치면 길이 4 이상의 순환이 된다. <span class="math inline">\(H\)</span>가 현그래프이므로 이 순환에 현이 있어야 하며, 구성상 가능한 현은 <span class="math inline">\(Z_1-Z_2\)</span>뿐이다. 따라서 <span class="math inline">\(\mathbf{S}\)</span>는 클리크이다.</p>
+<p>이제 <span class="math inline">\(H_1=H[\mathbf{W}_1\cup\mathbf{S}]\)</span>, <span class="math inline">\(H_2=H[\mathbf{W}_2\cup\mathbf{S}]\)</span>에 귀납가정을 적용하여 클리크 트리 <span class="math inline">\(T_1,T_2\)</span>를 얻는다. 각 트리에서 <span class="math inline">\(\mathbf{S}\)</span>를 포함하는 클리크를 골라 두 트리를 연결하거나, <span class="math inline">\(\mathbf{S}\)</span> 자체가 최대 클리크이면 중복노드를 적절히 합친다. <span class="math inline">\(H\)</span>의 최대 클리크는 두 부분 중 하나에 완전히 포함되고, 새 연결의 분리집합 <span class="math inline">\(\mathbf{S}\)</span>는 두 쪽을 분리한다. 기존 트리 내부의 분리성도 유지되므로 전체가 <span class="math inline">\(H\)</span>의 클리크 트리이다. <span class="math inline">\(\square\)</span></p>
+<blockquote class="blockquote">
+<p><strong>정리</strong><br>
+<span class="math inline">\(H\)</span>가 현 마르코프 네트워크이면 <span class="math display">\[
+\mathcal{I}(H)=\mathcal{I}(G)
+\]</span> 인 베이즈 네트워크 <span class="math inline">\(G\)</span>가 존재한다.</p>
+</blockquote>
+<p><strong>증명 개요.</strong> <span class="math inline">\(H\)</span>의 클리크 트리를 하나 고르고 임의의 클리크를 루트로 정한다. 루트에서 가까운 클리크부터 순서를 정하고, 각 변수가 처음 등장하는 클리크의 순서를 따라 변수순서를 만든다. 변수 <span class="math inline">\(X_i\)</span>가 처음 나타나는 클리크 <span class="math inline">\(\mathbf{C}_k\)</span>와 그 부모 클리크 <span class="math inline">\(\mathbf{C}_l\)</span>의 교집합 <span class="math inline">\(\mathbf{S}_{l,k}\)</span>를 이용하여 <span class="math inline">\(X_i\)</span>의 앞선 이웃을 부모로 둔다. 클리크 트리의 분리성 때문에 이 부모집합은 앞선 비부모 변수로부터 <span class="math inline">\(X_i\)</span>를 분리한다. 만들어진 DAG는 <span class="math inline">\(H\)</span>와 같은 골격을 갖고 부모들이 모두 같은 클리크 안에서 연결되어 있으므로 비도덕성이 없다. 도덕적 DAG의 완전지도 명제에 의해 도덕화 그래프 <span class="math inline">\(H\)</span>와 DAG <span class="math inline">\(G\)</span>가 같은 독립성을 갖는다. <span class="math inline">\(\square\)</span></p>
+<p>따라서 다음의 정확한 특징을 얻는다.</p>
+<p><span class="math display">\[
+\boxed{
+\text{한 독립성 구조가 BN과 MN 모두에서 완전하게 표현 가능}
+\Longleftrightarrow
+\text{그 무방향그래프가 현그래프}
+}
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>학습 보충 - 왜 현그래프가 중요한가</strong><br>
+현그래프는 단지 두 표현 사이의 교집합이 아니다. 최대 클리크를 트리로 배열할 수 있으므로 전역 결합분포의 추론을 국소 클리크 계산과 분리집합 메시지 전달로 바꿀 수 있다. 뒤에서 다룰 정확추론과 junction tree 알고리즘의 핵심 구조가 바로 이 성질이다.</p>
+</blockquote>
+</section>
+</section>
+<section id="부분방향-모형" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="부분방향-모형"><span class="header-section-number">3.5</span> 부분방향 모형</h2>
+<p>방향그래프와 무방향그래프를 결합하여 일부 관계는 방향으로, 일부는 무방향으로 표현할 수 있다. 먼저 관측변수에 조건화된 무방향 모형인 <strong>조건부 확률장(conditional random field, CRF)</strong>을 다루고, 이어 여러 무방향 성분이 방향적으로 연결되는 <strong>체인그래프(chain graph)</strong>로 일반화한다.</p>
+<section id="조건부-확률장" class="level3" data-number="3.5.1">
+<h3 data-number="3.5.1" class="anchored" data-anchor-id="조건부-확률장"><span class="header-section-number">3.5.1</span> 조건부 확률장</h3>
+<p>지금까지 마르코프 네트워크는 <span class="math inline">\(P(\mathcal{X})\)</span>라는 결합분포를 나타냈다. 같은 무방향그래프와 요인 모수화를 사용하여 서로 겹치지 않는 관측변수 집합 <span class="math inline">\(\mathbf{X}\)</span>와 목표변수 집합 <span class="math inline">\(\mathbf{Y}\)</span>에 대한 조건부분포</p>
+<p><span class="math display">\[
+P(\mathbf{Y}\mid\mathbf{X})
+\]</span></p>
+<p>를 나타낼 수도 있다. 이를 CRF라고 한다.</p>
+<section id="crf의-표현과-의미" class="level4" data-number="3.5.1.1">
+<h4 data-number="3.5.1.1" class="anchored" data-anchor-id="crf의-표현과-의미"><span class="header-section-number">3.5.1.1</span> CRF의 표현과 의미</h4>
+<p>CRF의 노드는 <span class="math inline">\(\mathbf{X}\cup\mathbf{Y}\)</span>에 대응하고, 일반 마르코프 네트워크처럼 요인집합</p>
+<p><span class="math display">\[
+\phi_1(\mathbf{D}_1),\ldots,\phi_m(\mathbf{D}_m)
+\]</span></p>
+<p>으로 모수화된다. 그러나 <span class="math inline">\(P(\mathbf{Y},\mathbf{X})\)</span> 전체가 아니라 <span class="math inline">\(P(\mathbf{Y}\mid\mathbf{X})\)</span>만 나타낸다. 따라서 관측변수 <span class="math inline">\(\mathbf{X}\)</span>만 포함하는 요인은 허용하지 않는다. 그런 요인은 <span class="math inline">\(P(\mathbf{X})\)</span>를 모형화하려는 것이기 때문이다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 조건부 확률장</strong><br>
+CRF는 <span class="math inline">\(\mathbf{X}\cup\mathbf{Y}\)</span>를 노드로 하는 무방향그래프 <span class="math inline">\(H\)</span>와 요인집합 <span class="math inline">\(\{\phi_i(\mathbf{D}_i)\}_{i=1}^m\)</span>으로 구성되며, 모든 범위는 <span class="math inline">\(\mathbf{D}_i\not\subseteq\mathbf{X}\)</span>를 만족한다. 조건부분포는 <span class="math display">\[
+P(\mathbf{Y}\mid\mathbf{X})
+=\frac{1}{Z(\mathbf{X})}\widetilde P(\mathbf{Y},\mathbf{X}),
+\]</span> <span class="math display">\[
+\widetilde P(\mathbf{Y},\mathbf{X})
+=\prod_{i=1}^{m}\phi_i(\mathbf{D}_i),
+\]</span> <span class="math display">\[
+Z(\mathbf{X})
+=\sum_{\mathbf{Y}}\widetilde P(\mathbf{Y},\mathbf{X})
+\]</span> 로 정의한다. 같은 요인범위에 등장하는 두 변수는 그래프에서 무방향간선으로 연결한다.</p>
+</blockquote>
+<p>일반 깁스 분포와의 핵심 차이는 분할함수가 상수가 아니라 관측값 <span class="math inline">\(\mathbf{x}\)</span>에 따라 달라지는 함수 <span class="math inline">\(Z(\mathbf{x})\)</span>라는 점이다. 그래프에서는 항상 관측되는 특징변수를 회색 노드로 표시한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 선형사슬 CRF</strong><br>
+<span class="math inline">\(\mathbf{Y}=\{Y_1,\ldots,Y_k\}\)</span>, <span class="math inline">\(\mathbf{X}=\{X_1,\ldots,X_k\}\)</span>이고 <span class="math inline">\(Y_i-Y_{i+1}\)</span> 및 <span class="math inline">\(Y_i-X_i\)</span> 간선이 있다고 하자. 그러면 <span class="math display">\[
+P(\mathbf{Y}\mid\mathbf{X})
+=\frac{1}{Z(\mathbf{X})}
+\left[\prod_{i=1}^{k-1}\phi(Y_i,Y_{i+1})\right]
+\left[\prod_{i=1}^{k}\phi(Y_i,X_i)\right],
+\]</span> <span class="math display">\[
+Z(\mathbf{X})
+=\sum_{\mathbf{Y}}
+\left[\prod_{i=1}^{k-1}\phi(Y_i,Y_{i+1})\right]
+\left[\prod_{i=1}^{k}\phi(Y_i,X_i)\right].
+\]</span></p>
+</blockquote>
+<p><img src="figures/fig-linear-chain-models.svg" id="fig-linear-chain-models" class="img-fluid" alt="그림 삽입 위치"> CRF 그래프에서는 관측변수끼리 같은 요인에 포함되어 간선으로 연결될 수 있다. 그러나 이 간선은 <span class="math inline">\(P(\mathbf{X})\)</span>의 독립성 구조를 나타내지 않는다. CRF는 관측변수의 분포를 전혀 정의하지 않기 때문이다.</p>
+<p>이 점은 CRF의 가장 큰 장점이다. 관측변수 사이의 의존성이 매우 복잡하거나 알기 어렵더라도, 목표변수를 예측하는 데 유용한 특징이면 모형에 자유롭게 포함할 수 있다. 연속형 픽셀값, 영상경사, 단어의 철자 패턴처럼 결합분포를 정의하기 어려운 특징도 그대로 조건화할 수 있다.</p>
+<p>영상분할을 예로 들면 픽셀값과 영역라벨의 결합분포를 만들 필요 없이</p>
+<p><span class="math display">\[
+P(\text{영역 라벨}\mid\text{관측 영상 특징})
+\]</span></p>
+<p>만 모형화할 수 있다. 영상처리 알고리즘으로 계산된 복잡한 특징도 관측변수로 넣을 수 있으므로 표현력이 크게 향상된다.</p>
+</section>
+<section id="방향-의존성과-무방향-의존성" class="level4" data-number="3.5.1.2">
+<h4 data-number="3.5.1.2" class="anchored" data-anchor-id="방향-의존성과-무방향-의존성"><span class="header-section-number">3.5.1.2</span> 방향 의존성과 무방향 의존성</h4>
+<p>CRF는 <span class="math inline">\(\mathbf{X}\)</span>에서 <span class="math inline">\(\mathbf{Y}\)</span>로는 조건화라는 방향적 관계가 있고, <span class="math inline">\(\mathbf{Y}\)</span> 내부에는 무방향 상호작용이 있는 부분방향 모형으로 볼 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 나이브 마르코프 모형과 로지스틱 CPD</strong><br>
+이진 관측변수 <span class="math inline">\(\mathbf{X}=\{X_1,\ldots,X_k\}\)</span>와 하나의 이진 목표변수 <span class="math inline">\(Y\)</span>가 있다고 하자. <span class="math inline">\(Y\)</span>와 각 <span class="math inline">\(X_i\)</span> 사이의 쌍별 퍼텐셜을 <span class="math display">\[
+\phi_i(X_i,Y)
+=\exp\{w_i\mathbf{1}[X_i=1,Y=1]\}
+\]</span> 로 두고, 단일노드 퍼텐셜을 <span class="math display">\[
+\phi_0(Y)=\exp\{w_0\mathbf{1}[Y=1]\}
+\]</span> 로 둔다. 그러면 <span class="math display">\[
+\widetilde P(Y=1\mid x_1,\ldots,x_k)
+=\exp\left(w_0+\sum_{i=1}^{k}w_ix_i\right),
+\]</span> <span class="math display">\[
+\widetilde P(Y=0\mid x_1,\ldots,x_k)=1.
+\]</span> 정규화하면 <span class="math display">\[
+P(Y=1\mid x_1,\ldots,x_k)
+=\operatorname{sigmoid}\left(w_0+\sum_{i=1}^{k}w_ix_i\right),
+\]</span> 여기서 <span class="math display">\[
+\operatorname{sigmoid}(z)=\frac{e^z}{1+e^z}.
+\]</span></p>
+</blockquote>
+<p>이는 부모 수가 늘어도 모수가 선형으로 증가하는 <strong>로지스틱 CPD</strong>이다. 표 형태의 CPD는 부모가 <span class="math inline">\(k\)</span>개이면 지수적으로 많은 항목이 필요하지만, 로지스틱 CPD는 <span class="math inline">\(k+1\)</span>개 가중치만 사용한다.</p>
+<p><span class="quarto-unresolved-ref">?fig-linear-chain-models의</span> (b)는 선형사슬 CRF를 부분방향으로 나타낸 것이다. (c)처럼 모든 간선을 방향화하면 조건값 <span class="math inline">\(\mathbf{x}\)</span>를 고정한 뒤의 <span class="math inline">\(\mathbf{Y}\)</span> 내부 독립성은 비슷해 보일 수 있지만 두 모형은 동등하지 않다. 방향모형에서는 예를 들어 <span class="math inline">\(Y_2\)</span>가 주어지지 않았을 때 <span class="math inline">\(Y_1\)</span>이 <span class="math inline">\(X_2\)</span>와 독립일 수 있지만, CRF의 <span class="math inline">\(Y_1\)</span> 주변 비정규화 질량은 전체 사슬의 모든 관측값과 요인의 영향을 받는다. 동등한 조건부 BN을 만들려면 모든 <span class="math inline">\(X_i\)</span>에서 여러 <span class="math inline">\(Y_j\)</span>로 많은 간선을 추가해야 하므로 CRF가 가진 간결한 구조가 사라진다.</p>
+<blockquote class="blockquote">
+<p><strong>상자 - 사례연구: 텍스트 분석을 위한 CRF</strong><br>
+CRF는 품사 태깅, 개체명 인식, 참고문헌에서 저자·제목·저널·연도 추출과 같은 순차 텍스트 분석에 널리 사용된다. 각 단어 또는 짧은 구에 목표라벨 <span class="math inline">\(Y_t\)</span>를 두고, 단어 자체와 주변 문맥에서 계산한 특징을 관측변수로 사용한다.</p>
+<p><strong>개체명 인식:</strong> 길이 <span class="math inline">\(T\)</span>의 단어열 <span class="math inline">\(X_1,\ldots,X_T\)</span>에 대해 각 위치의 라벨 <span class="math inline">\(Y_t\)</span>는 B-Person, I-Person, B-Location, I-Location, B-Organization, I-Organization, Other 등을 갖는다. BIO 표기에서 B는 개체명의 시작, I는 내부 또는 끝, Other는 개체가 아님을 뜻한다. “New York”과 “New York Times”처럼 개별 단어만으로 유형을 판단하기 어려운 문제를 순차구조가 해결한다.</p>
+<p>전형적인 <strong>선형사슬 CRF</strong>는 이웃 라벨 사이 요인 <span class="math display">\[
+\phi_{1t}(Y_t,Y_{t+1})
+\]</span> 과 현재 라벨과 전체 입력문맥 사이 요인 <span class="math display">\[
+\phi_{2t}(Y_t,X_1,\ldots,X_T)
+\]</span> 을 가진다. 둘째 요인은 전체 단어열의 임의 특징에 의존할 수 있다. 실제로는 표보다 로그선형 특징을 사용한다. 예를 들어 <span class="math display">\[
+f_t(Y_t,X_t)
+=\mathbf{1}[Y_t=B\text{-Organization},X_t=\text{``Times''}]
+\]</span> 와 같은 특징을 둔다.</p>
+<p>사용 가능한 특징에는 대문자 여부, 사람 이름 사전 포함 여부, 지명 사전 포함 여부, 특정 접미사, 정확한 단어 형태, 다음 단어가 “Times”인지, 문서 전체의 스포츠 관련 단어 수 등이 있다. 특징의 결합까지 포함하면 수십만 개 이상이 될 수 있지만 대부분의 위치에서 0인 희소특징이다.</p>
+<p>“Mrs.”가 앞에 있고 “spoke”가 뒤에 있는 단어는 사람 이름일 가능성이 높다. 같은 문맥단어는 여러 목표변수의 특징으로 재사용된다. 이를 생성모형으로 억지로 표현하면 하나의 관측단어가 여러 목표라벨의 자식이 되거나 복제되어 증거가 중복계산되는 문제가 생긴다. CRF는 관측특징을 조건화하므로 이 문제를 자연스럽게 피한다.</p>
+<p>선형사슬 CRF는 여러 실제 자료에서 토큰 단위 정확도가 90% 후반에 이르며, 전체 구의 경계와 범주가 모두 맞아야 하는 필드 단위 정밀도와 재현율은 자료에 따라 약 80-95% 수준으로 보고되었다.</p>
+<p>같은 단어가 문서에 여러 번 나타나면 같은 라벨일 가능성이 높다는 장거리 정보를 넣기 위해 동일 단어 위치를 연결한 <strong>skip-chain CRF</strong>를 사용할 수 있다. <span class="quarto-unresolved-ref">?fig-text-crf의</span> (a)의 두 “Green” 중 첫 번째는 주변 문맥으로 사람 이름임이 분명하지만 두 번째는 모호하다. 장거리 요인이 두 라벨을 같게 선호하여 두 번째도 올바르게 분류하도록 돕는다. (b)는 품사 태깅과 명사구 분할을 두 개의 연결된 사슬로 동시에 수행하는 결합모형이다.</p>
+</blockquote>
+<p><img src="figures/fig-text-crf.svg" id="fig-text-crf" class="img-fluid" alt="그림 삽입 위치"> CRF의 목표변수 그래프는 관측값에 따라 달라질 수도 있다. 특정 단어가 반복된 경우에만 장거리 간선을 추가하는 것이 한 예이다. 이러한 조건부 구조의 유연성은 생성모형보다 훨씬 자연스럽다.</p>
+</section>
+</section>
+<section id="체인그래프-모형" class="level3" data-number="3.5.2">
+<h3 data-number="3.5.2" class="anchored" data-anchor-id="체인그래프-모형"><span class="header-section-number">3.5.2</span> 체인그래프 모형</h3>
+<p>부분방향 비순환그래프(PDAG)의 노드는 서로 겹치지 않는 <strong>체인성분(chain component)</strong>으로 나뉜다. 같은 성분 안의 간선은 모두 무방향이고, 서로 다른 성분 사이의 간선은 방향을 갖는다. 따라서 PDAG를 체인그래프라고도 한다.</p>
+<section id="분해" class="level4" data-number="3.5.2.1">
+<h4 data-number="3.5.2.1" class="anchored" data-anchor-id="분해"><span class="header-section-number">3.5.2.1</span> 분해</h4>
+<p>체인그래프 <span class="math inline">\(K\)</span>의 분포는 각 체인성분이 그 부모에 조건화된 CRF라고 생각할 수 있다. 체인성분을 <span class="math inline">\(\mathbf{K}_1,\ldots,\mathbf{K}_\ell\)</span>이라 하면</p>
+<p><span class="math display">\[
+P(\mathcal{X})
+=\prod_{i=1}^{\ell}P(\mathbf{K}_i\mid Pa_{\mathbf{K}_i})
+\]</span></p>
+<p>로 분해한다.</p>
+<p>형식적 정의를 위해 PDAG의 도덕화를 일반화한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - PDAG의 도덕화 그래프</strong><br>
+<span class="math inline">\(K\)</span>의 체인성분을 <span class="math inline">\(\mathbf{K}_1,\ldots,\mathbf{K}_\ell\)</span>이라 하고 <span class="math inline">\(Pa_{\mathbf{K}_i}\)</span>를 그 성분 안 노드들의 모든 부모집합이라 하자. <span class="math inline">\(M[K]\)</span>는 각 <span class="math inline">\(Pa_{\mathbf{K}_i}\)</span> 안의 모든 노드쌍을 무방향간선으로 연결한 뒤 모든 방향간선을 무방향으로 바꾸어 만든 그래프이다.</p>
+</blockquote>
+<p>DAG에서는 각 노드가 하나의 체인성분이므로 같은 자식의 부모를 연결하는 기존 도덕화와 일치한다.</p>
+<p><span class="quarto-unresolved-ref">?fig-chain-graph-moralization에서</span> <span class="math inline">\(A\)</span>와 <span class="math inline">\(B\)</span>는 체인성분 <span class="math inline">\(\{C,D,E\}\)</span>의 부모이므로 연결되고, <span class="math inline">\(C,E,H\)</span>는 <span class="math inline">\(\{I\}\)</span>의 부모이므로 서로 연결된다. <span class="math inline">\(D\)</span>는 <span class="math inline">\(I\)</span>의 부모가 아니므로 <span class="math inline">\(D-H\)</span> 간선은 추가되지 않는다.</p>
+<p><img src="figures/fig-chain-graph-moralization.svg" id="fig-chain-graph-moralization" class="img-fluid" alt="그림 삽입 위치"> &gt; <strong>정의 - 체인그래프 분포</strong><br>
+&gt; PDAG <span class="math inline">\(K\)</span>의 체인성분을 <span class="math inline">\(\mathbf{K}_1,\ldots,\mathbf{K}_\ell\)</span>이라 하자. 요인 <span class="math inline">\(\phi_i(\mathbf{D}_i)\)</span>의 각 범위는 관련 상향폐포의 도덕화 그래프에서 완전 부분그래프이어야 한다. 각 요인은 하나의 체인성분 <span class="math inline">\(\mathbf{K}_j\)</span>에 배정되고 &gt; <span class="math display">\[
+&gt; \mathbf{D}_i\subseteq\mathbf{K}_j\cup Pa_{\mathbf{K}_j}
+&gt; \]</span> &gt; 를 만족한다. 이 요인들로 목표변수 <span class="math inline">\(\mathbf{K}_j\)</span>, 관측변수 <span class="math inline">\(Pa_{\mathbf{K}_j}\)</span>인 CRF &gt; <span class="math display">\[
+&gt; P(\mathbf{K}_j\mid Pa_{\mathbf{K}_j})
+&gt; \]</span> &gt; 를 정의하고, 전체 분포를 &gt; <span class="math display">\[
+&gt; P(\mathcal{X})
+&gt; =\prod_{j=1}^{\ell}P(\mathbf{K}_j\mid Pa_{\mathbf{K}_j})
+&gt; \]</span> &gt; 로 둔다. 이때 <span class="math inline">\(P\)</span>가 <span class="math inline">\(K\)</span>에 따라 분해된다고 한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제</strong><br>
+<span class="quarto-unresolved-ref">?fig-chain-graph-moralization의</span> 체인그래프에서는 <span class="math display">\[
+P(C,D,E\mid A,B)
+=\frac{1}{Z(A,B)}
+\phi_1(A,C)\phi_2(B,E)\phi_3(C,D)\phi_4(D,E)
+\]</span> 와 같이 분해되어야 한다. <span class="math inline">\(P(F,G\mid C,D)\)</span>에도 같은 원리가 적용된다.</p>
+</blockquote>
+</section>
+<section id="체인그래프의-독립성" class="level4" data-number="3.5.2.2">
+<h4 data-number="3.5.2.2" class="anchored" data-anchor-id="체인그래프의-독립성"><span class="header-section-number">3.5.2.2</span> 체인그래프의 독립성</h4>
+<p>PDAG에서는 부모 <span class="math inline">\(Pa_X\)</span>와 무방향 이웃 <span class="math inline">\(Nb_X\)</span>가 모두 존재하며</p>
+<p><span class="math display">\[
+Boundary_X=Pa_X\cup Nb_X
+\]</span></p>
+<p>를 <span class="math inline">\(X\)</span>의 경계라고 한다. 자손은 적어도 하나의 순방향 간선을 포함하고 반대방향 간선은 포함하지 않는 방향경로를 따라 도달할 수 있는 노드이다. 따라서 자손은 더 아래의 체인성분에 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - PDAG의 쌍별 독립성</strong><br>
+<span class="math display">\[
+\mathcal{I}_p(K)
+=\{(X\perp Y\mid NonDescendants_X-\{X,Y\}):
+X,Y\text{가 비인접이고 }Y\in NonDescendants_X\}.
+\]</span></p>
+</blockquote>
+<p>무방향그래프에서는 자손이 없으므로 기존 쌍별 독립성과 일치하고, DAG에서도 방향모형의 쌍별 마르코프 성질을 일반화한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - PDAG의 국소 독립성</strong><br>
+<span class="math display">\[
+\mathcal{I}_\ell(K)
+=\{(X\perp NonDescendants_X-Boundary_X\mid Boundary_X):X\in\mathcal{X}\}.
+\]</span></p>
+</blockquote>
+<p>DAG에서는 경계가 부모이고, 무방향그래프에서는 경계가 이웃이므로 두 기존 정의를 모두 포함한다.</p>
+<p>전역 독립성은 상향폐포의 도덕화 그래프에서 분리를 검사하여 정의한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - c-분리</strong><br>
+서로 겹치지 않는 <span class="math inline">\(\mathbf{X},\mathbf{Y},\mathbf{Z}\)</span>에 대해 <span class="math display">\[
+\mathbf{U}=\mathbf{X}\cup\mathbf{Y}\cup\mathbf{Z}
+\]</span> 라 하자. 도덕화 그래프 <span class="math display">\[
+M[K^+[\mathbf{U}]]
+\]</span> 에서 <span class="math inline">\(\mathbf{Z}\)</span>가 <span class="math inline">\(\mathbf{X}\)</span>와 <span class="math inline">\(\mathbf{Y}\)</span>를 분리하면, <span class="math inline">\(K\)</span>에서 <span class="math inline">\(\mathbf{X}\)</span>가 <span class="math inline">\(\mathbf{Z}\)</span>에 주어져 <span class="math inline">\(\mathbf{Y}\)</span>와 <strong>c-분리</strong>되었다고 한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제</strong><br>
+<span class="quarto-unresolved-ref">?fig-chain-graph-moralization의</span> PDAG에서 <span class="math inline">\(C\)</span>와 <span class="math inline">\(E\)</span>는 <span class="math inline">\(D,A\)</span>가 주어지면 <span class="quarto-unresolved-ref">?fig-chain-graph-c-separation의</span> (a)의 도덕화 부분그래프에서 분리된다. 그러나 <span class="math inline">\(D\)</span>만 주어지면 <span class="math inline">\(A,B\)</span>를 지나는 경로가 남는다. 또한 <span class="math inline">\(D,A,I\)</span>를 조건화하면 <span class="math inline">\(I\)</span>가 상향폐포에 포함되면서 그 부모 <span class="math inline">\(C,E,H\)</span>를 도덕화하여 <span class="math inline">\(C-E\)</span> 직접간선이 생기므로 더 이상 분리되지 않는다.</p>
+</blockquote>
+<p><img src="figures/fig-chain-graph-c-separation.svg" id="fig-chain-graph-c-separation" class="img-fluid" alt="그림 삽입 위치"> &gt; <strong>정의 - PDAG의 전역 독립성</strong><br>
+&gt; <span class="math display">\[
+&gt; \mathcal{I}(K)
+&gt; =\{(\mathbf{X}\perp\mathbf{Y}\mid\mathbf{Z}):
+&gt; \mathbf{X}\text{와 }\mathbf{Y}\text{가 }\mathbf{Z}\text{에 의해 c-분리}\}.
+&gt; \]</span></p>
+<p>c-분리는 무방향그래프의 분리와 DAG의 d-분리를 모두 일반화한다. 무방향그래프에서는 관련 상향폐포가 전체 연결구조로 귀결되고, DAG에서는 d-분리의 무방향 판정 명제의 도덕화 판정과 일치한다.</p>
+<p>비양의 분포에서는</p>
+<p><span class="math display">\[
+\mathcal{I}(K)\Rightarrow\mathcal{I}_\ell(K)\Rightarrow\mathcal{I}_p(K)
+\]</span></p>
+<p>의 포함만 성립하고 역은 일반적으로 거짓이다. 양의 분포에서는 세 정의가 동등하다.</p>
+<p>체인성분의 부모들은 관련 도덕화 그래프에서 완전히 연결된다. 따라서 부모들 사이 구조는 자식 체인성분의 조건부분포 안에서 별도의 독립성을 만들지는 않지만, <span class="math inline">\(P(\mathbf{K}_i\mid Pa_{\mathbf{K}_i})\)</span>의 요인 모수화에는 중요한 세부구조를 제공한다.</p>
+<blockquote class="blockquote">
+<p><strong>정리</strong><br>
+양의 분포 <span class="math inline">\(P\)</span>에 대해 <span class="math display">\[
+P\text{가 PDAG }K\text{에 따라 분해된다}
+\quad\Longleftrightarrow\quad
+P\models\mathcal{I}(K).
+\]</span></p>
+</blockquote>
+<p>원문에서는 증명을 생략한다. 이 정리는 DAG와 무방향그래프의 분해-독립성 동치가 체인그래프에도 확장됨을 보여 준다.</p>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./02-bayesian-network-representation.html" class="pagination-link" aria-label="베이즈 네트워크 표현">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">베이즈 네트워크 표현</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./04-local-probabilistic-models.html" class="pagination-link" aria-label="국소 확률 모형">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">국소 확률 모형</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

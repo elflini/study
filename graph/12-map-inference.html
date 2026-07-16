@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>12&nbsp; MAP 추론 – 확률적 그래프 모형</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./13-inference-in-hybrid-networks.html" rel="next">
+<link href="./11-particle-based-approximate-inference.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-a522afb83bf8ae494942cf1b0ac9d4c3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./12-map-inference.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">MAP 추론</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">확률적 그래프 모형</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">기초 개념</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-bayesian-network-representation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">베이즈 네트워크 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-undirected-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">무방향 그래픽 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-local-probabilistic-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">국소 확률 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-template-based-representations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">템플릿 기반 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-gaussian-network-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">가우시안 네트워크 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-exponential-family.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">지수족</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-exact-inference-variable-elimination.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">정확추론: 변수 제거</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-exact-inference-clique-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">정확추론: 클리크 트리</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-inference-as-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">최적화로서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-particle-based-approximate-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">입자 기반 근사추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-map-inference.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">MAP 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-inference-in-hybrid-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">혼합 네트워크에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-inference-in-temporal-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">시간 모형에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-learning-graphical-models-overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">그래프모형 학습 개요</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-parameter-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">모수추정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-structure-learning-bayesian-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">베이지안 네트워크의 구조학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-partially-observed-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">부분관측 자료</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./19-learning-undirected-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">무방향 그래프모형의 학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20-causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">인과성</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21-utilities-and-decisions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">효용과 의사결정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22-structured-decision-problems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">구조화된 의사결정 문제</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./23-epilogue.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">맺음말: 왜 확률적 그래프 모형인가?</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#개요" id="toc-개요" class="nav-link active" data-scroll-target="#개요"><span class="header-section-number">12.1</span> 개요</a>
+  <ul>
+  <li><a href="#계산-복잡도" id="toc-계산-복잡도" class="nav-link" data-scroll-target="#계산-복잡도"><span class="header-section-number">12.1.1</span> 계산 복잡도</a></li>
+  <li><a href="#해법의-전체-개요" id="toc-해법의-전체-개요" class="nav-link" data-scroll-target="#해법의-전체-개요"><span class="header-section-number">12.1.2</span> 해법의 전체 개요</a></li>
+  </ul></li>
+  <li><a href="#map-및-주변-map을-위한-변수-제거" id="toc-map-및-주변-map을-위한-변수-제거" class="nav-link" data-scroll-target="#map-및-주변-map을-위한-변수-제거"><span class="header-section-number">12.2</span> MAP 및 주변 MAP을 위한 변수 제거</a>
+  <ul>
+  <li><a href="#최대곱-변수-제거" id="toc-최대곱-변수-제거" class="nav-link" data-scroll-target="#최대곱-변수-제거"><span class="header-section-number">12.2.1</span> 최대곱 변수 제거</a></li>
+  <li><a href="#가장-가능성-높은-할당-찾기" id="toc-가장-가능성-높은-할당-찾기" class="nav-link" data-scroll-target="#가장-가능성-높은-할당-찾기"><span class="header-section-number">12.2.2</span> 가장 가능성 높은 할당 찾기</a></li>
+  <li><a href="#주변-map를-위한-변수-제거" id="toc-주변-map를-위한-변수-제거" class="nav-link" data-scroll-target="#주변-map를-위한-변수-제거"><span class="header-section-number">12.2.3</span> 주변 MAP를 위한 변수 제거</a></li>
+  </ul></li>
+  <li><a href="#클리크-트리에서의-최대곱-추론" id="toc-클리크-트리에서의-최대곱-추론" class="nav-link" data-scroll-target="#클리크-트리에서의-최대곱-추론"><span class="header-section-number">12.3</span> 클리크 트리에서의 최대곱 추론</a>
+  <ul>
+  <li><a href="#최대주변값-계산" id="toc-최대주변값-계산" class="nav-link" data-scroll-target="#최대주변값-계산"><span class="header-section-number">12.3.1</span> 최대주변값 계산</a></li>
+  <li><a href="#메시지-전달과-재모수화" id="toc-메시지-전달과-재모수화" class="nav-link" data-scroll-target="#메시지-전달과-재모수화"><span class="header-section-number">12.3.2</span> 메시지 전달과 재모수화</a></li>
+  <li><a href="#최대주변값의-디코딩" id="toc-최대주변값의-디코딩" class="nav-link" data-scroll-target="#최대주변값의-디코딩"><span class="header-section-number">12.3.3</span> 최대주변값의 디코딩</a></li>
+  </ul></li>
+  <li><a href="#순환-클러스터-그래프에서의-최대곱-믿음-전파" id="toc-순환-클러스터-그래프에서의-최대곱-믿음-전파" class="nav-link" data-scroll-target="#순환-클러스터-그래프에서의-최대곱-믿음-전파"><span class="header-section-number">12.4</span> 순환 클러스터 그래프에서의 최대곱 믿음 전파</a>
+  <ul>
+  <li><a href="#표준-최대곱-메시지-전달" id="toc-표준-최대곱-메시지-전달" class="nav-link" data-scroll-target="#표준-최대곱-메시지-전달"><span class="header-section-number">12.4.1</span> 표준 최대곱 메시지 전달</a>
+  <ul class="collapse">
+  <li><a href="#메시지-전달-알고리즘" id="toc-메시지-전달-알고리즘" class="nav-link" data-scroll-target="#메시지-전달-알고리즘"><span class="header-section-number">12.4.1.1</span> 메시지 전달 알고리즘</a></li>
+  <li><a href="#의사-최대주변값-디코딩" id="toc-의사-최대주변값-디코딩" class="nav-link" data-scroll-target="#의사-최대주변값-디코딩"><span class="header-section-number">12.4.1.2</span> 의사 최대주변값 디코딩</a></li>
+  <li><a href="#강한-국소-최대" id="toc-강한-국소-최대" class="nav-link" data-scroll-target="#강한-국소-최대"><span class="header-section-number">12.4.1.3</span> 강한 국소 최대</a></li>
+  </ul></li>
+  <li><a href="#계수수를-갖는-최대곱-bp" id="toc-계수수를-갖는-최대곱-bp" class="nav-link" data-scroll-target="#계수수를-갖는-최대곱-bp"><span class="header-section-number">12.4.2</span> 계수수를 갖는 최대곱 BP</a>
+  <ul class="collapse">
+  <li><a href="#계수수를-갖는-최대곱" id="toc-계수수를-갖는-최대곱" class="nav-link" data-scroll-target="#계수수를-갖는-최대곱"><span class="header-section-number">12.4.2.1</span> 계수수를 갖는 최대곱</a></li>
+  <li><a href="#최적성-보장" id="toc-최적성-보장" class="nav-link" data-scroll-target="#최적성-보장"><span class="header-section-number">12.4.2.2</span> 최적성 보장</a></li>
+  </ul></li>
+  <li><a href="#논의" id="toc-논의" class="nav-link" data-scroll-target="#논의"><span class="header-section-number">12.4.3</span> 논의</a></li>
+  </ul></li>
+  <li><a href="#선형-최적화-문제로서의-map" id="toc-선형-최적화-문제로서의-map" class="nav-link" data-scroll-target="#선형-최적화-문제로서의-map"><span class="header-section-number">12.5</span> 선형 최적화 문제로서의 MAP</a>
+  <ul>
+  <li><a href="#정수계획-표현" id="toc-정수계획-표현" class="nav-link" data-scroll-target="#정수계획-표현"><span class="header-section-number">12.5.1</span> 정수계획 표현</a></li>
+  <li><a href="#선형계획-완화" id="toc-선형계획-완화" class="nav-link" data-scroll-target="#선형계획-완화"><span class="header-section-number">12.5.2</span> 선형계획 완화</a></li>
+  <li><a href="#저온-극한" id="toc-저온-극한" class="nav-link" data-scroll-target="#저온-극한"><span class="header-section-number">12.5.3</span> 저온 극한</a>
+  <ul class="collapse">
+  <li><a href="#합-곱-극한으로서의-lp" id="toc-합-곱-극한으로서의-lp" class="nav-link" data-scroll-target="#합-곱-극한으로서의-lp"><span class="header-section-number">12.5.3.1</span> 합-곱 극한으로서의 LP</a></li>
+  <li><a href="#합-곱-극한으로서의-최대곱" id="toc-합-곱-극한으로서의-최대곱" class="nav-link" data-scroll-target="#합-곱-극한으로서의-최대곱"><span class="header-section-number">12.5.3.2</span> 합-곱 극한으로서의 최대곱</a></li>
+  <li><a href="#논의-1" id="toc-논의-1" class="nav-link" data-scroll-target="#논의-1"><span class="header-section-number">12.5.3.3</span> 논의</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#그래프-절단을-이용한-map" id="toc-그래프-절단을-이용한-map" class="nav-link" data-scroll-target="#그래프-절단을-이용한-map"><span class="header-section-number">12.6</span> 그래프 절단을 이용한 MAP</a>
+  <ul>
+  <li><a href="#그래프-절단-추론" id="toc-그래프-절단-추론" class="nav-link" data-scroll-target="#그래프-절단-추론"><span class="header-section-number">12.6.1</span> 그래프 절단 추론</a></li>
+  <li><a href="#비이진-변수" id="toc-비이진-변수" class="nav-link" data-scroll-target="#비이진-변수"><span class="header-section-number">12.6.2</span> 비이진 변수</a>
+  <ul class="collapse">
+  <li><a href="#알파-확장" id="toc-알파-확장" class="nav-link" data-scroll-target="#알파-확장"><span class="header-section-number">12.6.2.1</span> 알파 확장</a></li>
+  <li><a href="#알파-베타-교환" id="toc-알파-베타-교환" class="nav-link" data-scroll-target="#알파-베타-교환"><span class="header-section-number">12.6.2.2</span> 알파-베타 교환</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#국소-탐색-알고리즘" id="toc-국소-탐색-알고리즘" class="nav-link" data-scroll-target="#국소-탐색-알고리즘"><span class="header-section-number">12.7</span> 국소 탐색 알고리즘</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-map-inference" class="quarto-section-identifier"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">MAP 추론</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="개요" class="level2" data-number="12.1">
+<h2 data-number="12.1" class="anchored" data-anchor-id="개요"><span class="header-section-number">12.1</span> 개요</h2>
+<p>앞 장들에서는 주로 조건부확률 질의와 주변확률 계산을 다루었다. 그러나 실제 응용에서는 확률분포 전체를 요약하는 하나의 일관된 상태를 찾아야 하는 경우가 많다. <strong>MAP(maximum a posteriori) 질의</strong>는 증거가 주어졌을 때 아직 관측되지 않은 모든 변수의 가장 가능성 높은 결합 할당을 찾는다. <strong>주변 MAP(marginal MAP) 질의</strong>는 변수 일부에 대해서만 가장 가능성 높은 할당을 찾되, 나머지 변수는 합으로 제거한다.</p>
+<p>MAP 질의는 알려지지 않은 정보를 하나의 일관된 가설로 채우는 문제에 자연스럽다. 예를 들면 복잡한 장치의 관측된 이상 행동을 설명하는 부품 고장 조합, 잡음 통신 채널에서 수신된 비트열을 생성했을 가능성이 가장 높은 원래 메시지, 음향 신호에서 가장 가능성 높은 발화 문장, 영상에서 각 픽셀의 깊이나 분할 레이블을 동시에 결정하는 문제 등이 있다. 개별 변수의 주변분포에서 가장 높은 값을 따로 선택하면 서로 양립할 수 없는 조합이 될 수 있으므로, 이러한 문제에는 결합 할당 전체를 최적화하는 MAP가 적절하다.</p>
+<blockquote class="blockquote">
+<p><strong>보충 - MAP와 주변최빈값의 차이</strong> 각 변수의 주변 최빈값을 조합한 결과를 <strong>maximum posterior marginal(MPM)</strong> 해라고 부르기도 한다. MPM은 각 좌표의 오류를 줄이는 데 유리하지만, 변수 사이의 구조적 제약을 위반할 수 있다. MAP는 결합확률이 가장 큰 하나의 상태를 선택하므로 전체적으로 일관된 설명을 제공한다.</p>
+</blockquote>
+<section id="계산-복잡도" class="level3" data-number="12.1.1">
+<h3 data-number="12.1.1" class="anchored" data-anchor-id="계산-복잡도"><span class="header-section-number">12.1.1</span> 계산 복잡도</h3>
+<p>베이즈 네트워크 <span class="math inline">\(\mathcal B\)</span>와 임계값 <span class="math inline">\(\tau\)</span>가 주어졌을 때 다음 결정문제를 생각한다.</p>
+<blockquote class="blockquote">
+<p><strong>BN-MAP-DP</strong> <span class="math inline">\(P_{\mathcal B}(\mathbf x)&gt;\tau\)</span>를 만족하는 완전 할당 <span class="math inline">\(\mathbf x\)</span>가 존재하는가?</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정리</strong> 결정문제 BN-MAP-DP는 NP-완전이다.</p>
+</blockquote>
+<p>이 결정문제에서 확률값은 유리수로 주어진다고 가정한다. 후보 할당을 검증할 때 각 CPD의 한 항만 읽으면 되므로 필요한 곱셈의 수는 네트워크 노드 수에 선형이다. 반면 최적 할당을 찾으려면 지수적으로 많은 후보를 비교해야 할 수 있다. 이 차이는 “후보의 검증은 쉽지만 후보의 발견은 어렵다”는 NP-완전 문제의 전형적인 구조이다.</p>
+<p>NP에 속하는 이유는 후보 할당 <span class="math inline">\(\mathbf x\)</span>가 주어졌을 때 네트워크의 국소 CPD를 곱하여 <span class="math inline">\(P(\mathbf x)\)</span>를 다항시간에 계산할 수 있기 때문이다. NP-난해성은 SAT와 같은 조합적 문제의 해를 확률이 높은 할당으로 대응시키는 네트워크를 구성하여 보일 수 있다.</p>
+<p>주변 MAP의 결정문제는 다음과 같다.</p>
+<blockquote class="blockquote">
+<p><strong>BN-margMAP-DP</strong> 베이즈 네트워크 <span class="math inline">\(\mathcal B\)</span>, 임계값 <span class="math inline">\(\tau\)</span>, 부분집합 <span class="math inline">\(\mathbf Y\subset\mathbf X\)</span>가 주어졌을 때 <span class="math inline">\(P(\mathbf y)&gt;\tau\)</span>인 <span class="math inline">\(\mathbf y\)</span>가 존재하는가?</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>따름정리</strong> BN-margMAP-DP는 NP-난해하다.</p>
+</blockquote>
+<p>주변 MAP는 단순 MAP를 포함하므로 NP-난해성은 즉시 따른다. 그러나 주변확률 <span class="math inline">\(P(\mathbf y)=\sum_{\mathbf w}P(\mathbf y,\mathbf w)\)</span>를 검증하는 것 자체가 어려워 일반적인 의미에서 NP에 속한다고 말할 수 없다.</p>
+<blockquote class="blockquote">
+<p><strong>정리</strong> BN-margMAP-DP는 <span class="math inline">\(\mathrm{NP}^{\mathrm{PP}}\)</span>-완전이다.</p>
+</blockquote>
+<p>이 복잡도 계층은 NP보다 훨씬 강하며, 다항계층 전체를 포함하는 것으로 알려져 있다. 주변 MAP가 단순한 최대화와 합산을 한 문제 안에서 결합하기 때문에 나타나는 결과이다.</p>
+<blockquote class="blockquote">
+<p><strong>정리</strong> 폴리트리 베이즈 네트워크에서도 주변 MAP 결정문제는 NP-난해하다.</p>
+</blockquote>
+<p>이 결과는 중요하다. 폴리트리에서는 합-곱 주변추론과 순수 MAP 추론을 효율적으로 수행할 수 있지만, 주변 MAP는 여전히 어려울 수 있다. 즉 그래프가 단순하다는 사실만으로 주변 MAP의 계산 가능성이 보장되지 않는다.</p>
+</section>
+<section id="해법의-전체-개요" class="level3" data-number="12.1.2">
+<h3 data-number="12.1.2" class="anchored" data-anchor-id="해법의-전체-개요"><span class="header-section-number">12.1.2</span> 해법의 전체 개요</h3>
+<p>인자집합 <span class="math inline">\(\Phi\)</span>가 정의하는 비정규화 측도를</p>
+<p><span class="math display">\[
+\widetilde P_{\Phi}(\mathbf X)=\prod_{\phi\in\Phi}\phi(\mathbf U_{\phi})
+\]</span></p>
+<p>라 하자. 정규화상수 <span class="math inline">\(Z\)</span>는 할당에 따라 변하지 않으므로 MAP는</p>
+<p><span class="math display">\[
+\boldsymbol\xi^{\mathrm{map}}
+=
+\arg\max_{\boldsymbol\xi}P_{\Phi}(\boldsymbol\xi)
+=
+\arg\max_{\boldsymbol\xi}\widetilde P_{\Phi}(\boldsymbol\xi)
+\]</span></p>
+<p>으로 계산할 수 있다. 증거 <span class="math inline">\(\mathbf e\)</span>가 있다면 <span class="math inline">\(\widetilde P(\mathbf X)=P(\mathbf X,\mathbf e)\)</span>를 최대화한다.</p>
+<p>인자의 곱을 최대화하므로 이를 <strong>최대곱(max-product)</strong> 문제라 한다. 로그를 취하면</p>
+<p><span class="math display">\[
+\arg\max_{\boldsymbol\xi}
+\sum_{\phi\in\Phi}\log\phi(\boldsymbol\xi)
+\]</span></p>
+<p>가 되어 <strong>최대합(max-sum)</strong> 문제로 바뀐다. 에너지 <span class="math inline">\(\epsilon=-\log\phi\)</span>를 사용하면 같은 문제는 에너지의 합을 최소화하는 <strong>에너지 최소화(energy minimization)</strong>가 된다. 로그 공간은 작은 확률의 곱으로 인한 수치적 언더플로를 방지하며, 목적함수를 선형합으로 만들어 최적화 도구를 적용하기 쉽게 한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 최대주변값</strong> 함수 <span class="math inline">\(f\)</span>의 변수집합 <span class="math inline">\(\mathbf Y\)</span>에 대한 최대주변값은</p>
+</blockquote>
+<p><span class="math display">\[
+\operatorname{MaxMarg}_{f}(\mathbf y)
+=
+\max_{\boldsymbol\xi:\,\boldsymbol\xi\langle\mathbf Y\rangle=\mathbf y}
+f(\boldsymbol\xi)
+\]</span></p>
+<p>이다. 이는 <span class="math inline">\(\mathbf Y=\mathbf y\)</span>와 양립하는 완전 할당 중 가장 큰 함수값이다. 최대주변값은 확률분포일 필요가 없고 합이 1일 필요도 없다. 서로 다른 <span class="math inline">\(\mathbf y\)</span>의 값을 비교하는 목적에 사용한다. 정규화상수는 모든 할당에 공통이므로 비정규화 최대주변값만으로도 MAP를 결정할 수 있다.</p>
+<p>많은 MAP 알고리즘은 다음 두 단계로 구성된다.</p>
+<ol type="1">
+<li>변수 또는 클러스터에 대한 정확하거나 근사적인 최대주변값을 계산한다.</li>
+<li>최대주변값을 이용해 하나의 일관된 결합 할당을 복원한다. 이 단계를 <strong>디코딩(decoding)</strong>이라 한다.</li>
+</ol>
+<p>각 변수 <span class="math inline">\(X_i\)</span>의 최대주변값이 유일한 최대값을 가지면</p>
+<p><span class="math display">\[
+x_i^*=\arg\max_{x_i}\operatorname{MaxMarg}_{f}(x_i)
+\]</span></p>
+<p>를 개별적으로 선택할 수 있다. 이러한 최대주변값을 <strong>비모호(unambiguous)</strong>하다고 한다. 동점이 있으면 각 국소 선택이 서로 일관되는지 별도로 확인해야 한다.</p>
+<p>주변 MAP에서는 <span class="math inline">\(\mathbf X=\mathbf Y\cup\mathbf W\)</span>로 분할하고</p>
+<p><span class="math display">\[
+\mathbf y^{\mathrm{mMAP}}
+=
+\arg\max_{\mathbf y}P(\mathbf y)
+=
+\arg\max_{\mathbf y}
+\sum_{\mathbf W}\widetilde P_{\Phi}(\mathbf y,\mathbf W)
+\]</span></p>
+<p>를 계산한다. 곱, 합, 최대화가 함께 존재하며, 특히 합과 최대화의 순서를 임의로 바꿀 수 없다는 점이 핵심 난점이다.</p>
+</section>
+</section>
+<section id="map-및-주변-map을-위한-변수-제거" class="level2" data-number="12.2">
+<h2 data-number="12.2" class="anchored" data-anchor-id="map-및-주변-map을-위한-변수-제거"><span class="header-section-number">12.2</span> MAP 및 주변 MAP을 위한 변수 제거</h2>
+<section id="최대곱-변수-제거" class="level3" data-number="12.2.1">
+<h3 data-number="12.2.1" class="anchored" data-anchor-id="최대곱-변수-제거"><span class="header-section-number">12.2.1</span> 최대곱 변수 제거</h3>
+<p>가장 단순한 네트워크 <span class="math inline">\(A\rightarrow B\)</span>를 생각하자.</p>
+<p><span class="math display">\[
+\max_{a,b}P(a,b)
+=
+\max_a P(a)\max_b P(b\mid a).
+\]</span></p>
+<p>고정된 <span class="math inline">\(a\)</span>에 대해 가장 좋은 완성은 <span class="math inline">\(P(b\mid a)\)</span>를 최대화하는 <span class="math inline">\(b\)</span>이다. 따라서 <span class="math inline">\(\phi(a)=\max_bP(b\mid a)\)</span>를 먼저 계산한 뒤 <span class="math inline">\(P(a)\phi(a)\)</span>를 최대화하면 된다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 두 노드 네트워크</strong> 예를 들어</p>
+</blockquote>
+<ul>
+<li>사전분포: <span class="math inline">\(P(a^0)=0.4\)</span>, <span class="math inline">\(P(a^1)=0.6\)</span>.</li>
+<li>조건부분포: <span class="math inline">\(P(b^0\mid a^0)=0.1\)</span>, <span class="math inline">\(P(b^1\mid a^0)=0.9\)</span>, <span class="math inline">\(P(b^0\mid a^1)=0.55\)</span>, <span class="math inline">\(P(b^1\mid a^1)=0.45\)</span>.</li>
+</ul>
+<p>이면 <span class="math inline">\(\phi(a^0)=0.9\)</span>, <span class="math inline">\(\phi(a^1)=0.55\)</span>이고</p>
+<p><span class="math display">\[
+\max_aP(a)\phi(a)=\max(0.4\times0.9,0.6\times0.55)=0.36.
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>정의 - 인자 최대화</strong> <span class="math inline">\(\phi(\mathbf X,Y)\)</span>에서 <span class="math inline">\(Y\)</span>를 최대화하여 제거한 인자 <span class="math inline">\(\psi(\mathbf X)\)</span>는</p>
+</blockquote>
+<p><span class="math display">\[
+\psi(\mathbf X)=\max_Y\phi(\mathbf X,Y)
+\]</span></p>
+<p>로 정의한다.</p>
+<div id="fig-map-factor-maximization" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-map-factor-maximization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-map-factor-maximization.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-map-factor-maximization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.1: 변수 B에 대한 최대주변화 인자 연산.
+</figcaption>
+</figure>
+</div>
+<p><span class="math inline">\(X\notin\operatorname{Scope}[\phi_1]\)</span>이면</p>
+<p><span class="math display">\[
+\max_X(\phi_1\phi_2)=\phi_1\max_X\phi_2
+\]</span></p>
+<p>이고, 최대합 표현에서는</p>
+<p><span class="math display">\[
+\max_X(\phi_1+\phi_2)=\phi_1+\max_X\phi_2.
+\]</span></p>
+<p>따라서 합-곱 변수 제거에서 합산을 최대화로 바꾸면 최대곱 변수 제거가 된다.</p>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - MAP를 위한 최대곱 변수 제거</strong> <strong>입력:</strong> 인자집합 <span class="math inline">\(\Phi\)</span>, 제거순서 <span class="math inline">\(X_1\prec\cdots\prec X_k\)</span> <strong>전방 단계</strong> 1. <span class="math inline">\(i=1,\ldots,k\)</span>에 대해 <span class="math inline">\(X_i\)</span>를 포함하는 인자들을 모아 <span class="math inline">\(\psi_i=\prod_{\phi:X_i\in\operatorname{Scope}[\phi]}\phi\)</span>를 만든다. 2. <span class="math inline">\(\tau_i=\max_{X_i}\psi_i\)</span>를 계산하고, 사용한 인자들을 <span class="math inline">\(\tau_i\)</span>로 교체한다. 3. 추적을 위해 <span class="math inline">\(\psi_i\)</span> 또는 각 남은 변수 할당에서 최대값을 만드는 <span class="math inline">\(x_i\)</span>를 저장한다. <strong>역추적 단계</strong> 4. 마지막 변수부터 역순으로, 이미 결정된 뒤쪽 변수값을 <span class="math inline">\(\psi_i\)</span>에 대입한다. 5. <span class="math inline">\(x_i^*=\arg\max_{x_i}\psi_i(x_i,\mathbf u_i)\)</span>를 선택한다. 6. <span class="math inline">\(\mathbf x^*\)</span>와 마지막 상수 인자를 반환한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - Student 네트워크의 최대곱 제거</strong> Student 네트워크에서 제거순서를 <span class="math inline">\(S,I,D,L,G\)</span>로 정하면 다음과 같은 계산이 이루어진다.</p>
+</blockquote>
+<p>이 제거 과정은 다음과 같다.</p>
+<ol type="1">
+<li><span class="math inline">\(S\)</span> 제거: <span class="math inline">\(\phi_S(I,S)\)</span>로 <span class="math inline">\(\psi_1(I,S)\)</span>를 만들고 <span class="math inline">\(\tau_1(I)=\max_S\psi_1(I,S)\)</span>를 생성한다.</li>
+<li><span class="math inline">\(I\)</span> 제거: <span class="math inline">\(\phi_I(I)\)</span>, <span class="math inline">\(\phi_G(G,I,D)\)</span>, <span class="math inline">\(\tau_1(I)\)</span>를 곱해 <span class="math inline">\(\psi_2(G,I,D)\)</span>를 만들고 <span class="math inline">\(\tau_2(G,D)\)</span>를 생성한다.</li>
+<li><span class="math inline">\(D\)</span> 제거: <span class="math inline">\(\phi_D(D)\)</span>와 <span class="math inline">\(\tau_2(G,D)\)</span>를 곱해 <span class="math inline">\(\psi_3(G,D)\)</span>를 만들고 <span class="math inline">\(\tau_3(G)\)</span>를 생성한다.</li>
+<li><span class="math inline">\(L\)</span> 제거: <span class="math inline">\(\phi_L(L,G)\)</span>로 <span class="math inline">\(\psi_4(L,G)\)</span>를 만들고 <span class="math inline">\(\tau_4(G)\)</span>를 생성한다.</li>
+<li><span class="math inline">\(G\)</span> 제거: <span class="math inline">\(\tau_3(G)\)</span>와 <span class="math inline">\(\tau_4(G)\)</span>를 곱해 <span class="math inline">\(\psi_5(G)\)</span>를 만들고 최종 상수 <span class="math inline">\(\tau_5(\varnothing)\)</span>를 생성한다.</li>
+</ol>
+<p>첫 단계에서 <span class="math inline">\(\tau_1(i^0)=0.95\)</span>, <span class="math inline">\(\tau_1(i^1)=0.8\)</span>이며, 최종 상수는</p>
+<p><span class="math display">\[
+\tau_5(\varnothing)=
+\max_{S,I,D,L,G}P(S,I,D,L,G)=0.184
+\]</span></p>
+<p>이다. 같은 제거순서를 사용하면 합-곱과 최대곱에서 생성되는 인자 범위가 동일하므로 유도폭과 시간ㆍ공간 복잡도도 동일하다.</p>
+</section>
+<section id="가장-가능성-높은-할당-찾기" class="level3" data-number="12.2.2">
+<h3 data-number="12.2.2" class="anchored" data-anchor-id="가장-가능성-높은-할당-찾기"><span class="header-section-number">12.2.2</span> 가장 가능성 높은 할당 찾기</h3>
+<p>전방 최대화만으로는 MAP 확률값은 얻지만 각 변수의 값을 즉시 결정할 수 없다. 변수 <span class="math inline">\(X_i\)</span>를 제거할 때 아직 제거되지 않은 변수들의 값이 정해지지 않았기 때문이다. 대신 각 남은 할당에서 <span class="math inline">\(X_i\)</span>의 어떤 값이 최대화를 달성하는지를 저장한다.</p>
+<p><span class="math inline">\(A\rightarrow B\)</span> 예에서 <span class="math inline">\(a^0\)</span>이면 최적 <span class="math inline">\(b\)</span>는 <span class="math inline">\(b^1\)</span>, <span class="math inline">\(a^1\)</span>이면 최적 <span class="math inline">\(b\)</span>는 <span class="math inline">\(b^0\)</span>이다. 먼저 마지막에 남은 <span class="math inline">\(A\)</span>에서 <span class="math inline">\(a^*=a^0\)</span>를 선택한 다음 저장된 조건부 선택을 되짚어 <span class="math inline">\(b^*=b^1\)</span>을 얻는다. 이것이 <strong>역추적(traceback)</strong>이다.</p>
+<blockquote class="blockquote">
+<p><strong>정리</strong> 위 최대곱 변수 제거 알고리즘은</p>
+</blockquote>
+<p><span class="math display">\[
+\mathbf x^*=\arg\max_{\mathbf x}\prod_{\phi\in\Phi}\phi(\mathbf x)
+\]</span></p>
+<p>와 그 최대값을 반환한다.</p>
+<blockquote class="blockquote">
+<p><strong>증명 아이디어</strong> 제거단계의 각 새 인자는 이미 제거된 변수들에 대해 가능한 최적 완성을 요약한다. 마지막 변수의 최적값을 선택하면 그 값과 양립하는 전역 최적 완성이 반드시 존재한다. 역추적에서 저장된 조건부 최대값을 차례로 선택하면 매 단계 전역 최적 완성 가능성을 보존하므로 되돌아가 다른 값을 시험할 필요가 없다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - Student 네트워크의 역추적</strong> Student 네트워크에서는 먼저</p>
+</blockquote>
+<p><span class="math display">\[
+g^*=\arg\max_g\psi_5(g)
+\]</span></p>
+<p>를 선택한 뒤</p>
+<p><span class="math display">\[
+\begin{aligned}
+l^*&amp;=\arg\max_l\psi_4(g^*,l),\\
+d^*&amp;=\arg\max_d\psi_3(g^*,d),\\
+i^*&amp;=\arg\max_i\psi_2(g^*,i,d^*),\\
+s^*&amp;=\arg\max_s\psi_1(i^*,s)
+\end{aligned}
+\]</span></p>
+<p>를 계산한다. 결과는 <span class="math inline">\(d^1,i^0,g^3,s^0,l^0\)</span>이고 확률은 약 0.184이다.</p>
+<p>전방 인자들을 저장해야 하므로 공간은 증가하지만, 역추적 자체는 변수 수에 선형인 비교적 작은 비용이다. 상위 <span class="math inline">\(K\)</span>개의 할당을 찾는 문제는 추가적인 분기와 제약 최대주변값이 필요하며 훨씬 복잡하다.</p>
+</section>
+<section id="주변-map를-위한-변수-제거" class="level3" data-number="12.2.3">
+<h3 data-number="12.2.3" class="anchored" data-anchor-id="주변-map를-위한-변수-제거"><span class="header-section-number">12.2.3</span> 주변 MAP를 위한 변수 제거</h3>
+<p><span class="math inline">\(\mathbf X=\mathbf Y\cup\mathbf W\)</span>에서 주변 MAP의 값은</p>
+<p><span class="math display">\[
+\max_{\mathbf Y}\sum_{\mathbf W}\prod_{\phi\in\Phi}\phi
+\]</span></p>
+<p>이다. 변수 제거에서는 <span class="math inline">\(W\)</span> 변수는 합으로, <span class="math inline">\(Y\)</span> 변수는 최대화로 제거한다. 그러나</p>
+<p><span class="math display">\[
+\max_X\sum_Yf(X,Y)
+\neq
+\sum_Y\max_Xf(X,Y)
+\]</span></p>
+<p>이 일반적이므로 모든 합산 변수를 최대화 변수보다 먼저 제거해야 한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - Student 네트워크의 주변 MAP</strong> 예를 들어 Student 네트워크에서 <span class="math inline">\(S,L\)</span>의 주변 MAP를 찾는다면 <span class="math inline">\(D,I,G\)</span>를 먼저 합산하고 <span class="math inline">\(S,L\)</span>을 최대화한다.</p>
+</blockquote>
+<p><span class="math display">\[
+\begin{aligned}
+\tau_1(I,G)&amp;=\sum_D\phi_D(D)\phi_G(G,I,D),\\
+\tau_2(S,G)&amp;=\sum_I\phi_I(I)\phi_S(S,I)\tau_1(I,G),\\
+\tau_3(S,L)&amp;=\sum_G\tau_2(S,G)\phi_L(L,G),\\
+\tau_4(L)&amp;=\max_S\tau_3(S,L),\\
+\tau_5(\varnothing)&amp;=\max_L\tau_4(L).
+\end{aligned}
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>예제 - 주변 MAP의 역추적</strong> 마지막에 <span class="math inline">\(l^*=\arg\max_l\tau_4(l)\)</span>를 고르고, 저장한 인자를 사용하여 <span class="math inline">\(s^*=\arg\max_s\tau_3(s,l^*)\)</span>를 구한다. 합산된 <span class="math inline">\(D,I,G\)</span>의 개별 값은 주변 MAP 답의 일부가 아니므로 복원하지 않는다. 필요하다면 선택된 <span class="math inline">\((s^*,l^*)\)</span>에 조건부로 이 변수들의 사후분포나 조건부 MAP를 별도의 질의로 계산해야 한다.</p>
+</blockquote>
+<div id="fig-marginal-map-polytree" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-marginal-map-polytree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-marginal-map-polytree.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-marginal-map-polytree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.2: 주변 MAP에서 지수적 인자를 유발하는 폴리트리.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>예제 - 폴리트리에서도 어려운 주변 MAP</strong> <a href="#fig-marginal-map-polytree" class="quarto-xref">그림&nbsp;<span>12.2</span></a> 에 제시된 네트워크에서</p>
+</blockquote>
+<p><span class="math display">\[
+\arg\max_{Y_1,\ldots,Y_n}
+\sum_{X_1,\ldots,X_n}
+P(Y_1,\ldots,Y_n,X_1,\ldots,X_n)
+\]</span></p>
+<p>을 계산하려면 모든 <span class="math inline">\(X_i\)</span>를 먼저 합산해야 한다. 이 과정에서 모든 <span class="math inline">\(Y_i\)</span>를 범위로 갖는 인자가 생겨 크기가 <span class="math inline">\(n\)</span>에 지수적이다. 반면 이 네트워크의 비제약 유도폭은 2이므로 일반 주변확률 질의나 순수 MAP는 선형시간에 가능하다. 앞의 주변 MAP 복잡도 정리는 이 폭발이 특정 알고리즘의 결함이 아니라 문제 자체의 난해성임을 보여준다.</p>
+</section>
+</section>
+<section id="클리크-트리에서의-최대곱-추론" class="level2" data-number="12.3">
+<h2 data-number="12.3" class="anchored" data-anchor-id="클리크-트리에서의-최대곱-추론"><span class="header-section-number">12.3</span> 클리크 트리에서의 최대곱 추론</h2>
+<p>변수 제거는 하나의 MAP 할당과 마지막 변수의 최대주변값을 계산한다. 클리크 트리는 동적계획을 재사용하여 모든 클리크의 최대주변값을 동시에 계산한다. 이는 각 변수 결정의 확신 정도를 비교하거나, 정확추론이 불가능할 때 순환 그래프의 근사 최대주변값으로 확장하기 위한 기반이 된다.</p>
+<section id="최대주변값-계산" class="level3" data-number="12.3.1">
+<h3 data-number="12.3.1" class="anchored" data-anchor-id="최대주변값-계산"><span class="header-section-number">12.3.1</span> 최대주변값 계산</h3>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - 최대곱 메시지</strong> 클리크 <span class="math inline">\(C_i\)</span>에서 이웃 <span class="math inline">\(C_j\)</span>로 보낼 메시지는 <span class="math display">\[
+\delta_{i\rightarrow j}(S_{i,j})
+=
+\max_{C_i-S_{i,j}}
+\left[
+\psi_i(C_i)
+\prod_{k\in\operatorname{Nb}_i-\{j\}}
+\delta_{k\rightarrow i}(S_{k,i})
+\right].
+\]</span> 합-곱 클리크 트리의 합산을 최대화로 바꾼 형태이다.</p>
+</blockquote>
+<p>상향ㆍ하향 전달을 한 번씩 완료하면 각 클리크 믿음은</p>
+<p><span class="math display">\[
+\beta_i(C_i)
+=
+\psi_i(C_i)
+\prod_{j\in\operatorname{Nb}_i}\delta_{j\rightarrow i}
+\]</span></p>
+<p>가 된다.</p>
+<blockquote class="blockquote">
+<p><strong>명제</strong> 최대곱 클리크 트리 알고리즘의 보정 후 믿음은</p>
+</blockquote>
+<p><span class="math display">\[
+\beta_i(c_i)=\operatorname{MaxMarg}_{\widetilde P_{\Phi}}(c_i)
+\]</span></p>
+<p>이다.</p>
+<p>인접 클리크는 분리집합에서 같은 최대주변값을 가져야 한다.</p>
+<p><span class="math display">\[
+\max_{C_i-S_{i,j}}\beta_i
+=
+\max_{C_j-S_{i,j}}\beta_j
+=
+\mu_{i,j}(S_{i,j}).
+\]</span></p>
+<p>이를 <strong>최대보정(max-calibration)</strong>이라 한다.</p>
+<blockquote class="blockquote">
+<p><strong>따름정리</strong> 최대곱 클리크 트리의 상향ㆍ하향 전달이 끝난 후 모든 인접 클리크는 최대보정된다.</p>
+</blockquote>
+<div id="fig-map-clique-max-marginals" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-map-clique-max-marginals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-map-clique-max-marginals.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-map-clique-max-marginals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.3: Misconception 예제의 클리크와 분리집합 최대주변값.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>예제 - 최대보정 확인</strong> 왼쪽 클리크 <span class="math inline">\(\beta_1(A,B,D)\)</span>를 <span class="math inline">\(A\)</span>에 대해 최대화하고 오른쪽 클리크 <span class="math inline">\(\beta_2(B,C,D)\)</span>를 <span class="math inline">\(C\)</span>에 대해 최대화하면 모두 가운데 분리집합 믿음 <span class="math inline">\(\mu_{1,2}(B,D)\)</span>를 얻는다. 예를 들어 <span class="math inline">\((b^1,d^0)\)</span>에서 양쪽 최대값은 모두 <span class="math inline">\(5{,}000{,}000\)</span>이다. 이 일치는 각 클리크가 독립적으로 만든 표가 아니라 같은 전역 측도의 최대주변값임을 보여준다.</p>
+</blockquote>
+<p>믿음 갱신형 최대곱 알고리즘에서도</p>
+<p><span class="math display">\[
+\mu_{i,j}(S_{i,j})
+=
+\delta_{j\rightarrow i}(S_{i,j})
+\delta_{i\rightarrow j}(S_{i,j})
+\]</span></p>
+<p>이 성립한다.</p>
+</section>
+<section id="메시지-전달과-재모수화" class="level3" data-number="12.3.2">
+<h3 data-number="12.3.2" class="anchored" data-anchor-id="메시지-전달과-재모수화"><span class="header-section-number">12.3.2</span> 메시지 전달과 재모수화</h3>
+<p>최대곱 메시지 전달은 원래 비정규화 측도를 바꾸는 것이 아니라 같은 함수를 다른 국소 인자들로 표현하는 <strong>재모수화(reparameterization)</strong>로 볼 수 있다. 클리크 믿음과 분리집합 믿음이 정의하는 측도는</p>
+<p><span class="math display">\[
+Q_{\mathcal T}(\mathbf X)
+=
+\frac{\prod_{i\in V_{\mathcal T}}\beta_i(C_i)}
+{\prod_{(i-j)\in E_{\mathcal T}}\mu_{i,j}(S_{i,j})}.
+\]</span></p>
+<p>초기에는 클리크 믿음이 원인자이고 메시지는 1이므로 <span class="math inline">\(Q_{\mathcal T}=\widetilde P_{\Phi}\)</span>이다. 메시지를 보낼 때 곱해지는 항과 분모의 항이 상쇄되어 이 동일성이 유지된다.</p>
+<blockquote class="blockquote">
+<p><strong>명제</strong> 최대곱 믿음 전파 또는 믿음 갱신의 모든 단계에서 위 재모수화 식은 원래 측도 <span class="math inline">\(\widetilde P_{\Phi}\)</span>를 나타낸다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정리</strong> 최대곱 메시지 전달 후 얻은 믿음은 원래 측도의 재모수화이며 동시에 최대보정 조건을 만족한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - 재모수화의 수치 확인</strong> <a href="#fig-map-clique-max-marginals" class="quarto-xref">그림&nbsp;<span>12.3</span></a> 에 제시된 예에서</p>
+</blockquote>
+<p><span class="math display">\[
+\widetilde P(a^1,b^0,c^1,d^0)
+=
+\frac{
+\beta_1(a^1,b^0,d^0)\beta_2(b^0,c^1,d^0)
+}{\mu_{1,2}(b^0,d^0)}
+=
+\frac{100\times300000}{300000}=100.
+\]</span></p>
+<p>합-곱 보정과 최대곱 보정은 모두 원래 측도를 재표현하지만, 각각 주변합 일관성과 최대주변 일관성이라는 서로 다른 조건을 만족한다.</p>
+</section>
+<section id="최대주변값의-디코딩" class="level3" data-number="12.3.3">
+<h3 data-number="12.3.3" class="anchored" data-anchor-id="최대주변값의-디코딩"><span class="header-section-number">12.3.3</span> 최대주변값의 디코딩</h3>
+<p>각 변수의 최대주변값에서 최대값을 따로 고르는 방식은 동점이 있을 때 실패할 수 있다. 예를 들어 XOR형 분포가 <span class="math inline">\(X_1=X_2\)</span>인 두 상태에 0.1, <span class="math inline">\(X_1\neq X_2\)</span>인 두 상태에 0.4를 주면 각 단변량 최대주변값은 <span class="math inline">\((0.4,0.4)\)</span>이다. <span class="math inline">\(X_1\)</span>과 <span class="math inline">\(X_2\)</span>를 독립적으로 선택하면 낮은 확률의 같은 값 조합을 고를 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>명제</strong> 다음 두 조건은 동치이다.</p>
+</blockquote>
+<ol type="1">
+<li>모든 단변량 최대주변값이 비모호하며 각 <span class="math inline">\(X_i\)</span>의 유일한 최대값이 <span class="math inline">\(x_i^*\)</span>이다.</li>
+<li><span class="math inline">\(\widetilde P_{\Phi}\)</span>의 MAP 할당이 유일하며 <span class="math inline">\((x_1^*,\ldots,x_n^*)\)</span>이다.</li>
+</ol>
+<p>동점이 있으면 클리크 수준의 일관성을 사용한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 국소 최적성</strong> 최대보정된 클리크 트리의 믿음 <span class="math inline">\(\beta_i(C_i)\)</span>에 대해, 할당 <span class="math inline">\(\boldsymbol\xi^*\)</span>가 모든 클리크에서</p>
+</blockquote>
+<p><span class="math display">\[
+\boldsymbol\xi^*\langle C_i\rangle
+\in
+\arg\max_{c_i}\beta_i(c_i)
+\]</span></p>
+<p>를 만족하면 <strong>국소 최적(local optimal)</strong>이라 한다. 이러한 할당을 찾는 문제가 디코딩이다.</p>
+<blockquote class="blockquote">
+<p><strong>보조정리</strong> <span class="math inline">\(\psi(Z)=\max_{Y-Z}\phi(Y)\)</span>가 <span class="math inline">\(\phi\)</span>의 최대주변값이고 <span class="math inline">\(\mathbf y^*\)</span>가 <span class="math inline">\(\phi\)</span>의 최대 할당이면, <span class="math inline">\(\mathbf y^*\)</span>는 비율 <span class="math inline">\(\phi/\psi\)</span>도 최대화한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>증명 아이디어</strong> 모든 <span class="math inline">\(y\)</span>에서 <span class="math inline">\(\phi(y)\le\psi(y\langle Z\rangle)\)</span>이므로 <span class="math inline">\(\phi/\psi\le1\)</span>이다. 전역 최대 할당 <span class="math inline">\(y^*\)</span>에서는 대응하는 최대주변값이 바로 <span class="math inline">\(\phi(y^*)\)</span>이므로 비율이 1이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정리</strong> 최대보정된 클리크 트리에서 할당이 모든 클리크 믿음을 국소적으로 최대화하는 것과 클리크 트리 측도 <span class="math inline">\(Q_{\mathcal T}\)</span>의 전역 MAP인 것은 동치이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>증명 아이디어</strong> 트리에 루트 클리크를 정하고 위 재모수화 식을 <span class="math display">\[
+\beta_r(C_r)
+\prod_{i\neq r}
+\frac{\beta_i(C_i)}{\mu_{i,\pi(i)}(S_{i,\pi(i)})}
+\]</span> 로 쓴다. 국소 최적 할당은 루트 믿음을 최대화하고, 앞의 최대주변값 비율 보조정리에 의해 각 자식 클리크와 분리집합의 비율도 최대화한다. 따라서 전체 곱을 최대화한다.</p>
+</blockquote>
+</section>
+</section>
+<section id="순환-클러스터-그래프에서의-최대곱-믿음-전파" class="level2" data-number="12.4">
+<h2 data-number="12.4" class="anchored" data-anchor-id="순환-클러스터-그래프에서의-최대곱-믿음-전파"><span class="header-section-number">12.4</span> 순환 클러스터 그래프에서의 최대곱 믿음 전파</h2>
+<p>클리크 트리 최대곱 알고리즘을 순환 클러스터 그래프에 그대로 적용하면 근사 MAP 방법이 된다. 합-곱 순환 믿음 전파와 마찬가지로 수렴이 보장되지 않지만, 수렴했을 때 얻는 재모수화와 국소 최적성은 강한 결과를 제공한다.</p>
+<section id="표준-최대곱-메시지-전달" class="level3" data-number="12.4.1">
+<h3 data-number="12.4.1" class="anchored" data-anchor-id="표준-최대곱-메시지-전달"><span class="header-section-number">12.4.1</span> 표준 최대곱 메시지 전달</h3>
+<section id="메시지-전달-알고리즘" class="level4" data-number="12.4.1.1">
+<h4 data-number="12.4.1.1" class="anchored" data-anchor-id="메시지-전달-알고리즘"><span class="header-section-number">12.4.1.1</span> 메시지 전달 알고리즘</h4>
+<p><a href="10-inference-as-optimization.html" class="quarto-xref"><span>장 10</span></a> 에서 설명한 합-곱 메시지의 합산 연산을 최대화 연산으로 바꾸면 된다. 순환 구조에서는 메시지가 반복적으로 되돌아오므로 진동하거나 여러 고정점 중 하나로 수렴할 수 있다. 최대화에는 합산의 평활화 효과가 없으므로 실제로 합-곱보다 수렴성이 나쁠 수 있다. 감쇠, 비동기 스케줄, 잔차 기반 스케줄, 여러 초기값을 사용할 수 있다.</p>
+<p>수렴한 믿음은 클러스터 사이에서 최대보정되지만 정확한 최대주변값은 아니며, 이를 <strong>의사 최대주변값(pseudo-max-marginal)</strong>이라 한다.</p>
+<blockquote class="blockquote">
+<p><strong>따름정리</strong> 순환 클러스터 그래프의 최대곱 메시지 전달에서도 모든 단계에서 원래 측도의 재모수화 불변식이 유지된다.</p>
+</blockquote>
+</section>
+<section id="의사-최대주변값-디코딩" class="level4" data-number="12.4.1.2">
+<h4 data-number="12.4.1.2" class="anchored" data-anchor-id="의사-최대주변값-디코딩"><span class="header-section-number">12.4.1.2</span> 의사 최대주변값 디코딩</h4>
+<p>클리크 트리와 달리 순환 그래프에서는 모든 클러스터의 최대 할당을 동시에 만족하는 결합 할당이 존재하지 않을 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 좌절된 순환</strong> 세 클러스터 <span class="math inline">\(\{A,B\}\)</span>, <span class="math inline">\(\{B,C\}\)</span>, <span class="math inline">\(\{A,C\}\)</span>가 각각 두 변수의 불일치를 선호한다고 하자. 각 믿음에서 불일치 할당의 값은 2, 일치 할당의 값은 1로 둘 수 있다. <span class="math inline">\(A\neq B\)</span>와 <span class="math inline">\(B\neq C\)</span>를 만족하면 <span class="math inline">\(A=C\)</span>가 되어 세 번째 클러스터의 선호 <span class="math inline">\(A\neq C\)</span>를 위반한다. 모든 분리집합 최대값은 동점이어서 최대보정될 수 있지만, 세 클러스터의 최대항을 동시에 선택하는 결합 할당은 없다. 이런 구조를 <strong>좌절된 순환(frustrated loop)</strong>이라 한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - 모호하지만 디코딩 가능한 순환</strong> 반대로 각 쌍이 일치를 선호하면 <span class="math inline">\(a^1,b^1,c^1\)</span>과 <span class="math inline">\(a^0,b^0,c^0\)</span>처럼 동점이 있어도 국소 최적 결합 할당이 존재한다.</p>
+</blockquote>
+<p>디코딩 가능성을 검사하려면 각 클러스터 믿음에서 최대값을 갖는 할당을 1, 나머지를 0으로 바꾼다. 그러면 모든 클러스터에서 값 1을 달성하는 결합 할당을 찾는 <strong>제약만족문제(CSP)</strong>가 된다. CSP 자체가 NP-난해하므로 국소 최적 할당의 존재와 탐색도 어려울 수 있다.</p>
+<p>실무적 휴리스틱은 비모호한 변수만 먼저 고정하고 남은 축소 네트워크에 정확 또는 다른 근사 방법을 적용하는 것이다. 다만 이렇게 얻은 해가 모든 클러스터에서 국소 최적이라는 보장은 없다.</p>
+</section>
+<section id="강한-국소-최대" class="level4" data-number="12.4.1.3">
+<h4 data-number="12.4.1.3" class="anchored" data-anchor-id="강한-국소-최대"><span class="header-section-number">12.4.1.3</span> 강한 국소 최대</h4>
+<blockquote class="blockquote">
+<p><strong>정의 - 유도 부분그래프</strong> 클러스터 그래프 <span class="math inline">\(\mathcal U\)</span>와 변수집합 <span class="math inline">\(\mathbf Y\)</span>에 대해 <span class="math inline">\(\mathcal U_{\mathbf Y}\)</span>는 <span class="math inline">\(\mathbf Y\)</span>의 변수를 하나라도 포함하는 클러스터와 분리집합으로 이루어진 부분그래프이다.</p>
+</blockquote>
+<div id="fig-map-induced-subgraphs" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-map-induced-subgraphs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-map-induced-subgraphs.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-map-induced-subgraphs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.4: 변수집합에 의해 유도된 두 부분그래프.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>예제 - 유도 부분그래프</strong> 왼쪽에서 변수집합 <span class="math inline">\(\{B,C\}\)</span>와 관련된 클러스터와 분리집합만 남기면 정확히 하나의 순환과 거기에 붙은 가지가 생긴다. 오른쪽에서 <span class="math inline">\(\{C,E\}\)</span>를 선택하면 두 개의 분리된 트리가 생긴다. 이 강한 국소 최적성 정리는 두 경우 모두에 적용된다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정리</strong> <span class="math inline">\(\mathcal U\)</span>가 <span class="math inline">\(\widetilde P_{\Phi}\)</span>의 최대보정된 클러스터 그래프이고 <span class="math inline">\(\boldsymbol\xi^*\)</span>가 국소 최적 할당이라 하자. 변수집합 <span class="math inline">\(\mathbf Z\)</span>의 유도 부분그래프가 서로 분리된 성분들의 합이며 각 성분이 트리이거나 하나의 순환만 포함한다면, <span class="math inline">\(\mathbf Z\)</span>의 값만 바꾼 어떤 할당 <span class="math inline">\(\boldsymbol\xi'\)</span>에 대해서도</p>
+</blockquote>
+<p><span class="math display">\[
+\widetilde P_{\Phi}(\boldsymbol\xi')
+\le
+\widetilde P_{\Phi}(\boldsymbol\xi^*)
+\]</span></p>
+<p>이다.</p>
+<blockquote class="blockquote">
+<p><strong>증명 아이디어</strong> 나머지 변수 <span class="math inline">\(\mathbf Y=\mathbf X-\mathbf Z\)</span>를 <span class="math inline">\(\mathbf y^*\)</span>로 고정하면 <span class="math inline">\(\mathbf Z\)</span>와 관련 없는 믿음은 상수가 된다. <span class="math inline">\(\mathcal U_{\mathbf Z}\)</span>가 트리인 경우 남은 재모수화는 최대보정된 클리크 트리이며 <span class="math inline">\(\mathbf z^*\)</span>는 국소 최적이므로 클리크 트리의 국소 최적성과 전역 MAP의 동치에 의해 MAP이다. 하나의 순환인 경우에도 앞의 최대주변값 비율 보조정리를 사용한 유사한 분해가 가능하며, 분리된 성분에는 결과를 독립적으로 적용한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - 격자에서 허용되는 큰 교란</strong> 4x4 격자에서는 한 행, 한 열, 빗살 모양, 하나의 사각 순환, 서로 분리된 여러 행이나 순환과 L자 구조의 합 등에 대해 해를 동시에 바꾸어도 더 높은 점수로 갈 수 없다. 따라서 전역 MAP가 아닐 수 있어도 상당히 큰 구조적 변동에 견디는 <strong>강한 국소 최대(strong local maximum)</strong>이다.</p>
+</blockquote>
+</section>
+</section>
+<section id="계수수를-갖는-최대곱-bp" class="level3" data-number="12.4.2">
+<h3 data-number="12.4.2" class="anchored" data-anchor-id="계수수를-갖는-최대곱-bp"><span class="header-section-number">12.4.2</span> 계수수를 갖는 최대곱 BP</h3>
+<p>표준 Bethe 근사는 클러스터와 단일 변수 영역의 엔트로피를 특정 횟수로 세는 계수수(counting numbers)를 사용한다. <a href="10-inference-as-optimization.html" class="quarto-xref"><span>장 10</span></a> 에서 계수수에 따라 여러 합-곱 메시지 알고리즘을 만들었듯이, 합산을 최대화로 바꾸어 최대곱 변형을 정의할 수 있다.</p>
+<section id="계수수를-갖는-최대곱" class="level4" data-number="12.4.2.1">
+<h4 data-number="12.4.2.1" class="anchored" data-anchor-id="계수수를-갖는-최대곱"><span class="header-section-number">12.4.2.1</span> 계수수를 갖는 최대곱</h4>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - Bethe 구조 영역그래프의 일반화 최대곱 BP</strong> 큰 영역 <span class="math inline">\(r\)</span>과 단일 변수 영역 <span class="math inline">\(i\)</span>에 계수수 <span class="math inline">\(\kappa_r,\kappa_i\)</span>가 주어졌다고 하자. <span class="math inline">\(\rho_r=1/\kappa_r\)</span>, <span class="math inline">\(\rho_i=1/\kappa_i\)</span>를 두고, 영역-변수 메시지를 반복 갱신한다. 각 갱신은 다른 메시지의 가중 곱과 <span class="math inline">\(C_r-X_i\)</span>에 대한 최대화를 결합한다. 믿음은 <span class="math display">\[
+\beta_r(C_r)
+=
+\left(
+\psi_r(C_r)
+\prod_{X_i\in C_r}\delta_{i\rightarrow r}(X_i)
+\right)^{\rho_r}
+\]</span> 로 계산하며, 모든 영역이 최대보정될 때까지 반복한다.</p>
+</blockquote>
+<p>고정점에서 이 알고리즘도 원래 측도를</p>
+<p><span class="math display">\[
+\widetilde P_{\Phi}(\mathbf X)
+=
+\prod_r\beta_r(C_r)^{\kappa_r}
+\]</span></p>
+<p>로 재모수화한다.</p>
+</section>
+<section id="최적성-보장" class="level4" data-number="12.4.2.2">
+<h4 data-number="12.4.2.2" class="anchored" data-anchor-id="최적성-보장"><span class="header-section-number">12.4.2.2</span> 최적성 보장</h4>
+<p>계수수가 <strong>볼록 계수수</strong>이면 비음수 <span class="math inline">\(\nu_r,\nu_i,\nu_{r,i}\)</span>가 존재하여</p>
+<p><span class="math display">\[
+\kappa_r=\nu_r+\sum_{i:X_i\in C_r}\nu_{r,i},
+\qquad
+\kappa_i=\nu_i-\sum_{r:X_i\in C_r}\nu_{r,i}
+\]</span></p>
+<p>로 쓸 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정리</strong> 큰 영역과 단일 변수 영역으로 이루어진 Bethe 구조 영역그래프에서 계수수가 볼록이고, 최대보정된 믿음이 위 계수수 재모수화를 이루며, 모든 믿음을 동시에 국소적으로 최대화하는 할당 <span class="math inline">\(\boldsymbol\xi^*\)</span>가 존재하면 <span class="math inline">\(\boldsymbol\xi^*\)</span>는 전역 MAP이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>증명 아이디어</strong> 볼록 계수수 표현을 사용하면 원래 측도를 <span class="math display">\[
+\prod_r\beta_r^{\nu_r}
+\prod_i\beta_i^{\nu_i}
+\prod_{r,i}
+\left(\frac{\beta_r}{\beta_i}\right)^{\nu_{r,i}}
+\]</span> 로 쓸 수 있다. 모든 지수가 비음수이고, 국소 최적 할당은 각 믿음과 앞의 최대주변값 비율 보조정리의 비율항을 모두 최대화한다. 따라서 전체 곱도 최대화한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>따름정리</strong> 모든 국소 최적 할당에서 변수 <span class="math inline">\(X_i\)</span>가 항상 <span class="math inline">\(x_i^*\)</span>를 취하면 실제 MAP에서도 <span class="math inline">\(X_i=x_i^*\)</span>이다. 더 일반적으로 모든 국소 최적 할당에서 <span class="math inline">\(X_i\in S_i\)</span>이면 MAP에서도 그 집합에 속한다. 단, 국소 최적 결합 할당이 실제로 존재한다는 전제가 필요하다.</p>
+</blockquote>
+</section>
+</section>
+<section id="논의" class="level3" data-number="12.4.3">
+<h3 data-number="12.4.3" class="anchored" data-anchor-id="논의"><span class="header-section-number">12.4.3</span> 논의</h3>
+<p>최대곱 메시지 전달이 수렴하면 전역 최적화 문제를 국소 믿음들의 동시 최적화 문제로 바꾼다. 표준 Bethe 계수수에서는 디코딩된 해가 강한 국소 최대이고, 볼록 계수수에서는 디코딩 가능할 경우 전역 MAP이다.</p>
+<p>그러나 세 가지 문제가 남는다.</p>
+<ol type="1">
+<li>원하는 최대보정 재모수화가 존재하는가? 볼록 계수수와 Bethe 계수수 모두 존재성이 성립한다.</li>
+<li>메시지 알고리즘이 그 재모수화에 수렴하는가? 표준 최대곱은 자주 비수렴하며, 일부 볼록 변형만 단조 목적함수 개선과 수렴을 보장한다.</li>
+<li>수렴한 믿음에서 국소 최적 결합 할당이 존재하는가? 동점과 좌절 순환 때문에 존재하지 않을 수 있다.</li>
+</ol>
+<blockquote class="blockquote">
+<p><strong>상자 - Tree-Reweighted Belief Propagation(TRW)</strong> TRW는 쌍별 마르코프 네트워크의 여러 신장트리에 대한 확률분포를 정의하고, 간선과 노드가 트리에 포함되는 확률로 볼록 계수수를 만든다. 최대곱 TRW 메시지는 원인자, 이웃 메시지, 간선 포함확률을 결합한다. TRW-S는 변수에 고정된 순서를 두고 정방향과 역방향으로 메시지를 반복한다. 이 스케줄은 선형계획 이중목적을 단조 증가시키므로 수렴이 보장된다. 다만 이중문제의 전역 최적점까지 반드시 가는 것은 아니며, 정지점의 모호한 믿음을 디코딩하지 못할 수도 있다.</p>
+</blockquote>
+</section>
+</section>
+<section id="선형-최적화-문제로서의-map" class="level2" data-number="12.5">
+<h2 data-number="12.5" class="anchored" data-anchor-id="선형-최적화-문제로서의-map"><span class="header-section-number">12.5</span> 선형 최적화 문제로서의 MAP</h2>
+<p>MAP는 본질적으로 이산 최적화 문제이다. 이를 정수선형계획으로 표현한 뒤 정수 제약을 완화하면 다항시간에 풀 수 있는 선형계획이 된다. 이 관점은 최대곱 메시지 전달, 저온 극한, 그래프 절단을 하나의 최적화 틀에서 연결한다.</p>
+<section id="정수계획-표현" class="level3" data-number="12.5.1">
+<h3 data-number="12.5.1" class="anchored" data-anchor-id="정수계획-표현"><span class="header-section-number">12.5.1</span> 정수계획 표현</h3>
+<p>양의 인자를 가정하고 로그 공간에서</p>
+<p><span class="math display">\[
+\arg\max_{\boldsymbol\xi}
+\log\widetilde P_{\Phi}(\boldsymbol\xi)
+=
+\arg\max_{\boldsymbol\xi}
+\sum_{r\in\mathcal R}\log\phi_r(c_r)
+\]</span></p>
+<p>를 고려한다. 영역 <span class="math inline">\(C_r\)</span>의 가능한 할당을 <span class="math inline">\(c_r^1,\ldots,c_r^{n_r}\)</span>라 하고</p>
+<p><span class="math display">\[
+\eta_r^j=\log\phi_r(c_r^j)
+\]</span></p>
+<p>로 둔다. 최적화변수 <span class="math inline">\(q(x_r^j)\)</span>는 영역 <span class="math inline">\(r\)</span>이 할당 <span class="math inline">\(c_r^j\)</span>를 선택하면 1, 아니면 0이다. 목적함수는</p>
+<p><span class="math display">\[
+\max_{\mathbf q}
+\sum_{r\in\mathcal R}
+\sum_{j=1}^{n_r}\eta_r^jq(x_r^j)
+=
+\max_{\mathbf q}\boldsymbol\eta^T\mathbf q.
+\]</span></p>
+<p>법적 결합 할당을 보장하려면 다음 제약이 필요하다.</p>
+<p><span class="math display">\[
+q(x_r^j)\in\{0,1\}
+\]</span></p>
+<p><span class="math display">\[
+\sum_{j=1}^{n_r}q(x_r^j)=1
+\]</span></p>
+<p>그리고 겹치는 두 영역 <span class="math inline">\(C_r,C_{r'}\)</span>의 교집합 할당 <span class="math inline">\(s_{r,r'}\)</span>마다</p>
+<p><span class="math display">\[
+\sum_{j:c_r^j\sim s_{r,r'}}q(x_r^j)
+=
+\sum_{l:c_{r'}^l\sim s_{r,r'}}q(x_{r'}^l).
+\]</span></p>
+<p>첫 제약은 이진성, 둘째는 한 영역에서 정확히 하나의 할당 선택, 셋째는 영역 사이의 변수값 일관성을 보장한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 삼각형 MRF의 최적화변수</strong> <span class="math inline">\(A-B-C-A\)</span>의 세 쌍별 인자 <span class="math inline">\(\phi_1(A,B)\)</span>, <span class="math inline">\(\phi_2(B,C)\)</span>, <span class="math inline">\(\phi_3(A,C)\)</span>를 생각하자. <span class="math inline">\(A,B\)</span>는 이진이고 <span class="math inline">\(C\)</span>는 세 값이면 첫 영역에는 4개, 나머지 두 영역에는 각각 6개의 <span class="math inline">\(q\)</span> 변수가 생긴다. 예를 들어 <span class="math inline">\(q(x_3^4)\)</span>는 세 번째 영역 <span class="math inline">\((A,C)\)</span>에서 네 번째로 열거된 할당을 선택했는지를 나타낸다. 이 <span class="math inline">\(q\)</span>들은 확률변수가 아니라 최적화 문제의 지시변수이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - 교집합 일관성 제약</strong> <span class="math inline">\(\phi_1(A,B)\)</span>와 <span class="math inline">\(\phi_2(B,C)\)</span>가 <span class="math inline">\(B\)</span>를 공유한다고 하자. <span class="math inline">\(B=b^0\)</span>에 해당하는 첫 영역의 모든 선택변수 합과 둘째 영역의 모든 선택변수 합이 같아야 한다. <span class="math inline">\(B=b^1\)</span>에도 같은 제약을 둔다. 이 제약이 없으면 한 영역에서는 <span class="math inline">\(B=b^0\)</span>, 다른 영역에서는 <span class="math inline">\(B=b^1\)</span>인 모순된 해가 허용된다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>명제</strong> 위의 이진성·정규화·일관성 제약을 만족하는 모든 <span class="math inline">\(\mathbf q\)</span>는 원래 변수들의 하나의 법적 결합 할당과 일대일 대응한다.</p>
+</blockquote>
+<p>이 정수선형계획의 해는 정확한 MAP이지만 정수선형계획 자체가 NP-난해하다.</p>
+</section>
+<section id="선형계획-완화" class="level3" data-number="12.5.2">
+<h3 data-number="12.5.2" class="anchored" data-anchor-id="선형계획-완화"><span class="header-section-number">12.5.2</span> 선형계획 완화</h3>
+<p>정수 제약을</p>
+<p><span class="math display">\[
+q(x_r^j)\ge0
+\]</span></p>
+<p>으로 완화하면 각 영역의 <span class="math inline">\(q\)</span>는 합이 1인 확률벡터가 된다. 영역 사이의 일관성 제약과 함께 이 공간은 <a href="10-inference-as-optimization.html" class="quarto-xref"><span>장 10</span></a> 에서 설명한 <strong>국소 일관성 다면체</strong> <span class="math inline">\(\operatorname{Local}[\mathcal U]\)</span>와 정확히 같다. 이 변수들은 실제 결합분포의 주변분포일 필요가 없으므로 의사 주변분포이다.</p>
+<blockquote class="blockquote">
+<p><strong>MAP-LP</strong> <span class="math inline">\(\boldsymbol\eta^T\mathbf q\)</span>를 최대화하되, 각 영역 정규화, 교집합 일관성, 비음수 제약을 만족시킨다.</p>
+</blockquote>
+<p>모든 정수해는 LP의 가능해이므로 LP 최적값은 실제 MAP 로그점수의 상계이다. LP의 최적해가 정수이면 완화가 <strong>타이트(tight)</strong>하며 정확한 MAP를 얻는다. 분수해이면 각 변수값을 순차적으로 고르는 반올림이나 다른 휴리스틱이 필요하다. 한 가지 탐욕 반올림은 아직 정하지 않은 변수 <span class="math inline">\(X_i\)</span>의 각 값으로 의사 주변분포를 축소한 뒤 LP 목적값이 가장 큰 값을 고정하는 것이다. 그러나 반올림 과정에서 원래 LP 상계와의 간격이 커질 수 있으므로, 결과 할당의 실제 점수를 반드시 다시 계산해야 한다.</p>
+<p>LP 최적값은 실제 MAP 점수의 상계이므로, 반올림한 할당 점수와 LP 최적값의 차이를 <strong>최적성 간격(optimality gap)</strong>으로 사용할 수 있다. 간격이 0이면 반올림 해가 전역 최적이다. 간격이 작으면 전역 최적에 가까울 가능성이 있지만, 확률 공간에서는 로그점수 차이를 지수화하여 해석해야 한다.</p>
+<p>실제 주변분포들의 집합인 <strong>주변 다면체</strong> <span class="math inline">\(\operatorname{Marg}[\mathcal U]\)</span>에서 선형목적을 최대화하면 정확한 MAP를 얻는다. 그러나 주변 다면체를 기술하려면 일반적으로 지수적으로 많은 제약이 필요하다. 국소 다면체는 선형 크기의 제약으로 계산 가능하지만 더 넓기 때문에 비현실적인 의사 주변분포를 허용한다.</p>
+<p>LP 표현은 새로운 제약을 추가해 완화를 점진적으로 조일 수 있다는 장점이 있다. 단점은 영역 할당마다 변수를 만들기 때문에 문제 크기가 매우 커질 수 있다는 점이다. 메시지 전달은 이 LP의 이중구조를 활용하는 특화 알고리즘으로 이해할 수 있다.</p>
+</section>
+<section id="저온-극한" class="level3" data-number="12.5.3">
+<h3 data-number="12.5.3" class="anchored" data-anchor-id="저온-극한"><span class="header-section-number">12.5.3</span> 저온 극한</h3>
+<section id="합-곱-극한으로서의-lp" class="level4" data-number="12.5.3.1">
+<h4 data-number="12.5.3.1" class="anchored" data-anchor-id="합-곱-극한으로서의-lp"><span class="header-section-number">12.5.3.1</span> 합-곱 극한으로서의 LP</h4>
+<p>근사 에너지 범함수는 에너지항과 엔트로피항의 합이다.</p>
+<p><span class="math display">\[
+\widetilde{\mathcal F}^{(T)}[P_{\Phi},Q]
+=
+\sum_{r\in\mathcal R}
+\mathbb E_{C_r\sim Q}[\log\phi_r(C_r)]
++
+T\widetilde{\mathbb H}_{Q}(\mathbf X).
+\]</span></p>
+<p>온도 <span class="math inline">\(T\)</span>가 0으로 가면 엔트로피항의 영향이 사라지고 첫 번째 선형 에너지항만 남는다. 이는 MAP-LP의 목적함수이다. 엔트로피 근사가 볼록 계수수에서 유도되면 각 <span class="math inline">\(T&gt;0\)</span>의 문제는 유일한 최적점을 가지며, 그 최적점의 <span class="math inline">\(T\rightarrow0\)</span> 극한은 LP 최적해가 된다. Bethe처럼 비볼록 엔트로피에서는 여러 국소 최적점이 존재하여 이 결론이 성립하지 않을 수 있다.</p>
+<p>목적함수를 <span class="math inline">\(T\)</span>로 나누면</p>
+<p><span class="math display">\[
+\frac1T\sum_r\mathbb E_Q[\log\phi_r]
++\widetilde{\mathbb H}_Q
+=
+\sum_r\mathbb E_Q[\log\phi_r^{1/T}]
++\widetilde{\mathbb H}_Q.
+\]</span></p>
+<p>따라서 온도 <span class="math inline">\(T\)</span>의 문제는 원인자를 <span class="math inline">\(1/T\)</span> 제곱한 분포</p>
+<p><span class="math display">\[
+\widetilde P_{\Phi}^{(T)}(\mathbf X)
+=\widetilde P_{\Phi}(\mathbf X)^{1/T}
+\]</span></p>
+<p>에 대한 표준 합-곱 변분문제와 같다. <span class="math inline">\(T\)</span>가 작아질수록 높은 점수의 상태가 상대적으로 더 날카롭게 강조된다.</p>
+</section>
+<section id="합-곱-극한으로서의-최대곱" class="level4" data-number="12.5.3.2">
+<h4 data-number="12.5.3.2" class="anchored" data-anchor-id="합-곱-극한으로서의-최대곱"><span class="header-section-number">12.5.3.2</span> 합-곱 극한으로서의 최대곱</h4>
+<p>각 온도에서 최적 합-곱 믿음을 <span class="math inline">\(\beta_r^{(T)}\)</span>라 하고 최대값으로 정규화한 뒤 <span class="math inline">\(T\)</span>제곱한 믿음을</p>
+<p><span class="math display">\[
+\overline\beta_r^{(T)}=\max_{c_r}\beta_r^{(T)}(c_r),
+\]</span></p>
+<p><span class="math display">\[
+\widetilde\beta_r^{(T)}(c_r)
+=
+\left(
+\frac{\beta_r^{(T)}(c_r)}{\overline\beta_r^{(T)}}
+\right)^T
+\]</span></p>
+<p>로 정의한다. 그 극한은</p>
+<p><span class="math display">\[
+\widetilde\beta_r^{(0)}(c_r)
+=
+\lim_{T\rightarrow0}\widetilde\beta_r^{(T)}(c_r)
+\]</span></p>
+<p>이다.</p>
+<blockquote class="blockquote">
+<p><strong>명제</strong> 극한 믿음 <span class="math inline">\(\widetilde\beta^{(0)}\)</span>은 최대보정된다.</p>
+</blockquote>
+<p>합-곱 보정식은 영역 믿음을 합산하면 단일 변수 믿음이 된다는 등식이다. 각 믿음을 최대값으로 나누고 <span class="math inline">\(T\)</span>제곱한 뒤 <span class="math inline">\(T\rightarrow0\)</span>을 취하면, 위의 저온 극한 관계에 의해 합산 연산이 최대화 연산으로 변한다. 정규화에 사용한 영역 최대값과 단일 변수 최대값의 비는 유한한 범위에 있으므로 <span class="math inline">\(T\)</span>제곱에서 1로 수렴한다. 따라서 극한에서 영역의 최대주변값과 단일 변수 믿음이 일치한다.</p>
+<p>핵심 관계는 양수 <span class="math inline">\(a_i(T)\)</span>에 대해</p>
+<p><span class="math display">\[
+\max_i\lim_{T\rightarrow0}a_i(T)
+=
+\lim_{T\rightarrow0}
+\left[
+\sum_i a_i(T)^{1/T}
+\right]^T
+\]</span></p>
+<p>라는 것이다.</p>
+<blockquote class="blockquote">
+<p><strong>보조정리</strong> 연속함수 <span class="math inline">\(a_i(T)\)</span>에 대해 위의 저온 극한 관계가 성립한다. 가장 큰 항으로 묶으면 나머지 비율은 1보다 작고 <span class="math inline">\(1/T\)</span> 제곱에서 사라지므로 합이 최대값으로 수렴한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정리</strong> 극한 믿음은 원래 측도의 비례적 재모수화이다.</p>
+</blockquote>
+<p><span class="math display">\[
+\widetilde P_{\Phi}(\mathbf X)
+\propto
+\prod_r
+\left(\widetilde\beta_r^{(0)}(c_r)\right)^{\kappa_r}.
+\]</span></p>
+<p>따라서 볼록 합-곱 BP의 저온 극한은 같은 계수수를 갖는 최대곱 BP 고정점으로 연결된다.</p>
+</section>
+<section id="논의-1" class="level4" data-number="12.5.3.3">
+<h4 data-number="12.5.3.3" class="anchored" data-anchor-id="논의-1"><span class="header-section-number">12.5.3.3</span> 논의</h4>
+<p>이 분석은 세 대상을 연결한다.</p>
+<ol type="1">
+<li>MAP 정수계획의 국소 LP 완화</li>
+<li>볼록 계수수를 갖는 합-곱 BP의 <span class="math inline">\(T\rightarrow0\)</span> 극한</li>
+<li>같은 계수수를 갖는 최대곱 BP의 최대보정 재모수화</li>
+</ol>
+<blockquote class="blockquote">
+<p><strong>정리</strong> 계수수 재모수화를 만족하는 최대보정 믿음에 대해 국소 일관된 최적 할당이 존재하면 MAP-LP 완화는 타이트하다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>증명 아이디어</strong> 실제 MAP 점수는 주변 다면체에서의 최대값이고, 이는 국소 다면체에서의 LP 최대값 이하이다. 재모수화와 볼록 계수수 분해를 사용하면 LP의 어떤 의사 주변분포에서 얻는 기대점수도 각 국소 항의 최대값 합 이하이다. 국소 최적 할당은 모든 항의 최대를 동시에 달성하므로 LP 상계와 실제 할당 점수가 같아진다.</p>
+</blockquote>
+<p>결과적으로 볼록 최대곱 BP가 국소 최적 결합 할당으로 디코딩될 수 있는 경우는 LP 완화가 타이트한 경우이다. LP가 분수 최적해를 갖는다면 그런 국소 최적 결합 할당은 존재하지 않는다. 비볼록 Bethe 최대곱은 LP 상계와 동일한 관계를 갖지 않으므로 LP가 타이트하지 않아도 디코딩될 수 있지만, 그 해의 전역 최적성은 보장되지 않는다.</p>
+</section>
+</section>
+</section>
+<section id="그래프-절단을-이용한-map" class="level2" data-number="12.6">
+<h2 data-number="12.6" class="anchored" data-anchor-id="그래프-절단을-이용한-map"><span class="header-section-number">12.6</span> 그래프 절단을 이용한 MAP</h2>
+<p>그래프 절단 방법은 특정 쌍별 MRF의 에너지 최소화를 최소 <span class="math inline">\(s\)</span>-<span class="math inline">\(t\)</span> 절단 문제로 변환한다. 트리폭과 무관하게 다항시간에 전역 최적해를 얻을 수 있어, 확률 주변추론은 어려운데 MAP는 쉬운 중요한 예를 제공한다.</p>
+<section id="그래프-절단-추론" class="level3" data-number="12.6.1">
+<h3 data-number="12.6.1" class="anchored" data-anchor-id="그래프-절단-추론"><span class="header-section-number">12.6.1</span> 그래프 절단 추론</h3>
+<p>비음수 비용을 갖는 유향그래프에서 소스 <span class="math inline">\(s\)</span>와 싱크 <span class="math inline">\(t\)</span>를 서로 다른 쪽에 두는 정점 분할 <span class="math inline">\((Z_s,Z_t)\)</span>를 <strong>절단(cut)</strong>이라 한다. 절단비용은 <span class="math inline">\(Z_s\)</span>에서 <span class="math inline">\(Z_t\)</span>로 건너가는 간선비용의 합이다. 최소절단은 이 비용을 최소화한다.</p>
+<p>이진 MRF의 각 변수 <span class="math inline">\(X_i\)</span>에 정점 <span class="math inline">\(z_i\)</span>를 만들고 <span class="math inline">\(z_i\in Z_s\)</span>를 <span class="math inline">\(X_i=0\)</span>, <span class="math inline">\(z_i\in Z_t\)</span>를 <span class="math inline">\(X_i=1\)</span>로 대응시킨다. 단변량 에너지는 <span class="math inline">\(s\)</span> 또는 <span class="math inline">\(t\)</span>와 연결하는 간선으로, 이웃 불일치 에너지는 변수 정점 사이의 간선으로 표현한다.</p>
+<div id="fig-map-min-cut" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-map-min-cut-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-map-min-cut.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-map-min-cut-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.5: 이진 MAP 문제를 최소절단으로 변환한 예.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>예제 - 네 변수 순환의 최소절단</strong> 예제의 네 변수는 순환으로 연결되고 단변량 에너지는</p>
+</blockquote>
+<p><span class="math display">\[
+\epsilon_1(0)=7,\quad
+\epsilon_2(1)=2,\quad
+\epsilon_3(1)=1,\quad
+\epsilon_4(1)=6
+\]</span></p>
+<p>이며 상호작용은 <span class="math inline">\(\lambda_{1,2}=6\)</span>, <span class="math inline">\(\lambda_{2,3}=6\)</span>, <span class="math inline">\(\lambda_{3,4}=2\)</span>, <span class="math inline">\(\lambda_{1,4}=1\)</span>이다. 단변량 항만 보면 <span class="math inline">\((1,0,0,0)\)</span>이 좋지만 강한 일치 항 때문에 전역 MAP는 <span class="math inline">\((1,1,1,0)\)</span>이다. 최소절단이 이 해를 찾는다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 부분모듈러 에너지</strong> 이진 쌍별 에너지 <span class="math inline">\(\epsilon_{i,j}\)</span>가</p>
+</blockquote>
+<p><span class="math display">\[
+\epsilon_{i,j}(1,1)+\epsilon_{i,j}(0,0)
+\le
+\epsilon_{i,j}(1,0)+\epsilon_{i,j}(0,1)
+\]</span></p>
+<p>을 만족하면 부분모듈러(submodular)라고 한다. 이는 두 변수가 같은 값을 갖는 구성의 총비용이 서로 다른 값을 갖는 구성보다 지나치게 크지 않다는 조건이다.</p>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - 부분모듈러 이진 MRF의 최소절단 MAP</strong> 1. 각 쌍별 에너지에서 <span class="math inline">\(\epsilon_{i,j}(0,0)\)</span>을 빼고 일부 항을 두 단변량 에너지로 이동한다. 2. 남는 상호작용은 <span class="math display">\[
+\epsilon'_{i,j}(0,1)
+=\epsilon_{i,j}(1,0)+\epsilon_{i,j}(0,1)
+-\epsilon_{i,j}(0,0)-\epsilon_{i,j}(1,1)
+\]</span> 이며 부분모듈러성 때문에 비음수이다. 3. 단변량 에너지 차이는 <span class="math inline">\(s\rightarrow z_i\)</span> 또는 <span class="math inline">\(z_i\rightarrow t\)</span> 간선으로 변환한다. 4. 양의 <span class="math inline">\(\epsilon'_{i,j}(0,1)\)</span>은 <span class="math inline">\(z_i\rightarrow z_j\)</span> 간선으로 만든다. 5. 최소절단을 계산하여 <span class="math inline">\(z_i\)</span>가 <span class="math inline">\(t\)</span> 쪽이면 <span class="math inline">\(X_i=1\)</span>, 아니면 0을 반환한다.</p>
+</blockquote>
+<p>모든 절단 <span class="math inline">\(C\)</span>에 대해</p>
+<p><span class="math display">\[
+\operatorname{cost}(C)=E(\boldsymbol\xi^C)+\operatorname{Const}
+\]</span></p>
+<p>이므로 최소절단은 에너지 최소, 즉 MAP 할당을 준다. 이 경우 MAP-LP 완화도 타이트하다.</p>
+</section>
+<section id="비이진-변수" class="level3" data-number="12.6.2">
+<h3 data-number="12.6.2" class="anchored" data-anchor-id="비이진-변수"><span class="header-section-number">12.6.2</span> 비이진 변수</h3>
+<p>레이블이 둘보다 많으면 부분모듈러 에너지라도 전역 최적화는 일반적으로 NP-난해하다. 대신 한 번의 탐색 이동을 전역 최적으로 계산하는 두 방법이 널리 쓰인다.</p>
+<section id="알파-확장" class="level4" data-number="12.6.2.1">
+<h4 data-number="12.6.2.1" class="anchored" data-anchor-id="알파-확장"><span class="header-section-number">12.6.2.1</span> 알파 확장</h4>
+<p>현재 할당 <span class="math inline">\(\mathbf x\)</span>와 목표 레이블 <span class="math inline">\(\alpha\)</span>를 정한다. 모든 변수는 현재 레이블을 유지하거나 <span class="math inline">\(\alpha\)</span>로 바꾸는 두 선택만 한다. 이 선택을 이진변수 <span class="math inline">\(T_i\)</span>로 표현하고</p>
+<p><span class="math display">\[
+\begin{aligned}
+\epsilon'_i(t_i^0)&amp;=\epsilon_i(x_i),&amp;
+\epsilon'_i(t_i^1)&amp;=\epsilon_i(\alpha),\\
+\epsilon'_{i,j}(t_i^0,t_j^0)&amp;=\epsilon_{i,j}(x_i,x_j),&amp;
+\epsilon'_{i,j}(t_i^0,t_j^1)&amp;=\epsilon_{i,j}(x_i,\alpha),\\
+\epsilon'_{i,j}(t_i^1,t_j^0)&amp;=\epsilon_{i,j}(\alpha,x_j),&amp;
+\epsilon'_{i,j}(t_i^1,t_j^1)&amp;=\epsilon_{i,j}(\alpha,\alpha)
+\end{aligned}
+\]</span></p>
+<p>로 제한 에너지를 만든다. 상호작용이 거리함수이면 반사성과 삼각부등식 때문에 이 이진 에너지가 부분모듈러가 된다. 따라서 각 알파 확장 이동은 최소절단으로 전역 최적화할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - 알파 확장</strong> 초기 할당에서 시작하여 모든 레이블 <span class="math inline">\(v_1,\ldots,v_K\)</span>를 차례로 목표로 삼는다. 각 레이블에 대해 제한 이진 MRF를 만들고 최소절단으로 최적 확장을 계산한다. 한 순회에서 아무 변화도 없을 때 종료한다.</p>
+</blockquote>
+</section>
+<section id="알파-베타-교환" class="level4" data-number="12.6.2.2">
+<h4 data-number="12.6.2.2" class="anchored" data-anchor-id="알파-베타-교환"><span class="header-section-number">12.6.2.2</span> 알파-베타 교환</h4>
+<p>두 레이블 <span class="math inline">\(\alpha,\beta\)</span>를 선택하고 현재 둘 중 하나를 가진 변수들만 대상으로 두 레이블을 서로 바꿀 수 있게 한다. 이 이동 역시 이진 MRF로 바꾸어 최소절단으로 최적화할 수 있다. 알파 확장은 metric 조건이 필요하지만, 알파-베타 교환은 삼각부등식이 없는 semimetric에서도 적용할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>상자 - 컴퓨터 비전의 에너지 최소화</strong> 영상 분할, 스테레오 깊이 복원, 광류 등에서 픽셀을 변수로 하고 인접 픽셀 레이블의 불일치를 벌점화하는 쌍별 MRF가 널리 사용된다. 격자그래프는 매우 크고 짧은 순환이 많으며, 깊이 레이블처럼 상태 수가 큰 경우 인자 저장과 메시지 계산이 부담스럽다. 그래프 절단의 알파 확장, 알파-베타 교환, TRW-S, 표준 최대곱 BP가 대표적인 방법이다.</p>
+</blockquote>
+<div id="fig-stereo-map-benchmark" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stereo-map-benchmark-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-stereo-map-benchmark.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stereo-map-benchmark-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.6: 스테레오 복원에서 여러 MAP 알고리즘의 시간에 따른 에너지.
+</figcaption>
+</figure>
+</div>
+<p>벤치마크에서는 부분모듈러에 가까운 에너지에 대해 알파 확장과 TRW-S가 유사한 낮은 에너지를 달성하고, 그래프 절단이 실행시간에서 우세한 경우가 많다. 그러나 에너지 최소해가 실제 정답 깊이보다 더 낮은 에너지를 갖는 경우도 있다. 이는 추론 알고리즘보다 에너지 함수 설계가 문제일 수 있음을 뜻한다. 비국소 상호작용을 추가하면 모형은 현실적이지만 그래프 절단의 부분모듈러성과 BP의 수렴성이 악화될 수 있다.</p>
+</section>
+</section>
+</section>
+<section id="국소-탐색-알고리즘" class="level2" data-number="12.7">
+<h2 data-number="12.7" class="anchored" data-anchor-id="국소-탐색-알고리즘"><span class="header-section-number">12.7</span> 국소 탐색 알고리즘</h2>
+<p>MAP와 주변 MAP는 할당공간을 직접 탐색하는 방법으로도 풀 수 있다.</p>
+<ul>
+<li><strong>체계적 탐색(systematic search)</strong>은 탐색하지 않은 가지가 최적일 가능성을 상계로 제거하며 전역 최적성을 보장한다. 대표적으로 branch-and-bound가 있다.</li>
+<li><strong>비체계적 국소 탐색(local search)</strong>은 완전 할당에서 시작해 일부 변수값을 바꾸며 점수를 개선한다. 빠르지만 전역 최적 보장은 없다.</li>
+<li><strong>빔 탐색(beam search)</strong>은 각 깊이에서 제한된 수의 좋은 부분할당만 유지하여 메모리를 절약한다.</li>
+</ul>
+<p>순수 MAP에서는 탐색공간이 완전 할당 <span class="math inline">\(\boldsymbol\xi\)</span>이고 점수는 <span class="math inline">\(\log\widetilde P(\boldsymbol\xi)\)</span>이다. 분기한정은 상위 <span class="math inline">\(K\)</span>개 할당을 확률 순서대로 찾는 데도 사용할 수 있다.</p>
+<p>주변 MAP에서는 최대화 변수 <span class="math inline">\(\mathbf Y\)</span>의 할당을 탐색하고 각 후보의 점수를</p>
+<p><span class="math display">\[
+\operatorname{score}(\mathbf y)
+=
+\sum_{\mathbf W}\widetilde P_{\Phi}(\mathbf y,\mathbf W)
+\]</span></p>
+<p>로 평가한다. <span class="math inline">\(\mathbf y\)</span>가 고정되면 내부 계산은 순수 합-곱 추론이므로 제거순서 제약이 사라진다. <a href="#fig-marginal-map-polytree" class="quarto-xref">그림&nbsp;<span>12.2</span></a> 와 같은 네트워크에서도 고정된 <span class="math inline">\(\mathbf y\)</span>에 대한 계산은 단순 연쇄가 되어 선형시간에 가능하다.</p>
+<p>가장 단순한 연산자는 한 변수 <span class="math inline">\(Y_i\)</span>의 값을 다른 상태로 바꾸는 것이다. 탐욕적 상승, tabu search, 다중 시작점을 적용할 수 있다. 좋은 초기값은 증거만 넣은 클리크 트리에서 각 <span class="math inline">\(Y_i\)</span>의 주변확률이 가장 큰 값을 선택하는 것이다.</p>
+<p>나이브 구현은 매 탐색 단계에서 모든 <span class="math inline">\(k(d-1)\)</span> 이웃 후보마다 합-곱 추론을 반복한다. 예를 들어 최대화 변수 100개가 각각 5개 상태를 가지면 한 단계에 400개의 완전한 추론이 필요하다. 그러나 하나의 비제약 클리크 트리를 보정하면 모든 <span class="math inline">\(P(Y_i,\mathbf y_{-i})\)</span>를 국소적으로 계산할 수 있어 한 단계의 모든 단일변수 이동 점수를 한 번의 메시지 전달로 얻는다. 이는 동적계획 재사용의 중요한 예이다.</p>
+<p>정확한 주변 MAP를 위해 branch-and-bound를 사용할 수도 있다. 부분할당의 상계는 합과 최대화의 순서를 바꾼 계산에서 얻는다.</p>
+<p><span class="math display">\[
+\max_x\sum_yf(x,y)
+\le
+\sum_y\max_xf(x,y).
+\]</span></p>
+<p>오른쪽은 제거순서 제약이 완화되어 계산이 더 쉽고, 원래 주변 MAP 점수의 상계가 된다. 현재 최선의 완전해보다 상계가 낮은 부분할당 가지는 버린다.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./11-particle-based-approximate-inference.html" class="pagination-link" aria-label="입자 기반 근사추론">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">입자 기반 근사추론</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./13-inference-in-hybrid-networks.html" class="pagination-link" aria-label="혼합 네트워크에서의 추론">
+        <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">혼합 네트워크에서의 추론</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

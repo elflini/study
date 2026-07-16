@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>13&nbsp; 혼합 네트워크에서의 추론 – 확률적 그래프 모형</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./14-inference-in-temporal-models.html" rel="next">
+<link href="./12-map-inference.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-a522afb83bf8ae494942cf1b0ac9d4c3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./13-inference-in-hybrid-networks.html"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">혼합 네트워크에서의 추론</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">확률적 그래프 모형</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">기초 개념</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-bayesian-network-representation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">베이즈 네트워크 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-undirected-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">무방향 그래픽 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-local-probabilistic-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">국소 확률 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-template-based-representations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">템플릿 기반 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-gaussian-network-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">가우시안 네트워크 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-exponential-family.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">지수족</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-exact-inference-variable-elimination.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">정확추론: 변수 제거</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-exact-inference-clique-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">정확추론: 클리크 트리</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-inference-as-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">최적화로서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-particle-based-approximate-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">입자 기반 근사추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-map-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">MAP 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-inference-in-hybrid-networks.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">혼합 네트워크에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-inference-in-temporal-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">시간 모형에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-learning-graphical-models-overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">그래프모형 학습 개요</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-parameter-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">모수추정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-structure-learning-bayesian-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">베이지안 네트워크의 구조학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-partially-observed-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">부분관측 자료</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./19-learning-undirected-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">무방향 그래프모형의 학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20-causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">인과성</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21-utilities-and-decisions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">효용과 의사결정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22-structured-decision-problems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">구조화된 의사결정 문제</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./23-epilogue.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">맺음말: 왜 확률적 그래프 모형인가?</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#개요" id="toc-개요" class="nav-link active" data-scroll-target="#개요"><span class="header-section-number">13.1</span> 개요</a></li>
+  <li><a href="#서론" id="toc-서론" class="nav-link" data-scroll-target="#서론"><span class="header-section-number">13.2</span> 서론</a>
+  <ul>
+  <li><a href="#혼합-네트워크-추론의-어려움" id="toc-혼합-네트워크-추론의-어려움" class="nav-link" data-scroll-target="#혼합-네트워크-추론의-어려움"><span class="header-section-number">13.2.1</span> 혼합 네트워크 추론의 어려움</a>
+  <ul class="collapse">
+  <li><a href="#연속-인자의-표현-문제" id="toc-연속-인자의-표현-문제" class="nav-link" data-scroll-target="#연속-인자의-표현-문제"><span class="header-section-number">13.2.1.1</span> 연속 인자의 표현 문제</a></li>
+  <li><a href="#적분-문제" id="toc-적분-문제" class="nav-link" data-scroll-target="#적분-문제"><span class="header-section-number">13.2.1.2</span> 적분 문제</a></li>
+  </ul></li>
+  <li><a href="#이산화" id="toc-이산화" class="nav-link" data-scroll-target="#이산화"><span class="header-section-number">13.2.2</span> 이산화</a></li>
+  <li><a href="#이-장의-접근법" id="toc-이-장의-접근법" class="nav-link" data-scroll-target="#이-장의-접근법"><span class="header-section-number">13.2.3</span> 이 장의 접근법</a></li>
+  </ul></li>
+  <li><a href="#가우시안-네트워크의-변수-제거" id="toc-가우시안-네트워크의-변수-제거" class="nav-link" data-scroll-target="#가우시안-네트워크의-변수-제거"><span class="header-section-number">13.3</span> 가우시안 네트워크의 변수 제거</a>
+  <ul>
+  <li><a href="#정준형" id="toc-정준형" class="nav-link" data-scroll-target="#정준형"><span class="header-section-number">13.3.1</span> 정준형</a>
+  <ul class="collapse">
+  <li><a href="#정준형-표현" id="toc-정준형-표현" class="nav-link" data-scroll-target="#정준형-표현"><span class="header-section-number">13.3.1.1</span> 정준형 표현</a></li>
+  <li><a href="#정준형-연산" id="toc-정준형-연산" class="nav-link" data-scroll-target="#정준형-연산"><span class="header-section-number">13.3.1.2</span> 정준형 연산</a></li>
+  </ul></li>
+  <li><a href="#합-곱-알고리즘" id="toc-합-곱-알고리즘" class="nav-link" data-scroll-target="#합-곱-알고리즘"><span class="header-section-number">13.3.2</span> 합-곱 알고리즘</a></li>
+  <li><a href="#가우시안-믿음-전파" id="toc-가우시안-믿음-전파" class="nav-link" data-scroll-target="#가우시안-믿음-전파"><span class="header-section-number">13.3.3</span> 가우시안 믿음 전파</a></li>
+  </ul></li>
+  <li><a href="#혼합-네트워크" id="toc-혼합-네트워크" class="nav-link" data-scroll-target="#혼합-네트워크"><span class="header-section-number">13.4</span> 혼합 네트워크</a>
+  <ul>
+  <li><a href="#혼합-네트워크가-어려운-이유" id="toc-혼합-네트워크가-어려운-이유" class="nav-link" data-scroll-target="#혼합-네트워크가-어려운-이유"><span class="header-section-number">13.4.1</span> 혼합 네트워크가 어려운 이유</a></li>
+  <li><a href="#혼합-가우시안-네트워크의-인자-연산" id="toc-혼합-가우시안-네트워크의-인자-연산" class="nav-link" data-scroll-target="#혼합-가우시안-네트워크의-인자-연산"><span class="header-section-number">13.4.2</span> 혼합 가우시안 네트워크의 인자 연산</a>
+  <ul class="collapse">
+  <li><a href="#정준표" id="toc-정준표" class="nav-link" data-scroll-target="#정준표"><span class="header-section-number">13.4.2.1</span> 정준표</a></li>
+  <li><a href="#약한-주변화" id="toc-약한-주변화" class="nav-link" data-scroll-target="#약한-주변화"><span class="header-section-number">13.4.2.2</span> 약한 주변화</a></li>
+  </ul></li>
+  <li><a href="#clg-네트워크의-기대전파" id="toc-clg-네트워크의-기대전파" class="nav-link" data-scroll-target="#clg-네트워크의-기대전파"><span class="header-section-number">13.4.3</span> CLG 네트워크의 기대전파</a>
+  <ul class="collapse">
+  <li><a href="#메시지-순서-제약" id="toc-메시지-순서-제약" class="nav-link" data-scroll-target="#메시지-순서-제약"><span class="header-section-number">13.4.3.1</span> 메시지 순서 제약</a></li>
+  <li><a href="#정의되지-않는-믿음갱신-메시지" id="toc-정의되지-않는-믿음갱신-메시지" class="nav-link" data-scroll-target="#정의되지-않는-믿음갱신-메시지"><span class="header-section-number">13.4.3.2</span> 정의되지 않는 믿음갱신 메시지</a></li>
+  </ul></li>
+  <li><a href="#정확한-clg-알고리즘" id="toc-정확한-clg-알고리즘" class="nav-link" data-scroll-target="#정확한-clg-알고리즘"><span class="header-section-number">13.4.4</span> ‘정확한’ CLG 알고리즘</a>
+  <ul class="collapse">
+  <li><a href="#강한-루트-클리크-트리" id="toc-강한-루트-클리크-트리" class="nav-link" data-scroll-target="#강한-루트-클리크-트리"><span class="header-section-number">13.4.4.1</span> 강한 루트 클리크 트리</a></li>
+  <li><a href="#강한-루트와-정확성" id="toc-강한-루트와-정확성" class="nav-link" data-scroll-target="#강한-루트와-정확성"><span class="header-section-number">13.4.4.2</span> 강한 루트와 정확성</a></li>
+  <li><a href="#강한-삼각화와-계산복잡도" id="toc-강한-삼각화와-계산복잡도" class="nav-link" data-scroll-target="#강한-삼각화와-계산복잡도"><span class="header-section-number">13.4.4.3</span> 강한 삼각화와 계산복잡도</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#비선형-의존성" id="toc-비선형-의존성" class="nav-link" data-scroll-target="#비선형-의존성"><span class="header-section-number">13.5</span> 비선형 의존성</a>
+  <ul>
+  <li><a href="#선형화" id="toc-선형화" class="nav-link" data-scroll-target="#선형화"><span class="header-section-number">13.5.1</span> 선형화</a>
+  <ul class="collapse">
+  <li><a href="#taylor-급수-선형화" id="toc-taylor-급수-선형화" class="nav-link" data-scroll-target="#taylor-급수-선형화"><span class="header-section-number">13.5.1.1</span> Taylor 급수 선형화</a></li>
+  <li><a href="#수치적분을-이용한-m-투영" id="toc-수치적분을-이용한-m-투영" class="nav-link" data-scroll-target="#수치적분을-이용한-m-투영"><span class="header-section-number">13.5.1.2</span> 수치적분을 이용한 M-투영</a></li>
+  </ul></li>
+  <li><a href="#가우시안-근사를-이용한-기대전파" id="toc-가우시안-근사를-이용한-기대전파" class="nav-link" data-scroll-target="#가우시안-근사를-이용한-기대전파"><span class="header-section-number">13.5.2</span> 가우시안 근사를 이용한 기대전파</a>
+  <ul class="collapse">
+  <li><a href="#증거-처리" id="toc-증거-처리" class="nav-link" data-scroll-target="#증거-처리"><span class="header-section-number">13.5.2.1</span> 증거 처리</a></li>
+  <li><a href="#유효한-선형화와-순서-제약" id="toc-유효한-선형화와-순서-제약" class="nav-link" data-scroll-target="#유효한-선형화와-순서-제약"><span class="header-section-number">13.5.2.2</span> 유효한 선형화와 순서 제약</a></li>
+  <li><a href="#여러-함수의-선형화" id="toc-여러-함수의-선형화" class="nav-link" data-scroll-target="#여러-함수의-선형화"><span class="header-section-number">13.5.2.3</span> 여러 함수의 선형화</a></li>
+  <li><a href="#반복-메시지-전달" id="toc-반복-메시지-전달" class="nav-link" data-scroll-target="#반복-메시지-전달"><span class="header-section-number">13.5.2.4</span> 반복 메시지 전달</a></li>
+  <li><a href="#확장된-clg-네트워크" id="toc-확장된-clg-네트워크" class="nav-link" data-scroll-target="#확장된-clg-네트워크"><span class="header-section-number">13.5.2.5</span> 확장된 CLG 네트워크</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#입자-기반-근사-방법" id="toc-입자-기반-근사-방법" class="nav-link" data-scroll-target="#입자-기반-근사-방법"><span class="header-section-number">13.6</span> 입자 기반 근사 방법</a>
+  <ul>
+  <li><a href="#연속공간에서의-표본추출" id="toc-연속공간에서의-표본추출" class="nav-link" data-scroll-target="#연속공간에서의-표본추출"><span class="header-section-number">13.6.1</span> 연속공간에서의 표본추출</a></li>
+  <li><a href="#베이즈-네트워크의-전방-표본추출" id="toc-베이즈-네트워크의-전방-표본추출" class="nav-link" data-scroll-target="#베이즈-네트워크의-전방-표본추출"><span class="header-section-number">13.6.2</span> 베이즈 네트워크의 전방 표본추출</a></li>
+  <li><a href="#mcmc-방법" id="toc-mcmc-방법" class="nav-link" data-scroll-target="#mcmc-방법"><span class="header-section-number">13.6.3</span> MCMC 방법</a></li>
+  <li><a href="#축약-입자" id="toc-축약-입자" class="nav-link" data-scroll-target="#축약-입자"><span class="header-section-number">13.6.4</span> 축약 입자</a></li>
+  <li><a href="#비모수-메시지-전달" id="toc-비모수-메시지-전달" class="nav-link" data-scroll-target="#비모수-메시지-전달"><span class="header-section-number">13.6.5</span> 비모수 메시지 전달</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-inference-hybrid-networks" class="quarto-section-identifier"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">혼합 네트워크에서의 추론</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="개요" class="level2" data-number="13.1">
+<h2 data-number="13.1" class="anchored" data-anchor-id="개요"><span class="header-section-number">13.1</span> 개요</h2>
+<p>지금까지의 추론 논의는 대부분 이산 확률모형을 대상으로 하였다. 그러나 실제 연구에는 체온, 혈압, 검사 수치, 위치, 거리, 시간, 유전자 발현량과 같은 연속변수가 흔히 포함된다. 이 장에서는 연속변수만으로 이루어진 가우시안 네트워크와 이산ㆍ연속변수가 함께 존재하는 혼합 네트워크에서 추론하는 방법을 다룬다.</p>
+<p>전체 변수집합을</p>
+<p><span class="math display">\[
+\mathbf X=\Gamma\cup\Delta
+\]</span></p>
+<p>로 나타내자. 여기서 <span class="math inline">\(\Gamma\)</span>는 연속변수 집합이고 <span class="math inline">\(\Delta\)</span>는 이산변수 집합이다. 원문의 표기 관례에 따라 이산변수는 알파벳 앞쪽의 <span class="math inline">\(A,B,C,\ldots\)</span>, 연속변수는 뒤쪽의 <span class="math inline">\(X,Y,Z,\ldots\)</span>를 주로 사용한다.</p>
+</section>
+<section id="서론" class="level2" data-number="13.2">
+<h2 data-number="13.2" class="anchored" data-anchor-id="서론"><span class="header-section-number">13.2</span> 서론</h2>
+<section id="혼합-네트워크-추론의-어려움" class="level3" data-number="13.2.1">
+<h3 data-number="13.2.1" class="anchored" data-anchor-id="혼합-네트워크-추론의-어려움"><span class="header-section-number">13.2.1</span> 혼합 네트워크 추론의 어려움</h3>
+<p>추상적으로 보면 연속변수를 도입해도 추론의 원리는 이산모형과 같다. 인자들을 곱하고, 제거하려는 변수에 대해 주변화한다. 차이는 이산변수에서 합을 사용하던 자리에 연속변수에서는 적분을 사용한다는 점이다.</p>
+<p><span class="math display">\[
+\phi(\mathbf X)=\prod_k\phi_k(\mathbf X_k),
+\qquad
+\tau(\mathbf Y)=\int \phi(\mathbf Y,\mathbf Z)\,d\mathbf Z.
+\]</span></p>
+<p>이 두 연산이 정확히 구현된다면 합-곱 변수 제거, 클리크 트리, 믿음 전파의 추상 알고리즘은 그대로 사용할 수 있다. 하지만 실제 구현에서는 다음 두 문제가 발생한다.</p>
+<section id="연속-인자의-표현-문제" class="level4" data-number="13.2.1.1">
+<h4 data-number="13.2.1.1" class="anchored" data-anchor-id="연속-인자의-표현-문제"><span class="header-section-number">13.2.1.1</span> 연속 인자의 표현 문제</h4>
+<p>이산 인자는 유한한 표로 표현할 수 있지만, 임의의 연속함수 전체를 유한한 표로 나타낼 수는 없다. 따라서 연속 CPD나 퍼텐셜은 보통 가우시안, 감마, 로그정규, 로지스틱과 같은 특정 모수족으로 제한한다. 문제는 초기 인자들이 모두 같은 모수족에 속하더라도 곱셈이나 주변화 후의 중간 인자가 그 모수족에 남는다는 보장이 없다는 점이다.</p>
+<p>예를 들어 가우시안 두 개의 곱은 다시 가우시안 형태이지만, 서로 다른 평균을 갖는 가우시안들을 합하면 일반적으로 단일 가우시안이 아니라 <strong>가우시안 혼합분포</strong>가 된다. 이산 변수의 가능한 할당 수가 늘어날수록 혼합성분 수는 지수적으로 증가할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>핵심 문제</strong><br>
+정확추론에 사용할 인자 표현은 가능하면 곱셈, 나눗셈, 증거 대입, 주변화에 대해 닫혀 있어야 한다. 혼합 네트워크에서는 이러한 모든 연산에 대해 닫힌 유한차원 표현족이 일반적으로 존재하지 않는다.</p>
+</blockquote>
+</section>
+<section id="적분-문제" class="level4" data-number="13.2.1.2">
+<h4 data-number="13.2.1.2" class="anchored" data-anchor-id="적분-문제"><span class="header-section-number">13.2.1.2</span> 적분 문제</h4>
+<p>연속변수 주변화에는 적분이 필요하다. 그러나 모든 함수가 적분 가능한 것은 아니며, 적분값이 무한대이거나 정의되지 않을 수 있다. 적분이 유한하더라도 닫힌형식 해가 없을 수 있으므로 수치적분을 사용해야 한다. 수치적분은 근사오차를 만들며, 차원이 높아지면 계산량이 급격히 증가한다.</p>
+<blockquote class="blockquote">
+<p><strong>보충 - 적분 가능성과 정규화 가능성</strong><br>
+비정규화 인자 자체는 적분값이 1일 필요가 없지만, 주변화하려는 변수 방향으로 적분했을 때 유한한 값이 나와야 한다. 가우시안 정준형에서는 제거되는 변수에 대응하는 정밀도 부분행렬이 양의 정부호일 때 이 조건이 만족된다.</p>
+</blockquote>
+</section>
+</section>
+<section id="이산화" class="level3" data-number="13.2.2">
+<h3 data-number="13.2.2" class="anchored" data-anchor-id="이산화"><span class="header-section-number">13.2.2</span> 이산화</h3>
+<p>연속변수를 직접 다루는 어려움을 피하는 단순한 방법은 연속영역을 유한한 구간으로 나누어 이산변수로 바꾸는 <strong>이산화(discretization)</strong>이다. 모든 연속변수를 이산화하면 앞 장의 표 기반 추론 알고리즘을 그대로 적용할 수 있다.</p>
+<p>연속 부모 <span class="math inline">\(X\)</span>와 연속 자식 <span class="math inline">\(Y\)</span>를 각각 이산변수 <span class="math inline">\(A,B\)</span>로 대체한다고 하자. <span class="math inline">\(A=a\)</span>가 <span class="math inline">\(X\in[x_1,x_2]\)</span>, <span class="math inline">\(B=b\)</span>가 <span class="math inline">\(Y\in[y_1,y_2]\)</span>를 뜻한다면 원칙적으로</p>
+<p><span class="math display">\[
+P(b\mid a)
+=
+\int_{x_1}^{x_2}
+P\{Y\in[y_1,y_2]\mid X=x\}
+\,p(x\mid X\in[x_1,x_2])\,dx
+\]</span></p>
+<p>로 정의할 수 있다. 이는 구간 안의 <span class="math inline">\(x\)</span>값을 사전분포에 따라 가중평균한 것이다. 하지만 이 식 자체를 계산하려면 원래 연속모형에서 추론해야 하며, 사후분포가 사전분포와 크게 다르면 근사도 좋지 않을 수 있다.</p>
+<p>실무에서는 다음과 같은 단순화가 흔하다.</p>
+<ol type="1">
+<li>구간 <span class="math inline">\([x_1,x_2]\)</span>의 대표값 <span class="math inline">\(x^*\)</span>를 선택한다.</li>
+<li><span class="math inline">\(Y\)</span>가 목표 구간에 들어갈 확률을</li>
+</ol>
+<p><span class="math display">\[
+P\{Y\in[y_1,y_2]\mid x^*\}
+=
+\int_{y_1}^{y_2}p(y\mid x^*)\,dy
+\]</span></p>
+<p>로 계산한다. 3. 또는 구간 안에서 균등분포와 같은 미리 정한 분포로 평균한다.</p>
+<p>이산화에는 정확도와 계산비용의 절충이 있다. 사후확률질량이 집중된 구간에서는 세밀한 격자가 필요하지만, 추론 전에 그 위치를 알 수 없는 경우가 많다. 따라서 전체 영역을 세밀하게 나누면 변수 하나의 상태 수가 커지고, 여러 변수를 포함한 인자 크기는 급격히 증가한다.</p>
+<p>연속변수 <span class="math inline">\(d\)</span>개를 각각 <span class="math inline">\(m\)</span>개의 구간으로 이산화하면 완전한 표의 크기는</p>
+<p><span class="math display">\[
+O(m^d)
+\]</span></p>
+<p>이다. 반면 <span class="math inline">\(d\)</span>차원 가우시안은 평균벡터와 공분산행렬을 사용하므로 <span class="math inline">\(O(d^2)\)</span>개의 모수로 표현된다. 즉 이산화는 근사오차뿐 아니라, 원래 다항 크기였던 표현을 지수 크기로 바꿀 수도 있다.</p>
+<blockquote class="blockquote">
+<p><strong>주의 - 임상자료의 이산화</strong><br>
+혈압, HbA1c, eGFR처럼 임상 기준점이 있는 변수는 이산화가 해석에 유리할 수 있다. 그러나 기준점 주변의 작은 변화가 상태를 급격히 바꾸고, 범주 내 연속정보가 사라진다. 연구 목적이 예측인지, 임상적 상태분류인지에 따라 이산화의 정당성이 달라진다.</p>
+</blockquote>
+</section>
+<section id="이-장의-접근법" class="level3" data-number="13.2.3">
+<h3 data-number="13.2.3" class="anchored" data-anchor-id="이-장의-접근법"><span class="header-section-number">13.2.3</span> 이 장의 접근법</h3>
+<p>연속ㆍ혼합 추론법은 크게 두 계열로 나눌 수 있다.</p>
+<p>첫째는 <strong>메시지 전달 기반 방법</strong>이다. 순수 다변량 가우시안에서는 정준형(canonical form)을 사용하면 인자곱, 인자나눗셈, 증거 대입, 주변화가 모두 닫힌형식으로 가능하다. 따라서 변수 제거와 클리크 트리를 정확하게 수행할 수 있다. 순환 가우시안 믿음 전파도 가능하며, 수렴하면 평균은 정확하지만 분산을 과소추정할 수 있다.</p>
+<p>둘째는 <strong>입자 기반 방법</strong>이다. 중요도 표본추출, MCMC, 축약 입자와 같은 방법은 CPD의 모수형태에 대한 가정이 적고 복잡한 다봉 사후분포도 근사할 수 있다. 반면 좋은 정확도를 얻으려면 매우 많은 입자가 필요할 수 있다.</p>
+<p>순수 가우시안이 아닌 경우에는 중간 인자를 가우시안으로 근사하는 <strong>기대전파(expectation propagation, EP)</strong>가 자주 사용된다. CLG에서는 가우시안 혼합을 하나의 가우시안으로 붕괴시키고, 비선형 연속의존성에서는 Taylor 전개나 수치적분으로 비선형 변환의 평균과 공분산을 근사한다.</p>
+</section>
+</section>
+<section id="가우시안-네트워크의-변수-제거" class="level2" data-number="13.3">
+<h2 data-number="13.3" class="anchored" data-anchor-id="가우시안-네트워크의-변수-제거"><span class="header-section-number">13.3</span> 가우시안 네트워크의 변수 제거</h2>
+<p>가우시안 네트워크는 모든 변수가 연속이고 모든 국소 의존성이 선형인 모형이다. 베이즈 네트워크에서는 CPD가 선형 가우시안이고, 마르코프 네트워크에서는 로그가 이차식인 퍼텐셜로 표현된다. 두 표현 모두 결합분포가 다변량 가우시안이라는 동일한 분포족을 나타낸다.</p>
+<p>가장 직접적인 추론법은 네트워크를 결합 평균벡터와 공분산행렬로 변환한 뒤 다변량 가우시안의 조건화와 주변화를 사용하는 것이다. 다변량 가우시안의 표현 크기는 변수 수에 대해 이차이므로 이산 결합표처럼 지수적이지 않다. 그러나 변수가 수천 개 이상이면 전체 공분산행렬을 만드는 것도 부담이며, 네트워크의 희소구조를 활용하지 못한다. 따라서 희소 인자에 메시지를 전달하는 변수 제거와 클리크 트리 방식이 유용하다.</p>
+<section id="정준형" class="level3" data-number="13.3.1">
+<h3 data-number="13.3.1" class="anchored" data-anchor-id="정준형"><span class="header-section-number">13.3.1</span> 정준형</h3>
+<section id="정준형-표현" class="level4" data-number="13.3.1.1">
+<h4 data-number="13.3.1.1" class="anchored" data-anchor-id="정준형-표현"><span class="header-section-number">13.3.1.1</span> 정준형 표현</h4>
+<p>선형 가우시안 CPD는 그 자체로 정규화된 결합 가우시안이 아닐 수 있으므로, 단순한 평균-공분산 표현보다 일반적인 인자 표현이 필요하다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 정준형</strong> 변수벡터 <span class="math inline">\(\mathbf X\)</span>에 대한 정준형 <span class="math inline">\(\mathcal C(\mathbf X;K,h,g)\)</span>는</p>
+</blockquote>
+<p><span class="math display">\[
+\mathcal C(\mathbf X;K,h,g)
+=
+\exp\left\{-\frac12\mathbf X^TK\mathbf X+h^T\mathbf X+g\right\}
+\]</span></p>
+<p>로 정의한다.</p>
+<p>여기서 <span class="math inline">\(K\)</span>는 정보행렬 또는 정밀도행렬 역할을 하고, <span class="math inline">\(h\)</span>는 정보벡터, <span class="math inline">\(g\)</span>는 전체 크기를 조절하는 상수이다. 다변량 가우시안 <span class="math inline">\(\mathcal N(\mu;\Sigma)\)</span>는</p>
+<p><span class="math display">\[
+K=\Sigma^{-1},
+\qquad
+h=\Sigma^{-1}\mu,
+\]</span></p>
+<p><span class="math display">\[
+g=-\frac12\mu^T\Sigma^{-1}\mu
+-\log\left((2\pi)^{n/2}|\Sigma|^{1/2}\right)
+\]</span></p>
+<p>인 정준형으로 표현된다.</p>
+<p>정준형은 정규화된 가우시안보다 넓은 표현이다. <span class="math inline">\(K\)</span>가 가역이 아니더라도 앞의 정준형 정의식은 함수로서 정의될 수 있다. 선형 가우시안 CPD도 이러한 비정규화 정준형으로 나타낼 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>보충 - 왜 평균-공분산형보다 정준형이 유리한가</strong><br>
+가우시안들의 곱은 평균과 공분산형에서 복잡한 행렬연산을 요구하지만, 정준형에서는 <span class="math inline">\(K,h,g\)</span>를 단순히 더하면 된다. 그래프의 국소 퍼텐셜을 결합하는 메시지 전달에는 이 덧셈 구조가 특히 편리하다.</p>
+</blockquote>
+</section>
+<section id="정준형-연산" class="level4" data-number="13.3.1.2">
+<h4 data-number="13.3.1.2" class="anchored" data-anchor-id="정준형-연산"><span class="header-section-number">13.3.1.2</span> 정준형 연산</h4>
+<p>동일한 변수범위를 갖는 두 정준형의 곱은</p>
+<p><span class="math display">\[
+\mathcal C(K_1,h_1,g_1)\mathcal C(K_2,h_2,g_2)
+=
+\mathcal C(K_1+K_2,h_1+h_2,g_1+g_2).
+\]</span></p>
+<p>범위가 다르면 전체 변수순서에 맞추어 존재하지 않는 변수에 해당하는 <span class="math inline">\(K\)</span>의 행ㆍ열과 <span class="math inline">\(h\)</span>의 원소를 0으로 확장한 뒤 더한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 서로 다른 범위의 정준형 곱</strong> 다음 두 인자를 생각하자.</p>
+</blockquote>
+<p><span class="math display">\[
+\phi_1(X,Y)=
+\mathcal C\left(
+\begin{bmatrix}1&amp;-1\\-1&amp;1\end{bmatrix},
+\begin{bmatrix}1\\-1\end{bmatrix},-3
+\right),
+\]</span></p>
+<p><span class="math display">\[
+\phi_2(Y,Z)=
+\mathcal C\left(
+\begin{bmatrix}3&amp;-2\\-2&amp;4\end{bmatrix},
+\begin{bmatrix}5\\-1\end{bmatrix},1
+\right).
+\]</span></p>
+<p>둘을 <span class="math inline">\(X,Y,Z\)</span> 순서로 확장하여 더하면</p>
+<p><span class="math display">\[
+\phi_1\phi_2=
+\mathcal C\left(
+\begin{bmatrix}
+1&amp;-1&amp;0\\
+-1&amp;4&amp;-2\\
+0&amp;-2&amp;4
+\end{bmatrix},
+\begin{bmatrix}1\\4\\-1\end{bmatrix},-2
+\right).
+\]</span></p>
+<p>정준형의 나눗셈은 같은 방식으로 빼기이다.</p>
+<p><span class="math display">\[
+\frac{\mathcal C(K_1,h_1,g_1)}{\mathcal C(K_2,h_2,g_2)}
+=
+\mathcal C(K_1-K_2,h_1-h_2,g_1-g_2).
+\]</span></p>
+<p>모든 값이 1인 공허 정준형(vacuous canonical form)은 <span class="math inline">\(K=0,h=0,g=0\)</span>이다.</p>
+<section id="정준형-주변화" class="level5" data-number="13.3.1.2.1">
+<h5 data-number="13.3.1.2.1" class="anchored" data-anchor-id="정준형-주변화"><span class="header-section-number">13.3.1.2.1</span> 정준형 주변화</h5>
+<p><span class="math inline">\(\mathcal C(\mathbf X,\mathbf Y;K,h,g)\)</span>에서</p>
+<p><span class="math display">\[
+K=
+\begin{bmatrix}
+K_{XX}&amp;K_{XY}\\
+K_{YX}&amp;K_{YY}
+\end{bmatrix},
+\qquad
+h=
+\begin{bmatrix}h_X\\h_Y\end{bmatrix}
+\]</span></p>
+<p>라 하자. <span class="math inline">\(\mathbf Y\)</span>를 적분하여 제거할 때 <span class="math inline">\(K_{YY}\)</span>가 양의 정부호이면 결과는 다시 정준형이며</p>
+<p><span class="math display">\[
+K'=K_{XX}-K_{XY}K_{YY}^{-1}K_{YX},
+\]</span></p>
+<p><span class="math display">\[
+h'=h_X-K_{XY}K_{YY}^{-1}h_Y,
+\]</span></p>
+<p><span class="math display">\[
+g'=g+\frac12\left[
+\log|2\pi K_{YY}^{-1}|+h_Y^TK_{YY}^{-1}h_Y
+\right].
+\]</span></p>
+<p>이다. <span class="math inline">\(K'\)</span>는 Schur complement이다. <span class="math inline">\(K_{YY}\)</span>가 양의 정부호가 아니면 해당 방향의 적분이 유한하지 않을 수 있다.</p>
+</section>
+<section id="증거-대입" class="level5" data-number="13.3.1.2.2">
+<h5 data-number="13.3.1.2.2" class="anchored" data-anchor-id="증거-대입"><span class="header-section-number">13.3.1.2.2</span> 증거 대입</h5>
+<p><span class="math inline">\(\mathbf Y=\mathbf y\)</span>를 관측하면 결과 정준형은</p>
+<p><span class="math display">\[
+K'=K_{XX},
+\]</span></p>
+<p><span class="math display">\[
+h'=h_X-K_{XY}\mathbf y,
+\]</span></p>
+<p><span class="math display">\[
+g'=g+h_Y^T\mathbf y-\frac12\mathbf y^TK_{YY}\mathbf y.
+\]</span></p>
+<p>이 된다. 연속변수 증거는 이산표에서처럼 일치하지 않는 행을 0으로 만드는 방식으로 남겨둘 수 없으며, 관측변수를 범위에서 실제로 제거해야 한다.</p>
+<p>정준형 곱과 나눗셈은 범위 크기에 대해 이차시간, 주변화는 행렬역이 필요하므로 단순 구현에서 삼차시간이다.</p>
+</section>
+</section>
+</section>
+<section id="합-곱-알고리즘" class="level3" data-number="13.3.2">
+<h3 data-number="13.3.2" class="anchored" data-anchor-id="합-곱-알고리즘"><span class="header-section-number">13.3.2</span> 합-곱 알고리즘</h3>
+<p>정준형 연산은 변수 제거와 클리크 트리에 필요한 모든 기본연산을 제공한다. 이산 합-곱 변수 제거에서 인자곱을 정준형 곱셈식으로 구현하고, 합산을 정준형 주변화식의 적분으로 대체하면 선형 가우시안 네트워크의 정확 변수 제거가 된다.</p>
+<p>증거 <span class="math inline">\(Z=z\)</span>는 추론 시작 전에 모든 관련 정준형을 정준형 증거 대입식으로 축소해야 한다. 클리크와 분리집합 퍼텐셜도 메시지 전달 전에 증거로 축소한다.</p>
+<p>연속 적분이 항상 가능한지 확인해야 한다. 원문은 클리크 트리의 상향 메시지를 대상으로 다음 명제를 제시한다.</p>
+<blockquote class="blockquote">
+<p><strong>명제</strong> 선형 가우시안 네트워크에서 합-곱 클리크 트리의 상향 메시지 연산이 호출될 때마다 필요한 정준형 주변화는 잘 정의된다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>증명 아이디어</strong><br>
+클리크 <span class="math inline">\(C_i\)</span>가 이웃 <span class="math inline">\(C_j\)</span>로 메시지를 보낼 때 제거되는 변수집합을 <span class="math inline">\(\mathbf Y=C_i-S_{ij}\)</span>라 하자. <span class="math inline">\(C_j\)</span>에서 들어오는 반대방향 메시지는 분리집합 <span class="math inline">\(S_{ij}\)</span>만 포함하므로 <span class="math inline">\(\mathbf Y\)</span>에 대응하는 정밀도 부분행렬을 바꾸지 않는다. 모든 메시지를 받은 최종 클리크 믿음은 정상적인 가우시안 주변분포이므로 그 정밀도행렬은 양의 정부호이고, 따라서 부분행렬 <span class="math inline">\(K_{YY}\)</span>도 양의 정부호이다. 메시지 계산 직전의 <span class="math inline">\(K_{YY}\)</span>가 동일하므로 적분이 유한하다.</p>
+</blockquote>
+<p>따라서 선형 가우시안 네트워크의 변수 제거와 클리크 트리는 이산 알고리즘과 구조가 같고, 인자 표현과 연산만 달라진다. 클리크 수에 선형이고, 가장 큰 클리크의 연속 차원에 대해 최대 삼차 정도의 행렬비용을 갖는다. 이산표의 경우 클리크 크기에 지수적이었던 것과 대조된다.</p>
+<p>전체 결합 가우시안을 먼저 구성하는 방법과 클리크 트리 방법 중 어느 것이 빠른지는 문제에 따라 다르다. 변수 수가 작으면 전체 공분산을 직접 계산하는 방법이 단순하고 빠를 수 있다. 반면 변수 수가 크고 그래프의 트리폭이 작으면 희소 메시지 전달이 큰 절약을 제공한다.</p>
+</section>
+<section id="가우시안-믿음-전파" class="level3" data-number="13.3.3">
+<h3 data-number="13.3.3" class="anchored" data-anchor-id="가우시안-믿음-전파"><span class="header-section-number">13.3.3</span> 가우시안 믿음 전파</h3>
+<p>가우시안 마르코프 네트워크의 결합측도를</p>
+<p><span class="math display">\[
+p(\mathbf X)\propto
+\exp\left\{-\frac12\mathbf X^TJ\mathbf X+h^T\mathbf X\right\}
+\]</span></p>
+<p>라 하자. <span class="math inline">\(J\)</span>가 양의 정부호이면 정상화 가능한 가우시안 분포이다. 각 대각항 <span class="math inline">\(J_{ii}X_i^2\)</span>는 단변량 클러스터에, 비대각항 <span class="math inline">\(J_{ij}X_iX_j\)</span>는 쌍별 클러스터에 배정하여 Bethe형 클러스터 그래프를 만들 수 있다.</p>
+<p><span class="math inline">\(X_i\)</span>에서 <span class="math inline">\(X_j\)</span>로 보내는 메시지는</p>
+<p><span class="math display">\[
+\delta_{i\rightarrow j}(x_j)
+=
+\exp\left\{-\frac12J_{i\rightarrow j}x_j^2
++h_{i\rightarrow j}x_j\right\}.
+\]</span></p>
+<p>먼저 <span class="math inline">\(X_i\)</span>는 <span class="math inline">\(j\)</span>를 제외한 이웃의 메시지를 모아</p>
+<p><span class="math display">\[
+\widehat J_{i\setminus j}
+=J_{ii}+\sum_{k\in\operatorname{Nb}_i-\{j\}}J_{k\rightarrow i},
+\]</span></p>
+<p><span class="math display">\[
+\widehat h_{i\setminus j}
+=h_i+\sum_{k\in\operatorname{Nb}_i-\{j\}}h_{k\rightarrow i}
+\]</span></p>
+<p>를 계산한다. 이어서 쌍별 항을 통해</p>
+<p><span class="math display">\[
+J_{i\rightarrow j}
+=-J_{ji}\widehat J_{i\setminus j}^{-1}J_{ij},
+\]</span></p>
+<p><span class="math display">\[
+h_{i\rightarrow j}
+=-J_{ji}\widehat J_{i\setminus j}^{-1}\widehat h_{i\setminus j}
+\]</span></p>
+<p>를 보낸다.</p>
+<p>수렴 후 노드 <span class="math inline">\(X_i\)</span>의 정보모수는</p>
+<p><span class="math display">\[
+\widehat J_i=J_{ii}+\sum_{k\in\operatorname{Nb}_i}J_{k\rightarrow i},
+\qquad
+\widehat h_i=h_i+\sum_{k\in\operatorname{Nb}_i}h_{k\rightarrow i}
+\]</span></p>
+<p>이고, 근사 평균과 분산은</p>
+<p><span class="math display">\[
+\widehat\mu_i=\widehat J_i^{-1}\widehat h_i,
+\qquad
+\widehat\sigma_i^2=\widehat J_i^{-1}
+\]</span></p>
+<p>이다.</p>
+<blockquote class="blockquote">
+<p><strong>정리</strong> 앞의 메시지 갱신식의 메시지 전달이 고정점에 도달하면 <span class="math inline">\(\widehat\mu_i\)</span>는 <span class="math inline">\(X_i\)</span>의 정확한 사후평균이다.</p>
+</blockquote>
+<p>분산은 일반적으로 정확하지 않으며 실제 분산보다 작게 추정되어 <strong>과도하게 확신하는(overconfident)</strong> 결과가 된다.</p>
+<div id="fig-gaussian-bp-frustrated-cycle" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gaussian-bp-frustrated-cycle-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-gaussian-bp-frustrated-cycle.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gaussian-bp-frustrated-cycle-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13.1: 가우시안 믿음 전파의 수렴 성질을 설명하는 좌절 순환 가우시안 MRF. 대각항은 <span class="math inline">\(J_{ii}=1\)</span>이고 한 간선만 부호가 반대이다.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>예제 - 좌절 순환과 수렴</strong> <span class="quarto-unresolved-ref">?fig-gaussian-bp-frustrated-cycle에서</span> 세 간선은 양의 상관을, <span class="math inline">\(X_1-X_2\)</span> 간선은 반대 방향의 상관을 유도한다. <span class="math inline">\(r\)</span>이 커질수록 좌절이 강해진다. 이 모형은 <span class="math inline">\(r&lt;1/3\)</span>이면 대각우세이고, <span class="math inline">\(r&lt;0.39030\)</span>이면 쌍별 정규화 가능하며, <span class="math inline">\(r&lt;0.5\)</span>까지는 결합 가우시안 자체가 유효하다. 쌍별 정규화 가능성은 어떤 메시지 순서에서도 가우시안 BP의 수렴을 보장하는 충분조건이지만 필요조건은 아니다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>보충 - walk-summability</strong><br>
+관련 문헌에서는 쌍별 정규화 가능성을 walk-summability와 연결한다. 이는 그래프상의 반복 보행이 만드는 기여의 절대합이 수렴한다는 의미이며, 가우시안 BP의 안정성을 분석하는 핵심 조건이다.</p>
+</blockquote>
+</section>
+</section>
+<section id="혼합-네트워크" class="level2" data-number="13.4">
+<h2 data-number="13.4" class="anchored" data-anchor-id="혼합-네트워크"><span class="header-section-number">13.4</span> 혼합 네트워크</h2>
+<p>혼합 네트워크는 이산변수와 연속변수를 함께 포함한다. 이 절에서는 주로 <strong>조건부 선형 가우시안(conditional linear Gaussian, CLG)</strong> 네트워크를 다룬다. CLG에서는</p>
+<ul>
+<li>이산변수가 연속 부모를 가질 수 없고,</li>
+<li>연속변수의 CPD는 이산 부모의 각 할당마다 다른 선형 가우시안이며,</li>
+<li>연속 부모에 대해서는 선형 평균구조를 갖는다.</li>
+</ul>
+<p>이 제한된 모형에서도 정확추론은 매우 어려우며, 폴리트리 구조에서도 NP-난해할 수 있다.</p>
+<section id="혼합-네트워크가-어려운-이유" class="level3" data-number="13.4.1">
+<h3 data-number="13.4.1" class="anchored" data-anchor-id="혼합-네트워크가-어려운-이유"><span class="header-section-number">13.4.1</span> 혼합 네트워크가 어려운 이유</h3>
+<p>다음 구조를 생각하자.</p>
+<div id="fig-clg-hardness-network" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-clg-hardness-network-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-clg-hardness-network.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-clg-hardness-network-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13.2: 추론의 어려움을 보이기 위한 단순 CLG 네트워크. <span class="math inline">\(D_1,\ldots,D_n\)</span>은 이산변수이고 <span class="math inline">\(X_1,\ldots,X_n\)</span>은 연속변수이다.
+</figcaption>
+</figure>
+</div>
+<p>각 <span class="math inline">\(D_i\)</span>는 이진변수이고, 연속변수의 CPD가</p>
+<p><span class="math display">\[
+p(X_i\mid X_{i-1},D_i)
+=
+\mathcal N\left(
+X_i\mid \alpha_{i,d_i}x_{i-1}+\beta_{i,d_i};
+\sigma_{i,d_i}^2
+\right)
+\]</span></p>
+<p>라고 하자. <span class="math inline">\(X_1\)</span>에서는 <span class="math inline">\(\alpha_{1,d_1}=0\)</span>으로 두면 같은 식을 사용할 수 있다.</p>
+<p><span class="math inline">\(X_n\)</span>의 주변분포는</p>
+<p><span class="math display">\[
+p(X_n)
+=
+\sum_{D_1,\ldots,D_n}
+\int
+p(D_1,\ldots,D_n,X_1,\ldots,X_n)
+\,dX_1\cdots dX_{n-1}
+\]</span></p>
+<p>이고 결합분포는</p>
+<p><span class="math display">\[
+p(D_1,\ldots,D_n,X_1,\ldots,X_n)
+=
+\prod_{i=1}^{n}P(D_i)
+p(X_1\mid D_1)
+\prod_{i=2}^{n}p(X_i\mid D_i,X_{i-1}).
+\]</span></p>
+<p><span class="math inline">\(X_1\)</span>의 주변분포는 <span class="math inline">\(D_1\)</span>의 두 값에 대응하는 두 가우시안의 혼합이다. <span class="math inline">\(X_2\)</span>는 <span class="math inline">\((D_1,D_2)\)</span>의 네 할당에 대응하는 네 가우시안의 혼합이고, 일반적으로 <span class="math inline">\(X_i\)</span>는 <span class="math inline">\(2^i\)</span>개의 가우시안 성분을 갖는다.</p>
+<div id="fig-clg-gaussian-mixture" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-clg-gaussian-mixture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-clg-gaussian-mixture.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-clg-gaussian-mixture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13.3: 단순 CLG 네트워크에서 얻어지는 <span class="math inline">\(p(X_1,X_2)\)</span>의 결합 주변분포. 서로 다른 이산 할당이 서로 다른 가우시안 봉우리를 만든다.
+</figcaption>
+</figure>
+</div>
+<p>예를 들어</p>
+<p><span class="math display">\[
+p(X_1\mid d_1^0)=\mathcal N(0;0.7^2),
+\qquad
+p(X_1\mid d_1^1)=\mathcal N(1.5;0.6^2),
+\]</span></p>
+<p><span class="math display">\[
+p(X_2\mid X_1,d_2^0)=\mathcal N(-1.5X_1;0.6^2),
+\qquad
+p(X_2\mid X_1,d_2^1)=\mathcal N(1.5;0.7^2)
+\]</span></p>
+<p>이면 <span class="math inline">\(p(X_1,X_2)\)</span>는 네 성분의 혼합이 된다. <span class="math inline">\(d_2^1\)</span>에서는 <span class="math inline">\(X_2\)</span>가 <span class="math inline">\(X_1\)</span>과 독립인 성분도 포함된다.</p>
+<p>이 예는 정확 주변분포를 표현하는 것 자체가 네트워크 크기에 지수적일 수 있음을 보여준다.</p>
+<blockquote class="blockquote">
+<p><strong>정리</strong> CLG 베이즈 네트워크 <span class="math inline">\(\mathcal B\)</span>, 증거 <span class="math inline">\(E=e\)</span>, 이산변수 <span class="math inline">\(A\)</span>가 주어졌을 때</p>
+</blockquote>
+<p><span class="math display">\[
+P_{\mathcal B}(A=a^1\mid e)&gt;0.5
+\]</span></p>
+<p>인지 판정하는 문제 CLG-DP는 <span class="math inline">\(\mathcal B\)</span>가 폴리트리여도 NP-난해하다.</p>
+<p>더 강한 제한에서도 어려움은 남는다.</p>
+<blockquote class="blockquote">
+<p><strong>정리</strong> 모든 이산변수가 이진이고 각 연속변수가 이산 조상을 최대 하나만 갖는 폴리트리 CLG에서도 CLG-DP는 NP-난해하다.</p>
+</blockquote>
+<p>이 결과는 사전분포에서 각 연속변수의 혼합성분이 많지 않더라도, 증거가 v-구조를 활성화하면 사후분포에 지수적으로 많은 모드가 생길 수 있음을 뜻한다. 절대오차가 <span class="math inline">\(1/2\)</span>보다 작은 매우 거친 근사조차 일반적으로 다항시간에 보장하기 어렵다.</p>
+</section>
+<section id="혼합-가우시안-네트워크의-인자-연산" class="level3" data-number="13.4.2">
+<h3 data-number="13.4.2" class="anchored" data-anchor-id="혼합-가우시안-네트워크의-인자-연산"><span class="header-section-number">13.4.2</span> 혼합 가우시안 네트워크의 인자 연산</h3>
+<section id="정준표" class="level4" data-number="13.4.2.1">
+<h4 data-number="13.4.2.1" class="anchored" data-anchor-id="정준표"><span class="header-section-number">13.4.2.1</span> 정준표</h4>
+<p>CLG CPD는 이산 부모의 각 할당마다 하나의 선형 가우시안을 갖는다. 이를 표현하기 위해 정준형을 표와 결합한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 정준표</strong> <span class="math inline">\(\mathbf D\subseteq\Delta\)</span>, <span class="math inline">\(\mathbf X\subseteq\Gamma\)</span>에 대한 정준표 <span class="math inline">\(\phi(\mathbf D,\mathbf X)\)</span>는 각 <span class="math inline">\(\mathbf d\in\operatorname{Val}(\mathbf D)\)</span>마다 연속변수 <span class="math inline">\(\mathbf X\)</span>에 대한 정준형</p>
+</blockquote>
+<p><span class="math display">\[
+\mathcal C(\mathbf X;K_{\mathbf d},h_{\mathbf d},g_{\mathbf d})
+\]</span></p>
+<p>을 하나씩 저장하는 표이다. <span class="math inline">\(\phi(\mathbf d)\)</span>는 해당 행의 정준형을 뜻한다.</p>
+<p>이 표현은 두 특수한 경우를 포함한다.</p>
+<ul>
+<li><span class="math inline">\(\mathbf D=\varnothing\)</span>이면 하나의 정준형만 남아 순수 가우시안 인자이다.</li>
+<li><span class="math inline">\(\mathbf X=\varnothing\)</span>이면 각 행이 <span class="math inline">\(\exp(g_{\mathbf d})\)</span>인 일반 이산표가 된다.</li>
+</ul>
+<p>따라서 CLG의 모든 초기 CPD와 퍼텐셜을 정준표로 표현할 수 있다.</p>
+<p>정준표의 곱과 나눗셈은 이산표의 공통 할당별로 수행하며, 각 행의 연속부분에는 정준형 곱셈식과 정준형 나눗셈식을 적용한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제</strong> <span class="math inline">\(\phi_1(A,B,X,Y)\)</span>와 <span class="math inline">\(\phi_2(B,C,Y,Z)\)</span>를 곱해 <span class="math inline">\(\tau(A,B,C,X,Y,Z)\)</span>를 만든다고 하자. 각 <span class="math inline">\(a,b,c\)</span>에 대해 <span class="math inline">\(\phi_1(a,b)\)</span>의 정준형과 <span class="math inline">\(\phi_2(b,c)\)</span>의 정준형을 공통 범위 <span class="math inline">\(X,Y,Z\)</span>로 확장한 후 더한다.</p>
+</blockquote>
+<p>증거 <span class="math inline">\(\mathbf d,\mathbf x\)</span>의 대입도 자연스럽다. 이산증거와 불일치하는 행을 제거하거나 0으로 만들고, 연속증거는 각 행의 정준형에 정준형 증거 대입식을 적용한다.</p>
+<p>연속변수의 주변화는 각 행에서 정준형 주변화식을 독립적으로 적용한다. 이산 할당별 가우시안 성분 수는 그대로 유지된다. 다만 제거되는 연속변수에 해당하는 <span class="math inline">\(K_{YY}\)</span>가 각 행에서 양의 정부호여야 한다.</p>
+</section>
+<section id="약한-주변화" class="level4" data-number="13.4.2.2">
+<h4 data-number="13.4.2.2" class="anchored" data-anchor-id="약한-주변화"><span class="header-section-number">13.4.2.2</span> 약한 주변화</h4>
+<p>이산변수를 합산하는 연산은 훨씬 어렵다.</p>
+<blockquote class="blockquote">
+<p><strong>예제</strong> 이진변수 <span class="math inline">\(A\)</span>와 연속변수 <span class="math inline">\(X\)</span>에 대한 정준표가</p>
+</blockquote>
+<p><span class="math display">\[
+\phi(a^0)=0.4\,\mathcal N(X\mid 0;1),
+\qquad
+\phi(a^1)=0.6\,\mathcal N(X\mid 3;4)
+\]</span></p>
+<p>라고 하자. <span class="math inline">\(A\)</span>를 합산하면 두 가우시안의 혼합이 되며, 단일 정준형으로 정확히 나타낼 수 없다.</p>
+<div id="fig-gaussian-mixture-collapse" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gaussian-mixture-collapse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-gaussian-mixture-collapse.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gaussian-mixture-collapse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13.4: 가우시안 혼합의 합산과 붕괴. 왼쪽은 두 가우시안과 정확 혼합밀도, 오른쪽은 같은 혼합을 하나의 가우시안으로 모멘트 매칭한 결과이다.
+</figcaption>
+</figure>
+</div>
+<p>정확성을 유지하려면 각 행에 가우시안 혼합 전체를 저장해야 한다. 그러나 이산변수를 제거할 때마다 성분 수가 늘어나 원래의 지수적 문제로 돌아간다. 대안은 혼합을 하나의 가우시안으로 근사하는 것이다.</p>
+<p>이 장에서는 <span class="math inline">\(D(p\|\widehat p)\)</span>를 최소화하는 <strong>M-투영</strong>을 사용한다. 지수족의 성질에 따라 목표분포와 동일한 1차ㆍ2차 모멘트를 갖는 가우시안이 최적이다.</p>
+<blockquote class="blockquote">
+<p><strong>명제</strong> 임의의 분포 <span class="math inline">\(p(\mathbf X)\)</span>의 평균벡터와 공분산행렬을 각각 <span class="math inline">\(\mu,\Sigma\)</span>라 하면, <span class="math inline">\(D(p\|q)\)</span>를 모든 가우시안 <span class="math inline">\(q\)</span> 중에서 최소화하는 분포는</p>
+</blockquote>
+<p><span class="math display">\[
+q(\mathbf X)=\mathcal N(\mu;\Sigma)
+\]</span></p>
+<p>이다.</p>
+<p>가중치 <span class="math inline">\(w_i\)</span>를 갖는 <span class="math inline">\(k\)</span>개 가우시안 혼합에는 다음 결과를 적용한다.</p>
+<blockquote class="blockquote">
+<p><strong>명제</strong> <span class="math inline">\(\sum_iw_i=1\)</span>인 혼합</p>
+</blockquote>
+<p><span class="math display">\[
+p(\mathbf X)=\sum_{i=1}^kw_i\mathcal N(\mu_i;\Sigma_i)
+\]</span></p>
+<p>의 최적 단일 가우시안 근사는</p>
+<p><span class="math display">\[
+\mu=\sum_{i=1}^kw_i\mu_i,
+\]</span></p>
+<p><span class="math display">\[
+\Sigma
+=
+\sum_{i=1}^kw_i\Sigma_i
++
+\sum_{i=1}^kw_i(\mu_i-\mu)(\mu_i-\mu)^T.
+\]</span></p>
+<p>첫 항은 성분 내부의 평균 분산이고, 둘째 항은 성분 평균들 사이의 분산이다.</p>
+<blockquote class="blockquote">
+<p><strong>예제</strong> 앞의 이산-연속 혼합 예제의 혼합에서는</p>
+</blockquote>
+<p><span class="math display">\[
+\mu=0.4\times0+0.6\times3=1.8,
+\]</span></p>
+<p><span class="math display">\[
+\sigma^2
+=(0.4\times1+0.6\times4)
++
+\{0.4(0-1.8)^2+0.6(3-1.8)^2\}
+=4.96.
+\]</span></p>
+<p>성분 평균이 멀리 떨어져 있으면 단일 가우시안은 두 봉우리 사이에 큰 밀도를 부여하여 실제 혼합을 매우 나쁘게 근사할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 약한 주변화</strong> 정준표가 <span class="math inline">\(\{\mathbf A,\mathbf B,\mathbf X\}\)</span>에 대해 정의되어 있고 <span class="math inline">\(\mathbf A,\mathbf B\)</span>가 이산, <span class="math inline">\(\mathbf X\)</span>가 연속이라고 하자. <span class="math inline">\(\mathbf B\)</span>에 대한 약한 주변화는 각 <span class="math inline">\(\mathbf a\)</span>에 대해 <span class="math inline">\(\mathbf b\)</span>에 해당하는 행들을 합친 후, 그 혼합을 앞의 가우시안 혼합 모멘트 명제의 단일 가우시안으로 붕괴시켜 <span class="math inline">\(\mathbf A,\mathbf X\)</span>의 정준표를 만드는 연산이다.</p>
+</blockquote>
+<p>약한 주변화는 각 성분이 정상화 가능한 가우시안일 때만 정의된다. 일반 정준형은 유한한 평균과 공분산을 갖지 않을 수 있으므로, 어떤 메시지 순서에서 이 연산을 적용할 수 있는지가 중요한 제약이 된다.</p>
+</section>
+</section>
+<section id="clg-네트워크의-기대전파" class="level3" data-number="13.4.3">
+<h3 data-number="13.4.3" class="anchored" data-anchor-id="clg-네트워크의-기대전파"><span class="header-section-number">13.4.3</span> CLG 네트워크의 기대전파</h3>
+<p>약한 주변화를 이용하면 CLG용 기대전파 메시지 알고리즘을 정의할 수 있다. 한 클러스터가 보내는 메시지는 다음 과정을 따른다.</p>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - CLG 네트워크의 EP 메시지 투영</strong><br>
+<strong>입력:</strong> 남길 범위 <span class="math inline">\(\mathbf Z\)</span>, 정준표들의 집합 <span class="math inline">\(\widetilde\Phi\)</span><br>
+1. 모든 정준표를 곱하여 <span class="math inline">\(\widetilde\beta=\prod_{\phi\in\widetilde\Phi}\phi\)</span>를 만든다.<br>
+2. 남길 이산변수 <span class="math inline">\(\mathbf A=\mathbf Z\cap\Delta\)</span>와 연속변수 <span class="math inline">\(\mathbf X=\mathbf Z\cap\Gamma\)</span>를 정한다.<br>
+3. 제거할 이산변수 <span class="math inline">\(\mathbf B=(\operatorname{Scope}[\widetilde\Phi]-\mathbf A)\cap\Delta\)</span>와 연속변수 <span class="math inline">\(\mathbf Y=(\operatorname{Scope}[\widetilde\Phi]-\mathbf X)\cap\Gamma\)</span>를 정한다.<br>
+4. 각 <span class="math inline">\(\mathbf a,\mathbf b\)</span>에서 <span class="math inline">\(\mathbf Y\)</span>를 정준형 주변화식으로 적분한다.<br>
+5. <span class="math inline">\(\mathbf B\)</span>를 합산한다. 연속변수가 남아 있으면 약한 주변화로 혼합을 붕괴시키고, 연속변수가 없으면 일반 이산 합산을 사용한다.<br>
+6. 결과 정준표를 메시지로 반환한다.</p>
+</blockquote>
+<p>이 알고리즘은 원리상 단순하지만 두 가지 미묘한 문제가 있다.</p>
+<section id="메시지-순서-제약" class="level4" data-number="13.4.3.1">
+<h4 data-number="13.4.3.1" class="anchored" data-anchor-id="메시지-순서-제약"><span class="header-section-number">13.4.3.1</span> 메시지 순서 제약</h4>
+<p>약한 주변화를 적용하려면 클러스터의 각 정준형 성분이 정상화 가능한 가우시안이어야 한다. 선형 가우시안 CPD는 부모값이 주어졌을 때의 조건부밀도이므로, 부모에 대한 분포가 아직 들어오지 않은 상태에서는 결합범위 전체에 대해 적분 가능한 가우시안이 아닐 수 있다.</p>
+<div id="fig-clg-nonnormalizable-clique-tree" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-clg-nonnormalizable-clique-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-clg-nonnormalizable-clique-tree.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-clg-nonnormalizable-clique-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13.5: 정규화 불가능한 퍼텐셜이 존재하는 단순 CLG와 클리크 트리. <span class="math inline">\(\{B,X,Y\}\)</span> 클리크의 선형 가우시안 CPD만으로는 <span class="math inline">\(X,Y\)</span>의 결합밀도가 정규화되지 않는다.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>예제</strong> <span class="quarto-unresolved-ref">?fig-clg-nonnormalizable-clique-tree에서</span> 먼저 <span class="math inline">\(\{A,X\}\)</span>에서 <span class="math inline">\(\{B,X,Y\}\)</span>로 메시지를 보내면 <span class="math inline">\(X\)</span>에 대한 정상화된 가우시안이 전달된다. 이를 <span class="math inline">\(P(B)\)</span>와 <span class="math inline">\(p(Y\mid X,B)\)</span>에 곱하면 <span class="math inline">\(B\)</span>의 각 값마다 정상화 가능한 결합 가우시안이 생기므로 이후 약한 주변화가 가능하다.</p>
+</blockquote>
+<p>하지만 모든 클리크 트리가 이러한 순서를 허용하지는 않는다.</p>
+<div id="fig-clg-clique-tree-configurations" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-clg-clique-tree-configurations-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-clg-clique-tree-configurations.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-clg-clique-tree-configurations-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13.6: 동일한 CLG에서 가능한 여러 클리크 트리. (c)는 양쪽 잎 모두 필요한 부모분포를 받지 못해 메시지를 시작할 수 없고, (d)는 강한 루트를 가지며, (e)는 강한 루트는 아니지만 적절한 순서에서 약한 주변화가 가능하다.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>예제</strong> <span class="quarto-unresolved-ref">?fig-clg-clique-tree-configurations의</span> 패널 (c)에 있는 <span class="math inline">\(\{B,X,Y\}\)</span> 클리크는 <span class="math inline">\(P(B)\)</span>와 <span class="math inline">\(p(Y\mid B,X)\)</span>를 포함하지만 <span class="math inline">\(p(X)\)</span>를 포함하지 않는다. 따라서 <span class="math inline">\(X,Y\)</span>의 정준형은 조건부모형일 뿐 정상화된 가우시안이 아니며 <span class="math inline">\(B\)</span>를 약하게 제거할 수 없다. 반대쪽 잎도 같은 이유로 메시지를 보낼 수 없다. 반면 (d)와 (e)는 합법적인 메시지 순서를 갖는다.</p>
+</blockquote>
+<p>어떤 클러스터에서 변수 <span class="math inline">\(X_i\)</span>의 정상화된 분포가 있어야 메시지를 보낼 수 있을 때 <span class="math inline">\(X_i\)</span>는 그 클러스터에서 <strong>순서 제약(order-constrained)</strong>을 갖는다고 한다. CLG 베이즈 네트워크에서는 약한 주변화 전에 연속 자식의 부모분포가 먼저 전달되어야 하므로, 메시지 순서가 네트워크의 위상순서를 반영한다.</p>
+<p>마르코프 네트워크에서는 모든 초기 정준표 행이 정상화 가능한 가우시안이라는 충분조건을 둘 수 있다. 이 조건이면 곱과 주변화 뒤에도 정상화 가능성이 유지되어 메시지 순서 제약이 줄어든다.</p>
+</section>
+<section id="정의되지-않는-믿음갱신-메시지" class="level4" data-number="13.4.3.2">
+<h4 data-number="13.4.3.2" class="anchored" data-anchor-id="정의되지-않는-믿음갱신-메시지"><span class="header-section-number">13.4.3.2</span> 정의되지 않는 믿음갱신 메시지</h4>
+<p>합-곱 메시지는 기존 메시지를 직접 나누지 않지만, 믿음갱신 방식은 새 분리집합 메시지를 이전 메시지로 나눈 비율을 클러스터에 곱한다. 정준형 나눗셈은 정밀도행렬의 뺄셈이므로 결과가 음의 분산을 암시할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제</strong> <span class="quarto-unresolved-ref">?fig-clg-nonnormalizable-clique-tree의</span> 혼합에서 자식 <span class="math inline">\(Y\)</span>의 증거가 한 혼합성분과 더 잘 맞으면, 이전의 사전가중치로 만든 가우시안 붕괴보다 그 성분에 더 큰 가중치를 주어 다시 M-투영하는 것이 바람직하다. 이것이 반복적 믿음갱신의 동기이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제</strong> <span class="math inline">\(A,B\)</span>가 균등이고</p>
+</blockquote>
+<p><span class="math display">\[
+p(X\mid A)=
+\begin{cases}
+\mathcal N(0;2),&amp;A=a^0,\\
+\mathcal N(0;6),&amp;A=a^1,
+\end{cases}
+\]</span></p>
+<p><span class="math display">\[
+p(Y\mid B,X)=
+\begin{cases}
+\mathcal N(X;0.01),&amp;B=b^0,\\
+\mathcal N(-X;0.01),&amp;B=b^1
+\end{cases}
+\]</span></p>
+<p>라 하자. 첫 메시지에서 <span class="math inline">\(X\)</span>의 혼합을 <span class="math inline">\(\mathcal N(0;4)\)</span>로 붕괴시키고, <span class="math inline">\(Y=4\)</span>의 증거를 반영한 뒤 되돌아오는 메시지가 <span class="math inline">\(\mathcal N(0;15.93)\)</span>이라고 하자. <span class="math inline">\(A=a^1\)</span> 행의 갱신은</p>
+<p><span class="math display">\[
+\mathcal N(0;6)
+\frac{\mathcal N(0;15.93)}{\mathcal N(0;4)}
+\]</span></p>
+<p>이고 정밀도는</p>
+<p><span class="math display">\[
+\frac16+\frac1{15.93}-\frac14=-0.0206&lt;0
+\]</span></p>
+<p>가 된다. 음의 정밀도는 정상적인 가우시안 분산을 나타내지 못한다. 실제로 이러한 문제가 자주 발생하지는 않지만, 구현에서는 모든 적분 전에 정준형이 정상화 가능한지 검사해야 한다.</p>
+</section>
+</section>
+<section id="정확한-clg-알고리즘" class="level3" data-number="13.4.4">
+<h3 data-number="13.4.4" class="anchored" data-anchor-id="정확한-clg-알고리즘"><span class="header-section-number">13.4.4</span> ‘정확한’ CLG 알고리즘</h3>
+<p>CLG의 정확한 연속 주변분포는 지수적으로 많은 가우시안 혼합이므로 일반적으로 압축해 표현할 수 없다. 그러나 <strong>Lauritzen 알고리즘</strong>은 제한된 의미의 정확성을 제공한다.</p>
+<p>질의 <span class="math inline">\(p(\mathbf D,\mathbf X\mid e)\)</span>에서</p>
+<ul>
+<li>이산변수 <span class="math inline">\(\mathbf D\)</span>의 사후분포는 정확하고,</li>
+<li>각 <span class="math inline">\(\mathbf d\)</span>에 조건부인 연속변수 <span class="math inline">\(\mathbf X\)</span>의 평균과 공분산은 정확하다.</li>
+</ul>
+<p>연속부분의 전체 분포형태는 단일 가우시안으로 근사되므로 다봉성은 보존되지 않는다.</p>
+<section id="강한-루트-클리크-트리" class="level4" data-number="13.4.4.1">
+<h4 data-number="13.4.4.1" class="anchored" data-anchor-id="강한-루트-클리크-트리"><span class="header-section-number">13.4.4.1</span> 강한 루트 클리크 트리</h4>
+<p>상향 패스에서 약한 주변화가 전혀 필요하지 않도록 클리크 트리를 구성한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 강한 루트</strong> 클리크 트리 <span class="math inline">\(\mathcal T\)</span>의 루트 <span class="math inline">\(C_r\)</span>가 다음 조건을 만족하면 강한 루트라고 한다. 모든 자식 클리크 <span class="math inline">\(C_1\)</span>과 그 상향 이웃 <span class="math inline">\(C_2\)</span>에 대해</p>
+</blockquote>
+<p><span class="math display">\[
+C_2-C_1\subseteq\Gamma
+\]</span></p>
+<p>이거나</p>
+<p><span class="math display">\[
+C_1\cap C_2\subseteq\Delta
+\]</span></p>
+<p>이다. 강한 루트를 갖는 클리크 트리를 강하게 루팅된 트리라고 한다.</p>
+<p>첫 조건은 상향 메시지에서 이산변수를 제거하지 않는 경우이고, 둘째 조건은 이산변수를 제거하더라도 분리집합에 연속변수가 남지 않아 가우시안 혼합을 붕괴시킬 필요가 없는 경우이다.</p>
+<blockquote class="blockquote">
+<p><strong>예제</strong> <span class="quarto-unresolved-ref">?fig-clg-clique-tree-configurations의</span> 패널 (d)에서 <span class="math inline">\(\{A,B,C,Y\}\)</span>가 강한 루트이다. 두 비루트 클리크에서 루트 방향으로 이동할 때 이산변수를 제거하지 않으므로 상향 패스가 정확하다.</p>
+</blockquote>
+</section>
+<section id="강한-루트와-정확성" class="level4" data-number="13.4.4.2">
+<h4 data-number="13.4.4.2" class="anchored" data-anchor-id="강한-루트와-정확성"><span class="header-section-number">13.4.4.2</span> 강한 루트와 정확성</h4>
+<blockquote class="blockquote">
+<p><strong>정리</strong> 강한 루트 <span class="math inline">\(C_r\)</span>를 갖는 클리크 트리에서 증거를 대입한 후, 정준표와 약한 주변화를 사용하는 믿음갱신 보정을 수행하면 모든 클리크가 보정된다. 각 클리크는 이산변수의 정확한 주변분포와 연속변수의 정확한 평균ㆍ공분산을 갖는다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>증명 구조</strong><br>
+상향 패스에서는 강한 주변화만 사용하므로 모든 계산이 정확하며 루트에는 정확한 주변분포가 도달한다. 하향 패스에서는 부모 클리크가 이미 정확한 약한 주변을 갖는다고 가정하고, 자식에게 보내는 분리집합 메시지가 그 정확한 약한 주변임을 보인다. 자식 클리크가 이전 분리집합 메시지를 나누고 새 메시지를 곱하면 분리집합에서 부모와 일치한다. 자식의 조건부분포 <span class="math inline">\(P(C_j-S_{ij}\mid S_{ij})\)</span>는 상향 패스에서 정확히 보존되어 있으므로, 정확한 분리집합의 1ㆍ2차 모멘트와 이 선형 가우시안 조건부분포를 결합하면 자식 전체의 1ㆍ2차 모멘트도 정확하다.</p>
+</blockquote>
+<p>강한 루트가 없는 트리에서는 상향 패스에 약한 주변화가 들어가며, 분리집합의 이전 메시지가 정확한 주변과 같지 않을 수 있어 증명이 성립하지 않는다.</p>
+</section>
+<section id="강한-삼각화와-계산복잡도" class="level4" data-number="13.4.4.3">
+<h4 data-number="13.4.4.3" class="anchored" data-anchor-id="강한-삼각화와-계산복잡도"><span class="header-section-number">13.4.4.3</span> 강한 삼각화와 계산복잡도</h4>
+<p>강한 루트는 제거순서에 제약을 준다. 일반적으로 연속 이웃이 남아 있는 동안 이산변수를 먼저 제거하면 가우시안 혼합을 붕괴시켜야 하므로, 이산변수 제거를 늦춰야 한다. 이러한 제약된 제거순서는 일반적인 최소 트리폭 순서보다 훨씬 큰 클리크를 만들 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 연속 연결성분과 이산 이웃</strong> 도덕화 그래프에서 연속변수만을 거치는 경로로 서로 연결된 최대 연속변수 집합을 최대 연속 연결성분이라 한다. 이 성분의 임의 노드와 인접한 이산변수들을 그 성분의 이산 이웃이라 한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정리</strong> 혼합 네트워크 <span class="math inline">\(G\)</span>의 강하게 루팅된 클리크 트리에서는 모든 최대 연속 연결성분 <span class="math inline">\(\mathbf X\)</span>와 그 이산 이웃집합 <span class="math inline">\(\mathbf D\)</span>에 대해, <span class="math inline">\(\mathbf D\)</span> 전체와 <span class="math inline">\(\mathbf X\)</span>의 적어도 한 연속변수를 함께 포함하는 클리크가 존재한다.</p>
+</blockquote>
+<p><span class="quarto-unresolved-ref">?fig-clg-hardness-network에서는</span> 모든 <span class="math inline">\(X_i\)</span>가 하나의 연속 연결성분이고 모든 <span class="math inline">\(D_i\)</span>가 그 이웃이다. 따라서 강한 루트 트리에는 모든 <span class="math inline">\(D_i\)</span>와 적어도 하나의 <span class="math inline">\(X_i\)</span>를 포함하는 지수적으로 큰 클리크가 필요하다. 이는 폴리트리 CLG 추론의 NP-난해성과 일치한다.</p>
+<blockquote class="blockquote">
+<p><strong>핵심 해석</strong><br>
+Lauritzen 알고리즘은 이산 주변과 연속 모멘트에 대해 이론적으로 매력적이지만, 큰 연속 연결성분이 많은 이산변수와 접하면 클리크가 폭발한다. 따라서 실제 대규모 혼합모형에서는 축약 입자, MCMC, 구조화된 근사와 같은 다른 방법이 필요하다.</p>
+</blockquote>
+</section>
+</section>
+</section>
+<section id="비선형-의존성" class="level2" data-number="13.5">
+<h2 data-number="13.5" class="anchored" data-anchor-id="비선형-의존성"><span class="header-section-number">13.5</span> 비선형 의존성</h2>
+<p>선형 가우시안은 계산상 편리하지만 실제 현상을 충분히 표현하지 못하는 경우가 많다. 예를 들어 차량의 다음 위치 분산이 현재 속도에 따라 커지거나, 연속 온도에 따라 난방기의 이산 작동상태가 바뀌는 관계는 선형 가우시안만으로 표현할 수 없다.</p>
+<p>비선형 네트워크에서도 중간 인자를 정확히 표현하기 어렵기 때문에, 기대전파의 관점에서 각 클러스터의 비가우시안 측도를 가우시안으로 근사한다. 핵심 연산은 비선형 함수를 통과한 확률변수의 평균과 공분산을 근사하는 <strong>선형화(linearization)</strong>이다.</p>
+<section id="선형화" class="level3" data-number="13.5.1">
+<h3 data-number="13.5.1" class="anchored" data-anchor-id="선형화"><span class="header-section-number">13.5.1</span> 선형화</h3>
+<p>보조 가우시안 변수 <span class="math inline">\(\mathbf Z\)</span>가</p>
+<p><span class="math display">\[
+p_0(\mathbf Z)=\mathcal N(\mu;\Sigma)
+\]</span></p>
+<p>를 따르고, 관심변수가 결정적 함수</p>
+<p><span class="math display">\[
+X_i=f_i(\mathbf Z)
+\]</span></p>
+<p>로 정의된다고 하자. <span class="math inline">\(\mathbf X=\mathbf f(\mathbf Z)\)</span>의 정확한 분포는 일반적으로 가우시안이 아니다. 목표는 이를 가우시안 <span class="math inline">\(\widehat p(\mathbf X)\)</span>로 근사하는 것이다.</p>
+<section id="taylor-급수-선형화" class="level4" data-number="13.5.1.1">
+<h4 data-number="13.5.1.1" class="anchored" data-anchor-id="taylor-급수-선형화"><span class="header-section-number">13.5.1.1</span> Taylor 급수 선형화</h4>
+<p><span class="math inline">\(f\)</span>가 선형이면 가우시안의 선형변환은 다시 가우시안이다. 따라서 평균 <span class="math inline">\(\mu\)</span> 근방에서 1차 Taylor 근사</p>
+<p><span class="math display">\[
+\widehat f(\mathbf Z)
+=
+f(\mu)+\nabla f\big|_{\mu}^{T}(\mathbf Z-\mu)
+\]</span></p>
+<p>를 사용한다. 원문 표기의 좌표계에 따라 <span class="math inline">\(f(\mu)+\nabla f|_\mu\mathbf Z\)</span> 형태로 쓸 수도 있다. 이 방법은 확장 칼만 필터의 기초이다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - <span class="math inline">\(X=Z^2\)</span></strong> <span class="math inline">\(Z\sim\mathcal N(0,1)\)</span>이고 <span class="math inline">\(X=Z^2\)</span>라 하자. 실제 평균과 분산은</p>
+</blockquote>
+<p><span class="math display">\[
+E[X]=E[Z^2]=1,
+\]</span></p>
+<p><span class="math display">\[
+\operatorname{Var}(X)
+=E[Z^4]-E[Z^2]^2
+=3-1=2.
+\]</span></p>
+<p>하지만 <span class="math inline">\(f'(0)=0\)</span>이므로 평균 0에서 1차 Taylor 근사는 <span class="math inline">\(\widehat f(Z)\equiv0\)</span>이다. 따라서 모든 질량이 <span class="math inline">\(X=0\)</span>에 있는 퇴화분포를 얻게 되어 매우 나쁜 근사가 된다.</p>
+<p>Taylor 방법의 품질은 분포의 표준편차 범위 안에서 1차항이 고차항보다 우세한지에 달려 있다. 함수가 평균 근방에서 빠르게 휘거나 기울기가 0인 경우, 분산이 큰 경우에는 오차가 커진다.</p>
+</section>
+<section id="수치적분을-이용한-m-투영" class="level4" data-number="13.5.1.2">
+<h4 data-number="13.5.1.2" class="anchored" data-anchor-id="수치적분을-이용한-m-투영"><span class="header-section-number">13.5.1.2</span> 수치적분을 이용한 M-투영</h4>
+<p>더 직접적인 방법은 변환 후 분포 <span class="math inline">\(p(\mathbf X)\)</span>의 평균과 공분산을 계산하여 모멘트가 같은 가우시안을 만드는 것이다. 필요한 적분은</p>
+<p><span class="math display">\[
+E_p[X_i]
+=
+\int f_i(\mathbf z)p_0(\mathbf z)\,d\mathbf z,
+\]</span></p>
+<p><span class="math display">\[
+E_p[X_iX_j]
+=
+\int f_i(\mathbf z)f_j(\mathbf z)p_0(\mathbf z)\,d\mathbf z.
+\]</span></p>
+<p>이다. 닫힌형식으로 계산할 수 없는 경우 수치적분을 사용한다. 단, 유효한 밀도라도 1ㆍ2차 모멘트가 무한일 수 있으며, 이 경우 가우시안 M-투영은 정의되지 않는다.</p>
+<section id="가우스-구적법" class="level5" data-number="13.5.1.2.1">
+<h5 data-number="13.5.1.2.1" class="anchored" data-anchor-id="가우스-구적법"><span class="header-section-number">13.5.1.2.1</span> 가우스 구적법</h5>
+<p>가우스 구적법은</p>
+<p><span class="math display">\[
+\int_a^bW(z)f(z)\,dz
+\]</span></p>
+<p>를 미리 정한 점 <span class="math inline">\(z_1,\ldots,z_m\)</span>과 가중치 <span class="math inline">\(w_1,\ldots,w_m\)</span>으로</p>
+<p><span class="math display">\[
+\int_a^bW(z)f(z)\,dz
+\approx
+\sum_{j=1}^{m}w_jf(z_j)
+\]</span></p>
+<p>로 근사한다. 점과 가중치는 <span class="math inline">\(f\)</span>가 차수 <span class="math inline">\(2m-1\)</span> 이하의 다항식이면 적분이 정확하도록 선택된다. 이를 정밀도 <span class="math inline">\(2m-1\)</span>의 적분규칙이라고 한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 표준정규분포의 2점 규칙</strong> <span class="math inline">\(W(z)=\mathcal N(0,1)\)</span>이고 <span class="math inline">\(m=2\)</span>일 때 상수, <span class="math inline">\(z\)</span>, <span class="math inline">\(z^2\)</span>, <span class="math inline">\(z^3\)</span>의 적분을 정확히 맞추는 해는</p>
+</blockquote>
+<p><span class="math display">\[
+w_1=w_2=\frac12,
+\qquad
+z_1=-1,
+\qquad
+z_2=1
+\]</span></p>
+<p>이다. 따라서</p>
+<p><span class="math display">\[
+\int_{-\infty}^{\infty}\mathcal N(z\mid0,1)f(z)\,dz
+\approx
+\frac12f(-1)+\frac12f(1)
+\]</span></p>
+<p>이며 3차 이하 다항식에는 정확하다.</p>
+<p><span class="math inline">\(d\)</span>차원에서 각 차원마다 <span class="math inline">\(m\)</span>점 규칙을 사용하면 <span class="math inline">\(m^d\)</span>개의 격자점이 필요하다. 낮은 차원에서는 정확도가 높지만 차원의 저주를 겪는다.</p>
+</section>
+<section id="무향-변환과-정확-단항식" class="level5" data-number="13.5.1.2.2">
+<h5 data-number="13.5.1.2.2" class="anchored" data-anchor-id="무향-변환과-정확-단항식"><span class="header-section-number">13.5.1.2.2</span> 무향 변환과 정확 단항식</h5>
+<p><strong>무향 변환(unscented transformation)</strong>은 가우시안의 대칭성을 이용하여 훨씬 적은 시그마점으로 모멘트를 근사한다. 먼저 일반 가우시안 <span class="math inline">\(\mathcal N(\mu;\Sigma)\)</span>를 표준정규 좌표로 바꾼다. <span class="math inline">\(A^TA=\Sigma\)</span>인 행렬제곱근 <span class="math inline">\(A\)</span>를 사용하면</p>
+<p><span class="math display">\[
+\mathbf Z=A\mathbf Z'+\mu,
+\qquad
+\mathbf Z'\sim\mathcal N(0,I).
+\]</span></p>
+<p><span class="math inline">\(d\)</span>차원에서 원점과 각 좌표축의 <span class="math inline">\(\pm\lambda\)</span> 위치를 사용하면 총 <span class="math inline">\(2d+1\)</span>개의 점이 된다. <span class="math inline">\(\mathbf z_i^+\)</span>는 <span class="math inline">\(i\)</span>번째 좌표만 1인 벡터이고 <span class="math inline">\(\mathbf z_i^-=-\mathbf z_i^+\)</span>라 하면</p>
+<p><span class="math display">\[
+\int W(\mathbf z)f(\mathbf z)\,d\mathbf z
+\approx
+\left(1-\frac d{\lambda^2}\right)f(0)
++
+\sum_{i=1}^{d}\frac1{2\lambda^2}f(\lambda\mathbf z_i^+)
++
+\sum_{i=1}^{d}\frac1{2\lambda^2}f(\lambda\mathbf z_i^-).
+\]</span></p>
+<p>이 규칙은 총차수 3 이하의 다항식에 정확하다. 차수 5 규칙은 원점, 한 축 방향의 점, 두 축 방향의 점을 포함하여 <span class="math inline">\(2d^2+1\)</span>개의 함수평가가 필요하다.</p>
+<p><span class="math inline">\(\lambda\)</span>는 자유모수이다. 작은 <span class="math inline">\(\lambda\)</span>는 평균 근방을 강조하는 국소 근사를 만들고, 큰 <span class="math inline">\(\lambda\)</span>는 분포의 더 먼 영역을 반영한다.</p>
+<div id="fig-nonlinear-gaussian-approximation" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-nonlinear-gaussian-approximation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-nonlinear-gaussian-approximation.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-nonlinear-gaussian-approximation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13.7: 비선형 의존성의 가우시안 근사 비교. 위쪽은 실제 표본, Taylor 선형화, 무향 변환을 비교한다. 아래쪽은 비선형 함수에서 Taylor, 정밀도 3, 정밀도 5 규칙의 밀도근사와 최적 M-투영에 대한 KL 발산을 비교한다.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>예제 - 근사법 비교</strong> 원문의 비교에서는 무향 변환이 실제 평균과 공분산에 매우 가까운 반면 Taylor 선형화는 평균과 공분산 모두에서 큰 오차를 보인다. 함수</p>
+</blockquote>
+<p><span class="math display">\[
+f(Z_1,Z_2)=\sqrt{(\sigma Z_1)^2+(\sigma Z_2)^2}
+\]</span></p>
+<p>에서는 정밀도 5 규칙이 가장 정확하고, 작은ㆍ중간 분산에서 정밀도 3 규칙도 Taylor보다 우수하다. 분산이 커지면 모든 국소 다항근사의 오차가 커지며, 가우시안 자체가 실제 분포를 적절히 표현하지 못하는 구간에서는 어떤 모멘트 근사도 한계가 있다.</p>
+<p>계산비용은 다음과 같다.</p>
+<ul>
+<li>Taylor: 함수 1회와 <span class="math inline">\(d\)</span>개의 편미분 평가, 대략 <span class="math inline">\(d+1\)</span>회.</li>
+<li>정밀도 3 무향 변환: <span class="math inline">\(2d+1\)</span>회의 함수평가.</li>
+<li>정밀도 5 규칙: <span class="math inline">\(2d^2+1\)</span>회의 함수평가.</li>
+<li>차원별 가우스 구적: <span class="math inline">\(m^d\)</span>회의 함수평가.</li>
+</ul>
+<p>Taylor는 미분 가능성과 기울기 계산이 필요하다. 조회표나 외부 시뮬레이터처럼 함수값만 계산할 수 있는 경우 무향 변환이 훨씬 적용하기 쉽다. 수치적분으로 얻은 근사 공분산은 근사오차 때문에 양의 정부호가 아닐 수 있으므로 보정이 필요하다.</p>
+</section>
+</section>
+</section>
+<section id="가우시안-근사를-이용한-기대전파" class="level3" data-number="13.5.2">
+<h3 data-number="13.5.2" class="anchored" data-anchor-id="가우시안-근사를-이용한-기대전파"><span class="header-section-number">13.5.2</span> 가우시안 근사를 이용한 기대전파</h3>
+<p>원래 인자 각각이 한 변수를 다른 변수와 외생 가우시안 잡음의 결정적 함수로 나타낸다고 가정한다.</p>
+<p><span class="math display">\[
+X_i=f_i(\mathbf Y_i,\mathbf W_i),
+\]</span></p>
+<p>여기서 <span class="math inline">\(\mathbf W_i\)</span>는 표준가우시안 외생변수이며 CPD의 모든 확률성을 담당한다. 이 표현은 많은 연속 CPD를 포함한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제</strong> 비선형 CPD</p>
+</blockquote>
+<p><span class="math display">\[
+X\sim\mathcal N\left(\sqrt{Y_1^2+Y_2^2};\sigma^2\right)
+\]</span></p>
+<p>는 <span class="math inline">\(W\sim\mathcal N(0,1)\)</span>을 도입하여</p>
+<p><span class="math display">\[
+X=\sqrt{Y_1^2+Y_2^2}+\sigma W
+\]</span></p>
+<p>로 쓸 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제</strong> 다음 위치의 분산이 속도의 제곱에 비례하는</p>
+</blockquote>
+<p><span class="math display">\[
+X'\sim\mathcal N(X+V;\rho V^2)
+\]</span></p>
+<p>는</p>
+<p><span class="math display">\[
+X'=X+V+\sqrt\rho\,VZ,
+\qquad Z\sim\mathcal N(0,1)
+\]</span></p>
+<p>로 표현된다.</p>
+<p>클러스터는 초기 함수인자와 들어오는 가우시안 메시지들의 집합을 유지한다. 메시지를 보낼 때 이들의 곱이 만드는 측도를 Taylor 또는 수치적분으로 가우시안화하고, 분리집합으로 주변화한다.</p>
+<section id="증거-처리" class="level4" data-number="13.5.2.1">
+<h4 data-number="13.5.2.1" class="anchored" data-anchor-id="증거-처리"><span class="header-section-number">13.5.2.1</span> 증거 처리</h4>
+<p>연속변수 <span class="math inline">\(X=x\)</span>의 증거는 측도 0인 부분공간에 대한 조건화이므로 주의해야 한다. 부모변수의 관측은 비선형 함수에 값을 직접 대입하여 차원을 줄일 수 있다. 그러나 자식변수의 관측은 역함수를 구하기 어려운 경우가 많다.</p>
+<p>실무에서 가장 단순한 방법은 먼저 비선형 관계를 가우시안으로 선형화한 뒤 정준형에 증거를 대입하는 것이다. 예를 들어 <span class="math inline">\(p(X,Y_1,Y_2)\)</span>를 가우시안으로 근사한 후 <span class="math inline">\(X=x\)</span>를 조건화한다. 하지만 선형화에 사용한 분포가 사전분포이고 증거를 반영한 사후분포와 크게 다르면 근사가 부정확할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>주의</strong><br>
+비선형 함수가 급격하게 변하는 영역에 증거가 위치하면, 사전평균 근방의 선형화는 사실상 관련 없는 기울기를 사용할 수 있다. 반복 EP나 국소 재선형화가 필요한 이유이다.</p>
+</blockquote>
+</section>
+<section id="유효한-선형화와-순서-제약" class="level4" data-number="13.5.2.2">
+<h4 data-number="13.5.2.2" class="anchored" data-anchor-id="유효한-선형화와-순서-제약"><span class="header-section-number">13.5.2.2</span> 유효한 선형화와 순서 제약</h4>
+<p>선형화는 입력변수에 대한 정상화된 가우시안 분포가 필요하다. 따라서 베이즈 네트워크에서는 자식 CPD를 선형화하기 전에 부모들의 가우시안 근사가 준비되어야 한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제</strong> 비선형 연쇄 <span class="math inline">\(X_1\rightarrow X_2\rightarrow X_3\)</span>에서 <span class="math inline">\(X_3=x_3\)</span>를 관측했다고 하자. <span class="math inline">\(X_3=f_3(X_2,W_3)\)</span>를 선형화하려면 먼저 <span class="math inline">\(X_2\)</span>의 분포가 필요하고, 이를 얻으려면 <span class="math inline">\(X_1\)</span>과 <span class="math inline">\(X_2\)</span>의 상위 관계를 먼저 처리해야 한다. 따라서 증거가 끝노드에 있어도 메시지는 단순히 끝에서 시작할 수 없고 위상순서를 따라야 한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제</strong> <span class="quarto-unresolved-ref">?fig-clg-clique-tree-configurations의</span> 모든 변수를 연속 비선형 변수로 바꾸면 (c)의 클리크 트리는 어느 클리크도 필요한 부모분포를 갖지 않아 메시지를 시작할 수 없다. (e)는 <span class="math inline">\(\{A,B,X,Y\}\)</span>에서 먼저 메시지를 보내면 이후 <span class="math inline">\(C,Z\)</span>의 부모분포가 준비되어 선형화가 가능하다.</p>
+</blockquote>
+</section>
+<section id="여러-함수의-선형화" class="level4" data-number="13.5.2.3">
+<h4 data-number="13.5.2.3" class="anchored" data-anchor-id="여러-함수의-선형화"><span class="header-section-number">13.5.2.3</span> 여러 함수의 선형화</h4>
+<p>한 클러스터에 여러 비선형 함수가 연쇄적으로 포함되면 모든 함수가 독립 표준가우시안에 직접 의존한다는 단순 가정이 깨진다. 두 전략이 있다.</p>
+<p><strong>증분 선형화(incremental linearization)</strong>는 함수를 하나씩 선형화한다. 예를 들어 <span class="math inline">\(X_1=f_1(W_1)\)</span>를 먼저 가우시안화하여 <span class="math inline">\(X_1\)</span> 메시지를 만든 뒤, 이를 사용해 <span class="math inline">\(X_2=f_2(X_1,W_2)\)</span>를 선형화한다.</p>
+<p><strong>동시 선형화(simultaneous linearization)</strong>는 함수합성을 사용한다. <span class="math inline">\(X_2=f_2(f_1(W_1),W_2)=g_2(W_1,W_2)\)</span>로 바꾸어 한 번에 선형화한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제</strong> 연쇄 <span class="math inline">\(X_1\rightarrow X_2\rightarrow X_3\)</span>에서 증분 방식은 <span class="math inline">\(X_1\)</span>의 가우시안 근사오차를 다음 단계가 이어받는다. 동시 방식은 더 복잡한 합성함수의 모멘트를 직접 근사하므로 수치적분 오차가 커질 수 있다. 어느 방법이 항상 우월한 것은 아니다.</p>
+</blockquote>
+</section>
+<section id="반복-메시지-전달" class="level4" data-number="13.5.2.4">
+<h4 data-number="13.5.2.4" class="anchored" data-anchor-id="반복-메시지-전달"><span class="header-section-number">13.5.2.4</span> 반복 메시지 전달</h4>
+<p>한 번의 상향ㆍ하향 패스에서 선형화 결과는 메시지 순서와 초기 인자 배치에 크게 의존한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제</strong> <span class="math inline">\(X\)</span>의 두 자식 <span class="math inline">\(Y,Z\)</span>가 있고 <span class="math inline">\(Y=y\)</span>가 관측되었다고 하자. <span class="math inline">\(p(X)\)</span>를 <span class="math inline">\(\{X,Y\}\)</span> 클리크에 배치하면 <span class="math inline">\(Y\)</span>의 증거를 반영한 <span class="math inline">\(X\)</span> 사후근사로 <span class="math inline">\(Z\)</span>를 선형화할 수 있다. 반대로 <span class="math inline">\(p(X)\)</span>를 <span class="math inline">\(\{X,Z\}\)</span>에 배치하면 <span class="math inline">\(Z\)</span>는 <span class="math inline">\(X\)</span>의 사전분포를 기반으로 선형화되어 다른 결과가 나온다.</p>
+</blockquote>
+<p>반복 EP에서는 모든 클러스터가 한 번 선형화된 후 메시지를 계속 교환하며, 새로운 들어오는 메시지가 정의하는 더 사후적인 분포를 사용해 함수를 다시 선형화한다. 이 과정은 정확도를 개선할 수 있지만, 이전 메시지를 나누는 과정에서 음의 정밀도나 비정상 공분산이 생길 수 있다. 각 단계에서 양의 정부호와 적분 가능성을 검사해야 한다.</p>
+</section>
+<section id="확장된-clg-네트워크" class="level4" data-number="13.5.2.5">
+<h4 data-number="13.5.2.5" class="anchored" data-anchor-id="확장된-clg-네트워크"><span class="header-section-number">13.5.2.5</span> 확장된 CLG 네트워크</h4>
+<p>표준 CLG는 연속 부모를 갖는 이산변수를 허용하지 않는다. 그러나 비선형 EP는 로지스틱 또는 softmax CPD를 가우시안 인자와 곱한 뒤 정준표 행별로 근사할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제</strong> <span class="math inline">\(X\sim\mathcal N(\mu;\sigma^2)\)</span>이고</p>
+</blockquote>
+<p><span class="math display">\[
+P(A=a^1\mid X=x)
+=
+\frac1{1+\exp(c_1x+c_0)}
+\]</span></p>
+<p>인 <span class="math inline">\(X\rightarrow A\)</span>를 생각하자. <span class="math inline">\(A=a^1\)</span>과 <span class="math inline">\(a^0\)</span>의 각 행에는</p>
+<p><span class="math display">\[
+p(x)P(a\mid x)
+\]</span></p>
+<p>라는 비가우시안 연속함수가 들어간다. 각 행을 Taylor, 가우스 구적 또는 무향 변환으로 하나의 가우시안에 M-투영하면 정준표로 메시지 전달할 수 있다.</p>
+</section>
+</section>
+</section>
+<section id="입자-기반-근사-방법" class="level2" data-number="13.6">
+<h2 data-number="13.6" class="anchored" data-anchor-id="입자-기반-근사-방법"><span class="header-section-number">13.6</span> 입자 기반 근사 방법</h2>
+<p>앞 절의 메시지 전달법은 가우시안을 공통 언어로 사용한다. 순수 가우시안에서는 정확하지만, 다봉성ㆍ왜도ㆍ두꺼운 꼬리를 갖는 분포에서는 단일 가우시안 근사가 매우 부정확할 수 있다. 임의의 연속밀도를 유한한 모수로 정확히 표현하는 보편적 분포족은 없으므로, 반모수 또는 비모수 입자표현이 중요한 대안이 된다.</p>
+<section id="연속공간에서의-표본추출" class="level3" data-number="13.6.1">
+<h3 data-number="13.6.1" class="anchored" data-anchor-id="연속공간에서의-표본추출"><span class="header-section-number">13.6.1</span> 연속공간에서의 표본추출</h3>
+<p>가우시안, 감마 등 일부 표준분포는 효율적인 전용 난수생성법을 갖지만, 임의의 밀도 <span class="math inline">\(p(x)\)</span>에서 직접 표본을 만드는 방법이 항상 존재하는 것은 아니다.</p>
+<p>가장 단순한 일반법 중 하나는 <strong>거부 표본추출(rejection sampling)</strong>이다. <span class="math inline">\(p(x)&gt;0\)</span>인 곳에서 <span class="math inline">\(q(x)&gt;0\)</span>이고 모든 <span class="math inline">\(x\)</span>에서 <span class="math inline">\(q(x)\ge p(x)\)</span>이며,</p>
+<p><span class="math display">\[
+Q(x)=\frac{q(x)}{Z}
+\]</span></p>
+<p>에서 표본을 생성할 수 있다고 하자. 다음을 반복한다.</p>
+<ol type="1">
+<li><span class="math inline">\(x\sim Q\)</span>, <span class="math inline">\(u\sim\operatorname{Unif}(0,1)\)</span>을 생성한다.</li>
+<li><span class="math inline">\(u&lt;p(x)/q(x)\)</span>이면 <span class="math inline">\(x\)</span>를 채택하고, 아니면 다시 시도한다.</li>
+</ol>
+<p>채택된 <span class="math inline">\(x\)</span>의 분포는 정확히 <span class="math inline">\(p(x)\)</span>이다. 하한 <span class="math inline">\(b(x)\le p(x)\)</span>도 있다면 <span class="math inline">\(u&lt;b(x)/q(x)\)</span>일 때 <span class="math inline">\(p(x)\)</span>를 직접 계산하지 않고 즉시 채택할 수 있다.</p>
+<p>제안포락선 <span class="math inline">\(q\)</span>가 <span class="math inline">\(p\)</span>보다 지나치게 넓으면 채택률이 매우 낮아진다. 적응형 거부 표본추출, slice sampling과 같은 고급 방법은 이 문제를 완화한다.</p>
+</section>
+<section id="베이즈-네트워크의-전방-표본추출" class="level3" data-number="13.6.2">
+<h3 data-number="13.6.2" class="anchored" data-anchor-id="베이즈-네트워크의-전방-표본추출"><span class="header-section-number">13.6.2</span> 베이즈 네트워크의 전방 표본추출</h3>
+<p>각 연속 CPD <span class="math inline">\(p(X_i\mid\operatorname{Pa}_{X_i})\)</span>에서 표본을 만들 수 있다면, 위상순서에 따라 연속ㆍ혼합 베이즈 네트워크의 사전분포에서 전방 표본을 생성할 수 있다. 표본 <span class="math inline">\(\mathbf x^{[m]}\)</span>으로</p>
+<p><span class="math display">\[
+E[f(\mathbf X)]
+\approx
+\frac1M\sum_{m=1}^{M}f(\mathbf x^{[m]})
+\]</span></p>
+<p>를 추정한다. <span class="math inline">\(f(X)=X\)</span>이면 평균, <span class="math inline">\(f(X)=X^2\)</span>와 평균제곱을 조합하면 분산을 추정한다.</p>
+<p>연속증거가 있으면 단순 거부 표본추출은 사실상 불가능하다. 연속변수 <span class="math inline">\(Y\)</span>에서 정확히 <span class="math inline">\(Y=y\)</span>인 표본이 나올 확률은 0이므로 모든 표본이 거부된다.</p>
+<p>가능도 가중법은 자연스럽게 일반화된다. 관측되지 않은 변수는 CPD에서 표본을 만들고, 관측된 연속변수 <span class="math inline">\(X_i=x_i\)</span>는 해당 값으로 고정한 뒤 입자가중치에</p>
+<p><span class="math display">\[
+p(x_i\mid\mathbf u_i)
+\]</span></p>
+<p>를 곱한다. 여기서 <span class="math inline">\(\mathbf u_i\)</span>는 입자에서 부모에 배정된 값이다. 연속밀도는 1보다 클 수 있으므로 가중치도 1을 넘을 수 있다. 알고리즘의 타당성에는 문제가 없지만 가중치 분산이 커질 수 있다.</p>
+</section>
+<section id="mcmc-방법" class="level3" data-number="13.6.3">
+<h3 data-number="13.6.3" class="anchored" data-anchor-id="mcmc-방법"><span class="header-section-number">13.6.3</span> MCMC 방법</h3>
+<p>연속공간의 마르코프 연쇄 이론은 이산공간보다 복잡하지만, Gibbs와 Metropolis-Hastings의 기본 원리는 그대로 적용된다.</p>
+<p>Gibbs 표본추출에서는 현재 완전 할당을 유지하고 각 변수 <span class="math inline">\(X_i\)</span>를 마르코프 담요의 현재값 <span class="math inline">\(\mathbf u_i\)</span>에 조건부로 다시 뽑는다.</p>
+<p><span class="math display">\[
+p(x_i'\mid\mathbf u_i)
+=
+\frac{
+\prod_{C_j\ni X_i}\beta_j(x_i',\mathbf u_i)
+}{
+\int
+\prod_{C_j\ni X_i}\beta_j(x_i'',\mathbf u_i)
+\,dx_i''
+}.
+\]</span></p>
+<p>이 조건부분포가 표준형태가 아니면 직접 표본을 만들기 어렵다. 이때 Metropolis-Hastings를 사용한다. 지역 제안분포 <span class="math inline">\(T_i^Q\)</span>에서 <span class="math inline">\(x_i'\)</span>를 제안하고</p>
+<p><span class="math display">\[
+A(\mathbf u_i,x_i\rightarrow\mathbf u_i,x_i')
+=
+\min\left\{1,
+\frac{p(x_i'\mid\mathbf u_i)}{p(x_i\mid\mathbf u_i)}
+\frac{T_i^Q(\mathbf u_i,x_i'\rightarrow\mathbf u_i,x_i)}
+{T_i^Q(\mathbf u_i,x_i\rightarrow\mathbf u_i,x_i')}
+\right\}
+\]</span></p>
+<p>의 확률로 채택한다.</p>
+<p>흔한 제안은 현재값을 중심으로 한 가우시안, Student-<span class="math inline">\(t\)</span>, 또는 유한구간 균등분포이다. 이는 연속공간의 <strong>랜덤워크 연쇄</strong>를 만든다. 제안분산이 너무 작으면 채택률은 높지만 이동이 느리고, 너무 크면 대부분 거부된다. 분포의 서로 다른 영역에서 적절한 창 크기가 다를 수 있으므로 적응적 조정이 성능에 큰 영향을 준다.</p>
+</section>
+<section id="축약-입자" class="level3" data-number="13.6.4">
+<h3 data-number="13.6.4" class="anchored" data-anchor-id="축약-입자"><span class="header-section-number">13.6.4</span> 축약 입자</h3>
+<p>전체 변수에 값을 배정하는 완전 입자는 고차원 공간을 비효율적으로 덮는다. 변수집합을</p>
+<p><span class="math display">\[
+\mathbf X=\mathbf X^p\cup\mathbf X^d
+\]</span></p>
+<p>로 나누고, <span class="math inline">\(\mathbf X^p\)</span>만 표본화하며 <span class="math inline">\(\mathbf X^d\)</span>의 조건부분포를 닫힌형식 또는 근사모형으로 유지하면 분산을 크게 줄일 수 있다.</p>
+<p>혼합 네트워크에서는 특히</p>
+<p><span class="math display">\[
+\mathbf X^p=\Delta,
+\qquad
+\mathbf X^d=\Gamma
+\]</span></p>
+<p>로 두는 전략이 유용하다. 이산상태 경로를 입자로 표본화하면, 각 입자에 조건부인 연속부분은 순수 선형 가우시안 네트워크가 되어 정준형 변수 제거나 칼만형 계산으로 처리할 수 있다. 비선형 연속부분이면 가우시안 EP를 사용할 수 있다.</p>
+<p>CLG에서는 이산변수가 연속 부모를 갖지 않으므로 이산집합이 위쪽으로 닫혀 있어 가능도 가중 표본추출을 비교적 쉽게 적용할 수 있다. MCMC에서는 한 이산변수 값을 바꿀 때 전체 연속추론을 처음부터 계산하지 않고 관련 클리크나 메시지만 갱신하는 증분기법을 사용할 수 있다.</p>
+</section>
+<section id="비모수-메시지-전달" class="level3" data-number="13.6.5">
+<h3 data-number="13.6.5" class="anchored" data-anchor-id="비모수-메시지-전달"><span class="header-section-number">13.6.5</span> 비모수 메시지 전달</h3>
+<p>입자와 메시지 전달을 결합할 수도 있다. 클리크 트리 또는 순환 클러스터 그래프의 구조는 유지하되, 클러스터 퍼텐셜과 메시지를 단일 가우시안이 아니라 다음과 같이 표현한다.</p>
+<ul>
+<li>가중 입자 집합</li>
+<li>작은 커널을 붙인 가우시안 혼합</li>
+<li>가변 해상도 히스토그램</li>
+<li>기타 비모수 밀도추정</li>
+</ul>
+<p>전체 결합공간이 아니라 한 클러스터의 낮은 차원에서 표본을 생성하므로 순수 전역 입자방법보다 효율적일 수 있다. 반면 순환 클러스터 그래프를 사용하면 의사주변분포의 불일치오차가 추가된다.</p>
+<p>설계 선택은 세 축으로 나뉜다.</p>
+<ol type="1">
+<li>클리크 트리 또는 순환 클러스터 그래프, 합-곱 또는 믿음갱신.</li>
+<li>입자, 커널 밀도, 히스토그램과 같은 메시지 표현.</li>
+<li>중요도 표본추출, MCMC, 결정론적 근사와 같은 메시지 생성법.</li>
+</ol>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./12-map-inference.html" class="pagination-link" aria-label="MAP 추론">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">MAP 추론</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./14-inference-in-temporal-models.html" class="pagination-link" aria-label="시간 모형에서의 추론">
+        <span class="nav-page-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">시간 모형에서의 추론</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

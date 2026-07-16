@@ -1,0 +1,2484 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>18&nbsp; 부분관측 자료 – 확률적 그래프 모형</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./19-learning-undirected-models.html" rel="next">
+<link href="./17-structure-learning-bayesian-networks.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-a522afb83bf8ae494942cf1b0ac9d4c3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./18-partially-observed-data.html"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">부분관측 자료</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">확률적 그래프 모형</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">기초 개념</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-bayesian-network-representation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">베이즈 네트워크 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-undirected-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">무방향 그래픽 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-local-probabilistic-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">국소 확률 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-template-based-representations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">템플릿 기반 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-gaussian-network-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">가우시안 네트워크 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-exponential-family.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">지수족</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-exact-inference-variable-elimination.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">정확추론: 변수 제거</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-exact-inference-clique-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">정확추론: 클리크 트리</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-inference-as-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">최적화로서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-particle-based-approximate-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">입자 기반 근사추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-map-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">MAP 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-inference-in-hybrid-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">혼합 네트워크에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-inference-in-temporal-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">시간 모형에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-learning-graphical-models-overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">그래프모형 학습 개요</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-parameter-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">모수추정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-structure-learning-bayesian-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">베이지안 네트워크의 구조학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-partially-observed-data.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">부분관측 자료</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./19-learning-undirected-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">무방향 그래프모형의 학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20-causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">인과성</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21-utilities-and-decisions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">효용과 의사결정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22-structured-decision-problems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">구조화된 의사결정 문제</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./23-epilogue.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">맺음말: 왜 확률적 그래프 모형인가?</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#기초" id="toc-기초" class="nav-link active" data-scroll-target="#기초"><span class="header-section-number">18.1</span> 기초</a>
+  <ul>
+  <li><a href="#자료의-가능도와-관측모형" id="toc-자료의-가능도와-관측모형" class="nav-link" data-scroll-target="#자료의-가능도와-관측모형"><span class="header-section-number">18.1.1</span> 자료의 가능도와 관측모형</a></li>
+  <li><a href="#관측기전의-분리" id="toc-관측기전의-분리" class="nav-link" data-scroll-target="#관측기전의-분리"><span class="header-section-number">18.1.2</span> 관측기전의 분리</a></li>
+  <li><a href="#불완전자료의-가능도함수" id="toc-불완전자료의-가능도함수" class="nav-link" data-scroll-target="#불완전자료의-가능도함수"><span class="header-section-number">18.1.3</span> 불완전자료의 가능도함수</a></li>
+  <li><a href="#두-변수-네트워크의-예" id="toc-두-변수-네트워크의-예" class="nav-link" data-scroll-target="#두-변수-네트워크의-예"><span class="header-section-number">18.1.4</span> 두 변수 네트워크의 예</a></li>
+  <li><a href="#모수독립성의-상실" id="toc-모수독립성의-상실" class="nav-link" data-scroll-target="#모수독립성의-상실"><span class="header-section-number">18.1.5</span> 모수독립성의 상실</a></li>
+  <li><a href="#식별가능성" id="toc-식별가능성" class="nav-link" data-scroll-target="#식별가능성"><span class="header-section-number">18.1.6</span> 식별가능성</a></li>
+  </ul></li>
+  <li><a href="#모수추정" id="toc-모수추정" class="nav-link" data-scroll-target="#모수추정"><span class="header-section-number">18.2</span> 모수추정</a>
+  <ul>
+  <li><a href="#경사상승법" id="toc-경사상승법" class="nav-link" data-scroll-target="#경사상승법"><span class="header-section-number">18.2.1</span> 경사상승법</a>
+  <ul class="collapse">
+  <li><a href="#가능도-기울기의-계산" id="toc-가능도-기울기의-계산" class="nav-link" data-scroll-target="#가능도-기울기의-계산"><span class="header-section-number">18.2.1.1</span> 가능도 기울기의 계산</a></li>
+  <li><a href="#수치-예제" id="toc-수치-예제" class="nav-link" data-scroll-target="#수치-예제"><span class="header-section-number">18.2.1.2</span> 수치 예제</a></li>
+  <li><a href="#확률제약-처리" id="toc-확률제약-처리" class="nav-link" data-scroll-target="#확률제약-처리"><span class="header-section-number">18.2.1.3</span> 확률제약 처리</a></li>
+  </ul></li>
+  <li><a href="#기대-최대화-알고리즘" id="toc-기대-최대화-알고리즘" class="nav-link" data-scroll-target="#기대-최대화-알고리즘"><span class="header-section-number">18.2.2</span> 기대-최대화 알고리즘</a>
+  <ul class="collapse">
+  <li><a href="#직관" id="toc-직관" class="nav-link" data-scroll-target="#직관"><span class="header-section-number">18.2.2.1</span> 직관</a></li>
+  <li><a href="#기대-충분통계" id="toc-기대-충분통계" class="nav-link" data-scroll-target="#기대-충분통계"><span class="header-section-number">18.2.2.2</span> 기대 충분통계</a></li>
+  <li><a href="#베이지안-네트워크용-em" id="toc-베이지안-네트워크용-em" class="nav-link" data-scroll-target="#베이지안-네트워크용-em"><span class="header-section-number">18.2.2.3</span> 베이지안 네트워크용 EM</a></li>
+  <li><a href="#e-step" id="toc-e-step" class="nav-link" data-scroll-target="#e-step"><span class="header-section-number">18.2.2.4</span> E-step</a></li>
+  <li><a href="#m-step" id="toc-m-step" class="nav-link" data-scroll-target="#m-step"><span class="header-section-number">18.2.2.5</span> M-step</a></li>
+  <li><a href="#베이지안-군집화" id="toc-베이지안-군집화" class="nav-link" data-scroll-target="#베이지안-군집화"><span class="header-section-number">18.2.2.6</span> 베이지안 군집화</a></li>
+  <li><a href="#hard-assignment-em과-k-means" id="toc-hard-assignment-em과-k-means" class="nav-link" data-scroll-target="#hard-assignment-em과-k-means"><span class="header-section-number">18.2.2.7</span> Hard-assignment EM과 k-means</a></li>
+  <li><a href="#em의-이론적-기반" id="toc-em의-이론적-기반" class="nav-link" data-scroll-target="#em의-이론적-기반"><span class="header-section-number">18.2.2.8</span> EM의 이론적 기반</a></li>
+  <li><a href="#em-에너지-함수" id="toc-em-에너지-함수" class="nav-link" data-scroll-target="#em-에너지-함수"><span class="header-section-number">18.2.2.9</span> EM 에너지 함수</a></li>
+  <li><a href="#hard-assignment-em의-목적함수" id="toc-hard-assignment-em의-목적함수" class="nav-link" data-scroll-target="#hard-assignment-em의-목적함수"><span class="header-section-number">18.2.2.10</span> Hard-assignment EM의 목적함수</a></li>
+  </ul></li>
+  <li><a href="#비교-기울기-상승법과-em" id="toc-비교-기울기-상승법과-em" class="nav-link" data-scroll-target="#비교-기울기-상승법과-em"><span class="header-section-number">18.2.3</span> 비교: 기울기 상승법과 EM</a></li>
+  <li><a href="#수렴속도" id="toc-수렴속도" class="nav-link" data-scroll-target="#수렴속도"><span class="header-section-number">18.2.4</span> 수렴속도</a></li>
+  <li><a href="#어느-방법을-선택할-것인가" id="toc-어느-방법을-선택할-것인가" class="nav-link" data-scroll-target="#어느-방법을-선택할-것인가"><span class="header-section-number">18.2.5</span> 어느 방법을 선택할 것인가</a>
+  <ul class="collapse">
+  <li><a href="#초기화" id="toc-초기화" class="nav-link" data-scroll-target="#초기화"><span class="header-section-number">18.2.5.1</span> 초기화</a></li>
+  <li><a href="#다중-시작점과-빔-탐색" id="toc-다중-시작점과-빔-탐색" class="nav-link" data-scroll-target="#다중-시작점과-빔-탐색"><span class="header-section-number">18.2.5.2</span> 다중 시작점과 빔 탐색</a></li>
+  <li><a href="#어닐링" id="toc-어닐링" class="nav-link" data-scroll-target="#어닐링"><span class="header-section-number">18.2.5.3</span> 어닐링</a></li>
+  <li><a href="#수렴판정" id="toc-수렴판정" class="nav-link" data-scroll-target="#수렴판정"><span class="header-section-number">18.2.5.4</span> 수렴판정</a></li>
+  <li><a href="#과적합과-조기종료" id="toc-과적합과-조기종료" class="nav-link" data-scroll-target="#과적합과-조기종료"><span class="header-section-number">18.2.5.5</span> 과적합과 조기종료</a></li>
+  <li><a href="#수렴가속" id="toc-수렴가속" class="nav-link" data-scroll-target="#수렴가속"><span class="header-section-number">18.2.5.6</span> 수렴가속</a></li>
+  </ul></li>
+  <li><a href="#근사추론을-이용한-모수학습" id="toc-근사추론을-이용한-모수학습" class="nav-link" data-scroll-target="#근사추론을-이용한-모수학습"><span class="header-section-number">18.2.6</span> 근사추론을 이용한 모수학습</a></li>
+  <li><a href="#변분-em" id="toc-변분-em" class="nav-link" data-scroll-target="#변분-em"><span class="header-section-number">18.2.7</span> 변분 EM</a></li>
+  </ul></li>
+  <li><a href="#불완전자료에서의-베이지안-학습" id="toc-불완전자료에서의-베이지안-학습" class="nav-link" data-scroll-target="#불완전자료에서의-베이지안-학습"><span class="header-section-number">18.3</span> 불완전자료에서의 베이지안 학습</a>
+  <ul>
+  <li><a href="#개요" id="toc-개요" class="nav-link" data-scroll-target="#개요"><span class="header-section-number">18.3.1</span> 개요</a></li>
+  <li><a href="#map-추정" id="toc-map-추정" class="nav-link" data-scroll-target="#map-추정"><span class="header-section-number">18.3.2</span> MAP 추정</a></li>
+  <li><a href="#완전-베이지안-추론" id="toc-완전-베이지안-추론" class="nav-link" data-scroll-target="#완전-베이지안-추론"><span class="header-section-number">18.3.3</span> 완전 베이지안 추론</a></li>
+  <li><a href="#mcmc-표본추출" id="toc-mcmc-표본추출" class="nav-link" data-scroll-target="#mcmc-표본추출"><span class="header-section-number">18.3.4</span> MCMC 표본추출</a>
+  <ul class="collapse">
+  <li><a href="#gibbs-sampling" id="toc-gibbs-sampling" class="nav-link" data-scroll-target="#gibbs-sampling"><span class="header-section-number">18.3.4.1</span> Gibbs sampling</a></li>
+  <li><a href="#결측자료-변수-갱신" id="toc-결측자료-변수-갱신" class="nav-link" data-scroll-target="#결측자료-변수-갱신"><span class="header-section-number">18.3.4.2</span> 결측자료 변수 갱신</a></li>
+  <li><a href="#cpd-모수-갱신" id="toc-cpd-모수-갱신" class="nav-link" data-scroll-target="#cpd-모수-갱신"><span class="header-section-number">18.3.4.3</span> CPD 모수 갱신</a></li>
+  <li><a href="#collapsed-mcmc" id="toc-collapsed-mcmc" class="nav-link" data-scroll-target="#collapsed-mcmc"><span class="header-section-number">18.3.4.4</span> Collapsed MCMC</a></li>
+  <li><a href="#모수만-상태로-남기는-축약" id="toc-모수만-상태로-남기는-축약" class="nav-link" data-scroll-target="#모수만-상태로-남기는-축약"><span class="header-section-number">18.3.4.5</span> 모수만 상태로 남기는 축약</a></li>
+  <li><a href="#자료완성만-상태로-남기는-축약" id="toc-자료완성만-상태로-남기는-축약" class="nav-link" data-scroll-target="#자료완성만-상태로-남기는-축약"><span class="header-section-number">18.3.4.6</span> 자료완성만 상태로 남기는 축약</a></li>
+  <li><a href="#두-축약방법의-비교" id="toc-두-축약방법의-비교" class="nav-link" data-scroll-target="#두-축약방법의-비교"><span class="header-section-number">18.3.4.7</span> 두 축약방법의 비교</a></li>
+  </ul></li>
+  <li><a href="#변분-베이지안-학습" id="toc-변분-베이지안-학습" class="nav-link" data-scroll-target="#변분-베이지안-학습"><span class="header-section-number">18.3.5</span> 변분 베이지안 학습</a></li>
+  <li><a href="#이진-나이브-베이즈-군집에서의-갱신" id="toc-이진-나이브-베이즈-군집에서의-갱신" class="nav-link" data-scroll-target="#이진-나이브-베이즈-군집에서의-갱신"><span class="header-section-number">18.3.6</span> 이진 나이브 베이즈 군집에서의 갱신</a></li>
+  </ul></li>
+  <li><a href="#구조학습" id="toc-구조학습" class="nav-link" data-scroll-target="#구조학습"><span class="header-section-number">18.4</span> 구조학습</a>
+  <ul>
+  <li><a href="#구조점수" id="toc-구조점수" class="nav-link" data-scroll-target="#구조점수"><span class="header-section-number">18.4.1</span> 구조점수</a>
+  <ul class="collapse">
+  <li><a href="#laplace-근사" id="toc-laplace-근사" class="nav-link" data-scroll-target="#laplace-근사"><span class="header-section-number">18.4.1.1</span> Laplace 근사</a></li>
+  <li><a href="#점근적-근사와-bic" id="toc-점근적-근사와-bic" class="nav-link" data-scroll-target="#점근적-근사와-bic"><span class="header-section-number">18.4.1.2</span> 점근적 근사와 BIC</a></li>
+  <li><a href="#cheesemanstutz-근사" id="toc-cheesemanstutz-근사" class="nav-link" data-scroll-target="#cheesemanstutz-근사"><span class="header-section-number">18.4.1.3</span> Cheeseman–Stutz 근사</a></li>
+  <li><a href="#candidate-method" id="toc-candidate-method" class="nav-link" data-scroll-target="#candidate-method"><span class="header-section-number">18.4.1.4</span> Candidate method</a></li>
+  <li><a href="#변분-주변가능도" id="toc-변분-주변가능도" class="nav-link" data-scroll-target="#변분-주변가능도"><span class="header-section-number">18.4.1.5</span> 변분 주변가능도</a></li>
+  </ul></li>
+  <li><a href="#구조탐색" id="toc-구조탐색" class="nav-link" data-scroll-target="#구조탐색"><span class="header-section-number">18.4.2</span> 구조탐색</a>
+  <ul class="collapse">
+  <li><a href="#순진한-접근의-한계" id="toc-순진한-접근의-한계" class="nav-link" data-scroll-target="#순진한-접근의-한계"><span class="header-section-number">18.4.2.1</span> 순진한 접근의 한계</a></li>
+  <li><a href="#휴리스틱-해법" id="toc-휴리스틱-해법" class="nav-link" data-scroll-target="#휴리스틱-해법"><span class="header-section-number">18.4.2.2</span> 휴리스틱 해법</a></li>
+  </ul></li>
+  <li><a href="#structural-em" id="toc-structural-em" class="nav-link" data-scroll-target="#structural-em"><span class="header-section-number">18.4.3</span> Structural EM</a>
+  <ul class="collapse">
+  <li><a href="#선택적-군집" id="toc-선택적-군집" class="nav-link" data-scroll-target="#선택적-군집"><span class="header-section-number">18.4.3.1</span> 선택적 군집</a></li>
+  <li><a href="#효율적-구현" id="toc-효율적-구현" class="nav-link" data-scroll-target="#효율적-구현"><span class="header-section-number">18.4.3.2</span> 효율적 구현</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#잠재변수를-포함한-모형의-학습" id="toc-잠재변수를-포함한-모형의-학습" class="nav-link" data-scroll-target="#잠재변수를-포함한-모형의-학습"><span class="header-section-number">18.5</span> 잠재변수를 포함한 모형의 학습</a>
+  <ul>
+  <li><a href="#잠재변수의-정보내용" id="toc-잠재변수의-정보내용" class="nav-link" data-scroll-target="#잠재변수의-정보내용"><span class="header-section-number">18.5.1</span> 잠재변수의 정보내용</a></li>
+  <li><a href="#잠재변수의-상태수-결정" id="toc-잠재변수의-상태수-결정" class="nav-link" data-scroll-target="#잠재변수의-상태수-결정"><span class="header-section-number">18.5.2</span> 잠재변수의 상태수 결정</a>
+  <ul class="collapse">
+  <li><a href="#모형선택" id="toc-모형선택" class="nav-link" data-scroll-target="#모형선택"><span class="header-section-number">18.5.2.1</span> 모형선택</a></li>
+  <li><a href="#dirichlet-process" id="toc-dirichlet-process" class="nav-link" data-scroll-target="#dirichlet-process"><span class="header-section-number">18.5.2.2</span> Dirichlet process</a></li>
+  <li><a href="#중국음식점-과정" id="toc-중국음식점-과정" class="nav-link" data-scroll-target="#중국음식점-과정"><span class="header-section-number">18.5.2.3</span> 중국음식점 과정</a></li>
+  <li><a href="#stick-breaking-표현" id="toc-stick-breaking-표현" class="nav-link" data-scroll-target="#stick-breaking-표현"><span class="header-section-number">18.5.2.4</span> Stick-breaking 표현</a></li>
+  </ul></li>
+  <li><a href="#잠재변수의-도입" id="toc-잠재변수의-도입" class="nav-link" data-scroll-target="#잠재변수의-도입"><span class="header-section-number">18.5.3</span> 잠재변수의 도입</a></li>
+  <li><a href="#계층적-조직" id="toc-계층적-조직" class="nav-link" data-scroll-target="#계층적-조직"><span class="header-section-number">18.5.4</span> 계층적 조직</a></li>
+  <li><a href="#중첩-잠재요인" id="toc-중첩-잠재요인" class="nav-link" data-scroll-target="#중첩-잠재요인"><span class="header-section-number">18.5.5</span> 중첩 잠재요인</a></li>
+  <li><a href="#잠재변수의-구조적-신호" id="toc-잠재변수의-구조적-신호" class="nav-link" data-scroll-target="#잠재변수의-구조적-신호"><span class="header-section-number">18.5.6</span> 잠재변수의 구조적 신호</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-partially-observed-data" class="quarto-section-identifier"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">부분관측 자료</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>앞 장들에서는 각 학습 사례가 모든 변수의 값을 포함한다고 가정하였다. 이 완전관측 가정은 가능도의 분해, 국소 충분통계, 닫힌형식 모수추정과 구조점수의 분해를 가능하게 했다. 그러나 실제 자료에서는 결측이 예외가 아니라 보통이다. 자료수집 오류로 값이 사라질 수 있고, 검사 자체가 시행되지 않을 수 있으며, 질병상태·유전적 소인·환자의 잠재중증도처럼 원래 직접 관측할 수 없는 변수도 있다.</p>
+<p>불완전자료 학습에는 두 종류의 문제가 동시에 나타난다.</p>
+<ol type="1">
+<li><strong>통계적·개념적 문제</strong>: 왜 값이 관측되지 않았는지, 관측기전을 무시해도 되는지, 자료로 모형을 유일하게 식별할 수 있는지 판단해야 한다.</li>
+<li><strong>계산적 문제</strong>: 결측값을 합산하여 가능도를 계산하면 모수들이 결합되고, 가능도함수가 다봉형이 되며, 각 반복마다 확률추론이 필요해진다.</li>
+</ol>
+<p>이 장은 먼저 관측모형과 결측기전을 정식화한 뒤, 고정된 네트워크 구조에서 모수를 추정하는 경사상승법과 EM을 다룬다. 이어 완전 베이지안 학습의 MCMC·변분 접근법, 불완전자료에서의 구조학습과 structural EM, 마지막으로 잠재변수의 상태수와 배치를 논의한다.</p>
+<section id="기초" class="level2" data-number="18.1">
+<h2 data-number="18.1" class="anchored" data-anchor-id="기초"><span class="header-section-number">18.1</span> 기초</h2>
+<section id="자료의-가능도와-관측모형" class="level3" data-number="18.1.1">
+<h3 data-number="18.1.1" class="anchored" data-anchor-id="자료의-가능도와-관측모형"><span class="header-section-number">18.1.1</span> 자료의 가능도와 관측모형</h3>
+<p>완전자료에서 한 사례 <span class="math inline">\(\xi[m]\)</span>의 가능도는 모형이 그 완전한 할당에 부여하는 확률 <span class="math inline">\(P(\xi[m]\mid\theta)\)</span>이다. 부분관측 사례에서 관측된 변수를 <span class="math inline">\(O[m]\)</span>, 관측값을 <span class="math inline">\(o[m]\)</span>, 숨겨진 변수를 <span class="math inline">\(H[m]\)</span>라 하면 가장 자연스러운 확장은</p>
+<p><span class="math display">\[
+P(o[m]\mid\theta)
+=
+\sum_{h[m]}P(o[m],h[m]\mid\theta)
+\]</span></p>
+<p>로 결측변수를 주변화하는 것이다. 그러나 이 식은 값이 사라진 과정이 분석하고자 하는 확률과정과 분리될 수 있다는 가정을 내포한다.</p>
+<p>실제로 관측자료는 두 단계로 생성된다.</p>
+<ol type="1">
+<li>완전한 자료 <span class="math inline">\(X\)</span>가 목표분포 <span class="math inline">\(P(X\mid\theta)\)</span>에서 생성된다.</li>
+<li>관측기전이 각 변수의 값을 보여줄지 숨길지를 결정한다.</li>
+</ol>
+<p>따라서 결측자료를 엄밀히 분석하려면 자료생성과 관측기전을 함께 모형화해야 한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 압정이 우연히 탁자에서 떨어지는 경우</strong></p>
+</blockquote>
+<p>압정을 던졌는데 간혹 탁자 밖으로 굴러 결과를 기록하지 못한다고 하자. 떨어지는 사건이 앞면·뒷면과 무관하다면 관측된 던지기만 이용해 앞면확률을 추정하는 것이 타당하다. 결측된 시행은 결과에 관한 정보를 제공하지 않는다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 뒷면을 의도적으로 숨기는 경우</strong></p>
+</blockquote>
+<p>실험자가 압정의 뾰족한 면이 위로 나온 결과를 싫어하여 일부 뒷면 결과를 버리고 결측으로 기록한다고 하자. 이제 결측 자체가 뒷면일 가능성을 높이는 정보다. 앞의 첫 번째 압정 예제처럼 결측을 무시하면 앞면확률을 체계적으로 과대추정한다.</p>
+<p>의학연구에서 치료반응이 나쁜 환자가 더 자주 탈락한다면 이 상황과 동일하다. 반대로 탈락이 결과와 무관하다면 첫 번째 상황에 가깝다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 관측가능성 변수와 관측모형</strong></p>
+</blockquote>
+<p>원래 변수집합을</p>
+<p><span class="math display">\[
+X=\{X_1,\ldots,X_n\}
+\]</span></p>
+<p>이라 하고, 각 변수의 관측 여부를 나타내는 이항변수를</p>
+<p><span class="math display">\[
+O_X=\{O_{X_1},\ldots,O_{X_n}\}
+\]</span></p>
+<p>라 하자. 관측모형은</p>
+<p><span class="math display">\[
+P_{\text{missing}}(X,O_X)
+=P(X\mid\theta)P_{\text{missing}}(O_X\mid X,\psi)
+\]</span></p>
+<p>로 정의한다. <span class="math inline">\(\theta\)</span>는 관심분포의 모수이고 <span class="math inline">\(\psi\)</span>는 관측기전의 모수다.</p>
+<p>실제로 기록되는 변수 <span class="math inline">\(Y_i\)</span>의 값공간은 <span class="math inline">\(Val(X_i)\cup\{?\}\)</span>이며</p>
+<p><span class="math display">\[
+Y_i=
+\begin{cases}
+X_i,&amp;O_{X_i}=o^1,\\
+?,&amp;O_{X_i}=o^0.
+\end{cases}
+\]</span></p>
+<p>이다. <span class="math inline">\(Y_i\ne ?\)</span>이면 <span class="math inline">\(X_i\)</span>와 <span class="math inline">\(O_{X_i}\)</span>를 모두 알게 되고, <span class="math inline">\(Y_i=?\)</span>이면 적어도 <span class="math inline">\(O_{X_i}=o^0\)</span>임을 안다.</p>
+<div id="fig-partially-observed-observability-models" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-partially-observed-observability-models-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-partially-observed-observability-models.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-partially-observed-observability-models-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.1: 압정 예제의 두 관측모형. 왼쪽에서는 관측여부가 결과와 독립이고, 오른쪽에서는 결과 <span class="math inline">\(X\)</span>가 관측여부 <span class="math inline">\(O_X\)</span>에 직접 영향을 준다.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>예제 - 무작위 결측의 가능도 분해</strong></p>
+</blockquote>
+<p>앞면확률을 <span class="math inline">\(\theta\)</span>, 결과가 관측될 확률을 <span class="math inline">\(\psi\)</span>라 하자. 관측기전이 결과와 독립이면</p>
+<p><span class="math display">\[
+P(Y=1)=\theta\psi,
+\qquad
+P(Y=0)=(1-\theta)\psi,
+\qquad
+P(Y=? )=1-\psi.
+\]</span></p>
+<p>자료에서 앞면, 뒷면, 결측 수를 각각 <span class="math inline">\(M[1],M[0],M[?]\)</span>라 하면</p>
+<p><span class="math display">\[
+L(\theta,\psi:\mathcal D)
+=
+\theta^{M[1]}(1-\theta)^{M[0]}
+\psi^{M[1]+M[0]}(1-\psi)^{M[?]}.
+\]</span></p>
+<p>가능도는 <span class="math inline">\(\theta\)</span>의 함수와 <span class="math inline">\(\psi\)</span>의 함수로 분리된다. 따라서</p>
+<p><span class="math display">\[
+\widehat\theta
+=
+\frac{M[1]}{M[1]+M[0]},
+\qquad
+\widehat\psi
+=
+\frac{M[1]+M[0]}{M[1]+M[0]+M[?]}.
+\]</span></p>
+<p>결측 사례는 관측률 추정에는 사용되지만 결과확률 추정에는 직접 사용되지 않는다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 결과의존 결측과 모수의 결합</strong></p>
+</blockquote>
+<p>앞면일 때 관측확률을 <span class="math inline">\(\psi_{O_X\mid x^1}\)</span>, 뒷면일 때 관측확률을 <span class="math inline">\(\psi_{O_X\mid x^0}\)</span>라 하면</p>
+<p><span class="math display">\[
+P(Y=1)=\theta\psi_{O_X\mid x^1},
+\]</span></p>
+<p><span class="math display">\[
+P(Y=0)=(1-\theta)\psi_{O_X\mid x^0},
+\]</span></p>
+<p><span class="math display">\[
+P(Y=? )
+=
+\theta(1-\psi_{O_X\mid x^1})
++(1-\theta)(1-\psi_{O_X\mid x^0}).
+\]</span></p>
+<p>따라서</p>
+<p><span class="math display">\[
+\begin{aligned}
+L(&amp;\theta,\psi_{O_X\mid x^1},\psi_{O_X\mid x^0}:\mathcal D)
+={}&amp;\theta^{M[1]}(1-\theta)^{M[0]}
+\psi_{O_X\mid x^1}^{M[1]}
+\psi_{O_X\mid x^0}^{M[0]}\\
+&amp;\times
+\left[
+\theta(1-\psi_{O_X\mid x^1})
++(1-\theta)(1-\psi_{O_X\mid x^0})
+\right]^{M[?]}.
+\end{aligned}
+\]</span></p>
+<p>마지막 합이 결과모수와 관측모수를 결합하므로 두 과정을 독립적으로 추정할 수 없다.</p>
+</section>
+<section id="관측기전의-분리" class="level3" data-number="18.1.2">
+<h3 data-number="18.1.2" class="anchored" data-anchor-id="관측기전의-분리"><span class="header-section-number">18.1.2</span> 관측기전의 분리</h3>
+<blockquote class="blockquote">
+<p><strong>정의 - 완전무작위결측(MCAR)</strong></p>
+</blockquote>
+<p><span class="math display">\[
+P_{\text{missing}}\models X\perp O_X
+\]</span></p>
+<p>이면 결측모형은 <strong>MCAR(missing completely at random)</strong>이다. 관측여부가 모든 실제 변수값과 주변적으로 독립이라는 강한 조건이다. 이 경우 관심모수와 관측모수의 가능도가 분리되므로 관측기전을 무시해도 된다.</p>
+<p>센서의 순간적인 전원실패나 표본과 무관한 입력오류는 MCAR에 가까울 수 있다. 반면 의료기록에서 특정 검사가 시행되지 않은 이유는 환자의 증상이나 의사의 판단과 관련되므로 대개 MCAR가 아니다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - MAR이지만 MCAR가 아닌 경우</strong></p>
+</blockquote>
+<p>두 동전 <span class="math inline">\(X_1,X_2\)</span>를 차례로 던지고 첫 번째 결과는 항상 관측하되, 첫 결과에 따라 두 번째 결과를 숨길지 결정한다고 하자. 이 경우 <span class="math inline">\(O_{X_2}\)</span>는 <span class="math inline">\(X_1\)</span>에 의존하지만, <span class="math inline">\(X_1\)</span>을 조건으로 하면 <span class="math inline">\(X_2\)</span>와 독립일 수 있다.</p>
+<div id="fig-partially-observed-mar-example" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-partially-observed-mar-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-partially-observed-mar-example.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-partially-observed-mar-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.2: 관측패턴이 <span class="math inline">\(X_1\)</span>에 의존하여 MCAR는 아니지만, <span class="math inline">\(X_1\)</span>이 관측되면 숨겨진 <span class="math inline">\(X_2\)</span>와 관측여부가 독립이 되어 MAR를 만족하는 예.
+</figcaption>
+</figure>
+</div>
+<p>동전별 앞면확률을 <span class="math inline">\(\theta_{X_1},\theta_{X_2}\)</span>라 하고, 첫 동전 결과가 <span class="math inline">\(x_1^j\)</span>일 때 두 번째 동전이 관측될 확률을 <span class="math inline">\(\psi_{O_{X_2}\mid x_1^j}\)</span>라 하면, 자료가능도는 각 <span class="math inline">\(\theta\)</span>와 <span class="math inline">\(\psi\)</span>에 대한 항으로 다시 분해된다. 핵심은 결측여부를 결정하는 변수 <span class="math inline">\(X_1\)</span>이 항상 관측되어 있기 때문이다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 무작위결측(MAR)</strong></p>
+</blockquote>
+<p>한 관측패턴 <span class="math inline">\(y\)</span>가 변수들을 관측집합 <span class="math inline">\(X_{obs}^y\)</span>와 숨은집합 <span class="math inline">\(X_{hidden}^y\)</span>로 나눈다고 하자. 해당 관측패턴이 양의 확률을 가질 때</p>
+<p><span class="math display">\[
+P_{\text{missing}}
+\models
+o_X\perp x_{hidden}^y\mid x_{obs}^y
+\]</span></p>
+<p>가 모든 가능한 숨은값에 대해 성립하면 결측모형은 <strong>MAR(missing at random)</strong>이다.</p>
+<p>동등하게 관측된 값이 주어졌을 때 결측패턴은 숨겨진 값에 추가 정보를 제공하지 않는다.</p>
+<p><span class="math display">\[
+P(x_{hidden}^y\mid x_{obs}^y,o_X)
+=
+P(x_{hidden}^y\mid x_{obs}^y).
+\]</span></p>
+<p>MAR이면</p>
+<p><span class="math display">\[
+\begin{aligned}
+P_{\text{missing}}(y)
+&amp;=
+\sum_{x_{hidden}^y}
+P(x_{obs}^y,x_{hidden}^y)
+P_{\text{missing}}(o_X\mid x_{obs}^y,x_{hidden}^y)\\
+&amp;=
+P_{\text{missing}}(o_X\mid x_{obs}^y)
+P(x_{obs}^y).
+\end{aligned}
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>정리 - MAR 아래 가능도의 분리</strong></p>
+</blockquote>
+<p><span class="math inline">\(P_{\text{missing}}\)</span>이 MAR를 만족하면</p>
+<p><span class="math display">\[
+L(\theta,\psi:\mathcal D)
+=L(\theta:\mathcal D)L(\psi:\mathcal D)
+\]</span></p>
+<p>로 쓸 수 있다. 따라서 관심분포 <span class="math inline">\(P(X\mid\theta)\)</span>의 모수를 추정할 때 관측모형의 정확한 모수값을 명시적으로 추정하지 않아도 된다.</p>
+<blockquote class="blockquote">
+<p><strong>주의: MAR는 검증 가능한 순수 자료속성이 아니다.</strong><br>
+MAR는 관측된 자료만으로 직접 검정할 수 없는 가정이다. 결측의 임상적·행정적 발생과정을 이해하고, 관측여부를 설명하는 변수들을 모형에 포함해야 한다. 예를 들어 혈압측정 실패가 체중에 의존한다면 체중과 키가 관측되어 있을 때 MAR가 성립할 수 있지만, 그 변수들을 제외하면 성립하지 않을 수 있다.</p>
+</blockquote>
+</section>
+<section id="불완전자료의-가능도함수" class="level3" data-number="18.1.3">
+<h3 data-number="18.1.3" class="anchored" data-anchor-id="불완전자료의-가능도함수"><span class="header-section-number">18.1.3</span> 불완전자료의 가능도함수</h3>
+<p>이후에는 MAR를 가정하고 관측기전은 무시한다. <span class="math inline">\(m\)</span>번째 사례의 관측변수와 값이 <span class="math inline">\(O[m],o[m]\)</span>, 숨겨진 변수가 <span class="math inline">\(H[m]\)</span>이면</p>
+<p><span class="math display">\[
+L(\theta:\mathcal D)
+=
+\prod_{m=1}^M P(o[m]\mid\theta)
+=
+\prod_{m=1}^M
+\sum_{h[m]}P(o[m],h[m]\mid\theta).
+\]</span></p>
+<p>완전자료와 달리 합이 곱 안에 들어가 모수들이 결합한다.</p>
+</section>
+<section id="두-변수-네트워크의-예" class="level3" data-number="18.1.4">
+<h3 data-number="18.1.4" class="anchored" data-anchor-id="두-변수-네트워크의-예"><span class="header-section-number">18.1.4</span> 두 변수 네트워크의 예</h3>
+<p><span class="math inline">\(X\to Y\)</span>인 이항 네트워크에서 완전자료 가능도는</p>
+<p><span class="math display">\[
+L(\theta_X,\theta_{Y\mid x^0},\theta_{Y\mid x^1}:\mathcal D)
+=
+\theta_{x^1}^{M[x^1]}(1-\theta_{x^1})^{M[x^0]}
+\prod_{j=0}^1
+\theta_{y^1\mid x^j}^{M[x^j,y^1]}
+(1-\theta_{y^1\mid x^j})^{M[x^j,y^0]}.
+\]</span></p>
+<p>각 모수집합의 항이 분리되고 로그가능도는 오목하다. 그러나 한 사례에서 <span class="math inline">\(Y=y^1\)</span>만 관측되고 <span class="math inline">\(X\)</span>가 결측이면 그 사례의 확률은</p>
+<p><span class="math display">\[
+\theta_{x^1}\theta_{y^1\mid x^1}
++(1-\theta_{x^1})\theta_{y^1\mid x^0}
+\]</span></p>
+<p>이 된다. 이 합은 <span class="math inline">\(\theta_X\)</span>와 두 조건부확률을 결합한다.</p>
+<div id="fig-partially-observed-likelihood-mixture" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-partially-observed-likelihood-mixture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-partially-observed-likelihood-mixture.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-partially-observed-likelihood-mixture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.3: 각 완전자료 완성에 대응하는 가능도는 단봉형일 수 있지만, 이들을 합한 불완전자료 가능도는 여러 봉우리를 가질 수 있다.
+</figcaption>
+</figure>
+</div>
+<p>결측값이 <span class="math inline">\(r\)</span>개이면 가능한 완성은 최악의 경우 값공간 크기에 대해 지수적으로 증가한다. 완성별 가능도는 비교적 단순하더라도 전체 가능도는 혼합된 봉우리의 합이 되어 다봉형이 될 수 있다.</p>
+</section>
+<section id="모수독립성의-상실" class="level3" data-number="18.1.5">
+<h3 data-number="18.1.5" class="anchored" data-anchor-id="모수독립성의-상실"><span class="header-section-number">18.1.5</span> 모수독립성의 상실</h3>
+<p>완전자료에서 <span class="math inline">\(\theta_{Y\mid x^0}\)</span>와 <span class="math inline">\(\theta_{Y\mid x^1}\)</span>는 <span class="math inline">\(X\)</span>값이 관측되므로 각 사례가 어느 문맥의 충분통계에 들어가는지 명확하다. <span class="math inline">\(X\)</span>가 숨겨지면 한 사례가 두 문맥 중 어느 쪽에 기여하는지 불확실하므로 두 모수집합의 사후분포가 연관된다.</p>
+<div id="fig-partially-observed-parameter-coupling" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-partially-observed-parameter-coupling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-partially-observed-parameter-coupling.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-partially-observed-parameter-coupling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.4: <span class="math inline">\(X\to Y\)</span>의 메타네트워크. <span class="math inline">\(X[m]\)</span>이 숨겨지고 <span class="math inline">\(Y[m]\)</span>이 관측되면 <span class="math inline">\(\theta_X\to X[m]\to Y[m]\leftarrow\theta_{Y\mid X}\)</span> 경로가 활성화되어 모수들이 사후적으로 결합된다.
+</figcaption>
+</figure>
+</div>
+<div id="fig-partially-observed-likelihood-contours" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-partially-observed-likelihood-contours-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-partially-observed-likelihood-contours.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-partially-observed-likelihood-contours-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.5: 결측 <span class="math inline">\(X\)</span>의 수가 증가할수록 <span class="math inline">\(\theta_{y^1\mid x^0}\)</span>와 <span class="math inline">\(\theta_{y^1\mid x^1}\)</span>의 가능도 등고선이 기울어지고 두 모수의 상관이 강해지는 모습.
+</figcaption>
+</figure>
+</div>
+<p>숨은 공통원인 <span class="math inline">\(H\)</span>가 <span class="math inline">\(X,Y\)</span>의 부모인 모형에서는</p>
+<p><span class="math display">\[
+P(x,y)=\sum_hP(h)P(x\mid h)P(y\mid h),
+\]</span></p>
+<p>따라서</p>
+<p><span class="math display">\[
+L(\theta:\mathcal D)
+=
+\prod_{x,y}
+\left[
+\sum_hP(h)P(x\mid h)P(y\mid h)
+\right]^{M[x,y]}.
+\]</span></p>
+<p>곱과 합이 교차하여 CPD별 국소가능도로 분해할 수 없다.</p>
+<blockquote class="blockquote">
+<p><strong>명제 - IID 자료의 사례별 분해</strong></p>
+</blockquote>
+<p>IID를 가정하면</p>
+<p><span class="math display">\[
+L(\theta:\mathcal D)
+=
+\prod_m P(o[m]\mid\theta)
+=
+\prod_m\sum_{h[m]}P(o[m],h[m]\mid\theta).
+\]</span></p>
+<p>즉, 모수별 분해는 잃지만 사례별 독립성은 유지된다. 가능도 평가에는 각 사례에서 관측증거의 확률을 계산하는 추론이 필요하다. 네트워크의 트리폭과 결측패턴에 따라 이 추론 자체가 난해할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>불완전자료 가능도에서 잃는 세 성질</strong><br>
+1. 단봉성 또는 전역 오목성<br>
+2. 간단한 닫힌형식 표현<br>
+3. CPD별·부모문맥별 가능도 분해<br>
+이 세 손실이 이후 알고리즘의 대부분을 설명한다.</p>
+</blockquote>
+</section>
+<section id="식별가능성" class="level3" data-number="18.1.6">
+<h3 data-number="18.1.6" class="anchored" data-anchor-id="식별가능성"><span class="header-section-number">18.1.6</span> 식별가능성</h3>
+<p>불완전자료에서는 표본크기를 무한히 늘려도 서로 다른 모수값이 같은 관측분포를 유도할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 두 종류의 압정 혼합</strong></p>
+</blockquote>
+<p>숨은 변수 <span class="math inline">\(H\)</span>가 두 압정 브랜드 중 어느 것을 던졌는지 나타내고, 관측되는 것은 결과 <span class="math inline">\(X\)</span>뿐이라고 하자.</p>
+<p><span class="math display">\[
+P(x^1)
+=
+\theta_H\theta_{X\mid h^1}
++(1-\theta_H)\theta_{X\mid h^0}.
+\]</span></p>
+<p>자료가능도는 이 가중평균만의 함수다. 따라서 무수히 많은 <span class="math inline">\((\theta_H,\theta_{X\mid h^1},\theta_{X\mid h^0})\)</span>가 동일한 관측분포를 만든다. 이는 연속적인 비식별 영역이다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 두 변수를 동시에 관측하지 않는 경우</strong></p>
+</blockquote>
+<p><span class="math inline">\(X,Y\)</span>의 주변분포는 각각 충분히 추정할 수 있으나 한 번도 두 값을 함께 관측하지 않는다면 결합분포의 의존구조는 추정할 수 없다. 독립모형부터 강한 결정적 관계까지 같은 두 주변분포를 갖는 모든 결합분포가 동일한 관측가능도를 낸다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 식별가능성</strong></p>
+</blockquote>
+<p>모수족 <span class="math inline">\(P(X\mid\theta)\)</span>에서 <span class="math inline">\(\theta\ne\theta'\)</span>인데도</p>
+<p><span class="math display">\[
+P(X\mid\theta)=P(X\mid\theta')
+\]</span></p>
+<p>인 <span class="math inline">\(\theta'\)</span>가 존재하지 않으면 <span class="math inline">\(\theta\)</span>는 식별가능하다. 모든 모수점이 그러하면 모형이 식별가능하다고 한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 잠재상태 라벨교환</strong></p>
+</blockquote>
+<p>잠재변수 <span class="math inline">\(H\)</span>의 값 이름 <span class="math inline">\(h^0,h^1\)</span>을 서로 바꾸고 연결된 CPD의 행을 함께 바꾸면 관측분포는 변하지 않는다. 혼합모형의 군집번호는 본질적 의미가 없으므로 동일한 해가 순열만큼 반복된다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 국소 식별가능성</strong></p>
+</blockquote>
+<p>어떤 <span class="math inline">\(\epsilon&gt;0\)</span>가 존재하여</p>
+<p><span class="math display">\[
+\|\theta-\theta'\|_2&lt;\epsilon
+\]</span></p>
+<p>인 모든 다른 <span class="math inline">\(\theta'\)</span>가 서로 다른 관측분포를 유도하면 <span class="math inline">\(\theta\)</span>는 국소적으로 식별가능하다. 라벨교환처럼 멀리 떨어진 유한개의 동치해만 있으면 전역 식별은 실패하지만 국소 식별은 성립할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>해석 원칙</strong><br>
+비식별성은 학습을 포기해야 한다는 뜻이 아니다. 다만 자료가 구분할 수 없는 모수·잠재상태·간선방향에 고유한 실질적 의미를 부여하면 안 된다. 구조학습의 Markov 동치류와 같은 태도가 필요하다.</p>
+</blockquote>
+</section>
+</section>
+<section id="모수추정" class="level2" data-number="18.2">
+<h2 data-number="18.2" class="anchored" data-anchor-id="모수추정"><span class="header-section-number">18.2</span> 모수추정</h2>
+<p>주어진 네트워크 구조 <span class="math inline">\(G\)</span>와 CPD 형태에서 부분관측 자료의 최대가능도 모수를 찾는 문제는</p>
+<p><span class="math display">\[
+\widehat\theta
+=
+\arg\max_\theta\ell(\theta:\mathcal D)
+\]</span></p>
+<p>이다. 가능도는 고차원·비선형·다봉형이므로 일반적으로 닫힌해가 없다. 대표적 접근은 일반 비선형 최적화인 경사상승법과 불완전자료 가능도에 특화된 EM이다.</p>
+<section id="경사상승법" class="level3" data-number="18.2.1">
+<h3 data-number="18.2.1" class="anchored" data-anchor-id="경사상승법"><span class="header-section-number">18.2.1</span> 경사상승법</h3>
+<section id="가능도-기울기의-계산" class="level4" data-number="18.2.1.1">
+<h4 data-number="18.2.1.1" class="anchored" data-anchor-id="가능도-기울기의-계산"><span class="header-section-number">18.2.1.1</span> 가능도 기울기의 계산</h4>
+<p>표 형식 CPD의 한 항 <span class="math inline">\(P(x\mid u)\)</span>에 대해 관측증거 <span class="math inline">\(o\)</span>의 확률을 미분한다.</p>
+<blockquote class="blockquote">
+<p><strong>보조정리</strong></p>
+</blockquote>
+<p><span class="math inline">\(P(x\mid u)&gt;0\)</span>이면</p>
+<p><span class="math display">\[
+\frac{\partial}{\partial P(x\mid u)}P(o)
+=
+\frac{P(x,u,o)}{P(x\mid u)}.
+\]</span></p>
+<p>증거와 <span class="math inline">\(x,u\)</span>가 모순이면 분자는 0이다. 이 식은 해당 CPD 항을 사용하는 모든 완전할당의 확률을 합한 결과다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 부분관측 로그가능도의 기울기</strong></p>
+</blockquote>
+<p><span class="math inline">\(X\)</span>의 부모가 <span class="math inline">\(U\)</span>일 때</p>
+<p><span class="math display">\[
+\frac{\partial\ell(\theta:\mathcal D)}{\partial P(x\mid u)}
+=
+\frac{1}{P(x\mid u)}
+\sum_{m=1}^M
+P(x,u\mid o[m],\theta).
+\]</span></p>
+<p>완전자료에서는 <span class="math inline">\(P(x,u\mid o[m])\)</span>가 0 또는 1의 지시함수다. 불완전자료에서는 0과 1 사이의 사후확률이 되어 <strong>기대 충분통계</strong>를 형성한다.</p>
+<p>구조화 CPD가 <span class="math inline">\(P(x\mid u)=f_{x,u}(\eta)\)</span>로 모수화되면 연쇄법칙으로</p>
+<p><span class="math display">\[
+\frac{\partial\ell}{\partial\eta}
+=
+\sum_{x,u}
+\frac{\partial\ell}{\partial P(x\mid u)}
+\frac{\partial P(x\mid u)}{\partial\eta}
+\]</span></p>
+<p>를 이용한다.</p>
+<div id="fig-partially-observed-gradient-network" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-partially-observed-gradient-network-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-partially-observed-gradient-network.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-partially-observed-gradient-network-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.6: 경사계산과 EM 예제에 사용하는 네트워크 <span class="math inline">\(A\to C\leftarrow B\)</span>, <span class="math inline">\(C\to D\)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="수치-예제" class="level4" data-number="18.2.1.2">
+<h4 data-number="18.2.1.2" class="anchored" data-anchor-id="수치-예제"><span class="header-section-number">18.2.1.2</span> 수치 예제</h4>
+<p>부분관측 사례 <span class="math inline">\(o=\langle a^1,?, ?,d^0\rangle\)</span>를 생각하자. 현재 모수 아래 가능한 네 완전할당의 확률을 구한 뒤 <span class="math inline">\(P(o)\)</span>로 나누면 <span class="math inline">\(B,C\)</span>의 사후분포를 얻는다. 원문의 수치에서는</p>
+<p><span class="math display">\[
+P(b^1,c^1\mid o)=0.0492,
+\quad
+P(b^1,c^0\mid o)=0.8852,
+\]</span></p>
+<p><span class="math display">\[
+P(b^0,c^1\mid o)=0.0164,
+\quad
+P(b^0,c^0\mid o)=0.0492.
+\]</span></p>
+<p>이에 따라</p>
+<p><span class="math display">\[
+\frac{\partial\log P(o)}{\partial P(d^0\mid c^0)}
+=
+\frac{P(d^0,c^0\mid o)}{P(d^0\mid c^0)}
+\]</span></p>
+<p>처럼 각 CPD 항에 대한 기여를 계산한다. 다른 관측사례의 기울기를 합하면 전체 자료의 기울기가 된다.</p>
+<p>CPD 확률들이 합해서 1이어야 하므로 모든 항을 독립적으로 증가시킬 수 없다. 이항변수에서는 하나의 자유모수 <span class="math inline">\(\theta_{d^1\mid c^0}\)</span>로</p>
+<p><span class="math display">\[
+P(d^1\mid c^0)=\theta_{d^1\mid c^0},
+\qquad
+P(d^0\mid c^0)=1-\theta_{d^1\mid c^0}
+\]</span></p>
+<p>로 두어 제약을 자동으로 반영할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - 표 형식 CPD의 기울기 계산</strong></p>
+</blockquote>
+<ol type="1">
+<li>모든 가족할당 <span class="math inline">\((x_i,u_i)\)</span>에 대해 <span class="math inline">\(\overline M[x_i,u_i]=0\)</span>으로 초기화한다.</li>
+<li>각 사례 <span class="math inline">\(o[m]\)</span>에 대해 현재 네트워크를 증거로 보정한다.</li>
+<li>모든 가족에 대해 <span class="math display">\[
+\overline M[x_i,u_i]
+\leftarrow
+\overline M[x_i,u_i]+P(x_i,u_i\mid o[m],\theta)
+\]</span> 를 누적한다.</li>
+<li>기울기 성분을 <span class="math display">\[
+\delta_{x_i\mid u_i}
+=
+\frac{\overline M[x_i,u_i]}{\theta_{x_i\mid u_i}}
+\]</span> 로 반환한다.</li>
+</ol>
+<p>가족보존 성질 때문에 한 사례에서 하나의 클리크트리 보정만으로 모든 변수-부모 가족의 주변분포를 얻을 수 있다.</p>
+</section>
+<section id="확률제약-처리" class="level4" data-number="18.2.1.3">
+<h4 data-number="18.2.1.3" class="anchored" data-anchor-id="확률제약-처리"><span class="header-section-number">18.2.1.3</span> 확률제약 처리</h4>
+<p>표 형식 CPD는</p>
+<p><span class="math display">\[
+\theta_{x\mid u}\ge0,
+\qquad
+\sum_x\theta_{x\mid u}=1
+\]</span></p>
+<p>을 만족해야 한다. 세 가지 방법이 있다.</p>
+<ol type="1">
+<li>기울기를 합제약의 접공간으로 투영하고, 비음수 경계를 넘지 않도록 보폭을 제한한다.</li>
+<li>소프트맥스 재모수화 <span class="math display">\[
+P(x\mid u)
+=
+\frac{e^{\lambda_{x\mid u}}}
+{\sum_{x'}e^{\lambda_{x'\mid u}}}
+\]</span> 를 사용한다.</li>
+<li>라그랑주 승수를 사용한다. 이 접근을 정리하면 EM의 고정점 방정식과 연결된다.</li>
+</ol>
+<p>가능도는 다봉형이므로 경사상승법은 시작점에 의존하며 국소정상점만 보장한다. 다중 무작위 시작, 교란, annealing 같은 일반 최적화 기법이 필요하다.</p>
+</section>
+</section>
+<section id="기대-최대화-알고리즘" class="level3" data-number="18.2.2">
+<h3 data-number="18.2.2" class="anchored" data-anchor-id="기대-최대화-알고리즘"><span class="header-section-number">18.2.2</span> 기대-최대화 알고리즘</h3>
+<section id="직관" class="level4" data-number="18.2.2.1">
+<h4 data-number="18.2.2.1" class="anchored" data-anchor-id="직관"><span class="header-section-number">18.2.2.1</span> 직관</h4>
+<p>완전자료에서는 충분통계를 센 뒤 MLE 공식을 적용한다. 결측자료에서는 어느 셀에 사례를 세어야 하는지 알 수 없다. 단순 대치로 결측값을 하나의 값에 고정하면 그 대치분포의 편향이 모수에 반영된다.</p>
+<p>EM은 모수와 결측값을 동시에 알 수 없는 순환문제를 다음 두 단계로 해결한다.</p>
+<ul>
+<li>현재 모수가 주어지면 추론을 통해 결측값의 사후분포와 기대 충분통계를 계산한다.</li>
+<li>기대 충분통계를 실제 카운트처럼 취급하여 새 모수를 추정한다.</li>
+</ul>
+<p>이를 반복하면 매 단계 관측자료 가능도가 감소하지 않는다.</p>
+</section>
+<section id="기대-충분통계" class="level4" data-number="18.2.2.2">
+<h4 data-number="18.2.2.2" class="anchored" data-anchor-id="기대-충분통계"><span class="header-section-number">18.2.2.2</span> 기대 충분통계</h4>
+<p>현재 모수가 <span class="math inline">\(\theta\)</span>일 때 <span class="math inline">\(m\)</span>번째 사례의 완성분포를</p>
+<p><span class="math display">\[
+Q_m(h[m])
+=P(h[m]\mid o[m],\theta)
+\]</span></p>
+<p>라 하자. 완전할당 <span class="math inline">\(\langle o[m],h[m]\rangle\)</span>에 <span class="math inline">\(Q_m(h[m])\)</span>의 가중치를 부여한 가상 완전자료를 생각할 수 있다.</p>
+<p>사건 <span class="math inline">\(Y=y\)</span>의 기대카운트는</p>
+<p><span class="math display">\[
+\overline M_\theta[y]
+=
+\sum_{m=1}^M
+\sum_{h[m]}
+Q_m(h[m])
+\mathbf 1\{\xi[m]_Y=y\}.
+\]</span></p>
+<p>모든 완성을 명시적으로 열거할 필요는 없다. 내부합은 주변확률이므로</p>
+<p><span class="math display">\[
+\overline M_\theta[y]
+=
+\sum_{m=1}^M P(y\mid o[m],\theta).
+\]</span></p>
+<p>마찬가지로 가족카운트는</p>
+<p><span class="math display">\[
+\overline M_\theta[x,u]
+=
+\sum_mP(x,u\mid o[m],\theta).
+\]</span></p>
+<p>관측된 가족은 0/1의 실제 카운트로 기여하고, 부분관측 가족은 소프트 카운트로 기여한다.</p>
+</section>
+<section id="베이지안-네트워크용-em" class="level4" data-number="18.2.2.3">
+<h4 data-number="18.2.2.3" class="anchored" data-anchor-id="베이지안-네트워크용-em"><span class="header-section-number">18.2.2.3</span> 베이지안 네트워크용 EM</h4>
+<p>초기값 <span class="math inline">\(\theta^0\)</span>에서 시작해 <span class="math inline">\(t=0,1,\ldots\)</span>에 대해 다음을 반복한다.</p>
+</section>
+<section id="e-step" class="level4" data-number="18.2.2.4">
+<h4 data-number="18.2.2.4" class="anchored" data-anchor-id="e-step"><span class="header-section-number">18.2.2.4</span> E-step</h4>
+<p>각 사례와 각 가족에 대해</p>
+<p><span class="math display">\[
+P(X_i,Pa_i\mid o[m],\theta^t)
+\]</span></p>
+<p>를 계산하고</p>
+<p><span class="math display">\[
+\overline M_{\theta^t}[x_i,u_i]
+=
+\sum_mP(x_i,u_i\mid o[m],\theta^t)
+\]</span></p>
+<p>를 누적한다.</p>
+</section>
+<section id="m-step" class="level4" data-number="18.2.2.5">
+<h4 data-number="18.2.2.5" class="anchored" data-anchor-id="m-step"><span class="header-section-number">18.2.2.5</span> M-step</h4>
+<p>표 형식 CPD에서는</p>
+<p><span class="math display">\[
+\theta_{x_i\mid u_i}^{t+1}
+=
+\frac{\overline M_{\theta^t}[x_i,u_i]}
+{\overline M_{\theta^t}[u_i]}.
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - EM 절차</strong></p>
+</blockquote>
+<ol type="1">
+<li>초기모수 <span class="math inline">\(\theta^0\)</span>를 정한다.</li>
+<li>각 반복에서 모든 사례에 대해 추론하여 기대 충분통계를 계산한다.</li>
+<li>완전자료 MLE 공식을 기대 충분통계에 적용한다.</li>
+<li>로그가능도 변화, 모수 변화 또는 최대 반복횟수 기준으로 종료한다.</li>
+</ol>
+<p>지수족 CPD에서는 완전자료 충분통계 <span class="math inline">\(\tau(\xi)\)</span> 대신</p>
+<p><span class="math display">\[
+E_Q[\tau(\langle\mathcal D,H\rangle)]
+=
+\sum_mE_Q[\tau(o[m],h[m])]
+\]</span></p>
+<p>를 계산하고, 그 통계에 대한 지수족 MLE를 M-step에서 구한다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - EM의 단조성</strong></p>
+</blockquote>
+<p><span class="math display">\[
+\ell(\theta^t:\mathcal D)
+\le
+\ell(\theta^{t+1}:\mathcal D).
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>정리 - 고정점과 정상점</strong></p>
+</blockquote>
+<p><span class="math inline">\(\theta^{t+1}=\theta^t\)</span>이고 그 점이 허용모수공간의 내부점이면 <span class="math inline">\(\theta^t\)</span>는 로그가능도의 정상점이다. 이 점은 국소최대, 국소최소 또는 안장점일 수 있으나 비최대 고정점은 일반적으로 불안정하여 실제 실행에서는 보통 국소최대로 수렴한다.</p>
+</section>
+<section id="베이지안-군집화" class="level4" data-number="18.2.2.6">
+<h4 data-number="18.2.2.6" class="anchored" data-anchor-id="베이지안-군집화"><span class="header-section-number">18.2.2.6</span> 베이지안 군집화</h4>
+<p>숨은 군집변수 <span class="math inline">\(C\)</span>가 모든 관측특성 <span class="math inline">\(X_1,\ldots,X_n\)</span>의 부모인 나이브 베이즈 혼합모형을 생각한다.</p>
+<div id="fig-partially-observed-naive-bayes-clustering" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-partially-observed-naive-bayes-clustering-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-partially-observed-naive-bayes-clustering.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-partially-observed-naive-bayes-clustering-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.7: 숨은 클래스 <span class="math inline">\(C\)</span>가 주어지면 특성들이 조건부독립인 나이브 베이즈 군집모형.
+</figcaption>
+</figure>
+</div>
+<p>E-step에서 각 사례의 군집책임도(responsibility)를 계산한다.</p>
+<p><span class="math display">\[
+\gamma_{mk}=P(C[m]=c^k\mid x[m],\theta^t).
+\]</span></p>
+<p>기대카운트는</p>
+<p><span class="math display">\[
+\overline M[c^k]=\sum_m\gamma_{mk},
+\]</span></p>
+<p><span class="math display">\[
+\overline M[x_i,c^k]
+=
+\sum_m\gamma_{mk}\mathbf1\{x_i[m]=x_i\}.
+\]</span></p>
+<p>M-step은</p>
+<p><span class="math display">\[
+\theta_{c^k}^{t+1}
+=
+\frac{\overline M[c^k]}{M},
+\qquad
+\theta_{x_i\mid c^k}^{t+1}
+=
+\frac{\overline M[x_i,c^k]}{\overline M[c^k]}.
+\]</span></p>
+<p>연속특성의 조건부 가우시안 모형에서는 책임도로 가중한 평균과 공분산을 갱신한다.</p>
+</section>
+<section id="hard-assignment-em과-k-means" class="level4" data-number="18.2.2.7">
+<h4 data-number="18.2.2.7" class="anchored" data-anchor-id="hard-assignment-em과-k-means"><span class="header-section-number">18.2.2.7</span> Hard-assignment EM과 k-means</h4>
+<p>표준 EM은 한 사례가 여러 군집에 부분적으로 기여하는 소프트 할당이다. hard-assignment EM은</p>
+<p><span class="math display">\[
+c[m]
+=
+\arg\max_cP(c\mid x[m],\theta^t)
+\]</span></p>
+<p>로 하나의 군집만 선택한 뒤 완전자료 MLE를 수행한다. 구형 가우시안 군집에서 이 절차는 각 점을 가장 가까운 중심에 배정하고 중심을 다시 평균으로 갱신하는 <span class="math inline">\(k\)</span>-means가 된다.</p>
+<blockquote class="blockquote">
+<p><strong>상자 - 사용자 군집 발견</strong></p>
+</blockquote>
+<p>웹 뉴스 탐색자료에서 기사별 클릭 여부를 이항특성으로 보고 숨은 사용자 군집을 학습할 수 있다. 원문의 사례에서는 상업·기술 기사 독자, 메인페이지 주요기사 독자, 스포츠 독자, 그리고 사이트 여러 곳을 찾아다니며 가벼운 뉴스를 읽는 예상 밖의 독자군이 발견되었다.</p>
+<div id="fig-partially-observed-user-clusters" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-partially-observed-user-clusters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-partially-observed-user-clusters.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-partially-observed-user-clusters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.8: 뉴스 탐색자료에서 발견된 네 개의 큰 사용자 군집과 군집별 고확률 기사 예.
+</figcaption>
+</figure>
+</div>
+<p>군집모형은 직접적인 추천성능에서는 풍부한 구조학습 모형보다 약할 수 있지만, 잠재사용자 유형을 해석하고 서비스구조를 재설계하는 데 유용하다.</p>
+</section>
+<section id="em의-이론적-기반" class="level4" data-number="18.2.2.8">
+<h4 data-number="18.2.2.8" class="anchored" data-anchor-id="em의-이론적-기반"><span class="header-section-number">18.2.2.8</span> EM의 이론적 기반</h4>
+<p>완성자료를 <span class="math inline">\(\langle\mathcal D,H\rangle\)</span>라 하고 결측값 전체에 대한 임의의 분포를 <span class="math inline">\(Q(H)\)</span>라 하자. <strong>기대 로그가능도</strong>는</p>
+<p><span class="math display">\[
+E_Q[\ell(\theta:\langle\mathcal D,H\rangle)]
+=
+\sum_HQ(H)\ell(\theta:\langle\mathcal D,H\rangle).
+\]</span></p>
+<p>표 형식 CPD에서는</p>
+<p><span class="math display">\[
+E_Q[\ell(\theta:\langle\mathcal D,H\rangle)]
+=
+\sum_i\sum_{x_i,u_i}
+\overline M_Q[x_i,u_i]
+\log\theta_{x_i\mid u_i}.
+\]</span></p>
+<p>지수족에서는</p>
+<p><span class="math display">\[
+E_Q[\ell(\theta:\langle\mathcal D,H\rangle)]
+=
+\langle t(\theta),E_Q[\tau]\rangle
+-M\log Z(\theta)+\text{상수}.
+\]</span></p>
+<p>완전자료 로그가능도가 충분통계에 선형이기 때문에 기대 충분통계만으로 최적화할 수 있다.</p>
+</section>
+<section id="em-에너지-함수" class="level4" data-number="18.2.2.9">
+<h4 data-number="18.2.2.9" class="anchored" data-anchor-id="em-에너지-함수"><span class="header-section-number">18.2.2.9</span> EM 에너지 함수</h4>
+<p><span class="math display">\[
+F_{\mathcal D}[\theta,Q]
+=
+E_Q[\ell(\theta:\langle\mathcal D,H\rangle)]
++H_Q(H).
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>따름정리</strong></p>
+</blockquote>
+<p>임의의 <span class="math inline">\(Q\)</span>에 대해</p>
+<p><span class="math display">\[
+\ell(\theta:\mathcal D)
+=
+F_{\mathcal D}[\theta,Q]
++D_{KL}\left(Q(H)\|P(H\mid\mathcal D,\theta)\right\}.
+\]</span></p>
+<p>따라서 <span class="math inline">\(F\)</span>는 관측자료 로그가능도의 하한이며</p>
+<p><span class="math display">\[
+Q(H)=P(H\mid\mathcal D,\theta)
+\]</span></p>
+<p>일 때 하한이 정확해진다.</p>
+<p>EM은 이 함수에 대한 좌표상승법이다.</p>
+<ul>
+<li>E-step: <span class="math inline">\(\theta\)</span>를 고정하고 <span class="math inline">\(Q=P(H\mid\mathcal D,\theta)\)</span>를 선택하여 <span class="math inline">\(F\)</span>를 최대화한다.</li>
+<li>M-step: <span class="math inline">\(Q\)</span>를 고정하고 기대 완전자료 로그가능도를 최대화하는 <span class="math inline">\(\theta\)</span>를 선택한다.</li>
+</ul>
+<div id="fig-partially-observed-em-lower-bound" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-partially-observed-em-lower-bound-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-partially-observed-em-lower-bound.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-partially-observed-em-lower-bound-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.9: 현재점에서 로그가능도에 접하는 하한을 만든 뒤 그 하한을 최대화하여 다음 모수점으로 이동하는 EM의 상승과정.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>정리 - 한 반복의 개선량</strong></p>
+</blockquote>
+<p><span class="math display">\[
+\begin{aligned}
+\ell(\theta^{t+1}:\mathcal D)
+-
+\ell(\theta^t:\mathcal D)
+\ge{}&amp;
+E_{P(H\mid\mathcal D,\theta^t)}
+[\ell(\theta^{t+1}:\mathcal D,H)]\\
+&amp;-
+E_{P(H\mid\mathcal D,\theta^t)}
+[\ell(\theta^t:\mathcal D,H)].
+\end{aligned}
+\]</span></p>
+<p>우변은 M-step에서 비음수가 되므로 관측자료 가능도도 감소하지 않는다.</p>
+<blockquote class="blockquote">
+<p><strong>정리</strong></p>
+</blockquote>
+<p>EM의 내부 고정점은 제약공간에서 로그가능도의 정상점이다. 정확히는 허용방향에 대한 기울기가 0이거나 제약면에 직교한다.</p>
+</section>
+<section id="hard-assignment-em의-목적함수" class="level4" data-number="18.2.2.10">
+<h4 data-number="18.2.2.10" class="anchored" data-anchor-id="hard-assignment-em의-목적함수"><span class="header-section-number">18.2.2.10</span> Hard-assignment EM의 목적함수</h4>
+<p>Hard-assignment EM은</p>
+<p><span class="math display">\[
+\max_{\theta,H}\ell(\theta:\mathcal D,H)
+\]</span></p>
+<p>를 교대로 최대화한다. 표준 EM은 <span class="math inline">\(H\)</span>를 평균한 관측자료 가능도 <span class="math inline">\(\ell(\theta:\mathcal D)\)</span>를 최적화한다. 사후분포가 한 완성에 매우 집중하면 두 방법은 비슷하지만, 사후가 분산되어 있으면 hard EM은 군집을 인위적으로 더 분리시키고 표준 EM은 중첩군집을 허용한다.</p>
+<blockquote class="blockquote">
+<p><strong>상자 - EM의 실제 거동</strong></p>
+</blockquote>
+<p>ICU-Alarm 네트워크에서 자료의 50%를 무작위로 숨겨 EM을 적용하면 초반 몇 반복에서 훈련 로그가능도가 크게 향상되지만 이후에는 매우 천천히 증가한다. 일부 모수는 로그가능도 변화가 작아진 뒤에도 상당히 이동할 수 있다.</p>
+<div id="fig-partially-observed-em-trajectories" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-partially-observed-em-trajectories-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-partially-observed-em-trajectories.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-partially-observed-em-trajectories-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.10: EM 반복에 따른 훈련 로그가능도, 개별 모수와 검정 로그가능도의 변화.
+</figcaption>
+</figure>
+</div>
+<p>검정가능도는 초반에는 훈련가능도와 함께 향상되지만 일정 반복 이후 감소할 수 있다. 이는 EM도 과적합될 수 있음을 보여준다. 또한 결측률이 높거나 잠재변수가 있으면 서로 다른 무작위 시작점에서 많은 국소최대가 나타난다.</p>
+<div id="fig-partially-observed-em-local-maxima" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-partially-observed-em-local-maxima-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-partially-observed-em-local-maxima.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-partially-observed-em-local-maxima-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.11: 표본크기와 결측구성에 따른 서로 다른 국소최대의 수, 그리고 여러 시작점에서 도달한 해의 로그가능도 분포.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="비교-기울기-상승법과-em" class="level3" data-number="18.2.3">
+<h3 data-number="18.2.3" class="anchored" data-anchor-id="비교-기울기-상승법과-em"><span class="header-section-number">18.2.3</span> 비교: 기울기 상승법과 EM</h3>
+<p>불완전자료에서 MLE를 구하는 대표적 두 방법인 기울기 상승법과 EM은 서로 다른 형태를 갖지만, 계산구조와 한계는 상당히 비슷하다.</p>
+<p>첫째, 두 방법 모두 <strong>국소 최적화 알고리즘</strong>이다. 현재 모수값을 유지하면서 다음 모수값을 정하고, 정상점에 도달할 때까지 반복한다. 로그가능도가 다봉형이면 시작점에 따라 서로 다른 국소최대에 도달할 수 있다.</p>
+<p>둘째, 두 방법 모두 각 자료사례에 대해 현재 모형으로 추론을 수행해야 한다. 기울기 상승법은</p>
+<p><span class="math display">\[
+\sum_m P(x,u\mid o^{[m]},\theta)
+\]</span></p>
+<p>을 이용해 기울기를 계산하고, EM은 같은 양을 기대 충분통계로 사용한다. 따라서 두 방법의 주된 계산비용은 거의 동일하게 <strong>각 사례에 대한 사후추론</strong>에서 발생한다.</p>
+<p>셋째, 두 방법의 한 반복이 이동하는 방식은 다르다.</p>
+<ul>
+<li>기울기 상승법은 현재점의 국소 기울기와 곡률정보를 이용해 이동한다. 공액기울기법이나 준뉴턴법은 최대점 근처의 이차형태를 효율적으로 이용한다.</li>
+<li>EM은 현재점에서 관측자료 로그가능도에 접하는 하한을 만든 뒤 그 하한을 최대화한다. 한 반복의 계산은 대개 안정적이고 구현이 단순하다.</li>
+</ul>
+</section>
+<section id="수렴속도" class="level3" data-number="18.2.4">
+<h3 data-number="18.2.4" class="anchored" data-anchor-id="수렴속도"><span class="header-section-number">18.2.4</span> 수렴속도</h3>
+<p>EM은 일반적으로 최대점 부근에서 선형수렴한다. 현재 모수오차를 <span class="math inline">\(\epsilon_t\)</span>라 하면 대략</p>
+<p><span class="math display">\[
+\epsilon_{t+1}\leq \rho\epsilon_t,
+\qquad 0&lt;\rho&lt;1
+\]</span></p>
+<p>의 형태를 갖는다. 결측자료가 많아 관측자료가 완전자료에 비해 적은 정보를 제공하면 <span class="math inline">\(\rho\)</span>가 1에 가까워져 매우 느리게 수렴할 수 있다. 실제로는 초반 몇 번의 반복에서 가능도가 크게 증가한 뒤, 수많은 반복 동안 조금씩 증가하는 패턴이 흔하다.</p>
+<p>공액기울기법은 반대 양상을 보이는 경우가 많다. 최대점에서 멀리 떨어진 초기에는 안정적인 방향을 찾는 데 시간이 들 수 있지만, 로그가능도가 거의 이차함수가 되는 최대점 근처에서는 EM보다 훨씬 빠르게 정확한 최대점에 접근한다. 따라서 실무에서는 <strong>초기에는 EM, 후반에는 공액기울기법이나 준뉴턴법</strong>을 사용하는 혼합전략이 효과적이다.</p>
+</section>
+<section id="어느-방법을-선택할-것인가" class="level3" data-number="18.2.5">
+<h3 data-number="18.2.5" class="anchored" data-anchor-id="어느-방법을-선택할-것인가"><span class="header-section-number">18.2.5</span> 어느 방법을 선택할 것인가</h3>
+<p>EM의 장점은 다음과 같다.</p>
+<ol type="1">
+<li>완전자료 MLE 계산을 재사용할 수 있다.</li>
+<li>각 반복에서 가능도가 감소하지 않는다.</li>
+<li>확률제약을 자연스럽게 만족하는 모수갱신식을 얻기 쉽다.</li>
+<li>표형 CPD, 가우시안, 혼합모형과 같이 완전자료 MLE가 간단한 경우 구현이 매우 쉽다.</li>
+</ol>
+<p>기울기 기반 방법은 다음 상황에서 유리하다.</p>
+<ol type="1">
+<li>M-step에 닫힌형식 해가 없고 결국 수치최적화가 필요한 경우</li>
+<li>복잡한 정규화항이나 제약을 포함한 구조화 CPD를 사용할 때</li>
+<li>최대점 근처에서 높은 정밀도의 해가 필요할 때</li>
+<li>자동미분이나 고성능 최적화 라이브러리를 사용할 수 있을 때</li>
+</ol>
+<p>두 방법 모두 전역최적성을 보장하지 않으므로, 알고리즘 선택보다 시작점·재시작·정규화·검증자료를 포함한 전체 학습설계가 더 중요할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>상자 - 불완전자료 모수학습의 실무적 고려사항</strong></p>
+</blockquote>
+<section id="초기화" class="level4" data-number="18.2.5.1">
+<h4 data-number="18.2.5.1" class="anchored" data-anchor-id="초기화"><span class="header-section-number">18.2.5.1</span> 초기화</h4>
+<p>EM과 기울기 상승법은 결정론적 국소탐색이므로 초기값이 도달하는 해를 사실상 결정한다. 특히 잠재변수가 있으면 유사한 가능도값을 가지면서 의미가 전혀 다른 해가 나타날 수 있다. 문서군집을 예로 들면 한 해는 문서 주제를, 다른 해는 출판매체나 문체를 군집화할 수 있다.</p>
+<p>초기화 방법에는 다음이 있다.</p>
+<ul>
+<li>사전에 정한 모수값</li>
+<li>무작위 모수값</li>
+<li>사전분포의 평균</li>
+<li>관측된 사례만으로 계산한 부분적 MLE</li>
+<li>단순 대치로 완성한 자료에서 계산한 MLE</li>
+<li>hard-assignment EM 또는 <span class="math inline">\(k\)</span>-means의 결과</li>
+<li>문제영역 지식에서 얻은 군집 중심이나 CPD</li>
+</ul>
+<p>균일한 모수값은 겉보기에는 중립적이지만 대칭성을 깨지 못해 잠재군집이 동일한 상태로 남을 수 있다. 따라서 잠재변수가 있는 모형에서는 아주 작은 무작위 교란이라도 주는 것이 일반적으로 안전하다.</p>
+</section>
+<section id="다중-시작점과-빔-탐색" class="level4" data-number="18.2.5.2">
+<h4 data-number="18.2.5.2" class="anchored" data-anchor-id="다중-시작점과-빔-탐색"><span class="header-section-number">18.2.5.2</span> 다중 시작점과 빔 탐색</h4>
+<p>실무적으로는 여러 초기점에서 알고리즘을 실행하고 최종 훈련가능도 또는 검증가능도가 가장 높은 해를 선택한다. 계산량을 줄이기 위해 <span class="math inline">\(K\)</span>개의 실행을 병렬로 시작한 뒤 몇 반복마다 성능이 낮은 실행을 제거하는 빔 탐색을 사용할 수 있다. 우수한 <span class="math inline">\(k&lt;K\)</span>개 실행만 남기고 주변에 작은 교란을 준 새로운 실행을 추가하는 방식도 가능하다.</p>
+</section>
+<section id="어닐링" class="level4" data-number="18.2.5.3">
+<h4 data-number="18.2.5.3" class="anchored" data-anchor-id="어닐링"><span class="header-section-number">18.2.5.3</span> 어닐링</h4>
+<p>목적함수를 처음에는 매끄럽게 하여 큰 분지 하나만 남기고, 반복이 진행되면서 원래의 로그가능도에 가까워지도록 하는 결정론적 어닐링을 사용할 수 있다. E-step의 사후확률을</p>
+<p><span class="math display">\[
+Q_T(h)\propto P(h,o\mid\theta)^{1/T},
+\qquad T&gt;1
+\]</span></p>
+<p>과 같이 평탄하게 시작하고 <span class="math inline">\(T\downarrow1\)</span>로 감소시키는 방법이 대표적이다. 초기에는 여러 완성에 질량을 넓게 분배하고, 후반에는 실제 사후분포로 수렴한다.</p>
+</section>
+<section id="수렴판정" class="level4" data-number="18.2.5.4">
+<h4 data-number="18.2.5.4" class="anchored" data-anchor-id="수렴판정"><span class="header-section-number">18.2.5.4</span> 수렴판정</h4>
+<p>가능한 기준은 다음과 같다.</p>
+<ul>
+<li>반복 간 로그가능도 증가량이 절대 또는 상대 임계값보다 작음</li>
+<li>모수벡터의 변화량이 작음</li>
+<li>기대 충분통계의 변화량이 작음</li>
+<li>최대 반복횟수 도달</li>
+<li>검증자료 성능이 일정 횟수 동안 향상되지 않음</li>
+</ul>
+<p>가능도 증가량이 작다고 모든 모수가 안정된 것은 아니다. 가능도에 둔감한 모수는 상당히 움직이면서도 전체 로그가능도에는 작은 차이만 만들 수 있다. 따라서 연구목적이 모수해석이면 가능도와 함께 모수변화, 사후예측과 구조적 안정성을 점검해야 한다.</p>
+</section>
+<section id="과적합과-조기종료" class="level4" data-number="18.2.5.5">
+<h4 data-number="18.2.5.5" class="anchored" data-anchor-id="과적합과-조기종료"><span class="header-section-number">18.2.5.5</span> 과적합과 조기종료</h4>
+<p>EM은 훈련가능도를 단조롭게 증가시키지만 검증가능도는 어느 시점 이후 감소할 수 있다. 검증자료를 이용한 조기종료는 정규화 효과를 제공하지만, 학습자료를 줄이고 검증추정의 변동성을 증가시킨다. 표본이 작을 때에는 교차검증이나 사전분포를 이용한 MAP-EM을 함께 고려한다.</p>
+</section>
+<section id="수렴가속" class="level4" data-number="18.2.5.6">
+<h4 data-number="18.2.5.6" class="anchored" data-anchor-id="수렴가속"><span class="header-section-number">18.2.5.6</span> 수렴가속</h4>
+<ul>
+<li>초기 몇 회 EM 후 공액기울기 또는 준뉴턴법으로 전환</li>
+<li>표준 EM보다 큰 외삽단계를 취하는 accelerated EM</li>
+<li>한 번에 일부 CPD만 갱신하는 부분 M-step</li>
+<li>한 번에 일부 사례의 <span class="math inline">\(Q_m(H^{[m]})\)</span>만 갱신하는 incremental EM</li>
+<li>충분통계의 온라인 또는 미니배치 갱신</li>
+</ul>
+<p>부분갱신은 한 회의 계산비용을 줄일 뿐 아니라 새 정보가 모수와 사후분포 사이를 더 빨리 순환하도록 하여 전체 반복수를 줄일 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>상자 - 로봇의 3차원 지도작성에 EM 적용</strong></p>
+</blockquote>
+<p>로봇의 거리측정기는 환경의 표면에서 많은 3차원 점을 얻는다. 위치추정오차와 측정잡음 때문에 원자료를 직접 다각형으로 연결하면 인접표면의 법선이 조금씩 달라져 지도표면이 매우 거칠어진다.</p>
+<p>환경을 <span class="math inline">\(K\)</span>개의 평면 <span class="math inline">\(p_1,\ldots,p_K\)</span>로 표현하자. 평면 <span class="math inline">\(p_k\)</span>는 단위 법선벡터 <span class="math inline">\(\alpha_k\in\mathbb R^3\)</span>와 원점으로부터의 거리 <span class="math inline">\(\beta_k\)</span>로 기술된다. 점 <span class="math inline">\(x\)</span>와 평면의 거리는</p>
+<p><span class="math display">\[
+d(x,p_k)=|\alpha_k^Tx-\beta_k|
+\]</span></p>
+<p>이다. 각 측정점 <span class="math inline">\(X^{[m]}\)</span>이 어느 평면에서 생성되었는지를 나타내는 잠재 대응변수 <span class="math inline">\(C^{[m]}\)</span>를 두고</p>
+<p><span class="math display">\[
+P(X^{[m]}\mid C^{[m]}=k,\theta_k)
+\propto
+\mathcal N\!\left(d(X^{[m]},p_k);0,\sigma^2\right)
+\]</span></p>
+<p>로 모형화한다. 어떠한 평면에도 속하지 않는 잡음점을 위해 <span class="math inline">\(C=0\)</span>이라는 추가 상태와 균일분포를 사용할 수 있다.</p>
+<ul>
+<li>E-step은 각 점이 각 평면에 속할 사후확률을 계산한다.</li>
+<li>M-step은 사후가중치를 사용해 각 평면의 법선과 위치를 다시 적합한다.</li>
+<li>바깥 반복에서는 지지가 약한 평면을 제거하고 새로운 후보평면을 제안할 수 있다.</li>
+</ul>
+<div id="fig-partially-observed-robot-mapping" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-partially-observed-robot-mapping-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-partially-observed-robot-mapping.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-partially-observed-robot-mapping-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.12: 거리측정 원자료, EM으로 추출한 평면, 원자료 기반 표면과 평면 기반으로 매끄럽게 복원한 표면의 비교.
+</figcaption>
+</figure>
+</div>
+<p>이 사례는 결측값 학습이라는 추상적 문제가 실제로는 <strong>자료연관성(data association)</strong>을 추정하는 문제와 동일한 구조를 가짐을 보여준다.</p>
+</section>
+</section>
+<section id="근사추론을-이용한-모수학습" class="level3" data-number="18.2.6">
+<h3 data-number="18.2.6" class="anchored" data-anchor-id="근사추론을-이용한-모수학습"><span class="header-section-number">18.2.6</span> 근사추론을 이용한 모수학습</h3>
+<p>기울기 상승법과 EM의 가장 큰 비용은 기대 충분통계의 계산이다. 각 사례마다</p>
+<p><span class="math display">\[
+P(X_i,\operatorname{Pa}_{X_i}\mid o^{[m]},\theta)
+\]</span></p>
+<p>를 계산해야 하므로, 관측되지 않은 부분의 트리폭이 크면 정확추론이 비현실적이다. 완전자료 학습에서는 추론복잡도가 거의 문제가 되지 않았지만, 불완전자료에서는 추론이 학습의 핵심 병목이 된다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 학생-강좌 모형</strong></p>
+</blockquote>
+<p><span class="math inline">\(n\)</span>명의 학생이 <span class="math inline">\(m\)</span>개의 강좌를 수강한다고 하자. 학생 <span class="math inline">\(s\)</span>의 지능 <span class="math inline">\(I_s\)</span>와 강좌 <span class="math inline">\(c\)</span>의 난이도 <span class="math inline">\(D_c\)</span>가 성적 <span class="math inline">\(G_{sc}\)</span>의 부모이다. 일부 성적만 관측되고 지능과 난이도는 숨겨져 있다면, 관측된 성적들은 학생과 강좌를 연결하는 이분그래프를 만든다. 이 그래프에 순환이 많으면 <span class="math inline">\(P(I,D\mid G)\)</span>의 정확추론은 매우 어렵다.</p>
+<p>단순히 각 E-step에서 임의의 근사추론기를 호출할 수는 있지만 주의가 필요하다.</p>
+<ol type="1">
+<li>근사주변분포가 서로 일관되지 않을 수 있다.</li>
+<li>근사 E-step이 실제 EM 하한을 증가시킨다는 보장이 없다.</li>
+<li>따라서 관측자료 로그가능도가 감소할 수 있다.</li>
+<li>반복마다 근사오차가 달라지면 수렴판정이 어려워진다.</li>
+</ol>
+</section>
+<section id="변분-em" class="level3" data-number="18.2.7">
+<h3 data-number="18.2.7" class="anchored" data-anchor-id="변분-em"><span class="header-section-number">18.2.7</span> 변분 EM</h3>
+<p>근사추론을 학습목적과 일관되게 결합하려면 EM 함수</p>
+<p><span class="math display">\[
+F_{\mathcal D}[\theta,Q]
+=
+E_Q[\ell(\theta:\mathcal D,H)]+H_Q(H)
+\]</span></p>
+<p>를 직접 최적화한다. 정확 EM은 모든 가능한 <span class="math inline">\(Q\)</span>를 허용하여</p>
+<p><span class="math display">\[
+\max_{\theta}\ell(\theta:\mathcal D)
+=
+\max_{\theta}\max_Q F_{\mathcal D}[\theta,Q]
+\]</span></p>
+<p>를 수행한다. 변분 EM은 <span class="math inline">\(Q\)</span>를 계산 가능한 제한된 족 <span class="math inline">\(\mathcal Q\)</span>로 한정한다.</p>
+<p><span class="math display">\[
+\max_{\theta}\max_{Q\in\mathcal Q}F_{\mathcal D}[\theta,Q].
+\]</span></p>
+<p>이때</p>
+<ul>
+<li>변분 E-step: <span class="math inline">\(\theta\)</span>를 고정하고 <span class="math inline">\(Q\in\mathcal Q\)</span> 안에서 <span class="math inline">\(F\)</span>를 최대화한다.</li>
+<li>변분 M-step: <span class="math inline">\(Q\)</span>를 고정하고 기대 완전자료 로그가능도를 최대화한다.</li>
+</ul>
+<p>각 단계가 같은 변분목적함수를 증가시키므로 정확가능도는 아니더라도 명확한 하한에 대한 단조증가와 수렴을 얻는다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 평균장 근사</strong></p>
+</blockquote>
+<p>학생-강좌 모형에서</p>
+<p><span class="math display">\[
+Q(I,D)=\prod_s Q_s(I_s)\prod_c Q_c(D_c)
+\]</span></p>
+<p>와 같이 모든 잠재변수를 독립으로 가정하는 평균장 족을 선택할 수 있다. 좌표상승법으로 한 학생의 <span class="math inline">\(Q_s(I_s)\)</span>를 갱신할 때에는 그 학생이 수강한 강좌의 현재 난이도분포와 관측성적이 사용된다. 강좌난이도분포도 같은 방식으로 갱신한다.</p>
+<p>이 근사는 학생능력과 강좌난이도 사이의 사후상관을 무시한다. 그러나 정확추론보다 훨씬 저렴하며, 큰 관계형 모형에서 유일하게 실행 가능한 선택일 수 있다. 더 정교한 구조화 변분분포, loopy belief propagation, expectation propagation 또는 표본기반 E-step을 사용할 수도 있다. 다만 근사법마다 최적화하는 목적이 다르므로, 알고리즘이 보고하는 하한·자유에너지·근사로그가능도를 명확히 구분해야 한다.</p>
+</section>
+</section>
+<section id="불완전자료에서의-베이지안-학습" class="level2" data-number="18.3">
+<h2 data-number="18.3" class="anchored" data-anchor-id="불완전자료에서의-베이지안-학습"><span class="header-section-number">18.3</span> 불완전자료에서의 베이지안 학습</h2>
+<section id="개요" class="level3" data-number="18.3.1">
+<h3 data-number="18.3.1" class="anchored" data-anchor-id="개요"><span class="header-section-number">18.3.1</span> 개요</h3>
+<p>완전자료에서는 적절한 켤레사전분포와 모수독립성을 가정하면 사후분포가 CPD별 디리클레 분포의 곱으로 분해되었다. 불완전자료에서는 결측변수에 대한 합이 서로 다른 CPD 모수를 결합하므로 이 단순성이 사라진다. 사후분포</p>
+<p><span class="math display">\[
+P(\theta\mid\mathcal D)
+\propto P(\theta)P(\mathcal D\mid\theta)
+\]</span></p>
+<p>는 대체로 모수 간 강한 상관, 여러 봉우리와 비표준적 형태를 갖는다. 따라서 전체 사후분포에 대한 정확적분은 거의 항상 불가능하다.</p>
+</section>
+<section id="map-추정" class="level3" data-number="18.3.2">
+<h3 data-number="18.3.2" class="anchored" data-anchor-id="map-추정"><span class="header-section-number">18.3.2</span> MAP 추정</h3>
+<p>가장 단순한 타협은 사후분포 전체 대신 최대사후확률 모수만 구하는 것이다.</p>
+<p><span class="math display">\[
+\widetilde\theta
+=
+\arg\max_\theta P(\theta\mid\mathcal D)
+=
+\arg\max_\theta
+\{\ell(\theta:\mathcal D)+\log P(\theta)\}.
+\]</span></p>
+<p>사전항이 정규화 역할을 하므로 MLE보다 극단적 모수를 피할 수 있다. 기울기 상승법에는 <span class="math inline">\(\nabla\log P(\theta)\)</span>를 더하고, EM에서는 M-step에서 기대 완전자료 로그가능도와 로그사전분포의 합을 최대화하면 된다. 이를 MAP-EM이라 한다.</p>
+<p>MAP는 계산 면에서는 MLE와 거의 같지만 다음 한계를 유지한다.</p>
+<ul>
+<li>사후분포의 폭과 다봉성을 표현하지 않는다.</li>
+<li>모수화에 따라 MAP점이 달라질 수 있다.</li>
+<li>불확실성을 평균하지 않고 한 점으로 대체한다.</li>
+</ul>
+</section>
+<section id="완전-베이지안-추론" class="level3" data-number="18.3.3">
+<h3 data-number="18.3.3" class="anchored" data-anchor-id="완전-베이지안-추론"><span class="header-section-number">18.3.3</span> 완전 베이지안 추론</h3>
+<p>전체 베이지안 접근은 메타네트워크에서 모수 <span class="math inline">\(\theta\)</span>와 모든 결측값 <span class="math inline">\(H\)</span>를 함께 미관측변수로 보고</p>
+<p><span class="math display">\[
+P(\theta,H\mid\mathcal D)
+\]</span></p>
+<p>를 근사한다. 새로운 사례의 예측은</p>
+<p><span class="math display">\[
+P(x^{\mathrm{new}}\mid\mathcal D)
+=
+\int\sum_H
+P(x^{\mathrm{new}}\mid\theta)
+P(\theta,H\mid\mathcal D)
+\,d\theta
+\]</span></p>
+<p>로 모수와 자료완성의 불확실성을 모두 평균한다.</p>
+<p>사전분포에서 모수를 뽑고 결측값을 생성한 뒤 관측자료 가능도로 가중하는 가능도가중법은 개념적으로 가능하다. 그러나 모수공간은 고차원 연속공간이므로 사후질량이 큰 영역에서 표본을 얻을 확률이 극히 작다. 대부분의 표본가중치가 거의 0이 되어 실용성이 낮다. 이 절에서는 MCMC와 변분 베이즈를 중심으로 다룬다.</p>
+</section>
+<section id="mcmc-표본추출" class="level3" data-number="18.3.4">
+<h3 data-number="18.3.4" class="anchored" data-anchor-id="mcmc-표본추출"><span class="header-section-number">18.3.4</span> MCMC 표본추출</h3>
+<p>MCMC는 상태를 <span class="math inline">\((\theta,H)\)</span>의 할당으로 두고, 정상분포가 원하는 사후분포가 되도록 마르코프 연쇄를 구성한다. 충분한 burn-in 이후의 표본으로 모수사후, 잠재변수사후와 사후예측을 근사한다.</p>
+<section id="gibbs-sampling" class="level4" data-number="18.3.4.1">
+<h4 data-number="18.3.4.1" class="anchored" data-anchor-id="gibbs-sampling"><span class="header-section-number">18.3.4.1</span> Gibbs sampling</h4>
+<p>Gibbs 표본기는 두 종류의 변수를 번갈아 갱신한다.</p>
+</section>
+<section id="결측자료-변수-갱신" class="level4" data-number="18.3.4.2">
+<h4 data-number="18.3.4.2" class="anchored" data-anchor-id="결측자료-변수-갱신"><span class="header-section-number">18.3.4.2</span> 결측자료 변수 갱신</h4>
+<p>현재 모수와 나머지 결측값을 고정하고</p>
+<p><span class="math display">\[
+P(X^{[m]}\mid H_{-X^{[m]}},\theta,\mathcal D)
+\]</span></p>
+<p>에서 새 값을 추출한다. 이는 입자 기반 근사추론 장에서 다룬 일반 Gibbs 추론과 동일하며 해당 변수의 Markov blanket만 사용한다.</p>
+</section>
+<section id="cpd-모수-갱신" class="level4" data-number="18.3.4.3">
+<h4 data-number="18.3.4.3" class="anchored" data-anchor-id="cpd-모수-갱신"><span class="header-section-number">18.3.4.3</span> CPD 모수 갱신</h4>
+<p>현재 <span class="math inline">\(H\)</span>가 주어지면 자료는 완전해진다. 전역·국소 모수독립성과 디리클레 사전분포를 가정할 경우</p>
+<p><span class="math display">\[
+P(\theta_{X\mid u}\mid\mathcal D,H)
+=
+\operatorname{Dirichlet}
+\bigl(\alpha_{x_1\mid u}+M_H[x_1,u],\ldots,
+\alpha_{x_K\mid u}+M_H[x_K,u]\bigr)
+\]</span></p>
+<p>에서 직접 추출할 수 있다. 즉, 결측값을 채운 현재 상태의 완전자료 카운트를 이용한다.</p>
+<p>이 두 단계를 반복하면 결합사후 <span class="math inline">\(P(\theta,H\mid\mathcal D)\)</span>를 표본화할 수 있다. 단, 잠재변수와 모수의 사후상관이 강하면 연쇄가 천천히 섞이고 서로 다른 사후봉우리 사이를 이동하지 못할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>상자 - 디리클레 분포에서 표본추출</strong></p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정의 - 감마분포</strong></p>
+</blockquote>
+<p>연속확률변수 <span class="math inline">\(X\)</span>가</p>
+<p><span class="math display">\[
+p(x)=\frac{\beta^\alpha}{\Gamma(\alpha)}x^{\alpha-1}e^{-\beta x},
+\qquad x&gt;0
+\]</span></p>
+<p>의 밀도를 가지면 <span class="math inline">\(X\sim\operatorname{Gamma}(\alpha,\beta)\)</span>라 한다.</p>
+<blockquote class="blockquote">
+<p><strong>정리</strong></p>
+</blockquote>
+<p>독립변수 <span class="math inline">\(Z_i\sim\operatorname{Gamma}(\alpha_i,1)\)</span>를 생성하고</p>
+<p><span class="math display">\[
+\theta_i=\frac{Z_i}{\sum_{j=1}^K Z_j}
+\]</span></p>
+<p>로 정규화하면</p>
+<p><span class="math display">\[
+(\theta_1,\ldots,\theta_K)
+\sim\operatorname{Dirichlet}(\alpha_1,\ldots,\alpha_K).
+\]</span></p>
+<p>따라서 디리클레 표본은 각 성분에 대응하는 감마표본을 독립적으로 생성한 뒤 합으로 나누면 된다.</p>
+<blockquote class="blockquote">
+<p><strong>보조정리</strong></p>
+</blockquote>
+<p><span class="math inline">\(U\sim\operatorname{Unif}(0,1)\)</span>이면</p>
+<p><span class="math display">\[
+-\log U\sim\operatorname{Gamma}(1,1).
+\]</span></p>
+<p>그러므로 균일 디리클레 <span class="math inline">\(\operatorname{Dirichlet}(1,\ldots,1)\)</span>는 독립 균일난수의 음의 로그를 취하고 정규화하여 쉽게 표본화할 수 있다. 일반 감마분포 표본에는 거부표본추출이나 전용 감마 난수생성기를 사용한다.</p>
+</section>
+<section id="collapsed-mcmc" class="level4" data-number="18.3.4.4">
+<h4 data-number="18.3.4.4" class="anchored" data-anchor-id="collapsed-mcmc"><span class="header-section-number">18.3.4.4</span> Collapsed MCMC</h4>
+<p>축약표본은 상태의 일부를 분석적으로 적분하여 MCMC가 탐색해야 할 차원을 줄인다. 불완전자료 베이지안 학습에는 두 가지 반대 선택이 있다.</p>
+</section>
+<section id="모수만-상태로-남기는-축약" class="level4" data-number="18.3.4.5">
+<h4 data-number="18.3.4.5" class="anchored" data-anchor-id="모수만-상태로-남기는-축약"><span class="header-section-number">18.3.4.5</span> 모수만 상태로 남기는 축약</h4>
+<p>입자는 <span class="math inline">\(\theta\)</span>를 명시적으로 가지고 <span class="math inline">\(H\)</span>는 <span class="math inline">\(P(H\mid\theta,\mathcal D)\)</span>로 적분한다. 각 제안모수의 점수는</p>
+<p><span class="math display">\[
+P(\mathcal D,\theta)=P(\theta)P(\mathcal D\mid\theta)
+\]</span></p>
+<p>이며 <span class="math inline">\(P(\mathcal D\mid\theta)\)</span> 계산에는 사례별 추론이 필요하다. 나이브 베이즈 군집처럼 사례당 잠재변수가 하나이면 저렴하지만, 트리폭이 큰 모형에서는 비싸다.</p>
+<p>모수의 완전조건부분포는 결측자료 때문에 일반적으로 켤레형태가 아니다. 따라서 Gibbs보다 Metropolis-Hastings가 흔히 사용된다. 고차원 연속공간에서 단순 무작위보행 제안은 수락률과 혼합이 나쁠 수 있으므로 제안분포 설계가 중요하다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 베이지안 군집의 모수축약 표현</strong></p>
+</blockquote>
+<p><span class="math inline">\(K\)</span>개 군집의 혼합가중치가 <span class="math inline">\(\theta\)</span>, 군집별 모수가 <span class="math inline">\(\lambda_1,\ldots,\lambda_K\)</span>이고 <span class="math inline">\(C^{[m]}\)</span>가 사례의 잠재군집이라 하자.</p>
+<div id="fig-partially-observed-bayesian-clustering-plate" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-partially-observed-bayesian-clustering-plate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-partially-observed-bayesian-clustering-plate.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-partially-observed-bayesian-clustering-plate-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.13: 혼합가중치와 군집별 모수를 갖는 베이지안 군집 플레이트 모형.
+</figcaption>
+</figure>
+</div>
+<p>자료가능도는</p>
+<p><span class="math display">\[
+P(\mathcal D\mid\lambda_{1:K},\theta)
+=
+\prod_{m=1}^{M}
+\sum_{k=1}^{K}
+P(C^{[m]}=k\mid\theta)
+P(x^{[m]}\mid\lambda_k).
+\]</span></p>
+<p>한 <span class="math inline">\(\lambda_k\)</span>만 조건부로 표본화하려 해도 이 식은 <span class="math inline">\(M\)</span>개의 선형항의 곱이 되어 표준적인 켤레분포가 아니다. Metropolis-Hastings에서는 새 <span class="math inline">\(\lambda_k\)</span>를 제안하고 위 혼합가능도식의 가능도비를 계산해야 한다. 합 안에 모수가 들어 있으므로 다른 군집의 항이 단순히 상쇄되지 않는다.</p>
+</section>
+<section id="자료완성만-상태로-남기는-축약" class="level4" data-number="18.3.4.6">
+<h4 data-number="18.3.4.6" class="anchored" data-anchor-id="자료완성만-상태로-남기는-축약"><span class="header-section-number">18.3.4.6</span> 자료완성만 상태로 남기는 축약</h4>
+<p>반대로 입자는 <span class="math inline">\(H\)</span>의 할당만 보유하고 모수는</p>
+<p><span class="math display">\[
+P(\theta\mid\mathcal D,H)
+\]</span></p>
+<p>로 적분한다. 켤레사전분포를 사용하면 완전자료의 충분통계만으로 사후와 주변가능도를 닫힌형식으로 계산할 수 있다. MCMC는 이산적이지만 매우 큰 자료완성공간을 탐색한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 군집할당의 collapsed Gibbs</strong></p>
+</blockquote>
+<p>현재 군집할당을 <span class="math inline">\(c=(c^{[1]},\ldots,c^{[M]})\)</span>라 하고</p>
+<p><span class="math display">\[
+I_k(c)=\{m:c^{[m]}=k\}
+\]</span></p>
+<p>라 하자. 혼합가중치 사후는</p>
+<p><span class="math display">\[
+P(\theta\mid c)
+=
+\operatorname{Dirichlet}
+\left(\frac{\alpha_0}{K}+|I_1|,\ldots,
+\frac{\alpha_0}{K}+|I_K|\right).
+\]</span></p>
+<p>사례 <span class="math inline">\(m_0\)</span>의 군집을 갱신할 때</p>
+<p><span class="math display">\[
+P(C^{[m_0]}=k\mid c_{-m_0},\mathcal D,\omega)
+\propto
+P(C^{[m_0]}=k\mid c_{-m_0})
+P(x^{[m_0]}\mid C^{[m_0]}=k,
+\mathcal D_{I_k(c_{-m_0})},\omega).
+\]</span></p>
+<p>대칭 디리클레 사전분포를 사용하면</p>
+<p><span class="math display">\[
+P(C^{[m_0]}=k\mid\cdots)
+\propto
+\left(|I_k(c_{-m_0})|+\frac{\alpha_0}{K}\right)
+Q\!\left(x^{[m_0]}\mid
+\mathcal D_{I_k(c_{-m_0})},\omega\right),
+\]</span></p>
+<p>여기서 <span class="math inline">\(Q\)</span>는 해당 군집자료에 대한 베이지안 사후예측분포이다. 첫 항은 큰 군집을 선호하는 혼합가중치 효과이고, 둘째 항은 새 사례가 그 군집의 관측분포와 얼마나 잘 맞는지를 나타낸다.</p>
+</section>
+<section id="두-축약방법의-비교" class="level4" data-number="18.3.4.7">
+<h4 data-number="18.3.4.7" class="anchored" data-anchor-id="두-축약방법의-비교"><span class="header-section-number">18.3.4.7</span> 두 축약방법의 비교</h4>
+<ul>
+<li>모수축약 입자의 계산비용은 <span class="math inline">\(H\)</span>를 적분하는 네트워크 추론복잡도에 좌우된다.</li>
+<li>자료완성축약 입자는 켤레사전분포가 있으면 충분통계 갱신이 빠르다.</li>
+<li>모수축약은 고차원 연속공간을, 자료완성축약은 거대한 이산공간을 탐색한다.</li>
+<li>전자는 정교한 연속 MCMC가 필요하고 후자는 단순 Gibbs도 효과적일 수 있다.</li>
+<li>어떤 방식이 항상 우월하지 않으며 모형구조, 사전분포와 잠재변수 차원에 따라 선택한다.</li>
+</ul>
+</section>
+</section>
+<section id="변분-베이지안-학습" class="level3" data-number="18.3.5">
+<h3 data-number="18.3.5" class="anchored" data-anchor-id="변분-베이지안-학습"><span class="header-section-number">18.3.5</span> 변분 베이지안 학습</h3>
+<p>변분 베이즈는 실제 사후분포</p>
+<p><span class="math display">\[
+P(H,\theta\mid\mathcal D)
+\]</span></p>
+<p>를 제한된 분포족의 <span class="math inline">\(Q(H,\theta)\)</span>로 근사한다. 변분목적함수는</p>
+<p><span class="math display">\[
+\mathcal F[Q]
+=
+E_Q[\log P(H,\theta,\mathcal D)]
++H_Q(H,\theta)
+\]</span></p>
+<p>이며</p>
+<p><span class="math display">\[
+\log P(\mathcal D)
+=
+\mathcal F[Q]
++D_{\mathrm{KL}}\!\left(Q(H,\theta)\Vert
+P(H,\theta\mid\mathcal D)\right).
+\]</span></p>
+<p>따라서 <span class="math inline">\(\mathcal F\)</span>를 최대화하면 로그주변가능도의 하한을 최대화한다.</p>
+<p>가장 단순한 평균장 가정은</p>
+<p><span class="math display">\[
+Q(H,\theta)=Q(H)Q(\theta)
+\]</span></p>
+<p>이며 더 나아가</p>
+<p><span class="math display">\[
+Q(H)=\prod_m Q_m(H^{[m]}),
+\qquad
+Q(\theta)=\prod_i Q_i(\theta_i)
+\]</span></p>
+<p>로 분해할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 평균장 고정점</strong></p>
+</blockquote>
+<p>분포를 두 부분으로 분해한 <span class="math inline">\(Q(A,B)=Q_A(A)Q_B(B)\)</span>에 대해, 한 요인을 고정하고 다른 요인을 최적화하는 해는</p>
+<p><span class="math display">\[
+\log Q_A(A)
+=
+E_{Q_B}[\log P(A,B,\mathcal D)]+\text{상수},
+\]</span></p>
+<p><span class="math display">\[
+\log Q_B(B)
+=
+E_{Q_A}[\log P(A,B,\mathcal D)]+\text{상수}
+\]</span></p>
+<p>의 형태를 갖는다. 각 갱신을 번갈아 적용하면 변분하한이 감소하지 않는다.</p>
+</section>
+<section id="이진-나이브-베이즈-군집에서의-갱신" class="level3" data-number="18.3.6">
+<h3 data-number="18.3.6" class="anchored" data-anchor-id="이진-나이브-베이즈-군집에서의-갱신"><span class="header-section-number">18.3.6</span> 이진 나이브 베이즈 군집에서의 갱신</h3>
+<p>잠재군집 <span class="math inline">\(H^{[m]}\)</span>와 모수 <span class="math inline">\(\theta_H,\theta_{X_i\mid H}\)</span>를 갖는 모형에서</p>
+<p><span class="math display">\[
+Q(\theta_H)
+=
+\operatorname{Beta}
+\left(
+\alpha_{h_0}+\sum_m Q(H^{[m]}=h_0),
+\alpha_{h_1}+\sum_m Q(H^{[m]}=h_1)
+\right).
+\]</span></p>
+<p>즉, 모수사후는 기대 충분통계로 갱신한 베타·디리클레 분포이다. 이는 EM의 M-step과 유사하지만 한 점 추정치가 아니라 모수의 분포를 갱신한다.</p>
+<p>잠재군집의 갱신은</p>
+<p><span class="math display">\[
+Q_m(h)
+\propto
+\exp\left\{
+E_{Q(\theta_H)}[\log\theta_h]
++
+\sum_i E_{Q(\theta_{X_i\mid H})}
+[\log\theta_{x_i^{[m]}\mid h}]
+\right).
+\]</span></p>
+<p>디리클레 <span class="math inline">\(\operatorname{Dirichlet}(\alpha_1',\ldots,\alpha_K')\)</span>에 대해</p>
+<p><span class="math display">\[
+E[\log\theta_k]
+=
+\psi(\alpha_k')-
+\psi\!\left(\sum_j\alpha_j'\right),
+\]</span></p>
+<p>여기서 <span class="math inline">\(\psi(z)=d\log\Gamma(z)/dz\)</span>는 digamma 함수이다. <span class="math inline">\(\alpha\)</span>가 크면 <span class="math inline">\(\psi(z)\approx\log z\)</span>이므로 변분 E-step은 사후평균모수를 사용한 EM E-step과 거의 같아진다.</p>
+<p>변분 베이즈의 장점은 다음과 같다.</p>
+<ul>
+<li>모수불확실성을 부분적으로 유지한다.</li>
+<li>로그주변가능도의 계산 가능한 하한을 제공한다.</li>
+<li>사전분포가 자연스럽게 정규화 역할을 한다.</li>
+<li>MCMC보다 빠르고 수렴진단이 단순한 경우가 많다.</li>
+</ul>
+<p>그러나 인자화된 <span class="math inline">\(Q\)</span>는 사후상관과 다봉성을 충분히 표현하지 못한다. 군집라벨 교환으로 생기는 대칭적 여러 봉우리 중 하나만 선택하거나, 서로 다른 봉우리를 넓은 단봉분포로 부정확하게 평균할 수 있다.</p>
+</section>
+</section>
+<section id="구조학습" class="level2" data-number="18.4">
+<h2 data-number="18.4" class="anchored" data-anchor-id="구조학습"><span class="header-section-number">18.4</span> 구조학습</h2>
+<p>불완전자료에서는 구조점수의 계산과 구조공간 탐색이 모두 어려워진다. 완전자료의 BDe 점수는 CPD 가족별로 분해되었지만, 결측값을 합한 가능도는 모수들을 전역적으로 결합한다. 잠재변수가 허용되면 변수의 개수와 잠재변수의 상태수까지 선택해야 하므로 탐색공간 자체도 확대된다.</p>
+<section id="구조점수" class="level3" data-number="18.4.1">
+<h3 data-number="18.4.1" class="anchored" data-anchor-id="구조점수"><span class="header-section-number">18.4.1</span> 구조점수</h3>
+<p>관측자료에 대한 베이지안 구조점수는 원칙적으로 이전과 같다.</p>
+<p><span class="math display">\[
+\operatorname{score}_B(G:\mathcal D)
+=
+\log P(\mathcal D\mid G)+\log P(G),
+\]</span></p>
+<p><span class="math display">\[
+P(\mathcal D\mid G)
+=
+\int P(\mathcal D\mid\theta_G,G)
+P(\theta_G\mid G)d\theta_G.
+\]</span></p>
+<p>그러나 불완전자료 가능도는 가족별로 분해되지 않으므로 적분의 닫힌형식 해가 없다. 다음 근사들이 사용된다.</p>
+<section id="laplace-근사" class="level4" data-number="18.4.1.1">
+<h4 data-number="18.4.1.1" class="anchored" data-anchor-id="laplace-근사"><span class="header-section-number">18.4.1.1</span> Laplace 근사</h4>
+<blockquote class="blockquote">
+<p><strong>상자 - Laplace 근사의 원리</strong></p>
+</blockquote>
+<p><span class="math inline">\(f(w)=\exp\{g(w)\}\)</span>의 적분을 계산한다고 하자. <span class="math inline">\(g\)</span>의 최대점 <span class="math inline">\(w_0\)</span>에서 이차 Taylor 전개를 하면</p>
+<p><span class="math display">\[
+g(w)
+\approx
+g(w_0)-\frac12(w-w_0)^TC(w-w_0),
+\]</span></p>
+<p><span class="math display">\[
+C=-\nabla^2g(w_0).
+\]</span></p>
+<p>따라서</p>
+<p><span class="math display">\[
+\int f(w)dw
+\approx
+f(w_0)|C|^{-1/2}(2\pi)^{d/2},
+\]</span></p>
+<p>여기서 <span class="math inline">\(d\)</span>는 모수차원이다. 최대점 부근의 단일 봉우리가 가우시안 형태일 때 정확하다.</p>
+<p>불완전자료 구조학습에서는</p>
+<p><span class="math display">\[
+g(\theta)=
+\log P(\mathcal D\mid\theta,G)
++
+\log P(\theta\mid G)
+\]</span></p>
+<p>로 두고 MAP 모수 <span class="math inline">\(\widetilde\theta_G\)</span>에서 전개한다. Laplace 점수는</p>
+<p><span class="math display">\[
+\begin{aligned}
+\operatorname{score}_{\mathrm{Lap}}(G:\mathcal D)
+={}&amp;\log P(G)
++\log P(\mathcal D\mid\widetilde\theta_G,G)
++\log P(\widetilde\theta_G\mid G)\\
+&amp;+\frac{d}{2}\log(2\pi)
+-\frac12\log|C|.
+\end{aligned}
+\]</span></p>
+<p><span class="math inline">\(|C|\)</span>가 크면 봉우리가 좁아 특정 모수에 과도하게 맞춰진 것이므로 더 큰 패널티를 받는다. 반면 넓은 봉우리는 많은 모수값이 자료를 설명한다는 뜻이므로 적분질량이 크다.</p>
+<p>한계는 Hessian 계산이다. 서로 다른 CPD의 두 모수에 대한 이차미분은 사례별로 여러 가족변수의 결합사후확률을 요구한다. 이 변수들이 같은 클리크에 없으면 out-of-clique 추론이 필요하여 MAP 추정보다 훨씬 비쌀 수 있다. 다봉형 사후에서는 한 봉우리만 근사한다는 문제도 있다.</p>
+</section>
+<section id="점근적-근사와-bic" class="level4" data-number="18.4.1.2">
+<h4 data-number="18.4.1.2" class="anchored" data-anchor-id="점근적-근사와-bic"><span class="header-section-number">18.4.1.2</span> 점근적 근사와 BIC</h4>
+<p>자료수가 커지면 Hessian은 사례별 Hessian의 합이므로 대략</p>
+<p><span class="math display">\[
+C=M\left(\frac1M\sum_m C_m\right)
+\]</span></p>
+<p>이고</p>
+<p><span class="math display">\[
+\log|C|
+=d\log M+O(1).
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>정리</strong></p>
+</blockquote>
+<p><span class="math inline">\(M\to\infty\)</span>에서</p>
+<p><span class="math display">\[
+\operatorname{score}_{\mathrm{Lap}}(G:\mathcal D)
+=
+\operatorname{score}_{\mathrm{BIC}}(G:\mathcal D)+O(1),
+\]</span></p>
+<p><span class="math display">\[
+\operatorname{score}_{\mathrm{BIC}}(G:\mathcal D)
+=
+\log P(\mathcal D\mid\widetilde\theta_G,G)
+-\frac{\log M}{2}\operatorname{Dim}[G]
++\log P(G)
++\log P(\widetilde\theta_G\mid G).
+\]</span></p>
+<p>완전자료와 마찬가지로 자료적합도와 모형복잡도를 절충한다. 그러나 잠재변수가 있으면 명목상 모수수와 관측분포의 실제 자유도가 다를 수 있다. Hessian이 특이해져 유효차원만 사용해야 하지만, 일반 잠재변수 모형의 유효차원 결정은 쉽지 않다. 이 때문에 단순 BIC는 잠재군집 수를 지나치게 작게 선택할 수 있다.</p>
+</section>
+<section id="cheesemanstutz-근사" class="level4" data-number="18.4.1.3">
+<h4 data-number="18.4.1.3" class="anchored" data-anchor-id="cheesemanstutz-근사"><span class="header-section-number">18.4.1.3</span> Cheeseman–Stutz 근사</h4>
+<p>현재 구조 <span class="math inline">\(G\)</span>의 MAP 모수 <span class="math inline">\(\widetilde\theta_G\)</span>에서 기대 충분통계를 계산하여 가상의 완전자료 <span class="math inline">\(\mathcal D^*_{G,\widetilde\theta_G}\)</span>를 정의한다.</p>
+<p><span class="math display">\[
+M_{\mathcal D^*_{G,\theta}}[x]
+=
+\overline M_{P(H\mid\mathcal D,\theta,G)}[x].
+\]</span></p>
+<p>이 자료는 분수 가중치를 가진 완전자료로 볼 수 있다. 완전자료 주변가능도는 닫힌형식으로 계산 가능하지만, <span class="math inline">\(P(\mathcal D^*\mid G)\)</span> 하나만으로는 실제 자료의 모든 완성에 대한 적분합을 대체하지 못한다. 점근적 보정항을 더하면</p>
+<p><span class="math display">\[
+\begin{aligned}
+\operatorname{score}_{\mathrm{CS}}(G:\mathcal D)
+={}&amp;\log P(G)
++\log P(\mathcal D^*_{G,\widetilde\theta_G}\mid G)\\
+&amp;+\log P(\mathcal D\mid\widetilde\theta_G,G)
+-\log P(\mathcal D^*_{G,\widetilde\theta_G}
+\mid\widetilde\theta_G,G).
+\end{aligned}
+\]</span></p>
+<p>이 점수는 불완전자료의 MAP 가능도와 기대완전자료의 정확한 베이지안 점수를 결합한다. BIC보다 세밀하고 Laplace보다 저렴하여 잠재군집 수 선택에서 자주 더 좋은 근사를 제공한다.</p>
+</section>
+<section id="candidate-method" class="level4" data-number="18.4.1.4">
+<h4 data-number="18.4.1.4" class="anchored" data-anchor-id="candidate-method"><span class="header-section-number">18.4.1.4</span> Candidate method</h4>
+<p>임의의 후보모수 <span class="math inline">\(\theta\)</span>에 대해</p>
+<p><span class="math display">\[
+P(\mathcal D,\theta\mid G)
+=P(\mathcal D\mid\theta,G)P(\theta\mid G)
+=P(\theta\mid\mathcal D,G)P(\mathcal D\mid G)
+\]</span></p>
+<p>이므로</p>
+<p><span class="math display">\[
+P(\mathcal D\mid G)
+=
+\frac{P(\mathcal D\mid\theta,G)P(\theta\mid G)}
+{P(\theta\mid\mathcal D,G)}.
+\]</span></p>
+<p>분자의 가능도와 사전분포는 계산할 수 있고, 어려운 부분은 후보점에서의 사후밀도이다. MCMC, 특히 모수분포를 가진 축약입자로 이를 추정한다. 여러 고사후 후보점의 추정값을 평균하면 안정성이 높아지지만 추가 추론비용이 든다.</p>
+<p>위 관계는 항등식이므로 사후밀도 추정이 정확해질수록 주변가능도 추정도 임의로 정확해질 수 있다. 이는 고정된 점근근사와 다른 장점이다.</p>
+</section>
+<section id="변분-주변가능도" class="level4" data-number="18.4.1.5">
+<h4 data-number="18.4.1.5" class="anchored" data-anchor-id="변분-주변가능도"><span class="header-section-number">18.4.1.5</span> 변분 주변가능도</h4>
+<p>변분 베이즈에서</p>
+<p><span class="math display">\[
+\log P(\mathcal D\mid G)
+=
+\mathcal F_G[Q]
++D_{\mathrm{KL}}(Q\Vert P(H,\theta\mid\mathcal D,G))
+\]</span></p>
+<p>이므로 최적 변분하한 <span class="math inline">\(\mathcal F_G[Q^*]\)</span>를 구조점수로 사용할 수 있다. 계산 가능한 하한이지만 근사족이 구조마다 다른 정도로 부정확하면 구조비교가 편향될 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>상자 - 잠재군집 상태수 선택에서 점수 비교</strong></p>
+</blockquote>
+<p>나이브 베이즈 혼합모형에서 잠재변수의 상태수 <span class="math inline">\(K\)</span>를 늘리면 표현력과 최대가능도는 단조롭게 증가한다. 그러나 모수수도 늘어나 과적합 위험이 커진다. 실제 주변가능도에 가까운 candidate method를 기준으로 Laplace, Cheeseman–Stutz와 BIC를 비교한 실험에서는 다음 패턴이 나타났다.</p>
+<ul>
+<li>군집이 명확히 분리된 쉬운 자료에서는 대부분의 점수가 비슷했다.</li>
+<li>군집이 중첩되거나 표본이 작으면 차이가 커졌다.</li>
+<li>BIC는 잠재상태 수를 지나치게 작게 선택하는 경향이 강했다.</li>
+<li>Cheeseman–Stutz의 MAP 버전은 정확도와 계산효율의 절충이 좋았다.</li>
+<li>상태수가 커지면 빈 군집이 생겨 가능도면이 봉우리보다 능선에 가까워지고, 단일봉우리 점근근사는 주변가능도를 과소평가했다.</li>
+</ul>
+<div id="fig-partially-observed-state-number-scores" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-partially-observed-state-number-scores-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-partially-observed-state-number-scores.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-partially-observed-state-number-scores-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.14: 군집상태 수에 따른 여러 주변가능도 근사와 모형선택오차의 비교.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="구조탐색" class="level3" data-number="18.4.2">
+<h3 data-number="18.4.2" class="anchored" data-anchor-id="구조탐색"><span class="header-section-number">18.4.2</span> 구조탐색</h3>
+<section id="순진한-접근의-한계" class="level4" data-number="18.4.2.1">
+<h4 data-number="18.4.2.1" class="anchored" data-anchor-id="순진한-접근의-한계"><span class="header-section-number">18.4.2.1</span> 순진한 접근의 한계</h4>
+<p>구조마다 MAP 또는 MLE 모수를 학습하고 점수를 계산한 후 최고 구조를 선택할 수 있다. 후보가 잠재상태 수 몇 개뿐인 경우에는 가능하지만 일반 DAG 공간은 초지수적으로 크다.</p>
+<p>완전자료의 hill climbing은 점수분해성을 이용해 한 간선 변경에 관련된 가족점수만 다시 계산하고 델타점수를 캐시했다. 불완전자료에서는 국소 간선변경이 잠재변수의 의미와 모든 CPD 모수를 바꿀 수 있으므로</p>
+<p><span class="math display">\[
+\delta(G:o)
+=
+\operatorname{score}(o(G):\mathcal D)
+-
+\operatorname{score}(G:\mathcal D)
+\]</span></p>
+<p>가 먼 곳의 구조변경에도 달라진다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 비분해성</strong></p>
+</blockquote>
+<p>잠재군집 <span class="math inline">\(C\)</span>와 관측변수 <span class="math inline">\(X_1,\ldots,X_4\)</span>가 있고, <span class="math inline">\(C\to X_3\)</span>와 <span class="math inline">\(C\to X_4\)</span>의 포함여부를 선택한다고 하자. <span class="math inline">\(C\to X_3\)</span>만 추가하면 점수개선이 작지만 <span class="math inline">\(C\to X_4\)</span>가 이미 있을 때 <span class="math inline">\(C\to X_3\)</span>를 추가하면 큰 개선이 생길 수 있다. 두 변수를 함께 연결하면 <span class="math inline">\(C\)</span>의 의미가 <span class="math inline">\(X_3,X_4\)</span>의 강한 공통패턴을 설명하도록 바뀌기 때문이다.</p>
+<div id="fig-partially-observed-score-nondecomposability" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-partially-observed-score-nondecomposability-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-partially-observed-score-nondecomposability.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-partially-observed-score-nondecomposability-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.15: 잠재변수가 있는 구조점수의 비분해성. 한 간선의 기여가 다른 관측변수가 잠재변수에 연결되어 있는지에 따라 크게 달라진다.
+</figcaption>
+</figure>
+</div>
+<p>결과적으로 각 이웃구조마다 다음을 반복해야 할 수 있다.</p>
+<ol type="1">
+<li>모수 초기화</li>
+<li>EM 또는 기울기법으로 모수 최적화</li>
+<li>관측가능도와 근사 주변가능도 계산</li>
+<li>대부분의 후보결과 폐기</li>
+</ol>
+<p>이는 매우 비효율적이다.</p>
+</section>
+<section id="휴리스틱-해법" class="level4" data-number="18.4.2.2">
+<h4 data-number="18.4.2.2" class="anchored" data-anchor-id="휴리스틱-해법"><span class="header-section-number">18.4.2.2</span> 휴리스틱 해법</h4>
+<p>실용적 방법은 정확점수 계산 전에 값싼 근사를 사용해 후보를 줄이는 것이다.</p>
+<ul>
+<li>현재 구조의 모수를 새 구조에 가능한 한 그대로 옮기고 변경된 CPD만 대략 적합</li>
+<li>소수의 EM 반복만 수행하여 초기 점수개선을 평가</li>
+<li>일부 자료사례나 일부 변수로 스크리닝</li>
+<li>후보 부모집합을 사전지식이나 상호정보량으로 제한</li>
+<li>점수의 하한·상한을 사용해 안전하게 가지치기</li>
+<li>여러 후보를 빔으로 유지하고 유망한 후보에만 정밀학습 수행</li>
+</ul>
+<p>현재 모수를 고정하거나 부분적으로만 최적화해 얻은 BIC 가능도는 완전최적화 후 가능한 점수의 하한으로 사용할 수 있다. 하한이 이미 현재 최고후보보다 높으면 그 이동은 유망하며, 상한이 최고후보보다 낮으면 안전하게 제거할 수 있다. 다만 실용적인 강한 경계를 만드는 일은 어렵다.</p>
+</section>
+</section>
+<section id="structural-em" class="level3" data-number="18.4.3">
+<h3 data-number="18.4.3" class="anchored" data-anchor-id="structural-em"><span class="header-section-number">18.4.3</span> Structural EM</h3>
+<p>Structural EM은 하나의 기대완전자료를 여러 구조후보 평가에 재사용한다. 현재 구조와 모수 <span class="math inline">\((G^0,\widetilde\theta^0)\)</span>에서 가상 완전자료 <span class="math inline">\(\mathcal D^*_{G^0,\widetilde\theta^0}\)</span>를 만든 뒤</p>
+<p><span class="math display">\[
+\widehat\delta(G:o)
+=
+\operatorname{score}(o(G):\mathcal D^*)
+-
+\operatorname{score}(G:\mathcal D^*)
+\]</span></p>
+<p>를 완전자료 델타점수처럼 빠르게 계산한다.</p>
+<blockquote class="blockquote">
+<p><strong>정리</strong></p>
+</blockquote>
+<p><span class="math inline">\(G^0\)</span>의 MAP 모수가 <span class="math inline">\(\widetilde\theta^0\)</span>일 때 임의의 구조 <span class="math inline">\(G\)</span>에 대해</p>
+<p><span class="math display">\[
+\begin{aligned}
+&amp;\operatorname{score}_{\mathrm{BIC}}
+(G:\mathcal D^*_{G^0,\widetilde\theta^0})
+-
+\operatorname{score}_{\mathrm{BIC}}
+(G^0:\mathcal D^*_{G^0,\widetilde\theta^0})\\
+&amp;\qquad\leq
+\operatorname{score}_{\mathrm{BIC}}(G:\mathcal D)
+-
+\operatorname{score}_{\mathrm{BIC}}(G^0:\mathcal D).
+\end{aligned}
+\]</span></p>
+<p>즉 기대완전자료에서 측정한 <span class="math inline">\(G^0\)</span> 대비 개선은 실제 BIC 개선의 하한이다. 기대점수가 <span class="math inline">\(G^0\)</span>보다 높은 구조로 이동하면 실제 BIC도 증가한다. 베이지안 점수에는 감마함수의 비선형성 때문에 정확한 정리는 아니지만 큰 표본에서는 근사적으로 이용된다.</p>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - Structural EM</strong></p>
+</blockquote>
+<ol type="1">
+<li>초기 구조 <span class="math inline">\(G^0\)</span>와 모수 <span class="math inline">\(\theta^0\)</span>를 정한다.</li>
+<li>현재 구조에서 EM/MAP-EM으로 모수 <span class="math inline">\(\widetilde\theta^t\)</span>를 개선한다.</li>
+<li>E-step에서 <span class="math inline">\(P(H\mid\mathcal D,G^t,\widetilde\theta^t)\)</span>로 필요한 기대 충분통계를 계산한다.</li>
+<li>이 통계를 완전자료로 간주하고 앞 장에서 다룬 구조학습 알고리즘을 실행하여 <span class="math inline">\(G^{t+1}\)</span>을 구한다.</li>
+<li>같은 기대통계로 새 구조의 초기모수를 추정한다.</li>
+<li>점수 또는 구조가 더 이상 개선되지 않을 때까지 반복한다.</li>
+</ol>
+<p>BIC를 사용하면 반복별 점수증가와 수렴이 보장되지만, 최종구조가 구조공간의 국소최대라는 보장까지는 없다.</p>
+<section id="선택적-군집" class="level4" data-number="18.4.3.1">
+<h4 data-number="18.4.3.1" class="anchored" data-anchor-id="선택적-군집"><span class="header-section-number">18.4.3.1</span> 선택적 군집</h4>
+<p>잠재군집 <span class="math inline">\(C\)</span>가 루트이고 각 <span class="math inline">\(X_i\)</span>가 <span class="math inline">\(C\)</span>의 자식이거나 독립 루트인 모형은 총 <span class="math inline">\(2^n\)</span>개의 구조를 갖는다. 완전자료에서는 각 <span class="math inline">\(X_i\)</span>에 대해</p>
+<p><span class="math display">\[
+\operatorname{FamScore}(X_i\mid C)
+\quad\text{대}\quad
+\operatorname{FamScore}(X_i)
+\]</span></p>
+<p>를 독립적으로 비교할 수 있다. Structural EM에서는 현재 모형으로</p>
+<p><span class="math display">\[
+\overline M[x_i,c]
+=
+\sum_{m:X_i^{[m]}=x_i}
+P(C^{[m]}=c\mid o^{[m]},G^t,\widetilde\theta^t)
+\]</span></p>
+<p>를 계산하고 각 간선의 포함여부를 다시 선택한다.</p>
+<p>새 반복에서 여러 간선이 한꺼번에 바뀔 수 있다. 완전 나이브 베이즈 구조에서 시작하여 불필요한 간선을 제거하거나, 여러 무작위 부분구조에서 시작할 수 있다. 빈 구조에서는 <span class="math inline">\(C\)</span>가 관측변수와 전혀 연결되지 않아 기대통계가 독립으로 남으므로 Structural EM이 새 간선을 추가하지 못하는 대칭적 고정점이 될 수 있다.</p>
+</section>
+<section id="효율적-구현" class="level4" data-number="18.4.3.2">
+<h4 data-number="18.4.3.2" class="anchored" data-anchor-id="효율적-구현"><span class="header-section-number">18.4.3.2</span> 효율적 구현</h4>
+<p>가상 완전자료의 모든 완성을 저장할 필요는 없다. 구조학습에 필요한 기대 충분통계만 저장한다.</p>
+<ul>
+<li>트리구조만 탐색하면 모든 일변량·이변량 통계를 미리 계산한다.</li>
+<li>최대 진입차수가 <span class="math inline">\(k\)</span>이면 최대 <span class="math inline">\(k+1\)</span>개 변수의 통계를 후보에 따라 계산한다.</li>
+<li>고차통계가 너무 많으면 탐색 중 요청될 때만 계산하고 캐시한다.</li>
+<li>같은 기대자료에 대해서는 완전자료 점수분해성과 델타점수 캐싱을 그대로 이용한다.</li>
+<li>새 구조가 현재구조에서 멀어지면 기대자료를 다시 계산하여 근사를 갱신한다.</li>
+</ul>
+<p>이 재사용이 Structural EM을 많은 변수에 확장할 수 있게 하는 핵심이다.</p>
+</section>
+</section>
+</section>
+<section id="잠재변수를-포함한-모형의-학습" class="level2" data-number="18.5">
+<h2 data-number="18.5" class="anchored" data-anchor-id="잠재변수를-포함한-모형의-학습"><span class="header-section-number">18.5</span> 잠재변수를 포함한 모형의 학습</h2>
+<p>앞 절에서는 변수집합이 주어졌다고 가정했다. 실제로는 잠재변수의 존재, 위치와 상태수 자체가 미지일 수 있다. 잠재변수는 관측변수 사이의 복잡한 의존성을 소수의 공통원인으로 압축하고, 군집이나 잠재특성을 발견하는 데 유용하다. 그러나 비식별성, 다봉형 가능도와 과적합을 동시에 초래한다.</p>
+<section id="잠재변수의-정보내용" class="level3" data-number="18.5.1">
+<h3 data-number="18.5.1" class="anchored" data-anchor-id="잠재변수의-정보내용"><span class="header-section-number">18.5.1</span> 잠재변수의 정보내용</h3>
+<p>나이브 베이즈 군집모형에서 관측자료의 경험분포를 <span class="math inline">\(\widehat P_{\mathcal D}(X_{1:n})\)</span>라 하고, 모수 <span class="math inline">\(\theta\)</span>가 유도하는 잠재변수 사후를 결합하여</p>
+<p><span class="math display">\[
+\widehat Q_\theta(h,x_1,\ldots,x_n)
+=
+\widehat P_{\mathcal D}(x_1,\ldots,x_n)
+P(h\mid x_1,\ldots,x_n,\theta)
+\]</span></p>
+<p>를 정의한다. 이는 경험분포에 모형이 복원한 잠재라벨을 확률적으로 덧붙인 분포이다.</p>
+<p>완전자료에서 최대로그가능도는</p>
+<p><span class="math display">\[
+\frac1M\max_\theta\ell(\theta:\mathcal D,H)
+=
+\sum_i I_{\widehat P}(X_i;H)
+-H_{\widehat P}(H)
+-\sum_i H_{\widehat P}(X_i).
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>명제</strong></p>
+</blockquote>
+<p>현재 모수 <span class="math inline">\(\theta^0\)</span>에서 한 번의 EM 반복으로 얻은 모수를 <span class="math inline">\(\theta^1\)</span>이라 하면</p>
+<p><span class="math display">\[
+\frac1M\ell(\theta^0:\mathcal D)
+\leq
+\sum_i I_{\widehat Q_{\theta^0}}(X_i;H)
+-
+\sum_i H_{\widehat P_{\mathcal D}}(X_i)
+\leq
+\frac1M\ell(\theta^1:\mathcal D).
+\]</span></p>
+<p>고정점에서는 양쪽 부등식이 등식이 된다. 관측변수 엔트로피는 모수와 무관하므로, 나이브 베이즈 잠재변수의 가능도 최대화는 사실상 <span class="math inline">\(H\)</span>가 각 관측변수에 대해 전달하는 상호정보량의 합을 최대화한다.</p>
+<p>완전자료 식에는 <span class="math inline">\(-H(H)\)</span>가 있어 잠재상태가 복잡해지는 것을 일부 벌하지만, <span class="math inline">\(H\)</span>가 관측되지 않으면 관측자료 가능도에는 이 항이 없다. 따라서 잠재변수의 상태수를 늘리면 최대가능도는 감소하지 않는다. 상태수 선택에는 BIC, 주변가능도, 교차검증 또는 사전분포가 반드시 필요하다.</p>
+</section>
+<section id="잠재변수의-상태수-결정" class="level3" data-number="18.5.2">
+<h3 data-number="18.5.2" class="anchored" data-anchor-id="잠재변수의-상태수-결정"><span class="header-section-number">18.5.2</span> 잠재변수의 상태수 결정</h3>
+<section id="모형선택" class="level4" data-number="18.5.2.1">
+<h4 data-number="18.5.2.1" class="anchored" data-anchor-id="모형선택"><span class="header-section-number">18.5.2.1</span> 모형선택</h4>
+<p>후보 상태수 <span class="math inline">\(K=1,2,\ldots,K_{\max}\)</span>마다 모형을 학습하고 다음 중 하나로 비교한다.</p>
+<ul>
+<li>Laplace, Cheeseman–Stutz, candidate 또는 변분 주변가능도</li>
+<li>BIC와 유효차원 보정</li>
+<li>검증자료 로그가능도 또는 교차검증</li>
+<li>예측과제에 대한 조건부 손실</li>
+<li>해석가능성과 군집 안정성</li>
+</ul>
+<p>각 후보마다 다중초기값 EM을 수행해야 하므로 비용이 크다. 여러 잠재변수가 있으면 상태수 조합이 폭발한다. 더 값싼 휴리스틱은 잠재변수의 예상 Markov blanket만 이용해 국소군집을 먼저 수행하거나, 작은 상태수로 시작하여 설명되지 않은 잔여의존성이 크면 상태를 분할하거나 새 잠재변수를 추가하는 것이다.</p>
+</section>
+<section id="dirichlet-process" class="level4" data-number="18.5.2.2">
+<h4 data-number="18.5.2.2" class="anchored" data-anchor-id="dirichlet-process"><span class="header-section-number">18.5.2.2</span> Dirichlet process</h4>
+<p>베이지안 비모수 접근은 하나의 상태수를 선택하는 대신 서로 다른 군집수에 걸쳐 평균한다. 유한 <span class="math inline">\(K\)</span> 군집에서 대칭 사전분포</p>
+<p><span class="math display">\[
+\theta\sim\operatorname{Dirichlet}
+\left(\frac{\alpha_0}{K},\ldots,\frac{\alpha_0}{K}\right)
+\]</span></p>
+<p>를 사용하고 <span class="math inline">\(K\)</span>를 매우 크게 생각한다. 군집라벨 자체보다 사례들의 <strong>분할</strong> <span class="math inline">\(\sigma=\{I_1,\ldots,I_L\}\)</span>만 유지하면 빈 군집들을 하나로 축약할 수 있다.</p>
+<p>사례 <span class="math inline">\(m_0\)</span>를 제거한 분할 <span class="math inline">\(\sigma_{-m_0}\)</span>에서 기존 군집 <span class="math inline">\(I\)</span>에 들어갈 확률은</p>
+<p><span class="math display">\[
+P(I\leftarrow I\cup\{m_0\}\mid\cdots)
+\propto
+\left(|I|+\frac{\alpha_0}{K}\right)
+Q(x^{[m_0]}\mid\mathcal D_I,\omega),
+\]</span></p>
+<p>새 군집을 만들 확률은</p>
+<p><span class="math display">\[
+P(\sigma\leftarrow\sigma\cup\{\{m_0\}\}\mid\cdots)
+\propto
+(K-L)\frac{\alpha_0}{K}
+Q(x^{[m_0]}\mid\omega).
+\]</span></p>
+<p><span class="math inline">\(K\to\infty\)</span> 극한에서는</p>
+<p><span class="math display">\[
+P(m_0\text{가 }I\text{에 합류}\mid\cdots)
+\propto
+|I|Q(x^{[m_0]}\mid\mathcal D_I,\omega),
+\]</span></p>
+<p><span class="math display">\[
+P(m_0\text{가 새 군집 생성}\mid\cdots)
+\propto
+\alpha_0 Q(x^{[m_0]}\mid\omega).
+\]</span></p>
+<p>큰 군집은 더 많은 새 사례를 끌어들이고, <span class="math inline">\(\alpha_0\)</span>가 클수록 새 군집이 자주 생성된다. 자료가 늘어날 때 기대 군집수는 대략 로그크기로 증가한다.</p>
+</section>
+<section id="중국음식점-과정" class="level4" data-number="18.5.2.3">
+<h4 data-number="18.5.2.3" class="anchored" data-anchor-id="중국음식점-과정"><span class="header-section-number">18.5.2.3</span> 중국음식점 과정</h4>
+<p>사례가 한 명씩 식당에 들어온다고 생각한다. 이미 <span class="math inline">\(n_l\)</span>명이 앉은 테이블 <span class="math inline">\(l\)</span>을 선택할 확률은 <span class="math inline">\(n_l\)</span>에 비례하고 새 테이블을 열 확률은 <span class="math inline">\(\alpha_0\)</span>에 비례한다. 같은 테이블의 사례는 같은 군집모수를 공유한다. 이 생성과정이 위 두 조건부분포가 따르는 분할사전분포를 유도한다.</p>
+</section>
+<section id="stick-breaking-표현" class="level4" data-number="18.5.2.4">
+<h4 data-number="18.5.2.4" class="anchored" data-anchor-id="stick-breaking-표현"><span class="header-section-number">18.5.2.4</span> Stick-breaking 표현</h4>
+<p><span class="math display">\[
+\beta_k\sim\operatorname{Beta}(1,\alpha_0),
+\qquad
+\lambda_k=\beta_k\prod_{l&lt;k}(1-\beta_l)
+\]</span></p>
+<p>로 무한 혼합가중치를 만든다. 길이 1인 막대에서 <span class="math inline">\(\beta_1\)</span>만큼 떼고, 남은 막대에서 <span class="math inline">\(\beta_2\)</span>만큼 떼는 과정을 반복하는 해석이다. 적절한 조건에서 <span class="math inline">\(\sum_k\lambda_k=1\)</span>이며 유한 대칭 디리클레의 <span class="math inline">\(K\to\infty\)</span> 극한과 연결된다.</p>
+<p>Dirichlet process는 상태수 선택을 피하지만, 사후가 여러 군집수와 분할에 걸쳐 있어 결과요약과 해석이 어려울 수 있고 MCMC 또는 변분추론 비용도 크다.</p>
+</section>
+</section>
+<section id="잠재변수의-도입" class="level3" data-number="18.5.3">
+<h3 data-number="18.5.3" class="anchored" data-anchor-id="잠재변수의-도입"><span class="header-section-number">18.5.3</span> 잠재변수의 도입</h3>
+<p>잠재변수를 임의의 위치에 넣고 Structural EM이 알아서 고쳐줄 것이라 기대해서는 안 된다. 초기 연결이 나쁘면 잠재변수가 분리되거나 초기구조와 비슷한 의미 없는 해에 머문다. 잠재변수가 전혀 연결되지 않은 상태는 새 연결이 생기지 않는 고정점이 될 수 있다.</p>
+<p>잠재변수가 있는 모형의 독립모수 수는 관측경험분포의 자유도보다 충분히 작아야 한다. 그렇지 않으면 잠재변수는 구조를 압축하기보다 표본잡음을 기억한다.</p>
+</section>
+<section id="계층적-조직" class="level3" data-number="18.5.4">
+<h3 data-number="18.5.4" class="anchored" data-anchor-id="계층적-조직"><span class="header-section-number">18.5.4</span> 계층적 조직</h3>
+<div id="fig-partially-observed-latent-organizations" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-partially-observed-latent-organizations-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-partially-observed-latent-organizations.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-partially-observed-latent-organizations-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.16: 잠재변수의 계층적 조직과 서로 겹치는 잠재요인 조직.
+</figcaption>
+</figure>
+</div>
+<p>계층적 잠재모형에서는 잠재변수들이 트리형 계층을 이룬다. 각 잠재변수는 자식들의 공통의존성을 매개하고, 계층에서 가까운 변수일수록 강한 의존성을 공유하도록 유도한다. 트리구조는 추론이 상대적으로 쉽고 해석가능한 다층개념을 제공한다.</p>
+</section>
+<section id="중첩-잠재요인" class="level3" data-number="18.5.5">
+<h3 data-number="18.5.5" class="anchored" data-anchor-id="중첩-잠재요인"><span class="header-section-number">18.5.5</span> 중첩 잠재요인</h3>
+<p>관측변수가 여러 잠재변수의 영향을 받으면 하나의 사례를 여러 독립적 축으로 표현할 수 있다. 예를 들어 임상자료에서 한 잠재변수는 대사위험, 다른 잠재변수는 염증상태를 나타낼 수 있다. 그러나 다중잠재부모는 CPD 모수수를 늘리고 도덕화된 그래프의 트리폭을 크게 할 수 있으므로 noisy-OR, 로지스틱, 저순위 또는 가법 CPD 같은 압축모수화가 필요하다.</p>
+</section>
+<section id="잠재변수의-구조적-신호" class="level3" data-number="18.5.6">
+<h3 data-number="18.5.6" class="anchored" data-anchor-id="잠재변수의-구조적-신호"><span class="header-section-number">18.5.6</span> 잠재변수의 구조적 신호</h3>
+<p>잠재공통원인을 주변화하면 이웃 관측변수들 사이에 밀집된 의존성이 남는다. 이를 이용한 휴리스틱은 다음과 같다.</p>
+<ol type="1">
+<li>관측변수만으로 구조를 학습하고 밀집하게 연결된 부분그래프 탐색</li>
+<li>변수쌍의 상호정보량 행렬에서 강한 의존성 블록 탐색</li>
+<li>관측변수로 설명되지 않는 잔차상관이나 조건부의존성 탐색</li>
+<li>후보 블록에 잠재변수를 넣고 여러 상태수와 연결을 비교</li>
+<li>점수·검증성능·안정성이 개선되지 않으면 후보 잠재변수 제거</li>
+</ol>
+<p>쌍별상관만으로는 관측된 공통원인의 자식과 진짜 잠재공통원인의 자식을 구분하지 못한다. 따라서 후보생성 후 관측변수들을 포함한 전체모형에서 재평가해야 한다.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./17-structure-learning-bayesian-networks.html" class="pagination-link" aria-label="베이지안 네트워크의 구조학습">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">베이지안 네트워크의 구조학습</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./19-learning-undirected-models.html" class="pagination-link" aria-label="무방향 그래프모형의 학습">
+        <span class="nav-page-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">무방향 그래프모형의 학습</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

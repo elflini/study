@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>22&nbsp; 구조화된 의사결정 문제 – 확률적 그래프 모형</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./23-epilogue.html" rel="next">
+<link href="./21-utilities-and-decisions.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-a522afb83bf8ae494942cf1b0ac9d4c3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./22-structured-decision-problems.html"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">구조화된 의사결정 문제</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">확률적 그래프 모형</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">기초 개념</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-bayesian-network-representation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">베이즈 네트워크 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-undirected-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">무방향 그래픽 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-local-probabilistic-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">국소 확률 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-template-based-representations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">템플릿 기반 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-gaussian-network-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">가우시안 네트워크 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-exponential-family.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">지수족</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-exact-inference-variable-elimination.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">정확추론: 변수 제거</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-exact-inference-clique-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">정확추론: 클리크 트리</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-inference-as-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">최적화로서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-particle-based-approximate-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">입자 기반 근사추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-map-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">MAP 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-inference-in-hybrid-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">혼합 네트워크에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-inference-in-temporal-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">시간 모형에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-learning-graphical-models-overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">그래프모형 학습 개요</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-parameter-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">모수추정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-structure-learning-bayesian-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">베이지안 네트워크의 구조학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-partially-observed-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">부분관측 자료</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./19-learning-undirected-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">무방향 그래프모형의 학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20-causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">인과성</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21-utilities-and-decisions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">효용과 의사결정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22-structured-decision-problems.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">구조화된 의사결정 문제</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./23-epilogue.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">맺음말: 왜 확률적 그래프 모형인가?</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#의사결정나무" id="toc-의사결정나무" class="nav-link active" data-scroll-target="#의사결정나무"><span class="header-section-number">22.1</span> 의사결정나무</a>
+  <ul>
+  <li><a href="#표현" id="toc-표현" class="nav-link" data-scroll-target="#표현"><span class="header-section-number">22.1.1</span> 표현</a></li>
+  <li><a href="#후진귀납-알고리즘" id="toc-후진귀납-알고리즘" class="nav-link" data-scroll-target="#후진귀납-알고리즘"><span class="header-section-number">22.1.2</span> 후진귀납 알고리즘</a></li>
+  </ul></li>
+  <li><a href="#영향도" id="toc-영향도" class="nav-link" data-scroll-target="#영향도"><span class="header-section-number">22.2</span> 영향도</a>
+  <ul>
+  <li><a href="#기본-표현" id="toc-기본-표현" class="nav-link" data-scroll-target="#기본-표현"><span class="header-section-number">22.2.1</span> 기본 표현</a></li>
+  <li><a href="#의사결정규칙" id="toc-의사결정규칙" class="nav-link" data-scroll-target="#의사결정규칙"><span class="header-section-number">22.2.2</span> 의사결정규칙</a></li>
+  <li><a href="#시간과-기억" id="toc-시간과-기억" class="nav-link" data-scroll-target="#시간과-기억"><span class="header-section-number">22.2.3</span> 시간과 기억</a></li>
+  <li><a href="#의미론과-최적성-기준" id="toc-의미론과-최적성-기준" class="nav-link" data-scroll-target="#의미론과-최적성-기준"><span class="header-section-number">22.2.4</span> 의미론과 최적성 기준</a></li>
+  </ul></li>
+  <li><a href="#영향도에서의-후진귀납" id="toc-영향도에서의-후진귀납" class="nav-link" data-scroll-target="#영향도에서의-후진귀납"><span class="header-section-number">22.3</span> 영향도에서의 후진귀납</a>
+  <ul>
+  <li><a href="#영향도에-대응하는-의사결정나무" id="toc-영향도에-대응하는-의사결정나무" class="nav-link" data-scroll-target="#영향도에-대응하는-의사결정나무"><span class="header-section-number">22.3.1</span> 영향도에 대응하는 의사결정나무</a></li>
+  <li><a href="#합-최대-합-규칙" id="toc-합-최대-합-규칙" class="nav-link" data-scroll-target="#합-최대-합-규칙"><span class="header-section-number">22.3.2</span> 합-최대-합 규칙</a></li>
+  </ul></li>
+  <li><a href="#기대효용-계산" id="toc-기대효용-계산" class="nav-link" data-scroll-target="#기대효용-계산"><span class="header-section-number">22.4</span> 기대효용 계산</a>
+  <ul>
+  <li><a href="#단순-변수제거" id="toc-단순-변수제거" class="nav-link" data-scroll-target="#단순-변수제거"><span class="header-section-number">22.4.1</span> 단순 변수제거</a></li>
+  <li><a href="#다중-효용변수의-단순한-접근" id="toc-다중-효용변수의-단순한-접근" class="nav-link" data-scroll-target="#다중-효용변수의-단순한-접근"><span class="header-section-number">22.4.2</span> 다중 효용변수의 단순한 접근</a></li>
+  <li><a href="#일반화-변수제거" id="toc-일반화-변수제거" class="nav-link" data-scroll-target="#일반화-변수제거"><span class="header-section-number">22.4.3</span> 일반화 변수제거</a></li>
+  </ul></li>
+  <li><a href="#영향도-최적화" id="toc-영향도-최적화" class="nav-link" data-scroll-target="#영향도-최적화"><span class="header-section-number">22.5</span> 영향도 최적화</a>
+  <ul>
+  <li><a href="#단일-의사결정규칙-최적화" id="toc-단일-의사결정규칙-최적화" class="nav-link" data-scroll-target="#단일-의사결정규칙-최적화"><span class="header-section-number">22.5.1</span> 단일 의사결정규칙 최적화</a></li>
+  <li><a href="#반복-최적화-알고리즘" id="toc-반복-최적화-알고리즘" class="nav-link" data-scroll-target="#반복-최적화-알고리즘"><span class="header-section-number">22.5.2</span> 반복 최적화 알고리즘</a></li>
+  <li><a href="#전략적-관련성과-전역최적성" id="toc-전략적-관련성과-전역최적성" class="nav-link" data-scroll-target="#전략적-관련성과-전역최적성"><span class="header-section-number">22.5.3</span> 전략적 관련성과 전역최적성</a>
+  <ul class="collapse">
+  <li><a href="#전략적-관련성" id="toc-전략적-관련성" class="nav-link" data-scroll-target="#전략적-관련성"><span class="header-section-number">22.5.3.1</span> 전략적 관련성</a></li>
+  <li><a href="#s-도달가능성" id="toc-s-도달가능성" class="nav-link" data-scroll-target="#s-도달가능성"><span class="header-section-number">22.5.3.2</span> s-도달가능성</a></li>
+  <li><a href="#관련성-그래프" id="toc-관련성-그래프" class="nav-link" data-scroll-target="#관련성-그래프"><span class="header-section-number">22.5.3.3</span> 관련성 그래프</a></li>
+  <li><a href="#전역최적성" id="toc-전역최적성" class="nav-link" data-scroll-target="#전역최적성"><span class="header-section-number">22.5.3.4</span> 전역최적성</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#무관한-정보의-제거" id="toc-무관한-정보의-제거" class="nav-link" data-scroll-target="#무관한-정보의-제거"><span class="header-section-number">22.6</span> 무관한 정보의 제거</a></li>
+  <li><a href="#정보가치" id="toc-정보가치" class="nav-link" data-scroll-target="#정보가치"><span class="header-section-number">22.7</span> 정보가치</a>
+  <ul>
+  <li><a href="#단일-관측" id="toc-단일-관측" class="nav-link" data-scroll-target="#단일-관측"><span class="header-section-number">22.7.1</span> 단일 관측</a></li>
+  <li><a href="#다중-관측" id="toc-다중-관측" class="nav-link" data-scroll-target="#다중-관측"><span class="header-section-number">22.7.2</span> 다중 관측</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-structured-decision-problems" class="quarto-section-identifier"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">구조화된 의사결정 문제</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>앞 장에서는 불확실한 결과에 효용을 부여하고 기대효용을 최대화하는 원리를 살펴보았다. 그러나 결과와 행동을 하나의 거대한 상태공간으로 표현하면 실제 문제의 구조가 드러나지 않고 계산도 빠르게 어려워진다. 이 장에서는 의사결정 상황의 순차성, 조건부 독립성, 관측 가능한 정보와 효용의 분해구조를 명시적으로 표현하는 방법을 다룬다.</p>
+<p>가장 직관적인 표현은 의사결정나무이다. 의사결정나무는 행위자의 선택과 자연의 확률적 선택을 시간순으로 펼쳐 보여준다. 이어서 베이지안 네트워크에 의사결정노드와 효용노드를 추가한 영향도(influence diagram)를 정의한다. 영향도는 의사결정나무보다 훨씬 압축된 표현을 제공하며, 변수제거와 국소 최적화를 이용하여 최대 기대효용 전략을 계산할 수 있게 한다. 마지막으로 불필요한 정보의 제거와 정보가치(value of information)를 설명한다.</p>
+<section id="의사결정나무" class="level2" data-number="22.1">
+<h2 data-number="22.1" class="anchored" data-anchor-id="의사결정나무"><span class="header-section-number">22.1</span> 의사결정나무</h2>
+<section id="표현" class="level3" data-number="22.1.1">
+<h3 data-number="22.1.1" class="anchored" data-anchor-id="표현"><span class="header-section-number">22.1.1</span> 표현</h3>
+<p>의사결정나무(decision tree)는 의사결정자가 마주칠 수 있는 여러 시나리오를 뿌리에서 잎으로 전개한 트리이다. 내부 노드는 행위자가 선택하는 지점과 자연이 확률적으로 결과를 선택하는 지점으로 나뉜다. 잎은 최종 결과를 나타내며 그 결과의 효용값이 부여된다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 의사결정나무</strong></p>
+<p>의사결정나무 <span class="math inline">\(T\)</span>는 내부 t-노드 집합 <span class="math inline">\(V\)</span>와 잎 집합 <span class="math inline">\(V_L\)</span>을 갖는 뿌리 트리이다. 내부 노드는 행위자 노드 <span class="math inline">\(V_A\)</span>와 자연 노드 <span class="math inline">\(V_N\)</span>으로 분할된다. 각 내부 노드 <span class="math inline">\(v\)</span>에는 가능한 선택의 집합 <span class="math inline">\(C[v]\)</span>가 있고, 선택 <span class="math inline">\(c\in C[v]\)</span>를 따라 도달하는 자식노드를 <span class="math inline">\(\operatorname{succ}(v,c)\)</span>라 한다.</p>
+<p>자연 노드 <span class="math inline">\(v\in V_N\)</span>에는 <span class="math inline">\(C[v]\)</span> 위의 확률분포 <span class="math inline">\(P_v\)</span>가 주어진다. 각 잎 <span class="math inline">\(v\in V_L\)</span>에는 그 결과의 효용 <span class="math inline">\(U(v)\)</span>가 주어진다.</p>
+</blockquote>
+<p>가장 단순한 일회성 의사결정도 두 층의 의사결정나무로 표현할 수 있다. 뿌리에서 행위자가 행동을 선택하고, 다음 층에서 자연이 그 행동에 따른 결과를 확률적으로 선택한다. 순차적 의사결정에서는 행위자의 선택과 자연의 선택이 여러 번 교대로 나타난다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 시장조사를 포함한 창업 의사결정</strong></p>
+<p>창업자는 먼저 시장조사를 실시할지 결정한다. 조사를 실시하면 결과는 부정적, 중립적, 긍정적 반응 중 하나이며, 그 결과를 본 뒤 회사를 설립할지 결정한다. 조사를 하지 않은 경우에도 창업 여부를 결정하지만 조사결과에 관한 정보는 없다.</p>
+<p>의사결정나무의 뿌리는 조사 여부를 나타내는 행위자 노드이다. 조사한 가지에서는 자연이 조사결과를 선택하고, 각 조사결과 아래에서 창업 여부를 결정한다. 창업한 가지에서는 자연이 시장수요를 선택하며, 잎에는 조사비용과 시장수요에 따른 효용의 합이 표시된다.</p>
+</blockquote>
+<div id="fig-structured-decision-trees" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-structured-decision-trees-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-structured-decision-trees.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-structured-decision-trees-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;22.1: 일회성 창업 결정과 시장조사를 포함한 순차적 창업 결정의 의사결정나무. 굵게 표시할 경로는 최적 전략으로 교체할 수 있다.
+</figcaption>
+</figure>
+</div>
+<p>의사결정나무에서 전략은 실제로 도달할 가능성이 있는 노드만이 아니라 모든 행위자 노드에서 무엇을 선택할지를 지정해야 한다. 어떤 전략을 실행했을 때 확률 0으로 도달하지 않는 노드도 전략의 정의에는 포함된다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 의사결정나무 전략</strong></p>
+<p>의사결정나무 전략 <span class="math inline">\(\sigma\)</span>는 각 행위자 노드 <span class="math inline">\(v\in V_A\)</span>에 대해 그 노드에서 선택할 하나의 행동 <span class="math inline">\(c\in C[v]\)</span>를 지정하는 함수이다.</p>
+</blockquote>
+<p>의사결정나무는 복잡한 순차적 문제를 명시적으로 보여주는 장점이 있지만, 같은 확률모형과 효용함수가 여러 가지에 반복되어 나타난다. 관측변수가 많거나 결정단계가 길어지면 트리의 크기가 지수적으로 증가한다.</p>
+</section>
+<section id="후진귀납-알고리즘" class="level3" data-number="22.1.2">
+<h3 data-number="22.1.2" class="anchored" data-anchor-id="후진귀납-알고리즘"><span class="header-section-number">22.1.2</span> 후진귀납 알고리즘</h3>
+<p>의사결정나무의 최적 전략은 잎에서 뿌리로 올라가며 계산하는 후진귀납(backward induction)으로 구할 수 있다. 각 노드 <span class="math inline">\(v\)</span>에서 그 이후 최적으로 행동했을 때 얻을 수 있는 최대 기대효용을 <span class="math inline">\(\operatorname{MEU}_v\)</span>라 하자.</p>
+<p>잎에서는</p>
+<p><span class="math display">\[
+\operatorname{MEU}_v=U(v)
+\]</span></p>
+<p>이다. 자연 노드에서는 자식노드의 최대 기대효용을 자연의 확률로 가중평균한다.</p>
+<p><span class="math display">\[
+\operatorname{MEU}_v
+=
+\sum_{c\in C[v]}P_v(c)\operatorname{MEU}_{\operatorname{succ}(v,c)}.
+\]</span></p>
+<p>행위자 노드에서는 가장 큰 값을 주는 자식을 선택한다.</p>
+<p><span class="math display">\[
+\sigma(v)
+\in
+\arg\max_{c\in C[v]}
+\operatorname{MEU}_{\operatorname{succ}(v,c)},
+\]</span></p>
+<p><span class="math display">\[
+\operatorname{MEU}_v
+=
+\max_{c\in C[v]}
+\operatorname{MEU}_{\operatorname{succ}(v,c)}.
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - 의사결정나무의 최대 기대효용 전략</strong></p>
+<ol type="1">
+<li>모든 잎에 그 결과의 효용을 기록한다.</li>
+<li>아직 처리하지 않은 노드 중 모든 자식이 처리된 노드를 선택한다.</li>
+<li>자연 노드이면 자식값의 확률가중평균을 계산한다.</li>
+<li>행위자 노드이면 자식값 중 최댓값을 기록하고 그 값을 주는 선택을 전략에 저장한다.</li>
+<li>뿌리까지 반복한다.</li>
+<li>저장된 선택들의 집합을 최적 전략으로 반환한다.</li>
+</ol>
+</blockquote>
+<p>이 알고리즘은 트리의 각 노드를 한 번씩 처리하므로 트리 크기에 선형이다. 문제는 트리 자체가 원래 문제의 변수 수에 대해 지수적으로 클 수 있다는 점이다. 영향도는 이 중복을 제거하여 확률과 효용의 구조를 압축한다.</p>
+</section>
+</section>
+<section id="영향도" class="level2" data-number="22.2">
+<h2 data-number="22.2" class="anchored" data-anchor-id="영향도"><span class="header-section-number">22.2</span> 영향도</h2>
+<section id="기본-표현" class="level3" data-number="22.2.1">
+<h3 data-number="22.2.1" class="anchored" data-anchor-id="기본-표현"><span class="header-section-number">22.2.1</span> 기본 표현</h3>
+<p>영향도(influence diagram)는 베이지안 네트워크를 의사결정 문제로 확장한 방향성 비순환 그래프이다. 세 종류의 노드를 사용한다.</p>
+<ul>
+<li>확률노드 또는 기회노드(chance node): 자연이 확률적으로 값을 선택하며 보통 타원으로 표시한다.</li>
+<li>의사결정노드(decision node): 행위자가 값을 선택하며 보통 사각형으로 표시한다.</li>
+<li>효용노드(utility node): 부모변수의 값에 따른 효용을 나타내며 보통 마름모로 표시한다.</li>
+</ul>
+<p>효용노드는 다른 변수의 원인이 아니므로 자식을 갖지 않는다. 확률노드의 부모에는 확률노드와 의사결정노드가 올 수 있고, 효용노드의 부모에는 효용을 결정하는 확률변수와 의사결정변수가 온다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 영향도</strong></p>
+<p><span class="math inline">\(\mathcal X\)</span>를 확률변수 집합, <span class="math inline">\(\mathcal D\)</span>를 의사결정변수 집합, <span class="math inline">\(\mathcal U\)</span>를 효용변수 집합이라 하자. 영향도 <span class="math inline">\(\mathcal I\)</span>는 <span class="math inline">\(\mathcal Z=\mathcal X\cup\mathcal D\cup\mathcal U\)</span> 위의 방향성 비순환 그래프이며 효용노드는 자식을 갖지 않는다.</p>
+<p>각 확률변수 <span class="math inline">\(X\in\mathcal X\)</span>에는 조건부확률분포 <span class="math inline">\(P(X\mid\operatorname{Pa}_X)\)</span>가 주어진다. 각 효용변수 <span class="math inline">\(V\in\mathcal U\)</span>에는 부모값의 결정적 함수 <span class="math inline">\(V(\operatorname{Pa}_V)\)</span>가 주어진다. 전체 결과의 효용은 모든 효용노드 값의 합으로 정의한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - 기본 창업 영향도</strong></p>
+<p>시장수요 <span class="math inline">\(M\)</span>은 확률노드이고 창업 여부 <span class="math inline">\(F\)</span>는 의사결정노드이다. 효용노드 <span class="math inline">\(V_E\)</span>는 <span class="math inline">\((M,F)\)</span>의 함수이다. 창업하지 않으면 모든 시장상태에서 효용이 0이고, 창업하면 낮은 수요에서 손실, 중간 수요에서 보통 이익, 높은 수요에서 큰 이익을 얻는다.</p>
+</blockquote>
+<div id="fig-structured-basic-influence-diagram" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-structured-basic-influence-diagram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-structured-basic-influence-diagram.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-structured-basic-influence-diagram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;22.2: 시장수요, 창업 여부와 결과효용으로 구성된 기본 창업 영향도.
+</figcaption>
+</figure>
+</div>
+<p>시장조사를 추가하면 조사여부 <span class="math inline">\(C\)</span>가 의사결정노드, 조사결과 <span class="math inline">\(S\)</span>가 확률노드가 된다. 조사결과는 시장수요와 조사실시 여부에 의존하며, 창업결정은 조사결과를 관측한 뒤 이루어진다. 조사비용은 별도의 효용노드로 표현할 수 있다.</p>
+<div id="fig-structured-survey-influence-diagram" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-structured-survey-influence-diagram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-structured-survey-influence-diagram.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-structured-survey-influence-diagram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;22.3: 시장수요, 조사 여부, 조사결과, 창업 여부, 조사비용과 사업가치를 포함하는 영향도.
+</figcaption>
+</figure>
+</div>
+<p>영향도는 의사결정나무에서 여러 번 반복되던 확률분포와 효용함수를 한 번만 표현한다. 또한 확률노드 사이의 간선은 조건부 의존성과 인과적 영향을 나타내고, 의사결정노드로 들어오는 간선은 결정 시점에 알고 있는 정보를 나타낸다.</p>
+</section>
+<section id="의사결정규칙" class="level3" data-number="22.2.2">
+<h3 data-number="22.2.2" class="anchored" data-anchor-id="의사결정규칙"><span class="header-section-number">22.2.2</span> 의사결정규칙</h3>
+<p>의사결정노드 <span class="math inline">\(D\)</span>의 부모 <span class="math inline">\(\operatorname{Pa}_D\)</span>는 <span class="math inline">\(D\)</span>를 선택할 때 행위자가 관측한 변수들이다. 의사결정노드로 들어오는 간선을 정보간선(information edge)이라 한다. 부모변수의 한 결합값 <span class="math inline">\(w\in\operatorname{Val}(\operatorname{Pa}_D)\)</span>를 정보상태(information state)라 한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 의사결정규칙과 완전전략</strong></p>
+<p>의사결정변수 <span class="math inline">\(D\)</span>의 의사결정규칙 <span class="math inline">\(\delta_D\)</span>는 각 정보상태 <span class="math inline">\(w\)</span>에 대해 <span class="math inline">\(\operatorname{Val}(D)\)</span> 위의 확률분포</p>
+<p><span class="math display">\[
+\delta_D(D\mid w)
+\]</span></p>
+<p>를 지정하는 조건부확률모형이다. 각 정보상태에서 하나의 행동에만 확률 1을 부여하면 결정적 의사결정규칙이라 한다.</p>
+<p>모든 의사결정변수에 하나씩 의사결정규칙을 지정한 집합을 완전전략 <span class="math inline">\(\sigma\)</span>라 한다. 전략 <span class="math inline">\(\sigma\)</span>에서 <span class="math inline">\(D\)</span>에 해당하는 규칙은 <span class="math inline">\(\sigma_D\)</span>로 쓴다.</p>
+</blockquote>
+<p>결정적 규칙은 함수처럼</p>
+<p><span class="math display">\[
+\delta_D(w)=d
+\]</span></p>
+<p>로 쓸 수 있다. 단일 행위자의 최대 기대효용 문제에는 항상 결정적 최적전략이 존재하지만, 확률적 규칙은 확률 0인 정보상태를 다루거나 전략적 관련성을 정의할 때 유용하다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 조사결과에 따른 창업규칙</strong></p>
+<p>창업결정 <span class="math inline">\(F\)</span>의 부모가 조사여부 <span class="math inline">\(C\)</span>와 조사결과 <span class="math inline">\(S\)</span>라면, 규칙 <span class="math inline">\(\delta_F\)</span>는 가능한 각 <span class="math inline">\((c,s)\)</span> 조합에서 창업할지 여부를 지정한다. 조사하지 않은 경우에는 <span class="math inline">\(s^{\bot}\)</span>이라는 별도 값을 사용하여 조사결과가 없음을 나타낼 수 있다. 일부 <span class="math inline">\((c,s)\)</span> 조합은 모형상 확률 0일 수 있지만 규칙은 모든 정보상태에 대해 정의된다.</p>
+</blockquote>
+</section>
+<section id="시간과-기억" class="level3" data-number="22.2.3">
+<h3 data-number="22.2.3" class="anchored" data-anchor-id="시간과-기억"><span class="header-section-number">22.2.3</span> 시간과 기억</h3>
+<p>영향도에는 의사결정 사이의 시간순서가 암묵적으로 들어 있다. 의사결정변수 <span class="math inline">\(D_i\)</span>가 <span class="math inline">\(D_j\)</span>보다 먼저 선택된다는 관계를 <span class="math inline">\(D_i\prec D_j\)</span>로 나타낸다. 단일 행위자가 여러 결정을 순차적으로 내릴 때 흔히 완전기억(perfect recall) 또는 망각없음(no forgetting)을 가정한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 시간순서와 완전기억</strong></p>
+<p>영향도가 의사결정변수에 대한 전순서 <span class="math inline">\(\prec\)</span>를 가지며 이 순서가 그래프의 방향과 모순되지 않으면 시간순서를 갖는다고 한다.</p>
+<p><span class="math inline">\(D_i\prec D_j\)</span>일 때</p>
+<p><span class="math display">\[
+\operatorname{Pa}_{D_j}
+\supseteq
+\operatorname{Pa}_{D_i}\cup\{D_i\}
+\]</span></p>
+<p>가 항상 성립하면 완전기억을 만족한다고 한다. 앞선 결정과 앞선 결정에서 알고 있던 정보를 뒤의 결정에서도 기억하도록 추가되는 간선을 기억간선(recall edge)이라 한다.</p>
+</blockquote>
+<p>완전기억은 해석상 자연스럽지만 계산적으로 매우 비싸다. 뒤의 의사결정노드는 이전 결정과 모든 이전 관측을 부모로 가지므로 의사결정규칙의 표 크기가 계속 증가한다. 또한 실제 조직에서는 서로 다른 사람이 서로 다른 결정을 내리거나, 제한된 기억만 유지할 수 있다.</p>
+<p>완전기억을 만족하지 않는 영향도를 제한기억 영향도(limited-memory influence diagram, LIMID)라 한다. 제한기억 모형에서는 모든 정보간선을 명시적으로 표현해야 하지만, 의사결정규칙의 크기와 추론복잡도를 크게 줄일 수 있다.</p>
+</section>
+<section id="의미론과-최적성-기준" class="level3" data-number="22.2.4">
+<h3 data-number="22.2.4" class="anchored" data-anchor-id="의미론과-최적성-기준"><span class="header-section-number">22.2.4</span> 의미론과 최적성 기준</h3>
+<p>의사결정규칙 <span class="math inline">\(\delta_D\)</span>를 하나 선택하면 의사결정노드 <span class="math inline">\(D\)</span>는 그 규칙을 CPD로 갖는 확률노드처럼 취급할 수 있다. 부분전략 <span class="math inline">\(\sigma\)</span>를 지정한 영향도를 <span class="math inline">\(\mathcal I[\sigma]\)</span>라 하자. <span class="math inline">\(\sigma\)</span>가 완전전략이면 모든 의사결정노드가 확률모형으로 바뀌므로 결과는 하나의 베이지안 네트워크 <span class="math inline">\(B_{\mathcal I[\sigma]}\)</span>가 된다.</p>
+<p>전략 <span class="math inline">\(\sigma\)</span>의 기대효용은</p>
+<p><span class="math display">\[
+EU[\mathcal I[\sigma]]
+=
+\sum_{\zeta}
+P_{B_{\mathcal I[\sigma]}}(\zeta)U(\zeta)
+\]</span></p>
+<p>이다. 전체 효용이 부분효용의 합이면 선형성에 의해</p>
+<p><span class="math display">\[
+EU[\mathcal I[\sigma]]
+=
+\sum_{V\in\mathcal U}
+\mathbb E_{B_{\mathcal I[\sigma]}}[V]
+\]</span></p>
+<p>로 분해된다.</p>
+<p>확률요인과 의사결정규칙을 명시하면 다음과 같이 쓸 수 있다.</p>
+<p><span class="math display">\[
+EU[\mathcal I[\sigma]]
+=
+\sum_{\mathcal X\cup\mathcal D}
+\left(
+\prod_{X\in\mathcal X}P(X\mid\operatorname{Pa}_X)
+\right)
+\left(
+\prod_{D\in\mathcal D}\delta_D(D\mid\operatorname{Pa}_D)
+\right)
+\left(
+\sum_{V\in\mathcal U}V
+\right).
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>정의 - 최대 기대효용 전략</strong></p>
+<p>영향도 <span class="math inline">\(\mathcal I\)</span>에서 기대효용을 최대화하는 완전전략 <span class="math inline">\(\sigma^*\)</span>를 최대 기대효용 전략이라 한다.</p>
+<p><span class="math display">\[
+\sigma^*
+\in
+\arg\max_{\sigma}EU[\mathcal I[\sigma]].
+\]</span></p>
+<p>그 기대효용값을</p>
+<p><span class="math display">\[
+\operatorname{MEU}[\mathcal I]
+=EU[\mathcal I[\sigma^*]]
+\]</span></p>
+<p>로 쓴다.</p>
+</blockquote>
+<p>최적전략은 여러 개일 수 있지만 모두 같은 최대 기대효용값을 갖는다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 시장조사가 있는 창업전략</strong></p>
+<p>조사비용이 1이고 조사결과에 따라 시장수요의 사후분포가 달라진다고 하자. 부정적 조사결과에서는 창업하지 않고, 중립적 또는 긍정적 결과에서는 창업하며, 조사 자체는 실시하는 전략이 최적일 수 있다. 이 전략의 기대효용은 조사하지 않고 바로 창업하는 전략보다 높을 수 있다. 중요한 점은 하나의 행동이 아니라 조사결정과 결과조건부 창업결정 전체가 최적화 대상이라는 것이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>사례 - 산전검사의 순차적 의사결정</strong></p>
+<p>산전진단에서는 여러 검사와 임신종결 여부가 순차적으로 결정된다. 검사결과에는 위양성과 위음성이 존재하고, 환자마다 질환위험과 결과효용이 다르다. 영향도는 검사, 질환, 검사오류, 임신결과와 환자효용을 하나의 모형으로 결합한다. 가능한 전략 수가 막대하더라도 구조화된 최적화는 환자별 위험과 선호에 맞는 검사전략을 선택할 수 있게 한다.</p>
+</blockquote>
+</section>
+</section>
+<section id="영향도에서의-후진귀납" class="level2" data-number="22.3">
+<h2 data-number="22.3" class="anchored" data-anchor-id="영향도에서의-후진귀납"><span class="header-section-number">22.3</span> 영향도에서의 후진귀납</h2>
+<section id="영향도에-대응하는-의사결정나무" class="level3" data-number="22.3.1">
+<h3 data-number="22.3.1" class="anchored" data-anchor-id="영향도에-대응하는-의사결정나무"><span class="header-section-number">22.3.1</span> 영향도에 대응하는 의사결정나무</h3>
+<p>완전기억을 만족하는 영향도는 개념적으로 의사결정나무로 펼칠 수 있다. 행위자가 처음 관측하는 확률변수들을 분기한 뒤 첫 번째 의사결정을 분기하고, 다음으로 새롭게 관측하는 변수들과 다음 의사결정을 차례로 분기한다. 마지막 결정 이후에만 드러나는 변수들은 트리의 마지막 자연노드 층에 둔다.</p>
+<p><span class="math inline">\(D_1\prec\cdots\prec D_k\)</span>라 하자. <span class="math inline">\(X_i\)</span>를 <span class="math inline">\(D_i\)</span>를 선택하기 전에 처음 관측되는 확률변수들의 집합이라 하고, 어떤 결정 전에도 관측되지 않는 변수들을 <span class="math inline">\(Y\)</span>라 하자. 그러면 트리는 대략</p>
+<p><span class="math display">\[
+X_1,D_1,X_2,D_2,\ldots,X_k,D_k,Y
+\]</span></p>
+<p>순서로 전개된다.</p>
+<div id="fig-structured-id-decision-tree" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-structured-id-decision-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-structured-id-decision-tree.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-structured-id-decision-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;22.4: 시장조사 영향도를 행위자의 관측순서에 따라 펼친 의사결정나무.
+</figcaption>
+</figure>
+</div>
+<p>자연 노드의 분기확률은 단순히 원래 CPD의 한 행이 아니라 지금까지 관측된 정보와 선택한 결정에 대한 조건부확률이다. 예를 들어 조사 후 시장수요의 분기확률은 <span class="math inline">\(P(M\mid S,C,F)\)</span>처럼 나타나지만, 그래프의 조건부 독립성을 사용하면 불필요한 조건을 제거할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>보조정리 - 관측분포의 전략불변성</strong></p>
+<p>어떤 결정에 도달하기 전까지 동일한 관측과 결정을 갖는 두 전략을 생각하자. 그 경로의 확률이 양수라면 다음에 새롭게 관측되는 변수의 조건부분포는 아직 지정하지 않은 이후의 의사결정규칙에 의존하지 않는다.</p>
+</blockquote>
+<p>이 성질 때문에 의사결정나무의 자연노드 분기확률을 특정한 완전전략을 먼저 정하지 않고도 정의할 수 있다.</p>
+</section>
+<section id="합-최대-합-규칙" class="level3" data-number="22.3.2">
+<h3 data-number="22.3.2" class="anchored" data-anchor-id="합-최대-합-규칙"><span class="header-section-number">22.3.2</span> 합-최대-합 규칙</h3>
+<p>의사결정나무에서 자연노드는 합을, 행위자노드는 최대화를 수행한다. 따라서 영향도의 최대 기대효용은 관측과 결정의 시간순서에 따른 합과 최대화의 교대로 표현된다.</p>
+<p><span class="math display">\[
+\begin{aligned}
+\operatorname{MEU}[\mathcal I]
+={}&amp;
+\sum_{X_1}P(X_1)
+\max_{D_1}
+\sum_{X_2}P(X_2\mid X_1,D_1)
+\max_{D_2}\cdots\\
+&amp;\sum_{X_k}P(X_k\mid X_{1:k-1},D_{1:k-1})
+\max_{D_k}
+\sum_Y P(Y\mid X_{1:k},D_{1:k})U(X_{1:k},D_{1:k},Y).
+\end{aligned}
+\]</span></p>
+<p>이를 합-최대-합 규칙(sum-max-sum rule)이라 한다. 조건부확률을 안쪽으로 밀어 넣고 결합확률로 정리하면</p>
+<p><span class="math display">\[
+\operatorname{MEU}[\mathcal I]
+=
+\sum_{X_1}\max_{D_1}
+\sum_{X_2}\max_{D_2}\cdots
+\sum_{X_k}\max_{D_k}
+\sum_Y
+P(\mathcal X\mid\mathcal D)U(\mathcal X,\mathcal D)
+\]</span></p>
+<p>형태를 얻는다.</p>
+<p>합과 최대화는 일반적으로 교환되지 않는다.</p>
+<p><span class="math display">\[
+\sum_X\max_D f(X,D)
+\neq
+\max_D\sum_X f(X,D).
+\]</span></p>
+<p>따라서 변수제거 순서는 의사결정 시점의 정보구조를 지켜야 한다. 관측되기 전에 결정된 변수와 관측된 뒤 결정된 변수의 순서를 임의로 바꾸면, 실제로 허용되지 않은 정보를 사용하는 전략을 얻게 된다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 시험공부의 제한기억 문제</strong></p>
+<p>학생이 여러 시험마다 공부량을 결정하고 시험난이도는 이전 시험난이도와 교수의 전반적 엄격성에 의존한다고 하자. 학생은 바로 전 시험에 관한 정보만 기억한다. 완전기억을 강제한 합-최대-합 변수제거는 관측되지 않는 교수의 엄격성을 먼저 제거해야 하여 모든 시험난이도를 연결하는 큰 요인을 만들 수 있다. 제한기억 구조를 직접 이용한 국소 최적화는 이 지수적 증가를 피할 수 있다.</p>
+</blockquote>
+<div id="fig-structured-iterated-vs-ve" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-structured-iterated-vs-ve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-structured-iterated-vs-ve.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-structured-iterated-vs-ve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;22.5: 반복적 국소 최적화는 효율적이지만 제약된 변수제거에서는 큰 요인을 만드는 다단계 시험 의사결정 영향도.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="기대효용-계산" class="level2" data-number="22.4">
+<h2 data-number="22.4" class="anchored" data-anchor-id="기대효용-계산"><span class="header-section-number">22.4</span> 기대효용 계산</h2>
+<p>최적전략을 찾는 과정에서는 고정된 전략의 기대효용을 반복적으로 계산해야 한다. 먼저 의사결정규칙이 모두 주어져 의사결정노드를 확률노드처럼 다룰 수 있는 경우를 살펴본다.</p>
+<section id="단순-변수제거" class="level3" data-number="22.4.1">
+<h3 data-number="22.4.1" class="anchored" data-anchor-id="단순-변수제거"><span class="header-section-number">22.4.1</span> 단순 변수제거</h3>
+<p>효용노드가 하나이고 효용요인을 <span class="math inline">\(U\)</span>라 하자. 기대효용은 확률요인, 의사결정규칙 요인과 효용요인의 곱을 모든 변수에 대해 합한 값이다.</p>
+<p><span class="math display">\[
+EU[\mathcal I[\sigma]]
+=
+\sum_{\mathcal X\cup\mathcal D}
+\left(
+\prod_{X\in\mathcal X}P(X\mid\operatorname{Pa}_X)
+\right)
+\left(
+\prod_{D\in\mathcal D}\delta_D
+\right)U.
+\]</span></p>
+<p>이 식은 일반적인 요인들의 합-곱 문제이므로 표준 변수제거를 그대로 적용할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 두 효용노드를 가진 구조</strong></p>
+<p>확률변수 <span class="math inline">\(A,B,C,E\)</span>, 의사결정변수 <span class="math inline">\(D\)</span>, 효용변수 <span class="math inline">\(V_1(A,E)\)</span>와 <span class="math inline">\(V_2(C,E)\)</span>가 있다고 하자. 일단 <span class="math inline">\(V_1\)</span>만 존재한다고 생각하면 <span class="math inline">\(C\)</span>는 <span class="math inline">\(V_1\)</span>에 영향을 주지 않는 불모변수이므로 무시할 수 있다. 반대로 <span class="math inline">\(V_2\)</span>만 생각하면 <span class="math inline">\(A\)</span>와 <span class="math inline">\(B\)</span>에 관한 일부 계산은 순수한 확률요인으로만 진행된다.</p>
+</blockquote>
+<div id="fig-structured-multiple-utilities" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-structured-multiple-utilities-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-structured-multiple-utilities.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-structured-multiple-utilities-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;22.6: 확률변수, 의사결정변수와 두 개의 부분효용을 포함하는 영향도.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="다중-효용변수의-단순한-접근" class="level3" data-number="22.4.2">
+<h3 data-number="22.4.2" class="anchored" data-anchor-id="다중-효용변수의-단순한-접근"><span class="header-section-number">22.4.2</span> 다중 효용변수의 단순한 접근</h3>
+<p>부분효용이 여러 개이면 가장 단순한 방법은</p>
+<p><span class="math display">\[
+U=\sum_{V\in\mathcal U}V
+\]</span></p>
+<p>라는 하나의 효용요인을 만든 뒤 표준 변수제거를 수행하는 것이다. 그러나 이 합성 효용요인의 범위는 모든 부분효용 범위의 합집합이므로, 서로 거의 독립적인 부분효용을 합치면서 매우 큰 요인이 생성될 수 있다.</p>
+<p>다른 방법은 기대값의 선형성을 사용하는 것이다.</p>
+<p><span class="math display">\[
+\mathbb E\left[\sum_{V\in\mathcal U}V\right]
+=
+\sum_{V\in\mathcal U}\mathbb E[V].
+\]</span></p>
+<p>각 부분효용에 대해 별도의 변수제거를 실행하고 마지막에 더하면 큰 합성 효용요인을 피할 수 있다. 그러나 여러 부분효용이 공통된 확률경로를 공유하면 같은 계산을 반복하게 된다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 공통 확률사슬의 중복계산</strong></p>
+<p>의사결정 <span class="math inline">\(D\)</span>에서 <span class="math inline">\(E_1\to\cdots\to E_k\)</span>라는 긴 확률사슬이 이어지고 마지막 변수 <span class="math inline">\(E_k\)</span>가 두 효용노드의 공통 부모라고 하자. 두 부분효용을 따로 계산하면 사슬을 제거하는 동일한 계산을 두 번 수행해야 한다.</p>
+</blockquote>
+</section>
+<section id="일반화-변수제거" class="level3" data-number="22.4.3">
+<h3 data-number="22.4.3" class="anchored" data-anchor-id="일반화-변수제거"><span class="header-section-number">22.4.3</span> 일반화 변수제거</h3>
+<p>다중 효용을 동시에 처리하면서 부분효용의 구조를 보존하려면 확률요인과 효용요인을 한 쌍으로 묶은 결합요인(joint factor)을 사용한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 결합요인</strong></p>
+<p>결합요인 <span class="math inline">\(\gamma\)</span>는</p>
+<p><span class="math display">\[
+\gamma=(\phi,\mu)
+\]</span></p>
+<p>형태이다. <span class="math inline">\(\phi\)</span>는 확률성분이고 <span class="math inline">\(\mu\)</span>는 같은 범위에서 정의되는 조건부 기대효용 성분이다.</p>
+</blockquote>
+<p>확률요인 <span class="math inline">\(\phi_W\)</span>는</p>
+<p><span class="math display">\[
+\gamma_W=(\phi_W,0_{\operatorname{Scope}(\phi_W)})
+\]</span></p>
+<p>로 변환하고, 효용요인 <span class="math inline">\(V\)</span>는</p>
+<p><span class="math display">\[
+\gamma_V=(1_{\operatorname{Pa}_V},V)
+\]</span></p>
+<p>로 변환한다.</p>
+<p>두 결합요인의 결합은 확률을 곱하고 효용을 더한다.</p>
+<p><span class="math display">\[
+(\phi_1,\mu_1)\otimes(\phi_2,\mu_2)
+=
+(\phi_1\phi_2,\mu_1+\mu_2).
+\]</span></p>
+<p>결합요인 <span class="math inline">\(\gamma=(\phi,\mu)\)</span>에서 변수집합 <span class="math inline">\(W\)</span>를 제거할 때에는 효용성분의 척도를 조건부 기대효용으로 유지해야 한다.</p>
+<p><span class="math display">\[
+\operatorname{marg}_{W}(\gamma)
+=
+\left(
+\sum_W\phi,
+\frac{\sum_W\phi\mu}{\sum_W\phi}
+\right).
+\]</span></p>
+<p>분모가 0인 항에서는 해당 정보상태가 확률 0이므로 효용성분을 임의의 값으로 정의할 수 있다. 실제 구현에서는 0으로 두는 등의 일관된 규칙을 사용한다.</p>
+<p>마지막으로 결합요인의 수축(contraction)은 두 성분을 곱한다.</p>
+<p><span class="math display">\[
+\operatorname{cont}(\gamma)=\phi\mu.
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - 결합요인에 대한 일반화 변수제거</strong></p>
+<ol type="1">
+<li>모든 확률요인과 효용요인을 결합요인으로 변환한다.</li>
+<li>제거할 변수 <span class="math inline">\(W\)</span>를 하나 선택한다.</li>
+<li><span class="math inline">\(W\)</span>를 포함하는 모든 결합요인을 <span class="math inline">\(\otimes\)</span>로 결합한다.</li>
+<li>결합된 요인에서 <span class="math inline">\(W\)</span>를 결합요인 주변화로 제거한다.</li>
+<li>사용한 요인들을 제거하고 새 요인을 넣는다.</li>
+<li>모든 제거변수에 대해 반복한다.</li>
+<li>남은 결합요인들을 결합하여 반환한다.</li>
+</ol>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>명제 - 일반화 변수제거의 기대효용 보존</strong></p>
+<p>모든 확률변수와 의사결정규칙에 대응하는 결합요인, 모든 효용노드에 대응하는 결합요인을 결합하고 모든 변수를 주변화한 결과를 <span class="math inline">\(\gamma^*=(\phi^*,\mu^*)\)</span>라 하자. 그러면</p>
+<p><span class="math display">\[
+\gamma^*=(1,EU[\mathcal I[\sigma]]).
+\]</span></p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정리 - 결합요인 변수제거의 정확성</strong></p>
+<p>결합연산은 교환법칙과 결합법칙을 만족하고, 결합요인 주변화는 순차적 주변화와 일치하며, 제거변수를 포함하지 않는 요인과 주변화의 순서를 교환할 수 있다. 따라서 합법적인 변수제거 순서로 실행한 일반화 변수제거는 모든 요인을 먼저 결합한 뒤 주변화한 결과와 동일하다.</p>
+</blockquote>
+<p>결합요인 방식은 여러 부분효용을 일찍 하나의 큰 요인으로 합치지 않으면서도 공통된 확률계산을 공유한다. 계산복잡도는 동일한 범위의 일반 요인을 사용한 변수제거와 같은 유도 트리폭에 의해 결정된다.</p>
+</section>
+</section>
+<section id="영향도-최적화" class="level2" data-number="22.5">
+<h2 data-number="22.5" class="anchored" data-anchor-id="영향도-최적화"><span class="header-section-number">22.5</span> 영향도 최적화</h2>
+<section id="단일-의사결정규칙-최적화" class="level3" data-number="22.5.1">
+<h3 data-number="22.5.1" class="anchored" data-anchor-id="단일-의사결정규칙-최적화"><span class="header-section-number">22.5.1</span> 단일 의사결정규칙 최적화</h3>
+<p>영향도에 의사결정변수 <span class="math inline">\(D\)</span>가 하나만 있다고 하자. <span class="math inline">\(D\)</span>와 그 부모를 제외한 모든 변수를 제거하면 <span class="math inline">\(D\)</span>의 가족</p>
+<p><span class="math display">\[
+\operatorname{Family}_D
+=
+\{D\}\cup\operatorname{Pa}_D
+\]</span></p>
+<p>위의 기대효용요인을 얻는다.</p>
+<p><span class="math display">\[
+\mu_{-D}(D,\operatorname{Pa}_D)
+=
+\sum_{\mathcal X-\operatorname{Pa}_D}
+\left(
+\prod_{X\in\mathcal X}P(X\mid\operatorname{Pa}_X)
+\right)
+\left(
+\sum_{V\in\mathcal U}V
+\right).
+\]</span></p>
+<p>의사결정규칙 <span class="math inline">\(\delta_D\)</span>가 주어지면 전체 기대효용은</p>
+<p><span class="math display">\[
+\sum_{D,\operatorname{Pa}_D}
+\delta_D(D\mid\operatorname{Pa}_D)
+\mu_{-D}(D,\operatorname{Pa}_D)
+\]</span></p>
+<p>이다.</p>
+<blockquote class="blockquote">
+<p><strong>명제 - 단일 의사결정규칙의 최적화</strong></p>
+<p>각 정보상태 <span class="math inline">\(w\in\operatorname{Val}(\operatorname{Pa}_D)\)</span>에서</p>
+<p><span class="math display">\[
+\delta_D(w)
+\in
+\arg\max_{d\in\operatorname{Val}(D)}
+\mu_{-D}(d,w)
+\]</span></p>
+<p>로 선택한 결정적 규칙은 최적이다.</p>
+</blockquote>
+<p>결합요인을 사용하는 경우에는 <span class="math inline">\(D\)</span>의 규칙요인을 제외한 채 <span class="math inline">\(\operatorname{Family}_D\)</span>만 남기도록 일반화 변수제거를 실행한다. 결과가 <span class="math inline">\(\gamma_{-D}\)</span>이면</p>
+<p><span class="math display">\[
+\delta_D(w)
+\in
+\arg\max_d
+\operatorname{cont}(\gamma_{-D})(d,w)
+\]</span></p>
+<p>로 선택한다.</p>
+</section>
+<section id="반복-최적화-알고리즘" class="level3" data-number="22.5.2">
+<h3 data-number="22.5.2" class="anchored" data-anchor-id="반복-최적화-알고리즘"><span class="header-section-number">22.5.2</span> 반복 최적화 알고리즘</h3>
+<p>여러 의사결정변수가 있을 때 모든 규칙을 동시에 최적화하면 의사결정변수와 그 부모들의 합집합 위에 거대한 기대효용요인이 필요할 수 있다. 반복 최적화(iterated optimization)는 다른 규칙들을 고정한 채 한 규칙씩 최적화한다.</p>
+<p>전략 <span class="math inline">\(\sigma\)</span>에서 <span class="math inline">\(D\)</span> 이외의 규칙을 <span class="math inline">\(\sigma_{-D}\)</span>라 하자. 규칙 <span class="math inline">\(\delta_D\)</span>가</p>
+<p><span class="math display">\[
+EU[\mathcal I[(\sigma_{-D},\delta_D)]]
+\ge
+EU[\mathcal I[(\sigma_{-D},\delta'_D)]]
+\]</span></p>
+<p>를 모든 <span class="math inline">\(\delta'_D\)</span>에 대해 만족하면 <span class="math inline">\(\sigma\)</span>에 대해 국소 최적(locally optimal)이라고 한다.</p>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - 의사결정규칙의 반복 최적화</strong></p>
+<ol type="1">
+<li>모든 의사결정변수에 초기 규칙을 지정하여 전략 <span class="math inline">\(\sigma\)</span>를 만든다.</li>
+<li>의사결정변수 <span class="math inline">\(D\)</span> 하나를 선택한다.</li>
+<li>다른 규칙 <span class="math inline">\(\sigma_{-D}\)</span>를 고정하고 단일 의사결정 최적화로 <span class="math inline">\(D\)</span>의 국소 최적규칙을 구한다.</li>
+<li><span class="math inline">\(\sigma_D\)</span>를 새 규칙으로 바꾼다.</li>
+<li>더 이상 어떤 규칙도 개선되지 않을 때까지 반복한다.</li>
+</ol>
+</blockquote>
+<p>각 단계는 기대효용을 감소시키지 않는다. 그러나 일반적인 영향도에서는 국소 최적전략이 전역 최적전략이라는 보장이 없다. 전역최적성은 의사결정규칙 사이의 전략적 관련성 구조가 비순환일 때 얻어진다.</p>
+</section>
+<section id="전략적-관련성과-전역최적성" class="level3" data-number="22.5.3">
+<h3 data-number="22.5.3" class="anchored" data-anchor-id="전략적-관련성과-전역최적성"><span class="header-section-number">22.5.3</span> 전략적 관련성과 전역최적성</h3>
+<section id="전략적-관련성" class="level4" data-number="22.5.3.1">
+<h4 data-number="22.5.3.1" class="anchored" data-anchor-id="전략적-관련성"><span class="header-section-number">22.5.3.1</span> 전략적 관련성</h4>
+<p>의사결정규칙 <span class="math inline">\(D'\)</span>를 바꾸었을 때 <span class="math inline">\(D\)</span>의 최적규칙이 달라질 수 있다면 <span class="math inline">\(D\)</span>는 <span class="math inline">\(D'\)</span>의 전략에 의존한다. 확률 0인 정보상태에서는 임의의 행동도 기대효용에 영향을 주지 않으므로 관련성 정의가 왜곡될 수 있다. 이를 피하기 위해 완전혼합 규칙을 사용한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 완전혼합 의사결정규칙</strong></p>
+<p>모든 정보상태 <span class="math inline">\(w\)</span>와 모든 행동 <span class="math inline">\(d\)</span>에 대해</p>
+<p><span class="math display">\[
+\delta_D(d\mid w)&gt;0
+\]</span></p>
+<p>이면 <span class="math inline">\(\delta_D\)</span>를 완전혼합(fully mixed) 규칙이라 한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정의 - 전략적 관련성</strong></p>
+<p>영향도 <span class="math inline">\(\mathcal I\)</span>의 두 의사결정노드 <span class="math inline">\(D,D'\)</span>를 생각하자. 다음 조건을 만족하는 다른 결정들의 부분전략 <span class="math inline">\(\sigma\)</span>, <span class="math inline">\(D'\)</span>의 두 규칙 <span class="math inline">\(\delta_{D'}\)</span>와 <span class="math inline">\(\delta'_{D'}\)</span>, 그리고 <span class="math inline">\(D\)</span>의 규칙 <span class="math inline">\(\delta_D\)</span>가 존재하면 <span class="math inline">\(D'\)</span>는 <span class="math inline">\(D\)</span>에 전략적으로 관련되어 있다고 한다.</p>
+<ul>
+<li><span class="math inline">\(\delta_{D'}\)</span>는 완전혼합이다.</li>
+<li><span class="math inline">\(\delta_D\)</span>는 <span class="math inline">\((\sigma,\delta_{D'})\)</span>에 대해서는 최적이다.</li>
+<li><span class="math inline">\(\delta_D\)</span>는 <span class="math inline">\((\sigma,\delta'_{D'})\)</span>에 대해서는 최적이 아니다.</li>
+</ul>
+</blockquote>
+<p><span class="math inline">\(\mathcal U_{\downarrow D}\)</span>를 <span class="math inline">\(D\)</span>의 자손인 효용노드들의 집합이라 하자.</p>
+<blockquote class="blockquote">
+<p><strong>명제 - 국소 최적성의 조건부 기대효용 표현</strong></p>
+<p>규칙 <span class="math inline">\(\delta_D\)</span>가 전략 <span class="math inline">\(\sigma\)</span>에 대해 국소 최적일 필요충분조건은, 확률이 양수인 모든 정보상태 <span class="math inline">\(w\)</span>에서 <span class="math inline">\(\delta_D(D\mid w)\)</span>가 다음 최적화의 해인 것이다.</p>
+<p><span class="math display">\[
+\arg\max_{q(D)}
+\sum_{d}q(d)
+\sum_{V\in\mathcal U_{\downarrow D}}
+\sum_v
+P_{B_{\mathcal I[\sigma]}}(v\mid d,w)v.
+\]</span></p>
+</blockquote>
+<p>즉, <span class="math inline">\(D\)</span>의 최적규칙에는 <span class="math inline">\(D\)</span>의 자손이 아닌 효용노드는 영향을 주지 않는다. 또한 다른 결정 <span class="math inline">\(D'\)</span>의 규칙은 <span class="math inline">\(P(V\mid D,\operatorname{Pa}_D)\)</span>를 변화시킬 수 있을 때에만 <span class="math inline">\(D\)</span>의 최적규칙에 영향을 준다.</p>
+</section>
+<section id="s-도달가능성" class="level4" data-number="22.5.3.2">
+<h4 data-number="22.5.3.2" class="anchored" data-anchor-id="s-도달가능성"><span class="header-section-number">22.5.3.2</span> s-도달가능성</h4>
+<p>전략적 관련성을 그래프만으로 검사하기 위해 s-도달가능성(s-reachability)을 사용한다. 의사결정노드 <span class="math inline">\(D'\)</span>의 CPD, 즉 의사결정규칙을 바꾸는 효과를 표현하기 위해 <span class="math inline">\(D'\)</span>에 가상의 부모 <span class="math inline">\(\widehat D'\)</span>를 추가한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - s-도달가능성</strong></p>
+<p>영향도 <span class="math inline">\(\mathcal I\)</span>에서 <span class="math inline">\(D\)</span>의 자손인 어떤 효용노드 <span class="math inline">\(V\in\mathcal U_{\downarrow D}\)</span>가 존재하고, <span class="math inline">\(D'\)</span>에 가상 부모 <span class="math inline">\(\widehat D'\)</span>를 추가했을 때</p>
+<p><span class="math display">\[
+\widehat D'
+\not\!\perp_d
+V
+\mid
+\operatorname{Family}_D
+\]</span></p>
+<p>이면 <span class="math inline">\(D'\)</span>는 <span class="math inline">\(D\)</span>로부터 s-도달가능하다고 한다. 활성경로는 같은 그래프를 베이지안 네트워크로 보았을 때의 d-연결로 판단한다.</p>
+</blockquote>
+<p>s-도달가능성은 대칭관계가 아니다. <span class="math inline">\(D'\)</span>가 <span class="math inline">\(D\)</span>에 영향을 줄 수 있지만 반대방향의 영향은 없을 수 있다.</p>
+<div id="fig-structured-s-reachability" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-structured-s-reachability-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-structured-s-reachability.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-structured-s-reachability-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;22.7: 의사결정규칙의 변화를 나타내는 가상 부모를 추가하여 s-도달가능성을 검사하는 영향도.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>정리 - s-도달가능성의 건전성과 구조적 완전성</strong></p>
+<p><span class="math inline">\(D'\)</span>가 <span class="math inline">\(D\)</span>로부터 s-도달가능하지 않으면 <span class="math inline">\(D'\)</span>는 <span class="math inline">\(D\)</span>에 전략적으로 관련되지 않는다. 반대로 <span class="math inline">\(D'\)</span>가 <span class="math inline">\(D\)</span>로부터 s-도달가능하면 동일한 그래프구조를 가진 어떤 매개변수화에서는 <span class="math inline">\(D\)</span>가 <span class="math inline">\(D'\)</span>에 전략적으로 의존한다.</p>
+</blockquote>
+<p>첫 문장은 주어진 영향도의 실제 매개변수와 무관하게 사용할 수 있는 안전한 배제기준이다. 두 번째 문장은 그래프만으로 얻을 수 있는 기준 가운데 s-도달가능성이 가장 정밀함을 뜻한다. 특정한 수치 매개변수에서는 활성경로가 있어도 효과가 상쇄되어 실제 관련성이 나타나지 않을 수 있다.</p>
+</section>
+<section id="관련성-그래프" class="level4" data-number="22.5.3.3">
+<h4 data-number="22.5.3.3" class="anchored" data-anchor-id="관련성-그래프"><span class="header-section-number">22.5.3.3</span> 관련성 그래프</h4>
+<blockquote class="blockquote">
+<p><strong>정의 - 관련성 그래프</strong></p>
+<p>영향도 <span class="math inline">\(\mathcal I\)</span>의 관련성 그래프(relevance graph)는 의사결정변수들을 노드로 하는 방향그래프이다. <span class="math inline">\(D'\)</span>가 <span class="math inline">\(D\)</span>에 전략적으로 관련되어 있으면 간선</p>
+<p><span class="math display">\[
+D'\longrightarrow D
+\]</span></p>
+<p>를 둔다.</p>
+</blockquote>
+<p>각 의사결정 <span class="math inline">\(D\)</span>에 대해 다른 의사결정들이 s-도달가능한지 검사하면 관련성 그래프를 만들 수 있다. 확률변수가 <span class="math inline">\(n\)</span>개, 의사결정변수가 <span class="math inline">\(k\)</span>개이면 표준 활성경로 탐색을 반복하여 대략 <span class="math inline">\(O((n+k)k)\)</span> 시간에 구축할 수 있다.</p>
+<div id="fig-structured-relevance-graphs" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-structured-relevance-graphs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-structured-relevance-graphs.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-structured-relevance-graphs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;22.8: 여러 단순 영향도와 그에 대응하는 관련성 그래프. 완전기억에서는 관련성 그래프의 방향이 시간순서와 반대로 나타난다.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>정리 - 완전기억과 비순환 관련성 그래프</strong></p>
+<p>완전기억을 만족하는 영향도의 관련성 그래프는 비순환이다. 의사결정의 시간순서가</p>
+<p><span class="math display">\[
+D_1\prec D_2\prec\cdots\prec D_k
+\]</span></p>
+<p>이면 관련성 그래프의 가능한 위상순서는 보통 그 반대방향이다.</p>
+</blockquote>
+<p>완전기억이 아니더라도 관련성 그래프가 비순환일 수 있다. 반대로 제한기억 때문에 이전 결정의 행동이 숨은 상태에 관한 정보를 전달하면 뒤의 결정이 이전 규칙에 의존하여 순환이 생길 수 있다.</p>
+</section>
+<section id="전역최적성" class="level4" data-number="22.5.3.4">
+<h4 data-number="22.5.3.4" class="anchored" data-anchor-id="전역최적성"><span class="header-section-number">22.5.3.4</span> 전역최적성</h4>
+<p>관련성 그래프가 비순환이면 위상순서에 따라 의사결정규칙을 한 번씩 최적화하여 전역 최적전략을 얻을 수 있다. 초기전략은 확률 0 정보상태에서의 잘못된 규칙 선택을 막기 위해 완전혼합이어야 한다.</p>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - 비순환 관련성 그래프에서의 반복 최적화</strong></p>
+<ol type="1">
+<li>관련성 그래프의 위상순서 <span class="math inline">\(D_1,\ldots,D_k\)</span>를 구한다.</li>
+<li>모든 행동에 양의 확률을 주는 완전혼합 초기전략 <span class="math inline">\(\sigma^0\)</span>를 정한다.</li>
+<li><span class="math inline">\(i=1,\ldots,k\)</span>에 대해 현재 전략에서 <span class="math inline">\(D_i\)</span>의 국소 최적규칙 <span class="math inline">\(\delta_{D_i}\)</span>를 구한다.</li>
+<li><span class="math inline">\(\sigma^i=(\sigma^{i-1}_{-D_i},\delta_{D_i})\)</span>로 갱신한다.</li>
+<li><span class="math inline">\(\sigma^k\)</span>를 반환한다.</li>
+</ol>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정리 - 비순환 관련성 그래프에서의 전역최적성</strong></p>
+<p>관련성 그래프가 비순환인 영향도에서 위 알고리즘은 전역 최대 기대효용 전략을 반환한다.</p>
+</blockquote>
+<p>위상순서에서 앞서 최적화한 규칙은 뒤에서 바뀌는 규칙들에 의존하지 않으므로 다시 방문할 필요가 없다. 순서 뒤의 규칙들은 현재 규칙에 전략적으로 관련되어 있지 않으므로 임의의 초기값을 사용해도 현재 최적화의 결과를 바꾸지 않는다.</p>
+<div id="fig-structured-limid-clique-tree" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-structured-limid-clique-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-structured-limid-clique-tree.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-structured-limid-clique-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;22.9: 제한기억 덕분에 의사결정단계 수가 늘어도 폭이 제한되는 클리크 트리.
+</figcaption>
+</figure>
+</div>
+<p>관련성 그래프에 순환이 있으면 강하게 연결된 의사결정들의 규칙을 함께 최적화해야 한다. 이 방법은 전역최적성을 회복하지만 공동규칙의 상태공간이 커지므로 계산비용이 증가한다.</p>
+<blockquote class="blockquote">
+<p><strong>사례 - 로봇축구의 협조그래프</strong></p>
+<p>여러 로봇이 하나의 팀 효용을 공유하는 경우 각 로봇의 행동을 의사결정변수로 볼 수 있다. 전체 공동행동 공간은 지수적으로 크지만, 패스와 수비처럼 직접 협조해야 하는 로봇들만 연결한 협조그래프를 사용하면 효용을 국소 규칙들의 합으로 분해할 수 있다. 상태를 관측한 뒤 규칙기반 변수제거나 신뢰전파를 사용하여 공동행동을 선택한다. 이 구조는 로봇들이 공의 실제 이동을 기다리지 않고 패스와 이동을 미리 조정하도록 한다.</p>
+</blockquote>
+</section>
+</section>
+</section>
+<section id="무관한-정보의-제거" class="level2" data-number="22.6">
+<h2 data-number="22.6" class="anchored" data-anchor-id="무관한-정보의-제거"><span class="header-section-number">22.6</span> 무관한 정보의 제거</h2>
+<p>의사결정노드의 부모가 많아질수록 규칙표의 크기는 지수적으로 커진다. 그러나 관측 가능한 정보가 최적결정에 실제로 도움이 되지 않는다면 그 정보간선을 제거해도 최대 기대효용은 변하지 않는다.</p>
+<p><span class="math inline">\(\mathcal U_{\downarrow D}\)</span>를 <span class="math inline">\(D\)</span>의 자손 효용노드 집합이라 하자.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 무관한 정보간선</strong></p>
+<p>정보간선 <span class="math inline">\(W\to D\)</span>가 다음 조건을 만족하면 <span class="math inline">\(D\)</span>에 대해 무관하다고 한다.</p>
+<p><span class="math display">\[
+W
+\perp_d
+\mathcal U_{\downarrow D}
+\mid
+\operatorname{Pa}_D-\{W\}.
+\]</span></p>
+<p>즉, 나머지 부모정보를 알고 있을 때 <span class="math inline">\(W\)</span>에서 <span class="math inline">\(D\)</span>가 영향을 줄 수 있는 어떤 효용노드로도 활성경로가 없어야 한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - 학생의 지원결정에서 불필요한 난이도 정보</strong></p>
+<p>학생의 지능과 과목난이도가 성적에 영향을 주고, 성적과 추천서가 취업지원 결정에 영향을 준다고 하자. 지원 시 성적을 이미 관측한다면 과목난이도는 성적을 조건으로 취업효용과 분리될 수 있다. 난이도가 다른 효용에는 영향을 주더라도 지원결정으로 변화시킬 수 없는 효용이라면 지원규칙에는 관련되지 않는다.</p>
+</blockquote>
+<div id="fig-structured-irrelevant-information" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-structured-irrelevant-information-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-structured-irrelevant-information.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-structured-irrelevant-information-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;22.10: 학생 시나리오에서 정보간선의 관련성과 무관성을 검사하기 위한 영향도.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>명제 - 무관한 정보간선 제거의 무손실성</strong></p>
+<p><span class="math inline">\(W\to D\)</span>가 무관한 정보간선인 영향도 <span class="math inline">\(\mathcal I\)</span>에서 이 간선을 제거한 영향도를 <span class="math inline">\(\mathcal I'\)</span>라 하자. <span class="math inline">\(\mathcal I\)</span>의 임의의 전략 <span class="math inline">\(\sigma\)</span>에 대해</p>
+<p><span class="math display">\[
+EU[\mathcal I'[\sigma']]
+\ge
+EU[\mathcal I[\sigma]]
+\]</span></p>
+<p>를 만족하는 <span class="math inline">\(\mathcal I'\)</span>의 전략 <span class="math inline">\(\sigma'\)</span>가 존재한다.</p>
+</blockquote>
+<p>무관한 간선을 제거하여 얻은 영향도를 원래 영향도의 축약(reduction)이라 한다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 축약 영향도의 최적전략 보존</strong></p>
+<p><span class="math inline">\(\mathcal I'\)</span>가 <span class="math inline">\(\mathcal I\)</span>의 축약이면 <span class="math inline">\(\mathcal I'\)</span>의 최적전략은 <span class="math inline">\(\mathcal I\)</span>에서도 최적이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정리 - 무관성 판정의 순서불변성</strong></p>
+<p>어떤 무관한 정보간선들을 제거한 뒤에도 남은 간선의 무관성 여부는 원래 영향도에서의 판정과 같다. 따라서 모든 무관한 간선을 원래 그래프에서 한 번에 찾은 뒤 동시에 제거할 수 있다.</p>
+</blockquote>
+<p>정보간선 제거는 세 가지 이점을 준다. 의사결정규칙의 표현크기를 줄이고, 변수제거의 트리폭을 낮출 수 있으며, 관련성 그래프의 간선을 제거하여 순환을 끊을 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>명제 - 축약과 관련성 그래프</strong></p>
+<p><span class="math inline">\(\mathcal I'\)</span>가 <span class="math inline">\(\mathcal I\)</span>의 축약이면 <span class="math inline">\(\mathcal I'\)</span>의 관련성 그래프는 <span class="math inline">\(\mathcal I\)</span>의 관련성 그래프의 부분그래프이다.</p>
+</blockquote>
+</section>
+<section id="정보가치" class="level2" data-number="22.7">
+<h2 data-number="22.7" class="anchored" data-anchor-id="정보가치"><span class="header-section-number">22.7</span> 정보가치</h2>
+<p>어떤 변수를 관측할지 결정하는 문제는 의료검사, 고장진단, 센서배치와 자료수집에서 핵심적이다. 관측에는 금전, 시간, 통증과 위험 등의 비용이 들 수 있다. 정보의 가치는 단순히 불확실성을 얼마나 감소시키는지가 아니라, 그 정보를 사용하여 더 좋은 행동을 선택함으로써 기대효용을 얼마나 높이는지로 측정한다.</p>
+<section id="단일-관측" class="level3" data-number="22.7.1">
+<h3 data-number="22.7.1" class="anchored" data-anchor-id="단일-관측"><span class="header-section-number">22.7.1</span> 단일 관측</h3>
+<p>관측하려는 확률변수 <span class="math inline">\(X\)</span>가 의사결정 <span class="math inline">\(D\)</span>의 자손이 아니라고 하자. <span class="math inline">\(X\)</span>를 관측하지 않는 원래 영향도를 <span class="math inline">\(\mathcal I\)</span>라 하고, <span class="math inline">\(X\to D\)</span>라는 정보간선을 추가하여 <span class="math inline">\(D\)</span>에서 <span class="math inline">\(X\)</span>를 관측할 수 있게 만든 영향도를 <span class="math inline">\(\mathcal I'\)</span>라 하자.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 완전정보가치</strong></p>
+<p><span class="math inline">\(D\)</span>에서 <span class="math inline">\(X\)</span>를 완전히 관측하는 정보가치는</p>
+<p><span class="math display">\[
+\operatorname{VPI}_{\mathcal I}(D\mid X)
+=
+\operatorname{MEU}[\mathcal I']
+-
+\operatorname{MEU}[\mathcal I]
+\]</span></p>
+<p>로 정의한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>명제 - 완전정보가치의 비음성</strong></p>
+<p>무료로 제공되는 완전정보의 가치는 음수가 될 수 없다.</p>
+<p><span class="math display">\[
+\operatorname{VPI}_{\mathcal I}(D\mid X)\ge 0.
+\]</span></p>
+<p>등호는 원래 영향도의 최적전략이 <span class="math inline">\(X\)</span>를 관측할 수 있는 새 영향도에서도 최적일 때 성립한다.</p>
+</blockquote>
+<p>행위자는 새 정보를 무시하고 원래 전략을 그대로 사용할 수 있으므로 무료정보가 손해를 줄 수 없다. 정보가 최적행동을 바꾸지 않으면 그 정보의 가치는 0이다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 시장조사의 정보가치</strong></p>
+<p>조사하지 않고 바로 창업 여부를 결정할 때 최대 기대효용이 2이고, 조사결과를 무료로 관측한 뒤 최적으로 행동할 때 최대 기대효용이 4.22라 하자. 완전정보가치는 2.22이다. 실제 조사비용이 1이면 순정보가치는 1.22가 된다. 따라서 조사실시 여부는 정보가치와 비용의 차이로 결정할 수 있다.</p>
+</blockquote>
+<div id="fig-structured-value-of-information" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-structured-value-of-information-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-structured-value-of-information.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-structured-value-of-information-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;22.11: 두 회사 중 취업할 회사를 선택할 때 각 회사의 현재상태를 관측하는 정보가치를 비교하는 영향도.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>예제 - 두 회사의 상태정보</strong></p>
+<p>두 회사 중 하나의 일자리를 선택하고, 미래의 투자유치 성공 여부에 따라 효용이 결정된다고 하자. 회사의 현재상태는 미래 투자유치 확률을 예측한다.</p>
+<ul>
+<li>한 회사가 확실히 우월하면 상태정보가 결정을 거의 바꾸지 않으므로 정보가치가 작다.</li>
+<li>두 회사의 전망이 비슷하고 상태에 따라 우열이 자주 바뀌면 정보가치가 크다.</li>
+<li>관측이 선택을 자주 바꾸더라도 두 행동의 기대효용 차이가 작으면 정보가치는 다시 작아진다.</li>
+</ul>
+<p>따라서 정보가치는 행동이 바뀔 확률과 행동을 바꿈으로써 얻는 효용개선의 크기를 함께 반영한다.</p>
+</blockquote>
+<p>진단검사의 목적도 질환확률을 정밀하게 추정하는 것 자체가 아니다. 검사결과가 치료 또는 수리행동을 바꾸고, 그 변화가 결과효용을 개선할 때 검사가 가치가 있다.</p>
+</section>
+<section id="다중-관측" class="level3" data-number="22.7.2">
+<h3 data-number="22.7.2" class="anchored" data-anchor-id="다중-관측"><span class="header-section-number">22.7.2</span> 다중 관측</h3>
+<p>관측 가능한 변수가 <span class="math inline">\(m\)</span>개이면 동시에 관측할 부분집합은 <span class="math inline">\(2^m\)</span>개이다. 관측 수나 총비용을 제한해도 후보부분집합은 매우 많을 수 있다.</p>
+<p>더 중요한 문제는 관측을 순차적으로 선택한다는 점이다. 첫 번째 검사결과에 따라 다음에 가장 가치 있는 검사가 달라질 수 있다. 최적 관측전략은 다음과 같은 조건부 계획이다.</p>
+<ul>
+<li>먼저 <span class="math inline">\(X_1\)</span>을 관측한다.</li>
+<li><span class="math inline">\(X_1=x_1\)</span>이면 <span class="math inline">\(X_2\)</span>를 관측한다.</li>
+<li><span class="math inline">\(X_1=x_2\)</span>이면 <span class="math inline">\(X_3\)</span>를 관측한다.</li>
+<li>각 후속결과에 따라 다음 관측 또는 최종행동을 결정한다.</li>
+</ul>
+<p>가능한 조건부 계획의 수는 매우 빠르게 증가하며 일반적으로 최적 계획을 찾는 것은 계산적으로 어렵다.</p>
+<p>가장 흔한 근사는 근시적 정보가치(myopic value of information)이다. 현재 단계에서 단 하나의 관측만 더 수행한다고 가정하고 가장 큰 순정보가치를 주는 변수를 선택한다. 관측한 뒤 같은 계산을 반복한다.</p>
+<p>근시적 선택은 계산하기 쉽지만, 혼자서는 가치가 작고 다른 검사의 선택을 안내하는 관측을 과소평가할 수 있다. 더 정확한 방법은 어떤 변수를 다음에 관측할지를 별도의 의사결정노드로 추가하여 전체 문제를 영향도로 표현하는 것이다. 이 방법은 관측계획을 직접 최적화하지만 확장된 영향도가 매우 커질 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>사례 - 고장진단과 수리</strong></p>
+<p>장치의 고장진단에서는 숨은 고장상태, 센서관측, 진단검사, 수리와 교체행동을 영향도로 표현할 수 있다. 검사는 고장상태에 관한 정보를 주지만 비용이 들고, 수리행동은 고장을 해결할 가능성과 비용을 갖는다. 최적전략은 단순히 가장 불확실한 부품을 검사하는 것이 아니라, 검사결과가 다음 수리행동을 바꾸고 총 기대비용을 줄이는지를 평가한다.</p>
+</blockquote>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./21-utilities-and-decisions.html" class="pagination-link" aria-label="효용과 의사결정">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">효용과 의사결정</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./23-epilogue.html" class="pagination-link" aria-label="맺음말: 왜 확률적 그래프 모형인가?">
+        <span class="nav-page-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">맺음말: 왜 확률적 그래프 모형인가?</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

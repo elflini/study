@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>15&nbsp; 그래프모형 학습 개요 – 확률적 그래프 모형</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./16-parameter-estimation.html" rel="next">
+<link href="./14-inference-in-temporal-models.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-a522afb83bf8ae494942cf1b0ac9d4c3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./15-learning-graphical-models-overview.html"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">그래프모형 학습 개요</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">확률적 그래프 모형</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">기초 개념</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-bayesian-network-representation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">베이즈 네트워크 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-undirected-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">무방향 그래픽 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-local-probabilistic-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">국소 확률 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-template-based-representations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">템플릿 기반 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-gaussian-network-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">가우시안 네트워크 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-exponential-family.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">지수족</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-exact-inference-variable-elimination.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">정확추론: 변수 제거</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-exact-inference-clique-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">정확추론: 클리크 트리</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-inference-as-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">최적화로서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-particle-based-approximate-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">입자 기반 근사추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-map-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">MAP 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-inference-in-hybrid-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">혼합 네트워크에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-inference-in-temporal-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">시간 모형에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-learning-graphical-models-overview.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">그래프모형 학습 개요</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-parameter-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">모수추정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-structure-learning-bayesian-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">베이지안 네트워크의 구조학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-partially-observed-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">부분관측 자료</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./19-learning-undirected-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">무방향 그래프모형의 학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20-causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">인과성</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21-utilities-and-decisions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">효용과 의사결정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22-structured-decision-problems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">구조화된 의사결정 문제</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./23-epilogue.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">맺음말: 왜 확률적 그래프 모형인가?</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#개요" id="toc-개요" class="nav-link active" data-scroll-target="#개요"><span class="header-section-number">15.1</span> 개요</a></li>
+  <li><a href="#동기" id="toc-동기" class="nav-link" data-scroll-target="#동기"><span class="header-section-number">15.2</span> 동기</a></li>
+  <li><a href="#학습의-목표" id="toc-학습의-목표" class="nav-link" data-scroll-target="#학습의-목표"><span class="header-section-number">15.3</span> 학습의 목표</a>
+  <ul>
+  <li><a href="#밀도추정" id="toc-밀도추정" class="nav-link" data-scroll-target="#밀도추정"><span class="header-section-number">15.3.1</span> 밀도추정</a></li>
+  <li><a href="#특정-예측과제" id="toc-특정-예측과제" class="nav-link" data-scroll-target="#특정-예측과제"><span class="header-section-number">15.3.2</span> 특정 예측과제</a>
+  <ul class="collapse">
+  <li><a href="#분류오류와-0-1-손실" id="toc-분류오류와-0-1-손실" class="nav-link" data-scroll-target="#분류오류와-0-1-손실"><span class="header-section-number">15.3.2.1</span> 분류오류와 0-1 손실</a></li>
+  <li><a href="#hamming-손실" id="toc-hamming-손실" class="nav-link" data-scroll-target="#hamming-손실"><span class="header-section-number">15.3.2.2</span> Hamming 손실</a></li>
+  <li><a href="#조건부-로그가능도" id="toc-조건부-로그가능도" class="nav-link" data-scroll-target="#조건부-로그가능도"><span class="header-section-number">15.3.2.3</span> 조건부 로그가능도</a></li>
+  </ul></li>
+  <li><a href="#지식발견" id="toc-지식발견" class="nav-link" data-scroll-target="#지식발견"><span class="header-section-number">15.3.3</span> 지식발견</a>
+  <ul class="collapse">
+  <li><a href="#식별가능성" id="toc-식별가능성" class="nav-link" data-scroll-target="#식별가능성"><span class="header-section-number">15.3.3.1</span> 식별가능성</a></li>
+  <li><a href="#약한-관계" id="toc-약한-관계" class="nav-link" data-scroll-target="#약한-관계"><span class="header-section-number">15.3.3.2</span> 약한 관계</a></li>
+  <li><a href="#우연한-상관" id="toc-우연한-상관" class="nav-link" data-scroll-target="#우연한-상관"><span class="header-section-number">15.3.3.3</span> 우연한 상관</a></li>
+  <li><a href="#다중-가설" id="toc-다중-가설" class="nav-link" data-scroll-target="#다중-가설"><span class="header-section-number">15.3.3.4</span> 다중 가설</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#최적화-문제로서의-학습" id="toc-최적화-문제로서의-학습" class="nav-link" data-scroll-target="#최적화-문제로서의-학습"><span class="header-section-number">15.4</span> 최적화 문제로서의 학습</a>
+  <ul>
+  <li><a href="#경험위험과-과적합" id="toc-경험위험과-과적합" class="nav-link" data-scroll-target="#경험위험과-과적합"><span class="header-section-number">15.4.1</span> 경험위험과 과적합</a>
+  <ul class="collapse">
+  <li><a href="#편향-분산-절충" id="toc-편향-분산-절충" class="nav-link" data-scroll-target="#편향-분산-절충"><span class="header-section-number">15.4.1.1</span> 편향-분산 절충</a></li>
+  </ul></li>
+  <li><a href="#학습절차의-설계와-평가" id="toc-학습절차의-설계와-평가" class="nav-link" data-scroll-target="#학습절차의-설계와-평가"><span class="header-section-number">15.4.2</span> 학습절차의 설계와 평가</a>
+  <ul class="collapse">
+  <li><a href="#일반화-성능-평가" id="toc-일반화-성능-평가" class="nav-link" data-scroll-target="#일반화-성능-평가"><span class="header-section-number">15.4.2.1</span> 일반화 성능 평가</a></li>
+  <li><a href="#홀드아웃과-교차검증" id="toc-홀드아웃과-교차검증" class="nav-link" data-scroll-target="#홀드아웃과-교차검증"><span class="header-section-number">15.4.2.2</span> 홀드아웃과 교차검증</a></li>
+  <li><a href="#학습절차-선택과-독립-시험자료" id="toc-학습절차-선택과-독립-시험자료" class="nav-link" data-scroll-target="#학습절차-선택과-독립-시험자료"><span class="header-section-number">15.4.2.3</span> 학습절차 선택과 독립 시험자료</a></li>
+  <li><a href="#적합도-검정" id="toc-적합도-검정" class="nav-link" data-scroll-target="#적합도-검정"><span class="header-section-number">15.4.2.4</span> 적합도 검정</a></li>
+  </ul></li>
+  <li><a href="#pac-경계" id="toc-pac-경계" class="nav-link" data-scroll-target="#pac-경계"><span class="header-section-number">15.4.3</span> PAC 경계</a></li>
+  <li><a href="#생성적-학습과-판별적-학습" id="toc-생성적-학습과-판별적-학습" class="nav-link" data-scroll-target="#생성적-학습과-판별적-학습"><span class="header-section-number">15.4.4</span> 생성적 학습과 판별적 학습</a>
+  <ul class="collapse">
+  <li><a href="#생성적-학습" id="toc-생성적-학습" class="nav-link" data-scroll-target="#생성적-학습"><span class="header-section-number">15.4.4.1</span> 생성적 학습</a></li>
+  <li><a href="#판별적-학습" id="toc-판별적-학습" class="nav-link" data-scroll-target="#판별적-학습"><span class="header-section-number">15.4.4.2</span> 판별적 학습</a></li>
+  <li><a href="#통계적-절충" id="toc-통계적-절충" class="nav-link" data-scroll-target="#통계적-절충"><span class="header-section-number">15.4.4.3</span> 통계적 절충</a></li>
+  <li><a href="#생성모형의-장점" id="toc-생성모형의-장점" class="nav-link" data-scroll-target="#생성모형의-장점"><span class="header-section-number">15.4.4.4</span> 생성모형의 장점</a></li>
+  <li><a href="#판별모형의-장점" id="toc-판별모형의-장점" class="nav-link" data-scroll-target="#판별모형의-장점"><span class="header-section-number">15.4.4.5</span> 판별모형의 장점</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#학습과제" id="toc-학습과제" class="nav-link" data-scroll-target="#학습과제"><span class="header-section-number">15.5</span> 학습과제</a>
+  <ul>
+  <li><a href="#모형-제약" id="toc-모형-제약" class="nav-link" data-scroll-target="#모형-제약"><span class="header-section-number">15.5.1</span> 모형 제약</a>
+  <ul class="collapse">
+  <li><a href="#구조가-주어진-경우" id="toc-구조가-주어진-경우" class="nav-link" data-scroll-target="#구조가-주어진-경우"><span class="header-section-number">15.5.1.1</span> 구조가 주어진 경우</a></li>
+  <li><a href="#구조를-모르는-경우" id="toc-구조를-모르는-경우" class="nav-link" data-scroll-target="#구조를-모르는-경우"><span class="header-section-number">15.5.1.2</span> 구조를 모르는 경우</a></li>
+  <li><a href="#변수집합도-완전히-모르는-경우" id="toc-변수집합도-완전히-모르는-경우" class="nav-link" data-scroll-target="#변수집합도-완전히-모르는-경우"><span class="header-section-number">15.5.1.3</span> 변수집합도 완전히 모르는 경우</a></li>
+  </ul></li>
+  <li><a href="#데이터-관측성" id="toc-데이터-관측성" class="nav-link" data-scroll-target="#데이터-관측성"><span class="header-section-number">15.5.2</span> 데이터 관측성</a>
+  <ul class="collapse">
+  <li><a href="#완전자료" id="toc-완전자료" class="nav-link" data-scroll-target="#완전자료"><span class="header-section-number">15.5.2.1</span> 완전자료</a></li>
+  <li><a href="#불완전자료" id="toc-불완전자료" class="nav-link" data-scroll-target="#불완전자료"><span class="header-section-number">15.5.2.2</span> 불완전자료</a></li>
+  <li><a href="#숨은-변수" id="toc-숨은-변수" class="nav-link" data-scroll-target="#숨은-변수"><span class="header-section-number">15.5.2.3</span> 숨은 변수</a></li>
+  <li><a href="#숨은-변수의-과학적-의미" id="toc-숨은-변수의-과학적-의미" class="nav-link" data-scroll-target="#숨은-변수의-과학적-의미"><span class="header-section-number">15.5.2.4</span> 숨은 변수의 과학적 의미</a></li>
+  <li><a href="#혼합분포-관점" id="toc-혼합분포-관점" class="nav-link" data-scroll-target="#혼합분포-관점"><span class="header-section-number">15.5.2.5</span> 혼합분포 관점</a></li>
+  <li><a href="#숨은-변수와-모형단순화" id="toc-숨은-변수와-모형단순화" class="nav-link" data-scroll-target="#숨은-변수와-모형단순화"><span class="header-section-number">15.5.2.6</span> 숨은 변수와 모형단순화</a></li>
+  </ul></li>
+  <li><a href="#학습과제의-분류" id="toc-학습과제의-분류" class="nav-link" data-scroll-target="#학습과제의-분류"><span class="header-section-number">15.5.3</span> 학습과제의 분류</a>
+  <ul class="collapse">
+  <li><a href="#알려진-구조와-완전자료-베이즈-네트워크" id="toc-알려진-구조와-완전자료-베이즈-네트워크" class="nav-link" data-scroll-target="#알려진-구조와-완전자료-베이즈-네트워크"><span class="header-section-number">15.5.3.1</span> 알려진 구조와 완전자료: 베이즈 네트워크</a></li>
+  <li><a href="#알려진-구조와-완전자료-markov-network" id="toc-알려진-구조와-완전자료-markov-network" class="nav-link" data-scroll-target="#알려진-구조와-완전자료-markov-network"><span class="header-section-number">15.5.3.2</span> 알려진 구조와 완전자료: Markov network</a></li>
+  <li><a href="#미지의-구조와-완전자료-베이즈-네트워크" id="toc-미지의-구조와-완전자료-베이즈-네트워크" class="nav-link" data-scroll-target="#미지의-구조와-완전자료-베이즈-네트워크"><span class="header-section-number">15.5.3.3</span> 미지의 구조와 완전자료: 베이즈 네트워크</a></li>
+  <li><a href="#미지의-구조와-완전자료-markov-network" id="toc-미지의-구조와-완전자료-markov-network" class="nav-link" data-scroll-target="#미지의-구조와-완전자료-markov-network"><span class="header-section-number">15.5.3.4</span> 미지의 구조와 완전자료: Markov network</a></li>
+  <li><a href="#알려진-구조와-불완전자료" id="toc-알려진-구조와-불완전자료" class="nav-link" data-scroll-target="#알려진-구조와-불완전자료"><span class="header-section-number">15.5.3.5</span> 알려진 구조와 불완전자료</a></li>
+  <li><a href="#미지의-구조와-불완전자료" id="toc-미지의-구조와-불완전자료" class="nav-link" data-scroll-target="#미지의-구조와-불완전자료"><span class="header-section-number">15.5.3.6</span> 미지의 구조와 불완전자료</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-learning-graphical-models-overview" class="quarto-section-identifier"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">그래프모형 학습 개요</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="개요" class="level2" data-number="15.1">
+<h2 data-number="15.1" class="anchored" data-anchor-id="개요"><span class="header-section-number">15.1</span> 개요</h2>
+<p>지금까지의 논의에서는 대체로 그래프모형이 이미 주어진 것으로 가정하였다. 조건부 독립성, 정확추론, 근사추론을 설명할 때 네트워크의 구조와 모수가 모두 입력으로 제공되었다. 그러나 실제 연구에서는 모형 자체를 어떻게 얻을 것인가가 핵심 문제가 된다.</p>
+<p>그래프모형을 획득하는 방법은 크게 두 가지이다.</p>
+<p>첫째, 전문가의 지식에 기초하여 네트워크를 직접 구성할 수 있다. 이 방법은 <span class="quarto-unresolved-ref">?sec-bayesian-network-representation에서</span> 설명했듯이 지식공학자가 영역전문가와 긴 시간 협력하여 변수, 간선, 조건부확률을 정하는 방식이다. 규모가 작은 네트워크도 수시간의 인터뷰와 반복적 검토가 필요하고, 큰 네트워크는 수주 또는 수개월이 걸릴 수 있다. 또한 모형이 상식적으로 타당한 답을 내는지 확인하기 위해 대표적인 질의를 반복하여 실행하고 수정해야 한다.</p>
+<p>둘째, 실제 관측자료를 이용하여 모형을 학습할 수 있다. 현대의 많은 영역에서는 전문가의 시간을 확보하기보다 전자화된 대규모 자료를 얻는 일이 더 쉽다. 예를 들어 의료진단 영역에서는 환자의 연령, 성별, 흡연, 과거력, 증상, 검사결과, 진단, 치료와 예후가 포함된 전자의무기록을 이용할 수 있다. 유전분석에서는 특정 질환이 반복되는 가계도 자료를 이용하여 유전형의 전달확률과 표현형 발현확률을 추정할 수 있다. 영상분할에서는 사람이 분할한 영상표본을 이용하여 영역별 특징과 인접 픽셀이 같은 분절에 속할 가능성을 나타내는 MRF 모수를 학습할 수 있다.</p>
+<p>이처럼 자료로부터 분포를 설명하는 모형을 구성하는 과정을 <strong>모형학습(model learning)</strong>이라 한다. 실제로는 인간의 사전지식과 자료학습을 결합하는 경우가 많다. 예를 들어 전문가는 허용되는 간선의 방향이나 금지할 관계를 제시하고, 자료는 세부 모수를 추정하는 데 사용될 수 있다.</p>
+<p>학습문제를 형식화하자. 관심 영역은 미지의 실제 분포 <span class="math inline">\(P^*\)</span>에 의해 생성된다고 가정한다. 이 분포는 어떤 실제 모형</p>
+<p><span class="math display">\[
+M^*=(K^*,\theta^*)
+\]</span></p>
+<p>에 의해 표현된다. 여기서 <span class="math inline">\(K^*\)</span>는 구조, <span class="math inline">\(\theta^*\)</span>는 모수이다. 자료는</p>
+<p><span class="math display">\[
+\mathcal D=\{d[1],\ldots,d[M]\}
+\]</span></p>
+<p>으로 표기하며, 각 사례는 <span class="math inline">\(P^*\)</span>로부터 독립적이고 동일하게 분포하여 추출되었다고 가정한다. 이를 <strong>독립동일분포 표본(independent and identically distributed, IID samples)</strong>이라 한다.</p>
+<p>학습자는 사전에 정해진 모형족 안에서 하나의 모형 <span class="math inline">\(\widetilde M\)</span>을 선택한다. 어떤 문제에서는 구조가 고정되어 있고 모수만 학습한다. 다른 문제에서는 구조와 모수를 모두 학습한다. 또 다른 경우에는 하나의 최종모형을 선택하지 않고, 여러 모형에 대한 사후확률 또는 신뢰도를 반환할 수 있다.</p>
+<p>이 장의 목적은 이후 장에서 다룰 구체적 알고리즘에 앞서 다음 질문을 명확히 하는 것이다.</p>
+<ol type="1">
+<li>학습의 목적은 무엇인가?</li>
+<li>좋은 모형을 어떻게 평가할 것인가?</li>
+<li>학습을 어떤 최적화 문제로 정의할 것인가?</li>
+<li>과적합을 어떻게 피할 것인가?</li>
+<li>구조와 모수, 완전자료와 불완전자료의 조합에 따라 문제 난이도는 어떻게 달라지는가?</li>
+</ol>
+</section>
+<section id="동기" class="level2" data-number="15.2">
+<h2 data-number="15.2" class="anchored" data-anchor-id="동기"><span class="header-section-number">15.2</span> 동기</h2>
+<p>전문가 기반 수작업 모형구축은 다음과 같은 이유로 한계가 있다.</p>
+<ul>
+<li>필요한 지식의 양이 너무 많을 수 있다.</li>
+<li>전문가의 시간이 매우 비싸거나 제한적일 수 있다.</li>
+<li>해당 영역을 충분히 이해하는 전문가가 존재하지 않을 수 있다.</li>
+<li>기관, 지역 또는 시기에 따라 분포 특성이 변할 수 있다.</li>
+<li>환경이 변할 때마다 전문가가 네트워크를 반복적으로 수정하기 어렵다.</li>
+</ul>
+<p>반면 데이터가 충분하다면 실제 분포의 반복적 패턴, 조건부 의존성, 집단별 차이를 통계적으로 추정할 수 있다. 특히 그래프모형 학습은 단순한 회귀계수 추정과 달리 여러 변수의 결합분포와 조건부 독립구조를 동시에 표현한다는 장점이 있다.</p>
+<p>그러나 데이터가 많다고 해서 실제 모형을 정확히 복원할 수 있는 것은 아니다. 고차원 결합분포는 필요한 모수 수가 매우 많고, 유한한 표본은 실제 분포의 불완전한 근사에 불과하다. 따라서 학습문제는 “진실을 완벽히 복원”하는 문제라기보다, 주어진 자료와 목적에 맞는 최선의 근사를 선택하는 문제이다.</p>
+</section>
+<section id="학습의-목표" class="level2" data-number="15.3">
+<h2 data-number="15.3" class="anchored" data-anchor-id="학습의-목표"><span class="header-section-number">15.3</span> 학습의 목표</h2>
+<p>학습된 모형의 품질을 평가하려면 먼저 학습의 목적을 정해야 한다. 이상적으로는 <span class="math inline">\(\widetilde M=M^*\)</span>를 원하겠지만, 제한된 자료와 계산제약 때문에 일반적으로 불가능하다. 서로 다른 모형은 서로 다른 장단점을 갖는다. 어떤 모형은 전체 결합분포를 잘 근사하지만 특정 예측에는 약할 수 있고, 다른 모형은 특정 결과변수 예측에는 뛰어나지만 전체 분포를 올바르게 설명하지 못할 수 있다.</p>
+<p>따라서 “최선”이라는 개념은 목적에 의존한다. 이 절에서는 세 가지 대표 목적을 구분한다.</p>
+<ol type="1">
+<li>밀도추정</li>
+<li>특정 예측과제</li>
+<li>지식발견</li>
+</ol>
+<section id="밀도추정" class="level3" data-number="15.3.1">
+<h3 data-number="15.3.1" class="anchored" data-anchor-id="밀도추정"><span class="header-section-number">15.3.1</span> 밀도추정</h3>
+<p>가장 일반적인 목표는 학습된 그래프모형을 다양한 확률질의에 사용하는 것이다. 이 경우 학습문제는 실제 분포 <span class="math inline">\(P^*\)</span>에 가까운 분포 <span class="math inline">\(\widetilde P\)</span>를 찾는 <strong>밀도추정(density estimation)</strong>으로 볼 수 있다.</p>
+<p>두 분포 사이의 차이를 평가하는 대표적 척도는 상대엔트로피 또는 KL 발산이다.</p>
+<p><span class="math display">\[
+D(P^*\|\widetilde P)
+=
+\mathbb E_{\xi\sim P^*}
+\left[
+\log\frac{P^*(\xi)}{\widetilde P(\xi)}
+\right].
+\]</span></p>
+<p>이 값은 <span class="math inline">\(\widetilde P=P^*\)</span>일 때 0이고, 그렇지 않으면 양수이다. 정보이론적으로는 실제 분포 대신 근사분포를 사용했을 때 추가로 필요한 부호화 길이를 나타낸다.</p>
+<blockquote class="blockquote">
+<p><strong>명제</strong></p>
+</blockquote>
+<p>임의의 분포 <span class="math inline">\(P\)</span>와 <span class="math inline">\(P'\)</span>에 대하여</p>
+<p><span class="math display">\[
+D(P\|P')
+=
+-H_P(\boldsymbol X)
+-
+\mathbb E_{\xi\sim P}[\log P'(\xi)].
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>증명</strong></p>
+</blockquote>
+<p><span class="math display">\[
+\begin{aligned}
+D(P\|P')
+&amp;=
+\mathbb E_{\xi\sim P}
+\left[
+\log\frac{P(\xi)}{P'(\xi)}
+\right]\\
+&amp;=
+\mathbb E_{\xi\sim P}[\log P(\xi)]
+-
+\mathbb E_{\xi\sim P}[\log P'(\xi)]\\
+&amp;=
+-H_P(\boldsymbol X)
+-
+\mathbb E_{\xi\sim P}[\log P'(\xi)].
+\end{aligned}
+\]</span></p>
+<p>이를 <span class="math inline">\(P=P^*\)</span>, <span class="math inline">\(P'=\widetilde P\)</span>에 적용하면 첫 항 <span class="math inline">\(-H_{P^*}(\boldsymbol X)\)</span>는 후보모형에 관계없이 일정하다. 따라서 여러 후보모형을 비교할 때는</p>
+<p><span class="math display">\[
+\mathbb E_{\xi\sim P^*}[\log \widetilde P(\xi)]
+\]</span></p>
+<p>을 최대화하면 된다. 이를 <strong>기대 로그가능도(expected log-likelihood)</strong>라 한다. 실제 분포에서 자주 발생하는 사례에 높은 확률을 주는 모형이 더 좋은 모형으로 평가된다.</p>
+<p>자료 <span class="math inline">\(\mathcal D\)</span>가 주어졌을 때 모형 <span class="math inline">\(M\)</span>의 가능도는</p>
+<p><span class="math display">\[
+P(\mathcal D:M)
+\]</span></p>
+<p>이고, 로그가능도는</p>
+<p><span class="math display">\[
+\ell(\mathcal D:M)=\log P(\mathcal D:M)
+\]</span></p>
+<p>이다. 음의 로그가능도는 <strong>로그손실(log-loss)</strong>이다.</p>
+<p>일반적으로 손실함수</p>
+<p><span class="math display">\[
+\operatorname{loss}(\xi:M)
+\]</span></p>
+<p>는 모형 <span class="math inline">\(M\)</span>이 사례 <span class="math inline">\(\xi\)</span>에서 발생시키는 손실을 측정한다. 실제 위험(risk)은</p>
+<p><span class="math display">\[
+\mathbb E_{\xi\sim P^*}[\operatorname{loss}(\xi:M)]
+\]</span></p>
+<p>이다. 그러나 <span class="math inline">\(P^*\)</span>를 모르므로 자료에서 계산한 <strong>경험위험(empirical risk)</strong>을 사용한다.</p>
+<p><span class="math display">\[
+\widehat R_{\mathcal D}(M)
+=
+\frac{1}{|\mathcal D|}
+\sum_{\xi\in\mathcal D}
+\operatorname{loss}(\xi:M).
+\]</span></p>
+<p>IID 자료에서</p>
+<p><span class="math display">\[
+P(\mathcal D:M)
+=
+\prod_{m=1}^M P(\xi[m]:M)
+\]</span></p>
+<p>이므로</p>
+<p><span class="math display">\[
+\log P(\mathcal D:M)
+=
+\sum_{m=1}^M \log P(\xi[m]:M).
+\]</span></p>
+<p>따라서 경험 로그손실의 최소화는 로그가능도의 최대화와 동일하다.</p>
+</section>
+<section id="특정-예측과제" class="level3" data-number="15.3.2">
+<h3 data-number="15.3.2" class="anchored" data-anchor-id="특정-예측과제"><span class="header-section-number">15.3.2</span> 특정 예측과제</h3>
+<p>밀도추정은 전체 결합분포를 잘 맞추는 것이 목적이다. 그러나 실제 응용에서는 특정 변수 <span class="math inline">\(\boldsymbol Y\)</span>를 입력변수 <span class="math inline">\(\boldsymbol X\)</span>로 예측하는 것이 유일한 목적일 수 있다. 예를 들어 문서분류에서는 단어와 문서특징이 <span class="math inline">\(\boldsymbol X\)</span>, 문서주제가 <span class="math inline">\(Y\)</span>이다. 영상분할에서는 영상특징이 <span class="math inline">\(\boldsymbol X\)</span>, 각 픽셀의 분절라벨이 <span class="math inline">\(\boldsymbol Y\)</span>이다.</p>
+<p>학습된 모형은 각 입력 <span class="math inline">\(\boldsymbol x\)</span>에 대하여</p>
+<p><span class="math display">\[
+\widetilde P(\boldsymbol Y\mid\boldsymbol x)
+\]</span></p>
+<p>를 제공해야 한다. 하나의 예측값이 필요하다면 조건부 MAP 분류기를 사용한다.</p>
+<p><span class="math display">\[
+h_{\widetilde P}(\boldsymbol x)
+=
+\arg\max_{\boldsymbol y}
+\widetilde P(\boldsymbol y\mid\boldsymbol x).
+\]</span></p>
+<section id="분류오류와-0-1-손실" class="level4" data-number="15.3.2.1">
+<h4 data-number="15.3.2.1" class="anchored" data-anchor-id="분류오류와-0-1-손실"><span class="header-section-number">15.3.2.1</span> 분류오류와 0-1 손실</h4>
+<p>단일 결과변수의 분류에서는</p>
+<p><span class="math display">\[
+\mathbb E_{(\boldsymbol x,y)\sim P^*}
+\left[
+\mathbf 1\{h_{\widetilde P}(\boldsymbol x)\neq y\}
+\right]
+\]</span></p>
+<p>을 사용할 수 있다. 이는 오분류확률이다.</p>
+</section>
+<section id="hamming-손실" class="level4" data-number="15.3.2.2">
+<h4 data-number="15.3.2.2" class="anchored" data-anchor-id="hamming-손실"><span class="header-section-number">15.3.2.2</span> Hamming 손실</h4>
+<p>여러 결과변수를 동시에 예측하는 경우 전체 벡터에서 하나라도 틀렸다는 이유로 손실 1을 부여하는 것은 지나치게 엄격하다. 이때는 예측벡터와 실제벡터가 다른 좌표 수를 세는 <strong>Hamming 손실</strong>이 적절하다.</p>
+</section>
+<section id="조건부-로그가능도" class="level4" data-number="15.3.2.3">
+<h4 data-number="15.3.2.3" class="anchored" data-anchor-id="조건부-로그가능도"><span class="header-section-number">15.3.2.3</span> 조건부 로그가능도</h4>
+<p>예측의 신뢰도까지 평가하려면</p>
+<p><span class="math display">\[
+\mathbb E_{(\boldsymbol x,\boldsymbol y)\sim P^*}
+\left[
+\log \widetilde P(\boldsymbol y\mid\boldsymbol x)
+\right]
+\]</span></p>
+<p>을 사용한다. 이는 실제 정답에 높은 조건부확률을 부여할수록 좋은 점수를 준다.</p>
+<p>전체 결합분포를 평가하는 로그가능도와 달리, 조건부 로그가능도는 <span class="math inline">\(\boldsymbol X\)</span> 자체의 분포를 얼마나 잘 설명하는지에는 관심이 없다. 따라서 모형을 오직 특정 예측에만 사용할 예정이라면 학습목적도 해당 조건부분포에 맞추는 것이 타당하다.</p>
+</section>
+</section>
+<section id="지식발견" class="level3" data-number="15.3.3">
+<h3 data-number="15.3.3" class="anchored" data-anchor-id="지식발견"><span class="header-section-number">15.3.3</span> 지식발견</h3>
+<p>세 번째 목표는 학습된 모형을 이용하여 실제 분포의 구조적 지식을 발견하는 것이다. 관심대상은 단순한 예측성능이 아니라 다음과 같은 내용이다.</p>
+<ul>
+<li>어떤 변수들이 직접 연결되어 있는가?</li>
+<li>어떤 의존성이 간접적 경로에 의해 유도되는가?</li>
+<li>관계의 방향은 무엇인가?</li>
+<li>관계가 양의 방향인지 음의 방향인지?</li>
+<li>특정 변수의 변화가 다른 변수에 어떤 경로로 연결되는가?</li>
+</ul>
+<p>유전학에서는 유전자 조절관계를 찾을 수 있고, 의료연구에서는 위험요인, 질환과 증상 사이의 직접·간접관계를 구분할 수 있다.</p>
+<p>지식발견에서는 분포가 비슷한지만 보는 것으로 충분하지 않다. 실제 구조 <span class="math inline">\(K^*\)</span>와 학습구조 <span class="math inline">\(\widetilde K\)</span>가 얼마나 일치하는지가 중요하다. 그러나 구조복원은 다음 이유로 어렵다.</p>
+<section id="식별가능성" class="level4" data-number="15.3.3.1">
+<h4 data-number="15.3.3.1" class="anchored" data-anchor-id="식별가능성"><span class="header-section-number">15.3.3.1</span> 식별가능성</h4>
+<p>서로 다른 DAG가 동일한 조건부 독립집합을 표현할 수 있다. 이 경우 관측자료만으로는 하나의 방향구조를 고유하게 결정할 수 없고, 최선의 결과는 동일한 Markov 동치류를 복원하는 것이다.</p>
+</section>
+<section id="약한-관계" class="level4" data-number="15.3.3.2">
+<h4 data-number="15.3.3.2" class="anchored" data-anchor-id="약한-관계"><span class="header-section-number">15.3.3.2</span> 약한 관계</h4>
+<p>실제 간선이 존재하더라도 관계강도가 약하면 유한 표본에서 상관이 잡음과 구분되지 않을 수 있다. 밀도추정에서는 약한 관계를 놓쳐도 영향이 작을 수 있지만, 구조발견에서는 거짓음성 간선이 된다.</p>
+</section>
+<section id="우연한-상관" class="level4" data-number="15.3.3.3">
+<h4 data-number="15.3.3.3" class="anchored" data-anchor-id="우연한-상관"><span class="header-section-number">15.3.3.3</span> 우연한 상관</h4>
+<p>변수 수가 표본수에 비해 많으면 실제로 관계가 없는 변수쌍이 우연히 강한 상관을 보일 수 있다. 이는 거짓양성 간선을 만든다.</p>
+</section>
+<section id="다중-가설" class="level4" data-number="15.3.3.4">
+<h4 data-number="15.3.3.4" class="anchored" data-anchor-id="다중-가설"><span class="header-section-number">15.3.3.4</span> 다중 가설</h4>
+<p>가능한 구조의 수가 매우 크므로, 높은 점수를 얻은 간선이 단순히 많은 후보 중 우연히 선택된 것일 수 있다. 따라서 구조학습 결과는 부트스트랩 안정성, 사후확률, 선택빈도 또는 신뢰구간과 함께 평가해야 한다.</p>
+<blockquote class="blockquote">
+<p><strong>핵심 관찰</strong><br>
+지식발견에서는 단일 최적구조를 제시하는 것보다, 어떤 간선이 자료로부터 식별 가능한지와 추정의 불확실성을 평가하는 것이 더 중요하다.</p>
+</blockquote>
+</section>
+</section>
+</section>
+<section id="최적화-문제로서의-학습" class="level2" data-number="15.4">
+<h2 data-number="15.4" class="anchored" data-anchor-id="최적화-문제로서의-학습"><span class="header-section-number">15.4</span> 최적화 문제로서의 학습</h2>
+<p>현대의 통계적 학습은 대체로 최적화 문제로 표현된다. 학습자는 후보모형의 집합인 <strong>가설공간(hypothesis space)</strong>과 후보모형의 선호도를 측정하는 <strong>목적함수(objective function)</strong>를 정한다. 학습과정은 가설공간에서 목적함수가 가장 좋은 모형을 찾는 과정이다.</p>
+<p>그러나 목적함수를 단순히 훈련자료 적합도로 정하면 과적합이 발생한다. 또한 목적함수의 선택은 밀도추정, 예측 또는 지식발견 중 어느 목표를 택하는지에 따라 달라진다.</p>
+<section id="경험위험과-과적합" class="level3" data-number="15.4.1">
+<h3 data-number="15.4.1" class="anchored" data-anchor-id="경험위험과-과적합"><span class="header-section-number">15.4.1</span> 경험위험과 과적합</h3>
+<p>자료 <span class="math inline">\(\mathcal D\)</span>로부터 경험분포를 정의하자.</p>
+<p><span class="math display">\[
+\widehat P_{\mathcal D}(A)
+=
+\frac{1}{M}
+\sum_m
+\mathbf 1\{\xi[m]\in A\}.
+\]</span></p>
+<p>즉 사건 <span class="math inline">\(A\)</span>의 경험확률은 훈련자료에서 <span class="math inline">\(A\)</span>가 발생한 비율이다.</p>
+<blockquote class="blockquote">
+<p><strong>정리</strong></p>
+</blockquote>
+<p><span class="math inline">\(\xi[1],\xi[2],\ldots\)</span>가 <span class="math inline">\(P^*(\boldsymbol X)\)</span>로부터의 IID 표본이고</p>
+<p><span class="math display">\[
+\mathcal D_M=\langle\xi[1],\ldots,\xi[M]\rangle
+\]</span></p>
+<p>이라면</p>
+<p><span class="math display">\[
+\lim_{M\to\infty}
+\widehat P_{\mathcal D_M}(A)
+=
+P^*(A)
+\]</span></p>
+<p>가 거의 확실하게 성립한다.</p>
+<p>이 정리는 표본수가 충분히 크면 경험분포가 실제 분포에 가까워짐을 보장한다. 그러나 유한 표본에서 경험위험을 직접 최소화하면 심각한 문제가 생긴다.</p>
+<p>예를 들어 100개의 이진변수는 <span class="math inline">\(2^{100}\)</span>개의 가능한 결합상태를 갖는다. 자료가 1,000개뿐이면 경험분포는 관측된 약 1,000개 상태에만 확률을 주고 나머지 거의 모든 상태에 확률 0을 준다. 이는 훈련자료에는 완벽히 맞지만 새로운 사례를 거의 설명하지 못한다.</p>
+<p>베이즈 네트워크에서도 비슷한 문제가 발생한다. 어떤 변수 Fever가 많은 부모를 가지면 표형 CPD의 행 수가 부모 수에 따라 지수적으로 증가한다. 훈련자료에 거의 나타나지 않은 부모조합에서는 조건부확률을 안정적으로 추정할 수 없다.</p>
+<p>이처럼 훈련자료에 지나치게 맞추어 새로운 자료에서 성능이 나빠지는 현상을 <strong>과적합(overfitting)</strong>이라 한다. 학습된 모형의 실제 목표는 훈련자료가 아니라 미래의 새로운 사례에 잘 일반화하는 것이다.</p>
+<section id="편향-분산-절충" class="level4" data-number="15.4.1.1">
+<h4 data-number="15.4.1.1" class="anchored" data-anchor-id="편향-분산-절충"><span class="header-section-number">15.4.1.1</span> 편향-분산 절충</h4>
+<p>가설공간이 너무 제한적이면 실제 분포를 표현할 수 없다. 이는 <strong>편향(bias)</strong>을 증가시킨다. 반대로 가설공간이 지나치게 풍부하면 작은 표본변동에도 선택되는 모형이 크게 달라진다. 이는 <strong>분산(variance)</strong>을 증가시킨다.</p>
+<ul>
+<li>단순한 모형: 높은 편향, 낮은 분산</li>
+<li>복잡한 모형: 낮은 편향 가능성, 높은 분산</li>
+</ul>
+<p>자료가 적을 때는 실제구조보다 단순한 모형이 더 좋은 예측성능을 낼 수 있다. 구조가 일부 틀리더라도 모수를 안정적으로 추정하는 이점이 구조오차보다 클 수 있기 때문이다.</p>
+<p>과적합을 줄이는 대표 방법은 두 가지이다.</p>
+<ol type="1">
+<li><strong>가설공간 제한:</strong> 최대 부모 수, 최대 트리폭, 허용간선 수 등을 제한한다.</li>
+<li><strong>정규화 또는 벌점:</strong> 복잡한 모형에 점수상 불이익을 부여한다.</li>
+</ol>
+<p>실제 방법은 두 접근을 함께 사용한다. 예를 들어 최대 부모 수를 제한하고 BIC 또는 sparsity penalty를 추가할 수 있다.</p>
+</section>
+</section>
+<section id="학습절차의-설계와-평가" class="level3" data-number="15.4.2">
+<h3 data-number="15.4.2" class="anchored" data-anchor-id="학습절차의-설계와-평가"><span class="header-section-number">15.4.2</span> 학습절차의 설계와 평가</h3>
+<section id="일반화-성능-평가" class="level4" data-number="15.4.2.1">
+<h4 data-number="15.4.2.1" class="anchored" data-anchor-id="일반화-성능-평가"><span class="header-section-number">15.4.2.1</span> 일반화 성능 평가</h4>
+<p>실제 분포를 알 수 없는 현실자료에서는 학습절차의 일반화 성능을 별도의 자료로 평가한다.</p>
+<p><strong>홀드아웃 검증</strong></p>
+<p>자료를 무작위로 훈련자료 <span class="math inline">\(\mathcal D_{train}\)</span>과 시험자료 <span class="math inline">\(\mathcal D_{test}\)</span>로 나눈다. 모형은 훈련자료로만 학습하고, 성능은 시험자료에서 계산한다. 시험자료는 학습에 사용되지 않았으므로 새로운 사례에 대한 위험의 편향되지 않은 추정치를 제공한다.</p>
+<p>훈련성능과 시험성능 차이가 지나치게 크면 과적합을 의심해야 한다.</p>
+<p>홀드아웃은 시험자료를 크게 할수록 평가가 안정적이지만, 훈련자료가 줄어 모형이 나빠지는 딜레마가 있다.</p>
+<p><strong><span class="math inline">\(k\)</span>-겹 교차검증</strong></p>
+<p>자료를 <span class="math inline">\(k\)</span>개 부분으로 나누고, 각 반복에서 한 부분을 시험자료로 사용하며 나머지를 훈련자료로 사용한다. 모든 사례가 정확히 한 번 시험에 사용된다.</p>
+<p>극단적인 경우 <span class="math inline">\(k=M\)</span>이면 leave-one-out 교차검증이다.</p>
+<p>교차검증은 평균성능뿐 아니라 fold 간 변동을 제공한다. 다만 교차검증 자체는 <span class="math inline">\(k\)</span>개의 서로 다른 모형을 만들기 때문에 최종모형을 직접 제공하지 않는다. 평가와 방법선택이 끝난 뒤 전체 자료로 최종모형을 다시 학습한다.</p>
+</section>
+<section id="홀드아웃과-교차검증" class="level4" data-number="15.4.2.2">
+<h4 data-number="15.4.2.2" class="anchored" data-anchor-id="홀드아웃과-교차검증"><span class="header-section-number">15.4.2.2</span> 홀드아웃과 교차검증</h4>
+<pre class="text"><code>Procedure Evaluate(M, D)
+    loss &lt;- 0
+    for m = 1, ..., |D|
+        loss &lt;- loss + loss(xi[m] : M)
+    return loss / |D|
+
+Procedure Train-And-Test(LearnProc, Dtrain, Dtest)
+    M &lt;- LearnProc(Dtrain)
+    return Evaluate(M, Dtest)
+
+Procedure Holdout-Test(LearnProc, D, ptest)
+    D의 사례를 무작위로 섞는다.
+    Mtrain &lt;- round(M * (1 - ptest))
+    Dtrain &lt;- 처음 Mtrain개 사례
+    Dtest  &lt;- 나머지 사례
+    return Train-And-Test(LearnProc, Dtrain, Dtest)
+
+Procedure Cross-Validation(LearnProc, D, K)
+    D의 사례를 무작위로 섞는다.
+    D를 K개의 서로 겹치지 않는 부분 D1, ..., DK로 나눈다.
+    loss &lt;- 0
+    for k = 1, ..., K
+        Dminus-k &lt;- D - Dk
+        loss &lt;- loss + Train-And-Test(LearnProc, Dminus-k, Dk)
+    return loss / K</code></pre>
+</section>
+<section id="학습절차-선택과-독립-시험자료" class="level4" data-number="15.4.2.3">
+<h4 data-number="15.4.2.3" class="anchored" data-anchor-id="학습절차-선택과-독립-시험자료"><span class="header-section-number">15.4.2.3</span> 학습절차 선택과 독립 시험자료</h4>
+<p>교차검증 또는 validation set을 이용하여 알고리즘, 하이퍼파라미터, 네트워크 복잡도를 선택한 뒤 같은 성능값을 최종 일반화 성능으로 보고하면 낙관적 편향이 생긴다. 선택과정 자체가 validation 성능에 과적합되었기 때문이다.</p>
+<p>따라서 원칙적으로 다음 세 자료가 필요하다.</p>
+<ul>
+<li>training set: 모형 학습</li>
+<li>validation set: 알고리즘과 하이퍼파라미터 선택</li>
+<li>test set: 최종 성능평가</li>
+</ul>
+<p>표본이 작을 때는 <strong>nested cross-validation</strong>으로 같은 원칙을 구현할 수 있다. 외부 fold는 최종평가에만 사용하고, 내부 fold에서 방법과 하이퍼파라미터를 선택한다.</p>
+</section>
+<section id="적합도-검정" class="level4" data-number="15.4.2.4">
+<h4 data-number="15.4.2.4" class="anchored" data-anchor-id="적합도-검정"><span class="header-section-number">15.4.2.4</span> 적합도 검정</h4>
+<p>홀드아웃과 교차검증은 모형 간 비교에는 유용하지만, 학습된 모형이 실제 분포의 모든 중요한 특성을 충분히 포착했는지 직접 알려주지 않는다. 이를 평가하는 방법이 <strong>적합도 검정(goodness of fit)</strong>이다.</p>
+<p>일반 절차는 다음과 같다.</p>
+<ol type="1">
+<li>학습자료에서 통계량 <span class="math inline">\(f(\mathcal D_{train})\)</span>을 계산한다.</li>
+<li>학습된 모형 <span class="math inline">\(M\)</span>에서 같은 크기의 자료를 여러 번 생성한다.</li>
+<li>생성자료마다 <span class="math inline">\(f(\mathcal D)\)</span>를 계산한다.</li>
+<li>실제 자료의 통계량이 생성분포의 극단부에 위치하는지 평가한다.</li>
+</ol>
+<p>통계량으로 경험 로그손실, 특정 주변분포, 상관, 꼬리확률 또는 임상적으로 중요한 사건빈도를 사용할 수 있다. 이는 현대의 posterior predictive check와 유사한 관점이다.</p>
+</section>
+</section>
+<section id="pac-경계" class="level3" data-number="15.4.3">
+<h3 data-number="15.4.3" class="anchored" data-anchor-id="pac-경계"><span class="header-section-number">15.4.3</span> PAC 경계</h3>
+<p>훈련자료는 확률적으로 추출되므로 언제나 매우 비대표적인 자료가 우연히 얻어질 가능성이 있다. 따라서 모든 자료집합에서 좋은 모형을 보장할 수는 없다. 대신 <strong>아마도 근사적으로 정확(probably approximately correct, PAC)</strong>한 보장을 추구한다.</p>
+<p>학습절차 <span class="math inline">\(L\)</span>이 자료 <span class="math inline">\(\mathcal D\)</span>를 받아 모형 <span class="math inline">\(M_{L(\mathcal D)}\)</span>를 반환한다고 하자. 근사오차 <span class="math inline">\(\epsilon&gt;0\)</span>와 실패확률 <span class="math inline">\(\delta&gt;0\)</span>에 대해 충분히 큰 표본수 <span class="math inline">\(M\)</span>에서</p>
+<p><span class="math display">\[
+P_M^*
+\left(
+\left\{\mathcal D:
+D(P^*\|P_{M_{L(\mathcal D)}})\le\epsilon
+\right\}
+\right)
+\ge 1-\delta
+\]</span></p>
+<p>와 같은 결과를 얻고자 한다.</p>
+<p>즉 대부분의 훈련자료에 대해 학습된 모형이 실제분포에 <span class="math inline">\(\epsilon\)</span> 이내로 가까울 확률이 적어도 <span class="math inline">\(1-\delta\)</span>라는 의미이다.</p>
+<p>이 보장을 위해 필요한 표본수 <span class="math inline">\(M\)</span>을 <strong>표본복잡도(sample complexity)</strong>라 한다.</p>
+<p>PAC 경계는 가설공간 안에 실제분포를 정확히 표현하는 모형이 존재할 때 가장 직접적으로 정의된다. 실제분포가 가설공간에 없을 때는 절대오차 대신 가설공간 안에서 가능한 최저위험보다 얼마나 더 나쁜지를 평가한다. 이 차이를 <strong>초과위험(excess risk)</strong>이라 한다.</p>
+</section>
+<section id="생성적-학습과-판별적-학습" class="level3" data-number="15.4.4">
+<h3 data-number="15.4.4" class="anchored" data-anchor-id="생성적-학습과-판별적-학습"><span class="header-section-number">15.4.4</span> 생성적 학습과 판별적 학습</h3>
+<p>특정 <span class="math inline">\(\boldsymbol Y\)</span>를 <span class="math inline">\(\boldsymbol X\)</span>로 예측하는 것이 목적일 때 두 가지 학습방식이 가능하다.</p>
+<section id="생성적-학습" class="level4" data-number="15.4.4.1">
+<h4 data-number="15.4.4.1" class="anchored" data-anchor-id="생성적-학습"><span class="header-section-number">15.4.4.1</span> 생성적 학습</h4>
+<p>결합분포</p>
+<p><span class="math display">\[
+\widetilde P(\boldsymbol Y,\boldsymbol X)
+\]</span></p>
+<p>를 실제 결합분포에 맞춘다. 이후 Bayes 규칙으로 <span class="math inline">\(\widetilde P(\boldsymbol Y\mid\boldsymbol X)\)</span>를 계산한다.</p>
+</section>
+<section id="판별적-학습" class="level4" data-number="15.4.4.2">
+<h4 data-number="15.4.4.2" class="anchored" data-anchor-id="판별적-학습"><span class="header-section-number">15.4.4.2</span> 판별적 학습</h4>
+<p>조건부분포</p>
+<p><span class="math display">\[
+\widetilde P(\boldsymbol Y\mid\boldsymbol X)
+\]</span></p>
+<p>자체를 실제 조건부분포에 맞춘다. <span class="math inline">\(\boldsymbol X\)</span>의 분포는 모형화하지 않는다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - naive Bayes와 logistic regression</strong></p>
+</blockquote>
+<p>목표변수 <span class="math inline">\(Y\)</span>가 특징 <span class="math inline">\(X_1,\ldots,X_n\)</span> 각각과 연결된 별모양 Markov network를 생각하자.</p>
+<ul>
+<li>생성적으로 학습하면 naive Markov 모형이며, 트리구조이므로 naive Bayes와 동등하다.</li>
+<li>판별적으로 학습하면 <span class="math inline">\(Y\)</span>에 대한 logistic regression이 된다.</li>
+</ul>
+<p>생성적으로 학습한 모형은 분류뿐 아니라 <span class="math inline">\(\boldsymbol X\)</span>의 분포와 결측값 추론에도 사용할 수 있다. 판별모형은 <span class="math inline">\(P(Y\mid X)\)</span>만 제공하므로 특징변수 자체에 대한 질의에는 사용할 수 없다.</p>
+<p>판별학습은 모든 모형족에 적용할 수 있지만, 베이즈 네트워크에서는 CPD의 생성적 의미가 약해지고 학습의 계산적 분해가 사라질 수 있다. 따라서 판별학습은 주로 비방향모형, 특히 조건부확률장(CRF)에서 사용된다.</p>
+</section>
+<section id="통계적-절충" class="level4" data-number="15.4.4.3">
+<h4 data-number="15.4.4.3" class="anchored" data-anchor-id="통계적-절충"><span class="header-section-number">15.4.4.3</span> 통계적 절충</h4>
+<p>생성모형은 <span class="math inline">\(P(\boldsymbol X)\)</span>까지 설명해야 하므로 더 많은 독립성 가정과 분포가정을 한다. 따라서 편향이 더 크다. 그러나 가정이 정규화 역할을 하므로 작은 표본에서는 과적합을 줄일 수 있다.</p>
+<p>판별모형은 <span class="math inline">\(P(\boldsymbol Y\mid\boldsymbol X)\)</span>만 맞추므로 불필요한 가정이 적고 큰 표본에서 더 높은 예측성능을 낼 수 있다. 그러나 많은 모수를 공동으로 추정해야 하므로 작은 표본에서는 불안정할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 손글씨 문자 인식</strong></p>
+</blockquote>
+<p>256개 픽셀로 26개 문자를 분류한다고 하자.</p>
+<ul>
+<li>naive Bayes는 각 문자별로 픽셀분포를 독립적으로 추정한다. 비교적 저차원 추정문제로 분해되어 작은 자료에서 유리할 수 있다.</li>
+<li>다항 logistic regression은 약 <span class="math inline">\(26\times256\)</span>개의 모수를 공동 최적화한다. 더 많은 자료가 필요하지만 픽셀 간 중복과 상관을 보정할 수 있다.</li>
+</ul>
+<p>픽셀들이 문자라벨에 조건부로 독립이라는 naive Bayes 가정은 명백히 틀릴 가능성이 크다. 자료가 충분하면 판별모형이 더 잘 작동할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 풍부한 특징</strong></p>
+</blockquote>
+<p>영상의 원시픽셀보다 경계방향, 필터반응, 주변 패치특징이 분류에 유용할 수 있다. 그러나 이 특징들은 같은 픽셀에서 파생되므로 강하게 상관된다. naive Bayes는 이 상관된 증거를 독립으로 중복계산할 수 있다. logistic regression과 같은 판별모형은 상관된 특징을 함께 사용할 수 있다.</p>
+</section>
+<section id="생성모형의-장점" class="level4" data-number="15.4.4.4">
+<h4 data-number="15.4.4.4" class="anchored" data-anchor-id="생성모형의-장점"><span class="header-section-number">15.4.4.4</span> 생성모형의 장점</h4>
+<ul>
+<li>영역에 대한 자연스러운 해석을 제공한다.</li>
+<li>결측 특징을 확률적으로 처리할 수 있다.</li>
+<li>비표지자료를 활용할 수 있다.</li>
+<li>다양한 질의에 사용할 수 있다.</li>
+</ul>
+</section>
+<section id="판별모형의-장점" class="level4" data-number="15.4.4.5">
+<h4 data-number="15.4.4.5" class="anchored" data-anchor-id="판별모형의-장점"><span class="header-section-number">15.4.4.5</span> 판별모형의 장점</h4>
+<ul>
+<li>특정 예측과제에 직접 최적화된다.</li>
+<li>특징분포에 대한 불필요한 가정을 피한다.</li>
+<li>상관된 풍부한 특징을 쉽게 사용할 수 있다.</li>
+<li>충분한 자료에서 더 낮은 예측오차를 달성할 수 있다.</li>
+</ul>
+<p>따라서 어느 방법이 항상 우월한 것은 아니다. 표본수, 결측자료, 해석목표, 사용할 질의와 특징구조에 따라 선택해야 한다. 반지도학습이나 생성-판별 혼합목적함수처럼 두 방식을 결합할 수도 있다.</p>
+</section>
+</section>
+</section>
+<section id="학습과제" class="level2" data-number="15.5">
+<h2 data-number="15.5" class="anchored" data-anchor-id="학습과제"><span class="header-section-number">15.5</span> 학습과제</h2>
+<p>학습절차의 입력은 다음과 같다.</p>
+<ul>
+<li>모형에 대한 사전지식 또는 제약</li>
+<li>실제분포 <span class="math inline">\(P^*\)</span>에서 추출된 IID 자료 <span class="math inline">\(\mathcal D\)</span></li>
+</ul>
+<p>출력은 학습된 구조, 모수 또는 둘 모두이다.</p>
+<p>학습문제는 세 축에 따라 구분할 수 있다.</p>
+<ol type="1">
+<li>학습하려는 그래프모형의 종류: 베이즈 네트워크 또는 Markov network</li>
+<li>모형에 대해 주어진 제약의 정도</li>
+<li>훈련자료의 관측정도</li>
+</ol>
+<section id="모형-제약" class="level3" data-number="15.5.1">
+<h3 data-number="15.5.1" class="anchored" data-anchor-id="모형-제약"><span class="header-section-number">15.5.1</span> 모형 제약</h3>
+<p>가설공간을 얼마나 제한하는지에 따라 문제는 다음과 같이 달라진다.</p>
+<section id="구조가-주어진-경우" class="level4" data-number="15.5.1.1">
+<h4 data-number="15.5.1.1" class="anchored" data-anchor-id="구조가-주어진-경우"><span class="header-section-number">15.5.1.1</span> 구조가 주어진 경우</h4>
+<p>그래프구조는 고정되어 있고 일부 또는 전체 모수만 추정한다. 주어진 구조가 실제구조와 같다고 보장되지는 않는다.</p>
+</section>
+<section id="구조를-모르는-경우" class="level4" data-number="15.5.1.2">
+<h4 data-number="15.5.1.2" class="anchored" data-anchor-id="구조를-모르는-경우"><span class="header-section-number">15.5.1.2</span> 구조를 모르는 경우</h4>
+<p>구조와 모수를 모두 자료에서 학습한다. 후보 DAG 수는 변수 수에 대해 초지수적으로 증가하므로 매우 큰 탐색문제가 된다.</p>
+</section>
+<section id="변수집합도-완전히-모르는-경우" class="level4" data-number="15.5.1.3">
+<h4 data-number="15.5.1.3" class="anchored" data-anchor-id="변수집합도-완전히-모르는-경우"><span class="header-section-number">15.5.1.3</span> 변수집합도 완전히 모르는 경우</h4>
+<p>관측되지 않은 잠재변수가 실제 분포에 존재할 수 있다. 이 경우 학습자는 숨은 변수의 존재와 연결까지 추론해야 한다.</p>
+<p>가설공간이 넓어질수록 표현력은 증가하지만, 통계적 과적합과 계산적 탐색난이도가 함께 증가한다.</p>
+</section>
+</section>
+<section id="데이터-관측성" class="level3" data-number="15.5.2">
+<h3 data-number="15.5.2" class="anchored" data-anchor-id="데이터-관측성"><span class="header-section-number">15.5.2</span> 데이터 관측성</h3>
+<p>자료의 관측정도는 세 수준으로 구분할 수 있다.</p>
+<section id="완전자료" class="level4" data-number="15.5.2.1">
+<h4 data-number="15.5.2.1" class="anchored" data-anchor-id="완전자료"><span class="header-section-number">15.5.2.1</span> 완전자료</h4>
+<p>각 사례에서 모든 변수값이 관측된다. 이 경우 베이즈 네트워크의 고정구조 모수추정은 대체로 간단하고 폐쇄형 해를 갖는다.</p>
+</section>
+<section id="불완전자료" class="level4" data-number="15.5.2.2">
+<h4 data-number="15.5.2.2" class="anchored" data-anchor-id="불완전자료"><span class="header-section-number">15.5.2.2</span> 불완전자료</h4>
+<p>각 사례에서 일부 변수값이 빠져 있다. 예를 들어 모든 환자에게 모든 검사를 시행하지 않으므로 검사변수 일부가 결측일 수 있다.</p>
+</section>
+<section id="숨은-변수" class="level4" data-number="15.5.2.3">
+<h4 data-number="15.5.2.3" class="anchored" data-anchor-id="숨은-변수"><span class="header-section-number">15.5.2.3</span> 숨은 변수</h4>
+<p>어떤 변수는 모든 사례에서 관측되지 않는다. 유전적 취약성, 잠재 질병상태, 소비자 성향과 같은 변수가 이에 해당한다.</p>
+<p>불완전자료에서는 관측되지 않은 값에 대한 여러 가설을 동시에 고려해야 한다. 현재 모수로 결측값의 분포를 추정하고, 그 분포를 사용해 모수를 다시 추정하는 반복과정이 필요하다. 이는 이후의 EM 알고리즘과 연결된다.</p>
+</section>
+<section id="숨은-변수의-과학적-의미" class="level4" data-number="15.5.2.4">
+<h4 data-number="15.5.2.4" class="anchored" data-anchor-id="숨은-변수의-과학적-의미"><span class="header-section-number">15.5.2.4</span> 숨은 변수의 과학적 의미</h4>
+<p>숨은 변수는 직접 관측되지 않아도 영역을 이해하는 데 중요할 수 있다. 예를 들어 특정 질환의 유전적 취약성이 직접 측정되지 않더라도 질환과 여러 표현형의 공통원인을 설명할 수 있다.</p>
+</section>
+<section id="혼합분포-관점" class="level4" data-number="15.5.2.5">
+<h4 data-number="15.5.2.5" class="anchored" data-anchor-id="혼합분포-관점"><span class="header-section-number">15.5.2.5</span> 혼합분포 관점</h4>
+<p>naive Bayes 모형에서 클래스변수 <span class="math inline">\(C\)</span>가 숨겨져 있다고 하자. 각 <span class="math inline">\(C=c\)</span>는 관측변수에 대한 하나의 단순한 분포를 정의한다. 전체 모집단은 여러 하위집단의 혼합으로 표현된다. 숨은 클래스를 학습하면 모집단 안의 잠재 하위집단을 발견할 수 있다.</p>
+</section>
+<section id="숨은-변수와-모형단순화" class="level4" data-number="15.5.2.6">
+<h4 data-number="15.5.2.6" class="anchored" data-anchor-id="숨은-변수와-모형단순화"><span class="header-section-number">15.5.2.6</span> 숨은 변수와 모형단순화</h4>
+<p>숨은 변수를 무시하면 관측변수 사이에 많은 의존성이 유도되어 조밀한 그래프가 필요할 수 있다. 반대로 적절한 숨은 변수를 포함하면 희소하고 해석가능한 구조로 표현할 수 있다.</p>
+<div id="fig-learning-hidden-variable" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-learning-hidden-variable-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-learning-hidden-variable.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-learning-hidden-variable-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15.1: 숨은 변수를 무시했을 때의 효과. 왼쪽은 숨은 변수 <span class="math inline">\(H\)</span>를 포함한 희소모형이며, 오른쪽은 <span class="math inline">\(H\)</span>를 주변화한 뒤 관측변수만으로 같은 분포의 I-map을 표현한 모형이다. 이진변수 가정에서 필요한 독립모수의 수는 각각 17개와 59개이다.
+</figcaption>
+</figure>
+</div>
+<p>숨은 변수는 구조를 단순화할 수 있지만, 숨은 변수 자체의 수, 상태 수와 의미를 학습하는 일은 매우 어렵다. 따라서 잠재변수 포함 여부는 적합도 향상, 계산비용, 식별가능성과 해석가능성을 함께 고려해야 한다.</p>
+</section>
+</section>
+<section id="학습과제의-분류" class="level3" data-number="15.5.3">
+<h3 data-number="15.5.3" class="anchored" data-anchor-id="학습과제의-분류"><span class="header-section-number">15.5.3</span> 학습과제의 분류</h3>
+<section id="알려진-구조와-완전자료-베이즈-네트워크" class="level4" data-number="15.5.3.1">
+<h4 data-number="15.5.3.1" class="anchored" data-anchor-id="알려진-구조와-완전자료-베이즈-네트워크"><span class="header-section-number">15.5.3.1</span> 알려진 구조와 완전자료: 베이즈 네트워크</h4>
+<p>모수추정은 수치최적화 문제이며, 표형 CPD와 완전자료에서는 빈도비율에 의해 폐쇄형 해를 갖는 경우가 많다. 이는 가장 쉬운 학습과제이다.</p>
+</section>
+<section id="알려진-구조와-완전자료-markov-network" class="level4" data-number="15.5.3.2">
+<h4 data-number="15.5.3.2" class="anchored" data-anchor-id="알려진-구조와-완전자료-markov-network"><span class="header-section-number">15.5.3.2</span> 알려진 구조와 완전자료: Markov network</h4>
+<p>전역 분할함수 때문에 한 모수의 변화가 전체분포에 영향을 준다. 모수들이 서로 얽혀 있으며 단순한 국소 빈도비율로 추정할 수 없다. 고정구조와 완전자료에서는 대체로 볼록최적화 문제이므로 전역최적해를 찾을 수 있지만, 각 반복에서 네트워크 추론이 필요해 큰 모형에서는 계산비용이 높다.</p>
+</section>
+<section id="미지의-구조와-완전자료-베이즈-네트워크" class="level4" data-number="15.5.3.3">
+<h4 data-number="15.5.3.3" class="anchored" data-anchor-id="미지의-구조와-완전자료-베이즈-네트워크"><span class="header-section-number">15.5.3.3</span> 미지의 구조와 완전자료: 베이즈 네트워크</h4>
+<p>가능한 구조 수가 매우 많기 때문에 구조탐색이 추가된다. 후보구조마다 점수를 계산하고 가장 높은 점수의 구조를 찾는다. 완전자료에서는 많은 베이즈 네트워크 점수가 국소적으로 분해되고 폐쇄형으로 계산되므로 탐색이 상대적으로 효율적이다. 그럼에도 최적구조 탐색은 일반적으로 어려운 조합최적화 문제이다.</p>
+</section>
+<section id="미지의-구조와-완전자료-markov-network" class="level4" data-number="15.5.3.4">
+<h4 data-number="15.5.3.4" class="anchored" data-anchor-id="미지의-구조와-완전자료-markov-network"><span class="header-section-number">15.5.3.4</span> 미지의 구조와 완전자료: Markov network</h4>
+<p>분할함수 때문에 구조점수의 직접계산이 어렵다. 그러나 모수와 구조를 함께 최적화하는 볼록문제로 표현할 수 있는 경우가 있다. 예를 들어 희소성 벌점을 갖는 log-linear 모형학습이 이에 해당한다.</p>
+</section>
+<section id="알려진-구조와-불완전자료" class="level4" data-number="15.5.3.5">
+<h4 data-number="15.5.3.5" class="anchored" data-anchor-id="알려진-구조와-불완전자료"><span class="header-section-number">15.5.3.5</span> 알려진 구조와 불완전자료</h4>
+<p>관측되지 않은 변수의 가능한 값이 조합적으로 많다. 로그가능도는 비볼록이고 여러 국소최적점을 갖는다. 일반적인 알고리즘은 현재 모수로 숨은 변수의 사후분포를 계산하고, 이를 이용해 모수를 갱신하는 과정을 반복한다. 각 반복에서 확률추론이 하위과제로 필요하다.</p>
+</section>
+<section id="미지의-구조와-불완전자료" class="level4" data-number="15.5.3.6">
+<h4 data-number="15.5.3.6" class="anchored" data-anchor-id="미지의-구조와-불완전자료"><span class="header-section-number">15.5.3.6</span> 미지의 구조와 불완전자료</h4>
+<p>구조에 대한 이산탐색과 모수에 대한 비볼록최적화를 동시에 수행해야 한다. 가장 어려운 학습과제 중 하나이다. 구조가 바뀔 때마다 결측자료에 대한 추론과 모수재추정이 필요할 수 있다.</p>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./14-inference-in-temporal-models.html" class="pagination-link" aria-label="시간 모형에서의 추론">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">시간 모형에서의 추론</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./16-parameter-estimation.html" class="pagination-link" aria-label="모수추정">
+        <span class="nav-page-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">모수추정</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

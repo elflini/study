@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>5&nbsp; 템플릿 기반 표현 – 확률적 그래프 모형</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./06-gaussian-network-models.html" rel="next">
+<link href="./04-local-probabilistic-models.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-a522afb83bf8ae494942cf1b0ac9d4c3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./05-template-based-representations.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">템플릿 기반 표현</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">확률적 그래프 모형</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">기초 개념</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-bayesian-network-representation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">베이즈 네트워크 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-undirected-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">무방향 그래픽 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-local-probabilistic-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">국소 확률 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-template-based-representations.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">템플릿 기반 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-gaussian-network-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">가우시안 네트워크 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-exponential-family.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">지수족</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-exact-inference-variable-elimination.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">정확추론: 변수 제거</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-exact-inference-clique-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">정확추론: 클리크 트리</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-inference-as-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">최적화로서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-particle-based-approximate-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">입자 기반 근사추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-map-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">MAP 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-inference-in-hybrid-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">혼합 네트워크에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-inference-in-temporal-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">시간 모형에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-learning-graphical-models-overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">그래프모형 학습 개요</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-parameter-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">모수추정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-structure-learning-bayesian-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">베이지안 네트워크의 구조학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-partially-observed-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">부분관측 자료</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./19-learning-undirected-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">무방향 그래프모형의 학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20-causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">인과성</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21-utilities-and-decisions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">효용과 의사결정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22-structured-decision-problems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">구조화된 의사결정 문제</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./23-epilogue.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">맺음말: 왜 확률적 그래프 모형인가?</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#서론" id="toc-서론" class="nav-link active" data-scroll-target="#서론"><span class="header-section-number">5.1</span> 서론</a></li>
+  <li><a href="#시간-모형" id="toc-시간-모형" class="nav-link" data-scroll-target="#시간-모형"><span class="header-section-number">5.2</span> 시간 모형</a>
+  <ul>
+  <li><a href="#기본-가정" id="toc-기본-가정" class="nav-link" data-scroll-target="#기본-가정"><span class="header-section-number">5.2.1</span> 기본 가정</a>
+  <ul class="collapse">
+  <li><a href="#시간-절편" id="toc-시간-절편" class="nav-link" data-scroll-target="#시간-절편"><span class="header-section-number">5.2.1.1</span> 시간 절편</a></li>
+  </ul></li>
+  <li><a href="#동적-베이즈-네트워크" id="toc-동적-베이즈-네트워크" class="nav-link" data-scroll-target="#동적-베이즈-네트워크"><span class="header-section-number">5.2.2</span> 동적 베이즈 네트워크</a>
+  <ul class="collapse">
+  <li><a href="#사례-연구-유전자-탐색을-위한-hmm과-계통-hmm" id="toc-사례-연구-유전자-탐색을-위한-hmm과-계통-hmm" class="nav-link" data-scroll-target="#사례-연구-유전자-탐색을-위한-hmm과-계통-hmm"><span class="header-section-number">5.2.2.1</span> 사례 연구: 유전자 탐색을 위한 HMM과 계통 HMM</a></li>
+  </ul></li>
+  <li><a href="#상태-관측-모형" id="toc-상태-관측-모형" class="nav-link" data-scroll-target="#상태-관측-모형"><span class="header-section-number">5.2.3</span> 상태-관측 모형</a>
+  <ul class="collapse">
+  <li><a href="#은닉-마르코프-모형" id="toc-은닉-마르코프-모형" class="nav-link" data-scroll-target="#은닉-마르코프-모형"><span class="header-section-number">5.2.3.1</span> 은닉 마르코프 모형</a></li>
+  <li><a href="#사례-연구-음성인식을-위한-hmm" id="toc-사례-연구-음성인식을-위한-hmm" class="nav-link" data-scroll-target="#사례-연구-음성인식을-위한-hmm"><span class="header-section-number">5.2.3.2</span> 사례 연구: 음성인식을 위한 HMM</a></li>
+  <li><a href="#선형-동적-시스템" id="toc-선형-동적-시스템" class="nav-link" data-scroll-target="#선형-동적-시스템"><span class="header-section-number">5.2.3.3</span> 선형 동적 시스템</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#템플릿-변수와-템플릿-요인" id="toc-템플릿-변수와-템플릿-요인" class="nav-link" data-scroll-target="#템플릿-변수와-템플릿-요인"><span class="header-section-number">5.3</span> 템플릿 변수와 템플릿 요인</a>
+  <ul>
+  <li><a href="#템플릿-속성" id="toc-템플릿-속성" class="nav-link" data-scroll-target="#템플릿-속성"><span class="header-section-number">5.3.1</span> 템플릿 속성</a></li>
+  <li><a href="#인스턴스화와-객체-골격" id="toc-인스턴스화와-객체-골격" class="nav-link" data-scroll-target="#인스턴스화와-객체-골격"><span class="header-section-number">5.3.2</span> 인스턴스화와 객체 골격</a></li>
+  <li><a href="#템플릿-요인" id="toc-템플릿-요인" class="nav-link" data-scroll-target="#템플릿-요인"><span class="header-section-number">5.3.3</span> 템플릿 요인</a></li>
+  </ul></li>
+  <li><a href="#객체-관계-영역의-방향성-확률모형" id="toc-객체-관계-영역의-방향성-확률모형" class="nav-link" data-scroll-target="#객체-관계-영역의-방향성-확률모형"><span class="header-section-number">5.4</span> 객체-관계 영역의 방향성 확률모형</a>
+  <ul>
+  <li><a href="#플레이트-모형" id="toc-플레이트-모형" class="nav-link" data-scroll-target="#플레이트-모형"><span class="header-section-number">5.4.1</span> 플레이트 모형</a>
+  <ul class="collapse">
+  <li><a href="#예제" id="toc-예제" class="nav-link" data-scroll-target="#예제"><span class="header-section-number">5.4.1.1</span> 예제</a></li>
+  <li><a href="#플레이트-모형의-형식적-틀" id="toc-플레이트-모형의-형식적-틀" class="nav-link" data-scroll-target="#플레이트-모형의-형식적-틀"><span class="header-section-number">5.4.1.2</span> 플레이트 모형의 형식적 틀</a></li>
+  </ul></li>
+  <li><a href="#확률적-관계-모형" id="toc-확률적-관계-모형" class="nav-link" data-scroll-target="#확률적-관계-모형"><span class="header-section-number">5.4.2</span> 확률적 관계 모형</a>
+  <ul class="collapse">
+  <li><a href="#조건부-의존성" id="toc-조건부-의존성" class="nav-link" data-scroll-target="#조건부-의존성"><span class="header-section-number">5.4.2.1</span> 조건부 의존성</a></li>
+  <li><a href="#기초-네트워크의-cpd" id="toc-기초-네트워크의-cpd" class="nav-link" data-scroll-target="#기초-네트워크의-cpd"><span class="header-section-number">5.4.2.2</span> 기초 네트워크의 CPD</a></li>
+  <li><a href="#비순환성-확인" id="toc-비순환성-확인" class="nav-link" data-scroll-target="#비순환성-확인"><span class="header-section-number">5.4.2.3</span> 비순환성 확인</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#비방향성-표현" id="toc-비방향성-표현" class="nav-link" data-scroll-target="#비방향성-표현"><span class="header-section-number">5.5</span> 비방향성 표현</a>
+  <ul>
+  <li><a href="#사례-연구-웹페이지의-집단분류" id="toc-사례-연구-웹페이지의-집단분류" class="nav-link" data-scroll-target="#사례-연구-웹페이지의-집단분류"><span class="header-section-number">5.5.0.1</span> 사례 연구: 웹페이지의 집단분류</a></li>
+  </ul></li>
+  <li><a href="#구조적-불확실성" id="toc-구조적-불확실성" class="nav-link" data-scroll-target="#구조적-불확실성"><span class="header-section-number">5.6</span> 구조적 불확실성</a>
+  <ul>
+  <li><a href="#관계-불확실성" id="toc-관계-불확실성" class="nav-link" data-scroll-target="#관계-불확실성"><span class="header-section-number">5.6.1</span> 관계 불확실성</a></li>
+  <li><a href="#객체-불확실성" id="toc-객체-불확실성" class="nav-link" data-scroll-target="#객체-불확실성"><span class="header-section-number">5.6.2</span> 객체 불확실성</a>
+  <ul class="collapse">
+  <li><a href="#사례-연구-객체-불확실성과-인용문헌-매칭" id="toc-사례-연구-객체-불확실성과-인용문헌-매칭" class="nav-link" data-scroll-target="#사례-연구-객체-불확실성과-인용문헌-매칭"><span class="header-section-number">5.6.2.1</span> 사례 연구: 객체 불확실성과 인용문헌 매칭</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-template-based-representations" class="quarto-section-identifier"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">템플릿 기반 표현</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="서론" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="서론"><span class="header-section-number">5.1</span> 서론</h2>
+<p>앞 장에서 다룬 베이즈 네트워크와 마르코프 네트워크는 <strong>고정된 유한 개의 확률변수 집합</strong> <span class="math inline">\(\mathbf X\)</span> 위의 하나의 결합분포를 나타낸다. 예를 들어 의료 진단용 네트워크는 여러 환자에게 반복해서 적용할 수 있다. 환자마다 증상과 질환의 값은 다르지만, 모든 환자는 동일한 속성 집합으로 기술된다. 이와 같이 표현의 중심이 미리 정해진 확률변수 집합인 모형을 <strong>변수 기반 모형(variable-based model)</strong>이라 한다.</p>
+<p>그러나 많은 실제 문제에서는 하나의 고정된 변수집합만으로 표현하기 어려운 훨씬 복잡한 확률공간을 다루어야 한다.</p>
+<p>첫째, 시간에 따라 상태가 변하는 <strong>동적 영역</strong>이 있다. 중환자실 환자를 모니터링한다고 하자. 심박수, 혈압, 심전도 같은 센서값이 일정한 시간 간격으로 수집되며, 관심은 환자의 숨은 임상상태가 시간에 따라 어떻게 변하는지를 추적하는 데 있다. 이동하는 로봇의 위치를 센서 관측으로 추적하는 문제도 같다. 이때 하나의 모형이 길이가 서로 다른 궤적, 나아가 무한히 긴 궤적에도 적용되어야 한다.</p>
+<p>둘째, 유전학의 가계도처럼 서로 다른 수의 객체가 관계를 맺는 영역이 있다. 각 가계도에는 여러 사람이 있고, 사람마다 자신의 속성을 가지며 부모-자녀 관계를 통해 연결된다. 가계도마다 사람 수와 연결구조가 다르므로 하나의 고정 변수집합을 미리 만들 수 없다. 그럼에도 유전자가 부모에서 자녀로 전달되는 기제는 한 가계도 안의 여러 사람에게도, 서로 다른 가계도 사이에서도 동일하다.</p>
+<p>이러한 문제에서 원하는 것은 하나의 구체적인 분포가 아니라, 다음과 같은 <strong>분포들의 계열을 생성하는 간결한 템플릿</strong>이다.</p>
+<ul>
+<li>서로 다른 길이의 시간 궤적에 대한 분포</li>
+<li>서로 다른 가족 구성과 가계구조에 대한 분포</li>
+<li>서로 다른 수의 학생과 과목이 존재하는 대학에 대한 분포</li>
+<li>서로 다른 수의 웹페이지와 링크가 존재하는 웹 그래프에 대한 분포</li>
+</ul>
+<p>이 장에서는 여러 객체와 관계로 구성된 풍부한 구조공간에 대한 확률분포를 정의하는 <strong>템플릿 기반 표현(template-based representation)</strong>을 다룬다. 대표적 사용 영역은 두 가지이다.</p>
+<ol type="1">
+<li><strong>시간 모형화</strong>: 동적 베이즈 네트워크(dynamic Bayesian network, DBN)를 이용해 시스템 동역학의 공통 구조를 한 번만 정의하고, 길이가 다른 여러 궤적에 대한 분포를 생성한다.</li>
+<li><strong>객체-관계 모형화</strong>: 객체의 수와 관계구조가 서로 다른 여러 가능한 세계에 대해 공통된 확률적 기제를 정의한다.</li>
+</ol>
+<p>객체와 관계를 모형의 일급 구성요소로 허용하면 변수 기반 틀에서는 다루기 어려운 질문도 표현할 수 있다. 예를 들어 가계도 모형에서는 “Michael의 아버지는 누구인가?”, “Ethel 고모에게 자녀가 몇 명 있었는가?”처럼 객체의 정체성이나 개수 자체가 불확실한 질문을 다룰 수 있다. 즉 가능한 세계마다 객체집합과 관계구조가 달라지는 확률공간을 정의할 수 있다.</p>
+</section>
+<section id="시간-모형" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="시간-모형"><span class="header-section-number">5.2</span> 시간 모형</h2>
+<p>시간 모형의 목적은 세계의 상태가 시간에 따라 변할 때 그 변화를 확률적으로 추론하는 것이다. 시점 <span class="math inline">\(t\)</span>의 <strong>시스템 상태(system state)</strong>는 그 시점에서 관심 있는 숨은 속성과 관측된 속성의 스냅숏이다. 상태는 보통 확률변수 집합 <span class="math inline">\(\mathbf X\)</span>의 값 할당으로 표현한다.</p>
+<p><span class="math inline">\(X_i^{(t)}\)</span>는 템플릿 변수 <span class="math inline">\(X_i\)</span>가 시간 <span class="math inline">\(t\)</span>에 구체화된 확률변수를 뜻한다. 여기서 <span class="math inline">\(X_i\)</span> 자체는 값을 취하는 하나의 확률변수가 아니라, 여러 시점에 반복 인스턴스화되는 <strong>템플릿 변수(template variable)</strong>이다. 변수집합 <span class="math inline">\(\mathbf X\subseteq\mathcal X\)</span>에 대해</p>
+<p><span class="math display">\[
+\mathbf X^{(t_1:t_2)}=\{\mathbf X^{(t)}:t\in[t_1,t_2]\}
+\]</span></p>
+<p>로 쓰며, 이에 대한 값 할당은 <span class="math inline">\(\mathbf x^{(t_1:t_2)}\)</span>로 나타낸다.</p>
+<p>확률공간에서 하나의 가능한 세계는 모든 관련 시점의 변수값을 지정한 <strong>궤적(trajectory)</strong>이다. 목표는 이러한 궤적 전체에 대한 결합분포를 나타내는 것이다. 궤적공간은 매우 크기 때문에 몇 가지 구조적 가정을 도입한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 차량 위치 추적</strong><br>
+이동 차량이 고장 가능성이 있는 센서를 이용해 자신의 위치를 추적한다고 하자. 간단한 시스템 상태는 다음 변수로 구성할 수 있다. - <span class="math inline">\(Location\)</span>: 차량의 현재 위치 - <span class="math inline">\(Velocity\)</span>: 현재 속도 - <span class="math inline">\(Weather\)</span>: 현재 기상상태 - <span class="math inline">\(Failure\)</span>: 센서 고장상태 - <span class="math inline">\(Obs\)</span>: 현재 센서 관측값</p>
+<p>각 시점마다 이 변수들의 복사본이 존재한다. 이들 전체에 대한 결합분포가 차량의 가능한 궤적에 대한 분포를 정의한다. 관측열이 주어졌을 때 현재 위치, 10분 후 위치, 신호등에서 정지했는지 등의 질문을 할 수 있다.</p>
+</blockquote>
+<section id="기본-가정" class="level3" data-number="5.2.1">
+<h3 data-number="5.2.1" class="anchored" data-anchor-id="기본-가정"><span class="header-section-number">5.2.1</span> 기본 가정</h3>
+<section id="시간-절편" class="level4" data-number="5.2.1.1">
+<h4 data-number="5.2.1.1" class="anchored" data-anchor-id="시간-절편"><span class="header-section-number">5.2.1.1</span> 시간 절편</h4>
+<p>첫 번째 단순화는 연속적인 시간을 미리 정한 간격 <span class="math inline">\(\Delta\)</span>로 나누어 <strong>시간 절편(time slice)</strong>을 만드는 것이다. 따라서 확률변수는</p>
+<p><span class="math display">\[
+\mathbf X^{(0)},\mathbf X^{(1)},\ldots
+\]</span></p>
+<p>로 제한되고, <span class="math inline">\(\mathbf X^{(t)}\)</span>는 실제 시간 <span class="math inline">\(t\Delta\)</span>에서의 시스템 상태를 뜻한다. 환자 모니터링에서는 <span class="math inline">\(\Delta=1\)</span>초일 수 있고, 장기 질병 진행 연구에서는 <span class="math inline">\(\Delta=1\)</span>개월 또는 <span class="math inline">\(1\)</span>년일 수 있다.</p>
+<p>시점 <span class="math inline">\(0\)</span>부터 <span class="math inline">\(T\)</span>까지의 궤적분포를</p>
+<p><span class="math display">\[
+P(\mathbf X^{(0)},\mathbf X^{(1)},\ldots,\mathbf X^{(T)})
+=P(\mathbf X^{(0:T)})
+\]</span></p>
+<p>로 쓴다. 확률의 연쇄법칙을 시간방향으로 적용하면</p>
+<p><span class="math display">\[
+P(\mathbf X^{(0:T)})
+=P(\mathbf X^{(0)})
+\prod_{t=0}^{T-1}
+P(\mathbf X^{(t+1)}\mid\mathbf X^{(0:t)})
+\]</span></p>
+<p>이다. 아직은 다음 상태가 과거 전체에 의존할 수 있으므로 모형이 매우 크다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 마르코프 가정</strong><br>
+템플릿 변수집합 <span class="math inline">\(\mathbf X\)</span>로 표현된 동적 시스템이 모든 <span class="math inline">\(t\ge0\)</span>에 대해 <span class="math display">\[
+\left(\mathbf X^{(t+1)}\perp
+\mathbf X^{(0:(t-1))}\mid\mathbf X^{(t)}\right)
+\]</span> 을 만족하면 <strong>마르코프 가정(Markov assumption)</strong>을 만족한다고 한다. 이러한 시스템을 <strong>마르코프 시스템(Markovian system)</strong>이라 한다.</p>
+</blockquote>
+<p>마르코프 가정은 현재 상태가 주어지면 다음 상태는 더 오래된 과거와 직접적으로 무관하다는 뜻이다. 무한 베이즈 네트워크로 그리면 <span class="math inline">\(t-1\)</span> 이전 시점에서 <span class="math inline">\(t+1\)</span> 시점으로 직접 들어오는 간선이 없다는 제약에 해당한다. 이 가정 아래에서 궤적분포는</p>
+<p><span class="math display">\[
+P(\mathbf X^{(0:T)})
+=P(\mathbf X^{(0)})
+\prod_{t=0}^{T-1}
+P(\mathbf X^{(t+1)}\mid\mathbf X^{(t)})
+\]</span></p>
+<p>로 단순화된다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 상태변수를 충분히 풍부하게 정의해야 하는 이유</strong><br>
+차량 위치 추적에서 상태를 <span class="math inline">\(\{L,O\}\)</span>, 즉 실제 위치와 관측위치만으로 정의했다고 하자. <span class="math inline">\(L^{(t)}\)</span>만 주어졌을 때 <span class="math inline">\(L^{(t+1)}\)</span>이 더 과거의 위치와 독립이라고 보기 어렵다. 과거 위치열은 이동방향과 속도에 대한 정보를 제공하기 때문이다. 상태에 <span class="math inline">\(Velocity\)</span>를 추가하면 마르코프 가정이 더 타당해진다. 강풍에서 급가속·급감속 가능성이 달라진다면 <span class="math inline">\(Weather\)</span>도 필요하다. 센서 고장이 인접 시점에 지속되는 경향이 있다면 <span class="math inline">\(Failure\)</span>도 상태에 포함해야 한다. 이처럼 상태를 충분히 풍부하게 만들수록 “현재가 과거의 필요한 정보를 요약한다”는 가정이 더 합리적이 된다.</p>
+</blockquote>
+<p>마르코프 가정이 철학적으로 완벽한 진리인지가 핵심은 아니다. 실제 연구에서는 선택한 상태표현이 과거의 영향 중 연구목적에 중요한 부분을 충분히 요약하는지가 중요하다. 필요한 경우 최근 <span class="math inline">\(k\)</span>개 시점에 직접 의존하도록 한 <strong>반마르코프(semi-Markov)</strong> 또는 고차 마르코프 모형을 사용할 수 있다.</p>
+<p>두 번째 문제는 시간에 따라 서로 다른 전이분포를 모두 지정해야 한다는 점이다. 이를 해결하기 위해 정상성 가정을 둔다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 정상 동적 시스템과 전이모형</strong><br>
+마르코프 동적 시스템에서 <span class="math display">\[
+P(\mathbf X^{(t+1)}\mid\mathbf X^{(t)})
+\]</span> 이 모든 <span class="math inline">\(t\)</span>에서 같으면 <strong>정상(stationary)</strong>, <strong>시간불변(time invariant)</strong> 또는 <strong>동질(homogeneous)</strong> 시스템이라 한다. 이때 하나의 전이모형 <span class="math inline">\(P(\mathbf X'\mid\mathbf X)\)</span>을 사용하여 <span class="math display">\[
+P(\mathbf X^{(t+1)}=\boldsymbol\xi'\mid
+\mathbf X^{(t)}=\boldsymbol\xi)
+=P(\mathbf X'=\boldsymbol\xi'\mid\mathbf X=\boldsymbol\xi)
+\]</span> 로 나타낸다.</p>
+</blockquote>
+<p>정상성은 “전이의 법칙이 시점에 따라 변하지 않는다”는 가정이지, 상태분포 자체가 모든 시점에서 같다는 뜻은 아니다. 초기분포가 비정상적이면 주변분포는 시간에 따라 변할 수 있다.</p>
+</section>
+</section>
+<section id="동적-베이즈-네트워크" class="level3" data-number="5.2.2">
+<h3 data-number="5.2.2" class="anchored" data-anchor-id="동적-베이즈-네트워크"><span class="header-section-number">5.2.2</span> 동적 베이즈 네트워크</h3>
+<p>마르코프성과 정상성을 함께 사용하면 무한히 긴 궤적에 대한 분포를 다음 두 요소로 압축할 수 있다.</p>
+<ol type="1">
+<li>초기상태분포 <span class="math inline">\(P(\mathbf X^{(0)})\)</span></li>
+<li>하나의 전이모형 <span class="math inline">\(P(\mathbf X'\mid\mathbf X)\)</span></li>
+</ol>
+<p>전이모형은 앞 장에서 다룬 조건부 베이즈 네트워크로 표현할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 차량 모니터링의 2-TBN</strong><br>
+<span class="quarto-unresolved-ref">?fig-dbn-vehicle-monitoring의</span> (a)의 전이모형에서는 다음 시점의 관측값이 다음 시점 위치와 센서 고장상태에 의존한다. 악천후는 센서 고장을 더 가능하게 만들며, 다음 위치는 이전 위치와 속도에 의존한다. <span class="math inline">\(Obs\)</span>를 제외한 변수는 다음 시점에 직접 영향을 주므로 인터페이스 변수이다. <span class="math inline">\(Obs\)</span>는 같은 시점 상태로부터 새로 생성되며 미래에 직접 전달되지 않는다.</p>
+</blockquote>
+<p><img src="figures/fig-dbn-vehicle-monitoring.svg" id="fig-dbn-vehicle-monitoring" class="img-fluid" alt="Figure 삽입 위치"> &gt; <strong>정의 - 2-시간절편 베이즈 네트워크</strong><br>
+&gt; 과정 <span class="math inline">\(\mathbf X\)</span>에 대한 <strong>2-시간절편 베이즈 네트워크(2-time-slice Bayesian network, 2-TBN)</strong>는 인터페이스 변수집합 <span class="math inline">\(\mathbf X_I\subseteq\mathbf X\)</span>가 주어진 조건부 베이즈 네트워크로, 다음 시점 변수 <span class="math inline">\(\mathbf X'\)</span>에 대한 분포를 나타낸다. <span class="math inline">\(\mathbf X_I\)</span>는 현재 시점에서 다음 시점 변수의 직접 부모가 될 수 있는 변수들이다.</p>
+<p>2-TBN이 나타내는 전이분포는</p>
+<p><span class="math display">\[
+P(\mathbf X'\mid\mathbf X)
+=P(\mathbf X'\mid\mathbf X_I)
+=\prod_{i=1}^{n}P(X_i'\mid Pa_{X_i'})
+\]</span></p>
+<p>이다. 각 <span class="math inline">\(P(X_i'\mid Pa_{X_i'})\)</span>는 시간에 따라 반복 인스턴스화되는 <strong>템플릿 요인(template factor)</strong>이다.</p>
+<p>가장 단순한 비자명 시간모형은 숨은 상태변수 <span class="math inline">\(S\)</span>와 관측변수 <span class="math inline">\(O\)</span>를 하나씩 갖는 <strong>은닉 마르코프 모형(hidden Markov model, HMM)</strong>이다.</p>
+<p><img src="figures/fig-hmm-dbn-unrolled.svg" id="fig-hmm-dbn-unrolled" class="img-fluid" alt="Figure 삽입 위치"> &gt; <strong>예제 - 격자에서 이동하는 로봇</strong><br>
+&gt; 로봇 위치를 상태 <span class="math inline">\(S\)</span>로 두면 전이모형 <span class="math inline">\(P(S'\mid S)\)</span>는 현재 위치에서 다음 위치로 이동할 확률을 나타낸다. 관측모형 <span class="math inline">\(P(O\mid S)\)</span>는 위치 <span class="math inline">\(s\)</span>에서 센서값 <span class="math inline">\(o\)</span>가 관측될 확률이다. 센서가 잡음이 있어도 관측열 전체를 이용해 로봇의 위치를 추론할 수 있다.</p>
+<p>2-TBN의 간선은 두 종류이다.</p>
+<ul>
+<li><strong>시점 간 간선(inter-time-slice edge)</strong>: 시간절편 <span class="math inline">\(t\)</span>에서 <span class="math inline">\(t+1\)</span>로 연결된다.</li>
+<li><strong>시점 내 간선(intra-time-slice edge)</strong>: 같은 시간절편 안의 변수들을 연결한다.</li>
+</ul>
+<p>효과가 선택한 시간간격보다 훨씬 빠르게 나타나면 시점 내 간선으로, 한 절편에서 다음 절편에 걸쳐 나타나면 시점 간 간선으로 표현한다. 시간절편을 거칠게 잡을수록 더 많은 효과가 같은 절편 안에 들어갈 수 있다.</p>
+<p><span class="math inline">\(X\to X'\)</span> 형태의 시점 간 간선은 <strong>지속 간선(persistence edge)</strong>이며, 변수값이 시간에 따라 유지될 가능성이 높다는 것을 나타낸다. 이러한 변수를 <strong>지속 변수(persistent variable)</strong>라 한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 동적 베이즈 네트워크</strong><br>
+<strong>동적 베이즈 네트워크(DBN)</strong>는 쌍 <span class="math inline">\(\langle\mathcal B_0,\mathcal B_{\rightarrow}\rangle\)</span>이다. - <span class="math inline">\(\mathcal B_0\)</span>는 <span class="math inline">\(\mathbf X^{(0)}\)</span>에 대한 초기 베이즈 네트워크이다. - <span class="math inline">\(\mathcal B_{\rightarrow}\)</span>는 과정의 2-TBN이다.</p>
+<p>원하는 시간범위 <span class="math inline">\(T\ge0\)</span>에 대해 펼친 베이즈 네트워크를 만들며, - <span class="math inline">\(X_i^{(0)}\)</span>의 구조와 CPD는 <span class="math inline">\(\mathcal B_0\)</span>의 <span class="math inline">\(X_i\)</span>와 같다. - <span class="math inline">\(t&gt;0\)</span>인 <span class="math inline">\(X_i^{(t)}\)</span>의 구조와 CPD는 <span class="math inline">\(\mathcal B_{\rightarrow}\)</span>의 <span class="math inline">\(X_i'\)</span>와 같다.</p>
+<p>따라서 하나의 DBN은 모든 <span class="math inline">\(T\)</span>에 대해 서로 다른 크기의 베이즈 네트워크를 생성하는 압축 템플릿이다.</p>
+</blockquote>
+<p><img src="figures/fig-factorial-coupled-hmm.svg" id="fig-factorial-coupled-hmm" class="img-fluid" alt="Figure 삽입 위치"> <span class="quarto-unresolved-ref">?fig-factorial-coupled-hmm은</span> HMM을 확장한 두 중요한 구조를 보여준다.</p>
+<ul>
+<li><strong>요인 HMM(factorial HMM)</strong>: 여러 숨은 연쇄 <span class="math inline">\(X_i\to X_i'\)</span>가 하나의 공통 관측변수 <span class="math inline">\(Y'\)</span>를 함께 설명한다. 단일 마이크로폰에 여러 음원이 섞여 들어오는 상황처럼 여러 독립적 또는 약하게 의존적인 원인이 하나의 관측을 만든다.</li>
+<li><strong>결합 HMM(coupled HMM)</strong>: 각 연쇄가 자신의 관측변수 <span class="math inline">\(Y_i'\)</span>를 갖지만, 이웃 연쇄의 숨은 상태들이 서로 영향을 준다. 여러 방의 실제 온도가 인접 방과 상호작용하고 각 방에 별도 온도센서가 있는 건물 모니터링이 예이다.</li>
+</ul>
+<p>DBN에서는 흔히 템플릿 변수집합을 항상 숨은 변수 <span class="math inline">\(\mathbf X\)</span>와 항상 관측되는 변수 <span class="math inline">\(\mathbf O\)</span>로 나눈다. 실제 알고리즘은 시점마다 관측여부가 다른 경우에도 적용할 수 있지만, 표현과 설명을 단순화하기 위해 이 구분을 자주 사용한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 센서 고장을 설명변수로 넣는 이점</strong><br>
+차량이 0.1초 만에 15피트 옆으로 이동한 것처럼 비현실적인 관측이 들어오면, 센서 고장 변수가 있는 모형은 “차량이 순간이동했다”와 “센서가 고장났다”를 비교할 수 있다. 센서 고장 변수가 없다면 예상 밖의 연속 관측을 설명할 수 있는 유일한 방법은 실제 궤적을 비정상적으로 바꾸는 것이다. 비가 오면 센서 정확도가 떨어진다는 연결도 포함하면 악천후에서 이상 관측을 덜 신뢰하게 된다. 모형은 명시적으로 포함된 원인만 고려할 수 있으므로, 중요한 오류기제를 상태에 포함하는 것이 중요하다.</p>
+</blockquote>
+<section id="사례-연구-유전자-탐색을-위한-hmm과-계통-hmm" class="level4" data-number="5.2.2.1">
+<h4 data-number="5.2.2.1" class="anchored" data-anchor-id="사례-연구-유전자-탐색을-위한-hmm과-계통-hmm"><span class="header-section-number">5.2.2.1</span> 사례 연구: 유전자 탐색을 위한 HMM과 계통 HMM</h4>
+<p>HMM은 생물학적 서열에서 정보를 추출하는 핵심 도구이다. 관련 단백질군 모형화, DNA에서 유전자 탐색, 집단 내 유전변이의 상관구조 모형화 등에 사용된다.</p>
+<p>DNA는 <span class="math inline">\(A,C,G,T\)</span> 네 종류의 염기로 이루어진 긴 서열이며, 유전자·유전자 사이 영역·엑손·인트론 등 기능이 다른 여러 구간으로 구성된다. 단백질을 암호화하는 영역에서는 세 염기씩 묶인 코돈(codon)이 아미노산으로 번역된다. 가능한 코돈은 <span class="math inline">\(4^3=64\)</span>개이지만 아미노산은 20개이므로 코드는 중복적이다. 엑손은 번역되고 인트론은 스플라이싱 과정에서 제거된다. 각 영역은 서로 다른 염기조성 통계를 가지며, 경계에는 전사와 번역의 시작·종료를 나타내는 신호가 나타난다. 그러나 신호가 완벽하지 않으므로 각 염기의 기능적 구간을 추정하는 것은 불확실한 문제이다.</p>
+<p>HMM에서는 각 염기 위치마다 그 위치의 기능적 영역을 나타내는 숨은 상태변수를 둔다. 마르코프성을 만족시키기 위해 상태공간을 세분할 수 있다. 코딩영역의 세 자리 주기를 나타내기 위해 코돈의 첫째, 둘째, 셋째 위치를 서로 다른 숨은 상태로 둘 수 있다. 첫 엑손과 마지막 엑손이 중간 엑손과 다른 통계를 갖는다면 상태를 더 세분한다. 관측에는 실제 염기, mRNA 실험으로 얻은 전사 증거, 여러 종에서의 보존성 등이 들어간다. 기능적으로 중요한 염기는 선택압 때문에 종 사이에서 더 잘 보존되는 반면, 비기능 영역은 더 빠르게 변한다.</p>
+<p><strong>계통 HMM(phylogenetic HMM)</strong>은 한 종의 서열뿐 아니라 여러 관련 종의 계통수 전체를 함께 모형화한다. <span class="math inline">\(X_{k,i}\)</span>를 종 <span class="math inline">\(s_k\)</span>의 <span class="math inline">\(i\)</span>번째 염기, <span class="math inline">\(Y_i\)</span>를 해당 위치의 종 독립적 기능역할이라 하자. <span class="math inline">\(X_{k,i}\)</span>는 조상종의 같은 위치 <span class="math inline">\(X_{\ell,i}\)</span>, 같은 종의 이전 염기 <span class="math inline">\(X_{k,i-1}\)</span>, 기능역할 <span class="math inline">\(Y_i\)</span>에 의존한다. 진화거리와 기능영역에 따라 치환률이 달라진다. 코돈의 셋째 위치는 아미노산을 바꾸지 않는 중복성이 커 더 빠르게 진화할 수 있다.</p>
+<p>전체 구조는 각 위치마다 계통수 형태의 변수들이 있고, 각 종의 염기들이 위치방향 연쇄로 연결되며, 기능상태 <span class="math inline">\(Y_i\)</span>도 연쇄를 형성하는 “나무들의 연쇄”이다. 표현력은 높지만 추론구조가 매우 복잡하여 근사추론이 필요하다.</p>
+</section>
+</section>
+<section id="상태-관측-모형" class="level3" data-number="5.2.3">
+<h3 data-number="5.2.3" class="anchored" data-anchor-id="상태-관측-모형"><span class="header-section-number">5.2.3</span> 상태-관측 모형</h3>
+<p>시간과정은 <strong>상태-관측 모형(state-observation model)</strong>으로 해석할 수 있다. 시스템은 자체 동역학에 따라 진화하고, 관측은 별도의 센서 과정에서 생성된다. 이 분리는 시스템의 실제 변화와 관측오류를 따로 모형화할 수 있어 유용하다.</p>
+<p>상태-관측 모형은 다음 두 독립성을 사용한다.</p>
+<p><span class="math display">\[
+\left(\mathbf X^{(t+1)}\perp
+\mathbf X^{(0:(t-1))}\mid\mathbf X^{(t)}\right)
+\]</span></p>
+<p><span class="math display">\[
+\left(\mathbf O^{(t)}\perp
+\mathbf X^{(0:(t-1))},\mathbf X^{(t+1:\infty)}
+\mid\mathbf X^{(t)}\right)
+\]</span></p>
+<p>즉 상태는 마르코프적으로 진화하고, 시점 <span class="math inline">\(t\)</span>의 관측은 그 시점 상태가 주어지면 과거·미래 상태와 독립이다. 모형은 다음 두 부분으로 나뉜다.</p>
+<ul>
+<li>전이모형 <span class="math inline">\(P(\mathbf X'\mid\mathbf X)\)</span></li>
+<li>관측모형 <span class="math inline">\(P(\mathbf O\mid\mathbf X)\)</span></li>
+</ul>
+<p>DBN 구조에서는 관측변수 <span class="math inline">\(\mathbf O'\)</span>가 모두 잎이며 <span class="math inline">\(\mathbf X'\)</span>의 변수들만 부모로 가진다. 직접 관측할 수 없는 시스템을 잡음 센서로 측정하는 문제에 자연스럽다.</p>
+<p>임의의 2-TBN도 상태-관측 형태로 바꿀 수 있다. 구조제약을 만족하지 않는 관측변수 <span class="math inline">\(Y\)</span>가 있으면 <span class="math inline">\(Y\)</span>만 부모로 하고 <span class="math inline">\(Y\)</span>와 결정적으로 같은 새 변수 <span class="math inline">\(\widetilde Y\)</span>를 추가한다. <span class="math inline">\(Y\)</span>는 숨은 변수로 보고 <span class="math inline">\(\widetilde Y\)</span>를 완벽한 센서로 관측한다. 확률적으로는 동등하지만, <span class="math inline">\(Y\)</span>가 관측되었을 때 드러나는 독립성이 결정관계를 고려하지 않으면 그래프에서 직접 보이지 않는다는 단점이 있다.</p>
+<section id="은닉-마르코프-모형" class="level4" data-number="5.2.3.1">
+<h4 data-number="5.2.3.1" class="anchored" data-anchor-id="은닉-마르코프-모형"><span class="header-section-number">5.2.3.1</span> 은닉 마르코프 모형</h4>
+<p>HMM은 가장 단순한 상태-관측 모형이다. 상태전이 <span class="math inline">\(P(S'\mid S)\)</span>는 흔히 희소하여 많은 전이확률이 0이다. 이때 HMM은 확률그래프와 다른 표기법으로 자주 그린다. 노드는 확률변수가 아니라 상태변수 <span class="math inline">\(S\)</span>의 가능한 값이며, <span class="math inline">\(s\to s'\)</span> 간선은 <span class="math inline">\(P(s'\mid s)&gt;0\)</span>인 가능한 전이를 뜻한다. 한 상태에서 나가는 간선의 확률합은 1이다. 이 그래프는 <strong>확률적 유한상태 오토마톤(probabilistic finite-state automaton)</strong>으로 볼 수 있다.</p>
+<p><img src="figures/fig-four-state-hmm.svg" id="fig-four-state-hmm" class="img-fluid" alt="Figure 삽입 위치"> &gt; <strong>예제 - 네 상태 HMM</strong><br>
+&gt; 상태공간이 <span class="math inline">\(s_1,s_2,s_3,s_4\)</span>이고 전이행렬이 &gt; &gt; |현재/다음|<span class="math inline">\(s_1\)</span>|<span class="math inline">\(s_2\)</span>|<span class="math inline">\(s_3\)</span>|<span class="math inline">\(s_4\)</span>| &gt; |—|—:|—:|—:|—:| &gt; |<span class="math inline">\(s_1\)</span>|0.3|0.7|0|0| &gt; |<span class="math inline">\(s_2\)</span>|0|0|0.4|0.6| &gt; |<span class="math inline">\(s_3\)</span>|0.5|0|0|0.5| &gt; |<span class="math inline">\(s_4\)</span>|0|0.9|0|0.1| &gt; &gt; 이라 하자. <span class="quarto-unresolved-ref">?fig-four-state-hmm는</span> 0이 아닌 전이만 그린다. 이 상태전이 그래프는 변수 간 조건부독립성을 나타내는 베이즈 네트워크 그래프와 개념적으로 다르다.</p>
+<p>HMM은 단순하지만 음성인식과 생물학적 서열분석을 포함해 매우 넓게 사용되며, 다양한 일반화의 기초가 된다.</p>
+</section>
+<section id="사례-연구-음성인식을-위한-hmm" class="level4" data-number="5.2.3.2">
+<h4 data-number="5.2.3.2" class="anchored" data-anchor-id="사례-연구-음성인식을-위한-hmm"><span class="header-section-number">5.2.3.2</span> 사례 연구: 음성인식을 위한 HMM</h4>
+<p>전통적인 음성인식 HMM은 세 층으로 생각할 수 있다.</p>
+<ol type="1">
+<li><strong>언어모형(language model)</strong>: 단어열에 대한 분포를 나타낸다. 빅그램은 <span class="math inline">\(P(W_i\mid W_{i-1})\)</span>, 트라이그램은 <span class="math inline">\(P(W_i\mid W_{i-1},W_{i-2})\)</span>를 사용한다. 언어의 장거리 의미구조를 거의 표현하지 못하지만 대량 말뭉치에서 안정적으로 학습할 수 있어 강력하다.</li>
+<li><strong>단어모형(word model)</strong>: 단어를 음소(phoneme)들의 서열로 나타낸다. 한 단어가 여러 발음을 가질 수 있으므로 여러 음소경로가 가능하다.</li>
+<li><strong>음향모형(acoustic model)</strong>: 음향신호를 약 10-25ms의 짧은 프레임으로 나누고, 한 음소가 시작·중간·끝 단계에서 서로 다른 음향특성을 보이도록 HMM으로 표현한다. 관측은 음향 특징벡터이며 이산화하거나 가우시안 또는 가우시안 혼합으로 모형화한다.</li>
+</ol>
+<p><img src="figures/fig-phoneme-hmm.svg" id="fig-phoneme-hmm" class="img-fluid" alt="Figure 삽입 위치"> 세 층을 합치면 단어, 음소, 음소 내부상태를 모두 포함하는 거대한 <strong>계층 HMM(hierarchical HMM)</strong>이 된다. 빅그램 언어모형에서 상태는 <span class="math inline">\((w,i,j)\)</span>, 즉 현재 단어 <span class="math inline">\(w\)</span>, 그 단어 안의 음소 <span class="math inline">\(i\)</span>, 음소 안의 음향위치 <span class="math inline">\(j\)</span>로 표현할 수 있다. 한 단어 HMM의 종료상태에서 다음 단어 <span class="math inline">\(w'\)</span>의 시작상태로 <span class="math inline">\(P(w'\mid w)\)</span>에 따라 이동한다.</p>
+<p>계층 HMM은 DBN으로 변환할 수 있다. 각 계층의 상태변수와 하위 HMM이 끝났음을 나타내는 제어변수를 명시하면 된다. DBN은 공동조음(coarticulation)처럼 앞뒤 음소가 현재 발음을 바꾸는 효과, 음소 경계에서만 나타나는 관측특징 등을 더 유연하게 추가할 수 있다. 음향특징의 공분산도 대각 가우시안과 완전 공분산 가우시안 사이의 절충으로 가우시안 그래프모형을 사용할 수 있다.</p>
+</section>
+<section id="선형-동적-시스템" class="level4" data-number="5.2.3.3">
+<h4 data-number="5.2.3.3" class="anchored" data-anchor-id="선형-동적-시스템"><span class="header-section-number">5.2.3.3</span> 선형 동적 시스템</h4>
+<p><strong>선형 동적 시스템(linear dynamical system, LDS)</strong>은 하나 이상의 실수형 상태변수가 가우시안 잡음과 함께 시간에 따라 선형적으로 진화하는 모형이다. 추적 알고리즘의 이름을 따라 흔히 <strong>칼만 필터(Kalman filter)</strong>라고도 한다. DBN 관점에서는 모든 변수가 연속형이고 모든 의존성이 선형 가우시안인 특수한 DBN이다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 위치와 속도</strong><br>
+차량의 위치벡터를 <span class="math inline">\(X\)</span>, 속도벡터를 <span class="math inline">\(V\)</span>라 하자. 시간절편 길이가 <span class="math inline">\(\Delta\)</span>일 때 <span class="math display">\[
+P(X'\mid X,V)=\mathcal N(X+V\Delta;\sigma_X^2),
+\qquad
+P(V'\mid V)=\mathcal N(V;\sigma_V^2)
+\]</span> 로 둘 수 있다. GPS 관측은 <span class="math inline">\(X\)</span>의 잡음 있는 가우시안 측정값이다. 항공교통관제에서 레이더 자료로 비행기를 추적하는 문제 등이 이 구조를 사용한다.</p>
+</blockquote>
+<p>전통적으로 LDS는 상태벡터와 관측벡터, 전이·관측 행렬로 표현된다.</p>
+<p><span class="math display">\[
+P(\mathbf X^{(t)}\mid\mathbf X^{(t-1)})
+=\mathcal N(A\mathbf X^{(t-1)};Q)
+\]</span></p>
+<p><span class="math display">\[
+P(\mathbf O^{(t)}\mid\mathbf X^{(t)})
+=\mathcal N(H\mathbf X^{(t)};R)
+\]</span></p>
+<p>여기서 <span class="math inline">\(A\)</span>는 상태전이 행렬, <span class="math inline">\(Q\)</span>는 동역학 잡음 공분산, <span class="math inline">\(H\)</span>는 관측행렬, <span class="math inline">\(R\)</span>은 관측잡음 공분산이다. 행렬의 0 패턴은 조건부독립 구조를 암묵적으로 담는다.</p>
+<p><strong>확장 칼만 필터(extended Kalman filter)</strong>에서는 전이와 관측이 비선형 함수가 될 수 있다.</p>
+<p><span class="math display">\[
+\mathbf X^{(t)}=f(\mathbf X^{(t-1)},\mathbf U^{(t-1)}),
+\qquad
+\mathbf O^{(t)}=g(\mathbf X^{(t)},\mathbf W^{(t)})
+\]</span></p>
+<p><span class="math inline">\(\mathbf U^{(t)}\)</span>와 <span class="math inline">\(\mathbf W^{(t)}\)</span>는 가우시안 잡음이다. 즉 확률적 CPD를 결정함수와 잡음성분으로 분리한다.</p>
+<p><strong>전환 선형 동적 시스템(switching linear dynamical system, SLDS)</strong>은 연속형 선형 동역학에 이산 모드변수를 추가한다. 예를 들어 차량이 현재 차선을 유지하거나 왼쪽·오른쪽 차선으로 변경하는 모드에 따라 속도방정식이 달라진다. 이산 변수 <span class="math inline">\(D\)</span>가 <span class="math inline">\(D'\)</span>와 연속변수들의 부모가 되어 모드별 조건부 선형 가우시안 CPD를 선택한다.</p>
+</section>
+</section>
+</section>
+<section id="템플릿-변수와-템플릿-요인" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="템플릿-변수와-템플릿-요인"><span class="header-section-number">5.3</span> 템플릿 변수와 템플릿 요인</h2>
+<p>시간모형은 템플릿 구조의 한 특수한 예이다. 이제 객체-관계 영역에도 적용할 수 있는 일반적 구성요소를 정의한다.</p>
+<section id="템플릿-속성" class="level3" data-number="5.3.1">
+<h3 data-number="5.3.1" class="anchored" data-anchor-id="템플릿-속성"><span class="header-section-number">5.3.1</span> 템플릿 속성</h3>
+<p>템플릿은 같은 값공간과 의미를 갖는 여러 확률변수를 생성한다. 예를 들어 <span class="math inline">\(BloodType\)</span> 템플릿은 사람 Bart와 Homer에 대해 <span class="math inline">\(BloodType(Bart)\)</span>와 <span class="math inline">\(BloodType(Homer)\)</span>를 생성한다. <span class="math inline">\(Location\)</span> 템플릿은 시간점 <span class="math inline">\(t\)</span>마다 <span class="math inline">\(Location(t)\)</span>를 생성한다.</p>
+<p><strong>속성(attribute)</strong> 또는 <strong>템플릿 변수(template variable)</strong>는 반복 가능한 틀이며, <span class="math inline">\(BloodType(Bart)\)</span>처럼 특정 객체에 적용된 것은 구체적인 확률변수이다.</p>
+<p>속성은 한 객체뿐 아니라 객체 튜플의 속성일 수 있다.</p>
+<ul>
+<li>학생의 과목 성적: <span class="math inline">\(Grade(Student,Course)\)</span></li>
+<li>사람이 책에 대해 갖는 평가: <span class="math inline">\(Opinion(Person,Book)\)</span></li>
+<li>조절단백질과 표적유전자 사이 친화도: <span class="math inline">\(Affinity(Protein,Gene)\)</span></li>
+</ul>
+<p>세계는 서로 배타적이고 포괄적인 객체 <strong>클래스(class)</strong> <span class="math inline">\(\mathcal Q=\{Q_1,\ldots,Q_k\}\)</span>로 구성된다고 볼 수 있다. 대학 예에서는 Student와 Course 클래스가 있다.</p>
+<p>속성은 각각 특정 클래스의 객체를 취하는 <strong>논리변수(logical variable)</strong>들을 인자로 가진다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 속성과 인자서명</strong><br>
+속성 <span class="math inline">\(A\)</span>는 <span class="math display">\[
+A(U_1,\ldots,U_k)
+\]</span> 형태의 함수이며, 값범위는 <span class="math inline">\(Val(A)\)</span>이다. 각 <span class="math inline">\(U_i\)</span>는 클래스 <span class="math inline">\(Q[U_i]\)</span>에 속하는 객체를 범위로 하는 유형화된 논리변수이다. 튜플 <span class="math inline">\((U_1,\ldots,U_k)\)</span>를 속성의 <strong>인자서명(argument signature)</strong>이라 하고 <span class="math inline">\(\alpha(A)\)</span>로 쓴다.</p>
+</blockquote>
+<p>예를 들어 <span class="math inline">\(Grade(S,C)\)</span>에서 <span class="math inline">\(S\)</span>는 Student, <span class="math inline">\(C\)</span>는 Course 클래스이다. 서로 다른 인자가 같은 클래스일 수도 있다. <span class="math inline">\(Cited(A_1,A_2)\)</span>에서는 두 인자 모두 Article 클래스이다.</p>
+<p><strong>관계(relation)</strong>는 객체 튜플이 특정 관계를 만족하는지를 나타내는 이진 속성이다. <span class="math inline">\(TookCourse(s,c)\)</span>, <span class="math inline">\(Mother(p_1,p_2)\)</span>, <span class="math inline">\(Go(person,source,destination)\)</span> 등이 예이다. 관계를 단순한 이진 속성으로 볼 수 있지만, 객체들 사이의 연결이라는 의미가 이후 조건부 의존성 정의에서 중요하다.</p>
+</section>
+<section id="인스턴스화와-객체-골격" class="level3" data-number="5.3.2">
+<h3 data-number="5.3.2" class="anchored" data-anchor-id="인스턴스화와-객체-골격"><span class="header-section-number">5.3.2</span> 인스턴스화와 객체 골격</h3>
+<p>템플릿 속성을 구체적인 영역에 적용하려면 각 클래스에 존재하는 객체집합을 지정해야 한다. 예를 들어 특정 대학에 학생과 과목 객체를 정하면 <span class="math inline">\(Intelligence(s)\)</span>, <span class="math inline">\(SAT(s)\)</span>, <span class="math inline">\(Difficulty(c)\)</span>, <span class="math inline">\(Grade(s,c)\)</span> 같은 기초 확률변수들을 만든다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 객체 골격</strong><br>
+클래스집합 <span class="math inline">\(\mathcal Q\)</span>와 템플릿 속성집합 <span class="math inline">\(\mathcal A\)</span>가 있다고 하자. <strong>객체 골격(object skeleton)</strong> <span class="math inline">\(\kappa\)</span>는 각 클래스 <span class="math inline">\(Q\in\mathcal Q\)</span>에 대해 유한 객체집합 <span class="math inline">\(\mathcal O^\kappa[Q]\)</span>를 지정한다. 논리변수 튜플에 대해 <span class="math display">\[
+\mathcal O^\kappa[U_1,\ldots,U_k]
+=\mathcal O^\kappa[Q[U_1]]\times\cdots\times
+\mathcal O^\kappa[Q[U_k]]
+\]</span> 로 정의한다. 기본적으로 <span class="math inline">\(\Gamma_\kappa[A]=\mathcal O^\kappa[\alpha(A)]\)</span>이지만, 실제로 의미 있는 할당만 남기기 위해 합법적 할당의 부분집합 <span class="math inline">\(\Gamma_\kappa[A]\subseteq\mathcal O^\kappa[\alpha(A)]\)</span>을 지정할 수 있다.</p>
+</blockquote>
+<p><img src="figures/fig-university-world.svg" id="fig-university-world" class="img-fluid" alt="Figure 삽입 위치"> &gt; <strong>정의 - 기초 확률변수</strong><br>
+&gt; 객체 골격 <span class="math inline">\(\kappa\)</span>가 주어졌을 때 속성 <span class="math inline">\(A\)</span>가 생성하는 <strong>기초 확률변수(ground random variable)</strong> 집합은 &gt; <span class="math display">\[
+&gt; \mathcal X_\kappa[A]
+&gt; =\{A(\gamma):\gamma\in\Gamma_\kappa[A]\}
+&gt; \]</span> &gt; 이고, 전체 변수집합은 &gt; <span class="math display">\[
+&gt; \mathcal X_\kappa[\mathcal A]
+&gt; =\bigcup_{A\in\mathcal A}\mathcal X_\kappa[A]
+&gt; \]</span> &gt; 이다.</p>
+<p>모든 학생이 모든 과목을 수강하는 것은 아니므로 <span class="math inline">\(Grade\)</span>와 <span class="math inline">\(Satisfaction\)</span>의 합법적 할당을 실제 수강쌍으로 제한할 수 있다. 객체 골격이 달라지면 생성되는 확률변수집합도 달라진다. 하나의 템플릿은 서로 다른 객체집합 위의 무한한 분포들을 생성한다.</p>
+<p>이 정의는 골격이 객체집합과 일부 관계를 미리 알려준다고 가정한다. 뒤에서는 관계 자체가 불확실하거나 객체 수조차 불확실한 경우를 다룬다.</p>
+</section>
+<section id="템플릿-요인" class="level3" data-number="5.3.3">
+<h3 data-number="5.3.3" class="anchored" data-anchor-id="템플릿-요인"><span class="header-section-number">5.3.3</span> 템플릿 요인</h3>
+<p>객체와 속성을 생성하는 것만으로는 분포가 정해지지 않는다. 동일한 국소 확률모형이나 요인을 여러 기초 변수범위에 반복 적용해야 한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 템플릿 요인</strong><br>
+<strong>템플릿 요인(template factor)</strong> <span class="math inline">\(\xi\)</span>는 템플릿 속성 튜플 <span class="math inline">\(A_1,\ldots,A_\ell\)</span> 위에 정의된 함수로 <span class="math display">\[
+Val(A_1)\times\cdots\times Val(A_\ell)\to\mathbb R
+\]</span> 를 사상한다. 값공간이 대응하는 기초 확률변수 <span class="math inline">\(X_1,\ldots,X_\ell\)</span>가 주어지면 <span class="math inline">\(\xi(X_1,\ldots,X_\ell)\)</span>는 그 변수범위에 대한 <strong>인스턴스화된 요인(instantiated factor)</strong>이다.</p>
+</blockquote>
+<p>DBN에서 <span class="math inline">\(P(X_i'\mid Pa_{X_i'})\)</span>가 여러 시점의 <span class="math inline">\(X_i^{(t)}\)</span>에 반복 적용되는 것이 가장 단순한 예이다.</p>
+</section>
+</section>
+<section id="객체-관계-영역의-방향성-확률모형" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="객체-관계-영역의-방향성-확률모형"><span class="header-section-number">5.4</span> 객체-관계 영역의 방향성 확률모형</h2>
+<section id="플레이트-모형" class="level3" data-number="5.4.1">
+<h3 data-number="5.4.1" class="anchored" data-anchor-id="플레이트-모형"><span class="header-section-number">5.4.1</span> 플레이트 모형</h3>
+<p><strong>플레이트 모형(plate model)</strong>은 가장 단순하고 널리 사용된 객체-관계 템플릿 표현이다. 특히 여러 관측치가 같은 모수를 공유한다는 가정을 학습모형에서 표현하는 데 자주 쓰인다. 객체 유형을 플레이트라고 부르며, 같은 클래스의 여러 객체가 동일한 속성과 확률모형을 공유한다는 사실을 “동일한 접시가 여러 장 쌓인 것”처럼 상자로 표시한다.</p>
+<section id="예제" class="level4" data-number="5.4.1.1">
+<h4 data-number="5.4.1.1" class="anchored" data-anchor-id="예제"><span class="header-section-number">5.4.1.1</span> 예제</h4>
+<blockquote class="blockquote">
+<p><strong>예제 - 같은 동전의 반복 시행</strong><br>
+<span class="math inline">\(d\in D\)</span>에 대해 여러 확률변수 <span class="math inline">\(X(d)\)</span>가 같은 값공간을 갖고 같은 분포에서 표본추출된다고 하자. 그림에서는 <span class="math inline">\(X\)</span> 하나만 그리고 <span class="math inline">\(d\)</span>가 <span class="math inline">\(D\)</span>를 범위로 하는 상자 안에 넣는다. 상자는 동일한 구조의 변수들이 여러 개 있음을 뜻한다. 동전의 앞면확률을 <span class="math inline">\(\theta_X\in[0,1]\)</span>라 하면 플레이트 밖의 <span class="math inline">\(\theta_X\)</span>가 모든 시행 <span class="math inline">\(X(d)\)</span>의 공통 CPD 모수이다. 반대로 <span class="math inline">\(\theta_X(d)\)</span>를 플레이트 안에 넣으면 시행마다 서로 다른 동전을 사용한 모형이 된다.</p>
+</blockquote>
+<p><img src="figures/fig-coin-plate.svg" id="fig-coin-plate" class="img-fluid" alt="Figure 삽입 위치"> CPD 모수를 확률모형 안에 직접 넣는 방식은 이후 베이지안 학습에서 중심적인 역할을 한다. 그림에 명시되지 않은 모수는 모든 플레이트 밖에 있다고 가정한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 한 종류의 객체를 갖는 Student 플레이트</strong><br>
+Student 플레이트 안에 <span class="math inline">\(I(S)\)</span>와 <span class="math inline">\(G(S)\)</span>를 두고 <span class="math inline">\(I(S)\to G(S)\)</span>로 연결한다. 학생 <span class="math inline">\(s\)</span>마다 <span class="math inline">\((Intelligence(s),Grade(s))\)</span> 쌍이 만들어진다. 모든 학생은 같은 <span class="math inline">\(P(I(s))\)</span>와 <span class="math inline">\(P(G(s)\mid I(s))\)</span>를 공유한다. 두 학생으로 인스턴스화하면 서로 독립인 두 개의 동일한 네트워크 조각이 생긴다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - 중첩 플레이트의 문제</strong><br>
+과목 난이도 <span class="math inline">\(Difficulty(C)\)</span>가 학생의 성적에 영향을 준다고 하자. Course 플레이트 안에 Student 플레이트를 중첩하고, <span class="math inline">\(Difficulty\)</span>는 Course에, <span class="math inline">\(Intelligence\)</span>와 <span class="math inline">\(Grade\)</span>는 두 플레이트 모두에 넣을 수 있다. 이 경우 <span class="math inline">\(Grade(s,c)\)</span>는 <span class="math inline">\(Difficulty(c)\)</span>와 <span class="math inline">\(Intelligence(s,c)\)</span>에 의존한다. 그러나 학생의 지능이 학생 자체가 아니라 학생-과목 쌍마다 별도로 생성된다. 같은 학생이 두 과목을 들으면 서로 다른 <span class="math inline">\(Intelligence(s,c_1)\)</span>와 <span class="math inline">\(Intelligence(s,c_2)\)</span>를 가질 수 있다. 과목별 능력을 뜻한다면 적절할 수 있지만 일반적인 지능모형에는 부적절하다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - 교차 플레이트</strong><br>
+Student와 Course 플레이트를 교차시키면 <span class="math inline">\(Intelligence(S)\)</span>는 Student에만, <span class="math inline">\(Difficulty(C)\)</span>는 Course에만, <span class="math inline">\(Grade(S,C)\)</span>는 교차영역에 속한다. 따라서 모든 학생-과목 쌍에 대해 <span class="math display">\[
+Grade(s,c)\leftarrow\{Intelligence(s),Difficulty(c)\}
+\]</span> 가 된다. 동일 학생의 지능은 여러 과목에서 같은 하나의 변수가 된다.</p>
+</blockquote>
+<p><img src="figures/fig-student-plate-models.svg" id="fig-student-plate-models" class="img-fluid" alt="Figure 삽입 위치"> &gt; <strong>예제 - 관계망을 통한 간접 증거의 축적</strong><br>
+&gt; Jane이 CS101에서 A를 받으면 Jane의 지능이 높거나 CS101이 쉽다는 믿음이 증가한다. Jane이 Math101에서 C를 받았다는 추가 관측은 Jane이 높은 지능일 가능성을 낮추고, 결과적으로 CS101이 쉽다는 믿음을 더 높인다. George가 CS101에서 C를 받았다면, 쉬운 과목에서 낮은 성적을 받았다는 해석 때문에 George의 높은 지능 확률이 크게 낮아진다. 즉 George의 지능에 대한 믿음이 다른 학생이 다른 과목에서 받은 성적에 의해 바뀔 수 있다. &gt; &gt; 15명의 학생과 4개 과목을 포함한 <span class="quarto-unresolved-ref">?fig-university-interaction의</span> 예에서는 George 자신의 두 성적만 사용하면 높은 지능의 사후확률이 0.8이지만, 모든 학생과 과목의 증거를 함께 사용하면 0.25로 감소한다. CS101에서 George만 C를 받고 다른 학생들은 좋은 성적을 받은 패턴이 과목이 쉽다는 강한 간접증거가 되기 때문이다.</p>
+<p><img src="figures/fig-university-interaction.svg" id="fig-university-interaction" class="img-fluid" alt="Figure 삽입 위치"> 플레이트 모형은 반복구조와 공유모수를 템플릿 수준에서 표현한다. 특정 객체집합이 주어지면 기초 베이즈 네트워크를 생성한다. 가능한 객체집합이 무한히 많으므로 하나의 플레이트 템플릿이 무한히 많은 기초 네트워크를 정의한다.</p>
+</section>
+<section id="플레이트-모형의-형식적-틀" class="level4" data-number="5.4.1.2">
+<h4 data-number="5.4.1.2" class="anchored" data-anchor-id="플레이트-모형의-형식적-틀"><span class="header-section-number">5.4.1.2</span> 플레이트 모형의 형식적 틀</h4>
+<p>각 템플릿 속성은 0개 이상의 플레이트 안에 있다. 속성 <span class="math inline">\(A\)</span>가 플레이트 <span class="math inline">\(Q_1,\ldots,Q_k\)</span> 안에 있으면 인자서명은 <span class="math inline">\(U_1,\ldots,U_k\)</span>이고 <span class="math inline">\(U_i\)</span>는 <span class="math inline">\(Q_i\)</span>의 객체를 범위로 한다. 어떤 플레이트에도 속하지 않는 전역 속성은 인자 수가 0인 속성으로 본다.</p>
+<p>기본 플레이트 형식에서는 속성 <span class="math inline">\(A\)</span>의 모든 가능한 객체할당을 생성한다.</p>
+<p><span class="math display">\[
+\Gamma_\kappa[A]=\mathcal O^\kappa[\alpha(A)]
+\]</span></p>
+<p>따라서 실제로 수강하지 않은 학생-과목 쌍에도 <span class="math inline">\(Grade(s,c)\)</span>가 만들어질 수 있다. 이 변수와 모든 후손이 관측되지 않으면 barren 노드로 제거해 주변분포에는 영향을 주지 않지만, 의미적으로는 우아하지 않은 해결이다.</p>
+<p>플레이트 모형은 의존성의 의미를 명확하게 하기 위해 강한 제약을 둔다. 속성은 자신이 속한 플레이트들의 객체 인자 중 일부만 사용하는 부모에 의존할 수 있다. 예를 들어 <span class="math inline">\(Grade(S,C)\)</span>는 <span class="math inline">\(Intelligence(S)\)</span>와 <span class="math inline">\(Difficulty(C)\)</span>에 의존할 수 있지만, <span class="math inline">\(Difficulty(C)\)</span>가 <span class="math inline">\(Intelligence(S)\)</span>에 직접 의존하게 하면 특정 과목 <span class="math inline">\(c\)</span>에 어느 학생의 지능을 연결해야 하는지 정해지지 않는다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 플레이트 모형</strong><br>
+플레이트 모형 <span class="math inline">\(\mathcal M^{Plate}\)</span>은 인자서명 <span class="math inline">\(U_1,\ldots,U_k\)</span>를 갖는 각 템플릿 속성 <span class="math inline">\(A\)</span>에 대해 다음을 지정한다.</p>
+<ol type="1">
+<li>템플릿 부모집합 <span class="math display">\[
+Pa_A=\{B_1(\mathbf U_1),\ldots,B_\ell(\mathbf U_\ell)\}
+\]</span> 여기서 각 부모의 인자집합은 <span class="math display">\[
+\mathbf U_i\subseteq\{U_1,\ldots,U_k\}
+\]</span> 이다. <span class="math inline">\(\mathbf U_i\)</span>를 부모 <span class="math inline">\(B_i\)</span>의 <strong>부모 인자서명(parent argument signature)</strong>이라 한다.</li>
+<li>템플릿 CPD <span class="math inline">\(P(A\mid Pa_A)\)</span>.</li>
+</ol>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - 같은 클래스의 두 인자</strong><br>
+<span class="math inline">\(Cited(U_1,U_2)\)</span>의 두 인자가 모두 Paper 클래스라고 하자. 이 속성은 <span class="math inline">\(Topic(U_1)\)</span>, <span class="math inline">\(Topic(U_2)\)</span>, <span class="math inline">\(ReviewPaper(U_1)\)</span> 등에 의존할 수 있다. 단순 그림에서는 어떤 Topic이 첫 번째 논문에 속하고 어떤 Topic이 두 번째 논문에 속하는지 모호할 수 있지만, 기호표현은 인자 위치를 명확히 구분한다.</p>
+</blockquote>
+<p>논리변수 할당 <span class="math inline">\(\gamma=\langle U_1\mapsto u_1,\ldots,U_k\mapsto u_k\rangle\)</span>이 주어졌을 때 부모속성 <span class="math inline">\(B\)</span>에 같은 할당을 적용해 얻는 기초변수를 <span class="math inline">\(B(\gamma)\)</span>로 쓴다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 플레이트 모형의 기초 베이즈 네트워크</strong><br>
+플레이트 모형 <span class="math inline">\(\mathcal M^{Plate}\)</span>과 객체 골격 <span class="math inline">\(\kappa\)</span>는 다음과 같이 기초 베이즈 네트워크 <span class="math inline">\(\mathcal B_\kappa^{\mathcal M^{Plate}}\)</span>를 정의한다. 속성 <span class="math inline">\(A(U_1,\ldots,U_k)\)</span>와 모든 <span class="math inline">\(\gamma\in\Gamma_\kappa[A]\)</span>에 대해 기초변수 <span class="math inline">\(A(\gamma)\)</span>를 만들고, 각 <span class="math inline">\(B\in Pa_A\)</span>에 대해 <span class="math inline">\(B(\gamma)\)</span>를 부모로 연결하며, 인스턴스화된 CPD <span class="math display">\[
+P(A(\gamma)\mid Pa_A(\gamma))
+\]</span> 를 사용한다.</p>
+</blockquote>
+<p>플레이트는 이해하기 쉽지만 표현력이 제한된다. 자식의 인자서명에 없는 새 논리변수를 부모에 도입할 수 없으므로, <span class="math inline">\(Genotype(U)\)</span>가 어머니 <span class="math inline">\(V\)</span>의 <span class="math inline">\(Genotype(V)\)</span>에 의존하는 유전모형이나 <span class="math inline">\(Location(t)\)</span>가 이전 시점 <span class="math inline">\(Location(t-1)\)</span>에 의존하는 시간모형을 직접 표현할 수 없다.</p>
+</section>
+</section>
+<section id="확률적-관계-모형" class="level3" data-number="5.4.2">
+<h3 data-number="5.4.2" class="anchored" data-anchor-id="확률적-관계-모형"><span class="header-section-number">5.4.2</span> 확률적 관계 모형</h3>
+<p><strong>확률적 관계 모형(probabilistic relational model, PRM)</strong>은 부모속성이 자식의 인자서명에 없는 논리변수를 사용할 수 있도록 플레이트 모형을 확장한다. 그러나 단순히 <span class="math inline">\(Genotype(U)\)</span>가 <span class="math inline">\(Genotype(V)\)</span>에 의존한다고 쓰면 모든 사람의 유전자형이 모든 다른 사람의 유전자형에 의존하여 조밀하고 순환적인 네트워크가 된다. 원하는 것은 <span class="math inline">\(V\)</span>가 <span class="math inline">\(U\)</span>의 실제 부모일 때만 의존성이 활성화되는 표현이다.</p>
+<section id="조건부-의존성" class="level4" data-number="5.4.2.1">
+<h4 data-number="5.4.2.1" class="anchored" data-anchor-id="조건부-의존성"><span class="header-section-number">5.4.2.1</span> 조건부 의존성</h4>
+<p><strong>조건부 의존성(contingent dependency)</strong>은 특정 의존성이 적용되는 상황을 <strong>가드(guard)</strong>라는 논리식으로 지정한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - University 영역의 가드</strong><br>
+<span class="math inline">\(Grade(S,C)\)</span>는 <span class="math inline">\(Difficulty(C)\)</span>와 <span class="math inline">\(Intelligence(S)\)</span>에 의존하되 <span class="math inline">\(Registered(S,C)\)</span>일 때만 의미가 있다고 할 수 있다. 더 흥미롭게는 <span class="math inline">\(Satisfaction(S,C)\)</span>가 교수 <span class="math inline">\(P\)</span>의 <span class="math inline">\(TeachingAbility(P)\)</span>에 의존하되 <span class="math display">\[
+Registered(S,C)\wedge Teaches(P,C)
+\]</span> 가 참일 때만 연결되게 할 수 있다. 자식의 인자는 <span class="math inline">\((S,C)\)</span>이지만 부모를 기술하는 인자에는 새로운 논리변수 <span class="math inline">\(P\)</span>가 추가된다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - 시간과 유전</strong><br>
+시간모형에서는 <span class="math inline">\(Location(U)\)</span>가 <span class="math inline">\(Precedes(V,U)\)</span>일 때 <span class="math inline">\(Location(V)\)</span>에 의존하도록 할 수 있다. 유전모형에서는 <span class="math inline">\(Genotype(U)\)</span>가 <span class="math inline">\(Mother(V,U)\wedge Father(W,U)\)</span>일 때 <span class="math inline">\(Genotype(V)\)</span>와 <span class="math inline">\(Genotype(W)\)</span>에 의존하도록 한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정의 - 조건부 의존성 모형과 PRM</strong><br>
+템플릿 속성 <span class="math inline">\(A\)</span>의 조건부 의존성 모형은 다음으로 구성된다.</p>
+<ul>
+<li><span class="math inline">\(\alpha(Pa_A)\supseteq\alpha(A)\)</span>인 <strong>부모 인자서명</strong></li>
+<li>부모 인자서명 위의 템플릿 속성집합 <span class="math inline">\(Pa_A^\Gamma\)</span>로 정의되는 이진 논리식 <strong>가드</strong> <span class="math inline">\(\Gamma\)</span></li>
+<li>템플릿 부모집합 <span class="math display">\[
+Pa_A=\{B_1(\mathbf U_1),\ldots,B_\ell(\mathbf U_\ell)\}
+\]</span> 여기서 각 <span class="math inline">\(\mathbf U_i\subseteq\alpha(Pa_A)\)</span>이다.</li>
+</ul>
+<p>PRM <span class="math inline">\(\mathcal M^{PRM}\)</span>은 모든 속성 <span class="math inline">\(A\)</span>에 대해 이러한 조건부 의존성 모형과 템플릿 CPD를 지정한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정의 - PRM의 기초 네트워크</strong><br>
+PRM <span class="math inline">\(\mathcal M^{PRM}\)</span>과 객체 골격 <span class="math inline">\(\kappa\)</span>는 각 <span class="math inline">\(A(\gamma)\)</span>에 대해, 추가 논리변수의 모든 할당 <span class="math inline">\(\gamma'\)</span>를 고려하여 <span class="math display">\[
+B(\gamma,\gamma')
+\]</span> 를 부모후보로 갖는 기초 베이즈 네트워크를 정의한다. 여기서 <span class="math inline">\(B\)</span>는 가드속성 <span class="math inline">\(Pa_A^\Gamma\)</span> 또는 템플릿 부모 <span class="math inline">\(Pa_A\)</span>에 속한다.</p>
+</blockquote>
+<p>가드에 나타나는 속성도 기초변수의 부모가 되어야 한다. 가드의 참·거짓이 어떤 의존성이 활성화되는지를 결정하므로 자식의 조건부분포에 영향을 주기 때문이다.</p>
+<p>정의만 그대로 적용하면 <span class="math inline">\(Satisfaction(s,c)\)</span>는 모든 교수 <span class="math inline">\(p\)</span>에 대해 <span class="math inline">\(TeachingAbility(p)\)</span>, <span class="math inline">\(Teaches(p,c)\)</span>를 부모후보로 갖는다. 유전모형에서는 <span class="math inline">\(Genotype(u)\)</span>가 모든 사람 <span class="math inline">\(v\)</span>의 <span class="math inline">\(Genotype(v)\)</span>와 <span class="math inline">\(Mother(v,u)\)</span>, <span class="math inline">\(Father(v,u)\)</span>를 후보부모로 갖는다. 따라서 가드를 CPD 구조와 골격정보로 적절히 활용해야 한다.</p>
+</section>
+<section id="기초-네트워크의-cpd" class="level4" data-number="5.4.2.2">
+<h4 data-number="5.4.2.2" class="anchored" data-anchor-id="기초-네트워크의-cpd"><span class="header-section-number">5.4.2.2</span> 기초 네트워크의 CPD</h4>
+<section id="가드-구조-활용" class="level5" data-number="5.4.2.2.1">
+<h5 data-number="5.4.2.2.1" class="anchored" data-anchor-id="가드-구조-활용"><span class="header-section-number">5.4.2.2.1</span> 가드 구조 활용</h5>
+<p>가드가 특정 할당에서 거짓이면 그 부모의 영향은 사라진다. 이는 상황특이적 독립성이다. 예를 들어 <span class="math inline">\(Mother(v,u)\)</span>가 거짓이면 <span class="math inline">\(Genotype(u)\)</span>는 <span class="math inline">\(Genotype(v)\)</span>에 의존하지 않는다. <span class="math inline">\(Registered(s,c)\wedge Teaches(p,c)\)</span>가 거짓이면 <span class="math inline">\(Satisfaction(s,c)\)</span>는 <span class="math inline">\(TeachingAbility(p)\)</span>에 의존하지 않는다. 이러한 구조는 앞 장에서 다룬 multiplexer와 상황특이적 CPD로 표현할 수 있다.</p>
+<p>그러나 잠재적 간선이 많고 순환할 수 있다는 문제가 남는다. 흔한 해결책은 가드에 사용되는 관계가 <strong>관계 골격(relational skeleton)</strong>으로 미리 주어진다고 가정하는 것이다. 시간의 <span class="math inline">\(Precedes\)</span> 관계와 알려진 가계도는 대표적인 예이다.</p>
+<p>가드관계가 골격에서 고정되면 참인 가드에 해당하는 부모만 실제 네트워크에 남긴다. <span class="math inline">\(Registered\)</span>와 <span class="math inline">\(Teaches\)</span>가 알려져 있으면 특정 과목을 실제로 가르치는 교수의 <span class="math inline">\(TeachingAbility\)</span>만 <span class="math inline">\(Satisfaction\)</span>의 부모가 된다. 합법적인 가계도에서 자녀의 유전자형은 실제 어머니와 아버지의 유전자형에만 의존하고, 세대방향 때문에 기초 네트워크는 비순환이다.</p>
+<p>반대로 가드관계 자체가 확률변수이면 <strong>관계 불확실성(relational uncertainty)</strong>이 생긴다. 가계도가 불확실하면 잠재적으로 누구나 누구의 부모일 수 있어 조밀하고 순환적인 후보구조가 나타난다. 가능한 관계구조 중 합법적인 가계도만 양의 확률을 갖도록 분포를 설계하면 세계별 실제 의존구조는 비순환일 수 있지만, 그런 전역제약을 방향성 생성모형에 넣는 것은 어렵다.</p>
+</section>
+<section id="여러-부모의-집계" class="level5" data-number="5.4.2.2.2">
+<h5 data-number="5.4.2.2.2" class="anchored" data-anchor-id="여러-부모의-집계"><span class="header-section-number">5.4.2.2.2</span> 여러 부모의 집계</h5>
+<p>가드가 고정되어도 새 논리변수의 여러 할당이 동시에 참일 수 있다. 한 과목을 여러 교수가 공동강의하면 <span class="math inline">\(Satisfaction(s,c)\)</span>는 여러 <span class="math inline">\(TeachingAbility(p)\)</span>를 부모로 갖는다. 부모 수는 골격에 따라 달라지고 상한이 없을 수 있으며, 서로 교환가능하므로 CPD는 대칭적이어야 한다.</p>
+<p>가능한 방법은 다음과 같다.</p>
+<ul>
+<li>같은 모수를 공유하는 대칭 noisy-or</li>
+<li>같은 계수를 공유하는 대칭 로지스틱 CPD</li>
+<li>최소값, 최대값, 평균, 개수와 같은 <strong>집계 통계량(aggregate)</strong>을 계산한 뒤 그 통계량을 부모로 사용하는 <strong>집계자 CPD(aggregator CPD)</strong></li>
+</ul>
+<blockquote class="blockquote">
+<p><strong>예제 - 교수 집합의 영향 집계</strong><br>
+<span class="math inline">\(Satisfaction\)</span>과 <span class="math inline">\(TeachingAbility\)</span>가 이진이라면 여러 교수의 영향에 noisy-or를 사용할 수 있다. 또는 최악의 교수와 최고의 교수의 능력, 즉 <span class="math inline">\(\min\)</span>과 <span class="math inline">\(\max\)</span>를 계산하여 만족도의 CPD를 정의할 수 있다. 학생의 취업가능성이 수강한 모든 과목의 평균성적에 의존하도록 할 수도 있다.</p>
+</blockquote>
+<p>집계모형은 빈 부모집합과 매우 큰 부모집합을 모두 처리해야 한다. 강사가 없는 세미나, 가계도에 부모정보가 없는 사람 등이 빈 집합의 예이다. 부모가 많아지면 noisy-or나 로지스틱이 거의 0 또는 1로 포화될 수 있으므로 응용에 맞는 결합규칙을 선택해야 한다.</p>
+<p>여러 종류의 부모집합이 동시에 존재하면 각 집합 내부를 어떻게 집계할지와 집계결과들을 어떻게 하나의 CPD로 결합할지를 모두 정의해야 한다. 예를 들어 만족도가 여러 교수의 능력과 여러 과제의 품질에 함께 의존한다면 두 집합을 따로 요약한 뒤 다시 결합해야 한다. 보편적으로 옳은 결합규칙은 없으며 영역지식이 중요하다.</p>
+<p>관계 불확실성에서 잠재부모가 많은 것과 실제로 여러 부모가 동시에 영향을 주는 것은 다르다. 친자관계가 불확실하더라도 각 가능한 세계에서는 아버지가 한 명이어야 한다. 이 경우 가드는 “여러 후보 중 하나만 활성”이라는 구조를 표현하지만, 그 유일성 제약 자체를 확률모형으로 보장하기가 어렵다.</p>
+</section>
+</section>
+<section id="비순환성-확인" class="level4" data-number="5.4.2.3">
+<h4 data-number="5.4.2.3" class="anchored" data-anchor-id="비순환성-확인"><span class="header-section-number">5.4.2.3</span> 비순환성 확인</h4>
+<p>기초 네트워크 구조는 템플릿과 골격을 인스턴스화한 뒤에 결정된다. 특정 기초 네트워크를 만든 후 DAG인지 검사할 수 있지만, 모형 설계단계에서 모든 합법적 골격에 대해 일관된 분포를 보장하는 템플릿 수준 조건이 필요하다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 템플릿 의존성 그래프</strong><br>
+PRM의 <strong>템플릿 의존성 그래프(template dependency graph)</strong>는 각 템플릿 속성을 노드로 하고, <span class="math inline">\(B\)</span> 유형의 속성이 <span class="math inline">\(Pa_A^\Gamma\cup Pa_A\)</span>에 나타날 때 <span class="math inline">\(B\to A\)</span> 간선을 둔다.</p>
+</blockquote>
+<p><img src="figures/fig-template-dependency-graphs.svg" id="fig-template-dependency-graphs" class="img-fluid" alt="Figure 삽입 위치"> 템플릿 의존성 그래프가 DAG이면 모든 골격에서 생성되는 기초 네트워크도 DAG이다. 그러나 템플릿 그래프에 순환이 있다고 해서 모든 기초 네트워크가 순환인 것은 아니다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 유전모형의 자기고리</strong><br>
+Genetics 템플릿에서는 <span class="math inline">\(Genotype(Person)\)</span>가 부모의 <span class="math inline">\(Genotype(Person)\)</span>에 의존하므로 템플릿 수준에 자기고리가 있다. 그러나 합법적인 가계도에서는 사람은 자신의 조상이 될 수 없다. 객체들에 조상순서 <span class="math inline">\(u'\prec u\)</span>를 두면 <span class="math inline">\(Genotype(u)\)</span>는 <span class="math inline">\(u'\prec u\)</span>인 부모의 유전자형에만 의존한다. 객체순서가 비순환이므로 기초 의존구조도 비순환이다.</p>
+</blockquote>
+<p>템플릿 그래프만으로는 골격의 순서제약을 표현하지 못한다. 간선을 색으로 구분하여 객체순서와 일치하는 의존성을 표시하는 더 풍부한 검사를 사용할 수 있다. 관계 불확실성이 있으면 후보 기초 그래프 자체가 순환처럼 보일 수 있지만, 양의 확률을 갖는 가드 할당 중 실제 순환을 만드는 할당이 없음을 보장하면 세계별 분포는 일관될 수 있다.</p>
+</section>
+</section>
+</section>
+<section id="비방향성-표현" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="비방향성-표현"><span class="header-section-number">5.5</span> 비방향성 표현</h2>
+<p>방향성 객체-관계 모형의 아이디어는 마르코프 네트워크로도 확장할 수 있다. 비방향성 표현은 국소 정규화와 DAG 제약이 없으므로 객체관계와 구조적 제약을 더 유연하게 표현할 수 있다. 기본 구성요소는 논리변수를 인자로 갖는 템플릿 속성들 위의 식과 그 식에 연결된 템플릿 요인이다. 객체 골격이 주어지면 논리변수의 각 가능한 할당이 기초 마르코프 네트워크의 요인 하나를 생성하고, 모든 인스턴스는 같은 모수를 공유한다.</p>
+<p>여기서는 가장 세밀한 로그선형 특징표현을 사용한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 여러 학생의 오개념 상호작용</strong><br>
+<span class="math inline">\(StudyPair(S_1,S_2)\)</span>는 두 학생이 함께 공부하는지, <span class="math inline">\(Misconception(S)\)</span>는 학생이 오개념을 갖는지를 나타내는 이진 속성이라 하자. 템플릿 특징 <span class="math inline">\(f_M\)</span>은 <span class="math display">\[
+StudyPair(S_1,S_2)=true
+\wedge
+Misconception(S_1)=Misconception(S_2)
+\]</span> 일 때 1, 그 밖에는 0을 반환한다. 양의 가중치는 함께 공부하는 학생들이 같은 믿음을 갖는 구성을 선호한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정의 - 관계 마르코프 네트워크</strong><br>
+<strong>관계 마르코프 네트워크(relational Markov network, RMN)</strong> <span class="math inline">\(\mathcal M^{RMN}\)</span>은 템플릿 특징집합 <span class="math inline">\(\Lambda\)</span>로 정의된다. 각 <span class="math inline">\(\lambda\in\Lambda\)</span>는 - 템플릿 속성 인자집합 <span class="math inline">\(\mathcal A(\lambda)=\{A_1(\mathbf U_1),\ldots,A_\ell(\mathbf U_\ell)\}\)</span> 위의 실수값 특징 <span class="math inline">\(f_\lambda\)</span> - 가중치 <span class="math inline">\(w_\lambda\in\mathbb R\)</span> 를 가진다. 특징의 전체 논리변수 인자서명을 <span class="math inline">\(\alpha(\lambda)\)</span>로 쓴다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - 특징 인스턴스의 곱</strong><br>
+학생집합과 공부쌍이 주어진 골격에서 모든 학생 <span class="math inline">\(s\)</span>에 <span class="math inline">\(Misconception(s)\)</span>가 만들어지고, 모든 학생쌍에 특징 인스턴스가 생긴다. 가중치가 <span class="math inline">\(w_M=10\)</span>이면 특정 할당의 비정규화 측도는 <span class="math display">\[
+\exp(10K)
+\]</span> 이며, <span class="math inline">\(K\)</span>는 함께 공부하면서 오개념 상태가 같은 학생쌍의 수이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정의 - RMN의 기초 Gibbs 분포</strong><br>
+RMN <span class="math inline">\(\mathcal M^{RMN}\)</span>과 골격 <span class="math inline">\(\kappa\)</span>가 주어졌을 때 변수집합은 <span class="math inline">\(\mathcal X_\kappa[\mathcal A]\)</span>이고, 모든 템플릿 특징 <span class="math inline">\(\lambda\)</span>와 모든 <span class="math inline">\(\gamma\in\Gamma_\kappa[\alpha(\lambda)]\)</span>에 대해 <span class="math display">\[
+\exp\{w_\lambda f_\lambda(\gamma)\}
+\]</span> 항을 갖는 Gibbs 분포를 정의한다. 같은 특징에 함께 나타나는 변수들은 기초 마르코프 네트워크에서 연결된다.</p>
+</blockquote>
+<p>방향성 모형에서 문제가 되었던 비순환성은 비방향성 모형에서는 고려할 필요가 없다. 그러나 여러 특징 인스턴스가 어떻게 결합되는지와 조밀한 연결성 문제는 남는다. Gibbs 분포에서는 각 특징 인스턴스가 곱으로 결합되고, 로그공간에서는 기여도가 합산된다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 바이럴 마케팅과 포화효과</strong><br>
+소셜네트워크에서 <span class="math inline">\(Gadget(P)\)</span>가 신제품 구매여부이고 친구들이 같은 구매상태를 갖는 것을 선호하는 특징을 둔다고 하자. 단순 로그선형 모형에서는 구매한 친구 수 <span class="math inline">\(k_p\)</span>가 증가할 때 로그확률이 선형으로 증가한다. 그러나 현실에서는 첫 번째 구매 친구의 영향이 20번째에서 21번째로 늘어날 때보다 클 수 있다. 즉 포화효과가 필요하다. 이 경우 <span class="math inline">\(k_p\)</span>를 세는 보조 집계변수나 비선형 집계특징을 추가해야 한다.</p>
+</blockquote>
+<p>관계 골격이 알려져 있으면 고정된 관계를 관측증거로 조건화하여 네트워크를 크게 단순화할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 공부쌍 관계를 조건화한 축소 네트워크</strong><br>
+<span class="math inline">\(StudyPair(s_1,s_2)\)</span>가 골격에서 알려져 있으면 해당 관계변수는 제거된다. 관계가 거짓인 학생쌍의 특징은 항상 0이므로 완전히 제거할 수 있다. 결과적으로 실제로 함께 공부하는 학생들 사이에만 간선이 남는다.</p>
+</blockquote>
+<p>비방향성 관계모형에서는 새 객체를 추가할 때 기존 객체들에 대한 분포가 크게 바뀔 수 있다는 비국소성 문제가 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 객체 수에 민감한 분포</strong><br>
+학생 <span class="math inline">\(n\)</span>명 중 <span class="math inline">\(m\)</span>명이 오개념 1, 나머지가 0이라고 하자. 새 학생 <span class="math inline">\(s_{n+1}\)</span>가 각 기존 학생과 확률 <span class="math inline">\(p\)</span>로 공부쌍을 만들고, 같은 오개념 상태의 공부쌍에 가중치 10을 준다. 새 학생의 관계와 상태를 모두 주변화하면 기존 할당은 <span class="math display">\[
+(10p+1-p)^m+(10p+1-p)^{n-m}
+\]</span> 같은 <span class="math inline">\(m\)</span> 의존 항으로 재가중된다. 모든 학생이 같은 상태인 할당과 절반씩 나뉜 할당이 서로 매우 다른 배율을 받는다. 따라서 아무 정보가 없어 보이는 새 객체 하나가 기존 분포를 크게 바꿀 수 있다.</p>
+</blockquote>
+<p>이 때문에 특정 크기의 영역에서 학습한 비방향성 템플릿을 매우 다른 크기의 영역에 적용할 때는 객체 수 변화가 분포에 미치는 영향을 반드시 평가해야 한다.</p>
+<section id="사례-연구-웹페이지의-집단분류" class="level4" data-number="5.5.0.1">
+<h4 data-number="5.5.0.1" class="anchored" data-anchor-id="사례-연구-웹페이지의-집단분류"><span class="header-section-number">5.5.0.1</span> 사례 연구: 웹페이지의 집단분류</h4>
+<p>대학 웹사이트의 페이지를 학생, 교수, 과목, 프로젝트 등의 유형으로 분류한다고 하자. 각 웹페이지 <span class="math inline">\(w\)</span>에 숨은 유형 <span class="math inline">\(T(w)\)</span>가 있고, 페이지의 단어특징만 이용하면 독립 분류기가 된다. 그러나 링크관계는 유형 사이의 상관을 제공한다. 학생페이지는 다른 학생페이지보다 교수페이지로 링크할 가능성이 높을 수 있다.</p>
+<p>방향성 모형에서는 <span class="math inline">\(Links(W_1,W_2)\)</span>가 <span class="math inline">\(T(W_1),T(W_2)\)</span>에 의존하도록 만들 수 있다. 하지만 링크구조가 관측되어 있으면 모든 페이지쌍의 유형 사이에 활성 v-구조가 생긴다. 링크가 없는 쌍이 훨씬 많아 부재링크의 신호가 실제 링크의 신호를 압도할 수 있고 계산도 매우 비싸다.</p>
+<p>비방향성 모형에서는 실제 링크가 있는 쌍에만 <span class="math inline">\(T(W_1),T(W_2)\)</span>의 상관특징을 넣을 수 있다. 부재링크는 아예 모형에서 제외한다. 또한 같은 페이지의 가까운 위치에서 링크된 두 대상의 유형, 페이지와 링크유형의 공동분류, 연구그룹·지도관계·강의관계와 같은 고차 패턴도 특징으로 쉽게 넣을 수 있다. 이 유연성 때문에 집단분류에서는 비방향성 모형이 더 좋은 성능을 보이는 경우가 많다.</p>
+</section>
+</section>
+<section id="구조적-불확실성" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="구조적-불확실성"><span class="header-section-number">5.6</span> 구조적 불확실성</h2>
+<p>객체-관계 확률모형은 객체의 속성뿐 아니라 세계의 구조 자체에 대한 불확실성을 나타낼 수 있다. 주요 유형은 다음 두 가지이다.</p>
+<ul>
+<li><strong>관계 불확실성(relational uncertainty)</strong>: 객체들 사이에 관계가 존재하는지에 대한 분포</li>
+<li><strong>객체 불확실성(object uncertainty)</strong>: 실제 객체의 존재여부, 개수 또는 여러 참조가 같은 객체인지에 대한 분포</li>
+</ul>
+<section id="관계-불확실성" class="level3" data-number="5.6.1">
+<h3 data-number="5.6.1" class="anchored" data-anchor-id="관계-불확실성"><span class="header-section-number">5.6.1</span> 관계 불확실성</h3>
+<p>단순하게는 각 가능한 관계를 독립적인 베르누이 변수로 둘 수 있다. 그러나 실제 관계그래프는 독립 간선모형과 매우 다르다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 독립 관계모형의 비현실성</strong><br>
+교수 10명, 과목 20개가 있고 각 <span class="math inline">\(Teaches(p,c)\)</span>가 독립적으로 0.1 확률로 참이라고 하자. 교수당 기대과목수는 2, 과목당 기대교수수는 1로 겉보기에는 합리적이다. 그러나 한 교수가 5개 이상 과목을 맡을 확률은 약 4.3%, 10명 중 적어도 한 명이 그렇게 될 확률은 약 29%이다. 영역 크기가 커지면 비현실적 고차수 노드가 생길 가능성이 더 커진다.</p>
+</blockquote>
+<p>교수의 연구분야와 과목주제를 부모로 넣어도, 이 속성들이 주어진 뒤 관계간선들이 조건부로 독립이라는 근본 문제는 남는다. 실제로는 교수별 강의 수가 작다거나 과목마다 정확히 한 명의 담당교수가 있다는 전역제약이 있다. 이를 방향성 생성모형에서 표현하려면 한 과목에 대한 모든 <span class="math inline">\(Teaches(p,c)\)</span> 변수를 서로 의존시키는 복잡하고 조밀한 순서를 정의해야 한다.</p>
+<p>관계를 함수 또는 <strong>객체값 속성(object-valued attribute)</strong>으로 바꿀 수 있다. <span class="math inline">\(MotherOf(p)\)</span>는 사람을 입력받아 어머니 객체 하나를 반환하고, <span class="math inline">\(CoursesOf(p)\)</span>는 교수의 과목집합을 반환한다. 고정된 관계구조에서는 관계와 집합값 함수가 상호 변환 가능하지만, 불확실성을 모형화할 때 자연스러운 생성과정이 달라진다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 교수의 과목집합 생성</strong><br>
+먼저 교수 <span class="math inline">\(p\)</span>가 맡는 과목 수 <span class="math inline">\(\ell=|CoursesOf(p)|\)</span>의 분포를 정의하고, 그 다음 전체 과목 중 서로 다른 <span class="math inline">\(\ell\)</span>개를 복원 없이 선택한다. <span class="math inline">\(\ell\)</span>은 교수의 소속과 직급에 의존할 수 있고, 각 과목의 선택확률은 교수의 연구분야와 과목주제의 일치도에 의존할 수 있다. 이 모형은 교수별 강의 수를 제어하지만, 하나의 과목에 너무 많은 교수가 배정되는 문제는 여전히 남는다. 반대 방향의 함수 <span class="math inline">\(Instructor(c)\)</span>를 생성하면 이번에는 교수 한 명이 너무 많은 과목을 담당할 수 있다.</p>
+</blockquote>
+<p>방향성 생성모형은 관계의 전이성이나 양쪽 차수제약 같은 전역구조를 동시에 선호하도록 만들기 어렵다. 비방향성 모형에서는 다음과 같은 템플릿 특징으로 자연스럽게 표현할 수 있다.</p>
+<ul>
+<li>전이성 선호: <span class="math display">\[
+R(U,V)=true,\quad R(V,W)=true,\quad R(U,W)=true
+\]</span></li>
+<li>한 과목에 두 교수가 동시에 담당하는 것을 억제: <span class="math display">\[
+Teaches(P,C)=true,\quad Teaches(P',C)=true
+\]</span> 에 매우 낮은 퍼텐셜 부여</li>
+<li>교수별 과목 수와 과목별 교수 수를 세는 집계특징을 동시에 사용</li>
+</ul>
+<p>다만 이러한 특징은 기초 그래프를 매우 조밀하게 만들며, 집계 퍼텐셜은 제한되지 않은 수의 변수범위를 가질 수 있다. 표현력과 추론복잡성의 절충이 필요하다.</p>
+</section>
+<section id="객체-불확실성" class="level3" data-number="5.6.2">
+<h3 data-number="5.6.2" class="anchored" data-anchor-id="객체-불확실성"><span class="header-section-number">5.6.2</span> 객체 불확실성</h3>
+<p>객체집합 자체가 미리 정해지지 않을 수 있다. 가장 흔한 형태는 서로 다른 이름이나 기록이 사실 같은 실제 객체를 가리킬 수 있는 경우이다. 한 사람이 CS101의 34번 학생, Econ203의 57번 학생, John과 Mary의 첫째 딸, Tom의 여자친구로 각각 언급될 수 있다.</p>
+<p>한 접근은 실제 객체와 객체에 대한 <strong>참조(reference)</strong>를 구분하는 것이다. 사람 객체 클래스와 사람참조 객체 클래스를 두고 <span class="math inline">\(RefersTo(r,p)\)</span> 또는 객체값 속성 <span class="math inline">\(Referent(r)\)</span>로 참조가 가리키는 실제 사람을 나타낸다. 함수형 표현은 각 참조가 정확히 하나의 실제 객체를 가리킨다는 유일성을 자동으로 보장한다.</p>
+<p>참조와 실제 객체의 연결은 다른 속성과 확률적으로 상호작용한다. 이름·나이·소속 같은 속성의 유사도 퍼텐셜을 사용하되 오타, 약어, 보고편향을 허용한다. “John Franklin Adams”, “J. F. Adams”, “Frank Adams”는 같은 사람일 수 있지만 “Peggy Smith”일 가능성은 낮다. 사회적 상황에서 나이를 낮춰 말할 수 있지만 세금서류에서는 그렇지 않을 수 있다는 맥락도 넣을 수 있다. 이는 <strong>대응 문제(correspondence problem)</strong>의 한 형태이다.</p>
+<p>다른 접근은 실제 객체를 없애고 참조들 사이의 <span class="math inline">\(SameAs(r,r')\)</span> 관계만 추론하는 것이다. <span class="math inline">\(SameAs\)</span>가 동등관계가 되도록 다음 경성 제약이 필요하다.</p>
+<ul>
+<li>반사성: <span class="math inline">\(SameAs(r,r)\)</span></li>
+<li>대칭성: <span class="math inline">\(SameAs(r,r')\Leftrightarrow SameAs(r',r)\)</span></li>
+<li>추이성: <span class="math inline">\(SameAs(r,r')\wedge SameAs(r',r'')\Rightarrow SameAs(r,r'')\)</span></li>
+</ul>
+<p>이 제약은 참조들을 서로 배타적이고 포괄적인 동등류로 분할한다. 경성 전역제약은 비방향성 모형에서 자연스럽게 표현된다.</p>
+<p>그러나 참조만 사용하는 모형에는 중요한 문제가 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 실제 객체당 한 번 적용되어야 하는 요인의 중복</strong><br>
+이름으로 성별을 추론하면서 “Alex라는 이름은 남성일 가능성이 높다”는 요인을 둔다고 하자. <span class="math inline">\(\{Name(R),Gender(R)\}\)</span>에 대한 템플릿 요인은 같은 사람을 가리키는 참조가 많을수록 반복 적용된다. 따라서 Alex가 남성일 확률이 참조 수에 따라 지수적으로 증가하는 잘못된 효과가 생긴다. 실제 객체를 명시하면 이 요인은 객체당 한 번만 적용할 수 있다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - 군집크기에 민감한 참조 전용 모형</strong><br>
+속성 <span class="math inline">\(A\in\{1,2,3\}\)</span>를 갖는 참조들이 있고, <span class="math inline">\(SameAs(r,r')\)</span>인 각 쌍에 속성 유사도 퍼텐셜을 둔다. 값이 같으면 높은 가중치 <span class="math inline">\(w\)</span>, 1과 3은 매우 낮은 가중치, 2와 1 또는 2와 3은 중간 가중치 <span class="math inline">\(q\)</span>를 갖는다. 관측된 참조 수가 각각 <span class="math inline">\(k_1,k_2,k_3\)</span>이라고 하자. 높은 확률 후보는 1,2,3을 각각 분리하거나, 1과 2를 합치거나, 2와 3을 합치는 분할이다.</p>
+<p><span class="math inline">\(k_2=1\)</span>이고 값 2인 참조를 값 1 군집에 넣으면 군집 내 모든 <span class="math inline">\(k_1\)</span>개 쌍과 퍼텐셜이 생겨 확률이 <span class="math inline">\(q^{k_1}\)</span>만큼 곱해진다. 값 3 군집에 넣으면 <span class="math inline">\(q^{k_3}\)</span>만큼 곱해진다. <span class="math inline">\(q&lt;1\)</span>이면 작은 군집, <span class="math inline">\(q&gt;1\)</span>이면 큰 군집에 들어가는 경향이 생긴다. <span class="math inline">\(k_2\)</span>가 커지면 값 2만의 별도 군집이 최적이 될 수 있고 결과는 <span class="math inline">\(q,w,k_1,k_2,k_3\)</span>에 매우 민감하다.</p>
+<p>참조 전용 모형은 한 군집에 속한 모든 참조쌍에 요인이 생겨 요인 수가 군집크기의 제곱으로 증가한다. 그 결과 사후분포가 지나치게 뾰족하고 모수와 참조 수에 민감해진다. 실제 객체 하나를 군집 중심으로 두면 유사도 요인의 수가 군집크기에 선형으로 증가하여 더 매끄러운 모형이 된다.</p>
+</blockquote>
+<section id="사례-연구-객체-불확실성과-인용문헌-매칭" class="level4" data-number="5.6.2.1">
+<h4 data-number="5.6.2.1" class="anchored" data-anchor-id="사례-연구-객체-불확실성과-인용문헌-매칭"><span class="header-section-number">5.6.2.1</span> 사례 연구: 객체 불확실성과 인용문헌 매칭</h4>
+<p>학술문헌의 인용네트워크를 구축하려면 서로 다른 형식과 오류를 가진 인용문자열이 같은 논문을 가리키는지 판단해야 한다. 예를 들어 다음 두 인용은 같은 논문이지만 저자 이니셜, 제목 단어, 구두점에 차이가 있다.</p>
+<pre class="text"><code>Elston R, Stewart A. A General Model for the Genetic Analysis of
+Pedigree Data. Hum. Hered. 1971;21:523-542.
+
+Elston RC, Stewart J (1971): A general model for the analysis of
+pedigree data. Hum Hered 21523-542.</code></pre>
+<p>첫 인용은 J. Stewart의 이니셜이 틀리고, 둘째는 제목에서 “genetic”이 빠졌으며 권과 페이지 사이 구두점도 손실되었다. 매칭시스템은 이러한 변이를 허용하면서 제목과 저자가 비슷한 서로 다른 논문을 잘못 합치지 않아야 한다.</p>
+<p>방향성 객체-관계 모형에서는 Citation, Publication, Author 클래스를 둔다. 관측된 Citation 객체는 골격에 포함되지만 Publication과 Author의 수는 미지일 수 있다. <span class="math inline">\(PubCited(C)\)</span>는 인용 <span class="math inline">\(C\)</span>가 가리키는 Publication 객체, <span class="math inline">\(Authors(P)\)</span>는 논문 <span class="math inline">\(P\)</span>의 저자집합이다. <span class="math inline">\(Name(A)\)</span>와 <span class="math inline">\(Title(P)\)</span>에는 이름·제목 문자열의 사전분포를 두고, 관측된 <span class="math inline">\(Text(C)\)</span>는 해당 논문의 제목과 저자이름, 인용형식, 오류와 약어과정에 의존한다.</p>
+<p>두 인용이 하나의 논문 <span class="math inline">\(p_1\)</span>을 가리키고 두 번째에서 “genetic”이 누락되었다는 가설 <span class="math inline">\(H_1\)</span>과, 제목이 거의 같은 추가 논문 <span class="math inline">\(p_2\)</span>가 존재한다는 가설 <span class="math inline">\(H_2\)</span>를 비교할 수 있다. <span class="math inline">\(H_1\)</span>은 단어누락이라는 드문 오류를 요구하지만, <span class="math inline">\(H_2\)</span>는 새 논문과 새 제목 문자열의 낮은 사전확률을 추가로 지불해야 한다. 가능한 제목문자열이 매우 많으므로 불필요한 객체를 추가하지 않는 <span class="math inline">\(H_1\)</span>이 더 높은 확률을 가질 수 있다. 이는 필요한 것보다 많은 객체를 도입하지 않는 내재적 오컴의 면도날 효과이다.</p>
+<p>비방향성 접근에서는 Publication과 Author를 없애고 인용쌍의 <span class="math inline">\(Same(C,C')\)</span>를 직접 추론할 수 있다. 제목 편집거리, 첫 저자 성 일치 등 여러 특징 <span class="math inline">\(\phi_1,\ldots,\phi_k\)</span>가 동일문헌 여부에 대한 선호를 제공하며, <span class="math inline">\(Same\)</span> 관계에 동등관계 제약을 둔다.</p>
+<p><img src="figures/fig-citation-matching-models.svg" id="fig-citation-matching-models" class="img-fluid" alt="Figure 삽입 위치"> 참조쌍의 호환성만으로는 세 개 이상의 언급에서 발생하는 고차 모순을 놓칠 수 있다. “Jane”, “Smith”, “Stanley”는 임의의 두 개씩은 같은 사람의 이름일 수 있지만 세 개 모두가 한 사람을 가리키는 것은 부자연스러울 수 있다. 실제 숨은 객체와 속성을 두거나 고차 특징을 추가하는 모형이 필요하다.</p>
+<p>템플릿 기반 모형은 동일문헌 인용을 높은 90%대 정확도로 식별할 수 있었고, 저자 언급의 동일성 식별은 데이터에 따라 약 70% 수준으로 더 어렵다고 보고되었다. 인용문자열을 단어·구두점 토큰열로 나누어 각 토큰의 필드(저자, 제목, 학술지, 연도)를 HMM 또는 CRF 상태로 추론하면, 같은 문헌을 가리키는 여러 인용의 분할이 일관되도록 공동추론할 수 있다.</p>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./04-local-probabilistic-models.html" class="pagination-link" aria-label="국소 확률 모형">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">국소 확률 모형</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./06-gaussian-network-models.html" class="pagination-link" aria-label="가우시안 네트워크 모형">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">가우시안 네트워크 모형</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

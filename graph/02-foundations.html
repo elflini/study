@@ -1,0 +1,2542 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>제2장 기초 개념 – 확률적 그래프 모형</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./index.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-a522afb83bf8ae494942cf1b0ac9d4c3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./02-foundations.html"><span class="chapter-title">제2장 기초 개념</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">확률적 그래프 모형</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-foundations.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">제2장 기초 개념</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#이-장의-역할" id="toc-이-장의-역할" class="nav-link active" data-scroll-target="#이-장의-역할">이 장의 역할</a></li>
+  <li><a href="#학습-목표" id="toc-학습-목표" class="nav-link" data-scroll-target="#학습-목표">학습 목표</a></li>
+  <li><a href="#표기와-읽기-안내" id="toc-표기와-읽기-안내" class="nav-link" data-scroll-target="#표기와-읽기-안내">표기와 읽기 안내</a></li>
+  <li><a href="#확률이론" id="toc-확률이론" class="nav-link" data-scroll-target="#확률이론">2.1 확률이론</a>
+  <ul>
+  <li><a href="#확률분포" id="toc-확률분포" class="nav-link" data-scroll-target="#확률분포">2.1.1 확률분포</a>
+  <ul class="collapse">
+  <li><a href="#사건공간" id="toc-사건공간" class="nav-link" data-scroll-target="#사건공간">2.1.1.1 사건공간</a></li>
+  <li><a href="#확률분포-1" id="toc-확률분포-1" class="nav-link" data-scroll-target="#확률분포-1">2.1.1.2 확률분포</a></li>
+  <li><a href="#확률의-해석" id="toc-확률의-해석" class="nav-link" data-scroll-target="#확률의-해석">2.1.1.3 확률의 해석</a></li>
+  </ul></li>
+  <li><a href="#확률의-기본-개념" id="toc-확률의-기본-개념" class="nav-link" data-scroll-target="#확률의-기본-개념">2.1.2 확률의 기본 개념</a>
+  <ul class="collapse">
+  <li><a href="#조건부확률" id="toc-조건부확률" class="nav-link" data-scroll-target="#조건부확률">2.1.2.1 조건부확률</a></li>
+  <li><a href="#연쇄법칙과-베이즈-규칙" id="toc-연쇄법칙과-베이즈-규칙" class="nav-link" data-scroll-target="#연쇄법칙과-베이즈-규칙">2.1.2.2 연쇄법칙과 베이즈 규칙</a></li>
+  </ul></li>
+  <li><a href="#확률변수와-결합분포" id="toc-확률변수와-결합분포" class="nav-link" data-scroll-target="#확률변수와-결합분포">2.1.3 확률변수와 결합분포</a>
+  <ul class="collapse">
+  <li><a href="#동기" id="toc-동기" class="nav-link" data-scroll-target="#동기">2.1.3.1 동기</a></li>
+  <li><a href="#확률변수란-무엇인가" id="toc-확률변수란-무엇인가" class="nav-link" data-scroll-target="#확률변수란-무엇인가">2.1.3.2 확률변수란 무엇인가?</a></li>
+  <li><a href="#주변분포와-결합분포" id="toc-주변분포와-결합분포" class="nav-link" data-scroll-target="#주변분포와-결합분포">2.1.3.3 주변분포와 결합분포</a></li>
+  <li><a href="#조건부확률-1" id="toc-조건부확률-1" class="nav-link" data-scroll-target="#조건부확률-1">2.1.3.4 조건부확률</a></li>
+  </ul></li>
+  <li><a href="#독립성과-조건부독립성" id="toc-독립성과-조건부독립성" class="nav-link" data-scroll-target="#독립성과-조건부독립성">2.1.4 독립성과 조건부독립성</a>
+  <ul class="collapse">
+  <li><a href="#독립성" id="toc-독립성" class="nav-link" data-scroll-target="#독립성">2.1.4.1 독립성</a></li>
+  <li><a href="#조건부독립성" id="toc-조건부독립성" class="nav-link" data-scroll-target="#조건부독립성">2.1.4.2 조건부독립성</a></li>
+  <li><a href="#확률변수의-독립성" id="toc-확률변수의-독립성" class="nav-link" data-scroll-target="#확률변수의-독립성">2.1.4.3 확률변수의 독립성</a></li>
+  </ul></li>
+  <li><a href="#분포에-대한-질의" id="toc-분포에-대한-질의" class="nav-link" data-scroll-target="#분포에-대한-질의">2.1.5 분포에 대한 질의</a>
+  <ul class="collapse">
+  <li><a href="#확률-질의" id="toc-확률-질의" class="nav-link" data-scroll-target="#확률-질의">2.1.5.1 확률 질의</a></li>
+  <li><a href="#map-질의" id="toc-map-질의" class="nav-link" data-scroll-target="#map-질의">2.1.5.2 MAP 질의</a></li>
+  <li><a href="#주변-map-질의" id="toc-주변-map-질의" class="nav-link" data-scroll-target="#주변-map-질의">2.1.5.3 주변 MAP 질의</a></li>
+  </ul></li>
+  <li><a href="#연속공간" id="toc-연속공간" class="nav-link" data-scroll-target="#연속공간">2.1.6 연속공간</a>
+  <ul class="collapse">
+  <li><a href="#확률밀도함수" id="toc-확률밀도함수" class="nav-link" data-scroll-target="#확률밀도함수">2.1.6.1 확률밀도함수</a></li>
+  <li><a href="#결합밀도함수" id="toc-결합밀도함수" class="nav-link" data-scroll-target="#결합밀도함수">2.1.6.2 결합밀도함수</a></li>
+  <li><a href="#조건부밀도함수" id="toc-조건부밀도함수" class="nav-link" data-scroll-target="#조건부밀도함수">2.1.6.3 조건부밀도함수</a></li>
+  </ul></li>
+  <li><a href="#기댓값과-분산" id="toc-기댓값과-분산" class="nav-link" data-scroll-target="#기댓값과-분산">2.1.7 기댓값과 분산</a>
+  <ul class="collapse">
+  <li><a href="#기댓값" id="toc-기댓값" class="nav-link" data-scroll-target="#기댓값">2.1.7.1 기댓값</a></li>
+  <li><a href="#분산" id="toc-분산" class="nav-link" data-scroll-target="#분산">2.1.7.2 분산</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#그래프" id="toc-그래프" class="nav-link" data-scroll-target="#그래프">2.2 그래프</a>
+  <ul>
+  <li><a href="#노드와-간선" id="toc-노드와-간선" class="nav-link" data-scroll-target="#노드와-간선">2.2.1 노드와 간선</a></li>
+  <li><a href="#부분그래프" id="toc-부분그래프" class="nav-link" data-scroll-target="#부분그래프">2.2.2 부분그래프</a></li>
+  <li><a href="#경로와-트레일" id="toc-경로와-트레일" class="nav-link" data-scroll-target="#경로와-트레일">2.2.3 경로와 트레일</a></li>
+  <li><a href="#순환과-루프" id="toc-순환과-루프" class="nav-link" data-scroll-target="#순환과-루프">2.2.4 순환과 루프</a></li>
+  </ul></li>
+  <li><a href="#관련-문헌" id="toc-관련-문헌" class="nav-link" data-scroll-target="#관련-문헌">2.3 관련 문헌</a></li>
+  <li><a href="#연습문제" id="toc-연습문제" class="nav-link" data-scroll-target="#연습문제">2.4 연습문제</a>
+  <ul>
+  <li><a href="#연습문제-2.1" id="toc-연습문제-2.1" class="nav-link" data-scroll-target="#연습문제-2.1">연습문제 2.1</a></li>
+  <li><a href="#연습문제-2.2" id="toc-연습문제-2.2" class="nav-link" data-scroll-target="#연습문제-2.2">연습문제 2.2</a></li>
+  <li><a href="#연습문제-2.3" id="toc-연습문제-2.3" class="nav-link" data-scroll-target="#연습문제-2.3">연습문제 2.3</a></li>
+  <li><a href="#연습문제-2.4" id="toc-연습문제-2.4" class="nav-link" data-scroll-target="#연습문제-2.4">연습문제 2.4★</a></li>
+  <li><a href="#연습문제-2.5" id="toc-연습문제-2.5" class="nav-link" data-scroll-target="#연습문제-2.5">연습문제 2.5</a></li>
+  <li><a href="#연습문제-2.6" id="toc-연습문제-2.6" class="nav-link" data-scroll-target="#연습문제-2.6">연습문제 2.6</a></li>
+  <li><a href="#연습문제-2.7" id="toc-연습문제-2.7" class="nav-link" data-scroll-target="#연습문제-2.7">연습문제 2.7★</a></li>
+  <li><a href="#연습문제-2.8" id="toc-연습문제-2.8" class="nav-link" data-scroll-target="#연습문제-2.8">연습문제 2.8</a></li>
+  <li><a href="#연습문제-2.9" id="toc-연습문제-2.9" class="nav-link" data-scroll-target="#연습문제-2.9">연습문제 2.9</a></li>
+  <li><a href="#연습문제-2.10" id="toc-연습문제-2.10" class="nav-link" data-scroll-target="#연습문제-2.10">연습문제 2.10★</a></li>
+  <li><a href="#연습문제-2.11" id="toc-연습문제-2.11" class="nav-link" data-scroll-target="#연습문제-2.11">연습문제 2.11</a></li>
+  <li><a href="#연습문제-2.12" id="toc-연습문제-2.12" class="nav-link" data-scroll-target="#연습문제-2.12">연습문제 2.12★</a></li>
+  <li><a href="#연습문제-2.13" id="toc-연습문제-2.13" class="nav-link" data-scroll-target="#연습문제-2.13">연습문제 2.13</a></li>
+  <li><a href="#연습문제-2.14" id="toc-연습문제-2.14" class="nav-link" data-scroll-target="#연습문제-2.14">연습문제 2.14★</a></li>
+  <li><a href="#연습문제-2.15" id="toc-연습문제-2.15" class="nav-link" data-scroll-target="#연습문제-2.15">연습문제 2.15★</a></li>
+  <li><a href="#연습문제-2.16" id="toc-연습문제-2.16" class="nav-link" data-scroll-target="#연습문제-2.16">연습문제 2.16★</a></li>
+  <li><a href="#연습문제-2.17" id="toc-연습문제-2.17" class="nav-link" data-scroll-target="#연습문제-2.17">연습문제 2.17</a></li>
+  <li><a href="#연습문제-2.18" id="toc-연습문제-2.18" class="nav-link" data-scroll-target="#연습문제-2.18">연습문제 2.18★</a></li>
+  <li><a href="#연습문제-2.19" id="toc-연습문제-2.19" class="nav-link" data-scroll-target="#연습문제-2.19">연습문제 2.19</a></li>
+  <li><a href="#연습문제-2.20" id="toc-연습문제-2.20" class="nav-link" data-scroll-target="#연습문제-2.20">연습문제 2.20</a></li>
+  <li><a href="#연습문제-2.21" id="toc-연습문제-2.21" class="nav-link" data-scroll-target="#연습문제-2.21">연습문제 2.21★</a></li>
+  </ul></li>
+  <li><a href="#장-요약과-연구-연결" id="toc-장-요약과-연구-연결" class="nav-link" data-scroll-target="#장-요약과-연구-연결">2.5 장 요약과 연구 연결</a>
+  <ul>
+  <li><a href="#핵심-수식-체크리스트" id="toc-핵심-수식-체크리스트" class="nav-link" data-scroll-target="#핵심-수식-체크리스트">핵심 수식 체크리스트</a></li>
+  <li><a href="#반드시-구분해야-하는-개념" id="toc-반드시-구분해야-하는-개념" class="nav-link" data-scroll-target="#반드시-구분해야-하는-개념">반드시 구분해야 하는 개념</a></li>
+  <li><a href="#베이즈-네트워크-연구를-위한-연결" id="toc-베이즈-네트워크-연구를-위한-연결" class="nav-link" data-scroll-target="#베이즈-네트워크-연구를-위한-연결">베이즈 네트워크 연구를 위한 연결</a></li>
+  <li><a href="#핵심-용어표" id="toc-핵심-용어표" class="nav-link" data-scroll-target="#핵심-용어표">핵심 용어표</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-foundations" class="quarto-section-identifier"><span class="chapter-title">제2장 기초 개념</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="이-장의-역할" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="이-장의-역할">이 장의 역할</h2>
+<p>확률적 그래프 모형은 <strong>확률분포</strong>와 <strong>그래프 구조</strong>를 결합하여 고차원 불확실성을 표현한다. 따라서 이후의 베이즈 네트워크, 마르코프 네트워크, 동적 베이즈 네트워크, 정확·근사 추론, 모수 및 구조학습을 이해하려면 먼저 확률이론과 그래프이론의 공통 언어를 확실히 익혀야 한다.</p>
+<p>이 장은 통계학과 학부생에게는 확률론과 그래프이론의 핵심 개념을 체계적으로 복습하는 장이며, 대학원생에게는 이후 장에서 사용되는 표기, 정리, 증명 논리와 계산 구조를 정비하는 장이다. 본문에 제시된 정의, 명제, 정리와 수식은 이후 장에서 반복적으로 사용되므로 생략하지 않고 학습하는 것이 중요하다.</p>
+<div class="callout callout-style-default callout-important callout-titled" title="학습 수준 안내">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">중요</span>학습 수준 안내
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>학부 핵심:</strong> 확률분포, 조건부확률, 베이즈 규칙, 확률변수, 결합·주변·조건부분포, 독립성과 조건부독립성, 기댓값과 분산, DAG와 경로의 개념을 설명하고 간단한 계산을 수행할 수 있어야 한다.</li>
+<li><strong>대학원 심화:</strong> 조건부독립성의 동치 표현, MAP와 주변 MAP의 차이, 연속확률밀도의 엄밀한 해석, 체비셰프 부등식, 부분그래프·상향폐쇄·현그래프의 역할을 수식과 증명 수준에서 이해해야 한다.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="학습-목표" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="학습-목표">학습 목표</h2>
+<p>이 장을 마치면 독자는 다음을 수행할 수 있어야 한다.</p>
+<ol type="1">
+<li>결과공간, 사건공간과 확률분포의 공리를 정확히 정의한다.</li>
+<li>빈도주의적 확률과 주관적 확률의 해석 차이를 설명한다.</li>
+<li>조건부확률, 연쇄법칙과 베이즈 규칙을 유도하고 실제 문제에 적용한다.</li>
+<li>확률변수와 사건을 구분하고 결합·주변·조건부분포를 계산한다.</li>
+<li>독립성과 조건부독립성을 사건 및 확률변수 수준에서 판별한다.</li>
+<li>확률 질의, MPE/MAP 질의와 주변 MAP 질의의 차이를 설명한다.</li>
+<li>연속확률변수의 밀도, 결합밀도와 조건부밀도를 적분을 이용해 다룬다.</li>
+<li>기댓값, 조건부기댓값, 분산과 표준편차의 주요 성질을 증명하거나 적용한다.</li>
+<li>방향성·비방향성 그래프, 부분그래프, 경로, 트레일, 순환, 루프, 폴리트리와 현그래프를 구분한다.</li>
+<li>확률론의 분해식과 그래프 구조가 베이즈 네트워크 및 DBN으로 어떻게 연결되는지 설명한다.</li>
+</ol>
+</section>
+<section id="표기와-읽기-안내" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="표기와-읽기-안내">표기와 읽기 안내</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>표기</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\Omega\)</span></td>
+<td>가능한 모든 기본 결과의 집합인 결과공간</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathcal{S}\)</span></td>
+<td>확률을 부여할 수 있는 측정 가능한 사건의 집합</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(X,Y,Z\)</span></td>
+<td>확률변수</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathbf{X},\mathbf{Y},\mathbf{Z}\)</span></td>
+<td>확률변수의 집합</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(x,y,z\)</span></td>
+<td>확률변수의 값 또는 값의 할당</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(Val(X)\)</span></td>
+<td>확률변수 <span class="math inline">\(X\)</span>가 취할 수 있는 값의 집합</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(P\models(\mathbf{X}\perp\mathbf{Y}\mid\mathbf{Z})\)</span></td>
+<td>분포 <span class="math inline">\(P\)</span>에서 <span class="math inline">\(\mathbf{Z}\)</span>가 주어졌을 때 <span class="math inline">\(\mathbf{X}\)</span>와 <span class="math inline">\(\mathbf{Y}\)</span>가 조건부독립</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(Pa_X\)</span></td>
+<td>그래프에서 노드 <span class="math inline">\(X\)</span>의 부모 집합</td>
+</tr>
+</tbody>
+</table>
+<p>정의와 정리는 가능한 한 수식으로 다시 써 보고, 예제에서는 “무엇을 조건화하고 무엇을 주변화하는가”를 직접 표시하면서 계산하는 것이 좋다. 그림은 스캔본을 나중에 삽입할 수 있도록 각 위치에 <strong>Figure 제목과 삽입 표시</strong>만 남겨 두었다.</p>
+</section>
+<section id="확률이론" class="level2">
+<h2 class="anchored" data-anchor-id="확률이론">2.1 확률이론</h2>
+<p>이 책의 주요 초점은 복잡한 확률분포이다. 이 절에서는 확률이론의 기본 개념을 간략히 복습한다.</p>
+<section id="확률분포" class="level3">
+<h3 class="anchored" data-anchor-id="확률분포">2.1.1 확률분포</h3>
+<p>일상생활에서 “확률(probability)”이라는 말을 사용할 때, 우리는 불확실한 성격을 가진 어떤 사건이 발생할 것이라는 <strong>확신의 정도</strong>를 의미한다. 예를 들어 일기예보에서 “오후에 약한 비가 내릴 확률이 낮다”라고 말할 수 있다. 확률이론은 이러한 추정치를 논의하기 위한 형식적 기초와, 그러한 추정치가 따라야 하는 규칙을 다룬다.</p>
+<p>확률을 표현하기 전에, 확률을 부여하려는 사건이 무엇인지 먼저 정의해야 한다. 사건은 주사위를 던졌을 때 가능한 서로 다른 결과, 경마의 결과, 캘리포니아의 가능한 기상 상태, 또는 기계 장치에서 발생할 수 있는 고장 유형 등이 될 수 있다.</p>
+<section id="사건공간" class="level4">
+<h4 class="anchored" data-anchor-id="사건공간">2.1.1.1 사건공간</h4>
+<p>형식적으로 사건을 정의하기 위해, 가능한 결과들로 이루어진 합의된 공간이 존재한다고 가정한다. 이 공간을 <strong>결과공간(outcome space)</strong>이라 하고 <span class="math inline">\(\Omega\)</span>로 나타낸다.</p>
+<p>예를 들어 주사위를 고려하면 다음과 같이 둘 수 있다.</p>
+<p><span class="math display">\[
+\Omega=\{1,2,3,4,5,6\}.
+\]</span></p>
+<p>경마에서는 결과공간이 결승선을 통과하는 모든 가능한 순서로 구성될 수 있으며, 따라서 훨씬 큰 공간이 된다.</p>
+<p>또한 확률을 부여하려는 <strong>측정 가능한 사건(measurable event)</strong>의 집합 <span class="math inline">\(\mathcal{S}\)</span>가 존재한다고 가정한다. 형식적으로 각 사건 <span class="math inline">\(\alpha\in\mathcal{S}\)</span>는 <span class="math inline">\(\Omega\)</span>의 부분집합이다.</p>
+<p>주사위 예에서 사건 <span class="math inline">\(\{6\}\)</span>은 주사위 눈이 6인 경우를 나타내고, 사건 <span class="math inline">\(\{1,3,5\}\)</span>는 홀수 결과가 나오는 경우를 나타낸다. 경마 예에서는 “Lucky Strike가 우승한다”라는 사건을 생각할 수 있으며, 이 사건은 Lucky Strike가 첫 번째로 결승선을 통과하는 모든 결과를 포함한다.</p>
+<p>확률이론은 사건공간이 다음 세 가지 기본 성질을 만족할 것을 요구한다.</p>
+<ol type="1">
+<li>공사건 <span class="math inline">\(\varnothing\)</span>과 자명한 사건 <span class="math inline">\(\Omega\)</span>를 포함한다.</li>
+<li>합집합에 대해 닫혀 있다. 즉, <span class="math inline">\(\alpha,\beta\in\mathcal{S}\)</span>이면 <span class="math inline">\(\alpha\cup\beta\in\mathcal{S}\)</span>이다.</li>
+<li>여집합에 대해 닫혀 있다. 즉, <span class="math inline">\(\alpha\in\mathcal{S}\)</span>이면 <span class="math inline">\(\Omega-\alpha\in\mathcal{S}\)</span>이다.</li>
+</ol>
+<p>사건공간이 합집합과 여집합에 대해 닫혀 있다는 조건은 교집합과 차집합을 비롯한 다른 불 연산(Boolean operations)에 대해서도 닫혀 있음을 의미한다.</p>
+<blockquote class="blockquote">
+<p><strong>학습 보충 - 왜 사건을 부분집합으로 표현하는가</strong><br>
+하나의 실제 결과는 <span class="math inline">\(\omega\in\Omega\)</span>로 나타내고, 관심 있는 조건을 만족하는 결과들의 묶음은 사건 <span class="math inline">\(\alpha\subseteq\Omega\)</span>로 나타낸다. 이 표현 덕분에 “A 또는 B”, “A이면서 B”, “A가 아닌 경우”를 각각 합집합, 교집합, 여집합으로 계산할 수 있다.</p>
+</blockquote>
+</section>
+<section id="확률분포-1" class="level4">
+<h4 class="anchored" data-anchor-id="확률분포-1">2.1.1.2 확률분포</h4>
+<blockquote class="blockquote">
+<p><strong>정의 2.1 - 확률분포</strong><br>
+<span class="math inline">\((\Omega,\mathcal{S})\)</span> 위의 확률분포 <span class="math inline">\(P\)</span>는 <span class="math inline">\(\mathcal{S}\)</span>의 사건을 실수 값으로 대응시키는 사상이며, 다음 조건을 만족한다.</p>
+<ol type="1">
+<li>모든 <span class="math inline">\(\alpha\in\mathcal{S}\)</span>에 대해 <span class="math inline">\(P(\alpha)\ge 0\)</span>이다.</li>
+<li><span class="math inline">\(P(\Omega)=1\)</span>이다.</li>
+<li><span class="math inline">\(\alpha,\beta\in\mathcal{S}\)</span>이고 <span class="math inline">\(\alpha\cap\beta=\varnothing\)</span>이면, <span class="math display">\[
+P(\alpha\cup\beta)=P(\alpha)+P(\beta).
+\]</span></li>
+</ol>
+</blockquote>
+<p>첫 번째 조건은 확률이 음수가 될 수 없음을 말한다. 두 번째 조건은 가능한 모든 결과를 허용하는 자명한 사건이 최대 확률인 1을 가진다는 뜻이다. 세 번째 조건은 서로 겹치지 않는 두 사건 중 하나가 발생할 확률이 각 사건의 확률 합과 같다는 뜻이다.</p>
+<p>이 조건들로부터 여러 성질이 따라 나온다. 특히 다음이 중요하다.</p>
+<p><span class="math display">\[
+P(\varnothing)=0,
+\]</span></p>
+<p><span class="math display">\[
+P(\alpha\cup\beta)
+=P(\alpha)+P(\beta)-P(\alpha\cap\beta).
+\]</span></p>
+</section>
+<section id="확률의-해석" class="level4">
+<h4 class="anchored" data-anchor-id="확률의-해석">2.1.1.3 확률의 해석</h4>
+<p>확률분포에 관한 논의를 계속하기 전에, 확률에 어떤 의미를 부여할 것인지 살펴볼 필요가 있다. 직관적으로 사건 <span class="math inline">\(\alpha\)</span>의 확률 <span class="math inline">\(P(\alpha)\)</span>는 <span class="math inline">\(\alpha\)</span>가 발생할 것이라는 확신의 정도를 수량화한다.</p>
+<p><span class="math inline">\(P(\alpha)=1\)</span>이면 <span class="math inline">\(\alpha\)</span>에 포함된 결과 중 하나가 발생한다고 확신한다. <span class="math inline">\(P(\alpha)=0\)</span>이면 그 결과들을 모두 불가능하다고 간주한다. 0과 1 사이의 확률값은 두 극단 사이에 있는 가능성을 나타낸다.</p>
+<p>그러나 이러한 설명만으로는 숫자가 정확히 무엇을 의미하는지 충분히 설명되지 않는다. 확률에는 대표적으로 두 가지 해석이 있다.</p>
+<section id="빈도주의적-해석" class="level5">
+<h5 class="anchored" data-anchor-id="빈도주의적-해석">빈도주의적 해석</h5>
+<p><strong>빈도주의적 해석(frequentist interpretation)</strong>은 확률을 사건의 장기적 빈도로 본다. 더 정확히 말하면, 어떤 실험을 무한히 반복할 때 그 사건이 발생하는 비율이 사건의 확률이다.</p>
+<p>예를 들어 특정 주사위를 던지는 상황을 생각하자. <span class="math inline">\(\alpha=\{1,3,5\}\)</span>일 때 <span class="math inline">\(P(\alpha)=0.3\)</span>이라는 명제는 이 주사위를 반복해서 던지고 결과를 기록하면, <span class="math inline">\(\alpha\)</span>에 속하는 결과가 나타나는 비율이 0.3으로 수렴한다는 뜻이다. 더 엄밀하게는 첫 번째 시행, 처음 두 시행, 처음 세 시행, 그리고 처음 <span class="math inline">\(n\)</span>번 시행에서 <span class="math inline">\(\alpha\)</span>가 발생한 비율로 이루어진 수열의 극한이 0.3이라는 의미이다.</p>
+<p>빈도주의적 해석은 확률에 구체적인 의미를 부여한다. 주사위, 동전 던지기, 카드 게임과 같은 물리적 시스템에서는 빈도가 어떻게 정의되는지 상상하기 쉽다. 또한 빈도가 적절한 확률분포의 조건을 만족해야 한다는 것도 비교적 쉽게 확인할 수 있다.</p>
+<p>그러나 빈도주의적 해석은 “내일 오후에 비가 내린다”와 같은 사건을 다룰 때 어려움에 부딪힌다. “내일 오후”라는 시간 구간의 경계가 다소 모호할 수 있지만, 그 사건 자체는 정확히 한 번만 일어난다. 따라서 이 사건의 반복 빈도를 어떻게 정의해야 하는지 분명하지 않다.</p>
+<p>이와 같은 사건의 확률을 정의하기 위해 빈도가 잘 정의되는 유사 사건들의 <strong>참조집단(reference class)</strong>을 찾으려는 여러 시도가 있었지만, 완전히 만족스러운 해결책은 제시되지 않았다. 그러므로 빈도주의적 접근만으로는 “내일 오후 비가 올 확률은 0.3이다”라는 명제를 충분히 해석하기 어렵다.</p>
+</section>
+<section id="주관적-해석" class="level5">
+<h5 class="anchored" data-anchor-id="주관적-해석">주관적 해석</h5>
+<blockquote class="blockquote">
+<p><strong>핵심 개념 - 주관적 확률</strong><br>
+대안적 해석에서는 확률을 <strong>주관적 믿음의 정도(subjective degree of belief)</strong>로 본다. 이 해석에서 <span class="math inline">\(P(\alpha)=0.3\)</span>은 사건 <span class="math inline">\(\alpha\)</span>가 일어날 것이라는 개인의 믿음 정도를 수치로 표현한 것이다.</p>
+</blockquote>
+<p>예를 들어 “내일 오후 비가 올 확률은 50%이다”라는 말은 화자의 판단에서 비가 오는 경우와 오지 않는 경우가 동등하게 가능하다는 뜻이다. 내일 오후는 한 번만 발생하지만, 그 결과에 대한 불확실성은 여전히 존재하며 이를 확률로 표현할 수 있다.</p>
+<p>그렇지만 “특정한 믿음의 정도를 가진다”는 말이 정확히 무엇을 의미하는지는 여전히 설명이 필요하다. 어떤 사람이 선거에서 Bush가 이길 확률을 0.6이라고 말하면서 동시에 질 확률을 0.8이라고 말하지 못하게 하는 원리는 무엇인가? 문제의 핵심은 개인 내부의 주관적 믿음이 실제 행동에 어떻게 반영되는지를 설명해야 한다는 데 있다.</p>
+<p>주관적 확률에서 이 문제는 매우 중요하다. 믿음의 정도를 측정하는 한 가지 가능한 방법은 내기 게임을 이용하는 것이다. 사건 <span class="math inline">\(\alpha\)</span>에 대해 <span class="math inline">\(P(\alpha)=0.8\)</span>이라고 믿는다고 하자. 그러면 사건이 일어났을 때 1달러를 얻고 일어나지 않았을 때 3달러를 잃는 내기를 받아들일 수 있다.</p>
+<p>왜냐하면 확률 0.8로 1달러를 얻고 확률 0.2로 3달러를 잃으므로 기대이득은 다음과 같기 때문이다.</p>
+<p><span class="math display">\[
+0.8\times 1+0.2\times(-3)=0.2.
+\]</span></p>
+<p>즉 평균적으로 20센트의 이득이 있는 내기이다. 사건이 일어나면 1달러를 얻고 일어나지 않으면 4달러를 잃는 내기도 기대이득이 0이므로 받아들일 수 있다. 그러나 4달러 10센트를 잃을 수 있는 내기는 기대이득이 음수이므로 합리적으로 받아들이지 않을 것이다. 이처럼 어떤 내기를 받아들이는지를 살펴보면 개인의 믿음 정도를 평가할 수 있다.</p>
+<p>이 사고실험의 핵심은 다음과 같다. 만약 개인이 확률법칙을 만족하지 않는 믿음 정도를 가진다면, 영리하게 구성된 일련의 내기를 통해 그 사람이 반드시 손해를 보게 만들 수 있다. 따라서 합리적인 사람의 믿음 정도는 확률법칙을 만족해야 한다는 논리가 성립한다.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p>이 책의 나머지 부분에서는 확률을 사용하지만, 대개 어떤 해석을 채택하는지 명시적으로 말하지 않는다. 두 해석 모두 동일한 수학적 규칙으로 이어지므로, 이후의 기술적 정의는 두 해석 모두에서 성립한다.</p>
+<blockquote class="blockquote">
+<p><strong>연구 연결 - 베이지안 네트워크에서의 해석</strong><br>
+베이지안 네트워크의 수학은 빈도주의적 해석과 주관적 해석 모두에서 사용할 수 있다. 다만 전문가의 판단으로 사전확률을 설정하거나 새로운 증거에 따라 믿음을 갱신하는 연구에서는 주관적 해석이 특히 자연스럽다.</p>
+</blockquote>
+</section>
+</section>
+</section>
+<section id="확률의-기본-개념" class="level3">
+<h3 class="anchored" data-anchor-id="확률의-기본-개념">2.1.2 확률의 기본 개념</h3>
+<section id="조건부확률" class="level4">
+<h4 class="anchored" data-anchor-id="조건부확률">2.1.2.1 조건부확률</h4>
+<p>구체적인 예로, 어떤 과목을 수강하는 학생 집단 위의 분포를 생각하자. 결과공간은 그 집단에 속한 모든 학생의 집합이다. 학생의 지능과 최종 성적에 관해 추론하려고 한다고 하자.</p>
+<p>사건 <span class="math inline">\(\alpha\)</span>를 “A 성적을 받은 모든 학생”으로 정의하고, 사건 <span class="math inline">\(\beta\)</span>를 “지능이 높은 모든 학생”으로 정의할 수 있다. 이 분포를 이용하면 <span class="math inline">\(\alpha\)</span>와 <span class="math inline">\(\beta\)</span>의 확률뿐 아니라 <span class="math inline">\(\alpha\cap\beta\)</span>, 즉 지능이 높으면서 A 성적을 받은 학생 집합의 확률도 생각할 수 있다.</p>
+<p>그러나 이러한 확률만으로는 새로운 증거가 주어졌을 때 믿음을 어떻게 갱신해야 하는지 직접 알 수 없다. 특정 학생이 A 성적을 받았다는 사실을 알게 되었다고 하자. 이 정보는 그 학생의 지능에 대해 무엇을 말해 주는가?</p>
+<p>현실에 관한 추론에 확률분포를 사용할 때마다 이러한 질문이 발생한다. 더 정확히 말하면 사건 <span class="math inline">\(\alpha\)</span>가 참이라는 것을 알게 된 후 사건 <span class="math inline">\(\beta\)</span>가 발생할 확률을 어떻게 바꾸어야 하는가? 이에 대한 답이 <strong>조건부확률(conditional probability)</strong>이다.</p>
+<p>사건 <span class="math inline">\(\alpha\)</span>가 주어졌을 때 사건 <span class="math inline">\(\beta\)</span>의 조건부확률은 다음과 같이 정의된다.</p>
+<p><span class="math display">\[
+P(\beta\mid\alpha)
+=\frac{P(\alpha\cap\beta)}{P(\alpha)}.
+\tag{2.1}
+\]</span></p>
+<p>즉 <span class="math inline">\(\alpha\)</span>가 참이라고 알고 있을 때 <span class="math inline">\(\beta\)</span>가 참일 확률은, <span class="math inline">\(\alpha\)</span>를 만족하는 결과 가운데 <span class="math inline">\(\beta\)</span>도 만족하는 결과의 상대적 비율이다. <span class="math inline">\(P(\alpha)=0\)</span>이면 이 조건부확률은 정의되지 않는다.</p>
+<p>하나의 사건 <span class="math inline">\(\alpha\)</span>에 대해 조건화하여 얻은 조건부확률 <span class="math inline">\(P(\cdot\mid\alpha)\)</span>는 정의 2.1의 성질을 만족하므로 그 자체로 하나의 확률분포이다. 따라서 조건화 연산은 하나의 분포를 입력받아 동일한 확률공간 위의 새로운 분포를 반환하는 연산으로 볼 수 있다.</p>
+</section>
+<section id="연쇄법칙과-베이즈-규칙" class="level4">
+<h4 class="anchored" data-anchor-id="연쇄법칙과-베이즈-규칙">2.1.2.2 연쇄법칙과 베이즈 규칙</h4>
+<p>조건부확률의 정의에서 다음 관계를 즉시 얻을 수 있다.</p>
+<p><span class="math display">\[
+P(\alpha\cap\beta)=P(\alpha)P(\beta\mid\alpha).
+\tag{2.2}
+\]</span></p>
+<p>이 등식을 조건부확률의 <strong>연쇄법칙(chain rule)</strong>이라 한다. 더 일반적으로 사건 <span class="math inline">\(\alpha_1,\ldots,\alpha_k\)</span>에 대해 다음과 같이 쓸 수 있다.</p>
+<p><span class="math display">\[
+P(\alpha_1\cap\cdots\cap\alpha_k)
+=P(\alpha_1)
+P(\alpha_2\mid\alpha_1)\cdots
+P(\alpha_k\mid\alpha_1\cap\cdots\cap\alpha_{k-1}).
+\tag{2.3}
+\]</span></p>
+<p>즉 여러 사건의 결합이 발생할 확률을 첫 번째 사건의 확률, 첫 번째 사건이 주어졌을 때 두 번째 사건의 확률, 앞의 두 사건이 주어졌을 때 세 번째 사건의 확률 등의 곱으로 나타낼 수 있다. 사건을 어떤 순서로 배열하여 전개하더라도 최종 결과는 동일하다.</p>
+<p>조건부확률의 정의에서 바로 얻어지는 또 다른 중요한 결과가 <strong>베이즈 규칙(Bayes’ rule)</strong>이다.</p>
+<p><span class="math display">\[
+P(\alpha\mid\beta)
+=\frac{P(\beta\mid\alpha)P(\alpha)}{P(\beta)}.
+\tag{2.4}
+\]</span></p>
+<p>모든 확률이 배경 사건 <span class="math inline">\(\gamma\)</span>에 조건화되어 있는 더 일반적인 형태도 성립한다.</p>
+<p><span class="math display">\[
+P(\alpha\mid\beta\cap\gamma)
+=
+\frac{P(\beta\mid\alpha\cap\gamma)P(\alpha\mid\gamma)}
+{P(\beta\mid\gamma)}.
+\]</span></p>
+<p>베이즈 규칙의 중요성은 “역방향” 조건부확률 <span class="math inline">\(P(\beta\mid\alpha)\)</span>에서 <span class="math inline">\(P(\alpha\mid\beta)\)</span>를 계산할 수 있게 한다는 점에 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 2.1 - 성적과 지능</strong><br>
+학생 집단에서 <code>Smart</code>는 지능이 높은 학생, <code>GradeA</code>는 A 성적을 받은 학생을 나타낸다고 하자. 과거 통계 등에 근거하여 <span class="math display">\[
+P(GradeA\mid Smart)=0.6
+\]</span> 이라고 믿고 있으며, 특정 학생이 A 성적을 받았다는 사실을 알게 되었다. 이 학생이 지능이 높을 확률을 추정할 수 있을까?</p>
+<p>베이즈 규칙에 따르면 이 확률은 학생이 지능이 높을 사전확률과 학생이 A 성적을 받을 확률에 의존한다. 예를 들어 <span class="math display">\[
+P(Smart)=0.3,\qquad P(GradeA)=0.2
+\]</span> 라면, <span class="math display">\[
+P(Smart\mid GradeA)
+=\frac{0.6\times0.3}{0.2}=0.9.
+\]</span> 따라서 A 성적은 학생이 지능이 높다는 강한 증거이다.</p>
+<p>반면 시험이 더 쉬워서 A 성적이 흔하고 <span class="math inline">\(P(GradeA)=0.4\)</span>라면, <span class="math display">\[
+P(Smart\mid GradeA)
+=\frac{0.6\times0.3}{0.4}=0.45.
+\]</span> 이 경우 A 성적은 지능에 대해 훨씬 덜 결정적인 정보가 된다.</p>
+</blockquote>
+<p>이 추론의 중요성을 보여 주는 또 다른 고전적 예는 질병 선별검사이다. 다음 예는 설명을 위한 가상 수치이며 실제 통계와 관련이 없다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 2.2 - 결핵 선별검사와 기저율</strong><br>
+결핵(TB) 피부검사가 95% 정확하다고 하자. 즉 결핵 감염자라면 검사 양성일 확률이 0.95이고, 감염자가 아니라면 검사 음성일 확률이 0.95이다. 어떤 사람이 양성 결과를 받았다면 실제 감염자일 확률은 얼마인가?</p>
+<p>단순한 추론은 검사 오류율이 5%이므로 양성자의 감염 확률이 0.95라고 생각하게 만들 수 있다. 그러나 베이즈 규칙을 적용하려면 결핵 감염의 사전확률과 양성 결과가 나타날 전체 확률을 함께 고려해야 한다.</p>
+<p>검사 대상자 1,000명 중 1명이 감염자라고 하자. <span class="math display">\[
+P(TB)=0.001.
+\]</span> 감염자이면서 양성일 비율은 <span class="math display">\[
+0.001\times0.95=0.00095
+\]</span> 이고, 비감염자이면서 위양성일 비율은 <span class="math display">\[
+0.999\times0.05=0.04995
+\]</span> 이다. 따라서 양성 결과의 전체 확률은 <span class="math display">\[
+P(Positive)=0.00095+0.04995=0.0509.
+\]</span> 베이즈 규칙을 적용하면 <span class="math display">\[
+P(TB\mid Positive)
+=\frac{0.001\times0.95}{0.0509}
+\approx0.0187.
+\]</span> 즉 양성 판정을 받은 사람은 무작위로 선택한 사람보다 감염 가능성이 훨씬 높지만, 실제 감염자는 양성자 중 2% 미만이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>학습 보충 - 민감도와 특이도만으로는 충분하지 않다</strong><br>
+선별검사의 사후확률은 검사 정확도뿐 아니라 질병의 유병률 또는 기저율에 크게 좌우된다. 희귀질환에서는 특이도가 높지 않으면 위양성의 절대 수가 실제 양성보다 훨씬 많아질 수 있다. 베이즈 네트워크에서 사전분포가 중요한 이유를 보여 주는 대표적 사례이다.</p>
+</blockquote>
+</section>
+</section>
+<section id="확률변수와-결합분포" class="level3">
+<h3 class="anchored" data-anchor-id="확률변수와-결합분포">2.1.3 확률변수와 결합분포</h3>
+<section id="동기" class="level4">
+<h4 class="anchored" data-anchor-id="동기">2.1.3.1 동기</h4>
+<p>지금까지 확률분포에 관한 논의는 사건을 중심으로 이루어졌다. 형식적으로는 측정 가능한 사건의 집합에 포함된 어떤 사건도 고려할 수 있으며, 사건은 결과들의 집합으로 기술된다. 그러나 많은 경우에는 결과 자체의 <strong>속성(attribute)</strong>을 직접 다루는 것이 더 자연스럽다.</p>
+<p>예를 들어 환자를 고려한다면, 가능한 질병과 증상에 확률을 부여하는 데 관련된 속성으로 나이, 성별, 흡연력을 생각할 수 있다. 그리고 “나이가 55세를 초과하고, 중증 흡연력이 있으며, 반복적인 기침을 겪는다”와 같은 사건을 표현하고 싶을 수 있다.</p>
+<p>앞의 학생 집단 예를 다시 생각하자. 학생의 지능, 최종 성적 등을 추론하고자 한다. A 성적을 받은 학생의 부분집합을 <code>GradeA</code>라는 사건으로 표현할 수 있지만, B 성적, C 성적 등까지 모두 별도의 사건으로 표현하면 논의가 번거로워진다. 따라서 학생의 성적이라는 속성을 수학적으로 직접 지칭할 방법이 필요하다.</p>
+<p>서로 다른 결과에서 속성과 그 값을 다루기 위한 형식적 장치가 <strong>확률변수(random variable)</strong>이다. 확률변수는 각 결과의 어떤 속성을 보고하는 방법이다. 예를 들어 학생의 최종 성적을 나타내는 확률변수 <code>Grade</code>가 있다면,</p>
+<p><span class="math display">\[
+P(Grade=A)
+\]</span></p>
+<p>라는 표현은 <span class="math inline">\(P(GradeA)\)</span>의 또 다른 표기이다.</p>
+</section>
+<section id="확률변수란-무엇인가" class="level4">
+<h4 class="anchored" data-anchor-id="확률변수란-무엇인가">2.1.3.2 확률변수란 무엇인가?</h4>
+<p>형식적으로 <code>Grade</code>와 같은 확률변수는 결과공간 <span class="math inline">\(\Omega\)</span>의 각 결과에 하나의 값을 대응시키는 함수로 정의된다. 예를 들어 함수 <span class="math inline">\(f_{Grade}\)</span>는 <span class="math inline">\(\Omega\)</span>의 각 학생을 A, B, C 중 하나의 성적에 대응시킨다.</p>
+<p>사건 <span class="math inline">\(Grade=A\)</span>는 다음 사건을 줄여 쓴 것이다.</p>
+<p><span class="math display">\[
+\{\omega\in\Omega:f_{Grade}(\omega)=A\}.
+\]</span></p>
+<p>학생의 지능을 단순화를 위해 <code>high</code> 또는 <code>low</code> 두 값으로 나타내는 확률변수 <code>Intelligence</code>도 둘 수 있다. 이때 사건 <span class="math inline">\(Intelligence=high\)</span>는 지능이 높은 학생들의 집합을 뜻한다.</p>
+<p>확률변수는 서로 다른 값의 집합을 가질 수 있다. 앞의 예처럼 소수의 값 중 하나를 취하는 <strong>범주형 또는 이산 확률변수</strong>를 생각할 수 있다. 학생의 키를 나타내는 <code>Height</code>처럼 정수 또는 실수의 무한히 많은 값을 취하는 확률변수도 생각할 수 있다.</p>
+<p>확률변수 <span class="math inline">\(X\)</span>가 취할 수 있는 값의 집합은 다음과 같이 나타낸다.</p>
+<p><span class="math display">\[
+Val(X).
+\]</span></p>
+<p>이 책에서는 주로 범주형 확률변수 또는 실숫값을 취하는 확률변수를 다룬다. 확률변수는 보통 대문자 로마자 <span class="math inline">\(X,Y,Z\)</span>로 나타낸다. 일반적인 확률변수의 값을 언급할 때에는 대응하는 소문자를 사용한다. 예를 들어 <span class="math inline">\(x\)</span>는 <span class="math inline">\(X\)</span>의 일반적인 값을 나타내며, 다음과 같이 쓸 수 있다.</p>
+<p><span class="math display">\[
+P(X=x)\ge 0\qquad\text{for all }x\in Val(X).
+\]</span></p>
+<p>범주형 확률변수 <span class="math inline">\(X\)</span>의 가능한 값이 <span class="math inline">\(k=|Val(X)|\)</span>개라면, 그 구체적인 값들을 <span class="math inline">\(x^1,\ldots,x^k\)</span>로 열거할 수 있다. 따라서 다음이 성립한다.</p>
+<p><span class="math display">\[
+\sum_{i=1}^{k}P(X=x^i)=1.
+\]</span></p>
+<p>이러한 변수 위의 분포를 <strong>다항분포(multinomial distribution)</strong>라고 한다.</p>
+<p><span class="math inline">\(Val(X)=\{false,true\}\)</span>인 이진 확률변수의 경우에는 흔히 <span class="math inline">\(x^1\)</span>로 <code>true</code>, <span class="math inline">\(x^0\)</span>로 <code>false</code>를 나타낸다. 이러한 확률변수의 분포를 <strong>베르누이분포(Bernoulli distribution)</strong>라고 한다.</p>
+<p>확률변수 집합은 굵은 글씨로 나타낸다. 예를 들어 <span class="math inline">\(\mathbf{X},\mathbf{Y},\mathbf{Z}\)</span>는 보통 확률변수의 집합이고, <span class="math inline">\(\mathbf{x},\mathbf{y},\mathbf{z}\)</span>는 각각 그 변수 집합에 대한 값의 할당을 나타낸다.</p>
+<p><span class="math inline">\(Val(\mathbf{X})\)</span>는 변수 집합 <span class="math inline">\(\mathbf{X}\)</span>에 가능한 모든 공동 할당의 집합을 뜻하며, 항상 <span class="math inline">\(\mathbf{x}\in Val(\mathbf{X})\)</span>이다. <span class="math inline">\(\mathbf{Y}\subseteq\mathbf{X}\)</span>이면 <span class="math inline">\(\mathbf{x}\langle\mathbf{Y}\rangle\)</span>는 <span class="math inline">\(\mathbf{x}\)</span> 중 <span class="math inline">\(\mathbf{Y}\)</span>에 속한 변수에 대한 할당만을 뜻한다.</p>
+<p><span class="math inline">\(\mathbf{X}\)</span>에 대한 할당 <span class="math inline">\(\mathbf{x}\)</span>와 <span class="math inline">\(\mathbf{Y}\)</span>에 대한 할당 <span class="math inline">\(\mathbf{y}\)</span>가 두 집합의 공통 변수에서 동일한 값을 가지면 다음과 같이 쓴다.</p>
+<p><span class="math display">\[
+\mathbf{x}\sim\mathbf{y}
+\quad\Longleftrightarrow\quad
+\mathbf{x}\langle\mathbf{X}\cap\mathbf{Y}\rangle
+=
+\mathbf{y}\langle\mathbf{X}\cap\mathbf{Y}\rangle.
+\]</span></p>
+<p>많은 경우 <span class="math inline">\(P(X=x)\)</span>에서 <span class="math inline">\(x\)</span>가 이미 <span class="math inline">\(X\)</span>의 값이라는 사실이 문맥으로 분명하므로, 다음과 같이 줄여 쓴다.</p>
+<p><span class="math display">\[
+P(x)\equiv P(X=x).
+\]</span></p>
+<p>또한 <span class="math inline">\(\sum_x\)</span>는 <span class="math inline">\(X\)</span>가 취할 수 있는 모든 값에 대한 합을 뜻한다. 따라서 정규화 조건은 흔히 다음과 같이 쓴다.</p>
+<p><span class="math display">\[
+\sum_x P(x)=1.
+\]</span></p>
+<p>결합사건의 표기도 간략화한다. 다음 표현 대신</p>
+<p><span class="math display">\[
+P((X=x)\cap(Y=y))
+\]</span></p>
+<p>보통 다음과 같이 쓴다.</p>
+<p><span class="math display">\[
+P(X=x,Y=y),
+\]</span></p>
+<p>또는 더 간단히 <span class="math inline">\(P(x,y)\)</span>라고 쓴다.</p>
+<blockquote class="blockquote">
+<p><strong>학습 보충 - 확률변수는 무작위 그 자체가 아니라 함수이다</strong><br>
+엄밀하게 말하면 확률변수는 결과공간의 결과를 숫자나 범주에 대응시키는 함수이다. 무작위성은 결과 <span class="math inline">\(\omega\)</span>가 무엇이 될지 모른다는 데서 오며, 확률변수 <span class="math inline">\(X(\omega)\)</span>는 그 결과에서 관심 속성만 추출한다.</p>
+</blockquote>
+</section>
+<section id="주변분포와-결합분포" class="level4">
+<h4 class="anchored" data-anchor-id="주변분포와-결합분포">2.1.3.3 주변분포와 결합분포</h4>
+<p>확률변수 <span class="math inline">\(X\)</span>를 정의하면, <span class="math inline">\(X\)</span>로 표현할 수 있는 사건들에 대한 분포를 생각할 수 있다. 이를 <span class="math inline">\(X\)</span>의 <strong>주변분포(marginal distribution)</strong>라고 하며 <span class="math inline">\(P(X)\)</span>로 나타낸다.</p>
+<p>학생 집단 예에서 <code>Intelligence</code>의 주변분포는 다음과 같은 사건에 확률을 부여한다.</p>
+<p><span class="math display">\[
+P(Intelligence=high),\qquad
+P(Intelligence=low),
+\]</span></p>
+<p>그리고 자명한 사건</p>
+<p><span class="math display">\[
+P(Intelligence\in\{high,low\})
+\]</span></p>
+<p>에도 확률을 부여한다. 구체적으로 다음과 같다고 하자.</p>
+<p><span class="math display">\[
+P(Intelligence=high)=0.3,
+\]</span></p>
+<p><span class="math display">\[
+P(Intelligence=low)=0.7.
+\]</span></p>
+<p><code>Grade</code>에 대해서도 주변분포를 정의할 수 있다. 예를 들어 다음과 같다고 하자.</p>
+<p><span class="math display">\[
+P(Grade=A)=0.25,
+\]</span></p>
+<p><span class="math display">\[
+P(Grade=B)=0.37,
+\]</span></p>
+<p><span class="math display">\[
+P(Grade=C)=0.38.
+\]</span></p>
+<p>주변분포는 정의 2.1의 성질을 만족하는 확률분포이다. 달라진 점은 전체 사건공간 중 확률변수 <span class="math inline">\(X\)</span>로 기술할 수 있는 사건들에만 관심을 제한한다는 것이다.</p>
+<p>여러 확률변수의 값을 동시에 포함하는 질문도 자주 필요하다. 예를 들어 “지능이 높고 A 성적을 받았다”라는 사건을 생각할 수 있다. 이러한 사건을 다루려면 두 확률변수의 <strong>결합분포(joint distribution)</strong>가 필요하다.</p>
+<p>일반적으로 확률변수 집합</p>
+<p><span class="math display">\[
+\mathbf{X}=\{X_1,\ldots,X_n\}
+\]</span></p>
+<p>의 결합분포는</p>
+<p><span class="math display">\[
+P(X_1,\ldots,X_n)
+\]</span></p>
+<p>으로 나타내며, 이 변수들로 명시되는 사건에 확률을 부여하는 분포이다. <span class="math inline">\(\mathbf{X}\)</span>의 모든 변수에 대한 완전한 할당은 <span class="math inline">\(\xi\)</span>로 나타내며,</p>
+<p><span class="math display">\[
+\xi\in Val(\mathbf{X})
+\]</span></p>
+<p>이다.</p>
+<p>두 확률변수의 결합분포는 주변분포와 일관되어야 한다. 예를 들어</p>
+<p><span class="math display">\[
+P(x)=\sum_yP(x,y)
+\]</span></p>
+<p>가 성립해야 한다. 그림 2.1에서는 각 행의 확률을 합하여 <code>Grade</code>의 주변분포를 계산하고, 각 열의 확률을 합하여 <code>Intelligence</code>의 주변분포를 계산한다. 이 합들이 표의 행과 열의 가장자리에 기록되기 때문에 “주변(marginal)” 분포라는 이름이 붙었다.</p>
+<div id="fig-joint-distribution" class="figure-placeholder quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-joint-distribution-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<p><strong>Figure 2.1. 결합분포 <span class="math inline">\(P(Intelligence,Grade)\)</span>의 예. 열은 지능의 값, 행은 성적의 값을 나타내며, 마지막 행과 열은 각 변수의 주변분포이다</strong></p>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-joint-distribution-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.1: <em>[그림 삽입 위치: 원본 그림을 스캔한 뒤 이 블록을 이미지로 교체]</em>
+</figcaption>
+</figure>
+</div>
+<p><span class="math inline">\(\mathbf{X}=\{X_1,\ldots,X_n\}\)</span> 위의 결합분포가 있다고 하자. 이 변수들로 표현할 수 있는 가장 세밀한 사건은 다음과 같이 모든 변수에 하나씩 값을 지정하는 사건이다.</p>
+<p><span class="math display">\[
+X_1=x_1,\ X_2=x_2,\ \ldots,\ X_n=x_n.
+\]</span></p>
+<p>이러한 두 사건은 완전히 동일하거나 서로소이다. 두 사건 모두 모든 변수에 값을 지정하기 때문이다. 또한 <span class="math inline">\(\mathbf{X}\)</span>의 변수로 정의되는 모든 사건은 이러한 기본 사건들의 합집합으로 표현할 수 있다.</p>
+<p>따라서 우리는 사실상 <strong>정준 결과공간(canonical outcome space)</strong>에서 작업한다. 이 공간에서는 각 결과가 <span class="math inline">\(X_1,\ldots,X_n\)</span>에 대한 하나의 결합 할당에 대응한다. 원래 결과공간이 모든 학생의 집합이든, 지능과 성적의 모든 조합으로 이루어진 정준 공간이든 확률 계산은 동일하다.</p>
+<p>모든 변수에 값을 할당한 이러한 가장 작은 결과를 <strong>원자적 결과(atomic outcome)</strong>라고 하며 <span class="math inline">\(\xi\)</span>로 나타낸다. 예를 들어 <span class="math inline">\(\mathbf{X}=\{Intelligence,Grade\}\)</span>이면 그림 2.1에 보인 여섯 개의 원자적 결과가 존재한다.</p>
+<p>이후에는 결과공간과 측정 가능한 사건의 집합을 매번 명시하지 않고, 정준 결과공간을 암묵적으로 가정한다.</p>
+</section>
+<section id="조건부확률-1" class="level4">
+<h4 class="anchored" data-anchor-id="조건부확률-1">2.1.3.4 조건부확률</h4>
+<p>조건부확률의 개념은 확률변수 위에 유도된 분포에도 적용된다. 예를 들어</p>
+<p><span class="math display">\[
+P(Intelligence\mid Grade=A)
+\]</span></p>
+<p>는 학생의 성적이 A라는 사실이 주어졌을 때 <code>Intelligence</code>로 기술할 수 있는 사건들의 조건부분포를 뜻한다.</p>
+<p>다른 변수의 값을 관측한 후 한 변수에 대해 얻은 조건부분포는 주변분포와 같지 않다. 예를 들어</p>
+<p><span class="math display">\[
+P(Intelligence=high)=0.3
+\]</span></p>
+<p>이지만 그림 2.1에서</p>
+<p><span class="math display">\[
+P(Intelligence=high\mid Grade=A)
+=\frac{0.18}{0.25}=0.72.
+\]</span></p>
+<p>따라서</p>
+<p><span class="math display">\[
+P(Intelligence\mid Grade=A)
+\ne P(Intelligence).
+\]</span></p>
+<p>주변분포는 특정 학생에 관해 추가 정보를 알기 전의 사전 지식을 나타내고, 조건부분포는 그 학생의 성적을 알게 된 후의 더 정보가 많은 분포를 나타낸다.</p>
+<p><span class="math inline">\(P(X\mid Y)\)</span>는 하나의 조건부분포가 아니라, <span class="math inline">\(Y\)</span>의 각 값마다 <span class="math inline">\(X\)</span>의 값에 대한 확률분포를 제공하는 <strong>조건부분포들의 집합</strong>으로 이해할 수 있다. 이 표기를 사용하면 연쇄법칙을 다음과 같이 간단히 나타낼 수 있다.</p>
+<p><span class="math display">\[
+P(X,Y)=P(X)P(Y\mid X).
+\]</span></p>
+<p>여러 변수에 대해서는</p>
+<p><span class="math display">\[
+P(X_1,\ldots,X_k)
+=P(X_1)P(X_2\mid X_1)\cdots
+P(X_k\mid X_1,\ldots,X_{k-1}).
+\tag{2.5}
+\]</span></p>
+<p>베이즈 규칙도 조건부분포의 형태로 다음과 같이 쓸 수 있다.</p>
+<p><span class="math display">\[
+P(X\mid Y)
+=\frac{P(X)P(Y\mid X)}{P(Y)}.
+\tag{2.6}
+\]</span></p>
+</section>
+</section>
+<section id="독립성과-조건부독립성" class="level3">
+<h3 class="anchored" data-anchor-id="독립성과-조건부독립성">2.1.4 독립성과 조건부독립성</h3>
+<section id="독립성" class="level4">
+<h4 class="anchored" data-anchor-id="독립성">2.1.4.1 독립성</h4>
+<p>보통은 <span class="math inline">\(P(\alpha\mid\beta)\)</span>가 <span class="math inline">\(P(\alpha)\)</span>와 다를 것으로 예상한다. 즉 <span class="math inline">\(\beta\)</span>가 참이라는 사실을 알면 <span class="math inline">\(\alpha\)</span>에 대한 확률이 바뀐다. 그러나 어떤 상황에서는 다음 등식이 성립할 수 있다.</p>
+<p><span class="math display">\[
+P(\alpha\mid\beta)=P(\alpha).
+\]</span></p>
+<p>이 경우 <span class="math inline">\(\beta\)</span>가 발생했다는 정보가 <span class="math inline">\(\alpha\)</span>의 확률을 바꾸지 않는다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.2 - 독립사건</strong><br>
+분포 <span class="math inline">\(P\)</span>에서 사건 <span class="math inline">\(\alpha\)</span>가 사건 <span class="math inline">\(\beta\)</span>와 독립이라는 것을 <span class="math display">\[
+P\models(\alpha\perp\beta)
+\]</span> 로 나타낸다. 이는 <span class="math inline">\(P(\beta)&gt;0\)</span>일 때 <span class="math display">\[
+P(\alpha\mid\beta)=P(\alpha)
+\]</span> 이거나, 또는 <span class="math inline">\(P(\beta)=0\)</span>인 경우를 뜻한다.</p>
+</blockquote>
+<p>독립성은 다음과 같이 동등하게 표현할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>명제 2.1</strong><br>
+분포 <span class="math inline">\(P\)</span>가 <span class="math inline">\((\alpha\perp\beta)\)</span>를 만족할 필요충분조건은 <span class="math display">\[
+P(\alpha\cap\beta)=P(\alpha)P(\beta)
+\]</span> 이다.</p>
+</blockquote>
+<p><strong>증명.</strong> 먼저 <span class="math inline">\(P(\beta)=0\)</span>인 경우를 생각하자. 그러면 <span class="math inline">\(P(\alpha\cap\beta)=0\)</span>이므로 등식은 즉시 성립한다.</p>
+<p>이제 <span class="math inline">\(P(\beta)\ne0\)</span>이라고 하자. 연쇄법칙에 따라</p>
+<p><span class="math display">\[
+P(\alpha\cap\beta)=P(\alpha\mid\beta)P(\beta).
+\]</span></p>
+<p><span class="math inline">\(\alpha\)</span>와 <span class="math inline">\(\beta\)</span>가 독립이면 <span class="math inline">\(P(\alpha\mid\beta)=P(\alpha)\)</span>이므로</p>
+<p><span class="math display">\[
+P(\alpha\cap\beta)=P(\alpha)P(\beta).
+\]</span></p>
+<p>반대로</p>
+<p><span class="math display">\[
+P(\alpha\cap\beta)=P(\alpha)P(\beta)
+\]</span></p>
+<p>라고 가정하자. 조건부확률의 정의에서</p>
+<p><span class="math display">\[
+P(\alpha\mid\beta)
+=\frac{P(\alpha\cap\beta)}{P(\beta)}
+=\frac{P(\alpha)P(\beta)}{P(\beta)}
+=P(\alpha).
+\]</span></p>
+<p>따라서 두 조건은 동등하다. <span class="math inline">\(\square\)</span></p>
+<p>이 대안적 정의에서 독립성이 대칭적이라는 사실을 바로 알 수 있다.</p>
+<p><span class="math display">\[
+(\alpha\perp\beta)\Longrightarrow(\beta\perp\alpha).
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>예제 2.3 - 서로 다른 과정과 같은 과정에서의 독립</strong><br>
+동전을 두 번 던지고, <span class="math inline">\(\alpha\)</span>를 “첫 번째 던지기에서 앞면”, <span class="math inline">\(\beta\)</span>를 “두 번째 던지기에서 앞면”이라고 하자. 두 사건은 독립이라고 기대할 수 있다. 두 번째 결과를 알아도 첫 번째 결과의 확률은 변하지 않는다. 서로 다른 물리적 시행에서 사건이 만들어지므로 독립성이 직관적이다.</p>
+<p>그러나 같은 물리적 시행에서 정의된 사건도 독립일 수 있다. 공정한 주사위에서 <span class="math inline">\(\alpha\)</span>를 “짝수 눈”, <span class="math inline">\(\beta\)</span>를 “1 또는 2”라고 하자. 그러면 <span class="math display">\[
+P(\alpha)=\frac12,\qquad
+P(\beta)=\frac13,
+\]</span> <span class="math display">\[
+P(\alpha\cap\beta)=P(\{2\})=\frac16
+=\frac12\times\frac13.
+\]</span> 따라서 두 사건은 독립이다.</p>
+</blockquote>
+</section>
+<section id="조건부독립성" class="level4">
+<h4 class="anchored" data-anchor-id="조건부독립성">2.1.4.2 조건부독립성</h4>
+<blockquote class="blockquote">
+<p><strong>핵심 개념 - 독립보다 흔한 조건부독립</strong><br>
+완전히 독립인 두 사건을 만나는 경우는 흔하지 않다. 더 일반적인 상황은 어떤 추가 사건이 주어졌을 때 두 사건이 독립이 되는 경우이다.</p>
+</blockquote>
+<p>학생이 Stanford와 MIT 대학원에 합격할 가능성을 생각하자. <code>Stanford</code>를 “Stanford에 합격”, <code>MIT</code>를 “MIT에 합격”이라는 사건으로 정의한다. 대부분의 합리적인 분포에서 두 사건은 독립이 아니다. Stanford 합격 사실을 알게 되면 그 학생이 우수하다는 증거가 되므로 MIT 합격 가능성도 높게 평가하게 된다.</p>
+<p>그러나 두 대학이 오직 학생의 GPA만을 바탕으로 입학 결정을 내리고, 그 학생의 GPA가 A라는 사실을 이미 알고 있다고 하자. 이 경우 Stanford 합격 사실을 추가로 알아도 MIT 합격확률은 변하지 않는다고 주장할 수 있다. GPA가 MIT 합격 가능성과 관련된 정보를 이미 모두 제공하기 때문이다.</p>
+<p>형식적으로는 다음과 같다.</p>
+<p><span class="math display">\[
+P(MIT\mid Stanford,GradeA)
+=P(MIT\mid GradeA).
+\]</span></p>
+<p>이때 <code>GradeA</code>가 주어졌을 때 <code>MIT</code>와 <code>Stanford</code>가 조건부로 독립이라고 한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.3 - 사건의 조건부독립성</strong><br>
+분포 <span class="math inline">\(P\)</span>에서 사건 <span class="math inline">\(\gamma\)</span>가 주어졌을 때 사건 <span class="math inline">\(\alpha\)</span>가 사건 <span class="math inline">\(\beta\)</span>와 조건부로 독립임을 <span class="math display">\[
+P\models(\alpha\perp\beta\mid\gamma)
+\]</span> 로 나타낸다. 이는 <span class="math inline">\(P(\beta\cap\gamma)&gt;0\)</span>일 때 <span class="math display">\[
+P(\alpha\mid\beta\cap\gamma)=P(\alpha\mid\gamma)
+\]</span> 이거나, 또는 <span class="math inline">\(P(\beta\cap\gamma)=0\)</span>인 경우를 뜻한다.</p>
+</blockquote>
+<p>무조건 독립성에서와 같은 논리를 확장하면 다음 동등한 표현을 얻는다.</p>
+<blockquote class="blockquote">
+<p><strong>명제 2.2</strong><br>
+분포 <span class="math inline">\(P\)</span>가 <span class="math inline">\((\alpha\perp\beta\mid\gamma)\)</span>를 만족할 필요충분조건은 <span class="math display">\[
+P(\alpha\cap\beta\mid\gamma)
+=P(\alpha\mid\gamma)P(\beta\mid\gamma)
+\]</span> 이다.</p>
+</blockquote>
+</section>
+<section id="확률변수의-독립성" class="level4">
+<h4 class="anchored" data-anchor-id="확률변수의-독립성">2.1.4.3 확률변수의 독립성</h4>
+<p>지금까지는 사건 사이의 독립성을 다루었다. 예를 들어 첫 번째 동전 던지기의 앞면 사건과 두 번째 동전 던지기의 앞면 사건이 독립이라고 말할 수 있다. 그러나 우리는 두 동전 던지기에서 가능한 <strong>모든 값의 조합</strong>이 독립이라는 더 강한 명제를 표현하고 싶다. 이를 위해 독립성을 확률변수 집합으로 일반화한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.4 - 확률변수 집합의 조건부독립성</strong><br>
+<span class="math inline">\(\mathbf{X},\mathbf{Y},\mathbf{Z}\)</span>를 확률변수의 집합이라고 하자. 모든 <span class="math display">\[
+\mathbf{x}\in Val(\mathbf{X}),\quad
+\mathbf{y}\in Val(\mathbf{Y}),\quad
+\mathbf{z}\in Val(\mathbf{Z})
+\]</span> 에 대해 분포 <span class="math inline">\(P\)</span>가 <span class="math display">\[
+(\mathbf{X}=\mathbf{x}\perp
+\mathbf{Y}=\mathbf{y}\mid
+\mathbf{Z}=\mathbf{z})
+\]</span> 를 만족하면, <span class="math inline">\(\mathbf{Z}\)</span>가 주어졌을 때 <span class="math inline">\(\mathbf{X}\)</span>와 <span class="math inline">\(\mathbf{Y}\)</span>가 조건부로 독립이라고 한다. <span class="math inline">\(\mathbf{Z}\)</span>의 변수들은 흔히 <strong>관측된 변수(observed variables)</strong>라고 부른다.</p>
+<p><span class="math inline">\(\mathbf{Z}\)</span>가 공집합이면 <span class="math display">\[
+(\mathbf{X}\perp\mathbf{Y}\mid\varnothing)
+\]</span> 대신 <span class="math display">\[
+(\mathbf{X}\perp\mathbf{Y})
+\]</span> 라고 쓰며, <span class="math inline">\(\mathbf{X}\)</span>와 <span class="math inline">\(\mathbf{Y}\)</span>가 <strong>주변적으로 독립(marginally independent)</strong>이라고 한다.</p>
+</blockquote>
+<p>따라서 확률변수에 대한 독립성 명제는 가능한 모든 변수값에 대한 보편적 명제이다.</p>
+<blockquote class="blockquote">
+<p><strong>명제 2.3</strong><br>
+분포 <span class="math inline">\(P\)</span>가 <span class="math inline">\((\mathbf{X}\perp\mathbf{Y}\mid\mathbf{Z})\)</span>를 만족할 필요충분조건은 <span class="math display">\[
+P(\mathbf{X},\mathbf{Y}\mid\mathbf{Z})
+=P(\mathbf{X}\mid\mathbf{Z})
+P(\mathbf{Y}\mid\mathbf{Z})
+\]</span> 이다.</p>
+</blockquote>
+<p>하나의 조건부독립성 명제를 알고 있을 때 다른 독립성도 자동으로 따라오는지 살펴볼 수 있다. 먼저 앞에서 이미 본 <strong>대칭성(symmetry)</strong>이 있다.</p>
+<p><span class="math display">\[
+(\mathbf{X}\perp\mathbf{Y}\mid\mathbf{Z})
+\Longrightarrow
+(\mathbf{Y}\perp\mathbf{X}\mid\mathbf{Z}).
+\tag{2.7}
+\]</span></p>
+<p>조건부독립성에는 분포의 중요한 성질을 간결하게 증명하는 데 유용한 몇 가지 다른 성질도 있다.</p>
+<p><strong>분해성(decomposition)</strong></p>
+<p><span class="math display">\[
+(\mathbf{X}\perp\mathbf{Y},\mathbf{W}\mid\mathbf{Z})
+\Longrightarrow
+(\mathbf{X}\perp\mathbf{Y}\mid\mathbf{Z}).
+\tag{2.8}
+\]</span></p>
+<p><strong>약한 합집합성(weak union)</strong></p>
+<p><span class="math display">\[
+(\mathbf{X}\perp\mathbf{Y},\mathbf{W}\mid\mathbf{Z})
+\Longrightarrow
+(\mathbf{X}\perp\mathbf{Y}\mid\mathbf{Z},\mathbf{W}).
+\tag{2.9}
+\]</span></p>
+<p><strong>축약성(contraction)</strong></p>
+<p><span class="math display">\[
+(\mathbf{X}\perp\mathbf{W}\mid\mathbf{Z},\mathbf{Y})
+\ \&amp;\
+(\mathbf{X}\perp\mathbf{Y}\mid\mathbf{Z})
+\]</span></p>
+<p>이면</p>
+<p><span class="math display">\[
+(\mathbf{X}\perp\mathbf{Y},\mathbf{W}\mid\mathbf{Z}).
+\tag{2.10}
+\]</span></p>
+<p>다음 성질은 모든 분포에서 성립하지는 않지만 중요한 분포의 부분집합에서 성립한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.5 - 양의 분포</strong><br>
+공사건이 아닌 모든 사건 <span class="math inline">\(\alpha\in\mathcal{S}\)</span>에 대해 <span class="math display">\[
+P(\alpha)&gt;0
+\]</span> 이면 분포 <span class="math inline">\(P\)</span>를 <strong>양의 분포(positive distribution)</strong>라고 한다.</p>
+</blockquote>
+<p>양의 분포에서는 다음의 <strong>교차성(intersection)</strong>도 성립한다. <span class="math inline">\(\mathbf{X},\mathbf{Y},\mathbf{Z},\mathbf{W}\)</span>가 서로소인 변수 집합이면,</p>
+<p><span class="math display">\[
+(\mathbf{X}\perp\mathbf{Y}\mid\mathbf{Z},\mathbf{W})
+\ \&amp;\
+(\mathbf{X}\perp\mathbf{W}\mid\mathbf{Z},\mathbf{Y})
+\]</span></p>
+<p>로부터</p>
+<p><span class="math display">\[
+(\mathbf{X}\perp\mathbf{Y},\mathbf{W}\mid\mathbf{Z})
+\tag{2.11}
+\]</span></p>
+<p>가 따라온다.</p>
+<p>이러한 성질의 증명은 어렵지 않다. 예를 들어 분해성을 증명해 보자. 다음을 가정한다.</p>
+<p><span class="math display">\[
+(\mathbf{X}\perp\mathbf{Y},\mathbf{W}\mid\mathbf{Z}).
+\]</span></p>
+<p>조건부독립성의 정의에서</p>
+<p><span class="math display">\[
+P(\mathbf{X},\mathbf{Y},\mathbf{W}\mid\mathbf{Z})
+=P(\mathbf{X}\mid\mathbf{Z})
+P(\mathbf{Y},\mathbf{W}\mid\mathbf{Z})
+\]</span></p>
+<p>이다. 기본 확률법칙과 대수를 사용하면</p>
+<p><span class="math display">\[
+P(\mathbf{X},\mathbf{Y}\mid\mathbf{Z})
+=\sum_{\mathbf{w}}P(\mathbf{X},\mathbf{Y},\mathbf{w}\mid\mathbf{Z}).
+\]</span></p>
+<p><span class="math display">\[
+P(\mathbf{X},\mathbf{Y}\mid\mathbf{Z})
+=\sum_{\mathbf{w}}P(\mathbf{X}\mid\mathbf{Z})P(\mathbf{Y},\mathbf{w}\mid\mathbf{Z}).
+\]</span></p>
+<p><span class="math display">\[
+P(\mathbf{X},\mathbf{Y}\mid\mathbf{Z})
+=P(\mathbf{X}\mid\mathbf{Z})\sum_{\mathbf{w}}P(\mathbf{Y},\mathbf{w}\mid\mathbf{Z}).
+\]</span></p>
+<p><span class="math display">\[
+P(\mathbf{X},\mathbf{Y}\mid\mathbf{Z})
+=P(\mathbf{X}\mid\mathbf{Z})P(\mathbf{Y}\mid\mathbf{Z}).
+\]</span></p>
+<p>여기서 사용한 성질은 <strong>경우에 따른 추론(reasoning by cases)</strong>이며 연습문제 2.6에서 다룬다. 따라서</p>
+<p><span class="math display">\[
+(\mathbf{X}\perp\mathbf{Y}\mid\mathbf{Z})
+\]</span></p>
+<p>가 성립한다.</p>
+<blockquote class="blockquote">
+<p><strong>학습 보충 - 조건부독립성이 그래픽 모델의 핵심인 이유</strong><br>
+조건부독립성은 어떤 변수가 주어지면 다른 변수가 추가 정보를 제공하지 않는다는 뜻이다. 이 성질이 존재하면 고차원 결합분포를 작은 조건부분포의 곱으로 분해할 수 있다. 베이즈 네트워크의 그래프는 바로 이러한 독립성 구조를 표현한다.</p>
+</blockquote>
+</section>
+</section>
+<section id="분포에-대한-질의" class="level3">
+<h3 class="anchored" data-anchor-id="분포에-대한-질의">2.1.5 분포에 대한 질의</h3>
+<p>이 책의 핵심 관심사는 여러 확률변수에 대한 결합확률분포를 사용하여 관심 있는 질의에 답하는 것이다.</p>
+<section id="확률-질의" class="level4">
+<h4 class="anchored" data-anchor-id="확률-질의">2.1.5.1 확률 질의</h4>
+<p>가장 일반적인 질의 유형은 <strong>확률 질의(probability query)</strong>이다. 확률 질의는 두 부분으로 구성된다.</p>
+<ol type="1">
+<li><strong>증거(evidence)</strong>: 모델의 확률변수 부분집합 <span class="math inline">\(\mathbf{E}\)</span>와 이 변수들에 대한 값의 할당 <span class="math inline">\(\mathbf{e}\)</span></li>
+<li><strong>질의변수(query variables)</strong>: 네트워크의 확률변수 부분집합 <span class="math inline">\(\mathbf{Y}\)</span></li>
+</ol>
+<p>목표는 다음 분포를 계산하는 것이다.</p>
+<p><span class="math display">\[
+P(\mathbf{Y}\mid\mathbf{E}=\mathbf{e}).
+\]</span></p>
+<p>이는 <span class="math inline">\(\mathbf{E}=\mathbf{e}\)</span>라는 사실에 조건화된 <span class="math inline">\(\mathbf{Y}\)</span>의 값 <span class="math inline">\(\mathbf{y}\)</span>에 대한 <strong>사후확률분포(posterior distribution)</strong>이다. 또한 <span class="math inline">\(\mathbf{e}\)</span>로 조건화하여 얻은 새로운 분포에서 <span class="math inline">\(\mathbf{Y}\)</span>에 대한 주변분포라고 볼 수도 있다.</p>
+<blockquote class="blockquote">
+<p><strong>학습 보충 - 진단 문제의 전형적 형태</strong><br>
+환자의 검사 결과와 증상을 <span class="math inline">\(\mathbf{E}=\mathbf{e}\)</span>로 두고 질병 상태를 <span class="math inline">\(\mathbf{Y}\)</span>로 두면, 진단 문제는 <span class="math inline">\(P(\mathbf{Y}\mid\mathbf{e})\)</span>를 계산하는 확률 질의가 된다.</p>
+</blockquote>
+</section>
+<section id="map-질의" class="level4">
+<h4 class="anchored" data-anchor-id="map-질의">2.1.5.2 MAP 질의</h4>
+<p>두 번째 중요한 과업은 변수의 어떤 부분집합에 대해 확률이 높은 결합 할당을 찾는 것이다. 가장 단순한 형태가 <strong>MAP 질의</strong>이며, <strong>가장 가능성 높은 설명(most probable explanation, MPE)</strong>이라고도 한다.</p>
+<p>MAP 질의의 목적은 모든 비증거 변수에 대한 가장 가능성 높은 할당을 찾는 것이다. <span class="math inline">\(\mathbf{W}=\mathbf{X}-\mathbf{E}\)</span>라고 하면, 증거 <span class="math inline">\(\mathbf{E}=\mathbf{e}\)</span>가 주어졌을 때 <span class="math inline">\(\mathbf{W}\)</span>의 가장 가능성 높은 할당은 다음과 같다.</p>
+<p><span class="math display">\[
+MAP(\mathbf{W}\mid\mathbf{e})
+=
+\operatorname*{arg\,max}_{\mathbf{w}}P(\mathbf{w},\mathbf{e}).
+\tag{2.12}
+\]</span></p>
+<p>일반적으로 <span class="math inline">\(\operatorname*{arg\,max}_x f(x)\)</span>는 <span class="math inline">\(f(x)\)</span>를 최대로 만드는 <span class="math inline">\(x\)</span>의 값을 뜻한다. 가장 높은 사후확률을 가지는 할당이 둘 이상일 수도 있다. 이 경우 MAP 과업이 가능한 모든 최적 할당의 집합을 반환한다고 정의할 수도 있고, 그중 임의의 하나를 반환한다고 정의할 수도 있다.</p>
+<p>MAP 질의와 확률 질의의 차이를 이해하는 것이 중요하다. MAP 질의에서는 <span class="math inline">\(\mathbf{W}\)</span> 전체에 대한 가장 가능성 높은 <strong>공동 할당</strong>을 찾는다. 변수 <span class="math inline">\(A\)</span> 하나의 가장 가능성 높은 값을 찾으려면 <span class="math inline">\(P(A\mid\mathbf{e})\)</span>를 계산한 후 가장 큰 확률을 가진 값을 선택하면 된다.</p>
+<blockquote class="blockquote">
+<p><strong>핵심 경고 - 개별 최빈값과 공동 최빈값은 다를 수 있다</strong><br>
+각 변수가 개별적으로 가장 가능성 높은 값을 선택하여 만든 할당은 모든 변수에 대한 가장 가능성 높은 공동 할당과 크게 다를 수 있다. 이 현상은 증거가 전혀 없는 가장 단순한 경우에도 발생한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 2.4 - 개별 MAP와 공동 MAP의 차이</strong><br>
+<span class="math inline">\(A\)</span>와 <span class="math inline">\(B\)</span>가 모두 이진 변수인 두 노드 연쇄 <span class="math inline">\(A\rightarrow B\)</span>를 생각하자. 다음 분포를 가정한다.</p>
+<p><span class="math inline">\(A\)</span>의 주변분포:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>값</th>
+<th style="text-align: right;"><span class="math inline">\(a^0\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(a^1\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>확률</td>
+<td style="text-align: right;">0.4</td>
+<td style="text-align: right;">0.6</td>
+</tr>
+</tbody>
+</table>
+<p><span class="math inline">\(B\)</span>의 조건부분포:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(A\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(P(b^0\mid A)\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(P(b^1\mid A)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(a^0\)</span></td>
+<td style="text-align: right;">0.1</td>
+<td style="text-align: right;">0.9</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(a^1\)</span></td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">0.5</td>
+</tr>
+</tbody>
+</table>
+<p>여기서 <span class="math inline">\(P(a^1)&gt;P(a^0)\)</span>이므로 <span class="math display">\[
+MAP(A)=a^1.
+\]</span> 그러나 공동 MAP는 <span class="math display">\[
+MAP(A,B)=(a^0,b^1)
+\]</span> 이다. <span class="math inline">\(a^1\)</span>이 주어졌을 때 <span class="math inline">\(B\)</span>의 두 값은 같은 확률을 가지므로 <span class="math inline">\(a^1\)</span>을 포함하는 가장 가능성 높은 공동 할당의 확률은 <span class="math display">\[
+0.6\times0.5=0.3
+\]</span> 이다. 반면 <span class="math inline">\(a^0\)</span>이 주어졌을 때 <span class="math inline">\(B\)</span>의 분포는 더 한쪽으로 치우쳐 있으므로 <span class="math display">\[
+P(a^0,b^1)=0.4\times0.9=0.36.
+\]</span> 따라서 <span class="math display">\[
+\operatorname*{arg\,max}_{a,b}P(a,b)
+\ne
+\left(
+\operatorname*{arg\,max}_aP(a),
+\operatorname*{arg\,max}_bP(b)
+\right).
+\tag{2.13}
+\]</span></p>
+</blockquote>
+</section>
+<section id="주변-map-질의" class="level4">
+<h4 class="anchored" data-anchor-id="주변-map-질의">2.1.5.3 주변 MAP 질의</h4>
+<p>예제 2.4의 현상을 의료 진단 문제에 적용해 보자. 가장 가능성 높은 질병이 여러 가능한 증상을 가지고 있으며, 각 증상이 어느 정도의 확률로 나타나지만 압도적으로 높은 확률은 아닐 수 있다. 반면 조금 더 희귀한 질병은 증상 수가 적고, 그 증상들이 해당 질병에서 매우 높은 확률로 나타날 수 있다.</p>
+<p>이 경우 질병과 모든 증상에 대한 공동 MAP 할당은 두 번째의 희귀 질병을 선택할 수 있다. 그러나 우리가 실제로 알고 싶은 것은 질병과 증상을 모두 포함한 가장 가능성 높은 세계 상태가 아니라 <strong>질병 변수만의 가장 가능성 높은 값</strong>이다.</p>
+<p>이를 위해 더 일반적인 질의인 <strong>주변 MAP(marginal MAP)</strong>을 사용한다. 질의변수 집합을 <span class="math inline">\(\mathbf{Y}\)</span>라고 할 때, 증거 <span class="math inline">\(\mathbf{E}=\mathbf{e}\)</span>가 주어진 상태에서 <span class="math inline">\(\mathbf{Y}\)</span>의 가장 가능성 높은 할당은</p>
+<p><span class="math display">\[
+MAP(\mathbf{Y}\mid\mathbf{e})
+=
+\operatorname*{arg\,max}_{\mathbf{y}}P(\mathbf{y}\mid\mathbf{e})
+\]</span></p>
+<p>이다.</p>
+<p><span class="math inline">\(\mathbf{Z}=\mathbf{X}-\mathbf{Y}-\mathbf{E}\)</span>라고 두면 주변 MAP 과업은 다음과 같다.</p>
+<p><span class="math display">\[
+MAP(\mathbf{Y}\mid\mathbf{e})
+=
+\operatorname*{arg\,max}_{\mathbf{Y}}
+\sum_{\mathbf{Z}}P(\mathbf{Y},\mathbf{Z}\mid\mathbf{e}).
+\]</span></p>
+<p>따라서 주변 MAP에는 합산과 최대화가 모두 포함된다. 이런 의미에서 조건부확률 질의와 MAP 질의의 요소를 함께 가진다.</p>
+<p>예제 2.4는 주변 MAP 할당이 단조적이지 않다는 점도 보여 준다. <span class="math inline">\(MAP(\mathbf{Y}_1\mid\mathbf{e})\)</span>는 <span class="math inline">\(MAP(\{\mathbf{Y}_1,\mathbf{Y}_2\}\mid\mathbf{e})\)</span>에서 <span class="math inline">\(\mathbf{Y}_1\)</span>에 할당된 값과 완전히 다를 수 있다. 따라서 일반 MAP 질의의 답을 이용해 주변 MAP의 올바른 답을 얻을 수 없다.</p>
+<blockquote class="blockquote">
+<p><strong>학습 보충 - 연산 순서가 중요한 이유</strong><br>
+주변 MAP에서는 관심 없는 변수에 대해 먼저 합산하고, 관심 변수에 대해 최대화한다. 일반적으로 <span class="math display">\[
+\max_y\sum_z f(y,z)
+\ne
+\sum_z\max_y f(y,z)
+\]</span> 이므로 합산과 최대화의 순서를 바꾸면 답이 달라진다. 이 차이는 이후 추론 알고리즘의 계산 난이도와 직접 연결된다.</p>
+</blockquote>
+</section>
+</section>
+<section id="연속공간" class="level3">
+<h3 class="anchored" data-anchor-id="연속공간">2.1.6 연속공간</h3>
+<p>앞 절에서는 가능한 값이 유한한 확률변수에 초점을 맞추었다. 그러나 체중, 키, 지속시간, 비용과 같이 실수값을 취하는 연속적인 양에 대해서도 추론할 필요가 있다.</p>
+<p>연속 확률변수의 확률을 다룰 때에는 몇 가지 기술적 문제가 발생한다. 예를 들어 <span class="math inline">\(X\)</span>가 <span class="math inline">\([0,1]\)</span>의 값을 취하고 이 구간의 모든 수에 동일한 확률을 부여한다고 하자. 각 <span class="math inline">\(x\)</span>에 같은 확률이 주어지고 값이 무한히 많으므로,</p>
+<p><span class="math display">\[
+P(X=x)=0
+\]</span></p>
+<p>이어야 한다. 이 문제는 균등확률을 요구하지 않는 경우에도 발생한다. 연속분포에서는 한 점의 확률이 일반적으로 0이므로, 구간의 확률을 다루기 위한 새로운 표현이 필요하다.</p>
+<section id="확률밀도함수" class="level4">
+<h4 class="anchored" data-anchor-id="확률밀도함수">2.1.6.1 확률밀도함수</h4>
+<p>함수</p>
+<p><span class="math display">\[
+p:\mathbb{R}\rightarrow\mathbb{R}
+\]</span></p>
+<p>가 음이 아닌 적분 가능한 함수이고 다음을 만족하면 <span class="math inline">\(X\)</span>의 <strong>확률밀도함수(probability density function, PDF)</strong>라고 한다.</p>
+<p><span class="math display">\[
+\int_{Val(X)}p(x)\,dx=1.
+\]</span></p>
+<p>즉 <span class="math inline">\(X\)</span>가 취할 수 있는 값의 전체 범위에서 밀도함수를 적분한 값은 1이다. 이 밀도함수는 다음과 같이 <span class="math inline">\(X\)</span>의 분포를 정의한다.</p>
+<p><span class="math display">\[
+P(X\le a)=\int_{-\infty}^{a}p(x)\,dx.
+\]</span></p>
+<p>이 함수 <span class="math inline">\(P\)</span>를 <span class="math inline">\(X\)</span>의 <strong>누적분포(cumulative distribution)</strong>라고 한다. 밀도함수를 사용하면 다른 사건의 확률도 계산할 수 있다. 예를 들어</p>
+<p><span class="math display">\[
+P(a\le X\le b)=\int_a^b p(x)\,dx.
+\]</span></p>
+<p>직관적으로 <span class="math inline">\(p(x)\)</span>의 값은 누적분포를 적분으로 쌓아 갈 때 점 <span class="math inline">\(x\)</span> 주변이 더하는 국소적인 양을 나타낸다. <span class="math inline">\(x\)</span>와 그 주변에서 <span class="math inline">\(p\)</span>가 클수록 누적분포가 그 구간을 지나갈 때 더 많은 확률질량이 추가된다.</p>
+<p>가장 단순한 밀도함수는 균등분포이다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.6 - 균등분포</strong><br>
+확률변수 <span class="math inline">\(X\)</span>가 구간 <span class="math inline">\([a,b]\)</span>에서 균등분포를 따르면 <span class="math display">\[
+X\sim Unif[a,b]
+\]</span> 로 나타내며, 밀도함수는 <span class="math display">\[
+p(x)=
+\begin{cases}
+\dfrac{1}{b-a}, &amp; a\le x\le b,\\[6pt]
+0, &amp; \text{그 밖의 경우}
+\end{cases}
+\]</span> 이다.</p>
+</blockquote>
+<p>따라서 <span class="math inline">\([a,b]\)</span>의 임의 부분구간이 가질 확률은 전체 구간 길이에 대한 그 부분구간 길이의 비율에 비례한다.</p>
+<p><span class="math inline">\(b-a&lt;1\)</span>이면 밀도값 <span class="math inline">\(1/(b-a)\)</span>는 1보다 클 수 있다. 처음에는 이상하게 보일 수 있지만, 밀도는 확률 그 자체가 아니다. 밀도가 1보다 큰 구간이 충분히 짧아서 전체 곡선 아래 면적이 1이면 적절한 밀도함수이다.</p>
+<p>더 복잡한 예로 가우스분포를 생각하자.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.7 - 가우스분포</strong><br>
+확률변수 <span class="math inline">\(X\)</span>가 평균 <span class="math inline">\(\mu\)</span>, 분산 <span class="math inline">\(\sigma^2\)</span>인 가우스분포를 따르면 <span class="math display">\[
+X\sim\mathcal{N}(\mu;\sigma^2)
+\]</span> 로 나타내며, 밀도함수는 <span class="math display">\[
+p(x)=\frac{1}{\sqrt{2\pi}\sigma}
+\exp\left[-\frac{(x-\mu)^2}{2\sigma^2}\right]
+\]</span> 이다. 평균이 0이고 분산이 1인 가우스분포를 <strong>표준가우스분포(standard Gaussian)</strong>라고 한다.</p>
+</blockquote>
+<p>가우스분포는 종 모양의 곡선을 가진다. 평균 <span class="math inline">\(\mu\)</span>는 곡선의 최고점 위치를 결정하고, 분산 <span class="math inline">\(\sigma^2\)</span>은 곡선이 얼마나 뾰족하거나 넓게 퍼지는지를 결정한다. 분산이 작을수록 평균 주변에 더 집중된 뾰족한 곡선이 된다.</p>
+<div id="fig-gaussian-pdfs" class="figure-placeholder quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gaussian-pdfs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<p><strong>Figure 2.2. 평균과 분산이 서로 다른 세 가우스분포의 확률밀도함수 예</strong></p>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gaussian-pdfs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.2: <em>[그림 삽입 위치: 원본 그림을 스캔한 뒤 이 블록을 이미지로 교체]</em>
+</figcaption>
+</figure>
+</div>
+<p>더 기술적으로 보면 가우스 밀도의 지수부에는 <span class="math inline">\(x\)</span>가 평균 <span class="math inline">\(\mu\)</span>에서 표준편차 <span class="math inline">\(\sigma\)</span>의 몇 배만큼 떨어져 있는지를 제곱한 값이 들어간다. 따라서 평균에서 표준편차 단위로 측정한 거리가 커질수록 밀도는 그 거리의 제곱에 대해 지수적으로 감소한다.</p>
+</section>
+<section id="결합밀도함수" class="level4">
+<h4 class="anchored" data-anchor-id="결합밀도함수">2.1.6.2 결합밀도함수</h4>
+<p>한 개의 연속 확률변수에 대한 밀도함수 논의는 여러 연속 확률변수의 결합분포로 자연스럽게 확장된다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.8 - 결합밀도함수</strong><br>
+<span class="math inline">\(P\)</span>가 연속 확률변수 <span class="math inline">\(X_1,\ldots,X_n\)</span>의 결합분포라고 하자. 함수 <span class="math display">\[
+p(x_1,\ldots,x_n)
+\]</span> 이 다음 조건을 만족하면 <span class="math inline">\(X_1,\ldots,X_n\)</span>의 결합밀도함수이다.</p>
+<ol type="1">
+<li>모든 가능한 <span class="math inline">\(x_1,\ldots,x_n\)</span>에 대해 <span class="math inline">\(p(x_1,\ldots,x_n)\ge0\)</span>이다.</li>
+<li><span class="math inline">\(p\)</span>는 적분 가능한 함수이다.</li>
+<li>임의의 <span class="math inline">\(a_1,\ldots,a_n\)</span>과 <span class="math inline">\(b_1,\ldots,b_n\)</span>에 대해 <span class="math display">\[
+P(a_1\le X_1\le b_1,\ldots,a_n\le X_n\le b_n)
+=\int_{a_1}^{b_1}\cdots\int_{a_n}^{b_n}
+p(x_1,\ldots,x_n)\,dx_1\cdots dx_n.
+\]</span></li>
+</ol>
+</blockquote>
+<p>따라서 결합밀도는 관심 변수에 대한 모든 결합사건의 확률을 지정한다.</p>
+<p>균등분포와 가우스분포는 모두 다변량 형태로 자연스럽게 확장된다. 다변량 균등분포의 정의는 직접적이며, 다변량 가우스분포는 제7.1절에서 설명한다.</p>
+<p>결합밀도에서 다른 변수들을 적분하여 제거하면 한 변수의 주변밀도를 얻을 수 있다. 예를 들어 <span class="math inline">\(p(x,y)\)</span>가 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>의 결합밀도라면,</p>
+<p><span class="math display">\[
+p(x)=\int_{-\infty}^{\infty}p(x,y)\,dy.
+\]</span></p>
+<p>이 관계가 성립하는 이유는 사건 <span class="math inline">\(a\le X\le b\)</span>가 다음 사건과 같기 때문이다.</p>
+<p><span class="math display">\[
+a\le X\le b\quad\text{and}\quad-\infty\le Y\le\infty.
+\]</span></p>
+<p>이는 이산변수의 주변화에서 합을 사용하는 것과 정확히 대응하며, 연속변수에서는 합 대신 적분을 사용한다.</p>
+<p>이산확률분포에서처럼 표기를 약간 남용하여 결합밀도와 주변밀도에 모두 <span class="math inline">\(p\)</span>를 사용한다. 구분이 필요할 때에는 <span class="math inline">\(p_X\)</span>를 <span class="math inline">\(X\)</span>의 주변밀도, <span class="math inline">\(p_{X,Y}\)</span>를 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>의 결합밀도로 나타낸다.</p>
+</section>
+<section id="조건부밀도함수" class="level4">
+<h4 class="anchored" data-anchor-id="조건부밀도함수">2.1.6.3 조건부밀도함수</h4>
+<p>이산 확률변수와 마찬가지로 연속변수의 조건부분포도 기술하고 싶다. 예를 들어 <span class="math inline">\(P(Y\mid X=x)\)</span>를 정의하려고 할 수 있다. 그러나 식 (2.1)을 그대로 적용하면 연속변수에서는 일반적으로</p>
+<p><span class="math display">\[
+P(X=x)=0
+\]</span></p>
+<p>이므로 <span class="math inline">\(P(Y,X=x)\)</span>와 <span class="math inline">\(P(X=x)\)</span>의 비가 정의되지 않는다.</p>
+<p>이 문제를 피하기 위해 확률이 양수일 수 있는 작은 구간</p>
+<p><span class="math display">\[
+x-\epsilon\le X\le x+\epsilon
+\]</span></p>
+<p>에 조건화한 뒤 <span class="math inline">\(\epsilon\rightarrow0\)</span>의 극한을 생각한다.</p>
+<p><span class="math display">\[
+P(Y\mid x)
+=
+\lim_{\epsilon\rightarrow0}
+P(Y\mid x-\epsilon\le X\le x+\epsilon).
+\]</span></p>
+<p>연속적인 결합밀도 <span class="math inline">\(p(x,y)\)</span>가 존재하면 이 극한의 형태를 유도할 수 있다. <span class="math inline">\(Y\)</span>에 관한 사건 <span class="math inline">\(a\le Y\le b\)</span>를 생각하면</p>
+<p><span class="math display">\[
+P(a\le Y\le b\mid x-\epsilon\le X\le x+\epsilon)
+=\frac{P(a\le Y\le b,\ x-\epsilon\le X\le x+\epsilon)}{P(x-\epsilon\le X\le x+\epsilon)}.
+\]</span></p>
+<p><span class="math display">\[
+P(a\le Y\le b\mid x-\epsilon\le X\le x+\epsilon)
+=
+\frac{\displaystyle\int_a^b\int_{x-\epsilon}^{x+\epsilon}p(x',y)\,dx'\,dy}{\displaystyle\int_{x-\epsilon}^{x+\epsilon}p(x')\,dx'}.
+\]</span></p>
+<p><span class="math inline">\(\epsilon\)</span>이 충분히 작으면</p>
+<p><span class="math display">\[
+\int_{x-\epsilon}^{x+\epsilon}p(x')\,dx'
+\approx2\epsilon p(x)
+\]</span></p>
+<p>이고, <span class="math inline">\(p(x',y)\)</span>에도 같은 근사를 적용하면</p>
+<p><span class="math display">\[
+P(a\le Y\le b\mid x-\epsilon\le X\le x+\epsilon)
+\approx
+\frac{\displaystyle\int_a^b2\epsilon p(x,y)\,dy}{2\epsilon p(x)}.
+\]</span></p>
+<p><span class="math display">\[
+P(a\le Y\le b\mid x-\epsilon\le X\le x+\epsilon)
+\approx
+\int_a^b\frac{p(x,y)}{p(x)}\,dy.
+\]</span></p>
+<p>따라서 <span class="math inline">\(p(x,y)/p(x)\)</span>가 <span class="math inline">\(P(Y\mid X=x)\)</span>의 밀도이다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.9 - 조건부밀도함수</strong><br>
+<span class="math inline">\(p(x,y)\)</span>가 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>의 결합밀도라면, <span class="math inline">\(X\)</span>가 주어졌을 때 <span class="math inline">\(Y\)</span>의 조건부밀도함수는 <span class="math display">\[
+p(y\mid x)=\frac{p(x,y)}{p(x)}
+\]</span> 로 정의한다. <span class="math inline">\(p(x)=0\)</span>이면 조건부밀도는 정의되지 않는다.</p>
+</blockquote>
+<p>조건부밀도 <span class="math inline">\(p(y\mid x)\)</span>는 앞에서 정의한 조건부분포 <span class="math inline">\(P(Y\mid X=x)\)</span>를 특성화한다.</p>
+<p>결합분포와 조건부분포의 성질은 결합밀도와 조건부밀도에도 그대로 적용된다. 특히 연쇄법칙은</p>
+<p><span class="math display">\[
+p(x,y)=p(x)p(y\mid x)
+\tag{2.14}
+\]</span></p>
+<p>이고, 베이즈 규칙은</p>
+<p><span class="math display">\[
+p(x\mid y)=\frac{p(x)p(y\mid x)}{p(y)}
+\tag{2.15}
+\]</span></p>
+<p>이다.</p>
+<p>일반적으로 연속 확률변수의 결합분포를 다룰 때에는 이산변수에서 결합확률질량을 사용하듯이 결합밀도함수를 사용하여 성질을 표현한다. 특히 연속 확률변수의 조건부독립성은 다음과 같이 정의한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.10 - 연속 확률변수의 조건부독립성</strong><br>
+<span class="math inline">\(\mathbf{X},\mathbf{Y},\mathbf{Z}\)</span>가 결합밀도 <span class="math inline">\(p(\mathbf{X},\mathbf{Y},\mathbf{Z})\)</span>를 가지는 연속 확률변수 집합이라고 하자. <span class="math inline">\(p(\mathbf{z})&gt;0\)</span>인 모든 <span class="math inline">\(\mathbf{x},\mathbf{y},\mathbf{z}\)</span>에 대해 <span class="math display">\[
+p(\mathbf{x}\mid\mathbf{z})
+=p(\mathbf{x}\mid\mathbf{y},\mathbf{z})
+\]</span> 이면 <span class="math inline">\(\mathbf{Z}\)</span>가 주어졌을 때 <span class="math inline">\(\mathbf{X}\)</span>와 <span class="math inline">\(\mathbf{Y}\)</span>가 조건부로 독립이라고 한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>학습 보충 - 확률질량과 밀도의 차이</strong><br>
+이산변수에서는 <span class="math inline">\(P(X=x)\)</span>가 한 값에 놓인 확률질량이다. 연속변수에서는 한 점의 확률은 0이고, <span class="math inline">\(p(x)\)</span>는 점 주변의 상대적 집중도를 나타낸다. 따라서 <span class="math inline">\(p(x)&gt;1\)</span>이어도 문제가 없지만, 적분한 전체 면적은 반드시 1이어야 한다.</p>
+</blockquote>
+</section>
+</section>
+<section id="기댓값과-분산" class="level3">
+<h3 class="anchored" data-anchor-id="기댓값과-분산">2.1.7 기댓값과 분산</h3>
+<section id="기댓값" class="level4">
+<h4 class="anchored" data-anchor-id="기댓값">2.1.7.1 기댓값</h4>
+<p>수치값을 취하는 이산 확률변수 <span class="math inline">\(X\)</span>의 분포 <span class="math inline">\(P\)</span> 아래에서 <strong>기댓값(expectation)</strong>은 다음과 같다.</p>
+<p><span class="math display">\[
+\mathbb{E}_P[X]
+=
+\sum_x xP(x).
+\]</span></p>
+<p><span class="math inline">\(X\)</span>가 연속변수이면 밀도함수를 사용하여</p>
+<p><span class="math display">\[
+\mathbb{E}_P[X]
+=
+\int x p(x)\,dx
+\]</span></p>
+<p>로 정의한다.</p>
+<p>공정한 주사위 결과를 <span class="math inline">\(X\)</span>라고 하면 각 결과의 확률이 <span class="math inline">\(1/6\)</span>이므로</p>
+<p><span class="math display">\[
+\mathbb{E}[X]
+=1\times\frac16+2\times\frac16+\cdots+6\times\frac16
+=3.5.
+\]</span></p>
+<p>반면 편향된 주사위에서</p>
+<p><span class="math display">\[
+P(X=6)=0.5,
+\]</span></p>
+<p>그리고 <span class="math inline">\(x&lt;6\)</span>에 대해</p>
+<p><span class="math display">\[
+P(X=x)=0.1
+\]</span></p>
+<p>이라면</p>
+<p><span class="math display">\[
+\mathbb{E}[X]
+=1\times0.1+\cdots+5\times0.1+6\times0.5
+=4.5.
+\]</span></p>
+<p>확률변수 하나 또는 여러 개의 함수에 대한 기댓값도 자주 필요하다. 예를 들어 <span class="math inline">\(X^2+0.5X\)</span>의 기댓값을 생각할 수 있다. 확률변수 <span class="math inline">\(X_1,\ldots,X_k\)</span>의 함수 <span class="math inline">\(g\)</span>는 사실 새로운 확률변수 <span class="math inline">\(Y\)</span>를 정의한다. 각 결과 <span class="math inline">\(\omega\in\Omega\)</span>에 대해</p>
+<p><span class="math display">\[
+Y(\omega)
+=g(f_{X_1}(\omega),\ldots,f_{X_k}(\omega))
+\]</span></p>
+<p>로 둘 수 있기 때문이다.</p>
+<p>따라서 다음과 같이 함수식으로 새 확률변수를 정의할 수 있다.</p>
+<p><span class="math display">\[
+Y=X^2,
+\qquad
+Y=e^X.
+\]</span></p>
+<p>범주형 확률변수의 값을 수치로 바꾸는 함수도 사용할 수 있다. 자주 쓰이는 예가 <strong>지시함수(indicator function)</strong>이다.</p>
+<p><span class="math display">\[
+\mathbb{1}\{X=x\}
+=
+\begin{cases}
+1,&amp;X=x,\\
+0,&amp;X\ne x.
+\end{cases}
+\]</span></p>
+<p>함수가 정의하는 새 확률변수에 별도의 이름을 붙이지 않고 곧바로 <span class="math inline">\(\mathbb{E}[X+Y]\)</span>와 같이 쓰기도 한다. 그러나 이러한 표현도 어떤 확률변수의 기댓값이라는 사실은 변하지 않는다.</p>
+<p>기댓값의 첫 번째 중요한 성질은 선형성이다.</p>
+<p><span class="math display">\[
+\mathbb{E}[aX+b]
+=a\mathbb{E}[X]+b.
+\]</span></p>
+<p>여러 확률변수의 공동 행동을 포함하는 함수에서는 더 복잡해질 수 있지만, 두 확률변수의 합의 기댓값은 각 기댓값의 합이다.</p>
+<blockquote class="blockquote">
+<p><strong>명제 2.4 - 기댓값의 선형성</strong><br>
+<span class="math display">\[
+\mathbb{E}[X+Y]
+=\mathbb{E}[X]+\mathbb{E}[Y].
+\]</span></p>
+</blockquote>
+<p>이 성질은 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>가 독립이 아니어도 항상 성립한다. 복잡해 보이는 많은 문제를 단순화하는 핵심 성질이다.</p>
+<p>두 확률변수의 곱에 대한 기댓값은 일반적으로 개별 기댓값만으로 결정할 수 없다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 2.5 - 곱의 기댓값과 의존성</strong><br>
+<span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>가 각각 확률 <span class="math inline">\(1/2\)</span>로 <span class="math inline">\(+1\)</span>, 확률 <span class="math inline">\(1/2\)</span>로 <span class="math inline">\(-1\)</span>을 취한다고 하자. <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>가 독립이면 <span class="math display">\[
+\mathbb{E}[XY]=0.
+\]</span> 반면 두 변수가 항상 같은 값을 취하도록 완전히 상관되어 있다면 <span class="math display">\[
+XY=1
+\]</span> 이 항상 성립하므로 <span class="math display">\[
+\mathbb{E}[XY]=1.
+\]</span></p>
+</blockquote>
+<p>그러나 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>가 독립이면 곱의 기댓값을 개별 기댓값의 곱으로 계산할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>명제 2.5</strong><br>
+<span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>가 독립이면 <span class="math display">\[
+\mathbb{E}[XY]
+=\mathbb{E}[X]\mathbb{E}[Y].
+\]</span></p>
+</blockquote>
+<p>어떤 증거가 주어졌을 때의 기댓값도 자주 사용한다. <span class="math inline">\(y\)</span>가 주어졌을 때 <span class="math inline">\(X\)</span>의 <strong>조건부기댓값(conditional expectation)</strong>은</p>
+<p><span class="math display">\[
+\mathbb{E}_P[X\mid y]
+=
+\sum_x xP(x\mid y)
+\]</span></p>
+<p>이다.</p>
+</section>
+<section id="분산" class="level4">
+<h4 class="anchored" data-anchor-id="분산">2.1.7.2 분산</h4>
+<p><span class="math inline">\(X\)</span>의 기댓값은 <span class="math inline">\(X\)</span>의 평균값을 알려 주지만, 값들이 평균에서 얼마나 멀리 퍼져 있는지는 알려 주지 않는다. 이를 측정하는 양이 <strong>분산(variance)</strong>이다.</p>
+<p><span class="math display">\[
+Var_P[X]
+=
+\mathbb{E}_P\left[(X-\mathbb{E}_P[X])^2\right].
+\]</span></p>
+<p>즉 분산은 <span class="math inline">\(X\)</span>와 그 기댓값의 차이를 제곱한 값의 기댓값이다. 이는 <span class="math inline">\(X\)</span>의 값이 평균 주변에서 얼마나 넓게 퍼져 있는지를 나타낸다.</p>
+<p>분산은 다음과 같이도 쓸 수 있다.</p>
+<p><span class="math display">\[
+Var[X]
+=\mathbb{E}[X^2]-(\mathbb{E}[X])^2.
+\tag{2.16}
+\]</span></p>
+<p>이 등식은 연습문제 2.11에서 증명한다.</p>
+<p>독립인 두 확률변수의 합에 대해서는 다음 성질이 성립한다.</p>
+<blockquote class="blockquote">
+<p><strong>명제 2.6</strong><br>
+<span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>가 독립이면 <span class="math display">\[
+Var[X+Y]=Var[X]+Var[Y].
+\]</span></p>
+</blockquote>
+<p>분산은 변수의 척도에 대해 이차적으로 변한다.</p>
+<p><span class="math display">\[
+Var[aX+b]=a^2Var[X].
+\]</span></p>
+<p>이 때문에 분산의 제곱근인 <strong>표준편차(standard deviation)</strong>를 자주 사용한다.</p>
+<p><span class="math display">\[
+\sigma_X=\sqrt{Var[X]}.
+\]</span></p>
+<p>직관적으로 <span class="math inline">\(X\)</span>가 기댓값에서 여러 표준편차 이상 떨어진 값을 취할 가능성은 낮다. 따라서 <span class="math inline">\(\sigma_X\)</span>는 기댓값으로부터의 거리를 원래 변수와 같은 단위로 정규화한 척도이다.</p>
+<p>가우스분포에서는 분포의 매개변수와 기댓값 및 분산이 직접 대응한다.</p>
+<blockquote class="blockquote">
+<p><strong>명제 2.7</strong><br>
+<span class="math inline">\(X\sim\mathcal{N}(\mu,\sigma^2)\)</span>이면 <span class="math display">\[
+\mathbb{E}[X]=\mu,
+\qquad
+Var[X]=\sigma^2.
+\]</span></p>
+</blockquote>
+<p>가우스분포의 밀도는 표준화 거리 <span class="math inline">\((x-\mu)/\sigma\)</span>가 커질수록 지수적으로 빠르게 감소한다. 그러나 모든 분포가 평균에서 멀리 떨어진 결과의 확률을 이처럼 빠르게 감소시키는 것은 아니다. 그래도 임의의 분포에서도 일정한 상한을 제시할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 2.1 - 체비셰프 부등식(Chebyshev’s inequality)</strong><br>
+<span class="math display">\[
+P\left(|X-\mathbb{E}_P[X]|\ge t\right)
+\le
+\frac{Var_P[X]}{t^2}.
+\]</span></p>
+</blockquote>
+<p><span class="math inline">\(t=k\sigma_X\)</span>라고 쓰면 표준편차 단위의 형태는 다음과 같다.</p>
+<p><span class="math display">\[
+P\left(|X-\mathbb{E}_P[X]|\ge k\sigma_X\right)
+\le\frac{1}{k^2}.
+\]</span></p>
+<p>예를 들어 <span class="math inline">\(X\)</span>가 기댓값에서 두 표준편차 이상 떨어질 확률은 <span class="math inline">\(1/4\)</span> 이하이다.</p>
+<blockquote class="blockquote">
+<p><strong>학습 보충 - 체비셰프 부등식의 장점과 한계</strong><br>
+이 부등식은 분포의 형태를 전혀 가정하지 않고 평균과 분산만으로 성립한다는 점에서 매우 강력하다. 반면 가우스분포처럼 꼬리가 빠르게 감소하는 분포에서는 실제 확률보다 상당히 느슨한 상한을 제공한다.</p>
+</blockquote>
+</section>
+</section>
+</section>
+<section id="그래프" class="level2">
+<h2 class="anchored" data-anchor-id="그래프">2.2 그래프</h2>
+<p>이 책에서 가장 널리 사용되는 개념 중 하나는 확률분포를 <strong>자료구조로서의 그래프(graph)</strong>로 표현하는 것이다. 이 절에서는 책에서 사용하는 그래프이론의 기본 개념을 살펴본다.</p>
+<section id="노드와-간선" class="level3">
+<h3 class="anchored" data-anchor-id="노드와-간선">2.2.1 노드와 간선</h3>
+<p>그래프 <span class="math inline">\(\mathcal{K}\)</span>는 노드 집합과 간선 집합으로 이루어진 자료구조이다. 이 책의 대부분에서는 노드 집합을</p>
+<p><span class="math display">\[
+\mathcal{X}=\{X_1,\ldots,X_n\}
+\]</span></p>
+<p>으로 둔다.</p>
+<p>두 노드 <span class="math inline">\(X_i,X_j\)</span>는 <strong>방향성 간선(directed edge)</strong></p>
+<p><span class="math display">\[
+X_i\rightarrow X_j
+\]</span></p>
+<p>또는 <strong>비방향성 간선(undirected edge)</strong></p>
+<p><span class="math display">\[
+X_i-X_j
+\]</span></p>
+<p>으로 연결될 수 있다. 따라서 간선 집합 <span class="math inline">\(\mathcal{E}\)</span>는 <span class="math inline">\(i&lt;j\)</span>인 <span class="math inline">\(X_i,X_j\in\mathcal{X}\)</span>에 대해 다음 세 형태 중 하나를 원소로 가진다.</p>
+<p><span class="math display">\[
+X_i\rightarrow X_j,
+\qquad
+X_j\rightarrow X_i,
+\qquad
+X_i-X_j.
+\]</span></p>
+<p>이 책에서는 한 노드 쌍에 최대 한 종류의 간선만 존재한다고 가정한다. 따라서 동시에 <span class="math inline">\(X_i\rightarrow X_j\)</span>와 <span class="math inline">\(X_j\rightarrow X_i\)</span>가 있을 수 없으며, 동시에 <span class="math inline">\(X_i\rightarrow X_j\)</span>와 <span class="math inline">\(X_i-X_j\)</span>가 있을 수도 없다.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<p>표기 <span class="math inline">\(X_i\leftarrow X_j\)</span>는 <span class="math inline">\(X_j\rightarrow X_i\)</span>와 같고, <span class="math inline">\(X_j-X_i\)</span>는 <span class="math inline">\(X_i-X_j\)</span>와 같다. 두 노드가 방향에 관계없는 방향성 간선 또는 비방향성 간선 중 어떤 방식으로든 연결되어 있음을 간단히 <span class="math inline">\(X_i\mathrel{\text{---}}X_j\)</span>와 같은 일반 연결 표기로 나타내기도 한다. 이 문서에서는 문맥에 따라 “<span class="math inline">\(X_i\)</span>와 <span class="math inline">\(X_j\)</span>가 인접한다”라고 서술한다.</p>
+<p>한 종류의 간선만 포함하는 그래프에 관심을 제한하는 경우가 많다.</p>
+<ul>
+<li>모든 간선이 방향성 간선이면 <strong>방향성 그래프(directed graph)</strong>라고 하며 보통 <span class="math inline">\(\mathcal{G}\)</span>로 나타낸다.</li>
+<li>모든 간선이 비방향성 간선이면 <strong>비방향성 그래프(undirected graph)</strong>라고 하며 보통 <span class="math inline">\(\mathcal{H}\)</span>로 나타낸다.</li>
+</ul>
+<p>일반 그래프에서 간선의 방향을 무시하여 비방향성 그래프로 바꾸기도 한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.11 - 그래프의 비방향성 버전</strong><br>
+그래프 <span class="math inline">\(\mathcal{K}=(\mathcal{X},\mathcal{E})\)</span>가 주어졌을 때, 그 비방향성 버전은 <span class="math display">\[
+\mathcal{H}=(\mathcal{X},\mathcal{E}')
+\]</span> 이며, <span class="math display">\[
+\mathcal{E}'
+=\{X-Y:\ X\text{와 }Y\text{가 }\mathcal{E}\text{의 어떤 간선으로 연결됨}\}
+\]</span> 으로 정의한다.</p>
+</blockquote>
+<p><span class="math inline">\(X_i\rightarrow X_j\in\mathcal{E}\)</span>이면 <span class="math inline">\(X_j\)</span>를 <span class="math inline">\(X_i\)</span>의 <strong>자식(child)</strong>, <span class="math inline">\(X_i\)</span>를 <span class="math inline">\(X_j\)</span>의 <strong>부모(parent)</strong>라고 한다. <span class="math inline">\(X_i-X_j\in\mathcal{E}\)</span>이면 <span class="math inline">\(X_i\)</span>와 <span class="math inline">\(X_j\)</span>를 서로의 <strong>이웃(neighbor)</strong>이라고 한다.</p>
+<p>두 노드가 어떤 간선으로 연결되어 있으면 <strong>인접(adjacent)</strong>한다고 한다. 다음 표기를 사용한다.</p>
+<ul>
+<li><span class="math inline">\(Pa_X\)</span>: <span class="math inline">\(X\)</span>의 부모 집합</li>
+<li><span class="math inline">\(Ch_X\)</span>: <span class="math inline">\(X\)</span>의 자식 집합</li>
+<li><span class="math inline">\(Nb_X\)</span>: <span class="math inline">\(X\)</span>의 이웃 집합</li>
+</ul>
+<p><span class="math inline">\(X\)</span>의 <strong>경계(boundary)</strong>는 다음과 같이 정의한다.</p>
+<p><span class="math display">\[
+Boundary_X=Pa_X\cup Nb_X.
+\]</span></p>
+<p>DAG에서는 경계가 단순히 부모 집합이고, 비방향성 그래프에서는 이웃 집합이다.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
+<div id="fig-partially-directed" class="figure-placeholder quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-partially-directed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<p><strong>Figure 2.3. 부분적으로 방향이 지정된 그래프 <span class="math inline">\(\mathcal{K}\)</span>의 예</strong></p>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-partially-directed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.3: <em>[그림 삽입 위치: 원본 그림을 스캔한 뒤 이 블록을 이미지로 교체]</em>
+</figcaption>
+</figure>
+</div>
+<p>그림 2.3에서 <span class="math inline">\(A\)</span>는 <span class="math inline">\(C\)</span>의 유일한 부모이고, <span class="math inline">\(F\)</span>와 <span class="math inline">\(I\)</span>는 <span class="math inline">\(C\)</span>의 자식이다. <span class="math inline">\(C\)</span>의 유일한 비방향성 이웃은 <span class="math inline">\(D\)</span>이지만, <span class="math inline">\(C\)</span>와 인접한 노드는 <span class="math inline">\(A,D,F,I\)</span>이다.</p>
+<p>노드 <span class="math inline">\(X\)</span>의 <strong>차수(degree)</strong>는 <span class="math inline">\(X\)</span>가 참여하는 간선의 수이다. <span class="math inline">\(X\)</span>의 <strong>진입차수(indegree)</strong>는 <span class="math inline">\(Y\rightarrow X\)</span> 형태의 방향성 간선 수이다. 그래프의 차수는 그래프에 포함된 노드들의 차수 중 최댓값이다.</p>
+<blockquote class="blockquote">
+<p><strong>학습 보충 - 베이즈 네트워크에서 부모의 의미</strong><br>
+베이즈 네트워크에서는 각 노드의 조건부분포가 그 노드의 부모에 조건화된다. 즉 <span class="math inline">\(Pa_X\)</span>는 단순한 그래프 용어가 아니라 <span class="math inline">\(P(X\mid Pa_X)\)</span>라는 국소 확률모형의 설명변수 집합을 결정한다.</p>
+</blockquote>
+</section>
+<section id="부분그래프" class="level3">
+<h3 class="anchored" data-anchor-id="부분그래프">2.2.2 부분그래프</h3>
+<p>특정 노드 부분집합과 관련된 그래프의 일부만을 고려하고 싶을 때가 많다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.12 - 유도부분그래프</strong><br>
+<span class="math inline">\(\mathcal{K}=(\mathcal{X},\mathcal{E})\)</span>이고 <span class="math inline">\(\mathbf{X}\subseteq\mathcal{X}\)</span>라고 하자. <strong>유도부분그래프(induced subgraph)</strong> <span class="math inline">\(\mathcal{K}[\mathbf{X}]\)</span>는 <span class="math display">\[
+(\mathbf{X},\mathcal{E}')
+\]</span> 로 정의하며, <span class="math inline">\(\mathcal{E}'\)</span>는 양 끝 노드가 모두 <span class="math inline">\(\mathbf{X}\)</span>에 속하는 <span class="math inline">\(\mathcal{E}\)</span>의 모든 간선으로 이루어진다.</p>
+</blockquote>
+<p>그림 2.4(a)는 <span class="math inline">\(\mathcal{K}[C,D,I]\)</span>의 유도부분그래프를 보여 준다.</p>
+<p>모든 가능한 간선을 포함하는 부분그래프도 중요하다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.13 - 완전부분그래프와 클릭</strong><br>
+<span class="math inline">\(\mathbf{X}\)</span> 안의 모든 두 노드가 어떤 간선으로 연결되어 있으면 <span class="math inline">\(\mathbf{X}\)</span> 위의 부분그래프를 <strong>완전(complete)</strong>하다고 한다. 이 노드 집합 <span class="math inline">\(\mathbf{X}\)</span>를 흔히 <strong>클릭(clique)</strong>이라고 한다.</p>
+<p><span class="math inline">\(\mathbf{X}\)</span>를 진부분집합으로 포함하는 어떤 더 큰 노드 집합 <span class="math inline">\(\mathbf{Y}\supset\mathbf{X}\)</span>도 클릭이 아니면 <span class="math inline">\(\mathbf{X}\)</span>를 <strong>극대 클릭(maximal clique)</strong>이라고 한다.</p>
+</blockquote>
+<p>노드 부분집합은 임의로 선택할 수 있지만, 그래프 구조의 특정 측면을 보존하는 노드 집합에 관심을 두기도 한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.14 - 상향폐쇄와 상향폐쇄부분그래프</strong><br>
+노드 부분집합 <span class="math inline">\(\mathbf{X}\subseteq\mathcal{X}\)</span>가 다음을 만족하면 <span class="math inline">\(\mathcal{K}\)</span>에서 <strong>상향폐쇄(upwardly closed)</strong>되어 있다고 한다. <span class="math display">\[
+X\in\mathbf{X}
+\quad\Longrightarrow\quad
+Boundary_X\subseteq\mathbf{X}.
+\]</span> <span class="math inline">\(\mathbf{X}\)</span>의 <strong>상향폐쇄(upward closure)</strong>는 <span class="math inline">\(\mathbf{X}\)</span>를 포함하는 최소 상향폐쇄 노드 집합 <span class="math inline">\(\mathbf{Y}\)</span>이다. <span class="math inline">\(\mathbf{X}\)</span>의 상향폐쇄부분그래프는 <strong>K⁺[X] = K[Y]</strong> 로 정의한다.</p>
+</blockquote>
+<p>그림 2.3의 그래프에서 <span class="math inline">\(\{C\}\)</span>의 상향폐쇄는 <span class="math inline">\(\{A,B,C,D,E\}\)</span>이다. <span class="math inline">\(\{C\}\)</span>의 상향폐쇄부분그래프는 그림 2.4(b), <span class="math inline">\(\{C,D,I\}\)</span>의 상향폐쇄부분그래프는 그림 2.4(c)에 제시되어 있다.</p>
+<div id="fig-induced-upward" class="figure-placeholder quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-induced-upward-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<p><strong>Figure 2.4. 유도그래프와 상향폐쇄. (a) 유도부분그래프 K[C,D,I]. (b) 상향폐쇄부분그래프 K⁺[C]. (c) 상향폐쇄부분그래프 K⁺[C,D,I]</strong></p>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-induced-upward-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.4: <em>[그림 삽입 위치: 원본 그림을 스캔한 뒤 이 블록을 이미지로 교체]</em>
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>학습 보충 - 상향폐쇄의 직관</strong><br>
+관심 노드만 남기는 것이 유도부분그래프라면, 상향폐쇄는 관심 노드의 국소 확률모형을 정의하는 데 필요한 부모와 비방향성 이웃까지 반복적으로 포함한다. 이후 분포 분해와 부분모형을 논의할 때 중요하다.</p>
+</blockquote>
+</section>
+<section id="경로와-트레일" class="level3">
+<h3 class="anchored" data-anchor-id="경로와-트레일">2.2.3 경로와 트레일</h3>
+<p>간선의 기본 개념을 이용하여 그래프 안의 더 긴 범위의 연결을 정의할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.15 - 경로</strong><br>
+그래프 <span class="math inline">\(\mathcal{K}=(\mathcal{X},\mathcal{E})\)</span>에서 노드열 <span class="math inline">\(X_1,\ldots,X_k\)</span>가 모든 <span class="math inline">\(i=1,\ldots,k-1\)</span>에 대해 <span class="math display">\[
+X_i\rightarrow X_{i+1}
+\quad\text{또는}\quad
+X_i-X_{i+1}
+\]</span> 를 만족하면 <strong>경로(path)</strong>라고 한다. 적어도 하나의 <span class="math inline">\(i\)</span>에서 <span class="math inline">\(X_i\rightarrow X_{i+1}\)</span>이면 방향성 경로라고 한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정의 2.16 - 트레일</strong><br>
+노드열 <span class="math inline">\(X_1,\ldots,X_k\)</span>가 모든 <span class="math inline">\(i=1,\ldots,k-1\)</span>에 대해 <span class="math inline">\(X_i\)</span>와 <span class="math inline">\(X_{i+1}\)</span>가 방향에 관계없이 어떤 간선으로 연결되어 있으면 <strong>트레일(trail)</strong>이라고 한다.</p>
+</blockquote>
+<p>그림 2.3의 그래프 <span class="math inline">\(\mathcal{K}\)</span>에서</p>
+<p><span class="math display">\[
+A,C,D,E,I
+\]</span></p>
+<p>는 경로이므로 트레일이기도 하다. 반면</p>
+<p><span class="math display">\[
+A,C,F,G,D
+\]</span></p>
+<p>는 트레일이지만 경로는 아니다. <span class="math inline">\(C\rightarrow F\)</span>를 따라간 뒤 <span class="math inline">\(F-G\)</span>를 지나고, <span class="math inline">\(D\rightarrow G\)</span> 간선을 반대 방향으로 거슬러야 하기 때문이다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.17 - 연결그래프</strong><br>
+모든 노드쌍 <span class="math inline">\(X_i,X_j\)</span> 사이에 트레일이 존재하면 그래프를 <strong>연결(connected)</strong>되어 있다고 한다.</p>
+</blockquote>
+<p>이제 그래프에서 더 긴 범위의 방향성 관계를 정의할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.18 - 조상과 자손</strong><br>
+<span class="math inline">\(X_1=X\)</span>, <span class="math inline">\(X_k=Y\)</span>인 방향성 경로 <span class="math inline">\(X_1,\ldots,X_k\)</span>가 존재하면 <span class="math inline">\(X\)</span>를 <span class="math inline">\(Y\)</span>의 <strong>조상(ancestor)</strong>, <span class="math inline">\(Y\)</span>를 <span class="math inline">\(X\)</span>의 <strong>자손(descendant)</strong>이라고 한다.</p>
+<ul>
+<li><span class="math inline">\(Descendants_X\)</span>: <span class="math inline">\(X\)</span>의 자손 집합</li>
+<li><span class="math inline">\(Ancestors_X\)</span>: <span class="math inline">\(X\)</span>의 조상 집합</li>
+<li><span class="math inline">\(NonDescendants_X\)</span>: <span class="math inline">\(\mathcal{X}-Descendants_X\)</span></li>
+</ul>
+</blockquote>
+<p>그림 2.3에서 <span class="math inline">\(F,G,I\)</span>는 <span class="math inline">\(C\)</span>의 자손이다. <span class="math inline">\(C\)</span>의 조상은 경로 <span class="math inline">\(A,C\)</span>를 통한 <span class="math inline">\(A\)</span>와 경로 <span class="math inline">\(B,E,D,C\)</span>를 통한 <span class="math inline">\(B\)</span>이다.</p>
+<p>방향성 그래프의 간선 방향과 일관된 노드 순서도 중요하다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.19 - 위상정렬</strong><br>
+그래프 <span class="math inline">\(\mathcal{G}=(\mathcal{X},\mathcal{E})\)</span>에서 노드의 순서 <span class="math inline">\(X_1,\ldots,X_n\)</span>이 모든 <span class="math inline">\(X_i\rightarrow X_j\in\mathcal{E}\)</span>에 대해 <span class="math display">\[
+i&lt;j
+\]</span> 를 만족하면 이 순서를 그래프에 대한 <strong>위상정렬(topological ordering)</strong>이라고 한다.</p>
+</blockquote>
+<p>부록 A.3.1에서는 위상정렬을 찾는 알고리즘을 제시한다.</p>
+<blockquote class="blockquote">
+<p><strong>연구 연결 - 시간순서와 위상정렬</strong><br>
+동적 베이즈 네트워크에서는 이전 시점의 노드에서 이후 시점의 노드로만 간선을 허용하는 설계가 자연스러운 위상정렬을 제공한다. 동일 시점 내 간선에도 순환이 없어야 전체 네트워크가 DAG가 된다.</p>
+</blockquote>
+</section>
+<section id="순환과-루프" class="level3">
+<h3 class="anchored" data-anchor-id="순환과-루프">2.2.4 순환과 루프</h3>
+<p>일반적으로 한 노드에서 시작하여 다시 같은 노드로 돌아오는 순환 경로가 있을 수 있으며, 이 경우 그 노드는 자기 자신의 자손이 된다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.20 - 순환과 비순환 그래프</strong><br>
+<span class="math inline">\(X_1=X_k\)</span>인 방향성 경로 <span class="math inline">\(X_1,\ldots,X_k\)</span>를 <strong>순환(cycle)</strong>이라고 한다. 순환을 포함하지 않는 그래프를 <strong>비순환(acyclic)</strong>이라고 한다.</p>
+</blockquote>
+<p>이 책의 대부분에서는 방향성 순환이 있는 그래프 위에 일관된 확률모형을 정의하기가 매우 어렵기 때문에 순환을 허용하지 않는 그래프에 관심을 제한한다.</p>
+<p><strong>방향성 비순환 그래프(directed acyclic graph, DAG)</strong>는 베이즈 네트워크의 기본 그래프 표현이므로 이 책의 중심 개념 중 하나이다.</p>
+<p>일부 내용에서는 방향성 간선과 비방향성 간선을 함께 가지는 비순환 그래프도 사용한다. 그림 2.3의 <span class="math inline">\(\mathcal{K}\)</span>는 비순환이다. 그러나 <span class="math inline">\(A-E\)</span>라는 비방향성 간선을 추가하면</p>
+<p><span class="math display">\[
+A,C,D,E,A
+\]</span></p>
+<p>라는 자기 자신으로 돌아오는 경로가 생긴다. <span class="math inline">\(E\rightarrow A\)</span>를 추가해도 순환이 생긴다.</p>
+<p>순환이 없다는 것이 자기 자신으로 돌아오는 트레일도 없다는 뜻은 아니다. 그림 2.3의 <span class="math inline">\(\mathcal{K}\)</span>에는 다음과 같은 트레일이 존재한다.</p>
+<p><span class="math display">\[
+C,D,E,I,C,
+\]</span></p>
+<p><span class="math display">\[
+C,D,G,F,C.
+\]</span></p>
+<p>방향성 간선과 비방향성 간선을 모두 가지면서 비순환인 그래프를 <strong>부분 방향성 비순환 그래프(partially directed acyclic graph, PDAG)</strong>라고 한다.</p>
+<p>PDAG의 비순환성은 그래프를 <strong>연쇄성분(chain components)</strong>의 방향성 그래프로 분해할 수 있음을 뜻한다. 하나의 연쇄성분 안의 노드들은 서로 비방향성 간선으로만 연결된다. 성분 사이에는 낮은 순서의 성분에서 높은 순서의 성분으로 향하는 방향성 간선만 존재하도록 성분들을 정렬할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.21 - 연쇄성분</strong><br>
+<span class="math inline">\(\mathcal{K}\)</span>가 <span class="math inline">\(\mathcal{X}\)</span> 위의 PDAG라고 하자. <span class="math inline">\(K_1,\ldots,K_\ell\)</span>이 <span class="math inline">\(\mathcal{X}\)</span>의 서로소 분할이고 다음을 만족한다고 하자.</p>
+<ol type="1">
+<li><span class="math inline">\(K_i\)</span> 위의 유도부분그래프에는 방향성 간선이 없다.</li>
+<li><span class="math inline">\(i&lt;j\)</span>이고 <span class="math inline">\(X\in K_i\)</span>, <span class="math inline">\(Y\in K_j\)</span>일 때 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span> 사이에 간선이 존재한다면 그 간선은 오직 <span class="math inline">\(X\rightarrow Y\)</span>일 수 있다.</li>
+</ol>
+<p>각 <span class="math inline">\(K_i\)</span>를 <strong>연쇄성분(chain component)</strong>이라고 한다.</p>
+</blockquote>
+<p>이러한 연쇄구조 때문에 PDAG를 <strong>연쇄그래프(chain graph)</strong>라고도 한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 2.6 - 그림 2.3의 연쇄성분</strong><br>
+그림 2.3의 PDAG에는 다음 여섯 개의 연쇄성분이 있다. <span class="math display">\[
+\{A\},\quad
+\{B\},\quad
+\{C,D,E\},\quad
+\{F,G\},\quad
+\{H\},\quad
+\{I\}.
+\]</span> 이 순서는 가능한 여러 합법적 순서 중 하나이다.</p>
+</blockquote>
+<p>PDAG가 완전히 비방향성 그래프이면 전체 그래프가 하나의 연쇄성분을 이룬다. 반대로 PDAG가 완전히 방향성 그래프, 즉 DAG이면 각 노드가 하나의 연쇄성분이 된다.</p>
+<p>순환과 구별되는 개념으로 <strong>루프(loop)</strong>가 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.22 - 루프, 단일연결, 잎, 폴리트리</strong><br>
+<span class="math inline">\(X_1=X_k\)</span>인 트레일 <span class="math inline">\(X_1,\ldots,X_k\)</span>를 <strong>루프(loop)</strong>라고 한다. 루프를 포함하지 않는 그래프를 <strong>단일연결(singly connected)</strong> 그래프라고 한다.</p>
+<p>단일연결 그래프에서 인접한 노드가 정확히 하나인 노드를 <strong>잎(leaf)</strong>이라고 한다. 단일연결 방향성 그래프를 <strong>폴리트리(polytree)</strong>라고 한다. 단일연결 비방향성 그래프를 <strong>포리스트(forest)</strong>라고 하며, 그 그래프가 연결되어 있으면 <strong>트리(tree)</strong>라고 한다.</p>
+</blockquote>
+<p>방향성 그래프에 대해서도 포리스트와 트리를 정의할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.23 - 방향성 포리스트와 방향성 트리</strong><br>
+각 노드가 최대 한 개의 부모만 가지는 방향성 그래프를 포리스트라고 한다. 방향성 포리스트가 연결되어 있으면 트리라고 한다.</p>
+</blockquote>
+<p>폴리트리와 트리는 매우 다르다. 그림 2.5의 그래프는 폴리트리이지만 여러 노드가 둘 이상의 부모를 가지므로 트리는 아니다.</p>
+<div id="fig-polytree" class="figure-placeholder quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-polytree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<p><strong>Figure 2.5. 폴리트리의 예. 비방향성으로 보았을 때 두 노드 사이의 단순 경로가 하나뿐이지만 일부 노드는 둘 이상의 부모를 가진다</strong></p>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-polytree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.5: <em>[그림 삽입 위치: 원본 그림을 스캔한 뒤 이 블록을 이미지로 교체]</em>
+</figcaption>
+</figure>
+</div>
+<p>이후 논의하듯 그래프의 루프는 여러 계산 과업의 비용을 증가시킨다.</p>
+<p>마지막으로 루프와 관련된 개념을 정의한다. 이는 그래프 기반 표현을 이용한 추론 비용을 평가할 때 중요한 역할을 한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.24 - 현과 현그래프</strong><br>
+그래프에 루프 <span class="math display">\[
+X_1-X_2-\cdots-X_k-X_1
+\]</span> 이 있다고 하자. 루프에서 서로 연속하지 않은 두 노드 <span class="math inline">\(X_i,X_j\)</span>를 연결하는 간선을 <strong>현(chord)</strong>이라고 한다.</p>
+<p><span class="math inline">\(k\ge4\)</span>인 모든 루프가 현을 가지면 비방향성 그래프 <span class="math inline">\(\mathcal{H}\)</span>를 <strong>현그래프(chordal graph)</strong>라고 한다.</p>
+</blockquote>
+<p>예를 들어 그림 1.1(b)의</p>
+<p><span class="math display">\[
+A-B-C-D-A
+\]</span></p>
+<p>루프는 현이 없으므로 비현적이다. 여기에 <span class="math inline">\(A-C\)</span> 간선을 추가하면 현그래프가 된다. 즉 현그래프에서는 지름길이 없는 “최소 루프” 중 가장 긴 것이 삼각형이다. 이 때문에 현그래프를 <strong>삼각화 그래프(triangulated graph)</strong>라고도 한다.</p>
+<p>현그래프의 개념은 방향성 간선을 포함하는 그래프로 확장할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 2.25</strong><br>
+그래프 <span class="math inline">\(\mathcal{K}\)</span>의 기저 비방향성 그래프가 현그래프이면 <span class="math inline">\(\mathcal{K}\)</span>를 현그래프라고 한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>학습 보충 - 현그래프와 추론 계산량</strong><br>
+정확 추론에서 변수 제거 순서를 정하면 원래 그래프에 채움간선이 추가되어 삼각화 그래프가 만들어진다. 생성되는 극대 클릭의 크기가 계산량과 메모리 사용량을 좌우한다. 따라서 현그래프는 단순한 그래프이론 용어를 넘어 추론 알고리즘의 핵심 구조이다.</p>
+</blockquote>
+</section>
+</section>
+<section id="관련-문헌" class="level2">
+<h2 class="anchored" data-anchor-id="관련-문헌">2.3 관련 문헌</h2>
+<p>제1.4절에서는 확률적 방법의 역사적 발전을 일부 설명하였다. 확률이론에 관한 좋은 교재는 많으며, 예를 들어 DeGroot(1989), Ross(1988), Feller(1970)를 참고할 수 있다.</p>
+<p>확률의 빈도주의적 관점과 주관적 관점의 구분은 19세기 후반과 20세기 초반의 상당 기간 동안 중요한 쟁점이었다. 이 논의를 다루는 자료로 베이지안 관점에서는 Cox(2001)와 Jaynes(2003), 빈도주의 관점에서는 Feller(1970)가 있다. 이 책들은 확률적 추론에 관한 유용한 일반 자료도 많이 포함한다.</p>
+<p>Dawid(1979, 1980)는 조건부독립성 성질의 공리화를 처음 제안했으며, 이러한 공리들이 확률과 통계학의 여러 주제를 통합하는 데 어떻게 도움을 주는지 보였다. 이 공리들은 Pearl과 동료들에 의해 매우 상세히 연구되었으며, 그 연구는 Pearl(1988)에 자세히 제시되어 있다.</p>
+</section>
+<section id="연습문제" class="level2">
+<h2 class="anchored" data-anchor-id="연습문제">2.4 연습문제</h2>
+<section id="연습문제-2.1" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.1">연습문제 2.1</h3>
+<p>정의 2.1의 기본 성질을 사용하여 다음을 증명하라.</p>
+<ol type="1">
+<li><span class="math inline">\(P(\varnothing)=0\)</span>.</li>
+<li><span class="math inline">\(\alpha\subseteq\beta\)</span>이면 <span class="math inline">\(P(\alpha)\le P(\beta)\)</span>.</li>
+<li><span class="math inline">\(P(\alpha\cup\beta)=P(\alpha)+P(\beta)-P(\alpha\cap\beta)\)</span>.</li>
+</ol>
+</section>
+<section id="연습문제-2.2" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.2">연습문제 2.2</h3>
+<ol type="1">
+<li>이진 확률변수 <span class="math inline">\(X,Y\)</span>에서 사건 수준 독립성 <span class="math display">\[
+(x^0\perp y^0)
+\]</span> 이 확률변수 수준 독립성 <span class="math display">\[
+(X\perp Y)
+\]</span> 을 함의함을 보여라.</li>
+<li>비이진 변수에서는 위 성질이 성립하지 않는 반례를 제시하라.</li>
+<li>이진 변수 <span class="math inline">\(Z\)</span>에 대해 <span class="math display">\[
+(X\perp Y\mid z^0)
+\]</span> 가 <span class="math display">\[
+(X\perp Y\mid Z)
+\]</span> 를 함의하는가?</li>
+</ol>
+</section>
+<section id="연습문제-2.3" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.3">연습문제 2.3</h3>
+<p>두 사건 <span class="math inline">\(\alpha,\beta\)</span>에 대해</p>
+<p><span class="math display">\[
+P(\alpha)=p_a,
+\qquad
+P(\beta)=p_b
+\]</span></p>
+<p>라고 하자. 이 정보만 주어졌을 때 사건 <span class="math inline">\(\alpha\cap\beta\)</span>와 <span class="math inline">\(\alpha\cup\beta\)</span>의 확률이 가질 수 있는 최댓값과 최솟값은 무엇인가? 각 극값이 나타나는 상황을 특성화할 수 있는가?</p>
+</section>
+<section id="연습문제-2.4" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.4">연습문제 2.4★</h3>
+<p><span class="math inline">\(P\)</span>가 <span class="math inline">\((\Omega,\mathcal{S})\)</span> 위의 분포이고, <span class="math inline">\(\alpha\in\mathcal{S}\)</span>가 <span class="math inline">\(P(\alpha)&gt;0\)</span>인 사건이라고 하자. 조건부확률 <span class="math inline">\(P(\cdot\mid\alpha)\)</span>는 <span class="math inline">\(\mathcal{S}\)</span>의 각 사건에 하나의 값을 부여한다. 이 조건부확률이 정의 2.1의 성질을 만족함을 보여라.</p>
+</section>
+<section id="연습문제-2.5" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.5">연습문제 2.5</h3>
+<p><span class="math inline">\(\mathbf{X},\mathbf{Y},\mathbf{Z}\)</span>가 서로소인 세 변수 부분집합이고</p>
+<p><span class="math display">\[
+\mathcal{X}=\mathbf{X}\cup\mathbf{Y}\cup\mathbf{Z}
+\]</span></p>
+<p>라고 하자. 다음 두 조건이 동치임을 증명하라.</p>
+<p><span class="math display">\[
+P\models(\mathbf{X}\perp\mathbf{Y}\mid\mathbf{Z})
+\]</span></p>
+<p>그리고</p>
+<p><span class="math display">\[
+P(\mathcal{X})
+=\phi_1(\mathbf{X},\mathbf{Z})
+\phi_2(\mathbf{Y},\mathbf{Z}).
+\]</span></p>
+</section>
+<section id="연습문제-2.6" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.6">연습문제 2.6</h3>
+<p>확률을 다룰 때 자주 유용한 규칙을 <strong>경우에 따른 추론(reasoning by cases)</strong>이라고 한다. 확률변수 <span class="math inline">\(X,Y,Z\)</span>에 대해</p>
+<p><span class="math display">\[
+P(X\mid Y)
+=
+\sum_zP(X,z\mid Y)
+\]</span></p>
+<p>임을 확률의 연쇄법칙과 조건부분포의 기본 성질을 사용하여 증명하라.</p>
+</section>
+<section id="연습문제-2.7" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.7">연습문제 2.7★</h3>
+<p>이 문제에서는 제2.1.4.3절에서 논의한 조건부독립성의 성질을 증명한다.</p>
+<ol type="1">
+<li>약한 합집합성과 축약성이 임의의 확률분포 <span class="math inline">\(P\)</span>에서 성립함을 증명하라.</li>
+<li>교차성이 임의의 양의 확률분포 <span class="math inline">\(P\)</span>에서 성립함을 증명하라.</li>
+<li>분포 <span class="math inline">\(P\)</span>가 양의 분포가 아닐 때 교차성이 성립하지 않는 반례를 제시하라.</li>
+</ol>
+</section>
+<section id="연습문제-2.8" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.8">연습문제 2.8</h3>
+<ol type="1">
+<li>이진 확률변수 <span class="math inline">\(X,Y\)</span>에서 <span class="math display">\[
+(x^1\perp y^1)
+\]</span> 이 <span class="math display">\[
+(X\perp Y)
+\]</span> 를 함의함을 보여라.</li>
+<li>비이진 변수에서는 이 성질이 성립하지 않는 반례를 제시하라.</li>
+<li>이진 변수 <span class="math inline">\(Z\)</span>에 대해 <span class="math display">\[
+(X\perp Y\mid z^1)
+\]</span> 이 <span class="math display">\[
+(X\perp Y\mid Z)
+\]</span> 를 함의하는가? 증명하거나 반례를 제시하라.</li>
+</ol>
+</section>
+<section id="연습문제-2.9" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.9">연습문제 2.9</h3>
+<p>너비우선탐색(breadth-first search)을 사용하여 그래프 <span class="math inline">\(\mathcal{K}\)</span>에 순환이 존재하는지 판정하는 방법을 보여라.</p>
+</section>
+<section id="연습문제-2.10" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.10">연습문제 2.10★</h3>
+<p>부록 A.3.1에서는 방향성 그래프의 위상정렬을 찾는 알고리즘을 설명한다. 이 알고리즘을 확장하여 PDAG의 연쇄성분에 대한 위상정렬을 찾는 알고리즘을 구성하라.</p>
+<p>알고리즘은 다음 두 가지를 모두 수행해야 한다.</p>
+<ol type="1">
+<li>PDAG의 연쇄성분을 구성한다.</li>
+<li>정의 2.21의 조건을 만족하도록 연쇄성분의 순서를 정한다.</li>
+</ol>
+<p>알고리즘의 점근적 복잡도를 분석하라.</p>
+</section>
+<section id="연습문제-2.11" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.11">연습문제 2.11</h3>
+<p>기댓값의 성질을 사용하여 확률변수 <span class="math inline">\(X\)</span>의 분산을 다음과 같이 다시 쓸 수 있음을 보여라.</p>
+<p><span class="math display">\[
+Var[X]
+=\mathbb{E}[X^2]-(\mathbb{E}[X])^2.
+\]</span></p>
+</section>
+<section id="연습문제-2.12" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.12">연습문제 2.12★</h3>
+<p>다음 기댓값의 성질을 증명하라.</p>
+<blockquote class="blockquote">
+<p><strong>정리 2.2 - 마르코프 부등식(Markov inequality)</strong><br>
+<span class="math inline">\(P(X\ge0)=1\)</span>인 확률변수 <span class="math inline">\(X\)</span>에 대해, 모든 <span class="math inline">\(t\ge0\)</span>에서 <span class="math display">\[
+P(X\ge t)
+\le
+\frac{\mathbb{E}_P[X]}{t}.
+\]</span></p>
+</blockquote>
+<p>증명에서 <span class="math inline">\(X\)</span>가 유한개의 값을 가지는 이산 확률변수라고 가정해도 된다.</p>
+</section>
+<section id="연습문제-2.13" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.13">연습문제 2.13</h3>
+<p>연습문제 2.12의 마르코프 부등식을 이용하여 체비셰프 부등식을 증명하라. 힌트: 새로운 확률변수 <span class="math inline">\(Y\)</span>를 정의하여, 그 변수에 마르코프 부등식을 적용한 결과가 원하는 결론이 되도록 하라.</p>
+</section>
+<section id="연습문제-2.14" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.14">연습문제 2.14★</h3>
+<p><span class="math display">\[
+X\sim\mathcal{N}(\mu;\sigma^2)
+\]</span></p>
+<p>이고 새로운 변수</p>
+<p><span class="math display">\[
+Y=aX+b
+\]</span></p>
+<p>를 정의한다고 하자. 다음을 보여라.</p>
+<p><span class="math display">\[
+Y\sim\mathcal{N}(a\mu+b;a^2\sigma^2).
+\]</span></p>
+</section>
+<section id="연습문제-2.15" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.15">연습문제 2.15★</h3>
+<p>함수 <span class="math inline">\(f\)</span>가 모든 <span class="math inline">\(0\le\alpha\le1\)</span>과 모든 <span class="math inline">\(x,y\)</span>에 대해</p>
+<p><span class="math display">\[
+f(\alpha x+(1-\alpha)y)
+\ge
+\alpha f(x)+(1-\alpha)f(y)
+\]</span></p>
+<p>를 만족하면 <strong>오목함수(concave function)</strong>라고 한다. 반대 부등식</p>
+<p><span class="math display">\[
+f(\alpha x+(1-\alpha)y)
+\le
+\alpha f(x)+(1-\alpha)f(y)
+\]</span></p>
+<p>를 만족하면 <strong>볼록함수(convex function)</strong>라고 한다.</p>
+<ol type="1">
+<li>연속이고 미분 가능한 함수 <span class="math inline">\(f\)</span>가 오목함수일 필요충분조건이 모든 <span class="math inline">\(x\)</span>에 대해 <span class="math display">\[
+f''(x)\le0
+\]</span> 임을 증명하라.</li>
+<li><span class="math inline">\(\log(x)\)</span>가 양의 실수 영역에서 오목함수임을 보여라.</li>
+</ol>
+</section>
+<section id="연습문제-2.16" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.16">연습문제 2.16★</h3>
+<blockquote class="blockquote">
+<p><strong>명제 2.8 - 옌센 부등식(Jensen’s inequality)</strong><br>
+<span class="math inline">\(f\)</span>가 오목함수이고 <span class="math inline">\(P\)</span>가 확률변수 <span class="math inline">\(X\)</span> 위의 분포이면 <span class="math display">\[
+\mathbb{E}_P[f(X)]
+\le
+f(\mathbb{E}_P[X]).
+\]</span></p>
+</blockquote>
+<p>이 부등식을 사용하여 다음을 보여라.</p>
+<ol type="1">
+<li><span class="math inline">\(H_P(X)\le\log|Val(X)|\)</span>.</li>
+<li><span class="math inline">\(H_P(X)\ge0\)</span>.</li>
+<li><span class="math inline">\(D(P\Vert Q)\ge0\)</span>.</li>
+</ol>
+<p>기본 정의는 부록 A.1을 참고하라.</p>
+</section>
+<section id="연습문제-2.17" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.17">연습문제 2.17</h3>
+<p>임의의 확률분포 <span class="math inline">\(P(X)\)</span>에 대해 다음이 성립함을 보여라.</p>
+<p><span class="math display">\[
+H_P(X)
+=\log K-D(P(X)\Vert P_u(X)),
+\]</span></p>
+<p>여기서 <span class="math inline">\(P_u(X)\)</span>는 <span class="math inline">\(Val(X)\)</span> 위의 균등분포이고,</p>
+<p><span class="math display">\[
+K=|Val(X)|
+\]</span></p>
+<p>이다.</p>
+</section>
+<section id="연습문제-2.18" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.18">연습문제 2.18★</h3>
+<p>명제 A.3을 증명하고, 이를 사용하여 다음을 보여라.</p>
+<p><span class="math display">\[
+I(X;Y)\ge0.
+\]</span></p>
+</section>
+<section id="연습문제-2.19" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.19">연습문제 2.19</h3>
+<p>엔트로피와 마찬가지로 <strong>조건부 상호정보량(conditional mutual information)</strong>을 다음과 같이 정의할 수 있다.</p>
+<p><span class="math display">\[
+I_P(X;Y\mid Z)
+=
+\mathbb{E}_P\left[
+\log\frac{P(X\mid Y,Z)}{P(X\mid Z)}
+\right].
+\]</span></p>
+<p>다음을 증명하라.</p>
+<ol type="1">
+<li>원문에 제시된 등식: <span class="math display">\[
+I_P(X;Y\mid Z)
+=H_P(X\mid Z)-H_P(X,Y\mid Z).
+\]</span></li>
+<li>상호정보량의 연쇄법칙: <span class="math display">\[
+I_P(X;Y,Z)
+=I_P(X;Y)+I_P(X;Z\mid Y).
+\]</span></li>
+</ol>
+<blockquote class="blockquote">
+<p><strong>편집자 주 - 원문 식의 확인이 필요한 부분</strong><br>
+조건부 상호정보량의 표준 항등식은 일반적으로 <span class="math display">\[
+I_P(X;Y\mid Z)
+=H_P(X\mid Z)-H_P(X\mid Y,Z)
+\]</span> 로 쓴다. 제공된 원문에는 첫 번째 식의 두 번째 항이 <span class="math inline">\(H_P(X,Y\mid Z)\)</span>로 인쇄되어 있다. 공부와 논문 작성에서는 사용하는 엔트로피 표기 정의를 확인해야 한다.</p>
+</blockquote>
+</section>
+<section id="연습문제-2.20" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.20">연습문제 2.20</h3>
+<p>상호정보량의 연쇄법칙을 사용하여 다음을 증명하라.</p>
+<p><span class="math display">\[
+I_P(X;Y)
+\le
+I_P(X;Y,Z).
+\]</span></p>
+<p>즉 <span class="math inline">\(Y\)</span>와 <span class="math inline">\(Z\)</span>가 함께 <span class="math inline">\(X\)</span>에 관해 전달하는 정보는 <span class="math inline">\(Y\)</span>만이 전달하는 정보보다 적을 수 없다.</p>
+</section>
+<section id="연습문제-2.21" class="level3">
+<h3 class="anchored" data-anchor-id="연습문제-2.21">연습문제 2.21★</h3>
+<p>이진 확률변수 <span class="math inline">\(X\)</span>로부터 독립적으로 추출한 <span class="math inline">\(N\)</span>개의 표본을 생각하자. 분포는</p>
+<p><span class="math display">\[
+P(x^1)=p,
+\qquad
+P(x^0)=1-p
+\]</span></p>
+<p>이다. 부록 A.2와 같이 <span class="math inline">\(S_N\)</span>을 결과가 <span class="math inline">\(x^1\)</span>인 시행의 수라고 하자. 다음 근사를 보여라.</p>
+<p><span class="math display">\[
+P(S_N=r)
+\approx
+\exp\left[
+-N\cdot
+D\left(
+(p,1-p)
+\middle\Vert
+\left(\frac{r}{N},1-\frac{r}{N}\right)
+\right)
+\right].
+\]</span></p>
+<p>증명에서는 팩토리얼 함수에 대한 스털링 근사를 사용하라.</p>
+<p><span class="math display">\[
+m!
+\approx
+\sqrt{2\pi m}
+\left(\frac{m}{e}\right)^m.
+\]</span></p>
+</section>
+</section>
+<section id="장-요약과-연구-연결" class="level2">
+<h2 class="anchored" data-anchor-id="장-요약과-연구-연결">2.5 장 요약과 연구 연결</h2>
+<blockquote class="blockquote">
+<p><strong>강의 정리</strong><br>
+아래 내용은 이 장의 개념을 이후의 베이즈 네트워크와 동적 베이즈 네트워크 이론에 연결하기 위한 종합 정리이다.</p>
+</blockquote>
+<section id="핵심-수식-체크리스트" class="level3">
+<h3 class="anchored" data-anchor-id="핵심-수식-체크리스트">핵심 수식 체크리스트</h3>
+<p>이 장에서 반드시 기억해야 할 수식은 다음과 같다. 각 수식은 본문에서 정의와 유도 과정을 함께 확인해야 한다.</p>
+<ol type="1">
+<li>조건부확률 <span class="math display">\[
+P(\beta\mid\alpha)=\frac{P(\alpha\cap\beta)}{P(\alpha)}.
+\]</span></li>
+<li>연쇄법칙 <span class="math display">\[
+P(X_1,\ldots,X_k)=P(X_1)\prod_{i=2}^{k}P(X_i\mid X_1,\ldots,X_{i-1}).
+\]</span></li>
+<li>베이즈 규칙 <span class="math display">\[
+P(X\mid Y)=\frac{P(Y\mid X)P(X)}{P(Y)}.
+\]</span></li>
+<li>조건부독립성의 인수분해 표현 <span class="math display">\[
+P(\mathbf{X},\mathbf{Y}\mid\mathbf{Z})
+=P(\mathbf{X}\mid\mathbf{Z})P(\mathbf{Y}\mid\mathbf{Z}).
+\]</span></li>
+<li>주변화 <span class="math display">\[
+P(\mathbf{x})=\sum_{\mathbf{y}}P(\mathbf{x},\mathbf{y})
+\]</span> 이며, 연속변수에서는 합을 적분으로 바꾼다.</li>
+<li>기댓값과 분산 <span class="math display">\[
+\mathbb{E}[X]=\sum_x xP(x),
+\qquad
+Var[X]=\mathbb{E}[X^2]-(\mathbb{E}[X])^2.
+\]</span></li>
+<li>체비셰프 부등식 <span class="math display">\[
+P\left(|X-\mathbb{E}[X]|\ge t\right)\le\frac{Var[X]}{t^2}.
+\]</span></li>
+<li>베이즈 네트워크로 이어지는 결합분포 분해 <span class="math display">\[
+P(X_1,\ldots,X_n)=\prod_{i=1}^{n}P(X_i\mid Pa_{X_i}).
+\]</span></li>
+</ol>
+</section>
+<section id="반드시-구분해야-하는-개념" class="level3">
+<h3 class="anchored" data-anchor-id="반드시-구분해야-하는-개념">반드시 구분해야 하는 개념</h3>
+<ol type="1">
+<li><strong>사건과 확률변수</strong>: 사건은 결과들의 집합이고, 확률변수는 결과에서 속성값을 추출하는 함수이다.</li>
+<li><strong>주변분포와 조건부분포</strong>: 주변분포는 다른 변수의 값을 모르는 상태이고, 조건부분포는 관측 증거에 따라 갱신된 분포이다.</li>
+<li><strong>독립성과 조건부독립성</strong>: 무조건 독립은 드물지만, 특정 변수를 알고 나면 독립이 되는 조건부독립은 그래픽 모델에서 매우 흔하다.</li>
+<li><strong>확률 질의와 MAP 질의</strong>: 확률 질의는 전체 사후분포를 구하고, MAP은 가장 가능성 높은 공동 할당을 찾는다.</li>
+<li><strong>MAP와 주변 MAP</strong>: 관심 없는 변수에 대해 합산한 뒤 관심 변수의 최댓값을 찾는 주변 MAP은 일반 MAP과 다르다.</li>
+<li><strong>이산분포와 연속밀도</strong>: 이산변수에서는 확률질량을 합하고, 연속변수에서는 밀도를 적분한다.</li>
+<li><strong>순환과 루프</strong>: 순환은 방향을 따라 돌아오는 경로이고, 루프는 방향을 무시한 트레일이 자기 자신으로 돌아오는 것이다.</li>
+<li><strong>DAG와 PDAG</strong>: 베이즈 네트워크는 DAG를 사용하며, 구조학습 결과의 동치류를 표현할 때 PDAG가 중요하다.</li>
+</ol>
+</section>
+<section id="베이즈-네트워크-연구를-위한-연결" class="level3">
+<h3 class="anchored" data-anchor-id="베이즈-네트워크-연구를-위한-연결">베이즈 네트워크 연구를 위한 연결</h3>
+<p>베이즈 네트워크의 결합분포는 일반적으로 다음과 같이 분해된다.</p>
+<p><span class="math display">\[
+P(X_1,\ldots,X_n)
+=
+\prod_{i=1}^{n}P(X_i\mid Pa_{X_i}).
+\]</span></p>
+<p>이 분해가 가능한 이유는 그래프가 표현하는 조건부독립성 때문이다. 따라서 제2장에서 배운 다음 네 요소가 제3장의 이론적 출발점이 된다.</p>
+<ul>
+<li>연쇄법칙</li>
+<li>조건부독립성</li>
+<li>DAG와 위상정렬</li>
+<li>결합분포의 주변화와 조건화</li>
+</ul>
+<p>동적 베이즈 네트워크에서는 시간에 따라 복제된 변수 <span class="math inline">\(X_t\)</span> 사이의 결합분포를 유사하게 분해한다. 1차 마르코프 가정을 사용하면 과거 전체가 아니라 직전 시점만을 부모로 사용하여</p>
+<p><span class="math display">\[
+P(\mathbf{X}_{0:T})
+=P(\mathbf{X}_0)
+\prod_{t=1}^{T}P(\mathbf{X}_t\mid\mathbf{X}_{t-1})
+\]</span></p>
+<p>와 같은 형태를 얻는다. 이후 DBN을 이해하려면 제2장의 조건부확률, 조건부독립성, 그래프 경로, DAG 개념을 확실히 익혀야 한다.</p>
+</section>
+<section id="핵심-용어표" class="level3">
+<h3 class="anchored" data-anchor-id="핵심-용어표">핵심 용어표</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>영어</th>
+<th>한국어</th>
+<th>핵심 의미</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>outcome space</td>
+<td>결과공간</td>
+<td>가능한 모든 기본 결과의 집합 <span class="math inline">\(\Omega\)</span></td>
+</tr>
+<tr class="even">
+<td>event</td>
+<td>사건</td>
+<td>결과공간의 부분집합</td>
+</tr>
+<tr class="odd">
+<td>probability distribution</td>
+<td>확률분포</td>
+<td>사건에 0과 1 사이의 확률을 부여하는 사상</td>
+</tr>
+<tr class="even">
+<td>conditional probability</td>
+<td>조건부확률</td>
+<td>새로운 정보가 주어졌을 때 갱신된 확률</td>
+</tr>
+<tr class="odd">
+<td>random variable</td>
+<td>확률변수</td>
+<td>결과를 속성값에 대응시키는 함수</td>
+</tr>
+<tr class="even">
+<td>joint distribution</td>
+<td>결합분포</td>
+<td>여러 확률변수의 공동 할당에 대한 분포</td>
+</tr>
+<tr class="odd">
+<td>marginal distribution</td>
+<td>주변분포</td>
+<td>다른 변수를 합하거나 적분하여 제거한 분포</td>
+</tr>
+<tr class="even">
+<td>conditional independence</td>
+<td>조건부독립성</td>
+<td>조건변수가 주어졌을 때 추가 정보가 없는 관계</td>
+</tr>
+<tr class="odd">
+<td>posterior distribution</td>
+<td>사후분포</td>
+<td>증거에 조건화한 후의 분포</td>
+</tr>
+<tr class="even">
+<td>MAP / MPE</td>
+<td>최대사후할당 / 가장 가능성 높은 설명</td>
+<td>가장 확률이 높은 공동 할당</td>
+</tr>
+<tr class="odd">
+<td>marginal MAP</td>
+<td>주변 MAP</td>
+<td>비관심 변수를 주변화한 뒤 관심 변수의 최빈 할당 선택</td>
+</tr>
+<tr class="even">
+<td>probability density function</td>
+<td>확률밀도함수</td>
+<td>연속변수에서 구간 확률을 적분으로 정의하는 함수</td>
+</tr>
+<tr class="odd">
+<td>expectation</td>
+<td>기댓값</td>
+<td>확률가중 평균</td>
+</tr>
+<tr class="even">
+<td>variance</td>
+<td>분산</td>
+<td>평균에서의 제곱거리의 기댓값</td>
+</tr>
+<tr class="odd">
+<td>directed acyclic graph</td>
+<td>방향성 비순환 그래프</td>
+<td>방향성 순환이 없는 그래프</td>
+</tr>
+<tr class="even">
+<td>clique</td>
+<td>클릭</td>
+<td>모든 노드쌍이 연결된 노드 집합</td>
+</tr>
+<tr class="odd">
+<td>topological ordering</td>
+<td>위상정렬</td>
+<td>모든 간선이 앞 노드에서 뒤 노드로 향하는 순서</td>
+</tr>
+<tr class="even">
+<td>polytree</td>
+<td>폴리트리</td>
+<td>비방향성으로 보았을 때 루프가 없는 방향성 그래프</td>
+</tr>
+<tr class="odd">
+<td>chordal graph</td>
+<td>현그래프</td>
+<td>길이 4 이상 모든 루프에 현이 있는 그래프</td>
+</tr>
+</tbody>
+</table>
+
+
+</section>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>이 논증은 사람의 선호가 기대 금전이득에 직접 비례한다고 가정한다. 작은 금액에서는 이 가정이 상당히 합리적이다. 이 주제는 제22장에서 다시 다룬다.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>이 정의는 다소 제한적이다. <span class="math inline">\(X_i\rightarrow X_j\rightarrow X_i\)</span>와 같은 길이 2의 순환은 허용하지 않지만, <span class="math inline">\(X_i\rightarrow X_i\)</span>와 같은 자기고리는 허용한다.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>어떤 그래프를 기준으로 부모, 자식, 경계 등을 말하는지 문맥상 분명하지 않을 때에는 그래프를 추가 인수로 표기한다.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./index.html" class="pagination-link" aria-label="들어가며">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">들어가며</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

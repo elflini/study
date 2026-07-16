@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>6&nbsp; 가우시안 네트워크 모형 – 확률적 그래프 모형</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./07-exponential-family.html" rel="next">
+<link href="./05-template-based-representations.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-a522afb83bf8ae494942cf1b0ac9d4c3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./06-gaussian-network-models.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">가우시안 네트워크 모형</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">확률적 그래프 모형</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">기초 개념</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-bayesian-network-representation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">베이즈 네트워크 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-undirected-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">무방향 그래픽 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-local-probabilistic-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">국소 확률 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-template-based-representations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">템플릿 기반 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-gaussian-network-models.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">가우시안 네트워크 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-exponential-family.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">지수족</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-exact-inference-variable-elimination.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">정확추론: 변수 제거</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-exact-inference-clique-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">정확추론: 클리크 트리</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-inference-as-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">최적화로서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-particle-based-approximate-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">입자 기반 근사추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-map-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">MAP 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-inference-in-hybrid-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">혼합 네트워크에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-inference-in-temporal-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">시간 모형에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-learning-graphical-models-overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">그래프모형 학습 개요</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-parameter-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">모수추정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-structure-learning-bayesian-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">베이지안 네트워크의 구조학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-partially-observed-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">부분관측 자료</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./19-learning-undirected-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">무방향 그래프모형의 학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20-causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">인과성</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21-utilities-and-decisions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">효용과 의사결정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22-structured-decision-problems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">구조화된 의사결정 문제</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./23-epilogue.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">맺음말: 왜 확률적 그래프 모형인가?</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#다변량-가우시안" id="toc-다변량-가우시안" class="nav-link active" data-scroll-target="#다변량-가우시안"><span class="header-section-number">6.1</span> 다변량 가우시안</a>
+  <ul>
+  <li><a href="#기본-모수화" id="toc-기본-모수화" class="nav-link" data-scroll-target="#기본-모수화"><span class="header-section-number">6.1.1</span> 기본 모수화</a>
+  <ul class="collapse">
+  <li><a href="#다변량-표준-가우시안" id="toc-다변량-표준-가우시안" class="nav-link" data-scroll-target="#다변량-표준-가우시안"><span class="header-section-number">6.1.1.1</span> 다변량 표준 가우시안</a></li>
+  <li><a href="#양의-정부호-조건" id="toc-양의-정부호-조건" class="nav-link" data-scroll-target="#양의-정부호-조건"><span class="header-section-number">6.1.1.2</span> 양의 정부호 조건</a></li>
+  <li><a href="#정보형-모수화" id="toc-정보형-모수화" class="nav-link" data-scroll-target="#정보형-모수화"><span class="header-section-number">6.1.1.3</span> 정보형 모수화</a></li>
+  <li><a href="#기하학적-해석" id="toc-기하학적-해석" class="nav-link" data-scroll-target="#기하학적-해석"><span class="header-section-number">6.1.1.4</span> 기하학적 해석</a></li>
+  </ul></li>
+  <li><a href="#가우시안에-대한-연산" id="toc-가우시안에-대한-연산" class="nav-link" data-scroll-target="#가우시안에-대한-연산"><span class="header-section-number">6.1.2</span> 가우시안에 대한 연산</a>
+  <ul class="collapse">
+  <li><a href="#공분산형에서의-주변화" id="toc-공분산형에서의-주변화" class="nav-link" data-scroll-target="#공분산형에서의-주변화"><span class="header-section-number">6.1.2.1</span> 공분산형에서의 주변화</a></li>
+  <li><a href="#정보형에서의-조건화" id="toc-정보형에서의-조건화" class="nav-link" data-scroll-target="#정보형에서의-조건화"><span class="header-section-number">6.1.2.2</span> 정보형에서의 조건화</a></li>
+  <li><a href="#계산적-대비" id="toc-계산적-대비" class="nav-link" data-scroll-target="#계산적-대비"><span class="header-section-number">6.1.2.3</span> 계산적 대비</a></li>
+  </ul></li>
+  <li><a href="#가우시안의-독립성" id="toc-가우시안의-독립성" class="nav-link" data-scroll-target="#가우시안의-독립성"><span class="header-section-number">6.1.3</span> 가우시안의 독립성</a></li>
+  </ul></li>
+  <li><a href="#가우시안-베이즈-네트워크" id="toc-가우시안-베이즈-네트워크" class="nav-link" data-scroll-target="#가우시안-베이즈-네트워크"><span class="header-section-number">6.2</span> 가우시안 베이즈 네트워크</a>
+  <ul>
+  <li><a href="#선형-가우시안-자식의-주변분포" id="toc-선형-가우시안-자식의-주변분포" class="nav-link" data-scroll-target="#선형-가우시안-자식의-주변분포"><span class="header-section-number">6.2.1</span> 선형 가우시안 자식의 주변분포</a></li>
+  <li><a href="#결합-가우시안에서-조건부-선형-가우시안으로" id="toc-결합-가우시안에서-조건부-선형-가우시안으로" class="nav-link" data-scroll-target="#결합-가우시안에서-조건부-선형-가우시안으로"><span class="header-section-number">6.2.2</span> 결합 가우시안에서 조건부 선형 가우시안으로</a>
+  <ul class="collapse">
+  <li><a href="#표현-동등성과-모수화-비동일성" id="toc-표현-동등성과-모수화-비동일성" class="nav-link" data-scroll-target="#표현-동등성과-모수화-비동일성"><span class="header-section-number">6.2.2.1</span> 표현 동등성과 모수화 비동일성</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#가우시안-마르코프-확률장" id="toc-가우시안-마르코프-확률장" class="nav-link" data-scroll-target="#가우시안-마르코프-확률장"><span class="header-section-number">6.3</span> 가우시안 마르코프 확률장</a>
+  <ul>
+  <li><a href="#일반-이차-퍼텐셜과-정보형" id="toc-일반-이차-퍼텐셜과-정보형" class="nav-link" data-scroll-target="#일반-이차-퍼텐셜과-정보형"><span class="header-section-number">6.3.1</span> 일반 이차 퍼텐셜과 정보형</a>
+  <ul class="collapse">
+  <li><a href="#중요한-차이-모든-이차-mrf가-가우시안-분포를-정의하지는-않는다" id="toc-중요한-차이-모든-이차-mrf가-가우시안-분포를-정의하지는-않는다" class="nav-link" data-scroll-target="#중요한-차이-모든-이차-mrf가-가우시안-분포를-정의하지는-않는다"><span class="header-section-number">6.3.1.1</span> 중요한 차이: 모든 이차 MRF가 가우시안 분포를 정의하지는 않는다</a></li>
+  </ul></li>
+  <li><a href="#대각우세-조건" id="toc-대각우세-조건" class="nav-link" data-scroll-target="#대각우세-조건"><span class="header-section-number">6.3.2</span> 대각우세 조건</a></li>
+  <li><a href="#쌍별-정규화-가능성" id="toc-쌍별-정규화-가능성" class="nav-link" data-scroll-target="#쌍별-정규화-가능성"><span class="header-section-number">6.3.3</span> 쌍별 정규화 가능성</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-gaussian-network-models" class="quarto-section-identifier"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">가우시안 네트워크 모형</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>앞의 논의는 주로 이산 확률변수에 초점을 맞추었지만, <span class="quarto-unresolved-ref">?sec-local-probabilistic-models에서</span> 설명했듯이 베이즈 네트워크의 기본 틀과 <strong>독립성-분해(factorization)</strong>의 대응관계는 연속형 확률변수에도 적용된다. 마르코프 네트워크도 마찬가지이다.</p>
+<p>이산 확률변수에서는 표 형식 조건부확률분포(table CPD)가 매우 크고 비효율적일 수는 있어도, 원칙적으로 모든 이산 분포를 표현할 수 있는 범용적 수단을 제공한다. 반면 연속형 변수의 경우 가능한 모수화 방식이 사실상 무한하다. 따라서 연속형 확률그래프모형을 연구하려면 먼저 특정한 분포족을 선택해야 한다.</p>
+<p>이 장에서는 연속형 분포 가운데 특히 중요한 <strong>다변량 가우시안 분포(multivariate Gaussian distribution)</strong>를 다룬다. 가우시안 분포는 다음과 같은 강한 가정을 둔다.</p>
+<ul>
+<li>밀도는 평균으로부터 멀어질수록 지수적으로 감소한다.</li>
+<li>변수 사이의 관계가 선형적으로 표현된다.</li>
+<li>평균과 공분산만으로 분포 전체가 결정된다.</li>
+</ul>
+<p>이러한 가정은 실제 자료에서 정확히 성립하지 않는 경우가 많다. 그럼에도 가우시안 분포는 놀라울 정도로 많은 현실 분포에 유용한 근사치를 제공한다. 또한 비선형 가우시안 모형, 가우시안 혼합모형, 상태공간모형 등으로 폭넓게 확장할 수 있으며, 가우시안 모형에서 개발된 많은 도구가 이러한 확장모형에도 적용된다. 따라서 가우시안 분포의 학습은 광범위한 연속형 확률모형을 이해하기 위한 중요한 기초가 된다.</p>
+<p>이 장의 전개는 다음과 같다.</p>
+<ol type="1">
+<li>다변량 가우시안 분포의 두 가지 모수화와 기본 성질을 복습한다.</li>
+<li>주변화와 조건화가 두 모수화에서 어떻게 계산되는지 살펴본다.</li>
+<li>공분산행렬과 정보행렬의 0이 각각 어떤 독립성을 나타내는지 설명한다.</li>
+<li>다변량 가우시안을 선형 가우시안 베이즈 네트워크로 표현한다.</li>
+<li>다변량 가우시안을 가우시안 마르코프 확률장으로 표현한다.</li>
+</ol>
+<blockquote class="blockquote">
+<p><strong>핵심 질문</strong><br>
+이 장의 핵심은 “가우시안 분포가 무엇인가?”에만 있지 않다. 더 중요한 질문은 다음 세 가지이다.<br>
+① 공분산행렬과 정보행렬은 서로 어떤 다른 독립성을 보여 주는가?<br>
+② 동일한 가우시안 분포를 방향성 그래프와 무방향 그래프로 어떻게 표현하는가?<br>
+③ 표현은 확률분포 측면에서 동등하더라도, 독립성 표현과 계산 효율은 왜 달라지는가?</p>
+</blockquote>
+<section id="다변량-가우시안" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="다변량-가우시안"><span class="header-section-number">6.1</span> 다변량 가우시안</h2>
+<section id="기본-모수화" class="level3" data-number="6.1.1">
+<h3 data-number="6.1.1" class="anchored" data-anchor-id="기본-모수화"><span class="header-section-number">6.1.1</span> 기본 모수화</h3>
+<p><span class="quarto-unresolved-ref">?sec-foundations에서</span> 단변량 가우시안 분포를 다루었다. 이제 이를 여러 변수로 일반화한다. 결합 가우시안 밀도를 표현하는 방법에는 서로 성질이 상당히 다른 두 가지가 있다.</p>
+<p>단변량 가우시안은 평균과 분산으로 정의된다. 가장 일반적인 다변량 표현에서 <span class="math inline">\(X_1,\ldots,X_n\)</span>의 다변량 가우시안 분포는 다음 두 모수로 결정된다.</p>
+<ul>
+<li><span class="math inline">\(n\)</span>차원 <strong>평균벡터(mean vector)</strong> <span class="math inline">\(\boldsymbol\mu\)</span></li>
+<li>대칭인 <span class="math inline">\(n\times n\)</span> <strong>공분산행렬(covariance matrix)</strong> <span class="math inline">\(\boldsymbol\Sigma\)</span></li>
+</ul>
+<p>밀도함수는 다음과 같다.</p>
+<p><span class="math display">\[
+p(\mathbf x)
+=
+\frac{1}{(2\pi)^{n/2}|\boldsymbol\Sigma|^{1/2}}
+\exp\left[
+-\frac{1}{2}
+(\mathbf x-\boldsymbol\mu)^T
+\boldsymbol\Sigma^{-1}
+(\mathbf x-\boldsymbol\mu)
+\right].
+\]</span></p>
+<p>여기서 <span class="math inline">\(|\boldsymbol\Sigma|\)</span>는 공분산행렬의 행렬식이다.</p>
+<section id="다변량-표준-가우시안" class="level4" data-number="6.1.1.1">
+<h4 data-number="6.1.1.1" class="anchored" data-anchor-id="다변량-표준-가우시안"><span class="header-section-number">6.1.1.1</span> 다변량 표준 가우시안</h4>
+<p>다변량 <strong>표준 가우시안(standard Gaussian)</strong>은 평균벡터가 영벡터 <span class="math inline">\(\mathbf 0\)</span>이고 공분산행렬이 단위행렬 <span class="math inline">\(\mathbf I\)</span>인 가우시안이다. 단위행렬은 대각원소가 모두 1이고 비대각원소가 모두 0이다. 따라서 다변량 표준 가우시안은 각 차원의 독립적인 단변량 표준 가우시안들의 곱이다.</p>
+</section>
+<section id="양의-정부호-조건" class="level4" data-number="6.1.1.2">
+<h4 data-number="6.1.1.2" class="anchored" data-anchor-id="양의-정부호-조건"><span class="header-section-number">6.1.1.2</span> 양의 정부호 조건</h4>
+<p>앞의 다변량 가우시안 밀도식이 적분값 1을 갖는 정상적인 밀도함수가 되려면 <span class="math inline">\(\boldsymbol\Sigma\)</span>가 <strong>양의 정부호(positive definite)</strong>여야 한다. 즉, 모든 <span class="math inline">\(\mathbf x\ne\mathbf 0\)</span>에 대해</p>
+<p><span class="math display">\[
+\mathbf x^T\boldsymbol\Sigma\mathbf x&gt;0
+\]</span></p>
+<p>이어야 한다. 양의 정부호 행렬은 반드시 비특이행렬이며 역행렬이 존재하고, 행렬식이 0이 아니다. 이는 밀도식의 분모와 역행렬이 잘 정의되기 위한 필수 조건이다.</p>
+<p>보다 일반적으로 <span class="math inline">\(\boldsymbol\Sigma\)</span>가 <strong>양의 준정부호(positive semidefinite)</strong>, 즉 모든 <span class="math inline">\(\mathbf x\)</span>에 대해</p>
+<p><span class="math display">\[
+\mathbf x^T\boldsymbol\Sigma\mathbf x\ge 0
+\]</span></p>
+<p>를 만족하는 경우까지 가우시안 개념을 확장할 수 있다. 이 경우 공분산행렬이 특이할 수 있으며, 분포는 <span class="math inline">\(\mathbb R^n\)</span> 전체가 아니라 더 낮은 차원의 부분공간에 놓일 수 있다. 그러나 이 장의 나머지에서는 주로 양의 정부호 공분산행렬을 가정한다.</p>
+<blockquote class="blockquote">
+<p><strong>양의 정부호의 확률적 의미</strong><br>
+임의의 계수벡터 <span class="math inline">\(\mathbf a\)</span>에 대해 선형결합 <span class="math inline">\(\mathbf a^T\mathbf X\)</span>의 분산은 <span class="math inline">\(\mathbf a^T\boldsymbol\Sigma\mathbf a\)</span>이다. 따라서 양의 정부호는 0이 아닌 어떤 선형결합도 분산이 정확히 0이 되지 않는다는 뜻이다. 양의 준정부호이면서 특이한 경우에는 어떤 선형결합이 결정론적으로 고정된다.</p>
+</blockquote>
+</section>
+<section id="정보형-모수화" class="level4" data-number="6.1.1.3">
+<h4 data-number="6.1.1.3" class="anchored" data-anchor-id="정보형-모수화"><span class="header-section-number">6.1.1.3</span> 정보형 모수화</h4>
+<p>양의 정부호 행렬은 역행렬을 가지므로 공분산행렬의 역행렬</p>
+<p><span class="math display">\[
+\mathbf J=\boldsymbol\Sigma^{-1}
+\]</span></p>
+<p>을 사용해 분포를 모수화할 수 있다. <span class="math inline">\(\mathbf J\)</span>는 <strong>정보행렬(information matrix)</strong> 또는 <strong>정밀도행렬(precision matrix)</strong>이라 한다.</p>
+<p>다변량 가우시안 밀도의 지수부를 전개하면</p>
+<p><span class="math display">\[
+-\frac12(\mathbf x-\boldsymbol\mu)^T
+\boldsymbol\Sigma^{-1}(\mathbf x-\boldsymbol\mu)
+=
+-\frac12(\mathbf x-\boldsymbol\mu)^T
+\mathbf J(\mathbf x-\boldsymbol\mu)
+\]</span></p>
+<p>이고,</p>
+<p><span class="math display">\[
+-\frac12\left(\mathbf x^T\mathbf J\mathbf x-2\mathbf x^T\mathbf J\boldsymbol\mu+\boldsymbol\mu^T\mathbf J\boldsymbol\mu\right)
+\]</span></p>
+<p>로 쓸 수 있다. 마지막 항은 <span class="math inline">\(\mathbf x\)</span>에 의존하지 않는 상수이므로 정규화상수 안에 흡수할 수 있다. 따라서</p>
+<p><span class="math display">\[
+p(\mathbf x)
+\propto
+\exp\left[
+-\frac12\mathbf x^T\mathbf J\mathbf x
++(\mathbf J\boldsymbol\mu)^T\mathbf x
+\right].
+\]</span></p>
+<p>이 표현을 가우시안의 <strong>정보형(information form)</strong>이라 한다. 벡터</p>
+<p><span class="math display">\[
+\mathbf h=\mathbf J\boldsymbol\mu
+\]</span></p>
+<p>는 <strong>퍼텐셜 벡터(potential vector)</strong>라 한다. 정보형이 유효한 가우시안 밀도를 정의하기 위한 필요충분조건은 <span class="math inline">\(\mathbf J\)</span>가 대칭이고 양의 정부호라는 것이다. <span class="math inline">\(\boldsymbol\Sigma\)</span>가 양의 정부호일 때 그리고 그때에만 <span class="math inline">\(\boldsymbol\Sigma^{-1}\)</span>도 양의 정부호이다.</p>
+<blockquote class="blockquote">
+<p><strong>두 모수화의 역할</strong><br>
+공분산형 <span class="math inline">\(\mathcal N(\boldsymbol\mu;\boldsymbol\Sigma)\)</span>은 주변분포와 상관구조를 직접 읽는 데 유리하다. 정보형 <span class="math inline">\((\mathbf J,\mathbf h)\)</span>은 조건화와 무방향 그래프 구조를 읽는 데 유리하다. 두 표현은 같은 분포를 나타내지만 계산상 편리한 연산이 서로 다르다.</p>
+</blockquote>
+</section>
+<section id="기하학적-해석" class="level4" data-number="6.1.1.4">
+<h4 data-number="6.1.1.4" class="anchored" data-anchor-id="기하학적-해석"><span class="header-section-number">6.1.1.4</span> 기하학적 해석</h4>
+<p>다변량 가우시안의 등밀도곡면은 평균벡터 <span class="math inline">\(\boldsymbol\mu\)</span>를 중심으로 하는 서로 평행한 타원체이다. 타원체의 방향, 축의 길이, 밀도가 감소하는 정도는 공분산행렬 <span class="math inline">\(\boldsymbol\Sigma\)</span>가 결정한다.</p>
+<div id="fig-gaussian-density-contours" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gaussian-density-contours-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-gaussian-density-contours.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gaussian-density-contours-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.1: 두 변수 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>에 대한 가우시안 분포. (a) <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>가 비상관인 경우, (b) <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>가 상관된 경우.
+</figcaption>
+</figure>
+</div>
+<p>단변량 가우시안과 마찬가지로 평균벡터와 공분산행렬은 첫 번째와 두 번째 적률에 해당한다.</p>
+<p><span class="math display">\[
+\boldsymbol\mu=\mathbb E[\mathbf X],
+\]</span></p>
+<p><span class="math display">\[
+\boldsymbol\Sigma
+=
+\mathbb E[\mathbf X\mathbf X^T]
+-
+\mathbb E[\mathbf X]\mathbb E[\mathbf X]^T.
+\]</span></p>
+<p>개별 원소 수준에서</p>
+<ul>
+<li><span class="math inline">\(\mu_i=\mathbb E[X_i]\)</span>는 <span class="math inline">\(X_i\)</span>의 평균이다.</li>
+<li><span class="math inline">\(\Sigma_{ii}=\operatorname{Var}(X_i)\)</span>는 <span class="math inline">\(X_i\)</span>의 분산이다.</li>
+<li><span class="math inline">\(i\ne j\)</span>일 때 <span class="math inline">\(\Sigma_{ij}=\Sigma_{ji}\)</span>는 <span class="math inline">\(X_i\)</span>와 <span class="math inline">\(X_j\)</span>의 공분산이다.</li>
+</ul>
+<p><span class="math display">\[
+\operatorname{Cov}[X_i;X_j]
+=
+\mathbb E[X_iX_j]
+-
+\mathbb E[X_i]\mathbb E[X_j].
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>예제 - 세 변수의 평균과 공분산</strong><br>
+세 확률변수 <span class="math inline">\(X_1,X_2,X_3\)</span>의 결합분포를 다음 평균벡터와 공분산행렬로 나타낸다고 하자.</p>
+<p><span class="math display">\[
+\boldsymbol\mu=
+\begin{pmatrix}
+1\\-3\\4
+\end{pmatrix},
+\qquad
+\boldsymbol\Sigma=
+\begin{pmatrix}
+4&amp;2&amp;-2\\
+2&amp;5&amp;-5\\
+-2&amp;-5&amp;8
+\end{pmatrix}.
+\]</span></p>
+<p><span class="math inline">\(\operatorname{Cov}(X_1,X_3)=-2\)</span>이고 <span class="math inline">\(\operatorname{Cov}(X_2,X_3)=-5\)</span>이므로 <span class="math inline">\(X_3\)</span>는 <span class="math inline">\(X_1\)</span>과 <span class="math inline">\(X_2\)</span>에 음의 상관을 갖는다. 즉 다른 조건이 같다면 <span class="math inline">\(X_1\)</span> 또는 <span class="math inline">\(X_2\)</span>가 커질수록 <span class="math inline">\(X_3\)</span>는 작아지는 경향을 보인다.</p>
+</blockquote>
+</section>
+</section>
+<section id="가우시안에-대한-연산" class="level3" data-number="6.1.2">
+<h3 data-number="6.1.2" class="anchored" data-anchor-id="가우시안에-대한-연산"><span class="header-section-number">6.1.2</span> 가우시안에 대한 연산</h3>
+<p>분포에서 반복적으로 수행하는 핵심 연산은 두 가지이다.</p>
+<ol type="1">
+<li>변수의 일부에 대한 <strong>주변분포(marginal distribution)</strong> 계산</li>
+<li>일부 변수의 값이 관측되었을 때의 <strong>조건부분포(conditional distribution)</strong> 계산</li>
+</ol>
+<p>가우시안의 두 모수화는 이 두 연산에서 서로 다른 장점을 갖는다.</p>
+<section id="공분산형에서의-주변화" class="level4" data-number="6.1.2.1">
+<h4 data-number="6.1.2.1" class="anchored" data-anchor-id="공분산형에서의-주변화"><span class="header-section-number">6.1.2.1</span> 공분산형에서의 주변화</h4>
+<p>공분산형에서는 주변화가 매우 간단하다. 원하는 변수에 해당하는 평균벡터의 원소와 공분산행렬의 부분행렬을 선택하면 된다.</p>
+<p>앞의 세 변수 예제에서 <span class="math inline">\((X_2,X_3)\)</span>의 주변분포는</p>
+<p><span class="math display">\[
+\begin{pmatrix}X_2\\X_3\end{pmatrix}
+\sim
+\mathcal N\left(
+\begin{pmatrix}-3\\4\end{pmatrix};
+\begin{pmatrix}5&amp;-5\\-5&amp;8\end{pmatrix}
+\right)
+\]</span></p>
+<p>이다.</p>
+<p>보다 일반적으로 <span class="math inline">\(\mathbf X\in\mathbb R^n\)</span>, <span class="math inline">\(\mathbf Y\in\mathbb R^m\)</span>에 대한 결합정규분포를 다음과 같이 블록으로 분해하자.</p>
+<p><span class="math display">\[
+p(\mathbf X,\mathbf Y)
+=
+\mathcal N\left(
+\begin{pmatrix}
+\boldsymbol\mu_X\\
+\boldsymbol\mu_Y
+\end{pmatrix};
+\begin{bmatrix}
+\boldsymbol\Sigma_{XX}&amp;\boldsymbol\Sigma_{XY}\\
+\boldsymbol\Sigma_{YX}&amp;\boldsymbol\Sigma_{YY}
+\end{bmatrix}
+\right).
+\]</span></p>
+<p>여기서</p>
+<ul>
+<li><span class="math inline">\(\boldsymbol\mu_X\in\mathbb R^n\)</span></li>
+<li><span class="math inline">\(\boldsymbol\mu_Y\in\mathbb R^m\)</span></li>
+<li><span class="math inline">\(\boldsymbol\Sigma_{XX}\)</span>는 <span class="math inline">\(n\times n\)</span></li>
+<li><span class="math inline">\(\boldsymbol\Sigma_{XY}\)</span>는 <span class="math inline">\(n\times m\)</span></li>
+<li><span class="math inline">\(\boldsymbol\Sigma_{YX}=\boldsymbol\Sigma_{XY}^T\)</span>는 <span class="math inline">\(m\times n\)</span></li>
+<li><span class="math inline">\(\boldsymbol\Sigma_{YY}\)</span>는 <span class="math inline">\(m\times m\)</span></li>
+</ul>
+<p>이다.</p>
+<blockquote class="blockquote">
+<p><strong>보조정리</strong><br>
+앞에서 블록 형태로 나타낸 결합정규분포에서 <span class="math inline">\(\mathbf Y\)</span>의 주변분포는 <span class="math display">\[
+p(\mathbf Y)=\mathcal N(\boldsymbol\mu_Y;\boldsymbol\Sigma_{YY})
+\]</span> 이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>증명 개요</strong><br>
+표준정규벡터의 선형변환은 다시 정규분포를 따른다는 사실을 이용할 수 있다. 결합벡터 <span class="math inline">\((\mathbf X^T,\mathbf Y^T)^T\)</span>에서 <span class="math inline">\(\mathbf Y\)</span>를 선택하는 것은 선형 선택행렬을 곱하는 연산이다. 선택행렬 <span class="math inline">\(\mathbf A\)</span>를 사용하면 <span class="math inline">\(\mathbf Y=\mathbf A(\mathbf X^T,\mathbf Y^T)^T\)</span>이고, 선형변환의 평균과 공분산 공식에 따라 평균은 <span class="math inline">\(\boldsymbol\mu_Y\)</span>, 공분산은 <span class="math inline">\(\boldsymbol\Sigma_{YY}\)</span>가 된다.</p>
+</blockquote>
+</section>
+<section id="정보형에서의-조건화" class="level4" data-number="6.1.2.2">
+<h4 data-number="6.1.2.2" class="anchored" data-anchor-id="정보형에서의-조건화"><span class="header-section-number">6.1.2.2</span> 정보형에서의 조건화</h4>
+<p>관측 <span class="math inline">\(\mathbf Z=\mathbf z\)</span>에 대한 조건화는 정보형에서 매우 간단하다. 앞의 정보형 표현에 <span class="math inline">\(\mathbf Z=\mathbf z\)</span>를 대입하면 일부 이차항은 선형항이나 상수항으로 바뀌고, 일부 선형항은 상수항으로 바뀐다. 그러나 관측되지 않은 변수에 대한 남은 식은 여전히 정보형 가우시안의 형태를 유지한다.</p>
+<p>예를 들어 미관측변수 <span class="math inline">\(\mathbf Y\)</span>와 관측변수 <span class="math inline">\(\mathbf Z\)</span>에 따라</p>
+<p><span class="math display">\[
+\mathbf J=
+\begin{bmatrix}
+\mathbf J_{YY}&amp;\mathbf J_{YZ}\\
+\mathbf J_{ZY}&amp;\mathbf J_{ZZ}
+\end{bmatrix},
+\qquad
+\mathbf h=
+\begin{pmatrix}
+\mathbf h_Y\\
+\mathbf h_Z
+\end{pmatrix}
+\]</span></p>
+<p>로 나누면, <span class="math inline">\(\mathbf Z=\mathbf z\)</span>를 조건화한 뒤 <span class="math inline">\(\mathbf Y\)</span>에 대한 이차항의 정보행렬은 <span class="math inline">\(\mathbf J_{YY}\)</span>로 유지되고 선형항은</p>
+<p><span class="math display">\[
+\mathbf h_Y^{\text{new}}
+=
+\mathbf h_Y-\mathbf J_{YZ}\mathbf z
+\]</span></p>
+<p>형태로 갱신된다. <span class="math inline">\(\mathbf z\)</span>에만 의존하는 항들은 정규화상수에 포함된다.</p>
+</section>
+<section id="계산적-대비" class="level4" data-number="6.1.2.3">
+<h4 data-number="6.1.2.3" class="anchored" data-anchor-id="계산적-대비"><span class="header-section-number">6.1.2.3</span> 계산적 대비</h4>
+<p>두 표현은 동일한 정보를 담고 있지만 계산적 성질은 다르다.</p>
+<ul>
+<li>주변화를 하려면 관심 변수들의 쌍별 공분산이 필요하므로 공분산형이 자연스럽다.</li>
+<li>조건화를 하려면 공분산행렬을 역변환한 정보형이 자연스럽다.</li>
+<li>작은 행렬에서는 역행렬 계산이 큰 문제가 아니지만, 고차원에서는 비용이 매우 클 수 있다.</li>
+</ul>
+<blockquote class="blockquote">
+<p><strong>수치계산에서의 주의점</strong><br>
+이론식에는 <span class="math inline">\(\boldsymbol\Sigma^{-1}\)</span>가 자주 나타나지만, 수치계산에서는 대개 역행렬을 명시적으로 계산하지 않고 촐레스키 분해나 선형연립방정식 풀이를 사용한다. 예를 들어 <span class="math inline">\(\boldsymbol\Sigma^{-1}\mathbf b\)</span>는 <code>solve(Σ,b)</code>에 해당하는 계산으로 처리하는 것이 더 안정적이다.</p>
+</blockquote>
+</section>
+</section>
+<section id="가우시안의-독립성" class="level3" data-number="6.1.3">
+<h3 data-number="6.1.3" class="anchored" data-anchor-id="가우시안의-독립성"><span class="header-section-number">6.1.3</span> 가우시안의 독립성</h3>
+<p>다변량 가우시안에서는 독립성을 분포의 모수에서 직접 확인할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 공분산과 주변독립성</strong><br>
+<span class="math inline">\(\mathbf X=(X_1,\ldots,X_n)\)</span>이 결합정규분포 <span class="math inline">\(\mathcal N(\boldsymbol\mu;\boldsymbol\Sigma)\)</span>를 따른다고 하자. 그러면 <span class="math display">\[
+X_i\perp X_j
+\quad\Longleftrightarrow\quad
+\Sigma_{ij}=0.
+\]</span></p>
+</blockquote>
+<p>이 성질은 일반 분포에서는 성립하지 않는다. 가우시안이 아닌 분포에서는 공분산이 0이어도 두 변수가 의존할 수 있다. 즉</p>
+<p><span class="math display">\[
+\operatorname{Cov}(X,Y)=0
+\]</span></p>
+<p>은 일반적으로 <strong>비상관(uncorrelated)</strong>을 의미할 뿐 독립을 보장하지 않는다. 가우시안에서는 분포가 평균과 공분산으로 완전히 결정되기 때문에 비상관과 독립이 일치한다.</p>
+<blockquote class="blockquote">
+<p><strong>비가우시안 반례</strong><br>
+<span class="math inline">\(X\)</span>가 0을 중심으로 대칭인 연속분포를 따르고 <span class="math inline">\(Y=X^2\)</span>라 하자. 그러면 <span class="math inline">\(Y\)</span>는 <span class="math inline">\(X\)</span>에 완전히 의존하지만 대칭성 때문에 <span class="math inline">\(\mathbb E[X^3]=0\)</span>이고 <span class="math inline">\(\mathbb E[X]=0\)</span>이어서 <span class="math inline">\(\operatorname{Cov}(X,Y)=0\)</span>이 될 수 있다.</p>
+</blockquote>
+<p>조건부독립성은 공분산행렬보다 정보행렬에서 직접 드러난다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 정보행렬과 조건부독립성</strong><br>
+가우시안 분포 <span class="math display">\[
+p(X_1,\ldots,X_n)=\mathcal N(\boldsymbol\mu;\boldsymbol\Sigma)
+\]</span> 에 대해 <span class="math inline">\(\mathbf J=\boldsymbol\Sigma^{-1}\)</span>라 하자. 그러면 <span class="math display">\[
+J_{ij}=0
+\quad\Longleftrightarrow\quad
+X_i\perp X_j\mid \mathbf X-\{X_i,X_j\}.
+\]</span></p>
+</blockquote>
+<p>원문에서는 증명을 연습문제 7.3으로 남긴다.</p>
+<blockquote class="blockquote">
+<p><strong>증명 개요</strong><br>
+나머지 변수들을 모두 관측한 뒤 <span class="math inline">\((X_i,X_j)\)</span>의 조건부분포를 정보형으로 쓰면, 두 변수의 교차 이차항은 <span class="math inline">\(-J_{ij}x_ix_j\)</span>이다. <span class="math inline">\(J_{ij}=0\)</span>이면 조건부 밀도가 <span class="math inline">\(X_i\)</span>에 관한 항과 <span class="math inline">\(X_j\)</span>에 관한 항의 곱으로 분해되어 조건부독립이 성립한다. 반대로 <span class="math inline">\(J_{ij}\ne0\)</span>이면 교차항이 남아 두 변수의 조건부분포가 분해되지 않는다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - 정보행렬에서 읽는 조건부독립성</strong><br>
+앞의 세 변수 예제에서 제시한 공분산행렬을 역행렬로 바꾸면 <span class="math display">\[
+\mathbf J=
+\begin{pmatrix}
+0.3125&amp;-0.125&amp;0\\
+-0.125&amp;0.5833&amp;0.3333\\
+0&amp;0.3333&amp;0.3333
+\end{pmatrix}
+\]</span> 이다. <span class="math inline">\(J_{13}=0\)</span>이므로 <span class="math display">\[
+X_1\perp X_3\mid X_2
+\]</span> 가 성립한다. 그러나 공분산행렬에서는 <span class="math inline">\(\Sigma_{13}=-2\)</span>이므로 <span class="math inline">\(X_1\)</span>과 <span class="math inline">\(X_3\)</span>는 주변적으로는 상관되어 있다.</p>
+</blockquote>
+<p>정보행렬과 조건부독립성에 관한 정리가 나타내는 조건부독립성은 <span class="quarto-unresolved-ref">?sec-undirected-graphical-models에서</span> 다룬 <strong>쌍별 마르코프 독립성(pairwise Markov independence)</strong>과 정확히 일치한다. 가우시안 밀도는 양의 분포이므로 <span class="quarto-unresolved-ref">?sec-undirected-graphical-models의</span> 결과를 적용할 수 있다. 즉 정보행렬의 0이 아닌 비대각원소마다 무방향 간선을 추가하면 가우시안 분포의 유일한 최소 I-map 마르코프 네트워크를 얻는다.</p>
+<p><span class="math display">\[
+J_{ij}\ne0
+\quad\Longleftrightarrow\quad
+X_i-X_j\text{ 간선 존재}.
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>핵심 구분</strong><br>
+- <span class="math inline">\(\Sigma_{ij}=0\)</span>: <span class="math inline">\(X_i\)</span>와 <span class="math inline">\(X_j\)</span>의 <strong>주변독립성</strong><br>
+- <span class="math inline">\(J_{ij}=0\)</span>: 나머지 모든 변수를 조건으로 한 <span class="math inline">\(X_i\)</span>와 <span class="math inline">\(X_j\)</span>의 <strong>조건부독립성</strong></p>
+</blockquote>
+</section>
+</section>
+<section id="가우시안-베이즈-네트워크" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="가우시안-베이즈-네트워크"><span class="header-section-number">6.2</span> 가우시안 베이즈 네트워크</h2>
+<p>이제 연속형 결합분포를 베이즈 네트워크로 정의하는 방법을 살펴본다. 기본 국소모형은 <span class="quarto-unresolved-ref">?sec-local-probabilistic-models에서</span> 다룬 <strong>선형 가우시안 CPD</strong>이다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 가우시안 베이즈 네트워크</strong><br>
+모든 변수가 연속형이고, 모든 CPD가 선형 가우시안인 베이즈 네트워크를 <strong>가우시안 베이즈 네트워크(Gaussian Bayesian network)</strong>라 한다.</p>
+</blockquote>
+<p>선형 가우시안 베이즈 네트워크는 단순한 특수 사례가 아니다. 중요한 사실은 이 네트워크가 다변량 가우시안 분포와 동일한 분포족을 표현한다는 것이다.</p>
+<section id="선형-가우시안-자식의-주변분포" class="level3" data-number="6.2.1">
+<h3 data-number="6.2.1" class="anchored" data-anchor-id="선형-가우시안-자식의-주변분포"><span class="header-section-number">6.2.1</span> 선형 가우시안 자식의 주변분포</h3>
+<blockquote class="blockquote">
+<p><strong>정리</strong><br>
+<span class="math inline">\(Y\)</span>가 부모 <span class="math inline">\(X_1,\ldots,X_k\)</span>에 대해 다음 선형 가우시안 CPD를 갖는다고 하자. <span class="math display">\[
+p(Y\mid\mathbf x)
+=
+\mathcal N\left(\beta_0+\boldsymbol\beta^T\mathbf x;\sigma^2\right).
+\]</span> 부모벡터 <span class="math inline">\(\mathbf X=(X_1,\ldots,X_k)^T\)</span>가 <span class="math display">\[
+\mathbf X\sim\mathcal N(\boldsymbol\mu;\boldsymbol\Sigma)
+\]</span> 를 따르면 다음이 성립한다.</p>
+<ol type="1">
+<li><span class="math inline">\(Y\)</span>의 주변분포는 <span class="math display">\[
+Y\sim\mathcal N(\mu_Y;\sigma_Y^2)
+\]</span> 이며 <span class="math display">\[
+\mu_Y=\beta_0+\boldsymbol\beta^T\boldsymbol\mu,
+\]</span> <span class="math display">\[
+\sigma_Y^2=\sigma^2+\boldsymbol\beta^T\boldsymbol\Sigma\boldsymbol\beta.
+\]</span></li>
+<li><span class="math inline">\((\mathbf X,Y)\)</span>의 결합분포는 다변량 정규분포이고 <span class="math display">\[
+\operatorname{Cov}(X_i,Y)
+=
+\sum_{j=1}^{k}\beta_j\Sigma_{ij}.
+\]</span></li>
+</ol>
+</blockquote>
+<p>이 정리를 네트워크의 위상순서에 따라 반복 적용하면, 모든 CPD가 선형 가우시안인 베이즈 네트워크는 전체적으로 하나의 다변량 가우시안 결합분포를 정의한다.</p>
+<blockquote class="blockquote">
+<p><strong>분산식의 의미</strong><br>
+<span class="math inline">\(Y=\beta_0+\boldsymbol\beta^T\mathbf X+\varepsilon\)</span>이고 <span class="math inline">\(\varepsilon\sim\mathcal N(0,\sigma^2)\)</span>가 부모와 독립이라고 보면 <span class="math display">\[
+\operatorname{Var}(Y)
+=\operatorname{Var}(\boldsymbol\beta^T\mathbf X)
++\operatorname{Var}(\varepsilon)
+=\boldsymbol\beta^T\boldsymbol\Sigma\boldsymbol\beta+\sigma^2.
+\]</span> 즉 자식의 불확실성은 부모에서 전달된 변동과 자체 잡음의 합이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - 연쇄형 선형 가우시안 네트워크</strong><br>
+다음 연쇄를 생각하자. <span class="math display">\[
+X_1\longrightarrow X_2\longrightarrow X_3.
+\]</span> 국소분포가 <span class="math display">\[
+p(X_1)=\mathcal N(1;4),
+\]</span> <span class="math display">\[
+p(X_2\mid X_1)=\mathcal N(0.5X_1-3.5;4),
+\]</span> <span class="math display">\[
+p(X_3\mid X_2)=\mathcal N(-X_2+1;3)
+\]</span> 이라고 하자.</p>
+<p>평균은 <span class="math display">\[
+\mu_2=0.5\mu_1-3.5=0.5\times1-3.5=-3,
+\]</span> <span class="math display">\[
+\mu_3=-\mu_2+1=-(-3)+1=4
+\]</span> 이다.</p>
+<p>분산은 <span class="math display">\[
+\Sigma_{22}=4+(1/2)^2\times4=5,
+\]</span> <span class="math display">\[
+\Sigma_{33}=3+(-1)^2\times5=8
+\]</span> 이다. 각 분산은 자체 잡음분산과 부모로부터 전달된 분산의 합이다.</p>
+<p>공분산은 <span class="math display">\[
+\Sigma_{12}=(1/2)\times4=2,
+\]</span> <span class="math display">\[
+\Sigma_{23}=(-1)\Sigma_{22}=-5,
+\]</span> <span class="math display">\[
+\Sigma_{13}=(-1)\Sigma_{12}=-2
+\]</span> 이다. <span class="math inline">\(X_1\)</span>이 <span class="math inline">\(X_3\)</span>의 직접 부모는 아니지만 <span class="math inline">\(X_1\to X_2\to X_3\)</span> 경로를 통해 상관된다. 최종 평균벡터와 공분산행렬은 앞에서 제시한 세 변수의 평균벡터와 공분산행렬과 정확히 같다.</p>
+</blockquote>
+</section>
+<section id="결합-가우시안에서-조건부-선형-가우시안으로" class="level3" data-number="6.2.2">
+<h3 data-number="6.2.2" class="anchored" data-anchor-id="결합-가우시안에서-조건부-선형-가우시안으로"><span class="header-section-number">6.2.2</span> 결합 가우시안에서 조건부 선형 가우시안으로</h3>
+<p>앞의 결과의 역도 성립한다. 결합정규분포에서 한 변수집합을 다른 변수집합에 조건화하면 조건부분포는 다시 정규분포이며, 조건부 평균은 조건변수의 선형함수이다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 조건부 가우시안 공식</strong><br>
+앞에서 블록 형태로 나타낸 결합정규분포에서 <span class="math inline">\(\mathbf Y\)</span>가 단일 변수 <span class="math inline">\(Y\)</span>인 경우를 생각하자. 조건부 밀도는 <span class="math display">\[
+p(Y\mid\mathbf X)
+=
+\mathcal N\left(\beta_0+\boldsymbol\beta^T\mathbf X;\sigma^2\right)
+\]</span> 이며 <span class="math display">\[
+\beta_0
+=
+\mu_Y-
+\boldsymbol\Sigma_{YX}
+\boldsymbol\Sigma_{XX}^{-1}
+\boldsymbol\mu_X,
+\]</span> <span class="math display">\[
+\boldsymbol\beta^T
+=
+\boldsymbol\Sigma_{YX}
+\boldsymbol\Sigma_{XX}^{-1},
+\]</span> 또는 열벡터 표기로 동등하게 <span class="math display">\[
+\boldsymbol\beta
+=
+\boldsymbol\Sigma_{XX}^{-1}
+\boldsymbol\Sigma_{XY},
+\]</span> <span class="math display">\[
+\sigma^2
+=
+\Sigma_{YY}
+-
+\boldsymbol\Sigma_{YX}
+\boldsymbol\Sigma_{XX}^{-1}
+\boldsymbol\Sigma_{XY}.
+\]</span></p>
+</blockquote>
+<p>조건부 평균은 흔히 다음과 같이 쓰기도 한다.</p>
+<p><span class="math display">\[
+\mathbb E[Y\mid\mathbf X]
+=
+\mu_Y+
+\boldsymbol\Sigma_{YX}
+\boldsymbol\Sigma_{XX}^{-1}
+(\mathbf X-\boldsymbol\mu_X).
+\]</span></p>
+<p>조건부분산은 <span class="math inline">\(\mathbf X\)</span>의 실제 관측값에 의존하지 않는다. 이는 결합 가우시안의 중요한 특징이다.</p>
+<blockquote class="blockquote">
+<p><strong>회귀와의 연결</strong><br>
+<span class="math inline">\(\boldsymbol\beta=\boldsymbol\Sigma_{XX}^{-1}\boldsymbol\Sigma_{XY}\)</span>는 모집단 선형회귀계수와 동일하다. 가우시안 가정 아래에서는 “최적 선형예측”이 단순한 근사에 그치지 않고 실제 조건부기댓값과 정확히 일치한다.</p>
+</blockquote>
+<p>이 결과를 이용하면 임의의 결합 가우시안 분포로부터 베이즈 네트워크를 구성할 수 있다. 과정은 <span class="quarto-unresolved-ref">?sec-bayesian-network-representation에서</span> 최소 I-map을 구성한 방법과 같다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 결합 가우시안의 선형 가우시안 BN 표현</strong><br>
+<span class="math inline">\(\mathbf X=\{X_1,\ldots,X_n\}\)</span>에 대한 결합 가우시안 분포 <span class="math inline">\(p\)</span>와 임의의 변수 순서 <span class="math inline">\(X_1,\ldots,X_n\)</span>이 주어졌다고 하자. 다음 조건을 만족하는 베이즈 네트워크 그래프 <span class="math inline">\(G\)</span>와 모수화 <span class="math inline">\(\mathcal B\)</span>를 구성할 수 있다.</p>
+<ol type="1">
+<li><span class="math inline">\(Pa_G(X_i)\subseteq\{X_1,\ldots,X_{i-1}\}\)</span>이다.</li>
+<li><span class="math inline">\(X_i\)</span>의 CPD는 부모에 대한 선형 가우시안이다.</li>
+<li><span class="math inline">\(G\)</span>는 <span class="math inline">\(p\)</span>의 최소 I-map이다.</li>
+</ol>
+</blockquote>
+<p>원문에서는 증명을 연습문제 7.4로 남긴다. 이산형 베이즈 네트워크와 마찬가지로 최소 I-map은 유일하지 않다. 변수 순서가 달라지면 서로 다른 그래프가 만들어질 수 있다. 예를 들어 상관된 두 변수의 결합 가우시안은 <span class="math inline">\(X\to Y\)</span>로도, <span class="math inline">\(Y\to X\)</span>로도 나타낼 수 있다.</p>
+<section id="표현-동등성과-모수화-비동일성" class="level4" data-number="6.2.2.1">
+<h4 data-number="6.2.2.1" class="anchored" data-anchor-id="표현-동등성과-모수화-비동일성"><span class="header-section-number">6.2.2.1</span> 표현 동등성과 모수화 비동일성</h4>
+<p>다변량 가우시안과 선형 가우시안 베이즈 네트워크는 표현 가능한 확률분포의 집합이 동일하다. 네트워크에서 결합분포로, 결합분포에서 네트워크로 변환하는 닫힌형식 공식도 존재한다. 그러나 두 모수화 사이에는 일대일 대응이 없다.</p>
+<ul>
+<li>최악의 경우 두 표현의 독립 모수 수는 같다.</li>
+<li>그래프가 희소하면 선형 가우시안 BN이 훨씬 더 간결할 수 있다.</li>
+<li>반대로 특정 변수순서를 택한 최소 I-map은 공분산 표현보다 비효율적일 수 있다.</li>
+</ul>
+<blockquote class="blockquote">
+<p><strong>예제 - 연쇄에서의 조밀한 공분산과 희소한 정보행렬</strong><br>
+다음 연쇄형 선형 가우시안 네트워크를 생각하자. <span class="math display">\[
+X_1\to X_2\to\cdots\to X_n.
+\]</span> 모수화가 퇴화하지 않고 그래프가 분포의 최소 I-map이라고 하자. 그러면 일반적으로 모든 변수쌍 <span class="math inline">\(X_i,X_j\)</span>는 경로를 통해 상관되므로 공분산행렬은 조밀하다. 즉 대부분의 <span class="math inline">\(\Sigma_{ij}\)</span>가 0이 아니다.</p>
+<p>반면 연쇄에서 서로 이웃하지 않는 두 변수는 나머지 변수들을 조건으로 독립이다. 따라서 정보행렬에서는 이웃한 변수에 해당하는 원소만 0이 아니며, 비대각원소는 주로 <span class="math inline">\(j=i-1\)</span> 또는 <span class="math inline">\(j=i+1\)</span>에만 존재한다. 즉 정보행렬은 삼중대각(tridiagonal) 희소행렬이 된다.</p>
+</blockquote>
+<p>그러나 선형 가우시안 BN의 모든 구조가 정보행렬 하나에 직접 나타나는 것은 아니다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - v-구조와 다이아몬드 구조</strong><br>
+<span class="math inline">\(X\to Z\leftarrow Y\)</span>의 v-구조에서는 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>가 주변적으로 독립이지만 <span class="math inline">\(Z\)</span>를 조건으로 하면 의존한다. 따라서 <span class="math display">\[
+\Sigma_{XY}=0,
+\qquad
+J_{XY}\ne0.
+\]</span> 공분산행렬은 주변독립성을 보여 주지만 정보행렬은 나머지 변수를 조건으로 한 의존성을 반영한다.</p>
+<p>이제 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>가 공통 부모 <span class="math inline">\(W\)</span>도 갖는 다이아몬드 구조를 생각하자. 이 경우 <span class="math inline">\(X\)</span>와 <span class="math inline">\(Y\)</span>는 주변적으로도 의존하고, <span class="math inline">\(Z,W\)</span>를 조건으로 해도 독립이 아니다. 따라서 공분산행렬과 정보행렬의 해당 원소가 모두 0이 아닐 수 있다.</p>
+</blockquote>
+<p>이 예제들은 가우시안에서도 베이즈 네트워크와 마르코프 네트워크의 독립성 표현력이 다르다는 <span class="quarto-unresolved-ref">?sec-bayesian-network-representation과</span> <span class="quarto-unresolved-ref">?sec-undirected-graphical-models의</span> 결론을 그대로 재현한다.</p>
+</section>
+</section>
+</section>
+<section id="가우시안-마르코프-확률장" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="가우시안-마르코프-확률장"><span class="header-section-number">6.3</span> 가우시안 마르코프 확률장</h2>
+<p>이제 다변량 가우시안을 무방향 확률그래프모형으로 표현한다. 이 표현은 정보형 가우시안에서 거의 직접적으로 얻어진다.</p>
+<p>앞에서 제시한 정보형의 지수부를 단일 변수에 관한 항과 변수쌍에 관한 항으로 나누자. 변수 <span class="math inline">\(X_i\)</span>만 포함하는 항은</p>
+<p><span class="math display">\[
+-\frac12J_{ii}x_i^2+h_ix_i
+\]</span></p>
+<p>이다. 여기서 <span class="math inline">\(\mathbf h=\mathbf J\boldsymbol\mu\)</span>이다.</p>
+<p>변수쌍 <span class="math inline">\(X_i,X_j\)</span>를 포함하는 항은 <span class="math inline">\(\mathbf J\)</span>의 대칭성 때문에</p>
+<p><span class="math display">\[
+-\frac12[J_{ij}x_ix_j+J_{ji}x_jx_i]
+=-J_{ij}x_ix_j
+\]</span></p>
+<p>이다.</p>
+<p>따라서 정보형은 즉시 쌍별 마르코프 네트워크를 정의한다.</p>
+<ul>
+<li>노드 퍼텐셜은 <span class="math inline">\(h_i\)</span>와 <span class="math inline">\(J_{ii}\)</span>에서 나온다.</li>
+<li>간선 퍼텐셜은 <span class="math inline">\(J_{ij}\)</span>에서 나온다.</li>
+<li><span class="math inline">\(J_{ij}=0\)</span>이면 <span class="math inline">\(X_i-X_j\)</span> 간선이 없다.</li>
+</ul>
+<p>이와 같이 이차식 형태의 노드·간선 퍼텐셜을 갖는 쌍별 마르코프 네트워크를 <strong>가우시안 마르코프 확률장(Gaussian Markov random field, GMRF)</strong>이라 한다.</p>
+<section id="일반-이차-퍼텐셜과-정보형" class="level3" data-number="6.3.1">
+<h3 data-number="6.3.1" class="anchored" data-anchor-id="일반-이차-퍼텐셜과-정보형"><span class="header-section-number">6.3.1</span> 일반 이차 퍼텐셜과 정보형</h3>
+<p>반대로 이차형 노드·간선 퍼텐셜을 갖는 임의의 쌍별 MRF를 생각하자. 정규화상수에 흡수할 수 있는 상수를 포함하여 에너지함수를 다음과 같이 쓸 수 있다.</p>
+<p><span class="math display">\[
+\varepsilon_i(x_i)
+=d_0^i+d_1^ix_i+d_2^ix_i^2,
+\]</span></p>
+<p><span class="math display">\[
+\varepsilon_{ij}(x_i,x_j)
+=
+a_{00}^{ij}
++a_{01}^{ij}x_i
++a_{10}^{ij}x_j
++a_{11}^{ij}x_ix_j
++a_{02}^{ij}x_i^2
++a_{20}^{ij}x_j^2.
+\]</span></p>
+<p>같은 항을 모으면 다음 로그-이차형으로 다시 쓸 수 있다.</p>
+<p><span class="math display">\[
+p'(\mathbf x)
+=
+\exp\left(
+-\frac12\mathbf x^T\mathbf J\mathbf x
++\mathbf h^T\mathbf x
+\right),
+\]</span></p>
+<p>여기서 일반성을 잃지 않고 <span class="math inline">\(\mathbf J\)</span>가 대칭이라고 둘 수 있다.</p>
+<p>이 MRF가 유효한 가우시안 밀도를 정의할 필요충분조건은 <span class="math inline">\(\mathbf J\)</span>가 양의 정부호인 것이다. 이 경우 <span class="math inline">\(\mathbf J\)</span>는 합법적인 정보행렬이고 <span class="math inline">\(\mathbf h\)</span>는 퍼텐셜 벡터가 된다.</p>
+<section id="중요한-차이-모든-이차-mrf가-가우시안-분포를-정의하지는-않는다" class="level4" data-number="6.3.1.1">
+<h4 data-number="6.3.1.1" class="anchored" data-anchor-id="중요한-차이-모든-이차-mrf가-가우시안-분포를-정의하지는-않는다"><span class="header-section-number">6.3.1.1</span> 중요한 차이: 모든 이차 MRF가 가우시안 분포를 정의하지는 않는다</h4>
+<p>가우시안 베이즈 네트워크에서는 국소 선형 가우시안 CPD들이 모두 적법하면 전체 결합분포도 자동으로 적법하다. 그러나 이차형 퍼텐셜을 임의로 설정한 쌍별 MRF에서는 그렇지 않다. 국소 노드와 간선 퍼텐셜을 모두 합쳤을 때 얻는 전체 <span class="math inline">\(\mathbf J\)</span>가 양의 정부호가 아닐 수 있다. 그러면</p>
+<p><span class="math display">\[
+\exp\left(-\frac12\mathbf x^T\mathbf J\mathbf x+\mathbf h^T\mathbf x\right)
+\]</span></p>
+<p>의 적분이 무한대가 되어 정규화할 수 없다.</p>
+<p>일반적으로 전체 정보행렬을 구성하고 양의 정부호인지 검사하는 것 외에, 네트워크의 각 국소모수만으로 적법성을 정확히 판정하는 간단한 필요충분조건은 없다. 다만 실제에서 유용한 충분조건들이 있다.</p>
+</section>
+</section>
+<section id="대각우세-조건" class="level3" data-number="6.3.2">
+<h3 data-number="6.3.2" class="anchored" data-anchor-id="대각우세-조건"><span class="header-section-number">6.3.2</span> 대각우세 조건</h3>
+<blockquote class="blockquote">
+<p><strong>정의 - 대각우세</strong><br>
+정보행렬 <span class="math inline">\(\mathbf J\)</span>로 모수화된 이차 MRF가 모든 <span class="math inline">\(i\)</span>에 대해 <span class="math display">\[
+\sum_{j\ne i}|J_{ij}|&lt;J_{ii}
+\]</span> 를 만족하면 <strong>대각우세(diagonally dominant)</strong>라고 한다.</p>
+</blockquote>
+<p>앞에서 제시한 정보행렬은 대각우세이다. 예를 들어 두 번째 행에서</p>
+<p><span class="math display">\[
+|-0.125|+0.3333&lt;0.5833
+\]</span></p>
+<p>이다.</p>
+<blockquote class="blockquote">
+<p><strong>명제</strong><br>
+<span class="math display">\[
+p'(\mathbf x)=
+\exp\left(-\frac12\mathbf x^T\mathbf J\mathbf x+\mathbf h^T\mathbf x\right)
+\]</span> 가 이차 쌍별 MRF라고 하자. <span class="math inline">\(\mathbf J\)</span>가 대각우세이면 <span class="math inline">\(p'\)</span>는 유효한 가우시안 MRF를 정의한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>증명 개요</strong><br>
+대칭인 엄격한 대각우세 행렬에서 대각원소가 양수이면 모든 고유값이 양수임을 Gershgorin 원판 정리로 보일 수 있다. 따라서 <span class="math inline">\(\mathbf J\)</span>는 양의 정부호이다.</p>
+</blockquote>
+</section>
+<section id="쌍별-정규화-가능성" class="level3" data-number="6.3.3">
+<h3 data-number="6.3.3" class="anchored" data-anchor-id="쌍별-정규화-가능성"><span class="header-section-number">6.3.3</span> 쌍별 정규화 가능성</h3>
+<p>다음 조건은 정보행렬만 눈으로 검사하는 것보다 복잡하다. 특정 MRF가 노드·간선별로 각각 정상화 가능한 이차 퍼텐셜로 분해되는지를 확인한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 쌍별 정규화 가능성</strong><br>
+앞의 일반 이차 퍼텐셜로 모수화된 이차 MRF가 다음을 만족하면 <strong>쌍별 정규화 가능(pairwise normalizable)</strong>하다고 한다.</p>
+<ol type="1">
+<li>모든 <span class="math inline">\(i\)</span>에 대해 <span class="math inline">\(d_2^i&gt;0\)</span>이다.</li>
+<li>모든 <span class="math inline">\(i,j\)</span>에 대해 다음 <span class="math inline">\(2\times2\)</span> 행렬이 양의 준정부호이다. <span class="math display">\[
+\begin{pmatrix}
+a_{02}^{ij}&amp;a_{11}^{ij}/2\\
+a_{11}^{ij}/2&amp;a_{20}^{ij}
+\end{pmatrix}.
+\]</span></li>
+</ol>
+</blockquote>
+<p>직관적으로 각 간선 퍼텐셜을 다른 퍼텐셜과 분리하여 단독으로 보더라도 정규화할 수 있다는 뜻이다.</p>
+<blockquote class="blockquote">
+<p><strong>명제</strong><br>
+앞의 일반 이차 퍼텐셜로 모수화된 이차 쌍별 MRF <span class="math inline">\(p'\)</span>가 쌍별 정규화 가능하면, <span class="math inline">\(p'\)</span>는 유효한 가우시안 분포를 정의한다.</p>
+</blockquote>
+<p>이 조건은 충분조건이지만 필요조건은 아니다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 적법하지만 쌍별 정규화 가능하지 않은 정보행렬</strong><br>
+다음 정보행렬을 생각하자. <span class="math display">\[
+\mathbf J=
+\begin{pmatrix}
+1&amp;0.6&amp;0.6\\
+0.6&amp;1&amp;0.6\\
+0.6&amp;0.6&amp;1
+\end{pmatrix}.
+\]</span> 이 행렬은 양의 정부호이므로 적법한 가우시안 분포를 정의한다. 그러나 이를 세 개의 간선 퍼텐셜로 분해하면서 각 간선 퍼텐셜을 모두 양의 정부호로 만드는 것은 불가능하다. 따라서 분포 전체의 적법성과 특정 쌍별 분해의 정규화 가능성은 같은 개념이 아니다.</p>
+</blockquote>
+<p>또한 같은 가우시안 밀도는 서로 다른 MRF 퍼텐셜 모수화로 표현될 수 있다. 어떤 모수화는 쌍별 정규화 가능하지 않지만, 동일한 밀도를 나타내는 다른 모수화는 쌍별 정규화 가능할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 같은 밀도에 대한 서로 다른 MRF 모수화</strong><br>
+앞에서 제시한 정보행렬과 평균벡터 <span class="math inline">\(\mathbf0\)</span>을 생각하자. 가장 단순하게는 노드 퍼텐셜을 <span class="math inline">\(J_{ii}x_i^2\)</span>로, 간선 퍼텐셜을 <span class="math inline">\(2J_{ij}x_ix_j\)</span>로 설정할 수 있다. 그러나 이때 <span class="math inline">\(X_1,X_2\)</span> 간선 퍼텐셜만을 따로 보면 정상화 가능한 밀도가 아니므로 이 특정 모수화는 쌍별 정규화 가능하지 않다.</p>
+<p>같은 밀도를 다음과 같이 다시 모수화할 수 있다. <span class="math display">\[
+\varepsilon_i(x_i)=0.05x_i^2,
+\]</span> <span class="math display">\[
+\varepsilon_{12}(x_1,x_2)
+=0.2625x_1^2+0.0033x_2^2-0.25x_1x_2,
+\]</span> <span class="math display">\[
+\varepsilon_{23}(x_2,x_3)
+=0.53x_2^2+0.2833x_3^2+0.6666x_2x_3.
+\]</span> 이들을 합치면 앞에서 제시한 정보행렬을 얻는다. 세 노드 퍼텐셜은 양수이고 두 간선 퍼텐셜은 양의 정부호이므로 이 모수화는 쌍별 정규화 가능하다.</p>
+</blockquote>
+<p>이 예는 특정 MRF 모수화의 쌍별 정규화 가능성은 쉽게 확인할 수 있지만, 주어진 정보행렬을 그러한 모수화로 분해하는 문제는 별도의 탐색을 요구할 수 있음을 보여 준다. 행렬이 작으면 어렵지 않지만 고차원에서는 계산비용이 상당할 수 있다.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./05-template-based-representations.html" class="pagination-link" aria-label="템플릿 기반 표현">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">템플릿 기반 표현</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./07-exponential-family.html" class="pagination-link" aria-label="지수족">
+        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">지수족</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

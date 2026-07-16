@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>11&nbsp; 입자 기반 근사추론 – 확률적 그래프 모형</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./12-map-inference.html" rel="next">
+<link href="./10-inference-as-optimization.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-a522afb83bf8ae494942cf1b0ac9d4c3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./11-particle-based-approximate-inference.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">입자 기반 근사추론</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">확률적 그래프 모형</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">기초 개념</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-bayesian-network-representation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">베이즈 네트워크 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-undirected-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">무방향 그래픽 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-local-probabilistic-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">국소 확률 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-template-based-representations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">템플릿 기반 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-gaussian-network-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">가우시안 네트워크 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-exponential-family.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">지수족</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-exact-inference-variable-elimination.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">정확추론: 변수 제거</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-exact-inference-clique-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">정확추론: 클리크 트리</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-inference-as-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">최적화로서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-particle-based-approximate-inference.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">입자 기반 근사추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-map-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">MAP 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-inference-in-hybrid-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">혼합 네트워크에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-inference-in-temporal-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">시간 모형에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-learning-graphical-models-overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">그래프모형 학습 개요</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-parameter-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">모수추정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-structure-learning-bayesian-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">베이지안 네트워크의 구조학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-partially-observed-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">부분관측 자료</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./19-learning-undirected-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">무방향 그래프모형의 학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20-causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">인과성</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21-utilities-and-decisions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">효용과 의사결정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22-structured-decision-problems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">구조화된 의사결정 문제</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./23-epilogue.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">맺음말: 왜 확률적 그래프 모형인가?</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#전향-표본추출" id="toc-전향-표본추출" class="nav-link active" data-scroll-target="#전향-표본추출"><span class="header-section-number">11.1</span> 전향 표본추출</a>
+  <ul>
+  <li><a href="#베이즈-네트워크에서-표본추출" id="toc-베이즈-네트워크에서-표본추출" class="nav-link" data-scroll-target="#베이즈-네트워크에서-표본추출"><span class="header-section-number">11.1.1</span> 베이즈 네트워크에서 표본추출</a></li>
+  <li><a href="#오차-분석" id="toc-오차-분석" class="nav-link" data-scroll-target="#오차-분석"><span class="header-section-number">11.1.2</span> 오차 분석</a></li>
+  <li><a href="#조건부확률-질의" id="toc-조건부확률-질의" class="nav-link" data-scroll-target="#조건부확률-질의"><span class="header-section-number">11.1.3</span> 조건부확률 질의</a></li>
+  </ul></li>
+  <li><a href="#가능도-가중과-중요도-표본추출" id="toc-가능도-가중과-중요도-표본추출" class="nav-link" data-scroll-target="#가능도-가중과-중요도-표본추출"><span class="header-section-number">11.2</span> 가능도 가중과 중요도 표본추출</a>
+  <ul>
+  <li><a href="#가능도-가중의-직관" id="toc-가능도-가중의-직관" class="nav-link" data-scroll-target="#가능도-가중의-직관"><span class="header-section-number">11.2.1</span> 가능도 가중의 직관</a></li>
+  <li><a href="#중요도-표본추출" id="toc-중요도-표본추출" class="nav-link" data-scroll-target="#중요도-표본추출"><span class="header-section-number">11.2.2</span> 중요도 표본추출</a>
+  <ul class="collapse">
+  <li><a href="#비정규화-중요도-표본추출" id="toc-비정규화-중요도-표본추출" class="nav-link" data-scroll-target="#비정규화-중요도-표본추출"><span class="header-section-number">11.2.2.1</span> 비정규화 중요도 표본추출</a></li>
+  <li><a href="#정규화-중요도-표본추출" id="toc-정규화-중요도-표본추출" class="nav-link" data-scroll-target="#정규화-중요도-표본추출"><span class="header-section-number">11.2.2.2</span> 정규화 중요도 표본추출</a></li>
+  </ul></li>
+  <li><a href="#베이즈-네트워크를-위한-중요도-표본추출" id="toc-베이즈-네트워크를-위한-중요도-표본추출" class="nav-link" data-scroll-target="#베이즈-네트워크를-위한-중요도-표본추출"><span class="header-section-number">11.2.3</span> 베이즈 네트워크를 위한 중요도 표본추출</a>
+  <ul class="collapse">
+  <li><a href="#절단-네트워크-제안분포" id="toc-절단-네트워크-제안분포" class="nav-link" data-scroll-target="#절단-네트워크-제안분포"><span class="header-section-number">11.2.3.1</span> 절단 네트워크 제안분포</a></li>
+  <li><a href="#사건의-비조건부-확률" id="toc-사건의-비조건부-확률" class="nav-link" data-scroll-target="#사건의-비조건부-확률"><span class="header-section-number">11.2.3.2</span> 사건의 비조건부 확률</a></li>
+  <li><a href="#비율-가능도-가중" id="toc-비율-가능도-가중" class="nav-link" data-scroll-target="#비율-가능도-가중"><span class="header-section-number">11.2.3.3</span> 비율 가능도 가중</a></li>
+  <li><a href="#정규화-가능도-가중" id="toc-정규화-가능도-가중" class="nav-link" data-scroll-target="#정규화-가능도-가중"><span class="header-section-number">11.2.3.4</span> 정규화 가능도 가중</a></li>
+  <li><a href="#조건부확률-방법의-비교" id="toc-조건부확률-방법의-비교" class="nav-link" data-scroll-target="#조건부확률-방법의-비교"><span class="header-section-number">11.2.3.5</span> 조건부확률 방법의 비교</a></li>
+  </ul></li>
+  <li><a href="#중요도-표본추출의-재검토" id="toc-중요도-표본추출의-재검토" class="nav-link" data-scroll-target="#중요도-표본추출의-재검토"><span class="header-section-number">11.2.4</span> 중요도 표본추출의 재검토</a></li>
+  </ul></li>
+  <li><a href="#마르코프-연쇄-몬테카를로-방법" id="toc-마르코프-연쇄-몬테카를로-방법" class="nav-link" data-scroll-target="#마르코프-연쇄-몬테카를로-방법"><span class="header-section-number">11.3</span> 마르코프 연쇄 몬테카를로 방법</a>
+  <ul>
+  <li><a href="#gibbs-표본추출-알고리즘" id="toc-gibbs-표본추출-알고리즘" class="nav-link" data-scroll-target="#gibbs-표본추출-알고리즘"><span class="header-section-number">11.3.1</span> Gibbs 표본추출 알고리즘</a></li>
+  <li><a href="#마르코프-연쇄" id="toc-마르코프-연쇄" class="nav-link" data-scroll-target="#마르코프-연쇄"><span class="header-section-number">11.3.2</span> 마르코프 연쇄</a>
+  <ul class="collapse">
+  <li><a href="#기본-정의" id="toc-기본-정의" class="nav-link" data-scroll-target="#기본-정의"><span class="header-section-number">11.3.2.1</span> 기본 정의</a></li>
+  <li><a href="#점근적-거동" id="toc-점근적-거동" class="nav-link" data-scroll-target="#점근적-거동"><span class="header-section-number">11.3.2.2</span> 점근적 거동</a></li>
+  <li><a href="#정상분포" id="toc-정상분포" class="nav-link" data-scroll-target="#정상분포"><span class="header-section-number">11.3.2.3</span> 정상분포</a></li>
+  <li><a href="#여러-전이모형" id="toc-여러-전이모형" class="nav-link" data-scroll-target="#여러-전이모형"><span class="header-section-number">11.3.2.4</span> 여러 전이모형</a></li>
+  </ul></li>
+  <li><a href="#gibbs-표본추출의-재검토" id="toc-gibbs-표본추출의-재검토" class="nav-link" data-scroll-target="#gibbs-표본추출의-재검토"><span class="header-section-number">11.3.3</span> Gibbs 표본추출의 재검토</a></li>
+  <li><a href="#더-넓은-마르코프-연쇄의-계열" id="toc-더-넓은-마르코프-연쇄의-계열" class="nav-link" data-scroll-target="#더-넓은-마르코프-연쇄의-계열"><span class="header-section-number">11.3.4</span> 더 넓은 마르코프 연쇄의 계열</a>
+  <ul class="collapse">
+  <li><a href="#상세균형" id="toc-상세균형" class="nav-link" data-scroll-target="#상세균형"><span class="header-section-number">11.3.4.1</span> 상세균형</a></li>
+  <li><a href="#metropolishastings-알고리즘" id="toc-metropolishastings-알고리즘" class="nav-link" data-scroll-target="#metropolishastings-알고리즘"><span class="header-section-number">11.3.4.2</span> Metropolis–Hastings 알고리즘</a></li>
+  </ul></li>
+  <li><a href="#마르코프-연쇄의-사용" id="toc-마르코프-연쇄의-사용" class="nav-link" data-scroll-target="#마르코프-연쇄의-사용"><span class="header-section-number">11.3.5</span> 마르코프 연쇄의 사용</a>
+  <ul class="collapse">
+  <li><a href="#혼합시간" id="toc-혼합시간" class="nav-link" data-scroll-target="#혼합시간"><span class="header-section-number">11.3.5.1</span> 혼합시간</a></li>
+  <li><a href="#표본-수집" id="toc-표본-수집" class="nav-link" data-scroll-target="#표본-수집"><span class="header-section-number">11.3.5.2</span> 표본 수집</a></li>
+  <li><a href="#논의" id="toc-논의" class="nav-link" data-scroll-target="#논의"><span class="header-section-number">11.3.5.3</span> 논의</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#붕괴-입자" id="toc-붕괴-입자" class="nav-link" data-scroll-target="#붕괴-입자"><span class="header-section-number">11.4</span> 붕괴 입자</a>
+  <ul>
+  <li><a href="#붕괴-가능도-가중" id="toc-붕괴-가능도-가중" class="nav-link" data-scroll-target="#붕괴-가능도-가중"><span class="header-section-number">11.4.1</span> 붕괴 가능도 가중</a>
+  <ul class="collapse">
+  <li><a href="#붕괴-중요도-표본추출" id="toc-붕괴-중요도-표본추출" class="nav-link" data-scroll-target="#붕괴-중요도-표본추출"><span class="header-section-number">11.4.1.1</span> 붕괴 중요도 표본추출</a></li>
+  <li><a href="#형식적-기술" id="toc-형식적-기술" class="nav-link" data-scroll-target="#형식적-기술"><span class="header-section-number">11.4.1.2</span> 형식적 기술</a></li>
+  <li><a href="#제안분포" id="toc-제안분포" class="nav-link" data-scroll-target="#제안분포"><span class="header-section-number">11.4.1.3</span> 제안분포</a></li>
+  </ul></li>
+  <li><a href="#붕괴-mcmc" id="toc-붕괴-mcmc" class="nav-link" data-scroll-target="#붕괴-mcmc"><span class="header-section-number">11.4.2</span> 붕괴 MCMC</a></li>
+  </ul></li>
+  <li><a href="#결정론적-탐색-방법" id="toc-결정론적-탐색-방법" class="nav-link" data-scroll-target="#결정론적-탐색-방법"><span class="header-section-number">11.5</span> 결정론적 탐색 방법</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-particle-based-approximate-inference" class="quarto-section-identifier"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">입자 기반 근사추론</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>앞 장에서는 목표분포를 단순한 분포로 근사하고 에너지 범함수를 최적화하는 근사추론을 다루었다. 그 방법들은 인자곱, 주변화, 메시지 전달 등 정확추론과 유사한 계산을 사용하였다. 이 장에서는 전혀 다른 계열인 <strong>입자 기반 방법(particle-based methods)</strong>을 다룬다. 여기서 결합분포는 네트워크 변수 전체 또는 일부에 대한 구체적 할당들의 집합으로 근사된다. 각각의 할당을 <strong>입자(particle)</strong>라 부르며, 입자들의 집합이 전체 확률분포의 중요한 부분을 대표하도록 설계한다.</p>
+<p>입자 기반 방법은 두 축으로 분류할 수 있다.</p>
+<p>첫째, 입자를 생성하는 방식이다. 입자는 무작위 표본추출로 생성할 수도 있고, 높은 확률을 갖는 상태를 찾아가는 결정론적 탐색으로 생성할 수도 있다. 무작위 방법 안에서도 원분포에서 직접 표본을 뽑는 방법, 다른 제안분포에서 뽑아 가중치를 부여하는 방법, 마르코프 연쇄를 이용하는 방법이 구분된다.</p>
+<p>둘째, 입자가 표현하는 범위이다.</p>
+<ul>
+<li><strong>완전 입자(full particle)</strong>: 모든 변수 <span class="math inline">\(\mathbf X\)</span>에 대한 완전한 할당 <span class="math inline">\(\xi\)</span>이다.</li>
+<li><strong>붕괴 입자(collapsed particle)</strong>: 일부 변수 <span class="math inline">\(\mathbf X^p\)</span>에 대해서만 할당 <span class="math inline">\(\mathbf x^p\)</span>를 지정하고, 나머지 변수 <span class="math inline">\(\mathbf X^d\)</span>에 대해서는 조건부분포 <span class="math inline">\(P(\mathbf X^d\mid \mathbf x^p)\)</span> 또는 그 요약을 함께 보존한다. 이를 Rao–Blackwellized particle이라고도 한다.</li>
+</ul>
+<p>일반적인 문제는 다음과 같다. 분포 <span class="math inline">\(P(\mathbf X)\)</span>에서 함수 <span class="math inline">\(f(\mathbf X)\)</span>의 기댓값</p>
+<p><span class="math display">\[
+\mathbb E_P[f(\mathbf X)]
+\]</span></p>
+<p>을 구하고 싶다고 하자. 사건 <span class="math inline">\(\mathbf Y=\mathbf y\)</span>의 확률은</p>
+<p><span class="math display">\[
+f(\xi)=\mathbf 1\{\xi\langle\mathbf Y\rangle=\mathbf y\}
+\]</span></p>
+<p>라는 지시함수를 사용한 특수한 경우이다. 입자 기반 방법은 <span class="math inline">\(M\)</span>개의 입자를 생성하고, 각 입자에서 함수값 또는 조건부 기댓값을 계산한 뒤 이를 평균하거나 가중평균한다.</p>
+<p>이 장의 흐름은 다음과 같다.</p>
+<ol type="1">
+<li>전향 표본추출은 원분포에서 직접 표본을 생성한다.</li>
+<li>가능도 가중과 중요도 표본추출은 사후분포에 더 가까운 제안분포를 사용한다.</li>
+<li>MCMC는 반복 과정의 극한분포가 목표 사후분포가 되도록 마르코프 연쇄를 구성한다.</li>
+<li>붕괴 입자는 표본추출과 정확 또는 근사추론을 결합한다.</li>
+<li>결정론적 탐색은 높은 확률을 갖는 서로 다른 상태들을 직접 열거한다.</li>
+</ol>
+<div id="fig-particle-student-network" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-particle-student-network-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-particle-student-network.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-particle-student-network-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.1: Student 베이즈 네트워크와 각 조건부확률분포.
+</figcaption>
+</figure>
+</div>
+<section id="전향-표본추출" class="level2" data-number="11.1">
+<h2 data-number="11.1" class="anchored" data-anchor-id="전향-표본추출"><span class="header-section-number">11.1</span> 전향 표본추출</h2>
+<p><strong>전향 표본추출(forward sampling)</strong>은 가장 단순한 입자 생성 방법이다. 분포 <span class="math inline">\(P(\mathbf X)\)</span>에서 독립적인 표본</p>
+<p><span class="math display">\[
+\xi[1],\ldots,\xi[M]
+\]</span></p>
+<p>을 직접 생성한다. 베이즈 네트워크에서는 그래프의 위상 순서에 따라 각 노드를 부모값에 조건부로 표본추출하면 결합분포에서 정확히 표본을 얻을 수 있다. 반면 일반적인 비방향 그래프모형에서는 사전분포에서 표본 하나를 정확히 생성하는 것 자체가 어려울 수 있다.</p>
+<section id="베이즈-네트워크에서-표본추출" class="level3" data-number="11.1.1">
+<h3 data-number="11.1.1" class="anchored" data-anchor-id="베이즈-네트워크에서-표본추출"><span class="header-section-number">11.1.1</span> 베이즈 네트워크에서 표본추출</h3>
+<p>베이즈 네트워크 <span class="math inline">\(\mathcal B\)</span>가</p>
+<p><span class="math display">\[
+P_{\mathcal B}(\mathbf X)=\prod_{i=1}^{n}P(X_i\mid \operatorname{Pa}_{X_i})
+\]</span></p>
+<p>로 인수분해된다고 하자. 변수들을 부모가 자식보다 먼저 나타나는 위상 순서 <span class="math inline">\(X_1,\ldots,X_n\)</span>으로 배열한다. <span class="math inline">\(X_i\)</span>를 표본추출할 때에는 이미 부모의 값 <span class="math inline">\(\mathbf u_i\)</span>가 정해져 있으므로 CPD <span class="math inline">\(P(X_i\mid \mathbf u_i)\)</span>에서 값을 뽑을 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - 베이즈 네트워크의 전향 표본추출</strong><br>
+<strong>입력:</strong> 베이즈 네트워크 <span class="math inline">\(\mathcal B\)</span><br>
+1. <span class="math inline">\(X_1,\ldots,X_n\)</span>을 위상 순서로 정한다.<br>
+2. <span class="math inline">\(i=1,\ldots,n\)</span>에 대해 다음을 수행한다.<br>
+- 지금까지 생성된 부분 할당에서 <span class="math inline">\(\mathbf u_i=\mathbf x\langle\operatorname{Pa}_{X_i}\rangle\)</span>를 얻는다.<br>
+- <span class="math inline">\(P(X_i\mid \mathbf u_i)\)</span>에서 <span class="math inline">\(x_i\)</span>를 표본추출한다.<br>
+3. 완전 할당 <span class="math inline">\((x_1,\ldots,x_n)\)</span>을 반환한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - Student 네트워크</strong><br>
+먼저 <span class="math inline">\(D\)</span>를 <span class="math inline">\(P(D)\)</span>에서 표본추출하고, 이어서 <span class="math inline">\(I\)</span>를 <span class="math inline">\(P(I)\)</span>에서 표본추출한다. 예를 들어 <span class="math inline">\(D=d^1\)</span>, <span class="math inline">\(I=i^0\)</span>가 나왔다면 <span class="math inline">\(G\)</span>는 <span class="math inline">\(P(G\mid i^0,d^1)\)</span>에서 뽑는다. 그 다음 <span class="math inline">\(S\)</span>는 <span class="math inline">\(P(S\mid i^0)\)</span>에서, <span class="math inline">\(L\)</span>은 <span class="math inline">\(P(L\mid G)\)</span>에서 뽑는다. 이 절차로 생성되는 완전 할당의 확률은 각 단계에서 사용된 CPD의 곱이며, 이는 정확히 <span class="math inline">\(P_{\mathcal B}(\xi)\)</span>이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>Box - 이산분포에서 표본을 생성하는 방법</strong><br>
+<span class="math inline">\(\operatorname{Val}(X)=\{x^1,\ldots,x^k\}\)</span>이고 <span class="math inline">\(P(X=x^i)=\theta_i\)</span>라 하자. 먼저 <span class="math inline">\([0,1]\)</span>의 균등난수 <span class="math inline">\(s\)</span>를 생성한다. 구간을 누적확률에 따라 <span class="math display">\[
+[0,\theta_1),\ [\theta_1,\theta_1+\theta_2),\ldots
+\]</span> 로 나누고, <span class="math inline">\(s\)</span>가 포함되는 구간의 값을 표본으로 선택한다. 누적합을 미리 저장하면 이진탐색을 통해 <span class="math inline">\(O(\log k)\)</span>에 값을 찾을 수 있다. 연속분포에서는 역누적분포법, 거절 표본추출, 변환법 또는 분포별 전용 알고리즘이 필요하다.</p>
+</blockquote>
+<p>생성된 자료집합을</p>
+<p><span class="math display">\[
+\mathcal D=\{\xi[1],\ldots,\xi[M]\}
+\]</span></p>
+<p>이라 하자. 함수 <span class="math inline">\(f\)</span>의 기댓값은 표본평균으로 추정한다.</p>
+<p><span class="math display">\[
+\widehat{\mathbb E}_{\mathcal D}(f)
+=
+\frac{1}{M}\sum_{m=1}^{M}f(\xi[m]).
+\]</span></p>
+<p>사건 <span class="math inline">\(\mathbf Y=\mathbf y\)</span>의 확률은 해당 사건을 만족하는 입자의 비율이다.</p>
+<p><span class="math display">\[
+\widehat P_{\mathcal D}(\mathbf y)
+=
+\frac{1}{M}\sum_{m=1}^{M}
+\mathbf 1\{\mathbf y[m]=\mathbf y\}.
+\]</span></p>
+<p>동일한 입자집합으로 여러 사건의 확률을 동시에 추정할 수 있다. 예를 들어 <span class="math inline">\(P(i^1,l^0)\)</span>, <span class="math inline">\(P(g^1)\)</span>, <span class="math inline">\(P(d^0,s^1)\)</span>을 모두 같은 자료집합에서 계산할 수 있다.</p>
+<p>각 변수의 부모 수의 최댓값을 <span class="math inline">\(p\)</span>, 상태 수의 최댓값을 <span class="math inline">\(d\)</span>, 변수 수를 <span class="math inline">\(n\)</span>이라 하면 <span class="math inline">\(M\)</span>개 입자를 생성하는 비용은 대략</p>
+<p><span class="math display">\[
+O(Mnp\log d)
+\]</span></p>
+<p>이다. 실제 구현에서는 CPD의 자료구조와 표본추출 전처리에 따라 상수가 크게 달라진다.</p>
+</section>
+<section id="오차-분석" class="level3" data-number="11.1.2">
+<h3 data-number="11.1.2" class="anchored" data-anchor-id="오차-분석"><span class="header-section-number">11.1.2</span> 오차 분석</h3>
+<p>사건 <span class="math inline">\(Y=y\)</span>의 지시함수는 성공확률 <span class="math inline">\(P(y)\)</span>인 베르누이 확률변수이다. 따라서 <span class="math inline">\(M\)</span>개 독립 표본에 Hoeffding 부등식을 적용하면</p>
+<p><span class="math display">\[
+P_{\mathcal D}
+\left(
+\widehat P_{\mathcal D}(y)
+\notin [P(y)-\epsilon,P(y)+\epsilon]
+\right)
+\le 2e^{-2M\epsilon^2}.
+\]</span></p>
+<p>오차가 <span class="math inline">\(\epsilon\)</span>을 넘을 확률을 <span class="math inline">\(\delta\)</span> 이하로 만들려면 충분한 표본 수는</p>
+<p><span class="math display">\[
+M\ge \frac{\log(2/\delta)}{2\epsilon^2}
+\]</span></p>
+<p>이다. 절대오차 보장은 사건의 실제 확률과 무관하지만, 작은 확률을 상대적으로 정확하게 추정한다는 뜻은 아니다.</p>
+<p>상대오차를 위해 Chernoff 부등식을 사용하면</p>
+<p><span class="math display">\[
+P_{\mathcal D}
+\left(
+\widehat P_{\mathcal D}(y)
+\notin P(y)(1\pm\epsilon)
+\right)
+\le
+2e^{-MP(y)\epsilon^2/3}.
+\]</span></p>
+<p>이고 따라서</p>
+<p><span class="math display">\[
+M\ge
+\frac{3\log(2/\delta)}{P(y)\epsilon^2}
+\]</span></p>
+<p>이면 충분하다. 필요한 표본 수가 <span class="math inline">\(1/P(y)\)</span>에 비례한다는 점이 핵심이다. 희귀 사건에서는 표본에서 사건이 한 번도 나타나지 않을 가능성이 높으므로, 상대오차를 제어하려면 매우 많은 표본이 필요하다.</p>
+<blockquote class="blockquote">
+<p><strong>학습 보충 - 절대오차와 상대오차</strong><br>
+참 확률이 <span class="math inline">\(10^{-5}\)</span>일 때 추정값 0은 절대오차 <span class="math inline">\(10^{-5}\)</span>로 매우 작지만 상대오차는 100%이다. 의학적 희귀 이상반응, 유전변이, 고장 진단과 같은 연구에서는 상대오차가 더 중요한 경우가 많다. 이때 단순 전향 표본추출은 비효율적이다.</p>
+</blockquote>
+</section>
+<section id="조건부확률-질의" class="level3" data-number="11.1.3">
+<h3 data-number="11.1.3" class="anchored" data-anchor-id="조건부확률-질의"><span class="header-section-number">11.1.3</span> 조건부확률 질의</h3>
+<p>실제 추론에서는 <span class="math inline">\(P(y\mid e)\)</span>를 구하는 경우가 많다. 가장 직접적인 방법은 <strong>거절 표본추출(rejection sampling)</strong>이다.</p>
+<ol type="1">
+<li><span class="math inline">\(P(\mathbf X)\)</span>에서 전향 표본을 생성한다.</li>
+<li>증거 <span class="math inline">\(e\)</span>와 일치하지 않는 표본은 버린다.</li>
+<li>남은 표본은 <span class="math inline">\(P(\mathbf X\mid e)\)</span>에서 추출된 표본이다.</li>
+</ol>
+<p>그러나 표본 하나가 살아남을 확률은 <span class="math inline">\(P(e)\)</span>이다. 원래 <span class="math inline">\(M\)</span>개의 표본 중 기대되는 유효 표본 수는 <span class="math inline">\(MP(e)\)</span>이고, <span class="math inline">\(M^*\)</span>개의 유효 표본을 얻으려면 평균적으로</p>
+<p><span class="math display">\[
+M=\frac{M^*}{P(e)}
+\]</span></p>
+<p>개의 사전표본이 필요하다. 증거변수가 많아질수록 <span class="math inline">\(P(e)\)</span>가 지수적으로 작아지는 경우가 많다. 의료진단에서 여러 증상의 동시 관측은 전형적으로 낮은 확률을 가지므로 거절 표본추출은 대부분의 계산을 버리게 된다.</p>
+<p><span class="math inline">\(P(y,e)\)</span>와 <span class="math inline">\(P(e)\)</span>를 각각 추정하여 비율을 취하는 방법도 가능하지만, 두 추정량 모두 낮은 상대오차를 가져야 비율이 안정적이다. 특히 <span class="math inline">\(P(e)\)</span>의 절대오차만 작다는 사실로는 <span class="math inline">\(P(y,e)/P(e)\)</span>의 오차를 제어할 수 없다. 분모가 매우 작으면 작은 절대오차도 비율을 크게 왜곡한다.</p>
+</section>
+</section>
+<section id="가능도-가중과-중요도-표본추출" class="level2" data-number="11.2">
+<h2 data-number="11.2" class="anchored" data-anchor-id="가능도-가중과-중요도-표본추출"><span class="header-section-number">11.2</span> 가능도 가중과 중요도 표본추출</h2>
+<p>거절 표본추출은 증거와 맞지 않는 표본을 완전히 폐기한다. <strong>가능도 가중(likelihood weighting, LW)</strong>은 증거노드의 값을 강제로 관측값으로 설정하고, 그 표본이 원래의 전향 과정에서 그 증거를 생성했을 가능성을 가중치로 부여한다. 이 방법은 모든 표본이 계산에 기여하도록 한다.</p>
+<section id="가능도-가중의-직관" class="level3" data-number="11.2.1">
+<h3 data-number="11.2.1" class="anchored" data-anchor-id="가능도-가중의-직관"><span class="header-section-number">11.2.1</span> 가능도 가중의 직관</h3>
+<p>증거가 <span class="math inline">\(S=s^1\)</span>이라고 하자. <span class="math inline">\(S\)</span>를 단순히 <span class="math inline">\(s^1\)</span>로 고정하고 나머지를 사전분포에서 표본추출하면 <span class="math inline">\(I\)</span>의 분포가 여전히 사전분포 <span class="math inline">\(P(I)\)</span>로 남는다. 이는 <span class="math inline">\(s^1\)</span>이 지능이 높은 학생에서 훨씬 더 잘 발생한다는 정보를 반영하지 못한다.</p>
+<p>해결책은 각 표본에 증거의 가능도를 부여하는 것이다. <span class="math inline">\(I=i^1\)</span>인 표본에서 <span class="math inline">\(S=s^1\)</span>이 발생할 확률이 0.8이고, <span class="math inline">\(I=i^0\)</span>에서 0.05라면 첫 표본은 두 번째보다 16배 더 큰 기여를 해야 한다.</p>
+<p>여러 증거노드가 있으면 전향 생성과정에서 각 증거노드가 관측값을 생성할 조건부확률을 곱한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제</strong><br>
+증거가 <span class="math inline">\(L=l^0,S=s^1\)</span>이고, 표본 과정에서 <span class="math inline">\(I=i^0\)</span>, <span class="math inline">\(G=g^2\)</span>가 생성되었다고 하자. 증거 가능도는 <span class="math display">\[
+P(s^1\mid i^0)P(l^0\mid g^2)=0.05\times0.4=0.02
+\]</span> 이다. 따라서 이 입자의 가중치는 0.02이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - 가능도 가중 입자 생성</strong><br>
+<strong>입력:</strong> 베이즈 네트워크 <span class="math inline">\(\mathcal B\)</span>, 증거 <span class="math inline">\(\mathbf Z=\mathbf z\)</span><br>
+1. <span class="math inline">\(X_1,\ldots,X_n\)</span>을 위상 순서로 정하고 <span class="math inline">\(w\leftarrow1\)</span>로 둔다.<br>
+2. 각 <span class="math inline">\(X_i\)</span>에 대해 부모 할당 <span class="math inline">\(\mathbf u_i\)</span>를 구한다.<br>
+3. <span class="math inline">\(X_i\notin\mathbf Z\)</span>이면 <span class="math inline">\(P(X_i\mid\mathbf u_i)\)</span>에서 <span class="math inline">\(x_i\)</span>를 표본추출한다.<br>
+4. <span class="math inline">\(X_i\in\mathbf Z\)</span>이면 <span class="math inline">\(x_i\leftarrow z_i\)</span>로 고정하고 <span class="math display">\[
+w\leftarrow wP(x_i\mid\mathbf u_i)
+\]</span> 로 갱신한다.<br>
+5. 가중 입자 <span class="math inline">\((\xi,w)\)</span>를 반환한다.</p>
+</blockquote>
+<p><span class="math inline">\(M\)</span>개의 가중 입자 <span class="math inline">\((\xi[m],w[m])\)</span>가 있을 때 조건부확률은</p>
+<p><span class="math display">\[
+\widehat P_{\mathcal D}(y\mid e)
+=
+\frac{\sum_{m=1}^{M}w[m]\mathbf1\{y[m]=y\}}
+{\sum_{m=1}^{M}w[m]}.
+\]</span></p>
+<p>으로 추정한다.</p>
+</section>
+<section id="중요도-표본추출" class="level3" data-number="11.2.2">
+<h3 data-number="11.2.2" class="anchored" data-anchor-id="중요도-표본추출"><span class="header-section-number">11.2.2</span> 중요도 표본추출</h3>
+<p>가능도 가중은 더 일반적인 <strong>중요도 표본추출(importance sampling)</strong>의 특수한 경우이다. 목표분포를 <span class="math inline">\(P(X)\)</span>, 실제 표본을 생성하는 분포를 <strong>제안분포(proposal distribution)</strong> <span class="math inline">\(Q(X)\)</span>라 하자. <span class="math inline">\(P(x)&gt;0\)</span>인 모든 상태에서 <span class="math inline">\(Q(x)&gt;0\)</span>이어야 한다. 즉, <span class="math inline">\(Q\)</span>의 지지집합은 <span class="math inline">\(P\)</span>의 지지집합을 포함해야 한다.</p>
+<section id="비정규화-중요도-표본추출" class="level4" data-number="11.2.2.1">
+<h4 data-number="11.2.2.1" class="anchored" data-anchor-id="비정규화-중요도-표본추출"><span class="header-section-number">11.2.2.1</span> 비정규화 중요도 표본추출</h4>
+<p>다음 항등식이 출발점이다.</p>
+<p><span class="math display">\[
+\mathbb E_P[f(X)]
+=
+\mathbb E_Q\left[f(X)\frac{P(X)}{Q(X)}\right].
+\]</span></p>
+<p><span class="math inline">\(Q\)</span>에서 생성한 표본 <span class="math inline">\(x[1],\ldots,x[M]\)</span>에 대해</p>
+<p><span class="math display">\[
+\widehat{\mathbb E}_{\mathcal D}(f)
+=
+\frac{1}{M}
+\sum_{m=1}^{M}
+f(x[m])\frac{P(x[m])}{Q(x[m])}.
+\]</span></p>
+<p>을 사용한다. 중요도 가중치를</p>
+<p><span class="math display">\[
+w(x)=\frac{P(x)}{Q(x)}
+\]</span></p>
+<p>라 한다.</p>
+<blockquote class="blockquote">
+<p><strong>명제 - 비정규화 중요도 추정량의 비편향성</strong><br>
+<span class="math inline">\(Q\)</span>에서 표본을 생성하면 <span class="math display">\[
+\mathbb E_{\mathcal D}
+\left[
+\widehat{\mathbb E}_{\mathcal D}(f)
+\right]
+=
+\mathbb E_Q[f(X)w(X)]
+=
+\mathbb E_P[f(X)].
+\]</span></p>
+</blockquote>
+<p>큰 표본에서 추정량의 분산은 대략 <span class="math inline">\(\sigma_Q^2/M\)</span>이며</p>
+<p><span class="math display">\[
+\sigma_Q^2
+=
+\mathbb E_Q[(f(X)w(X))^2]
+-
+(\mathbb E_P[f(X)])^2.
+\]</span></p>
+<p><span class="math inline">\(Q\)</span>와 <span class="math inline">\(P\)</span>가 다를수록 가중치의 변동이 커지고 추정량 분산이 증가한다. 이상적인 제안분포는</p>
+<p><span class="math display">\[
+Q^*(X)\propto |f(X)|P(X)
+\]</span></p>
+<p>이다. 특히 <span class="math inline">\(f\)</span>가 어떤 사건의 지시함수라면 그 사건으로 조건화한 분포가 이상적이다. 그러나 보통 이 분포에서 직접 표본추출할 수 없기 때문에 중요도 표본추출이 필요하다.</p>
+<blockquote class="blockquote">
+<p><strong>주의 - 꼬리와 지지집합</strong><br>
+<span class="math inline">\(P(x)f(x)\)</span>가 의미 있게 큰 영역에서 <span class="math inline">\(Q(x)\)</span>가 지나치게 작으면 가중치가 폭발하고 분산이 무한대가 될 수도 있다. 제안분포가 목표분포의 중요한 꼬리 영역을 빠뜨리지 않도록 해야 한다.</p>
+</blockquote>
+</section>
+<section id="정규화-중요도-표본추출" class="level4" data-number="11.2.2.2">
+<h4 data-number="11.2.2.2" class="anchored" data-anchor-id="정규화-중요도-표본추출"><span class="header-section-number">11.2.2.2</span> 정규화 중요도 표본추출</h4>
+<p>실제 문제에서는 목표분포를 정규화상수까지밖에 모르는 경우가 많다.</p>
+<p><span class="math display">\[
+\widetilde P(X)=ZP(X).
+\]</span></p>
+<p>베이즈 네트워크의 사후분포에서는 <span class="math inline">\(\widetilde P(\mathbf X)=P(\mathbf X,e)\)</span>이고 <span class="math inline">\(Z=P(e)\)</span>이다. 마르코프 네트워크에서는 <span class="math inline">\(\widetilde P\)</span>가 잠재함수들의 곱이고 <span class="math inline">\(Z\)</span>는 분할함수이다.</p>
+<p>가중치를</p>
+<p><span class="math display">\[
+w(X)=\frac{\widetilde P(X)}{Q(X)}
+\]</span></p>
+<p>로 두면</p>
+<p><span class="math display">\[
+\mathbb E_Q[w(X)]=Z.
+\]</span></p>
+<p>또한</p>
+<p><span class="math display">\[
+\mathbb E_P[f(X)]
+=
+\frac{\mathbb E_Q[f(X)w(X)]}
+{\mathbb E_Q[w(X)]}.
+\]</span></p>
+<p>따라서 경험적 추정량은</p>
+<p><span class="math display">\[
+\widehat{\mathbb E}_{\mathcal D}(f)
+=
+\frac{\sum_{m=1}^{M}f(x[m])w(x[m])}
+{\sum_{m=1}^{M}w(x[m])}.
+\]</span></p>
+<p>이다. 이를 <strong>정규화 중요도 표본추출(normalized importance sampling)</strong> 또는 가중 중요도 표본추출이라 한다.</p>
+<p>정규화 추정량은 분자와 분모의 비율이므로 유한 표본에서 편향되어 있다. 예를 들어 <span class="math inline">\(M=1\)</span>이면 가중치가 약분되어 단순히 <span class="math inline">\(f(x[1])\)</span>가 되고, 그 평균은 <span class="math inline">\(\mathbb E_Q[f]\)</span>이다. 그러나 <span class="math inline">\(M\to\infty\)</span>이면 일관적이며 편향은 대략 <span class="math inline">\(1/M\)</span>의 속도로 감소한다.</p>
+<p>분산의 근사는</p>
+<p><span class="math display">\[
+\operatorname{Var}
+\left[
+\widehat{\mathbb E}_{\mathcal D}(f)
+\right]
+\approx
+\frac{1}{M}
+\operatorname{Var}_P[f(X)]
+\left(1+\operatorname{Var}_Q[w(X)]\right)
+\]</span></p>
+<p>이다. 실무에서는 정규화 추정량이 비정규화 추정량보다 분산이 낮은 경우가 많아 <span class="math inline">\(P\)</span>가 정규화되어 있어도 자주 사용된다.</p>
+<p>가중치의 변동을 이용한 <strong>유효 표본크기(effective sample size, ESS)</strong>의 경험적 지표는</p>
+<p><span class="math display">\[
+M_{\mathrm{eff}}
+=
+\frac{M}{1+\widehat{\operatorname{Var}}(w)}
+\]</span></p>
+<p>형태로 이해할 수 있다. 가중치를 합이 1이 되도록 정규화하면 흔히</p>
+<p><span class="math display">\[
+M_{\mathrm{eff}}
+=
+\frac{1}{\sum_m\bar w_m^2}
+\]</span></p>
+<p>를 사용한다. 모든 가중치가 같으면 <span class="math inline">\(M_{\mathrm{eff}}=M\)</span>이고, 한 입자가 거의 모든 가중치를 차지하면 <span class="math inline">\(M_{\mathrm{eff}}\approx1\)</span>이다.</p>
+</section>
+</section>
+<section id="베이즈-네트워크를-위한-중요도-표본추출" class="level3" data-number="11.2.3">
+<h3 data-number="11.2.3" class="anchored" data-anchor-id="베이즈-네트워크를-위한-중요도-표본추출"><span class="header-section-number">11.2.3</span> 베이즈 네트워크를 위한 중요도 표본추출</h3>
+<section id="절단-네트워크-제안분포" class="level4" data-number="11.2.3.1">
+<h4 data-number="11.2.3.1" class="anchored" data-anchor-id="절단-네트워크-제안분포"><span class="header-section-number">11.2.3.1</span> 절단 네트워크 제안분포</h4>
+<p>사건 <span class="math inline">\(\mathbf Z=\mathbf z\)</span>에 관심이 있다고 하자. 관측변수의 값을 강제로 <span class="math inline">\(\mathbf z\)</span>로 설정하되, 그 값이 후손의 표본추출에는 영향을 주고 비후손에는 영향을 주지 않는 제안분포를 만들 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 절단 네트워크(mutilated network)</strong><br>
+베이즈 네트워크 <span class="math inline">\(\mathcal B\)</span>와 변수 할당 <span class="math inline">\(Z_1=z_1,\ldots,Z_k=z_k\)</span>가 있을 때, <span class="math inline">\(\mathcal B_{\mathbf Z=\mathbf z}\)</span>를 다음과 같이 정의한다. - 각 <span class="math inline">\(Z_i\)</span>로 들어오는 모든 간선을 제거한다. - <span class="math inline">\(Z_i\)</span>의 새 CPD는 <span class="math inline">\(z_i\)</span>에 확률 1, 다른 값에 확률 0을 부여한다. - 나머지 노드의 부모와 CPD는 바꾸지 않는다.</p>
+</blockquote>
+<div id="fig-likelihood-weighting-mutilated-student" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-likelihood-weighting-mutilated-student-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-likelihood-weighting-mutilated-student.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-likelihood-weighting-mutilated-student-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.2: <span class="math inline">\(I=i^1,G=g^2\)</span>를 강제로 설정한 Student 절단 네트워크.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>명제 - LW와 절단 네트워크의 동치</strong><br>
+앞에서 제시한 가능도 가중 입자 생성 알고리즘이 입자 <span class="math inline">\(\xi\)</span>와 가중치 <span class="math inline">\(w\)</span>를 생성했다고 하자. <span class="math inline">\(\xi\)</span>의 생성분포는 <span class="math inline">\(\mathcal B_{\mathbf Z=\mathbf z}\)</span>가 정의하는 분포이며 <span class="math display">\[
+w(\xi)
+=
+\frac{P_{\mathcal B}(\xi)}
+{P_{\mathcal B_{\mathbf Z=\mathbf z}}(\xi)}.
+\]</span></p>
+</blockquote>
+<p>즉, 가능도 가중은 절단 네트워크를 제안분포로 사용하는 중요도 표본추출이다. 구현에서는 절단 네트워크를 실제로 새로 만들 필요가 없고, 원 네트워크를 위상 순서로 훑으면서 관측노드에서 가중치만 곱하면 된다.</p>
+</section>
+<section id="사건의-비조건부-확률" class="level4" data-number="11.2.3.2">
+<h4 data-number="11.2.3.2" class="anchored" data-anchor-id="사건의-비조건부-확률"><span class="header-section-number">11.2.3.2</span> 사건의 비조건부 확률</h4>
+<p><span class="math inline">\(P_{\mathcal B}(\mathbf z)\)</span>를 계산할 때 목표분포는 사전분포 <span class="math inline">\(P_{\mathcal B}(\mathbf X)\)</span>이고 제안분포는 <span class="math inline">\(P_{\mathcal B_{\mathbf Z=\mathbf z}}\)</span>이다. 제안분포에서는 모든 표본이 <span class="math inline">\(\mathbf z\)</span>를 만족하므로 비정규화 중요도 추정량은</p>
+<p><span class="math display">\[
+\widehat P_{\mathcal D}(\mathbf z)
+=
+\frac1M\sum_{m=1}^{M}w[m].
+\]</span></p>
+<p>가 된다.</p>
+<p>증거노드 수가 <span class="math inline">\(k\)</span>이고 각 증거노드 CPD의 관련 항이 <span class="math inline">\(\ell\le P(Z_i=z_i\mid\mathbf u_i)\le u\)</span>를 만족한다고 하자. 그러면 각 가중치는 <span class="math inline">\([\ell^k,u^k]\)</span> 안에 있다. 이 성질과 실수값 Chernoff 경계를 이용하면 상대오차 <span class="math inline">\(\epsilon\)</span>, 실패확률 <span class="math inline">\(\delta\)</span>를 보장하기 위한 충분한 표본 수는</p>
+<p><span class="math display">\[
+M
+\ge
+\frac{3\log(2/\delta)u^k}
+{P_{\mathcal B}(\mathbf z)\epsilon^2}
+\]</span></p>
+<p>이며, <span class="math inline">\(P_{\mathcal B}(\mathbf z)\ge\ell^k\)</span>를 사용하면 더 보수적인 조건</p>
+<p><span class="math display">\[
+M
+\ge
+\frac{3\log(2/\delta)}{\epsilon^2}
+\left(\frac{u}{\ell}\right)^k
+\]</span></p>
+<p>을 얻는다. 사건 자체가 매우 희귀하더라도 각 부모 구성에서 관측값의 조건부확률이 극단적으로 변하지 않는다면 전향 표본추출보다 훨씬 나은 보장을 줄 수 있다.</p>
+<p>표본 수를 미리 고정하는 대신 누적 가중치가 충분히 커질 때까지 표본을 생성할 수도 있다.</p>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - 자료 의존적 종료규칙을 사용한 가능도 가중</strong><br>
+<span class="math inline">\(\gamma=4(1+\epsilon)\epsilon^{-2}\log(2/\delta)\)</span>, <span class="math inline">\(k=|\mathbf Z|\)</span>로 둔다. 누적 가중치 <span class="math inline">\(W\)</span>와 표본 수 <span class="math inline">\(M\)</span>을 0으로 초기화한다. <span class="math inline">\(W&lt;\gamma u^k\)</span>인 동안 LW 표본을 생성하여 <span class="math inline">\(W\leftarrow W+w\)</span>, <span class="math inline">\(M\leftarrow M+1\)</span>로 갱신한다. 최종적으로 <span class="math inline">\(W/M\)</span>을 반환한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정리</strong><br>
+자료 의존적 LW가 반환하는 <span class="math inline">\(\widehat p\)</span>는 확률 <span class="math inline">\(1-\delta\)</span> 이상으로 <span class="math inline">\(P_{\mathcal B}(\mathbf z)\)</span>에 대해 상대오차 <span class="math inline">\(\epsilon\)</span> 이내이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정리</strong><br>
+이 알고리즘이 사용하는 기대 표본 수는 <span class="math display">\[
+\frac{u^k}{P_{\mathcal B}(\mathbf z)}\gamma
+\le
+\left(\frac{u}{\ell}\right)^k\gamma
+\]</span> 이하이다.</p>
+</blockquote>
+<p>자료 의존적 규칙은 우연히 높은 가중치의 표본이 많이 생성되면 일찍 종료하고, 낮은 가중치만 나오면 더 오래 표본추출한다.</p>
+</section>
+<section id="비율-가능도-가중" class="level4" data-number="11.2.3.3">
+<h4 data-number="11.2.3.3" class="anchored" data-anchor-id="비율-가능도-가중"><span class="header-section-number">11.2.3.3</span> 비율 가능도 가중</h4>
+<p>조건부확률을</p>
+<p><span class="math display">\[
+P(y\mid e)=\frac{P(y,e)}{P(e)}
+\]</span></p>
+<p>로 쓰고, 분자와 분모를 서로 독립적인 비정규화 중요도 표본추출로 추정할 수 있다. 이를 <strong>비율 가능도 가중(ratio likelihood weighting)</strong>이라 한다.</p>
+<p><span class="math display">\[
+\widehat P(y\mid e)
+=
+\frac{M^{-1}\sum_{m=1}^{M}w[m]}
+{{M'}^{-1}\sum_{m=1}^{M'}w'[m]}.
+\]</span></p>
+<p>분자는 <span class="math inline">\(y,e\)</span>를 강제로 설정한 제안분포에서, 분모는 <span class="math inline">\(e\)</span>만 강제로 설정한 제안분포에서 추출한다. 두 추정량에 각각 상대오차 경계를 적용할 수 있으므로 이론분석이 비교적 명확하다.</p>
+</section>
+<section id="정규화-가능도-가중" class="level4" data-number="11.2.3.4">
+<h4 data-number="11.2.3.4" class="anchored" data-anchor-id="정규화-가능도-가중"><span class="header-section-number">11.2.3.4</span> 정규화 가능도 가중</h4>
+<p>여러 질의값 <span class="math inline">\(y\in\operatorname{Val}(Y)\)</span>의 전체 분포를 구하려면 비율 LW는 값마다 별도의 표본집합을 요구한다. 정규화 LW는 한 번 생성한 가중 입자집합으로 모든 <span class="math inline">\(y\)</span>를 계산한다.</p>
+<p>목표분포는 <span class="math inline">\(P_{\mathcal B}(\mathbf X\mid e)\)</span>, 비정규화 목표측도는 <span class="math inline">\(P_{\mathcal B}(\mathbf X,e)\)</span>, 제안분포는 <span class="math inline">\(\mathcal B_{E=e}\)</span>이다. 정규화 중요도 표본추출의 일반식을 적용하면 앞에서 제시한 가능도 가중 추정식이 바로 나온다.</p>
+<p>이 방법의 성능은 제안분포와 사후분포의 유사성에 좌우된다.</p>
+<ul>
+<li>증거가 모두 루트노드라면 절단 네트워크는 사후분포와 일치한다. 모든 입자의 가중치는 <span class="math inline">\(P(e)\)</span>로 동일하고 표본효율이 높다.</li>
+<li>증거가 잎노드에만 있으면 제안분포는 사실상 사전분포이다. 사후분포가 사전분포와 크게 다르면 대부분의 표본이 매우 낮은 가중치를 갖는다.</li>
+</ul>
+<p>의료진단에서 희귀질환만이 설명할 수 있는 비정상적 증상조합을 관측했다고 하자. 사전분포에서는 희귀질환이 거의 표본추출되지 않으므로, 수많은 입자가 증거를 거의 설명하지 못하고 가중치가 0에 가까워진다. 이 경우 LW는 거절 표본추출보다 낫지만 여전히 심각한 가중치 퇴화(weight degeneracy)를 겪는다.</p>
+<p>정규화 중요도 표본추출에 대해 원하는 정확도를 보장하는 일반적인 유한표본 경계는 단순하지 않다. 실무에서는 표본 수를 고정하거나 누적 가중치, ESS, 반복 추정치의 안정성을 이용해 종료한다. 단, 모든 구성에서 증거가 희귀하면 누적 가중치 자체가 작은 것은 제안분포의 실패가 아니라 증거확률이 작기 때문일 수도 있다.</p>
+</section>
+<section id="조건부확률-방법의-비교" class="level4" data-number="11.2.3.5">
+<h4 data-number="11.2.3.5" class="anchored" data-anchor-id="조건부확률-방법의-비교"><span class="header-section-number">11.2.3.5</span> 조건부확률 방법의 비교</h4>
+<p><strong>비율 LW의 장점</strong></p>
+<ul>
+<li>질의변수 <span class="math inline">\(Y\)</span>도 강제로 설정하므로 <span class="math inline">\(Y\)</span>를 무작위로 표본추출하는 변동을 제거한다.</li>
+<li>분자와 분모가 비정규화 추정량이어서 이론적 상대오차 분석이 쉽다.</li>
+</ul>
+<p><strong>비율 LW의 단점</strong></p>
+<ul>
+<li>질의값마다 별도의 표본집합이 필요하다.</li>
+<li>많은 변수의 전체 사후분포를 계산할 때 비용이 급격히 증가한다.</li>
+</ul>
+<p><strong>정규화 LW의 장점</strong></p>
+<ul>
+<li>한 표본집합으로 여러 질의를 계산할 수 있다.</li>
+<li>구현이 간단하고 실제 시스템에서 더 널리 사용된다.</li>
+</ul>
+<p><strong>정규화 LW의 단점</strong></p>
+<ul>
+<li>유한표본 편향이 있다.</li>
+<li>제안분포와 사후분포가 멀면 가중치가 소수 입자에 집중된다.</li>
+</ul>
+</section>
+</section>
+<section id="중요도-표본추출의-재검토" class="level3" data-number="11.2.4">
+<h3 data-number="11.2.4" class="anchored" data-anchor-id="중요도-표본추출의-재검토"><span class="header-section-number">11.2.4</span> 중요도 표본추출의 재검토</h3>
+<p>절단 네트워크는 단순하고 표본생성이 쉽지만 최적의 제안분포는 아니다. 증거노드의 CPD가 매우 치우쳐 있거나 증거가 상류 원인에 강한 정보를 제공하면 가중치 분산이 커질 수 있다. 심지어 증거가 없는 단순한 경우에도 특정 사건 <span class="math inline">\(X=x\)</span>의 확률을 추정할 때 사전분포 자체가 최저분산 제안분포가 아닐 수 있다.</p>
+<p>더 나은 제안분포의 예는 다음과 같다.</p>
+<ul>
+<li><strong>후향 중요도 표본추출(backward importance sampling)</strong>: 관측된 자식 <span class="math inline">\(Y=y\)</span>를 이용하여 부모 <span class="math inline">\(X\)</span>를 <span class="math inline">\(Q(X)\propto P(y\mid X)\)</span>와 같은 분포에서 표본추출한다.</li>
+<li>부모와 자식 중 이미 관측 또는 표본추출된 값을 함께 이용하는 국소 제안분포.</li>
+<li>loopy BP, 평균장 또는 다른 근사추론으로 사후 주변분포를 구한 뒤 이를 제안분포로 사용.</li>
+<li>간선 반전을 이용해 증거의 영향을 표본추출 방향의 앞쪽으로 이동.</li>
+</ul>
+<p>중요한 원칙은 제안분포가 무엇이든 실제 생성확률 <span class="math inline">\(Q(\xi)\)</span>를 정확히 계산하고, 목표측도와의 비율로 가중치를 올바르게 부여해야 한다는 것이다. 그러면 추정량의 정당성은 유지된다. 다만 좋은 제안분포를 계산하는 비용과 표본 효율의 향상 사이에 절충이 있다.</p>
+</section>
+</section>
+<section id="마르코프-연쇄-몬테카를로-방법" class="level2" data-number="11.3">
+<h2 data-number="11.3" class="anchored" data-anchor-id="마르코프-연쇄-몬테카를로-방법"><span class="header-section-number">11.3</span> 마르코프 연쇄 몬테카를로 방법</h2>
+<p>가능도 가중의 근본적 한계는 증거가 표본추출에 미치는 직접적 영향이 후손 방향으로만 흐른다는 점이다. 잎노드의 증거가 상류 원인에 미치는 효과는 가중치로만 보정된다. <strong>마르코프 연쇄 몬테카를로(Markov chain Monte Carlo, MCMC)</strong>는 하나의 상태에서 다음 상태로 이동하는 연쇄를 구성하고, 시간이 지날수록 상태분포가 원하는 사후분포에 가까워지도록 한다.</p>
+<p>MCMC는 방향모형과 비방향모형 모두에 적용할 수 있다. 이하에서는 증거로 인자를 축소하여 목표분포를 <span class="math inline">\(P_\Phi(\mathbf X)\)</span>로 표기한다.</p>
+<section id="gibbs-표본추출-알고리즘" class="level3" data-number="11.3.1">
+<h3 data-number="11.3.1" class="anchored" data-anchor-id="gibbs-표본추출-알고리즘"><span class="header-section-number">11.3.1</span> Gibbs 표본추출 알고리즘</h3>
+<p><strong>Gibbs 표본추출</strong>은 현재의 완전 상태에서 한 변수씩 값을 다시 뽑는다. <span class="math inline">\(X_i\)</span>를 갱신할 때 나머지 변수의 현재값 <span class="math inline">\(\mathbf x_{-i}\)</span>에 조건부인 분포</p>
+<p><span class="math display">\[
+P_\Phi(X_i\mid\mathbf x_{-i})
+\]</span></p>
+<p>에서 새 값을 표본추출한다.</p>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - Gibbs 연쇄 궤적 생성</strong><br>
+<strong>입력:</strong> 표본추출 변수집합 <span class="math inline">\(\mathbf X\)</span>, 인자집합 <span class="math inline">\(\Phi\)</span>, 초기분포 <span class="math inline">\(P^{(0)}(\mathbf X)\)</span>, 반복수 <span class="math inline">\(T\)</span><br>
+1. <span class="math inline">\(\mathbf x^{(0)}\sim P^{(0)}\)</span>를 생성한다.<br>
+2. <span class="math inline">\(t=1,\ldots,T\)</span>에 대해 <span class="math inline">\(\mathbf x^{(t)}\leftarrow\mathbf x^{(t-1)}\)</span>로 둔다.<br>
+3. 각 <span class="math inline">\(X_i\)</span>에 대해 <span class="math display">\[
+x_i^{(t)}\sim P_\Phi(X_i\mid\mathbf x_{-i}^{(t)})
+\]</span> 를 생성하여 현재 상태에서 <span class="math inline">\(X_i\)</span> 값을 교체한다.<br>
+4. 전체 궤적 <span class="math inline">\(\mathbf x^{(0)},\ldots,\mathbf x^{(T)}\)</span>을 반환한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - Student 네트워크의 Gibbs 갱신</strong><br>
+증거가 <span class="math inline">\(s^1,l^0\)</span>이면 미관측변수는 <span class="math inline">\(D,I,G\)</span>이다. 현재 상태가 <span class="math inline">\((d^1,i^0,g^2)\)</span>라고 하자. <span class="math inline">\(G\)</span>를 갱신할 때 <span class="math display">\[
+P_\Phi(G\mid d^1,i^0)
+\propto
+P(G\mid i^0,d^1)P(l^0\mid G)
+\]</span> 이다. <span class="math inline">\(G\)</span>의 자식 <span class="math inline">\(L\)</span>에 대한 증거가 즉시 갱신분포에 들어간다. 이어 <span class="math inline">\(I\)</span>는 새로 뽑힌 <span class="math inline">\(G\)</span>와 <span class="math inline">\(s^1\)</span>에 조건부로, <span class="math inline">\(D\)</span>는 새 <span class="math inline">\(G\)</span>와 <span class="math inline">\(I\)</span>에 조건부로 갱신된다. 여러 번 반복하면 증거정보가 네트워크 전체로 전달된다.</p>
+</blockquote>
+</section>
+<section id="마르코프-연쇄" class="level3" data-number="11.3.2">
+<h3 data-number="11.3.2" class="anchored" data-anchor-id="마르코프-연쇄"><span class="header-section-number">11.3.2</span> 마르코프 연쇄</h3>
+<section id="기본-정의" class="level4" data-number="11.3.2.1">
+<h4 data-number="11.3.2.1" class="anchored" data-anchor-id="기본-정의"><span class="header-section-number">11.3.2.1</span> 기본 정의</h4>
+<blockquote class="blockquote">
+<p><strong>정의 - 마르코프 연쇄</strong><br>
+상태공간 <span class="math inline">\(\operatorname{Val}(\mathbf X)\)</span>와 전이모형 <span class="math inline">\(\mathcal T\)</span>로 정의된다. 각 두 상태 <span class="math inline">\(\mathbf x,\mathbf x'\)</span>에 대해 <span class="math display">\[
+\mathcal T(\mathbf x\to\mathbf x')
+\]</span> 는 현재 상태가 <span class="math inline">\(\mathbf x\)</span>일 때 다음 상태가 <span class="math inline">\(\mathbf x'\)</span>가 될 확률이다. 이 장에서는 시간에 따라 전이규칙이 변하지 않는 동질 마르코프 연쇄를 주로 다룬다.</p>
+</blockquote>
+<div id="fig-grasshopper-markov-chain" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-grasshopper-markov-chain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-grasshopper-markov-chain.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-grasshopper-markov-chain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.3: <span class="math inline">\(-4\)</span>에서 <span class="math inline">\(+4\)</span>까지 움직이는 Grasshopper 마르코프 연쇄.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>예제 - Grasshopper 연쇄</strong><br>
+메뚜기가 <span class="math inline">\(-4,\ldots,+4\)</span>의 정수 위치에 있다. 내부 위치에서는 현재 위치에 머물 확률이 0.5, 왼쪽과 오른쪽으로 한 칸 이동할 확률이 각각 0.25이다. 경계에서는 벽 쪽으로 뛰려는 이동이 자기고리로 바뀌어 <span class="math inline">\(\mathcal T(+4\to+4)=0.75\)</span>가 된다.</p>
+</blockquote>
+<p>초기분포가 <span class="math inline">\(P^{(0)}\)</span>일 때 다음 시점의 분포는</p>
+<p><span class="math display">\[
+P^{(t+1)}(\mathbf x')
+=
+\sum_{\mathbf x}
+P^{(t)}(\mathbf x)
+\mathcal T(\mathbf x\to\mathbf x').
+\]</span></p>
+<p>이다.</p>
+</section>
+<section id="점근적-거동" class="level4" data-number="11.3.2.2">
+<h4 data-number="11.3.2.2" class="anchored" data-anchor-id="점근적-거동"><span class="header-section-number">11.3.2.2</span> 점근적 거동</h4>
+<p>Grasshopper가 0에서 시작하면 초기에는 확률질량이 중앙에 집중되지만 시간이 지날수록 퍼진다. <span class="math inline">\(t=50\)</span> 정도에서는 9개 상태의 확률이 거의 균등해진다. 이 예는 직접 표본추출하기 어려운 분포도 적절한 연쇄를 오래 실행하여 근사적으로 표본추출할 수 있다는 MCMC의 기본 아이디어를 보여준다.</p>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - 마르코프 연쇄 궤적 생성</strong><br>
+1. <span class="math inline">\(\mathbf x^{(0)}\sim P^{(0)}\)</span>를 생성한다.<br>
+2. <span class="math inline">\(t=1,\ldots,T\)</span>에 대해 <span class="math display">\[
+\mathbf x^{(t)}\sim\mathcal T(\mathbf x^{(t-1)}\to\mathbf X)
+\]</span> 를 생성한다.<br>
+3. 궤적을 반환한다.</p>
+</blockquote>
+</section>
+<section id="정상분포" class="level4" data-number="11.3.2.3">
+<h4 data-number="11.3.2.3" class="anchored" data-anchor-id="정상분포"><span class="header-section-number">11.3.2.3</span> 정상분포</h4>
+<blockquote class="blockquote">
+<p><strong>정의 - 정상분포(stationary distribution)</strong><br>
+분포 <span class="math inline">\(\pi(\mathbf X)\)</span>가 <span class="math display">\[
+\pi(\mathbf x')
+=
+\sum_{\mathbf x}
+\pi(\mathbf x)\mathcal T(\mathbf x\to\mathbf x')
+\]</span> 를 만족하면 <span class="math inline">\(\mathcal T\)</span>의 정상분포 또는 불변분포라 한다.</p>
+</blockquote>
+<div id="fig-three-state-markov-chain" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-three-state-markov-chain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-three-state-markov-chain.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-three-state-markov-chain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.4: 세 상태를 갖는 단순 마르코프 연쇄.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>예제</strong><br>
+<span class="quarto-unresolved-ref">?fig-three-state-markov-chain의</span> 연쇄에서 정상분포는 <span class="math display">\[
+\pi(x^1)=0.2,\qquad
+\pi(x^2)=0.5,\qquad
+\pi(x^3)=0.3
+\]</span> 이다. 예를 들어 첫 상태로 들어오는 확률흐름은 <span class="math inline">\(0.25(0.2)+0.5(0.3)=0.2\)</span>이다.</p>
+</blockquote>
+<p>모든 연쇄가 정상분포로 수렴하는 것은 아니다. 두 상태를 매번 번갈아 이동하는 연쇄는 주기적이며 분포가 진동한다. 서로 이동할 수 없는 여러 영역이 있으면 초기상태에 따라 다른 제한분포에 머무는 가약 연쇄가 된다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 정칙 마르코프 연쇄(regular Markov chain)</strong><br>
+어떤 정수 <span class="math inline">\(k\)</span>가 존재하여 모든 상태쌍 <span class="math inline">\(\mathbf x,\mathbf x'\)</span>에 대해 정확히 <span class="math inline">\(k\)</span>단계 만에 <span class="math inline">\(\mathbf x\)</span>에서 <span class="math inline">\(\mathbf x'\)</span>로 갈 확률이 양수이면 연쇄를 정칙이라 한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정리</strong><br>
+유한 상태공간의 정칙 마르코프 연쇄는 유일한 정상분포를 갖는다.</p>
+</blockquote>
+<p>모든 상태가 양의 확률 경로로 연결되고 각 상태에 양의 자기고리가 있으면 정칙성이 보장된다. 이 조건은 충분조건이지만 필요조건은 아니다.</p>
+</section>
+<section id="여러-전이모형" class="level4" data-number="11.3.2.4">
+<h4 data-number="11.3.2.4" class="anchored" data-anchor-id="여러-전이모형"><span class="header-section-number">11.3.2.4</span> 여러 전이모형</h4>
+<p>인수분해된 상태공간에서는 한 번에 한 좌표만 갱신하는 여러 <strong>커널(kernel)</strong>을 정의하는 것이 편리하다. <span class="math inline">\(T_i\)</span>는 <span class="math inline">\(X_i\)</span>만 바꾸고 나머지 값은 고정한다. 여러 커널을 결합하는 방법은 다음과 같다.</p>
+<ul>
+<li>각 반복에서 커널을 무작위로 선택하는 혼합 연쇄.</li>
+<li><span class="math inline">\(T_1,T_2,\ldots,T_k\)</span>를 순서대로 한 번씩 적용하는 다단계 연쇄.</li>
+</ul>
+<p>각 커널이 같은 분포 <span class="math inline">\(\pi\)</span>를 정상분포로 보존하면 혼합 또는 순차적 결합도 <span class="math inline">\(\pi\)</span>를 정상분포로 보존한다. 개별 커널은 전체 상태공간을 연결하지 못해도 여러 커널을 합치면 전체 연쇄가 정칙이 될 수 있다.</p>
+</section>
+</section>
+<section id="gibbs-표본추출의-재검토" class="level3" data-number="11.3.3">
+<h3 data-number="11.3.3" class="anchored" data-anchor-id="gibbs-표본추출의-재검토"><span class="header-section-number">11.3.3</span> Gibbs 표본추출의 재검토</h3>
+<p>Gibbs 커널은 현재 상태 <span class="math inline">\((\mathbf x_{-i},x_i)\)</span>에서 <span class="math inline">\(X_i\)</span>의 기존 값을 버리고</p>
+<p><span class="math display">\[
+T_i\big((\mathbf x_{-i},x_i)\to(\mathbf x_{-i},x_i')\big)
+=
+P_\Phi(x_i'\mid\mathbf x_{-i})
+\]</span></p>
+<p>로 새 값을 뽑는다. 이 커널은 목표 사후분포 <span class="math inline">\(P_\Phi(\mathbf X)\)</span>를 정상분포로 갖는다.</p>
+<p>그래프모형에서는 전조건부분포를 국소적으로 계산할 수 있다. 마르코프 네트워크에서</p>
+<p><span class="math display">\[
+P_\Phi(\mathbf X)
+=
+\frac1Z\prod_j\phi_j(D_j)
+\]</span></p>
+<p>라고 하면 <span class="math inline">\(X_i\)</span>가 포함되지 않은 인자들은 조건부분포의 분자와 분모에서 약분된다. 따라서</p>
+<p><span class="math display">\[
+P(x_i'\mid\mathbf x_{-i})
+=
+\frac{
+\prod_{D_j\ni X_i}
+\phi_j(x_i',\mathbf x_{j,-i})
+}
+{
+\sum_{x_i''}
+\prod_{D_j\ni X_i}
+\phi_j(x_i'',\mathbf x_{j,-i})
+}.
+\]</span></p>
+<p>즉, <span class="math inline">\(X_i\)</span>의 마르코프 블랭킷에 속한 변수와 <span class="math inline">\(X_i\)</span>를 포함하는 인자만 필요하다. 베이즈 네트워크에서는 <span class="math inline">\(X_i\)</span> 자신의 CPD와 자식들의 CPD만 사용하면 된다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - Student 네트워크의 국소 조건부분포</strong><br>
+증거 <span class="math inline">\(s^1,l^0\)</span>에서 <span class="math inline">\(G\)</span>의 Gibbs 갱신은 <span class="math display">\[
+P(g'\mid i,d,s^1,l^0)
+=
+\frac{P(g'\mid i,d)P(l^0\mid g')}
+{\sum_{g''}P(g''\mid i,d)P(l^0\mid g'')}.
+\]</span> <span class="math inline">\(I\)</span>의 갱신은 <span class="math display">\[
+P(i'\mid g,d,s^1,l^0)
+=
+\frac{P(i')P(g\mid i',d)P(s^1\mid i')}
+{\sum_{i''}P(i'')P(g\mid i'',d)P(s^1\mid i'')}.
+\]</span></p>
+</blockquote>
+<p>한 번에 변수 하나가 아니라 여러 변수를 하나의 블록으로 묶어 조건부분포에서 공동 표본추출할 수도 있다. 이를 <strong>블록 Gibbs 표본추출(block Gibbs sampling)</strong>이라 한다. 블록 내부의 조건부분포가 연쇄, 트리 또는 다른 추론 가능한 구조를 가지면 한 번의 블록 이동으로 상태공간을 더 멀리 이동할 수 있다.</p>
+<div id="fig-student-course-gibbs-network" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-student-course-gibbs-network-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-student-course-gibbs-network.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-student-course-gibbs-network-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.5: 네 명의 학생, 두 과목과 다섯 성적변수로 이루어진 베이즈 네트워크.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>예제 - 학생과 과목 모형의 블록 Gibbs</strong><br>
+학생별 지능변수 <span class="math inline">\(I_1,\ldots,I_n\)</span>, 과목별 난이도변수 <span class="math inline">\(D_1,\ldots,D_\ell\)</span>, 관측된 성적변수 <span class="math inline">\(G_{j,k}\)</span>가 있다고 하자. <span class="math inline">\(D\)</span>를 고정하면 학생들의 <span class="math inline">\(I_j\)</span>는 조건부 독립이므로 모든 <span class="math inline">\(I\)</span>를 하나의 블록으로 병렬 표본추출할 수 있다. 반대로 <span class="math inline">\(I\)</span>를 고정하면 모든 <span class="math inline">\(D_k\)</span>도 조건부 독립이다. 따라서 <span class="math inline">\(I\)</span> 블록과 <span class="math inline">\(D\)</span> 블록을 번갈아 표본추출할 수 있다.</p>
+</blockquote>
+<p>Gibbs 연쇄가 항상 정칙인 것은 아니다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 결정적 XOR로 인한 가약성</strong><br>
+<span class="math inline">\(X\to Z\leftarrow Y\)</span>이고 <span class="math inline">\(Z\)</span>가 <span class="math inline">\(X,Y\)</span>의 결정적 XOR라고 하자. <span class="math inline">\(z^1\)</span>을 관측하면 가능한 상태는 <span class="math inline">\((x^1,y^0)\)</span>와 <span class="math inline">\((x^0,y^1)\)</span>뿐이다. 한 변수만 바꾸면 증거와 모순되는 확률 0 상태를 거쳐야 하므로 단일변수 Gibbs 연쇄는 두 상태 사이를 이동할 수 없다. 초기상태에 영원히 갇혀 가약 연쇄가 된다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정리</strong><br>
+마르코프 네트워크의 모든 클리크 잠재함수가 엄격히 양수이면 Gibbs 표본추출 연쇄는 정칙이다.</p>
+</blockquote>
+<p>양성은 충분조건이며 필요조건은 아니다. 더 중요한 문제는 정칙인 연쇄도 정상분포에 가까워지는 데 매우 오래 걸릴 수 있다는 점이다.</p>
+</section>
+<section id="더-넓은-마르코프-연쇄의-계열" class="level3" data-number="11.3.4">
+<h3 data-number="11.3.4" class="anchored" data-anchor-id="더-넓은-마르코프-연쇄의-계열"><span class="header-section-number">11.3.4</span> 더 넓은 마르코프 연쇄의 계열</h3>
+<p>Gibbs 표본추출은 국소 조건부분포에서 직접 표본을 생성할 수 있어야 한다. 연속형 복잡분포에서는 이것이 불가능할 수 있다. 또한 강하게 상관된 변수들에서는 한 변수만 바꾸는 이동이 높은 확률의 모드에서 매우 낮은 확률 상태로 나가야 하므로 거의 일어나지 않는다. 따라서 여러 변수를 동시에 바꾸는 장거리 이동이 필요할 수 있다.</p>
+<section id="상세균형" class="level4" data-number="11.3.4.1">
+<h4 data-number="11.3.4.1" class="anchored" data-anchor-id="상세균형"><span class="header-section-number">11.3.4.1</span> 상세균형</h4>
+<blockquote class="blockquote">
+<p><strong>정의 - 가역 마르코프 연쇄와 상세균형</strong><br>
+어떤 분포 <span class="math inline">\(\pi\)</span>에 대해 모든 <span class="math inline">\(\mathbf x,\mathbf x'\)</span>가 <span class="math display">\[
+\pi(\mathbf x)T(\mathbf x\to\mathbf x')
+=
+\pi(\mathbf x')T(\mathbf x'\to\mathbf x)
+\]</span> 를 만족하면 연쇄는 <span class="math inline">\(\pi\)</span>에 대해 가역이라고 한다. 이 식을 <strong>상세균형(detailed balance)</strong>이라 한다.</p>
+</blockquote>
+<p>상세균형은 각 상태쌍 사이의 정상상태 확률흐름이 양방향으로 같다는 뜻이다. 상세균형을 모든 <span class="math inline">\(\mathbf x\)</span>에 대해 합하면 정상분포 조건이 나온다.</p>
+<blockquote class="blockquote">
+<p><strong>명제</strong><br>
+<span class="math inline">\(T\)</span>가 정칙이고 <span class="math inline">\(\pi\)</span>에 대해 상세균형을 만족하면 <span class="math inline">\(\pi\)</span>는 <span class="math inline">\(T\)</span>의 유일한 정상분포이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제</strong><br>
+<span class="quarto-unresolved-ref">?fig-three-state-markov-chain에서</span> <span class="math inline">\(x^1\)</span>과 <span class="math inline">\(x^3\)</span> 사이의 상세균형은 <span class="math display">\[
+0.2\times0.75
+=
+0.3\times0.5
+=0.15
+\]</span> 로 성립한다.</p>
+</blockquote>
+</section>
+<section id="metropolishastings-알고리즘" class="level4" data-number="11.3.4.2">
+<h4 data-number="11.3.4.2" class="anchored" data-anchor-id="metropolishastings-알고리즘"><span class="header-section-number">11.3.4.2</span> Metropolis–Hastings 알고리즘</h4>
+<p><strong>Metropolis–Hastings(MH)</strong>는 원하는 정상분포 <span class="math inline">\(\pi\)</span>를 갖는 가역 연쇄를 구성하는 일반적 방법이다. 현재 상태 <span class="math inline">\(\mathbf x\)</span>에서 제안전이 <span class="math inline">\(T^Q(\mathbf x\to\mathbf x')\)</span>에 따라 후보 <span class="math inline">\(\mathbf x'\)</span>를 생성한 뒤, 적절한 확률로 수용하거나 거절한다.</p>
+<p>실제 전이확률은 <span class="math inline">\(\mathbf x'\ne\mathbf x\)</span>에 대해</p>
+<p><span class="math display">\[
+T(\mathbf x\to\mathbf x')
+=
+T^Q(\mathbf x\to\mathbf x')A(\mathbf x\to\mathbf x')
+\]</span></p>
+<p>이고, 거절된 확률은 자기고리에 더해진다.</p>
+<p>상세균형을 만족시키는 수용확률은</p>
+<p><span class="math display">\[
+A(\mathbf x\to\mathbf x')
+=
+\min\left
+\{1,
+\frac{
+\pi(\mathbf x')T^Q(\mathbf x'\to\mathbf x)
+}{
+\pi(\mathbf x)T^Q(\mathbf x\to\mathbf x')
+}
+\right\}.
+\]</span></p>
+<p>이다. 대칭 제안분포이면 제안비가 약분되어 목표확률의 비만 사용한다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - Metropolis–Hastings의 정상분포</strong><br>
+임의의 제안분포 <span class="math inline">\(T^Q\)</span>에 대해 위 수용확률로 정의한 연쇄가 정칙이면 정상분포는 <span class="math inline">\(\pi\)</span>이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제</strong><br>
+<span class="quarto-unresolved-ref">?fig-three-state-markov-chain의</span> 전이를 제안분포로 사용하면서 목표분포를 <span class="math inline">\(\pi'(x^1)=0.6\)</span>, <span class="math inline">\(\pi'(x^2)=0.3\)</span>, <span class="math inline">\(\pi'(x^3)=0.1\)</span>로 바꾸자. <span class="math inline">\(x^1\to x^3\)</span>의 수용확률은 <span class="math display">\[
+\min\left\{1,\frac{0.1\times0.5}{0.6\times0.75}\right\}
+\approx0.11,
+\]</span> 반대 방향은 1이다. 목표분포가 선호하는 <span class="math inline">\(x^1\)</span> 쪽 이동은 항상 받아들이고 반대 이동은 자주 거절함으로써 원하는 정상분포를 만든다.</p>
+</blockquote>
+<p>그래프모형에서 <span class="math inline">\(X_i\)</span>만 바꾸는 국소 제안이라면 목표분포의 비는</p>
+<p><span class="math display">\[
+\frac{P_\Phi(x_i',\mathbf x_{-i})}
+{P_\Phi(x_i,\mathbf x_{-i})}
+=
+\frac{P_\Phi(x_i'\mid\mathbf u_i)}
+{P_\Phi(x_i\mid\mathbf u_i)},
+\]</span></p>
+<p>여기서 <span class="math inline">\(\mathbf u_i\)</span>는 <span class="math inline">\(X_i\)</span>의 마르코프 블랭킷 할당이다. 따라서 정규화상수 없이 국소 인자만으로 수용확률을 계산할 수 있다. Gibbs 표본추출은 제안분포를 정확한 전조건부분포로 택한 MH의 특수한 경우이며, 모든 제안이 수용된다.</p>
+<p>MH가 올바른 정상분포를 보장하더라도 정칙성은 자동으로 보장되지 않는다. 결정적 XOR 예에서 한 변수만 바꾸는 제안은 여전히 두 모드를 연결할 수 없다. 두 변수를 동시에 바꾸는 제안이 필요하다.</p>
+</section>
+</section>
+<section id="마르코프-연쇄의-사용" class="level3" data-number="11.3.5">
+<h3 data-number="11.3.5" class="anchored" data-anchor-id="마르코프-연쇄의-사용"><span class="header-section-number">11.3.5</span> 마르코프 연쇄의 사용</h3>
+<section id="혼합시간" class="level4" data-number="11.3.5.1">
+<h4 data-number="11.3.5.1" class="anchored" data-anchor-id="혼합시간"><span class="header-section-number">11.3.5.1</span> 혼합시간</h4>
+<p>MCMC에서 가장 어려운 실무 문제는 얼마 동안 초기 구간을 버려야 하는가이다. 이를 <strong>burn-in</strong>이라 한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - <span class="math inline">\(\epsilon\)</span>-혼합시간</strong><br>
+모든 초기분포 <span class="math inline">\(P^{(0)}\)</span>에 대해 <span class="math display">\[
+D_{\mathrm{var}}(P^{(T)},\pi)\le\epsilon
+\]</span> 이 되게 하는 최소 <span class="math inline">\(T\)</span>를 <span class="math inline">\(T_\epsilon\)</span>이라 하고 <span class="math inline">\(\epsilon\)</span>-혼합시간이라 한다.</p>
+</blockquote>
+<p>상태공간이 내부적으로 잘 연결된 여러 영역으로 나뉘고 영역 사이의 전이가 희박하면 혼합이 느리다. 이를 정량화하는 개념이 전도도이다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 전도도(conductance)</strong><br>
+정상분포가 <span class="math inline">\(\pi\)</span>인 연쇄에서 <span class="math display">\[
+\operatorname{cond}(T)
+=
+\min_{S:\,0&lt;\pi(S)\le1/2}
+\frac{P(S\rightsquigarrow S^c)}{\pi(S)}
+\]</span> 로 정의한다. 여기서 <span class="math inline">\(P(S\rightsquigarrow S^c)\)</span>는 <span class="math inline">\(S\)</span>에서 보완집합으로 나가는 전체 전이질량이다.</p>
+</blockquote>
+<div id="fig-low-conductance-bottleneck" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-low-conductance-bottleneck-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-low-conductance-bottleneck.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-low-conductance-bottleneck-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.6: 두 영역 사이에 낮은 확률의 병목 전이만 존재하는 저전도도 마르코프 연쇄.
+</figcaption>
+</figure>
+</div>
+<p>전도도가 낮으면 어떤 영역에 들어간 연쇄가 오랫동안 빠져나오지 못한다. 결정적 또는 거의 결정적인 CPD, 강한 상호작용, 다봉형 사후분포에서 이런 현상이 흔하다. 전이행렬을 완전히 구성하면 고유값을 통해 혼합시간을 분석할 수 있지만, 그래프모형에서는 상태 수가 지수적이므로 일반적으로 불가능하다. 따라서 실무에서는 진단법과 휴리스틱을 사용한다.</p>
+</section>
+<section id="표본-수집" class="level4" data-number="11.3.5.2">
+<h4 data-number="11.3.5.2" class="anchored" data-anchor-id="표본-수집"><span class="header-section-number">11.3.5.2</span> 표본 수집</h4>
+<p>연쇄가 정상분포에 도달한 뒤에는 같은 궤적에서 연속적으로 표본을 수집할 수 있다. 각 표본의 주변분포는 <span class="math inline">\(\pi\)</span>이지만 서로 독립은 아니다. 따라서</p>
+<p><span class="math display">\[
+\widehat{\mathbb E}_{\mathcal D}(f)
+=
+\frac1M\sum_{m=1}^{M}f(\mathbf x[m])
+\]</span></p>
+<p>은 정상상태에서 비편향이지만 독립표본보다 분산이 크다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 마르코프 연쇄 표본의 중심극한정리</strong><br>
+정상상태에서 수집한 <span class="math inline">\(X[1],\ldots,X[M]\)</span>에 대해 큰 <span class="math inline">\(M\)</span>에서 <span class="math display">\[
+\widehat{\mathbb E}_{\mathcal D}(f)
+-\mathbb E_\pi[f]
+\]</span> 는 평균 0, 점근분산 <span class="math inline">\(\sigma_f^2/M\)</span>인 정규분포에 가까워진다. 여기서 <span class="math display">\[
+\sigma_f^2
+=
+\operatorname{Var}_\pi[f(X)]
++2\sum_{\ell=1}^{\infty}
+\operatorname{Cov}
+\big(f(X[m]),f(X[m+\ell])\big).
+\]</span></p>
+</blockquote>
+<p>뒤의 합은 시차별 <strong>자기공분산(autocovariance)</strong>이다. 자기상관이 오래 유지되면 실질적인 정보량이 작다. 경험적 분산과 시차 <span class="math inline">\(\ell\)</span>의 자기공분산은 각각</p>
+<p><span class="math display">\[
+\widehat{\operatorname{Var}}(f)
+=
+\frac{1}{M-1}
+\sum_{m=1}^{M}
+\left(f(X[m])-\bar f\right)^2
+\]</span></p>
+<p>및</p>
+<p><span class="math display">\[
+\widehat{\operatorname{Cov}}_\ell
+=
+\frac{1}{M-\ell}
+\sum_{m=1}^{M-\ell}
+\left(f(X[m])-\bar f\right)
+\left(f(X[m+\ell])-\bar f\right)
+\]</span></p>
+<p>로 추정한다.</p>
+<p>표본 사이를 일정 간격으로 얇게 추출하는 thinning은 상관을 줄이지만, 이미 생성된 중간 표본을 버리는 것이므로 동일한 계산시간에서 평균 추정량의 분산을 개선하지 않는다. 함수 평가나 저장비용이 매우 큰 경우에만 유용할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>Box - MCMC 실무 진단</strong><br>
+1. <strong>자기상관 함수</strong>: 먼 시차에서도 자기상관이 높으면 혼합이 느리다.<br>
+2. <strong>여러 연쇄</strong>: 서로 멀리 떨어진 초기값에서 여러 연쇄를 실행하고 연쇄 간 분산과 연쇄 내 분산을 비교한다.<br>
+3. 연쇄 <span class="math inline">\(k\)</span>의 평균을 <span class="math inline">\(\bar f_k\)</span>, 전체 평균을 <span class="math inline">\(\bar f\)</span>라 하면 <span class="math display">\[
+B=\frac{M}{K-1}\sum_{k=1}^{K}(\bar f_k-\bar f)^2,
+\]</span> <span class="math display">\[
+W=\frac1K\frac1{M-1}
+\sum_{k=1}^{K}\sum_{m=1}^{M}
+(f(X_k[m])-\bar f_k)^2.
+\]</span> <span class="math inline">\(V=(M-1)W/M+B/M\)</span>와 <span class="math inline">\(\widehat R=\sqrt{V/W}\)</span>를 계산한다. <span class="math inline">\(\widehat R\)</span>이 1보다 크면 연쇄들이 아직 동일한 분포를 탐색하지 않을 가능성이 있다.<br>
+4. 서로 다른 여러 함수와 변수에 대해 진단해야 한다. 일부 주변분포만 안정되어도 전체 연쇄는 다른 모드를 탐색하지 못했을 수 있다.</p>
+</blockquote>
+<p>실무적으로는 소수의 연쇄를 서로 다른 시작점에서 충분히 길게 실행하고, burn-in 이후 각 연쇄에서 여러 표본을 모두 사용하는 전략이 권장된다.</p>
+</section>
+<section id="논의" class="level4" data-number="11.3.5.3">
+<h4 data-number="11.3.5.3" class="anchored" data-anchor-id="논의"><span class="header-section-number">11.3.5.3</span> 논의</h4>
+<p>MCMC의 장점은 다음과 같다.</p>
+<ul>
+<li>원칙적으로 충분히 오래 실행하면 참 사후분포에 임의로 가까워질 수 있다.</li>
+<li>증거확률이 작거나 사전분포와 사후분포가 매우 달라도 가능도 가중처럼 직접 퇴화하지 않는다.</li>
+<li>방향모형과 비방향모형 모두에 적용할 수 있다.</li>
+<li>정규화상수를 몰라도 확률비만으로 MH를 실행할 수 있다.</li>
+</ul>
+<p>그러나 제안분포, 커널, 연쇄 수, 초기값, burn-in, 수렴진단, 표본 수집 간격 등을 사용자가 결정해야 한다. 실제 고차원 다봉형 문제에서는 단순 Gibbs나 국소 MH가 매우 느리게 혼합할 수 있다.</p>
+<p>개선의 핵심은 더 큰 이동을 도입하는 것이다.</p>
+<ul>
+<li>블록 Gibbs로 상관된 변수들을 함께 갱신한다.</li>
+<li>문제구조에 맞춘 군집 이동을 설계한다.</li>
+<li>온도 <span class="math inline">\(T\)</span>가 높은 완화분포를 이용한다. 원문에서 의도하는 전형적 형태는 &gt; <span class="math display">\[
+&gt; P_T(\mathbf X)\propto \widetilde P(\mathbf X)^{1/T}
+&gt; \]</span> &gt; 이며, <span class="math inline">\(T&gt;1\)</span>이면 모드 사이의 장벽이 평평해진다.</li>
+<li>simulated tempering, parallel tempering, tempered transitions 또는 annealed importance sampling을 사용할 수 있다.</li>
+</ul>
+<div id="fig-bugs-hybrid-network" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bugs-hybrid-network-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-bugs-hybrid-network.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bugs-hybrid-network-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.7: 혼합형 베이즈 네트워크와 BUGS 언어를 이용한 모형 명세 예.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>Box - BUGS 시스템</strong><br>
+BUGS는 확률모형을 프로그램 언어 형태로 정의하고 MCMC를 자동 실행하는 범용 시스템이다. 변수는 결정적 함수나 Bernoulli, categorical, Gaussian, logistic 등 다양한 확률분포로 정의할 수 있다. <span class="quarto-unresolved-ref">?fig-bugs-hybrid-network의</span> 예에서는 이산변수 <span class="math inline">\(A,B,C\)</span>와 연속변수 <span class="math inline">\(X,Y\)</span>가 혼합되어 있고, <span class="math inline">\(Y\)</span>의 평균과 정밀도가 다른 변수의 함수로 정의된다. 사용자는 관측값, 반복수와 모니터할 변수를 지정하고, 시스템은 변수의 조건부분포 형태를 분석하여 적절한 MCMC 갱신을 선택한다. 이 사례는 MCMC가 매우 넓은 모형계열에 적용될 수 있다는 장점을 보여준다.</p>
+</blockquote>
+</section>
+</section>
+</section>
+<section id="붕괴-입자" class="level2" data-number="11.4">
+<h2 data-number="11.4" class="anchored" data-anchor-id="붕괴-입자"><span class="header-section-number">11.4</span> 붕괴 입자</h2>
+<p>완전 입자는 모든 변수의 값을 하나씩 지정하므로 한 입자가 덮는 상태공간의 범위가 매우 작다. <strong>붕괴 입자(collapsed particle)</strong>는 변수집합을</p>
+<p><span class="math display">\[
+\mathbf X=\mathbf X^p\cup\mathbf X^d,
+\qquad
+\mathbf X^p\cap\mathbf X^d=\varnothing
+\]</span></p>
+<p>로 나누고, <span class="math inline">\(\mathbf X^p\)</span>에 대해서만 구체적 할당 <span class="math inline">\(\mathbf x^p\)</span>를 생성한다. 나머지 <span class="math inline">\(\mathbf X^d\)</span>는 조건부분포</p>
+<p><span class="math display">\[
+P(\mathbf X^d\mid\mathbf x^p,e)
+\]</span></p>
+<p>로 보존한다. 이를 Rao–Blackwellization이라고도 한다.</p>
+<p>함수 <span class="math inline">\(f\)</span>의 사후기댓값은 다음과 같이 두 단계로 분해된다.</p>
+<p><span class="math display">\[
+\mathbb E_{P(\xi\mid e)}[f(\xi)]
+=
+\sum_{\mathbf x^p}P(\mathbf x^p\mid e)
+\sum_{\mathbf x^d}P(\mathbf x^d\mid\mathbf x^p,e)
+f(\mathbf x^p,\mathbf x^d,e).
+\]</span></p>
+<p>동일한 식을 내부 조건부 기댓값으로 쓰면 다음과 같다.</p>
+<p><span class="math display">\[
+\mathbb E_{P(\xi\mid e)}[f(\xi)]
+=
+\sum_{\mathbf x^p}P(\mathbf x^p\mid e)
+\mathbb E_{P(\mathbf X^d\mid\mathbf x^p,e)}
+[f(\mathbf x^p,\mathbf X^d,e)].
+\]</span></p>
+<p>외부 기대는 입자로 근사하고 내부 기대는 조건부 그래프모형에서 정확 또는 근사추론으로 계산한다.</p>
+<ul>
+<li><span class="math inline">\(\mathbf X^p=\mathbf X\)</span>이면 완전 입자 방법이다.</li>
+<li><span class="math inline">\(\mathbf X^p=\varnothing\)</span>이면 원 네트워크에서 직접 정확추론하는 경우이다.</li>
+<li>중간 선택은 표본추출과 그래프 추론의 절충이다.</li>
+</ul>
+<p>표본추출하는 변수 수를 줄일수록 한 입자가 더 큰 확률질량을 대표하며, <span class="math inline">\(\mathbf X^d\)</span>에서 발생할 표본변동을 분석적으로 적분하여 분산을 줄인다. 다만 각 입자마다 조건부 추론을 수행해야 하므로 입자당 비용은 커진다.</p>
+<section id="붕괴-가능도-가중" class="level3" data-number="11.4.1">
+<h3 data-number="11.4.1" class="anchored" data-anchor-id="붕괴-가능도-가중"><span class="header-section-number">11.4.1</span> 붕괴 가능도 가중</h3>
+<section id="붕괴-중요도-표본추출" class="level4" data-number="11.4.1.1">
+<h4 data-number="11.4.1.1" class="anchored" data-anchor-id="붕괴-중요도-표본추출"><span class="header-section-number">11.4.1.1</span> 붕괴 중요도 표본추출</h4>
+<p>제안분포 <span class="math inline">\(Q(\mathbf X^p)\)</span>에서 <span class="math inline">\(\mathbf x^p[m]\)</span>을 생성하고, 각 입자에 가중치와 조건부분포를 결합한다.</p>
+<p><span class="math display">\[
+\mathcal D
+=
+\left\{
+\left(
+\mathbf x^p[m],w[m],
+P(\mathbf X^d\mid\mathbf x^p[m],e)
+\right)
+\right\}_{m=1}^{M}.
+\]</span></p>
+<p>위의 반복기댓값 표현에서 내부 기대를</p>
+<p><span class="math display">\[
+g(\mathbf x^p)
+=
+\mathbb E_{P(\mathbf X^d\mid\mathbf x^p,e)}
+[f(\mathbf x^p,\mathbf X^d,e)]
+\]</span></p>
+<p>로 보면 정규화 중요도 추정량은</p>
+<p><span class="math display">\[
+\widehat{\mathbb E}_{\mathcal D}(f)
+=
+\frac{
+\sum_{m=1}^{M}w[m]
+\mathbb E_{P(\mathbf X^d\mid\mathbf x^p[m],e)}
+[f(\mathbf x^p[m],\mathbf X^d,e)]
+}{
+\sum_{m=1}^{M}w[m]
+}.
+\]</span></p>
+<div id="fig-collapsed-extended-student" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-collapsed-extended-student-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-collapsed-extended-student.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-collapsed-extended-student-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.8: (a) Extended Student 네트워크와 (b) <span class="math inline">\(G=g,D=d\)</span>로 축소한 조건부 네트워크.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>예제 - Extended Student 모형</strong><br>
+증거가 <span class="math inline">\(d^1,h^0\)</span>이고 <span class="math inline">\(\mathbf X^p=\{D,G\}\)</span>, <span class="math inline">\(\mathbf X^d=\{C,I,S,L,J,H\}\)</span>라고 하자. 각 입자는 <span class="math inline">\((d^1,g)\)</span>를 지정하고 조건부분포 <span class="math inline">\(P(C,I,S,L,J,H\mid g,d^1,h^0)\)</span>를 보존한다. 질의가 <span class="math inline">\(P(j^1\mid d^1,h^0)\)</span>이면 각 입자에서 <span class="math display">\[
+P(j^1\mid g,d^1,h^0)
+\]</span> 를 조건부 네트워크 추론으로 구한 뒤 가중평균한다. <span class="math inline">\(G,D\)</span>를 고정하면 원 네트워크가 단순해지므로 입자당 추론비용이 감소할 수 있다.</p>
+</blockquote>
+</section>
+<section id="형식적-기술" class="level4" data-number="11.4.1.2">
+<h4 data-number="11.4.1.2" class="anchored" data-anchor-id="형식적-기술"><span class="header-section-number">11.4.1.2</span> 형식적 기술</h4>
+<p>증거를</p>
+<p><span class="math display">\[
+\mathbf E^p=\mathbf E\cap\mathbf X^p,
+\qquad
+\mathbf E^d=\mathbf E\cap\mathbf X^d
+\]</span></p>
+<p>로 나누고 관측값을 <span class="math inline">\(\mathbf e^p,\mathbf e^d\)</span>라 하자. <span class="math inline">\(\mathbf E^p\)</span>는 가능도 가중의 강제설정과 가중치에 사용하고, <span class="math inline">\(\mathbf E^d\)</span>는 조건부 추론에서 처리한다.</p>
+<p>임의의 제안분포 <span class="math inline">\(Q(\mathbf x^p)\)</span>에 대해</p>
+<p><span class="math display">\[
+P(\mathbf x^p\mid e)
+=
+\frac{1}{P(e)}
+P(\mathbf x^p,\mathbf e^p)
+P(\mathbf e^d\mid\mathbf x^p,\mathbf e^p).
+\]</span></p>
+<p>따라서 적절한 비정규화 중요도 가중치는</p>
+<p><span class="math display">\[
+w(\mathbf x^p)
+=
+\frac{P(\mathbf x^p,\mathbf e^p)}{Q(\mathbf x^p)}
+P(\mathbf e^d\mid\mathbf x^p,\mathbf e^p).
+\]</span></p>
+<p>이다. 이 가중치의 <span class="math inline">\(Q\)</span>에 대한 평균은 <span class="math inline">\(P(\mathbf e^p,\mathbf e^d)=P(e)\)</span>이므로 앞에서 제시한 정규화된 붕괴 중요도 추정량이 정당화된다.</p>
+</section>
+<section id="제안분포" class="level4" data-number="11.4.1.3">
+<h4 data-number="11.4.1.3" class="anchored" data-anchor-id="제안분포"><span class="header-section-number">11.4.1.3</span> 제안분포</h4>
+<p>붕괴 입자의 제안분포도 표본생성이 쉬워야 하고 <span class="math inline">\(P(\mathbf X^p\mid e)\)</span>와 가까워야 한다. 단순한 전향방식을 사용하려면 <span class="math inline">\(\mathbf X^p\)</span>를 <strong>상향 폐쇄(upwardly closed)</strong> 집합으로 정할 수 있다. 즉, 표본추출 변수의 부모도 모두 <span class="math inline">\(\mathbf X^p\)</span>에 포함되도록 한다. 그러면 위상 순서에 따라 원래 CPD에서 표본을 생성할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제</strong><br>
+Extended Student 모형 예제에서 <span class="math inline">\(\mathbf X^p=\{C,D,I,G\}\)</span>를 선택하면 이는 상향 폐쇄 집합이다. <span class="math inline">\(C,I,G\)</span>는 CPD에서 표본추출하고 <span class="math inline">\(D\)</span>는 관측값 <span class="math inline">\(d^1\)</span>로 고정한다. 가중치는 <span class="math display">\[
+P(d^1\mid c)P(h^0\mid c,d^1,i,g)
+\]</span> 이다. 두 번째 항은 남은 <span class="math inline">\(L,J,S\)</span>를 주변화하는 조건부 추론으로 계산한다.</p>
+</blockquote>
+<p>더 일반적으로 <span class="math inline">\(\mathbf X^p\)</span> 위에 임의의 제안 베이즈 네트워크 <span class="math inline">\(\mathcal G_Q\)</span>를 정의할 수 있다. 제안네트워크의 위상 순서와 CPD를 사용하면 <span class="math inline">\(Q(\mathbf x^p)\)</span>는 연쇄법칙으로 계산된다. 나머지 두 항 <span class="math inline">\(P(\mathbf x^p,\mathbf e^p)\)</span>와 <span class="math inline">\(P(\mathbf e^d\mid\mathbf x^p,\mathbf e^p)\)</span>는 <span class="math inline">\(\mathbf x^p,\mathbf e^p\)</span>로 조건화한 네트워크에서 추론한다. 붕괴 입자의 유용성은 바로 이 조건부 네트워크에서 추론이 가능하다는 가정에 달려 있다.</p>
+</section>
+</section>
+<section id="붕괴-mcmc" class="level3" data-number="11.4.2">
+<h3 data-number="11.4.2" class="anchored" data-anchor-id="붕괴-mcmc"><span class="header-section-number">11.4.2</span> 붕괴 MCMC</h3>
+<p>붕괴 MCMC에서는 연쇄의 상태가 <span class="math inline">\(\mathbf X^p\)</span>의 할당이다. 목표 정상분포는 주변 사후분포 <span class="math inline">\(P_\Phi(\mathbf X^p)\)</span>이다. <span class="math inline">\(X_i\in\mathbf X^p\)</span>에 대한 붕괴 Gibbs 커널은</p>
+<p><span class="math display">\[
+T_i
+\big((\mathbf x_{-i},x_i)\to(\mathbf x_{-i},x_i')\big)
+=
+P_\Phi(x_i'\mid\mathbf x_{-i}),
+\]</span></p>
+<p>이다. 여기서 <span class="math inline">\(\mathbf x_{-i}\)</span>는 <span class="math inline">\(\mathbf X^p-\{X_i\}\)</span>만의 할당이므로, 표준 Gibbs와 달리 <span class="math inline">\(\mathbf X^d\)</span>가 적분되어 있다. 따라서 표준 Gibbs에서 사용한, <span class="math inline">\(X_i\)</span>의 국소 마르코프 블랭킷만으로 계산하는 공식을 그대로 적용할 수 없고, <span class="math inline">\(\mathbf X^d\)</span>에 대한 추론이 필요하다.</p>
+<p>연쇄가 정상상태에 도달한 뒤 <span class="math inline">\(M\)</span>개 입자 <span class="math inline">\(\mathbf x^p[m]\)</span>을 얻으면</p>
+<p><span class="math display">\[
+\widehat{\mathbb E}_{\mathcal D}(f)
+=
+\frac1M\sum_{m=1}^{M}
+\mathbb E_{P_\Phi(\mathbf X^d\mid\mathbf x^p[m])}
+[f(\mathbf x^p[m],\mathbf X^d,e)]
+\]</span></p>
+<p>로 추정한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 학생-과목 이분 그래프의 붕괴 Gibbs</strong><br>
+모든 성적 <span class="math inline">\(G=g\)</span>가 관측되면 남은 <span class="math inline">\(I\)</span>와 <span class="math inline">\(D\)</span>는 이분 마르코프 네트워크를 이룬다. 과목 수가 학생 수보다 적다면 <span class="math inline">\(D\)</span>만 표본추출하고 <span class="math inline">\(I\)</span>를 적분하는 것이 유리하다. 특정 <span class="math inline">\(D=d\)</span>가 주어졌을 때 각 <span class="math inline">\(I_j\)</span>에 관련된 인자들이 단변량 인자로 분해되므로 <span class="math display">\[
+P_\Phi[d](I_1,\ldots,I_n)
+\propto
+\prod_{j,k}\phi_{j,k}(I_j,d_k)
+\]</span> 의 분할함수와 주변분포를 선형시간에 계산할 수 있다. 이를 이용해 <span class="math inline">\(P(D_k\mid d_{-k})\)</span>를 계산하고 Gibbs 갱신한다. 각 입자에서 학생들의 지능 사후분포가 닫힌 형태로 남기 때문에 스마트한 학생 수와 같은 기대값을 낮은 분산으로 구할 수 있다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>학습 보충 - Rao–Blackwell 분산감소</strong><br>
+완전 입자에서 <span class="math inline">\(f(\mathbf X^p,\mathbf X^d)\)</span>를 직접 평가하는 대신 <span class="math display">\[
+\mathbb E[f\mid\mathbf X^p]
+\]</span> 를 사용하면 전분산법칙에 의해 분산이 증가하지 않는다. 일반적으로 <span class="math display">\[
+\operatorname{Var}(\mathbb E[f\mid\mathbf X^p])
+\le
+\operatorname{Var}(f).
+\]</span> 붕괴 방법의 통계적 이점은 이 정리에서 나온다.</p>
+</blockquote>
+<div id="fig-data-association-body-scans" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-data-association-body-scans-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-data-association-body-scans.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-data-association-body-scans-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.9: 세 개의 3차원 인체 스캔 사이에서 대응점을 찾은 결과. 점 번호가 대응관계를 나타낸다.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>Box - 대응관계와 자료연관</strong><br>
+대응문제는 두 객체집합 <span class="math inline">\(U=\{u_1,\ldots,u_k\}\)</span>와 <span class="math inline">\(V=\{v_1,\ldots,v_m\}\)</span> 사이의 매핑을 추정하는 문제이다. 레이더 관측과 항공기, 로봇 센서값과 장애물, 문헌 인용과 실제 논문, 두 영상의 특징점, 이중언어 문장의 단어, 서로 다른 생물종의 상동유전자 등에서 나타난다.</p>
+<p><strong>확률적 표현</strong>: <span class="math inline">\(C_i=j\)</span>는 <span class="math inline">\(u_i\)</span>가 <span class="math inline">\(v_j\)</span>에 대응함을 나타낸다. 각 쌍의 유사도를 나타내는 affinity <span class="math inline">\(w_{i,j}\)</span>를 사용하여 <span class="math inline">\(P(C_i=j)\propto e^{w_{i,j}}\)</span>와 같은 국소항을 정의할 수 있다.<br>
+<strong>상호배제</strong>: 일대일 대응을 요구하면 <span class="math inline">\(C_i=C_{i'}\)</span>를 금지하는 강한 제약이 생긴다. 완전한 상호배제 그래프는 조밀하여 일반 추론이 어렵다. MAP 문제는 최대가중치 이분매칭으로 바뀌며 조합최적화로 효율적으로 풀 수 있다.<br>
+<strong>MCMC</strong>: 단일 변수 Gibbs 이동은 상호배제 제약을 깨므로 부적절하다. 두 대응을 교환하거나 여러 대응을 순환시키는 MH 제안이 필요하다.<br>
+<strong>점진적 BP</strong>: 처음에는 상호배제 제약을 일부 제외하고 loopy BP를 실행한 뒤, 위반확률이 큰 제약만 추가하는 휴리스틱을 사용할 수 있다.<br>
+<strong>미관측 속성</strong>: 대상 <span class="math inline">\(v_j\)</span>의 숨은 속성 <span class="math inline">\(A_j\)</span>가 유사도를 결정한다면 대응변수 <span class="math inline">\(C_i\)</span>는 표본추출하고 <span class="math inline">\(A_j\)</span>의 사후분포는 닫힌 형태로 유지하는 붕괴 MCMC가 자연스럽다.<br>
+<strong>상관된 대응</strong>: 영상이나 3차원 형상에서는 인접 특징점들의 상대기하가 보존되어야 한다. 대응변수 사이의 쌍별 잠재함수로 이 상관을 표현할 수 있으며, 국소적 공간구조 덕분에 loopy BP가 효과적일 수 있다. <span class="quarto-unresolved-ref">?fig-data-association-body-scans에</span> 제시된 결과는 서로 다른 자세와 체형을 가진 인체 스캔에서 이러한 상관을 이용한 대응을 보여준다.</p>
+</blockquote>
+</section>
+</section>
+<section id="결정론적-탐색-방법" class="level2" data-number="11.5">
+<h2 data-number="11.5" class="anchored" data-anchor-id="결정론적-탐색-방법"><span class="header-section-number">11.5</span> 결정론적 탐색 방법</h2>
+<p>무작위 표본추출은 상태를 확률에 비례하여 반복적으로 생성한다. 분포가 매우 치우쳐 소수 상태가 대부분의 질량을 차지하면 같은 상태를 여러 번 뽑아 계산을 낭비할 수 있다. <strong>결정론적 탐색(deterministic search)</strong>은 서로 다른 고확률 상태를 명시적으로 찾아 입자로 사용한다.</p>
+<p>서로 다른 할당집합을</p>
+<p><span class="math display">\[
+\mathcal D=\{\xi[1],\ldots,\xi[M]\}
+\]</span></p>
+<p>이라 하자. 이 입자들이 큰 확률질량을 덮으면 나머지를 무시한 근사가 유용할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - Student 네트워크의 상위 상태</strong><br>
+48개 완전할당 중 상위 10개가 약 82.6%의 확률질량을 차지한다. 95%를 덮으려면 22개, 99%를 덮으려면 33개가 필요하다. 이 예는 분포가 어느 정도 집중되어 있지만 상위 10개만으로 모든 질의가 정확해지는 것은 아님을 보여준다.</p>
+</blockquote>
+<p>고확률 할당의 열거는 첫 번째 할당만 찾으면 MAP 문제이며, 여러 개를 찾는 문제는 <span class="math inline">\(k\)</span>-best MAP 또는 순위화된 MAP과 밀접하다.</p>
+<p>사건 <span class="math inline">\(Z=z\)</span>의 비정규화 질량에 대한 자연스러운 근사는</p>
+<p><span class="math display">\[
+\sum_{m=1}^{M}
+\mathbf1\{z[m]=z\}
+\widetilde P(\xi[m]).
+\]</span></p>
+<p>이다. 표본추출법과 달리 각 입자가 서로 다른 결정론적 상태이므로 그 확률 자체로 가중한다.</p>
+<p>그러나 이 값을 점추정량으로 해석하면 탐색순서에 따른 편향을 제어할 수 없다. 대신 엄밀한 하한과 상한을 계산한다.</p>
+<p><span class="math display">\[
+\sum_{m=1}^{M}
+\mathbf1\{z[m]=z\}\widetilde P(\xi[m])
+\le
+\widetilde P(Z=z)
+\le
+1-
+\sum_{m=1}^{M}
+\mathbf1\{z[m]\ne z\}\widetilde P(\xi[m]).
+\]</span></p>
+<p>정규화된 분포라면 아직 열거하지 않은 질량을</p>
+<p><span class="math display">\[
+\rho=1-\sum_{m=1}^{M}P(\xi[m])
+\]</span></p>
+<p>라 두어 상한을 하한 <span class="math inline">\(+\rho\)</span>로 쓸 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제</strong><br>
+상위 10개 입자 중 <span class="math inline">\(l^1\)</span>을 만족하는 질량은 0.433, 반대 사건의 열거된 질량은 0.393이다. 따라서 <span class="math display">\[
+0.433\le P(l^1)\le1-0.393=0.607.
+\]</span> 참값은 0.502이다. 사건 <span class="math inline">\(i^0,l^1\)</span>에 대해서는 <span class="math display">\[
+0.244\le P(i^0,l^1)\le0.418
+\]</span> 이며 참값은 0.272이다.</p>
+</blockquote>
+<p>조건부확률에 대해 분자와 분모의 경계를 결합할 수 있다. 만약</p>
+<p><span class="math display">\[
+\ell_{y,e}\le P(y,e)\le u_{y,e},
+\qquad
+\ell_e\le P(e)\le u_e
+\]</span></p>
+<p>이면</p>
+<p><span class="math display">\[
+\frac{\ell_{y,e}}{u_e}
+\le
+P(y\mid e)
+\le
+\frac{u_{y,e}}{\ell_e}.
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>예제</strong><br>
+상위 10개 상태로 <span class="math inline">\(P(i^0\mid l^1)\)</span>을 경계화하면 대략 <span class="math display">\[
+0.437\le P(i^0\mid l^1)\le1.014
+\]</span> 가 된다. 확률상한은 최종적으로 1로 절단할 수 있지만 매우 느슨하다. 참값 0.542는 구간 안에 있으나 경계가 실용적이지 않다. 결정론적 탐색은 소수 입자가 거의 모든 질량을 덮는 매우 치우친 분포에서만 강력하다.</p>
+</blockquote>
+<p>붕괴 입자로도 결정론적 탐색을 확장할 수 있다. 입자 <span class="math inline">\(\mathbf x^p[m]\)</span>의 사건 <span class="math inline">\(z\)</span>에 대한 기여는</p>
+<p><span class="math display">\[
+P(\mathbf x^p[m])P(z\mid\mathbf x^p[m])
+\]</span></p>
+<p>이다. 열거된 입자의 합이 하한이고, 열거되지 않은 질량을 전부 사건 <span class="math inline">\(z\)</span>에 배정한 값이 상한이다. 이는 조건화 집합의 모든 값을 열거하지 않고 확률질량이 큰 일부만 점진적으로 처리하는 <strong>bounded conditioning</strong>으로 볼 수 있다.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./10-inference-as-optimization.html" class="pagination-link" aria-label="최적화로서의 추론">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">최적화로서의 추론</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./12-map-inference.html" class="pagination-link" aria-label="MAP 추론">
+        <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">MAP 추론</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

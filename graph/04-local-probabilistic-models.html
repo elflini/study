@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>4&nbsp; 국소 확률 모형 – 확률적 그래프 모형</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./05-template-based-representations.html" rel="next">
+<link href="./03-undirected-graphical-models.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-a522afb83bf8ae494942cf1b0ac9d4c3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-local-probabilistic-models.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">국소 확률 모형</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">확률적 그래프 모형</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">기초 개념</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-bayesian-network-representation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">베이즈 네트워크 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-undirected-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">무방향 그래픽 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-local-probabilistic-models.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">국소 확률 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-template-based-representations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">템플릿 기반 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-gaussian-network-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">가우시안 네트워크 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-exponential-family.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">지수족</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-exact-inference-variable-elimination.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">정확추론: 변수 제거</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-exact-inference-clique-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">정확추론: 클리크 트리</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-inference-as-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">최적화로서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-particle-based-approximate-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">입자 기반 근사추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-map-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">MAP 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-inference-in-hybrid-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">혼합 네트워크에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-inference-in-temporal-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">시간 모형에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-learning-graphical-models-overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">그래프모형 학습 개요</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-parameter-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">모수추정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-structure-learning-bayesian-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">베이지안 네트워크의 구조학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-partially-observed-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">부분관측 자료</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./19-learning-undirected-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">무방향 그래프모형의 학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20-causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">인과성</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21-utilities-and-decisions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">효용과 의사결정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22-structured-decision-problems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">구조화된 의사결정 문제</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./23-epilogue.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">맺음말: 왜 확률적 그래프 모형인가?</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#표-형식-cpd" id="toc-표-형식-cpd" class="nav-link active" data-scroll-target="#표-형식-cpd"><span class="header-section-number">4.1</span> 표 형식 CPD</a></li>
+  <li><a href="#결정적-cpd" id="toc-결정적-cpd" class="nav-link" data-scroll-target="#결정적-cpd"><span class="header-section-number">4.2</span> 결정적 CPD</a>
+  <ul>
+  <li><a href="#표현" id="toc-표현" class="nav-link" data-scroll-target="#표현"><span class="header-section-number">4.2.1</span> 표현</a></li>
+  <li><a href="#결정적-관계가-만드는-독립성" id="toc-결정적-관계가-만드는-독립성" class="nav-link" data-scroll-target="#결정적-관계가-만드는-독립성"><span class="header-section-number">4.2.2</span> 결정적 관계가 만드는 독립성</a></li>
+  </ul></li>
+  <li><a href="#상황특이적-cpd" id="toc-상황특이적-cpd" class="nav-link" data-scroll-target="#상황특이적-cpd"><span class="header-section-number">4.3</span> 상황특이적 CPD</a>
+  <ul>
+  <li><a href="#표현-1" id="toc-표현-1" class="nav-link" data-scroll-target="#표현-1"><span class="header-section-number">4.3.1</span> 표현</a>
+  <ul class="collapse">
+  <li><a href="#트리-cpd" id="toc-트리-cpd" class="nav-link" data-scroll-target="#트리-cpd"><span class="header-section-number">4.3.1.1</span> 트리 CPD</a></li>
+  <li><a href="#다른-표현" id="toc-다른-표현" class="nav-link" data-scroll-target="#다른-표현"><span class="header-section-number">4.3.1.2</span> 다른 표현</a></li>
+  </ul></li>
+  <li><a href="#상황특이적-독립성-판정" id="toc-상황특이적-독립성-판정" class="nav-link" data-scroll-target="#상황특이적-독립성-판정"><span class="header-section-number">4.3.2</span> 상황특이적 독립성 판정</a></li>
+  </ul></li>
+  <li><a href="#인과영향의-독립성" id="toc-인과영향의-독립성" class="nav-link" data-scroll-target="#인과영향의-독립성"><span class="header-section-number">4.4</span> 인과영향의 독립성</a>
+  <ul>
+  <li><a href="#noisy-or-모형" id="toc-noisy-or-모형" class="nav-link" data-scroll-target="#noisy-or-모형"><span class="header-section-number">4.4.1</span> Noisy-OR 모형</a>
+  <ul class="collapse">
+  <li><a href="#이진-자식" id="toc-이진-자식" class="nav-link" data-scroll-target="#이진-자식"><span class="header-section-number">4.4.1.1</span> 이진 자식</a></li>
+  </ul></li>
+  <li><a href="#일반-ici-정식화" id="toc-일반-ici-정식화" class="nav-link" data-scroll-target="#일반-ici-정식화"><span class="header-section-number">4.4.2</span> 일반 ICI 정식화</a></li>
+  <li><a href="#ici가-만드는-독립성" id="toc-ici가-만드는-독립성" class="nav-link" data-scroll-target="#ici가-만드는-독립성"><span class="header-section-number">4.4.3</span> ICI가 만드는 독립성</a></li>
+  </ul></li>
+  <li><a href="#연속형-변수" id="toc-연속형-변수" class="nav-link" data-scroll-target="#연속형-변수"><span class="header-section-number">4.5</span> 연속형 변수</a></li>
+  <li><a href="#조건부-베이즈-네트워크" id="toc-조건부-베이즈-네트워크" class="nav-link" data-scroll-target="#조건부-베이즈-네트워크"><span class="header-section-number">4.6</span> 조건부 베이즈 네트워크</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-local-probabilistic-models" class="quarto-section-identifier"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">국소 확률 모형</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>앞의 두 장에서는 그래프를 이용하여 결합분포의 전역적인 조건부독립 구조를 표현했다. 그래프가 제공하는 독립성 덕분에 고차원 결합분포를 낮은 차원의 조건부확률분포(conditional probability distribution, CPD)나 요인들의 곱으로 분해할 수 있었다. 그러나 지금까지는 각 CPD 내부가 어떻게 표현되는지를 거의 다루지 않았다.</p>
+<p>이 장에서는 CPD 자체의 표현을 자세히 살펴본다. 핵심 질문은 다음과 같다.</p>
+<ul>
+<li>부모가 많을 때 거대한 조건부확률표를 어떻게 피할 수 있는가?</li>
+<li>CPD 내부의 결정적 관계나 반복되는 확률값을 어떻게 명시적으로 나타낼 수 있는가?</li>
+<li>그래프 수준에서는 보이지 않는 추가 독립성을 CPD 구조에서 어떻게 찾아낼 수 있는가?</li>
+<li>여러 원인이 하나의 결과에 미치는 영향을 독립적인 기제로 분해할 수 있는가?</li>
+<li>연속형 변수와 이산형 변수가 함께 있을 때 어떤 국소 확률 모형을 사용할 수 있는가?</li>
+<li>하나의 CPD 자체를 더 작은 베이즈 네트워크로 재귀적으로 표현할 수 있는가?</li>
+</ul>
+<p>CPD는 일반 요인보다 국소 정규화 제약이 강하므로 이 장에서는 주로 CPD를 중심으로 설명한다. 그러나 결정트리, 규칙, 로그선형 함수와 같은 많은 표현은 마르코프 네트워크의 요인에도 적용할 수 있다.</p>
+<section id="표-형식-cpd" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="표-형식-cpd"><span class="header-section-number">4.1</span> 표 형식 CPD</h2>
+<p>변수가 모두 유한한 이산 값을 가지는 경우, 가장 일반적인 CPD 표현은 <strong>표 형식 CPD(table-CPD)</strong> 또는 <strong>조건부확률표(conditional probability table, CPT)</strong>이다. <span class="math inline">\(P(X\mid Pa_X)\)</span>의 표에는 <span class="math inline">\(X\)</span>와 부모 <span class="math inline">\(Pa_X\)</span>의 모든 결합 할당마다 하나의 확률값이 들어간다.</p>
+<p>적법한 CPD가 되려면 모든 값이 음이 아니어야 하며, 각 부모 할당 <span class="math inline">\(pa_X\)</span>에 대해</p>
+<p><span class="math display">\[
+\sum_{x\in Val(X)}P(x\mid pa_X)=1
+\]</span></p>
+<p>을 만족해야 한다.</p>
+<p>표 형식 표현은 표현력 측면에서 완전하다. 모든 이산 CPD를 표로 나타낼 수 있고, 뒤에서 다룰 추론 알고리즘에서도 자연스럽게 사용할 수 있다. 이러한 장점 때문에 CPT가 베이즈 네트워크의 필수 구성요소인 것처럼 여겨지기도 한다. 그러나 표 형식 표현에는 중요한 약점이 있다.</p>
+<p>첫째, 연속형 변수처럼 값공간이 무한하면 모든 조건부확률을 표에 저장할 수 없다. 둘째, 이산형 변수에서도 부모 수가 증가하면 표 크기가 지수적으로 커진다. <span class="math inline">\(X\)</span>와 부모들의 모든 결합상태를 저장하는 단순한 표의 항목 수는</p>
+<p><span class="math display">\[
+|Val(Pa_X)|\,|Val(X)|
+\]</span></p>
+<p>이다. 이진 자식과 이진 부모를 가정하면 부모가 5개일 때 부모 조합은 <span class="math inline">\(2^5=32\)</span>개이고, 부모가 10개이면 <span class="math inline">\(2^{10}=1{,}024\)</span>개이다. 각 부모 조합마다 자식분포를 별도로 지정해야 한다.</p>
+<p>의료 진단 모형에서 발열(Fever)이 10개의 질환에 의존한다고 하자. 완전한 CPT를 전문가에게서 얻으려면 “질환 A는 있고 질환 B는 없고 …일 때 고열 확률은 얼마인가?”와 같은 질문을 1,024개의 부모 조합에 대해 반복해야 한다. 실제 전문가 지식 유도에서는 현실적으로 불가능하다.</p>
+<p>더 근본적인 문제는 CPT가 CPD 내부의 규칙성을 무시한다는 점이다. 예를 들어 특정 질환 A가 존재하면 다른 질환의 존재 여부와 무관하게 발열이 거의 확실할 수 있다. 이 경우 A가 참인 모든 부모 조합에서 같은 조건부분포를 사용하지만, 표는 동일한 값을 여러 번 반복한다.</p>
+<blockquote class="blockquote">
+<p><strong>핵심 관찰</strong><br>
+CPD는 모든 <span class="math inline">\((x,pa_X)\)</span>에 대해 <span class="math inline">\(P(x\mid pa_X)\)</span>를 반환해야 하지만, 그 값을 반드시 모두 나열할 필요는 없다. CPD는 “표”가 아니라 입력 <span class="math inline">\((x,pa_X)\)</span>를 받아 확률을 반환하는 <strong>함수</strong>로 생각할 수 있다. 이 함수를 암묵적이고 구조적인 방식으로 표현하면 저장공간, 지식유도, 학습 및 추론 비용을 크게 줄일 수 있다.</p>
+</blockquote>
+</section>
+<section id="결정적-cpd" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="결정적-cpd"><span class="header-section-number">4.2</span> 결정적 CPD</h2>
+<section id="표현" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="표현"><span class="header-section-number">4.2.1</span> 표현</h3>
+<p>가장 단순한 비표 형식 CPD는 자식변수 <span class="math inline">\(X\)</span>가 부모의 결정적 함수인 경우이다. 함수</p>
+<p><span class="math display">\[
+f:Val(Pa_X)\rightarrow Val(X)
+\]</span></p>
+<p>가 존재하여</p>
+<p><span class="math display">\[
+P(x\mid pa_X)=
+\begin{cases}
+1,&amp;x=f(pa_X),\\
+0,&amp;\text{그 밖의 경우}
+\end{cases}
+\]</span></p>
+<p>이면 <span class="math inline">\(P(X\mid Pa_X)\)</span>를 <strong>결정적 CPD(deterministic CPD)</strong>라고 한다.</p>
+<p>이진 변수에서는 <span class="math inline">\(X\)</span>가 부모들의 OR, AND, XOR일 수 있다. 연속형 변수에서는 <span class="math inline">\(X=Y+Z\)</span> 또는 <span class="math inline">\(X=2Y-3Z+1\)</span>과 같은 관계를 사용할 수 있다. 이 표현이 얼마나 간결한지는 모형 언어가 어떤 함수족을 지원하는가에 달려 있다. 논리 OR와 AND만 지원하는 언어에서는 다른 함수를 보조노드를 이용해 조합하거나 표로 직접 지정해야 한다. 연속형 모형에서도 선형함수만 허용할 수도 있고, <span class="math inline">\(\sin(y+e^z)\)</span> 같은 임의의 비선형함수를 허용할 수도 있다.</p>
+<p>결정적 관계는 기계, 전자회로, 소프트웨어와 같이 설계 규칙이 명확한 인공 시스템에서 자연스럽게 나타난다. 정상적인 OR 게이트의 출력은 입력의 결정적 OR이다. 그러나 생물학과 의학 같은 자연 영역에서도 결정적 또는 거의 결정적인 관계가 존재한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 유전자형과 혈액형</strong><br>
+한 사람은 특정 유전자에 대해 두 개의 대립유전자 <span class="math inline">\(G_1,G_2\)</span>를 가진다. ABO 혈액형 유전자의 값은 <span class="math inline">\(a,b,o\)</span> 중 하나이고, 표현형 혈액형 <span class="math inline">\(T\)</span>는 다음 결정적 함수로 나타낼 수 있다. <span class="math display">\[
+T=
+\begin{cases}
+ab,&amp;G_1,G_2\text{ 중 하나가 }a\text{이고 다른 하나가 }b,\\
+a,&amp;\{G_1,G_2\}\subseteq\{a,o\}\text{이고 적어도 하나가 }a,\\
+b,&amp;\{G_1,G_2\}\subseteq\{b,o\}\text{이고 적어도 하나가 }b,\\
+o,&amp;G_1=o,\;G_2=o.
+\end{cases}
+\]</span> 혈액형 표현형은 두 대립유전자 조합에 의해 결정된다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - 보조 결정변수로 부모 수 줄이기</strong><br>
+자동차의 네 타이어가 펑크 났는지를 <span class="math inline">\(T_1,\ldots,T_4\)</span>로 나타내고, 조향(Steering), 승차감(Ride) 등이 어느 타이어든 펑크 나면 영향을 받는다고 하자. 모든 <span class="math inline">\(T_i\)</span>를 조향과 승차감의 부모로 연결하면 각 CPD의 부모 수가 커진다. 대신 <span class="math display">\[
+FlatTire=T_1\lor T_2\lor T_3\lor T_4
+\]</span> 라는 결정적 보조변수를 추가하고, 조향과 승차감은 <span class="math inline">\(FlatTire\)</span>에만 직접 의존하도록 만들 수 있다. 이는 의미를 보존하면서 각 CPD의 차수를 줄인다.</p>
+</blockquote>
+</section>
+<section id="결정적-관계가-만드는-독립성" class="level3" data-number="4.2.2">
+<h3 data-number="4.2.2" class="anchored" data-anchor-id="결정적-관계가-만드는-독립성"><span class="header-section-number">4.2.2</span> 결정적 관계가 만드는 독립성</h3>
+<p>결정적 구조를 명시하면 압축 외에도 추가 독립성을 발견할 수 있다. 조건부독립성은 본래 확률값의 등식으로 정의되지만, 그래프와 CPD의 구조를 이용하면 수치값을 모두 확인하지 않고도 특정 독립성을 보장할 수 있다.</p>
+<p><img src="figures/fig-deterministic-cpd.svg" id="fig-deterministic-cpd" class="img-fluid" alt="Figure 삽입 위치"> &gt; <strong>예제</strong><br>
+&gt; <span class="quarto-unresolved-ref">?fig-deterministic-cpd에서</span> <span class="math inline">\(C\)</span>가 <span class="math inline">\(A,B\)</span>의 결정적 함수라고 하자. <span class="math inline">\(A,B\)</span>를 관측하면 <span class="math inline">\(C\)</span>의 값도 완전히 결정된다. 따라서 <span class="math inline">\(C\)</span>를 사실상 관측한 것과 같고, &gt; <span class="math display">\[
+&gt; (D\perp E\mid A,B)
+&gt; \]</span> &gt; 가 성립한다. 일반적인 확률적 CPD였다면 <span class="math inline">\(A,B\)</span>만 조건화해서는 <span class="math inline">\(D\)</span>와 <span class="math inline">\(E\)</span>가 d-분리되지 않는다.</p>
+<p>이 직관을 d-분리에 반영하려면 관측집합 <span class="math inline">\(\mathbf Z\)</span>로부터 값이 결정되는 모든 결정변수를 반복적으로 추가하면 된다.</p>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - 결정적 CPD가 있을 때의 분리 판정</strong></p>
+<pre class="text"><code>det-sep(G, D, X, Y, Z)
+  Z+ &lt;- Z
+  while 다음을 만족하는 Xi가 존재:
+      (1) Xi는 결정적 CPD를 갖는다(Xi in D)
+      (2) Pa(Xi) subset Z+
+    Z+ &lt;- Z+ union {Xi}
+  return d-sep_G(X; Y | Z+)</code></pre>
+<p>결정적 부모가 모두 관측된 노드는 그 값도 관측된 것으로 간주하고, 더 이상 새 결정노드가 추가되지 않을 때까지 폐포를 계산한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정리 - 결정적 분리의 건전성</strong><br>
+네트워크 구조 <span class="math inline">\(G\)</span>, 결정변수 집합 <span class="math inline">\(\mathbf D\)</span>, 변수집합 <span class="math inline">\(\mathbf X,\mathbf Y,\mathbf Z\)</span>가 있다고 하자. 앞의 결정적 분리 알고리즘이 <span class="math inline">\(\mathbf X\)</span>와 <span class="math inline">\(\mathbf Y\)</span>가 <span class="math inline">\(\mathbf Z\)</span>에 의해 결정적으로 분리된다고 판정하면, <span class="math inline">\(G\)</span>의 국소 독립성을 만족하고 <span class="math inline">\(\mathbf D\)</span>의 각 변수가 부모의 결정적 함수인 모든 분포 <span class="math inline">\(P\)</span>에 대해 <span class="math display">\[
+P\models(\mathbf X\perp\mathbf Y\mid\mathbf Z)
+\]</span> 가 성립한다.</p>
+</blockquote>
+<p>이 절차는 그래프 구조와 “어떤 노드가 결정적인가”라는 정보만으로 보장되는 독립성을 모두 포착한다.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 구조적 완전성의 한계</strong><br>
+<code>det-sep</code>가 거짓을 반환한다면, <span class="math inline">\(G\)</span>의 국소 독립성과 지정된 결정적 CPD 조건을 만족하지만 <span class="math display">\[
+P\not\models(\mathbf X\perp\mathbf Y\mid\mathbf Z)
+\]</span> 인 분포를 구성할 수 있다. 즉, 구체적인 결정함수의 형태를 보지 않고서는 더 많은 독립성을 일반적으로 보장할 수 없다.</p>
+</blockquote>
+<p>특정 결정함수의 성질을 알면 추가 독립성을 얻을 수 있다.</p>
+<p><img src="figures/fig-deterministic-function-independence.svg" id="fig-deterministic-function-independence" class="img-fluid" alt="Figure 삽입 위치"> &gt; <strong>예제 - XOR의 역결정성</strong><br>
+&gt; <span class="quarto-unresolved-ref">?fig-deterministic-function-independence에서</span> <span class="math inline">\(C=A\oplus B\)</span>라 하자. <span class="math inline">\(B\)</span>와 <span class="math inline">\(C\)</span>를 알면 <span class="math inline">\(A\)</span>를 정확히 복원할 수 있다. 따라서 &gt; <span class="math display">\[
+&gt; (D\perp E\mid B,C)
+&gt; \]</span> &gt; 와 같이 단순한 “자식은 부모에 의해 결정된다”는 사실만으로는 나오지 않는 독립성을 얻을 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - OR와 값 수준 독립성</strong><br>
+<span class="quarto-unresolved-ref">?fig-deterministic-cpd에서</span> <span class="math inline">\(C=A\lor B\)</span>라고 하자. <span class="math inline">\(A=a^1\)</span>이면 <span class="math inline">\(B\)</span>와 무관하게 <span class="math inline">\(C=c^1\)</span>이므로 <span class="math display">\[
+P(D\mid B,a^1)=P(D\mid a^1)
+\]</span> 이다. 반면 <span class="math inline">\(A=a^0\)</span>이면 <span class="math inline">\(C\)</span>는 <span class="math inline">\(B\)</span>에 따라 달라지므로 같은 독립성이 성립하지 않는다. 독립성이 변수 전체가 아니라 특정 값의 맥락에서만 성립한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정의 - 상황특이적 독립성</strong><br>
+서로 겹치지 않는 변수집합 <span class="math inline">\(\mathbf X,\mathbf Y,\mathbf Z\)</span>, 맥락변수 집합 <span class="math inline">\(\mathbf C\)</span>, 특정 할당 <span class="math inline">\(\mathbf c\in Val(\mathbf C)\)</span>가 있다고 하자. 양의 확률을 갖는 관련 할당에 대해 <span class="math display">\[
+P(\mathbf X\mid\mathbf Y,\mathbf Z,\mathbf c)
+=P(\mathbf X\mid\mathbf Z,\mathbf c)
+\]</span> 이면 <span class="math inline">\(\mathbf X\)</span>와 <span class="math inline">\(\mathbf Y\)</span>가 <span class="math inline">\(\mathbf Z\)</span> 및 맥락 <span class="math inline">\(\mathbf c\)</span> 아래에서 <strong>상황특이적으로 독립(context-specific independence, CSI)</strong>이라고 하며 <span class="math display">\[
+(\mathbf X\perp_c\mathbf Y\mid\mathbf Z,\mathbf c)
+\]</span> 로 쓴다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제</strong><br>
+OR 함수에서는 다음과 같은 CSI가 나타난다. - <span class="math inline">\(A=a^1\)</span>이면 <span class="math inline">\((C\perp_c B\mid a^1)\)</span>이고, 그 결과 <span class="math inline">\((D\perp_c B\mid a^1)\)</span>이다. - <span class="math inline">\(C=c^0\)</span>이면 반드시 <span class="math inline">\(A=a^0,B=b^0\)</span>이므로 <span class="math inline">\((A\perp_c B\mid c^0)\)</span> 및 <span class="math inline">\((D\perp_c E\mid c^0)\)</span>이다. - <span class="math inline">\(C=c^1,B=b^0\)</span>이면 <span class="math inline">\(A=a^1\)</span>이므로 <span class="math inline">\((D\perp_c E\mid b^0,c^1)\)</span>이다.</p>
+</blockquote>
+<p>CSI는 표 형식 CPD에도 존재할 수 있지만, 표에서는 실제 수치 항목들을 비교해야만 드러난다. 결정함수, 트리 또는 규칙으로 구조를 명시하면 정성적 추론만으로 CSI를 발견할 수 있다.</p>
+</section>
+</section>
+<section id="상황특이적-cpd" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="상황특이적-cpd"><span class="header-section-number">4.3</span> 상황특이적 CPD</h2>
+<section id="표현-1" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="표현-1"><span class="header-section-number">4.3.1</span> 표현</h3>
+<p>결정적 관계가 아니더라도 여러 부모 맥락에서 동일한 자식분포가 반복되는 경우가 많다.</p>
+<p><img src="figures/fig-student-job-network.svg" id="fig-student-job-network" class="img-fluid" alt="Figure 삽입 위치"> &gt; <strong>예제 - 채용 제안 CPD</strong><br>
+&gt; Student 예제에 Acme Consulting의 채용 제안 여부 <span class="math inline">\(J\)</span>와 지원 여부 <span class="math inline">\(A\)</span>를 추가한다. <span class="math inline">\(J\)</span>는 지원 여부, SAT 점수 <span class="math inline">\(S\)</span>, 추천서 <span class="math inline">\(L\)</span>에 의존한다. 그러나 학생이 지원하지 않은 <span class="math inline">\(A=a^0\)</span> 맥락에서는 회사가 SAT와 추천서를 볼 수 없으므로 &gt; <span class="math display">\[
+&gt; P(J\mid a^0,s,l)
+&gt; \]</span> &gt; 는 모든 <span class="math inline">\(s,l\)</span>에서 동일해야 한다. 또한 지원했고 SAT가 높은 <span class="math inline">\(A=a^1,S=s^1\)</span> 맥락에서는 SAT만으로 바로 제안한다고 가정하면 추천서 값과 무관하여 &gt; <span class="math display">\[
+&gt; P(J\mid a^1,s^1,l^1)=P(J\mid a^1,s^1,l^0)
+&gt; \]</span> &gt; 이다.</p>
+<p>이처럼 부분 부모할당만으로 나머지 부모가 무관해지는 맥락을 트리나 규칙으로 표현할 수 있다.</p>
+<section id="트리-cpd" class="level4" data-number="4.3.1.1">
+<h4 data-number="4.3.1.1" class="anchored" data-anchor-id="트리-cpd"><span class="header-section-number">4.3.1.1</span> 트리 CPD</h4>
+<p>트리 CPD에서는 내부노드가 부모변수에 대한 검사를 나타내고, 각 가지가 해당 변수값을 나타내며, 잎에는 자식변수의 분포가 저장된다.</p>
+<p><img src="figures/fig-tree-cpd-job.svg" id="fig-tree-cpd-job" class="img-fluid" alt="Figure 삽입 위치"> &gt; <strong>예제</strong><br>
+&gt; <span class="math inline">\(P(J\mid a^1,s^1,l^0)\)</span>를 구하려면 루트에서 <span class="math inline">\(A=a^1\)</span> 가지를 따라가고, 다음 <span class="math inline">\(S=s^1\)</span> 가지를 따라 잎에 도달한다. 그 잎의 분포가 <span class="math inline">\((P(j^0),P(j^1))=(0.1,0.9)\)</span>라면 해당 조건부확률을 사용한다. 이 경로에서는 <span class="math inline">\(L\)</span>을 검사하지 않으므로 SAT가 높은 맥락에서 추천서는 무관하다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 트리 CPD</strong><br>
+변수 <span class="math inline">\(X\)</span>의 트리 CPD는 루트가 있는 트리이다. - 각 잎 t-노드는 <span class="math inline">\(X\)</span>에 대한 하나의 확률분포로 표시된다. - 각 내부 t-노드는 어떤 부모변수 <span class="math inline">\(Z\in Pa_X\)</span>로 표시된다. - 내부노드의 각 자식 가지는 서로 다른 값 <span class="math inline">\(Z=z_i\)</span>에 대응한다. - 루트에서 잎까지의 경로를 <strong>가지(branch)</strong>라 한다. - 한 가지에서 같은 부모변수를 두 번 검사하지 않는다. - 가지에서 만난 변수값들의 집합을 그 가지가 유도하는 <strong>부모 맥락(parent context)</strong>이라고 한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제</strong><br>
+<span class="quarto-unresolved-ref">?fig-tree-cpd-job의</span> 네 가지는 <span class="math inline">\(\langle a^0\rangle\)</span>, <span class="math inline">\(\langle a^1,s^1\rangle\)</span>, <span class="math inline">\(\langle a^1,s^0,l^1\rangle\)</span>, <span class="math inline">\(\langle a^1,s^0,l^0\rangle\)</span>의 네 부모 맥락을 만든다. 완전 CPT는 8개의 부모 조합을 구분하지만 트리는 네 개의 서로 다른 자식분포만 저장하므로 이진 <span class="math inline">\(J\)</span>에 필요한 독립 모수도 8개에서 4개로 줄어든다.</p>
+</blockquote>
+<p>트리 CPD는 다음과 같은 상황에 특히 자연스럽다.</p>
+<ul>
+<li>비가 와도 밖에 있을 때만 젖는 경우</li>
+<li>온도계가 정상일 때만 실제 온도에 의존하는 경우</li>
+<li>여러 후보 중 실제로 선택된 하나의 변수만 결과에 영향을 주는 경우</li>
+<li>장치의 구성 또는 행동에 따라 유효한 부모집합이 달라지는 경우</li>
+</ul>
+<p><img src="figures/fig-one-letter-multiplexer.svg" id="fig-one-letter-multiplexer" class="img-fluid" alt="Figure 삽입 위치"> &gt; <strong>예제 - 선택에 따라 달라지는 부모</strong><br>
+&gt; George가 두 추천서 <span class="math inline">\(L_1,L_2\)</span> 중 하나를 선택해 제출하고, 선택변수 <span class="math inline">\(C\)</span>가 어떤 추천서를 사용했는지 나타낸다고 하자. <span class="math inline">\(J\)</span>는 형식적으로 <span class="math inline">\(C,L_1,L_2\)</span> 모두의 자식이지만, <span class="math inline">\(C=c^1\)</span>이면 <span class="math inline">\(L_1\)</span>만 관련되고 <span class="math inline">\(C=c^2\)</span>이면 <span class="math inline">\(L_2\)</span>만 관련된다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 멀티플렉서 CPD</strong><br>
+<span class="math inline">\(Val(A)=\{1,\ldots,k\}\)</span>이고 <span class="math display">\[
+P(Y\mid a,Z_1,\ldots,Z_k)=\mathbf 1\{Y=Z_a\}
+\]</span> 이면 <span class="math inline">\(P(Y\mid A,Z_1,\ldots,Z_k)\)</span>를 <strong>멀티플렉서 CPD(multiplexer CPD)</strong>라고 한다. <span class="math inline">\(A\)</span>는 <strong>선택변수(selector variable)</strong>이다. <span class="math inline">\(Y\)</span>는 <span class="math inline">\(A\)</span>가 지정한 부모 <span class="math inline">\(Z_a\)</span>의 값을 복사한다.</p>
+</blockquote>
+<p>OneLetter 예제에서는 <span class="math inline">\(C\)</span>가 선택변수이고 새 변수 <span class="math inline">\(L\)</span>이 <span class="math inline">\(L_1,L_2\)</span> 중 선택된 추천서 값을 복사하도록 한 뒤 <span class="math inline">\(J\)</span>는 <span class="math inline">\(L\)</span>에만 의존하게 만들 수 있다. 이런 구조는 센서의 자료연결(data association), 객체 대응(correspondence), 문서 속 이름의 실세계 객체 식별(identity resolution)에서도 사용된다.</p>
+<blockquote class="blockquote">
+<p><strong>상자 - 진단 네트워크의 상황특이성</strong><br>
+프린터 장애진단 네트워크에서는 프린터가 로컬 케이블로 연결되었는지 네트워크로 연결되었는지에 따라 출력에 영향을 주는 변수들이 달라진다. 네트워크 연결 맥락에서는 Ethernet 및 네트워크 프린터 상태가 관련되고, 로컬 연결 맥락에서는 로컬 케이블, 포트, 로컬 용지 및 전원 상태가 관련된다. Microsoft Windows 95의 실제 문제해결 네트워크에서 Printer Output의 트리 CPD를 사용함으로써 필요한 모수 수가 145개에서 55개로 줄었다.</p>
+</blockquote>
+<p><img src="figures/fig-printer-diagnostic-tree-cpd.svg" id="fig-printer-diagnostic-tree-cpd" class="img-fluid" alt="Figure 삽입 위치"> #### 규칙 CPD</p>
+<p>트리는 CPD 전체를 하나의 전역 자료구조로 표현한다. 더 세밀한 표현으로 각 CPD 항목을 특정 맥락과 확률값의 규칙으로 나눌 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 규칙</strong><br>
+규칙 <span class="math inline">\(\rho\)</span>는 <span class="math inline">\(\langle\mathbf c;p\rangle\)</span>의 쌍이다. <span class="math inline">\(\mathbf c\)</span>는 변수집합 <span class="math inline">\(\mathbf C\)</span>의 부분할당이고 <span class="math inline">\(p\in[0,1]\)</span>이다. <span class="math inline">\(\mathbf C\)</span>를 규칙의 범위 <span class="math inline">\(Scope[\rho]\)</span>라고 한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - <span class="quarto-unresolved-ref">?fig-tree-cpd-job의</span> 규칙분해</strong><br>
+트리의 각 가지와 <span class="math inline">\(J\)</span>의 각 값에 대해 다음 8개 규칙을 얻는다. <span class="math display">\[
+\begin{aligned}
+\rho_1&amp;:\langle a^0,j^0;0.8\rangle,&amp;
+\rho_2&amp;:\langle a^0,j^1;0.2\rangle,\\
+\rho_3&amp;:\langle a^1,s^0,l^0,j^0;0.9\rangle,&amp;
+\rho_4&amp;:\langle a^1,s^0,l^0,j^1;0.1\rangle,\\
+\rho_5&amp;:\langle a^1,s^0,l^1,j^0;0.4\rangle,&amp;
+\rho_6&amp;:\langle a^1,s^0,l^1,j^1;0.6\rangle,\\
+\rho_7&amp;:\langle a^1,s^1,j^0;0.1\rangle,&amp;
+\rho_8&amp;:\langle a^1,s^1,j^1;0.9\rangle.
+\end{aligned}
+\]</span></p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정의 - 규칙 기반 CPD</strong><br>
+<span class="math inline">\(P(X\mid Pa_X)\)</span>의 규칙 기반 CPD는 다음 조건을 만족하는 규칙집합 <span class="math inline">\(\mathcal R\)</span>이다. 1. 모든 규칙의 범위는 <span class="math inline">\(\{X\}\cup Pa_X\)</span>의 부분집합이다. 2. 모든 완전할당 <span class="math inline">\((x,\mathbf u)\)</span>에 대해 그 할당과 양립 가능한 규칙이 정확히 하나 존재한다. 3. 그 규칙의 값이 <span class="math inline">\(P(X=x\mid Pa_X=\mathbf u)\)</span>를 정의한다. 4. 각 부모할당 <span class="math inline">\(\mathbf u\)</span>에서 <span class="math inline">\(\sum_xP(x\mid\mathbf u)=1\)</span>이다.</p>
+<p>즉 규칙들의 맥락은 상호배타적이고 전체 상태공간을 빠짐없이 포괄해야 한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제 - 트리와 다른 규칙 구조</strong><br>
+<span class="math inline">\(Pa_X=\{A,B,C\}\)</span>인 이진 <span class="math inline">\(X\)</span>에 대해 다음 규칙을 생각하자. <span class="math display">\[
+\begin{array}{ll}
+\langle a^1,b^1,x^0;0.1\rangle,&amp;\langle a^1,b^1,x^1;0.9\rangle,\\
+\langle a^0,c^1,x^0;0.2\rangle,&amp;\langle a^0,c^1,x^1;0.8\rangle,\\
+\langle b^0,c^0,x^0;0.3\rangle,&amp;\langle b^0,c^0,x^1;0.7\rangle,\\
+\langle a^1,b^0,c^1,x^0;0.4\rangle,&amp;\langle a^1,b^0,c^1,x^1;0.6\rangle,\\
+\langle a^0,b^1,c^0;0.5\rangle.&amp;
+\end{array}
+\]</span> 마지막 규칙은 <span class="math inline">\(x^0,x^1\)</span> 모두에 동일하게 적용되어 균등분포 <span class="math inline">\((0.5,0.5)\)</span>를 만든다. 규칙들은 완전 CPT의 8개 부모 조합을 겹치지 않게 덮는다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>명제 - 규칙을 이용한 결합확률 계산</strong><br>
+베이즈 네트워크 <span class="math inline">\(\mathcal B\)</span>의 각 CPD가 규칙집합 <span class="math inline">\(\mathcal R_X\)</span>로 표현되고 모든 규칙을 합친 다중집합을 <span class="math inline">\(\mathcal R\)</span>이라 하자. 완전할당 <span class="math inline">\(\boldsymbol\xi\)</span>의 확률은 <span class="math display">\[
+P(\boldsymbol\xi)=
+\prod_{\langle\mathbf c;p\rangle\in\mathcal R:\,\boldsymbol\xi\sim\mathbf c}p
+\]</span> 로 계산된다. 각 변수의 현재 할당과 양립하는 규칙 하나씩의 확률값을 곱한다.</p>
+</blockquote>
+<p>규칙 표현은 단순한 트리의 분해보다 일반적이다. 모든 트리 CPD는 규칙집합으로 간결하게 바꿀 수 있지만, 모든 규칙집합이 같은 크기의 트리로 표현되지는 않는다.</p>
+<p><img src="figures/fig-rule-cpd-minimal-tree.svg" id="fig-rule-cpd-minimal-tree" class="img-fluid" alt="Figure 삽입 위치"> &gt; <strong>예제</strong><br>
+&gt; 트리에서 루트 변수는 모든 가지, 따라서 모든 규칙에 나타난다. 앞의 트리와 규칙 비교 예제의 규칙집합에는 <span class="math inline">\(A,B,C\)</span> 중 모든 규칙에 나타나는 변수가 없다. 어느 변수를 루트로 선택하더라도 그 변수가 없는 규칙을 여러 가지에 복제해야 한다. 그러므로 <span class="quarto-unresolved-ref">?fig-rule-cpd-minimal-tree처럼</span> 트리가 규칙집합보다 커질 수 있다.</p>
+</section>
+<section id="다른-표현" class="level4" data-number="4.3.1.2">
+<h4 data-number="4.3.1.2" class="anchored" data-anchor-id="다른-표현"><span class="header-section-number">4.3.1.2</span> 다른 표현</h4>
+<p>트리와 규칙은 <span class="math inline">\(Val(\{X\}\cup Pa_X)\)</span>를 여러 영역으로 분할하고 각 영역에 하나의 확률값 또는 분포를 연결한다. 두 표현 모두 “일부 변수에 대한 특정 값 할당”으로 영역을 기술하므로 다음과 같은 영역을 직접 하나로 묶기는 어렵다.</p>
+<ul>
+<li><span class="math inline">\((a^1,s^1,l^0)\)</span>와 <span class="math inline">\((a^1,s^0,l^1)\)</span>만 포함하는 영역</li>
+<li>“SAT가 높거나 추천서가 강하지만 둘 다는 아닌 경우” 같은 논리식 영역</li>
+<li>부모값에 계층적 분류가 있는 경우의 상위 범주 영역</li>
+</ul>
+<p>이를 표현하려면 같은 모수를 가진 여러 가지나 규칙을 반복해야 한다. 더 일반적인 논리식으로 영역을 표현할 수 있지만 식이 복잡해진다. <strong>결정다이어그램(decision diagram)</strong>은 서로 다른 경로가 같은 하위트리를 공유하게 하여 중복을 줄인다. 결정다이어그램은 트리보다 일반적이지만 규칙과는 표현력·간결성 면에서 서로 비교 불가능할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>상자 - 멀티넷과 유사성 네트워크</strong><br>
+<strong>멀티넷(multinet)</strong>은 구별되는 클래스 변수 <span class="math inline">\(C\)</span>를 중심으로, <span class="math inline">\(C=c\)</span>의 각 값마다 별도의 베이즈 네트워크 <span class="math inline">\(\mathcal B_c\)</span>를 정의한다. 구조와 모수가 클래스 값에 따라 달라질 수 있다. 모든 맥락의 간선을 합치면 순환이 생길 수 있지만, 각 맥락에서 활성인 네트워크가 비순환이면 전체 분포는 일관되게 정의될 수 있다.</p>
+<p><strong>유사성 네트워크(similarity network)</strong>는 클래스 값의 일부 집합 <span class="math inline">\(S\subset Val(C)\)</span>를 구분하는 데 필요한 변수만 포함하는 국소 네트워크를 사용한다. 어떤 변수가 <span class="math inline">\(\mathcal B_S\)</span>에 없으면 <span class="math inline">\(C\in S\)</span>의 클래스들 사이에서 그 변수의 분포가 동일하다고 본다. 질환분류에서 Sore-throat가 모든 질환마다 다른 분포를 갖는 대신, “인후통 없음”, “미만성 인후통”, “국소성 인후통” 같은 질환군별로 세 개의 분포만 갖도록 표현할 수 있다. 이는 전문가가 실제로 구분에 필요한 특성에만 집중하게 하고 모수 유도량을 줄인다.</p>
+</blockquote>
+</section>
+</section>
+<section id="상황특이적-독립성-판정" class="level3" data-number="4.3.2">
+<h3 data-number="4.3.2" class="anchored" data-anchor-id="상황특이적-독립성-판정"><span class="header-section-number">4.3.2</span> 상황특이적 독립성 판정</h3>
+<p>구조화된 CPD는 수치 모수를 모두 확인하지 않고도 국소 CSI를 알려 준다.</p>
+<blockquote class="blockquote">
+<p><strong>예제</strong><br>
+<span class="quarto-unresolved-ref">?fig-tree-cpd-job에서</span> <span class="math inline">\(A=a^0\)</span>인 모든 가지는 <span class="math inline">\(S,L\)</span>을 검사하지 않으므로 <span class="math display">\[
+(J\perp_c S,L\mid a^0)
+\]</span> 이다. 또한 <span class="math inline">\(A=a^1,S=s^1\)</span>에서는 <span class="math inline">\(L\)</span>을 검사하지 않으므로 <span class="math display">\[
+(J\perp_c L\mid a^1,s^1)
+\]</span> 이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제</strong><br>
+<span class="quarto-unresolved-ref">?fig-one-letter-multiplexer의</span> 멀티플렉서 구조에서 <span class="math inline">\(C=c^1\)</span>이면 <span class="math inline">\(J\)</span>는 <span class="math inline">\(L_1\)</span>에는 의존하지만 <span class="math inline">\(L_2\)</span>에는 의존하지 않으므로 <span class="math display">\[
+(J\perp_c L_2\mid c^1)
+\]</span> 이다. <span class="math inline">\(c^1\)</span>은 잎까지 가는 완전한 가지 맥락이 아니어도 독립성을 유도한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제</strong><br>
+<span class="quarto-unresolved-ref">?fig-tree-cpd-job에서</span> <span class="math inline">\(S=s^1\)</span>인 가지들을 모두 보면 어느 경우에도 <span class="math inline">\(L\)</span>을 검사하지 않는다. 따라서 <span class="math display">\[
+(J\perp_c L\mid s^1)
+\]</span> 이다.</p>
+</blockquote>
+<p>규칙 기반 표현에서는 특정 맥락과 양립하는 규칙만 남기고 이미 주어진 변수들을 규칙에서 제거하여 같은 판단을 할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 축소 규칙과 축소 규칙집합</strong><br>
+규칙 <span class="math inline">\(\rho=\langle\mathbf c';p\rangle\)</span>와 맥락 <span class="math inline">\(\mathbf c\)</span>가 양립하면 <span class="math inline">\(\rho\sim\mathbf c\)</span>라 한다. <span class="math inline">\(\mathbf c'\)</span>에서 이미 <span class="math inline">\(\mathbf c\)</span>에 포함된 변수들을 제거한 할당을 <span class="math inline">\(\mathbf c''\)</span>라 할 때 <span class="math display">\[
+\rho[\mathbf c]=\langle\mathbf c'';p\rangle
+\]</span> 로 정의한다. 규칙집합 <span class="math inline">\(\mathcal R\)</span>의 축소는 <span class="math display">\[
+\mathcal R[\mathbf c]
+=\{\rho[\mathbf c]:\rho\in\mathcal R,\rho\sim\mathbf c\}
+\]</span> 이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>예제</strong><br>
+앞의 트리와 규칙 비교 예제의 규칙을 <span class="math inline">\(a^1\)</span>로 축소하면 <span class="math inline">\(a^0\)</span>를 요구하는 규칙은 제거되고, <span class="math inline">\(a^1\)</span>이 들어 있던 규칙에서는 <span class="math inline">\(a^1\)</span>이 삭제된다. 남은 규칙은 <span class="math inline">\(B,C,X\)</span>에 대한 조건만 포함한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>명제 - 축소 규칙에서의 국소 CSI</strong><br>
+<span class="math inline">\(\mathcal R\)</span>이 <span class="math inline">\(X\)</span>의 규칙 기반 CPD이고 <span class="math inline">\(\mathbf Y\subseteq Pa_X\)</span>가 맥락 <span class="math inline">\(\mathbf c\)</span>에 포함되지 않는 부모집합이라고 하자. <span class="math inline">\(\mathcal R[\mathbf c]\)</span>의 어떤 규칙도 <span class="math inline">\(\mathbf Y\)</span>를 언급하지 않으면 <span class="math display">\[
+(X\perp_c\mathbf Y\mid Pa_X-\mathbf Y,\mathbf c)
+\]</span> 이다.</p>
+</blockquote>
+<p>이 검사는 규칙 수에 선형인 시간으로 가능하다. 단, 실제 모수의 우연한 동일성에서 생기는 독립성은 놓칠 수 있으며, 국소적인 부모-자식 CSI만 직접 검사한다.</p>
+<p>더 전역적인 CSI를 판정하기 위해 특정 맥락에서 불필요해지는 간선을 제거한 뒤 d-분리를 적용한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제</strong><br>
+Student 채용 네트워크에서 <span class="math inline">\(A=a^0\)</span>이면 Job의 CPD가 SAT와 Letter에 의존하지 않는다. 따라서 <span class="math inline">\(S\to J\)</span>와 <span class="math inline">\(L\to J\)</span>를 제거한 맥락별 그래프에서는 <span class="math inline">\(J\)</span>와 Intelligence가 분리된다. 학생이 지원하지 않았다면 채용 제안 여부를 관측해도 그 학생의 지능에 대한 정보를 얻지 못한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정의 - 허위 간선</strong><br>
+<span class="math inline">\(Y\in Pa_X\)</span>이고 맥락 <span class="math inline">\(\mathbf c\)</span>가 주어졌을 때 <span class="math display">\[
+(X\perp_c Y\mid Pa_X-\{Y\},\mathbf c')
+\]</span> 가 성립하면 <span class="math inline">\(Y\to X\)</span>를 맥락 <span class="math inline">\(\mathbf c\)</span>에서 <strong>허위 간선(spurious edge)</strong>이라고 한다. 여기서 <span class="math inline">\(\mathbf c'\)</span>는 <span class="math inline">\(\mathbf c\)</span>를 <span class="math inline">\(Pa_X\)</span>에 제한한 할당이다. 규칙 CPD에서는 <span class="math inline">\(\mathcal R[\mathbf c]\)</span>에 <span class="math inline">\(Y\)</span>가 전혀 등장하지 않으면 그 간선이 허위이다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - CSI-분리</strong></p>
+<pre class="text"><code>CSI-sep(G, c, X, Y, Z)
+  G' &lt;- G
+  for each edge U -&gt; V in G':
+      if U -&gt; V is spurious in context c:
+          remove U -&gt; V from G'
+  return d-sep_G'(X; Y | Z, c)</code></pre>
+</blockquote>
+<p><img src="figures/fig-csi-reduced-student.svg" id="fig-csi-reduced-student" class="img-fluid" alt="Figure 삽입 위치"> &gt; <strong>정리 - CSI-분리의 건전성</strong><br>
+&gt; <span class="math inline">\(P\)</span>가 <span class="math inline">\(G\)</span>의 국소 독립성을 만족하고, 맥락 <span class="math inline">\(\mathbf c\)</span>에서 앞의 CSI-분리 알고리즘가 <span class="math inline">\(\mathbf X\)</span>와 <span class="math inline">\(\mathbf Y\)</span>를 <span class="math inline">\(\mathbf Z\)</span>에 의해 분리한다고 판정하면 &gt; <span class="math display">\[
+&gt; P\models(\mathbf X\perp_c\mathbf Y\mid\mathbf Z,\mathbf c)
+&gt; \]</span> &gt; 이다.</p>
+<p>CSI-분리는 건전하지만 완전하지 않다.</p>
+<p><img src="figures/fig-one-letter-context-graphs.svg" id="fig-one-letter-context-graphs" class="img-fluid" alt="Figure 삽입 위치"> &gt; <strong>예제 - 경우 나누기가 필요한 독립성</strong><br>
+&gt; <span class="math inline">\(C=c^1\)</span>이면 <span class="math inline">\(L_2\to J\)</span>가 제거되어 <span class="math inline">\((L_1\perp_cL_2\mid J,c^1)\)</span>이고, <span class="math inline">\(C=c^2\)</span>이면 <span class="math inline">\(L_1\to J\)</span>가 제거되어 <span class="math inline">\((L_1\perp_cL_2\mid J,c^2)\)</span>이다. 두 경우를 합치면 &gt; <span class="math display">\[
+&gt; (L_1\perp L_2\mid J,C)
+&gt; \]</span> &gt; 이지만, 빈 맥락에서 한 번의 CSI-분리를 실행하면 두 간선이 모두 남아 이 결론을 얻지 못한다. <span class="math inline">\(C\)</span>의 모든 값에 대해 경우를 나누면 얻을 수 있으나, 조건변수가 많으면 경우 수가 지수적으로 증가한다. 이와 같은 완전한 CSI 판정은 일반적으로 NP-완전이어서, 조건변수가 많을 때 정확한 경우 나누기는 계산적으로 매우 어렵다.</p>
+</section>
+</section>
+<section id="인과영향의-독립성" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="인과영향의-독립성"><span class="header-section-number">4.4</span> 인과영향의 독립성</h2>
+<p>여러 원인 <span class="math inline">\(X_1,\ldots,X_k\)</span>가 결과 <span class="math inline">\(Y\)</span>에 영향을 줄 때 완전 CPT는 모든 원인 조합마다 독립적인 확률을 허용한다. 그러나 많은 영역에서는 각 원인이 별도의 기제로 <span class="math inline">\(Y\)</span>에 영향을 주고, 그 개별 영향들이 단순한 결합함수로 합쳐진다. 이를 <strong>인과독립(causal independence)</strong> 또는 <strong>인과영향 독립성(independence of causal influence, ICI)</strong>이라 한다.</p>
+<section id="noisy-or-모형" class="level3" data-number="4.4.1">
+<h3 data-number="4.4.1" class="anchored" data-anchor-id="noisy-or-모형"><span class="header-section-number">4.4.1</span> Noisy-OR 모형</h3>
+<p>추천서가 강해지는 두 원인으로 수업참여 <span class="math inline">\(Q\)</span>와 좋은 기말논문 <span class="math inline">\(F\)</span>를 생각하자. 참여가 있었어도 교수가 기억하지 못할 수 있고, 논문이 좋아도 필체 때문에 내용을 이해하지 못할 수 있다. 각 원인은 서로 독립적인 성공·실패 기제를 가진다고 가정한다.</p>
+<p><span class="math display">\[
+P(l^1\mid q^1,f^0)=0.8,\qquad
+P(l^1\mid q^0,f^1)=0.9.
+\]</span></p>
+<p>두 원인이 모두 존재하면 참여 기제의 실패확률은 <span class="math inline">\(0.2\)</span>, 논문 기제의 실패확률은 <span class="math inline">\(0.1\)</span>이다. 두 기제가 독립적으로 모두 실패할 확률은 <span class="math inline">\(0.02\)</span>이므로</p>
+<p><span class="math display">\[
+P(l^0\mid q^1,f^1)=0.02,\qquad
+P(l^1\mid q^1,f^1)=0.98.
+\]</span></p>
+<p>CPD는 다음과 같다.</p>
+<p>이를 부모 조합별로 쓰면 다음과 같다.</p>
+<p><span class="math display">\[
+\begin{aligned}
+P(l^0\mid q^0,f^0)&amp;=1.00, &amp; P(l^1\mid q^0,f^0)&amp;=0.00,\\
+P(l^0\mid q^0,f^1)&amp;=0.10, &amp; P(l^1\mid q^0,f^1)&amp;=0.90,\\
+P(l^0\mid q^1,f^0)&amp;=0.20, &amp; P(l^1\mid q^1,f^0)&amp;=0.80,\\
+P(l^0\mid q^1,f^1)&amp;=0.02, &amp; P(l^1\mid q^1,f^1)&amp;=0.98.
+\end{aligned}
+\]</span></p>
+<p><img src="figures/fig-noisy-or-decomposition.svg" id="fig-noisy-or-decomposition" class="img-fluid" alt="Figure 삽입 위치"> <span class="math inline">\(Q'\)</span>는 교수가 참여를 기억했는지, <span class="math inline">\(F'\)</span>는 논문의 가치를 인식했는지를 나타낸다. <span class="math inline">\(L\)</span>은 <span class="math inline">\(Q'\lor F'\)</span>이다. 원인 <span class="math inline">\(X_i\)</span>가 결과를 실제로 활성화할 확률 <span class="math inline">\(\lambda_i\)</span>를 <strong>잡음 모수(noise parameter)</strong>라고 한다.</p>
+<p>아무 원인도 없는데 결과가 우연히 발생할 수 있는 확률 <span class="math inline">\(\lambda_0\)</span>를 <strong>누출확률(leak probability)</strong>이라 한다. 이는 모형에 포함하지 않은 원인들의 종합적 효과로 해석할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - Noisy-OR CPD</strong><br>
+이진 자식 <span class="math inline">\(Y\)</span>와 이진 부모 <span class="math inline">\(X_1,\ldots,X_k\)</span>에 대해 모수 <span class="math inline">\(\lambda_0,\lambda_1,\ldots,\lambda_k\)</span>가 존재하여 <span class="math display">\[
+P(y^0\mid X_1,\ldots,X_k)
+=(1-\lambda_0)
+\prod_{i:X_i=x_i^1}(1-\lambda_i)
+\]</span> 이면 noisy-OR CPD라 한다. 따라서 <span class="math display">\[
+P(y^1\mid X_1,\ldots,X_k)
+=1-(1-\lambda_0)
+\prod_{i:X_i=x_i^1}(1-\lambda_i).
+\]</span> <span class="math inline">\(x_i^1=1,x_i^0=0\)</span>으로 부호화하면 <span class="math display">\[
+P(y^0\mid x_1,\ldots,x_k)
+=(1-\lambda_0)\prod_{i=1}^k(1-\lambda_i)^{x_i}.
+\]</span></p>
+</blockquote>
+<p><img src="figures/fig-noisy-or-curves.svg" id="fig-noisy-or-curves" class="img-fluid" alt="Figure 삽입 위치"> Noisy-OR은 여러 질환이 발열 같은 하나의 증상을 각기 다른 기제로 유발하는 의료 진단에 특히 적합하다. 완전 CPT의 모수 수는 부모 수에 지수적이지만 noisy-OR은 원인별 모수와 누출 모수만 필요하므로 선형이다.</p>
+<blockquote class="blockquote">
+<p><strong>상자 - BN2O 네트워크</strong><br>
+BN2O는 두 층으로 구성된 베이즈 네트워크이다. 위층은 질환 같은 원인 <span class="math inline">\(D_1,\ldots,D_n\)</span>, 아래층은 증상·검사소견 같은 발견 <span class="math inline">\(F_1,\ldots,F_m\)</span>이고, 모든 발견 CPD가 noisy-OR이다. <span class="math display">\[
+P(f_i^0\mid Pa_{F_i})=(1-\lambda_{i0})
+\prod_{D_j\in Pa_{F_i}}(1-\lambda_{ij})^{d_j}.
+\]</span> 각 간선의 <span class="math inline">\(\lambda_{ij}\)</span>는 질환 <span class="math inline">\(D_j\)</span>가 단독으로 발견 <span class="math inline">\(F_i\)</span>를 유발할 확률을 뜻하므로 전문가에게 설명하기 쉽다. 또한 대부분의 임상 사례에서 많은 발견은 음성이다. noisy-OR 자식이 <span class="math inline">\(f_i^0\)</span>로 관측되면 부모 질환들이 조건부독립이 되어 추론이 단순해질 수 있다.</p>
+</blockquote>
+<p><img src="figures/fig-bn2o-network.svg" id="fig-bn2o-network" class="img-fluid" alt="Figure 삽입 위치"> ### 일반화 선형모형</p>
+<section id="이진-자식" class="level4" data-number="4.4.1.1">
+<h4 data-number="4.4.1.1" class="anchored" data-anchor-id="이진-자식"><span class="header-section-number">4.4.1.1</span> 이진 자식</h4>
+<p>또 다른 ICI 표현은 일반화 선형모형이다. 부모들의 효과를 선형점수</p>
+<p><span class="math display">\[
+f(X_1,\ldots,X_k)=w_0+\sum_{i=1}^kw_iX_i
+\]</span></p>
+<p>로 합친 뒤 이를 확률로 변환한다. 의료 예에서는 각 질환이 면역계 부담에 <span class="math inline">\(w_i\)</span>만큼 기여하고, 총 부담이 임계값 부근을 넘을수록 발열확률이 증가한다고 볼 수 있다. <span class="math inline">\(w_0\)</span>는 음의 임계값 역할을 한다.</p>
+<p>대표적인 연결함수는 시그모이드 또는 로짓 함수이다.</p>
+<p><span class="math display">\[
+\operatorname{sigmoid}(z)=\frac{e^z}{1+e^z}.
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>정의 - 로지스틱 CPD</strong><br>
+이진 <span class="math inline">\(Y\)</span>와 수치형 부모 <span class="math inline">\(X_1,\ldots,X_k\)</span>에 대해 <span class="math display">\[
+P(y^1\mid X_1,\ldots,X_k)
+=\operatorname{sigmoid}\left(w_0+\sum_{i=1}^kw_iX_i\right)
+\]</span> 이면 로지스틱 CPD라 한다.</p>
+</blockquote>
+<p>로그오즈는</p>
+<p><span class="math display">\[
+\log\frac{P(y^1\mid\mathbf X)}{P(y^0\mid\mathbf X)}
+=w_0+\sum_iw_iX_i
+\]</span></p>
+<p>이다. <span class="math inline">\(X_j\)</span>가 0에서 1로 변하면 오즈가 <span class="math inline">\(e^{w_j}\)</span>배 된다.</p>
+<p><span class="math display">\[
+\frac{O(\mathbf X_{-j},x_j^1)}{O(\mathbf X_{-j},x_j^0)}=e^{w_j}.
+\]</span></p>
+<p>따라서 <span class="math inline">\(w_j&gt;0\)</span>이면 <span class="math inline">\(y^1\)</span>의 오즈를 증가시키고, <span class="math inline">\(w_j&lt;0\)</span>이면 감소시킨다. Noisy-OR과 달리 억제 효과를 자연스럽게 표현할 수 있고, <span class="math inline">\(w_0\)</span>와 가중치의 규모를 조절하여 임계위치와 전이의 급격함을 바꿀 수 있다.</p>
+<p><img src="figures/fig-logistic-cpd-curves.svg" id="fig-logistic-cpd-curves" class="img-fluid" alt="Figure 삽입 위치"> #### 다범주 자식과 부모</p>
+<p><span class="math inline">\(Y\)</span>가 <span class="math inline">\(m\)</span>개의 값 <span class="math inline">\(y^1,\ldots,y^m\)</span>을 가지면 각 범주에 대한 선형 지지점수를 정의하고 softmax로 정규화한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 다항 로지스틱 CPD</strong><br>
+각 범주 <span class="math inline">\(j\)</span>에 대해 <span class="math display">\[
+\ell_j(X_1,\ldots,X_k)=w_{j0}+\sum_{i=1}^kw_{ji}X_i
+\]</span> 로 두고 <span class="math display">\[
+P(y^j\mid X_1,\ldots,X_k)
+=\frac{\exp\{\ell_j(X_1,\ldots,X_k)\}}
+{\sum_{j'=1}^m\exp\{\ell_{j'}(X_1,\ldots,X_k)\}}
+\]</span> 이면 다항 로지스틱 CPD 또는 softmax CPD라 한다.</p>
+</blockquote>
+<p><img src="figures/fig-multinomial-logistic-cpd.svg" id="fig-multinomial-logistic-cpd" class="img-fluid" alt="Figure 삽입 위치"> 부모 <span class="math inline">\(X_i\)</span>가 <span class="math inline">\(m_i\)</span>개의 범주를 가지면 각 값에 대한 지시변수 <span class="math inline">\(\mathbf1\{X_i=x_i^j\}\)</span>를 만들 수 있다. 이진 자식의 경우</p>
+<p><span class="math display">\[
+P(y^1\mid X)=\operatorname{sigmoid}
+\left(w_0+\sum_{j=1}^mw_j\mathbf1\{X=x^j\}\right).
+\]</span></p>
+<p>한 번에 하나의 지시변수만 1이므로 한 범주의 계수는 기준범주로 흡수할 수 있다. 다항 로짓 CPD는 쌍별 조건부 확률장(CRF)의 조건부분포와도 연결된다.</p>
+</section>
+</section>
+<section id="일반-ici-정식화" class="level3" data-number="4.4.2">
+<h3 data-number="4.4.2" class="anchored" data-anchor-id="일반-ici-정식화"><span class="header-section-number">4.4.2</span> 일반 ICI 정식화</h3>
+<p><img src="figures/fig-causal-influence-independence.svg" id="fig-causal-influence-independence" class="img-fluid" alt="Figure 삽입 위치"> &gt; <strong>정의 - 인과영향 독립성</strong><br>
+&gt; <span class="math inline">\(Y\)</span>의 부모가 <span class="math inline">\(X_1,\ldots,X_k\)</span>일 때, <span class="quarto-unresolved-ref">?fig-causal-influence-independence과</span> 같이 각 <span class="math inline">\(X_i\)</span>가 독립적인 국소 모형 <span class="math inline">\(P(Z_i\mid X_i)\)</span>를 통해 <span class="math inline">\(Z_i\)</span>를 생성하고, <span class="math inline">\(Z\)</span>가 <span class="math inline">\(Z_0,Z_1,\ldots,Z_k\)</span>의 결정함수이며, 마지막으로 <span class="math inline">\(P(Y\mid Z)\)</span>가 주어지는 네트워크 조각으로 CPD를 표현할 수 있으면 ICI를 갖는다고 한다.</p>
+<p>각 원인의 확률적 부분은 다른 원인과 독립적으로 적용되고, 원인 사이의 상호작용은 결정적 결합함수 <span class="math inline">\(f\)</span> 안에서만 일어난다. 그러나 임의로 복잡한 <span class="math inline">\(f\)</span>와 큰 중간상태를 허용하면 모든 CPD를 표현할 수 있어 정의가 너무 일반적이다. 따라서 결합함수에 구조를 제한한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 대칭 분해가능 함수</strong><br>
+이항 연산 <span class="math inline">\(\star\)</span>가 교환법칙과 결합법칙을 만족하고 <span class="math display">\[
+f(x_1,\ldots,x_k)=x_1\star x_2\star\cdots\star x_k
+\]</span> 로 쓸 수 있으면 <span class="math inline">\(f\)</span>를 대칭 분해가능 함수라고 한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정의 - 대칭 ICI와 완전 대칭 ICI</strong><br>
+<span class="quarto-unresolved-ref">?fig-causal-influence-independence에서</span> <span class="math inline">\(Z\)</span>의 결정함수가 대칭 분해가능하면 CPD는 <strong>대칭 ICI</strong>를 갖는다. 모든 <span class="math inline">\(P(Z_i\mid X_i)\)</span>가 같은 형태이면 <strong>완전 대칭 ICI</strong>라고 한다.</p>
+</blockquote>
+<p>Noisy-OR은 <span class="math inline">\(\star=\lor\)</span>이고, 일반화 선형모형은 각 <span class="math inline">\(Z_i=w_iX_i\)</span>와 <span class="math inline">\(\star=+\)</span>를 사용한다. 이 모형들은 인지적으로 자연스럽고 모수 수를 부모 수에 선형으로 줄인다.</p>
+<blockquote class="blockquote">
+<p><strong>상자 - 의료진단의 noisy-max</strong><br>
+Noisy-max는 증상 <span class="math inline">\(Y\)</span>가 단순한 유무가 아니라 없음, 경도, 중등도, 중증 같은 순서형 심각도를 가질 때 사용한다. 각 <span class="math inline">\(Z_i\)</span>는 질환 <span class="math inline">\(X_i\)</span>가 단독으로 유발하는 증상 심각도를 나타내고 <span class="math inline">\(Z=\max_iZ_i\)</span>로 결합한다.</p>
+<p>QMR-DT는 500개 이상의 주요 질환, 약 4,000개의 발견, 40,000개 이상의 질환-발견 연관을 가진 대규모 BN2O 모형이었다. CPCS는 약 500개 변수와 900개 이상의 간선을 포함하고, 질환뿐 아니라 소인과 중간 생리상태를 여러 층으로 표현했다. 완전 CPT로는 약 1억 3,400만 개의 모수가 필요하지만 noisy-OR과 noisy-max를 사용하여 실제 모수는 8,254개였고, 직접 전문가에게서 유도한 모수는 약 560개에 불과했다.</p>
+</blockquote>
+</section>
+<section id="ici가-만드는-독립성" class="level3" data-number="4.4.3">
+<h3 data-number="4.4.3" class="anchored" data-anchor-id="ici가-만드는-독립성"><span class="header-section-number">4.4.3</span> ICI가 만드는 독립성</h3>
+<p><span class="quarto-unresolved-ref">?fig-causal-influence-independence의</span> 확장 네트워크에서는 각 <span class="math inline">\(X_i\)</span>가 <span class="math inline">\(Z_i\)</span>가 주어지면 <span class="math inline">\(Y\)</span> 및 다른 원인과 독립이다. 결합법칙을 이용해 중간변수를 여러 수준으로 분해할 수도 있다. 예를 들어</p>
+<p><span class="math display">\[
+W_1=Z_0\star Z_1\star Z_2,\qquad
+W_2=Z_3\star Z_4,\qquad
+Z=W_1\star W_2
+\]</span></p>
+<p>로 두면 <span class="math inline">\(W_2\)</span>가 주어졌을 때 <span class="math inline">\(X_4\)</span>와 <span class="math inline">\(Y\)</span>가 분리되는 등의 독립성을 얻는다. 이러한 분해는 중간변수의 값공간이 작을 때 추론 효율을 높인다.</p>
+<blockquote class="blockquote">
+<p><strong>명제 - Noisy-OR의 음성 관측 독립성</strong><br>
+<span class="math inline">\(P(Y\mid X_1,\ldots,X_k)\)</span>가 noisy-OR이면 모든 <span class="math inline">\(i\ne j\)</span>에 대해 <span class="math display">\[
+X_i\perp X_j\mid Y=y^0.
+\]</span> 즉 결과가 발생하지 않았다는 음성 관측에서는 원인들이 조건부독립이다. 일반적인 v-구조에서는 자식을 관측하면 부모가 의존하게 되지만, noisy-OR의 특수한 함수구조 때문에 <span class="math inline">\(y^0\)</span> 맥락에서는 반대로 독립성이 유지된다. 이 독립성은 <span class="math inline">\(y^1\)</span>에서는 일반적으로 성립하지 않는 CSI이다.</p>
+</blockquote>
+</section>
+</section>
+<section id="연속형-변수" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="연속형-변수"><span class="header-section-number">4.5</span> 연속형 변수</h2>
+<p>위치, 속도, 온도, 압력과 같은 변수는 연속공간에서 값을 가진다. 연속변수를 미세하게 이산화하면 값 수가 매우 커지고 인접한 값 사이의 연속성 구조를 잃는다. 예를 들어 로봇의 <span class="math inline">\(x,y\)</span> 좌표를 15cm 간격으로 이산화하면 각 좌표가 수천 개의 값을 가질 수 있고 위치 조합은 백만 개를 넘는다.</p>
+<p>베이즈 네트워크의 정의는 변수가 반드시 이산이어야 한다고 요구하지 않는다. 각 부모할당마다 자식에 대한 적법한 분포만 제공하면 된다. 따라서 연속 자식에는 조건부밀도함수를 사용하고, 연속 부모의 무한한 값에 대한 분포를 유한한 모수 함수로 표현할 수 있다.</p>
+<p>가장 널리 쓰이는 연속분포는 가우시안이다. 연속 자식 <span class="math inline">\(Y\)</span>의 평균이 연속 부모의 선형함수이고 분산이 일정하다고 가정할 수 있다.</p>
+<p><span class="math display">\[
+p(Y\mid x)=\mathcal N(-2x+0.9;1).
+\]</span></p>
+<blockquote class="blockquote">
+<p><strong>예제 - 차량의 위치전이</strong><br>
+시간 <span class="math inline">\(t\)</span>의 위치를 <span class="math inline">\(X^{(t)}\)</span>, 속도를 <span class="math inline">\(V^{(t)}\)</span>라 하면 이상적으로 <span class="math display">\[
+X^{(t+1)}=X^{(t)}+V^{(t)}
+\]</span> 이다. 현재 위치가 510m이고 속도가 15m/s이면 다음 위치의 평균은 525m이다. 실제 운동에는 오차가 있으므로 <span class="math display">\[
+X^{(t+1)}\mid X^{(t)}=510,V^{(t)}=15
+\sim\mathcal N(525;5)
+\]</span> 같은 모형을 사용할 수 있다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정의 - 선형 가우시안 CPD</strong><br>
+연속 자식 <span class="math inline">\(Y\)</span>와 연속 부모 <span class="math inline">\(X_1,\ldots,X_k\)</span>에 대해 <span class="math display">\[
+p(Y\mid x_1,\ldots,x_k)
+=\mathcal N\left(\beta_0+\beta_1x_1+\cdots+\beta_kx_k;\sigma^2\right)
+\]</span> 이면 선형 가우시안 CPD라 한다. 벡터로는 <span class="math display">\[
+p(Y\mid\mathbf x)=\mathcal N(\beta_0+\boldsymbol\beta^T\mathbf x;\sigma^2)
+\]</span> 이고, 구조방정식으로는 <span class="math display">\[
+Y=\beta_0+\boldsymbol\beta^T\mathbf X+\varepsilon,
+\qquad\varepsilon\sim\mathcal N(0,\sigma^2)
+\]</span> 이다.</p>
+</blockquote>
+<p>이 모형은 자식의 조건부분산이 부모값에 따라 달라지는 이분산성을 표현하지 못한다. 예를 들어 차량 속도가 빠를수록 다음 위치의 불확실성이 커지는 현상은 표준 선형 가우시안만으로는 나타낼 수 없다. 평균과 분산을 임의의 비선형 함수로 확장할 수 있지만, 선형 가우시안은 단순성, 해석성, 계산 편의성 때문에 매우 널리 사용된다.</p>
+<blockquote class="blockquote">
+<p><strong>상자 - 로봇 운동과 센서 모형</strong><br>
+로봇 위치 <span class="math inline">\(L=(X,Y,\theta)\)</span>의 다음 상태 <span class="math inline">\(L'\)</span>는 현재 위치와 행동 <span class="math inline">\(A\)</span>에 의존한다. 이동거리와 회전오차를 가우시안으로 두면 회전불확실성 때문에 <span class="math inline">\(X',Y'\)</span>의 분포가 바나나 모양이 된다.</p>
+<p>거리센서 <span class="math inline">\(D\)</span>의 측정모형은 두 경우를 결합한다. 지도에 있는 가장 가까운 장애물까지 거리 <span class="math inline">\(o_L\)</span>에서 반사되는 경우는 <span class="math inline">\(P_m(D\mid L)=\mathcal N(o_L;\sigma^2)\)</span>로, 지도에 없는 동적 장애물에서 반사되는 경우는 거리와 함께 감소하는 지수분포 <span class="math inline">\(P_u(D)\)</span>로 나타낸다. 초음파는 레이저보다 분산이 크며, 센서 최대거리에서는 “그 이상”의 측정이 한 값에 누적되어 큰 질량을 가질 수 있다. 최종 <span class="math inline">\(P(D\mid L)\)</span>는 알려진 장애물과 알려지지 않은 장애물의 반사 가능성을 결합한다.</p>
+</blockquote>
+<p><img src="figures/fig-robot-motion-sensor-models.svg" id="fig-robot-motion-sensor-models" class="img-fluid" alt="Figure 삽입 위치"> ### 혼합 모형</p>
+<p>이산형과 연속형 변수가 함께 있는 혼합 베이즈 네트워크에서는 두 종류의 의존성을 다뤄야 한다.</p>
+<ol type="1">
+<li>연속 자식이 이산·연속 부모를 갖는 경우</li>
+<li>이산 자식이 연속·이산 부모를 갖는 경우</li>
+</ol>
+<p>연속 자식 <span class="math inline">\(X\)</span>의 이산 부모값마다 서로 다른 선형 가우시안 모수를 사용하면 된다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 조건부 선형 가우시안 CPD</strong><br>
+연속 자식 <span class="math inline">\(X\)</span>, 이산 부모 <span class="math inline">\(\mathbf U=\{U_1,\ldots,U_m\}\)</span>, 연속 부모 <span class="math inline">\(\mathbf Y=\{Y_1,\ldots,Y_k\}\)</span>가 있다고 하자. 각 <span class="math inline">\(\mathbf u\in Val(\mathbf U)\)</span>에 대해 계수 <span class="math inline">\(a_{\mathbf u,0},\ldots,a_{\mathbf u,k}\)</span>와 분산 <span class="math inline">\(\sigma_{\mathbf u}^2\)</span>가 존재하여 <span class="math display">\[
+p(X\mid\mathbf u,\mathbf y)
+=\mathcal N\left(a_{\mathbf u,0}+\sum_{i=1}^ka_{\mathbf u,i}y_i;\sigma_{\mathbf u}^2\right)
+\]</span> 이면 조건부 선형 가우시안(conditional linear Gaussian, CLG) CPD라 한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정의 - CLG 네트워크</strong><br>
+모든 이산변수는 이산 부모만 가지며, 모든 연속변수는 CLG CPD를 가지는 베이즈 네트워크를 CLG 네트워크라고 한다.</p>
+</blockquote>
+<p>CLG의 결합분포는 이산변수의 각 완전할당마다 하나의 가우시안 성분을 갖는 가우시안 혼합분포가 된다. 성분 가중치는 해당 이산할당의 확률이다. 이산변수 수가 많으면 혼합성분 수가 최악의 경우 지수적으로 증가한다.</p>
+<p>표준 CLG에서는 연속변수가 이산 자식의 부모가 되는 것을 허용하지 않는다. 이산 자식이 연속 부모를 갖는 경우에는 불연속 임계모형보다 로지스틱 또는 softmax CPD가 자연스럽다. 예를 들어 온도 <span class="math inline">\(X\)</span>에 따라 센서 범주 <span class="math inline">\(C\in\{low,medium,high\}\)</span>의 확률이 부드럽게 전환되도록 할 수 있다.</p>
+<p><img src="figures/fig-continuous-parent-softmax.svg" id="fig-continuous-parent-softmax" class="img-fluid" alt="Figure 삽입 위치"> 이산 부모가 추가되면 이산 부모의 각 할당마다 별도의 로지스틱/softmax 계수집합을 둘 수 있다.</p>
+</section>
+<section id="조건부-베이즈-네트워크" class="level2" data-number="4.6">
+<h2 data-number="4.6" class="anchored" data-anchor-id="조건부-베이즈-네트워크"><span class="header-section-number">4.6</span> 조건부 베이즈 네트워크</h2>
+<p>앞 절의 모든 표현은 하나의 CPD를 더 간결하게 나타내는 방법이었다. CPD 자체를 하나의 작은 베이즈 네트워크 조각으로 표현할 수도 있다. 앞에서 살펴본 noisy-OR 분해는 <span class="math inline">\(P(L\mid Q,F)\)</span>를 보조변수 <span class="math inline">\(Q',F'\)</span>와 결정적 OR를 이용한 네트워크로 표현한 예이다.</p>
+<p>이 네트워크 조각은 <span class="math inline">\(Q,F\)</span>의 사전분포를 지정하지 않으므로 완전한 결합 베이즈 네트워크가 아니다. 대신 입력이 주어졌을 때 출력에 대한 조건부분포를 정의한다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 조건부 베이즈 네트워크</strong><br>
+<span class="math inline">\(\mathbf X\)</span>가 입력, <span class="math inline">\(\mathbf Y\)</span>가 출력, <span class="math inline">\(\mathbf Z\)</span>가 내부에 캡슐화된 변수라고 하자. 세 집합은 서로 겹치지 않는다. 조건부 베이즈 네트워크 <span class="math inline">\(\mathcal B\)</span>는 <span class="math inline">\(\mathbf X\cup\mathbf Y\cup\mathbf Z\)</span> 위의 DAG이며, - 입력변수 <span class="math inline">\(\mathbf X\)</span>는 부모가 없다. - <span class="math inline">\(\mathbf Y\cup\mathbf Z\)</span>의 각 변수에는 CPD가 있다. - 조건부분포는 <span class="math display">\[
+P_{\mathcal B}(\mathbf Y,\mathbf Z\mid\mathbf X)
+=\prod_{V\in\mathbf Y\cup\mathbf Z}P(V\mid Pa_V^G)
+\]</span> 로 정의된다. - 출력의 조건부분포는 내부변수를 주변화하여 <span class="math display">\[
+P_{\mathcal B}(\mathbf Y\mid\mathbf X)
+=\sum_{\mathbf Z}P_{\mathcal B}(\mathbf Y,\mathbf Z\mid\mathbf X)
+\]</span> 로 정의한다.</p>
+</blockquote>
+<p>조건부 확률장(CRF)은 이 정의의 무방향 대응물이다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 캡슐화 CPD</strong><br>
+<span class="math inline">\(Y\)</span>와 부모 <span class="math inline">\(X_1,\ldots,X_k\)</span>의 CPD가 <span class="math inline">\(Y\)</span>를 출력, <span class="math inline">\(X_1,\ldots,X_k\)</span>를 입력으로 하는 조건부 베이즈 네트워크로 표현되면 이를 <strong>캡슐화 CPD(encapsulated CPD)</strong>라고 한다.</p>
+</blockquote>
+<p>캡슐화는 표현력 자체를 늘리지는 않는다. 내부 네트워크를 전체 모형에 펼쳐 넣을 수 있기 때문이다. 핵심 이점은 인지적·모듈적 분리이다. 외부에서는 Letter를 Questions와 FinalPaper를 부모로 갖는 하나의 변수로 보고, 내부의 기억 여부나 논문 판독 여부 같은 보조변수를 감출 수 있다.</p>
+<p>복잡한 물리 시스템에서는 이 이점이 더 크다. 컴퓨터를 모형화할 때 하드디스크 내부의 컨트롤러, 디스크 표면, 모터, 헤드의 고장모형을 상위 수준에서 모두 볼 필요가 없다. 하드디스크 모듈은 온도, 연령, 운영체제 상태를 입력으로 받고 작동상태와 용량상태를 출력으로 내보낼 수 있다. 하드디스크 내부에서는 다시 Controller, Surface, Drive-Mechanism이 각각 캡슐화된 하위모형을 가질 수 있다.</p>
+<p><img src="figures/fig-encapsulated-cpd-hierarchy.svg" id="fig-encapsulated-cpd-hierarchy" class="img-fluid" alt="Figure 삽입 위치"> 같은 부품유형은 동일한 캡슐화 CPD 템플릿을 반복 사용할 수 있다. 예를 들어 Surface1부터 Surface4까지는 같은 내부구조를 공유한다. 이러한 템플릿과 재사용 개념이 <strong>객체지향 베이즈 네트워크(object-oriented Bayesian network)</strong>의 기초이다.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./03-undirected-graphical-models.html" class="pagination-link" aria-label="무방향 그래픽 모형">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">무방향 그래픽 모형</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./05-template-based-representations.html" class="pagination-link" aria-label="템플릿 기반 표현">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">템플릿 기반 표현</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

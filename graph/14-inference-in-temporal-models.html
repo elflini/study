@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>14&nbsp; 시간 모형에서의 추론 – 확률적 그래프 모형</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./15-learning-graphical-models-overview.html" rel="next">
+<link href="./13-inference-in-hybrid-networks.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-a522afb83bf8ae494942cf1b0ac9d4c3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./14-inference-in-temporal-models.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">시간 모형에서의 추론</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">확률적 그래프 모형</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">들어가며</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-foundations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">기초 개념</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-bayesian-network-representation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">베이즈 네트워크 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-undirected-graphical-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">무방향 그래픽 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-local-probabilistic-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">국소 확률 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-template-based-representations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">템플릿 기반 표현</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-gaussian-network-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">가우시안 네트워크 모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-exponential-family.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">지수족</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-exact-inference-variable-elimination.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">정확추론: 변수 제거</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-exact-inference-clique-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">정확추론: 클리크 트리</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-inference-as-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">최적화로서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-particle-based-approximate-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">입자 기반 근사추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-map-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">MAP 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-inference-in-hybrid-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">혼합 네트워크에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-inference-in-temporal-models.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">시간 모형에서의 추론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-learning-graphical-models-overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">그래프모형 학습 개요</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-parameter-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">모수추정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-structure-learning-bayesian-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">베이지안 네트워크의 구조학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-partially-observed-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">부분관측 자료</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./19-learning-undirected-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">무방향 그래프모형의 학습</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20-causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">인과성</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21-utilities-and-decisions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">효용과 의사결정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22-structured-decision-problems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">구조화된 의사결정 문제</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./23-epilogue.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">맺음말: 왜 확률적 그래프 모형인가?</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#개요" id="toc-개요" class="nav-link active" data-scroll-target="#개요"><span class="header-section-number">14.1</span> 개요</a></li>
+  <li><a href="#시간-모형의-추론-과제" id="toc-시간-모형의-추론-과제" class="nav-link" data-scroll-target="#시간-모형의-추론-과제"><span class="header-section-number">14.2</span> 시간 모형의 추론 과제</a>
+  <ul>
+  <li><a href="#필터링과-믿음상태" id="toc-필터링과-믿음상태" class="nav-link" data-scroll-target="#필터링과-믿음상태"><span class="header-section-number">14.2.1</span> 필터링과 믿음상태</a></li>
+  <li><a href="#예측" id="toc-예측" class="nav-link" data-scroll-target="#예측"><span class="header-section-number">14.2.2</span> 예측</a></li>
+  <li><a href="#평활화" id="toc-평활화" class="nav-link" data-scroll-target="#평활화"><span class="header-section-number">14.2.3</span> 평활화</a></li>
+  <li><a href="#가장-가능성-높은-궤적" id="toc-가장-가능성-높은-궤적" class="nav-link" data-scroll-target="#가장-가능성-높은-궤적"><span class="header-section-number">14.2.4</span> 가장 가능성 높은 궤적</a></li>
+  </ul></li>
+  <li><a href="#정확추론" id="toc-정확추론" class="nav-link" data-scroll-target="#정확추론"><span class="header-section-number">14.3</span> 정확추론</a>
+  <ul>
+  <li><a href="#상태-관측-모형의-필터링" id="toc-상태-관측-모형의-필터링" class="nav-link" data-scroll-target="#상태-관측-모형의-필터링"><span class="header-section-number">14.3.1</span> 상태-관측 모형의 필터링</a>
+  <ul class="collapse">
+  <li><a href="#예측-또는-시간갱신" id="toc-예측-또는-시간갱신" class="nav-link" data-scroll-target="#예측-또는-시간갱신"><span class="header-section-number">14.3.1.1</span> 예측 또는 시간갱신</a></li>
+  <li><a href="#관측-또는-측정갱신" id="toc-관측-또는-측정갱신" class="nav-link" data-scroll-target="#관측-또는-측정갱신"><span class="header-section-number">14.3.1.2</span> 관측 또는 측정갱신</a></li>
+  </ul></li>
+  <li><a href="#클리크-트리-전파로서의-필터링" id="toc-클리크-트리-전파로서의-필터링" class="nav-link" data-scroll-target="#클리크-트리-전파로서의-필터링"><span class="header-section-number">14.3.2</span> 클리크 트리 전파로서의 필터링</a></li>
+  <li><a href="#일반-dbn의-템플릿-클리크-트리" id="toc-일반-dbn의-템플릿-클리크-트리" class="nav-link" data-scroll-target="#일반-dbn의-템플릿-클리크-트리"><span class="header-section-number">14.3.3</span> 일반 DBN의 템플릿 클리크 트리</a></li>
+  <li><a href="#얽힘" id="toc-얽힘" class="nav-link" data-scroll-target="#얽힘"><span class="header-section-number">14.3.4</span> 얽힘</a></li>
+  </ul></li>
+  <li><a href="#근사추론" id="toc-근사추론" class="nav-link" data-scroll-target="#근사추론"><span class="header-section-number">14.4</span> 근사추론</a>
+  <ul>
+  <li><a href="#핵심-아이디어" id="toc-핵심-아이디어" class="nav-link" data-scroll-target="#핵심-아이디어"><span class="header-section-number">14.4.1</span> 핵심 아이디어</a>
+  <ul class="collapse">
+  <li><a href="#제한된-이력-갱신" id="toc-제한된-이력-갱신" class="nav-link" data-scroll-target="#제한된-이력-갱신"><span class="header-section-number">14.4.1.1</span> 제한된 이력 갱신</a></li>
+  <li><a href="#오차의-장기-거동" id="toc-오차의-장기-거동" class="nav-link" data-scroll-target="#오차의-장기-거동"><span class="header-section-number">14.4.1.2</span> 오차의 장기 거동</a></li>
+  </ul></li>
+  <li><a href="#인자화-믿음상태-방법" id="toc-인자화-믿음상태-방법" class="nav-link" data-scroll-target="#인자화-믿음상태-방법"><span class="header-section-number">14.4.2</span> 인자화 믿음상태 방법</a></li>
+  <li><a href="#입자필터" id="toc-입자필터" class="nav-link" data-scroll-target="#입자필터"><span class="header-section-number">14.4.3</span> 입자필터</a>
+  <ul class="collapse">
+  <li><a href="#순진한-가능도-가중법" id="toc-순진한-가능도-가중법" class="nav-link" data-scroll-target="#순진한-가능도-가중법"><span class="header-section-number">14.4.3.1</span> 순진한 가능도 가중법</a></li>
+  <li><a href="#부트스트랩-필터" id="toc-부트스트랩-필터" class="nav-link" data-scroll-target="#부트스트랩-필터"><span class="header-section-number">14.4.3.2</span> 부트스트랩 필터</a></li>
+  <li><a href="#순차-중요도-표본추출과-최적-제안분포" id="toc-순차-중요도-표본추출과-최적-제안분포" class="nav-link" data-scroll-target="#순차-중요도-표본추출과-최적-제안분포"><span class="header-section-number">14.4.3.3</span> 순차 중요도 표본추출과 최적 제안분포</a></li>
+  <li><a href="#입자-선택과-재표본화" id="toc-입자-선택과-재표본화" class="nav-link" data-scroll-target="#입자-선택과-재표본화"><span class="header-section-number">14.4.3.4</span> 입자 선택과 재표본화</a></li>
+  <li><a href="#확장-방법" id="toc-확장-방법" class="nav-link" data-scroll-target="#확장-방법"><span class="header-section-number">14.4.3.5</span> 확장 방법</a></li>
+  </ul></li>
+  <li><a href="#결정론적-탐색" id="toc-결정론적-탐색" class="nav-link" data-scroll-target="#결정론적-탐색"><span class="header-section-number">14.4.4</span> 결정론적 탐색</a></li>
+  </ul></li>
+  <li><a href="#혼합-동적-베이즈-네트워크" id="toc-혼합-동적-베이즈-네트워크" class="nav-link" data-scroll-target="#혼합-동적-베이즈-네트워크"><span class="header-section-number">14.5</span> 혼합 동적 베이즈 네트워크</a>
+  <ul>
+  <li><a href="#연속-모형" id="toc-연속-모형" class="nav-link" data-scroll-target="#연속-모형"><span class="header-section-number">14.5.1</span> 연속 모형</a>
+  <ul class="collapse">
+  <li><a href="#kalman-filter" id="toc-kalman-filter" class="nav-link" data-scroll-target="#kalman-filter"><span class="header-section-number">14.5.1.1</span> Kalman filter</a></li>
+  <li><a href="#비선형-시스템" id="toc-비선형-시스템" class="nav-link" data-scroll-target="#비선형-시스템"><span class="header-section-number">14.5.1.2</span> 비선형 시스템</a></li>
+  </ul></li>
+  <li><a href="#사례연구-추적-위치추정과-지도작성" id="toc-사례연구-추적-위치추정과-지도작성" class="nav-link" data-scroll-target="#사례연구-추적-위치추정과-지도작성"><span class="header-section-number">14.5.2</span> 사례연구: 추적, 위치추정과 지도작성</a>
+  <ul class="collapse">
+  <li><a href="#이동물체-추적" id="toc-이동물체-추적" class="nav-link" data-scroll-target="#이동물체-추적"><span class="header-section-number">14.5.2.1</span> 이동물체 추적</a></li>
+  <li><a href="#monte-carlo-위치추정" id="toc-monte-carlo-위치추정" class="nav-link" data-scroll-target="#monte-carlo-위치추정"><span class="header-section-number">14.5.2.2</span> Monte Carlo 위치추정</a></li>
+  <li><a href="#slam" id="toc-slam" class="nav-link" data-scroll-target="#slam"><span class="header-section-number">14.5.2.3</span> SLAM</a></li>
+  </ul></li>
+  <li><a href="#혼합-모형" id="toc-혼합-모형" class="nav-link" data-scroll-target="#혼합-모형"><span class="header-section-number">14.5.3</span> 혼합 모형</a>
+  <ul class="collapse">
+  <li><a href="#혼합-가지치기와-붕괴" id="toc-혼합-가지치기와-붕괴" class="nav-link" data-scroll-target="#혼합-가지치기와-붕괴"><span class="header-section-number">14.5.3.1</span> 혼합 가지치기와 붕괴</a></li>
+  <li><a href="#일반-의사-bayes-알고리즘" id="toc-일반-의사-bayes-알고리즘" class="nav-link" data-scroll-target="#일반-의사-bayes-알고리즘"><span class="header-section-number">14.5.3.2</span> 일반 의사-Bayes 알고리즘</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-inference-temporal-models" class="quarto-section-identifier"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">시간 모형에서의 추론</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="개요" class="level2" data-number="14.1">
+<h2 data-number="14.1" class="anchored" data-anchor-id="개요"><span class="header-section-number">14.1</span> 개요</h2>
+<p><span class="quarto-unresolved-ref">?sec-template-based-representations에서는</span> 동적 베이즈 네트워크(dynamic Bayesian network, DBN), 확률적 관계모형과 같은 템플릿 기반 표현을 소개하였다. 템플릿 기반 모형은 주어진 골격(skeleton)에 따라 구체적인 확률변수와 간선을 생성하는 <strong>기저 그래프모형(ground graphical model)의 생성기</strong>로 볼 수 있다. 따라서 가장 직접적인 추론 방법은 템플릿을 전개하여 기저 네트워크를 만든 다음, 앞선 장들에서 다룬 변수 제거, 클리크 트리, 믿음 전파, 변분추론 또는 표본추출을 적용하는 것이다. 이 과정을 <strong>지식 기반 모형 구성(knowledge-based model construction, KBMC)</strong>이라 한다.</p>
+<p>하지만 이 단순한 전략에는 세 가지 어려움이 있다.</p>
+<p>첫째, 생성되는 기저 네트워크가 매우 크거나 무한할 수 있다. 질의변수 <span class="math inline">\(\boldsymbol Y\)</span>와 증거 <span class="math inline">\(\boldsymbol E=\boldsymbol e\)</span>가 주어졌을 때 질의 <span class="math inline">\(P(\boldsymbol Y\mid\boldsymbol e)\)</span>에 필요한 부분만 동적으로 생성할 수 있지만, 필요한 부분 자체가 여전히 매우 클 수 있다.</p>
+<p>둘째, 템플릿의 집계 의존성이나 관계 불확실성은 기저 네트워크를 조밀하게 만들 수 있다. 조밀한 연결은 정확추론의 트리폭을 증가시키고, 대부분의 근사 알고리즘에도 수렴과 계산량 문제를 일으킨다.</p>
+<p>셋째, 템플릿 모형에서는 일반적인 단일 변수 주변확률보다 복잡한 질의가 등장한다. 예를 들어 “가계도 안의 모든 사람이 특정 질환을 가진 가까운 친척을 적어도 한 명 갖는가?”라는 질의는 전칭기호와 존재기호가 함께 들어간다. 이를 기저 수준의 논리식으로 바꾸면 많은 변수에 대한 거대한 논리결합이 된다.</p>
+<p>일반 템플릿 모형의 효율적 추론은 여전히 활발한 연구영역이다. 이 장은 구조가 반복적이고 질의형태가 비교적 명확한 <strong>시간 모형</strong>에 초점을 맞춘다. 특히 추적, 예측, 평활화, 최적 경로 추론을 다루고, 정확추론의 구조적 한계와 근사추론의 대표적 해법을 설명한다.</p>
+</section>
+<section id="시간-모형의-추론-과제" class="level2" data-number="14.2">
+<h2 data-number="14.2" class="anchored" data-anchor-id="시간-모형의-추론-과제"><span class="header-section-number">14.2</span> 시간 모형의 추론 과제</h2>
+<p>DBN은 원하는 시간길이만큼 펼쳐진 베이즈 네트워크를 생성한다. 형식적으로는 펼쳐진 네트워크에 기존 추론법을 적용하면 되지만, 시간길이가 계속 증가할 수 있고 많은 과제가 온라인으로 수행된다는 점에서 정적 네트워크와 다르다.</p>
+<section id="필터링과-믿음상태" class="level3" data-number="14.2.1">
+<h3 data-number="14.2.1" class="anchored" data-anchor-id="필터링과-믿음상태"><span class="header-section-number">14.2.1</span> 필터링과 믿음상태</h3>
+<p>시간 <span class="math inline">\(t\)</span>의 관측을 <span class="math inline">\(o^{(t)}\)</span>라 하자. <strong>필터링(filtering)</strong> 또는 <strong>추적(tracking)</strong>은 현재까지의 관측을 사용하여 현재 상태의 사후분포를 계산하는 과제이다.</p>
+<p><span class="math display">\[
+\sigma^{(t)}(\boldsymbol X^{(t)})
+=
+P(\boldsymbol X^{(t)}\mid o^{(1:t)}).
+\]</span></p>
+<p>이 분포를 시간 <span class="math inline">\(t\)</span>의 <strong>믿음상태(belief state)</strong>라 한다. 믿음상태는 과거 관측 전체가 현재 상태에 주는 정보를 요약하는 충분한 확률적 표현이다. 1차 Markov DBN에서는 미래 예측을 위해 과거 전체를 저장할 필요가 없고 현재 믿음상태만 있으면 된다.</p>
+<p>그러나 상태변수가 많으면 완전한 믿음상태의 표 크기는 상태변수 수에 대해 지수적이다. 실제로는 특정 변수의 주변분포, 위험사건의 확률 또는 소수 변수의 결합분포만 질의하는 경우가 많다. 핵심은 필요한 질의를 지원하면서 믿음상태를 효율적으로 표현하고 갱신하는 것이다.</p>
+</section>
+<section id="예측" class="level3" data-number="14.2.2">
+<h3 data-number="14.2.2" class="anchored" data-anchor-id="예측"><span class="header-section-number">14.2.2</span> 예측</h3>
+<p><strong>예측(prediction)</strong>은 시간 <span class="math inline">\(t\)</span>까지의 관측을 바탕으로 미래 시점 <span class="math inline">\(t'&gt;t\)</span>의 상태를 계산한다.</p>
+<p><span class="math display">\[
+P(\boldsymbol X^{(t')}\mid o^{(1:t)}).
+\]</span></p>
+<p>필터링과 달리 미래 관측은 아직 없으므로 전이모형만 반복 적용한다. 장기 예측일수록 초기 믿음상태의 영향은 줄고, 전이모형의 정상분포와 불확실성이 더 크게 작용한다.</p>
+</section>
+<section id="평활화" class="level3" data-number="14.2.3">
+<h3 data-number="14.2.3" class="anchored" data-anchor-id="평활화"><span class="header-section-number">14.2.3</span> 평활화</h3>
+<p><strong>평활화(smoothing)</strong>는 미래 관측까지 포함하여 과거 상태를 다시 추정한다.</p>
+<p><span class="math display">\[
+P(\boldsymbol X^{(t)}\mid o^{(1:T)}),
+\qquad T&gt;t.
+\]</span></p>
+<p>새로운 관측이 들어오면 과거에 내린 판단이 바뀔 수 있다. 필터링은 시점별로 현재까지의 정보만 사용하므로 일시적으로 큰 변동이나 오해를 만들 수 있지만, 평활화는 미래 정보를 뒤로 전달하여 이를 완화한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 센서고장의 소급적 판단</strong> 센서에서 한 번 이상한 값이 나오면 시스템은 실제 상태가 급격히 변했다고 잠정 판단할 수 있다. 이후 비정상값이 반복되면 센서가 이미 첫 이상 시점부터 고장났다는 설명이 더 타당해진다. 미래 관측을 과거로 전달하면 첫 이상값의 신뢰도를 낮추고, 당시 상태를 더 정확하게 재구성할 수 있다.</p>
+</blockquote>
+<p>평활화는 전체 미래 <span class="math inline">\(t+1{:}T\)</span>를 사용할 수도 있고, <span class="math inline">\(k\)</span>시점의 제한된 미래창만 사용할 수도 있다. 후자는 고정지연 평활화(fixed-lag smoothing)라 하며 온라인 시스템에서 자주 사용된다.</p>
+</section>
+<section id="가장-가능성-높은-궤적" class="level3" data-number="14.2.4">
+<h3 data-number="14.2.4" class="anchored" data-anchor-id="가장-가능성-높은-궤적"><span class="header-section-number">14.2.4</span> 가장 가능성 높은 궤적</h3>
+<p>관측열이 주어졌을 때 전체 상태경로의 MAP 할당을 찾는 과제는</p>
+<p><span class="math display">\[
+\boldsymbol\xi^{*(0:T)}
+=
+\arg\max_{\boldsymbol\xi^{(0:T)}}
+P(\boldsymbol\xi^{(0:T)}\mid o^{(1:T)})
+\]</span></p>
+<p>이다. HMM에서는 이를 Viterbi 알고리즘으로 계산한다. 각 시점에서 개별 상태의 가장 높은 주변확률을 선택하는 것과, 전체 경로의 결합확률을 최대화하는 것은 다르다.</p>
+<blockquote class="blockquote">
+<p><strong>핵심 관찰</strong><br>
+필터링, 예측, 평활화와 최적 궤적은 모두 펼쳐진 DBN의 표준 확률질의이다. 그러나 매 시점마다 더 큰 네트워크를 새로 만들고 모든 과거 관측을 영구히 저장하는 순진한 구현은 시간과 공간이 계속 증가한다. 시간모형 추론법의 핵심은 Markov 구조를 이용해 과거를 유한한 메시지로 요약하는 데 있다.</p>
+</blockquote>
+</section>
+</section>
+<section id="정확추론" class="level2" data-number="14.3">
+<h2 data-number="14.3" class="anchored" data-anchor-id="정확추론"><span class="header-section-number">14.3</span> 정확추론</h2>
+<p>이 절에서는 DBN의 정확 필터링을 먼저 다룬다. Markov 독립성으로부터 믿음상태의 재귀 갱신식을 유도하고, 이 식이 펼쳐진 네트워크의 클리크 트리 전방 메시지와 동일함을 보인다. 이후 일반 DBN의 템플릿 클리크 트리와 <strong>얽힘(entanglement)</strong>이 만드는 계산적 한계를 설명한다.</p>
+<section id="상태-관측-모형의-필터링" class="level3" data-number="14.3.1">
+<h3 data-number="14.3.1" class="anchored" data-anchor-id="상태-관측-모형의-필터링"><span class="header-section-number">14.3.1</span> 상태-관측 모형의 필터링</h3>
+<p>현재 믿음상태가</p>
+<p><span class="math display">\[
+\sigma^{(t)}(\boldsymbol X^{(t)})
+=
+P(\boldsymbol X^{(t)}\mid o^{(1:t)})
+\]</span></p>
+<p>라고 하자. 시간 <span class="math inline">\(t+1\)</span>의 믿음상태는 두 단계로 계산한다.</p>
+<section id="예측-또는-시간갱신" class="level4" data-number="14.3.1.1">
+<h4 data-number="14.3.1.1" class="anchored" data-anchor-id="예측-또는-시간갱신"><span class="header-section-number">14.3.1.1</span> 예측 또는 시간갱신</h4>
+<p>먼저 새 관측을 보지 않은 시간 <span class="math inline">\(t+1\)</span>의 사전 믿음상태를 계산한다.</p>
+<p><span class="math display">\[
+\sigma^{(\cdot t+1)}(\boldsymbol X^{(t+1)})
+=
+P(\boldsymbol X^{(t+1)}\mid o^{(1:t)})
+\]</span></p>
+<p><span class="math display">\[
+\sigma^{(\cdot t+1)}(\boldsymbol X^{(t+1)})
+=
+\sum_{\boldsymbol X^{(t)}}
+P(\boldsymbol X^{(t+1)}\mid\boldsymbol X^{(t)},o^{(1:t)})
+P(\boldsymbol X^{(t)}\mid o^{(1:t)})
+\]</span></p>
+<p><span class="math display">\[
+\sigma^{(\cdot t+1)}(\boldsymbol X^{(t+1)})
+=
+\sum_{\boldsymbol X^{(t)}}
+P(\boldsymbol X^{(t+1)}\mid\boldsymbol X^{(t)})
+\sigma^{(t)}(\boldsymbol X^{(t)}).
+\]</span></p>
+<p>마지막 등식은 DBN의 1차 Markov 가정에서 나온다. 점이 들어간 위첨자 <span class="math inline">\((\cdot t+1)\)</span>는 <span class="math inline">\(t+1\)</span>의 관측을 아직 반영하지 않은 사전상태임을 나타낸다.</p>
+</section>
+<section id="관측-또는-측정갱신" class="level4" data-number="14.3.1.2">
+<h4 data-number="14.3.1.2" class="anchored" data-anchor-id="관측-또는-측정갱신"><span class="header-section-number">14.3.1.2</span> 관측 또는 측정갱신</h4>
+<p>새 관측 <span class="math inline">\(o^{(t+1)}\)</span>를 반영하면</p>
+<p><span class="math display">\[
+\sigma^{(t+1)}(\boldsymbol X^{(t+1)})
+=
+P(\boldsymbol X^{(t+1)}\mid o^{(1:t)},o^{(t+1)})
+\]</span></p>
+<p><span class="math display">\[
+\sigma^{(t+1)}(\boldsymbol X^{(t+1)})
+=
+\frac{
+P(o^{(t+1)}\mid\boldsymbol X^{(t+1)})
+\sigma^{(\cdot t+1)}(\boldsymbol X^{(t+1)})
+}{P(o^{(t+1)}\mid o^{(1:t)})}.
+\]</span></p>
+<p>분모는 전체 합이 1이 되게 하는 정규화상수이다. 이 두 단계를 반복하는 알고리즘을 <strong>재귀 필터(recursive filter)</strong>라 한다.</p>
+<p>상태 수가 <span class="math inline">\(N\)</span>인 HMM에서 전이갱신은 모든 상태쌍을 고려하므로 한 시점당 <span class="math inline">\(O(N^2)\)</span>, 관측갱신은 <span class="math inline">\(O(N)\)</span>이다. <span class="math inline">\(T\)</span>개 시점의 총 시간은 <span class="math inline">\(O(N^2T)\)</span>이고, 전이행렬과 현재 믿음상태만 저장하면 되므로 시간길이에 대한 공간은 상수이다.</p>
+<blockquote class="blockquote">
+<p><strong>보충 - 전향 알고리즘과 같은 식</strong><br>
+HMM 문헌에서 전향확률 <span class="math inline">\(\alpha_t(s)=P(o^{(1:t)},S^{(t)}=s)\)</span>를 사용하면 정규화하지 않은 형태의 같은 재귀식이 나온다. 매 시점 정규화하면 수치적 언더플로를 막고 <span class="math inline">\(\alpha_t\)</span>를 믿음상태로 직접 해석할 수 있다.</p>
+</blockquote>
+</section>
+</section>
+<section id="클리크-트리-전파로서의-필터링" class="level3" data-number="14.3.2">
+<h3 data-number="14.3.2" class="anchored" data-anchor-id="클리크-트리-전파로서의-필터링"><span class="header-section-number">14.3.2</span> 클리크 트리 전파로서의 필터링</h3>
+<p>HMM의 펼쳐진 네트워크에 클리크 트리를 만들면 전방 필터링의 의미가 명확해진다.</p>
+<div id="fig-temporal-hmm-clique-tree" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temporal-hmm-clique-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-temporal-hmm-clique-tree.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temporal-hmm-clique-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.1: HMM의 클리크 트리. 상태전이 클리크와 관측 클리크를 따라 왼쪽에서 오른쪽으로 메시지를 보내면 예측갱신과 관측갱신이 번갈아 수행된다.
+</figcaption>
+</figure>
+</div>
+<p>첫 상태전이 클리크에서 보내는 메시지는</p>
+<p><span class="math display">\[
+\sum_{S^{(0)}}P(S^{(0)})P(S^{(1)}\mid S^{(0)})
+=P(S^{(1)})
+\]</span></p>
+<p>이다. 이어 관측클리크는 이를 <span class="math inline">\(P(o^{(1)}\mid S^{(1)})\)</span>와 곱한다. 정규화하면</p>
+<p><span class="math display">\[
+P(S^{(1)}\mid o^{(1)})=\sigma^{(1)}(S^{(1)})
+\]</span></p>
+<p>을 얻는다. 같은 과정이 다음 시점으로 반복된다. 따라서 클리크 트리의 상향 패스는 시간방향의 <strong>전방 패스(forward pass)</strong>이고, 필터링은 하향 패스 없이 수행할 수 있다.</p>
+<p>예측에서는 미래 관측클리크가 필요 없으므로 관측갱신 단계만 생략한다. 반면 평활화에는 미래에서 과거로 메시지를 보내는 하향 패스가 필요하며, 이를 <strong>전방-후방 알고리즘(forward-backward algorithm)</strong>이라 한다.</p>
+<p>변수 제거 방식의 후방메시지는</p>
+<p><span class="math display">\[
+P(o^{((t+1):T)}\mid S^{(t+1)})
+\]</span></p>
+<p>을 나타낸다. 믿음갱신 방식으로 보정된 클리크의 후방메시지는 완전히 정보가 반영된 평활분포</p>
+<p><span class="math display">\[
+P(S^{(t+1)}\mid o^{(1:T)})
+\]</span></p>
+<p>와 직접 연결된다.</p>
+<p>평활화를 위해 모든 클리크를 저장하면 공간이 <span class="math inline">\(O(N^2T)\)</span>이다. 초기 퍼텐셜은 템플릿에서 다시 만들 수 있으므로 전방메시지와 관측만 저장하면 <span class="math inline">\(O(NT)\)</span>로 줄일 수 있다. 그래도 매우 긴 시계열에서는 부담이 될 수 있으며, 일부 체크포인트 메시지만 저장하고 필요할 때 중간구간을 재계산하는 시간-공간 절충이 가능하다.</p>
+</section>
+<section id="일반-dbn의-템플릿-클리크-트리" class="level3" data-number="14.3.3">
+<h3 data-number="14.3.3" class="anchored" data-anchor-id="일반-dbn의-템플릿-클리크-트리"><span class="header-section-number">14.3.3</span> 일반 DBN의 템플릿 클리크 트리</h3>
+<p>필터링은 무한히 긴 클리크 트리를 유지하는 과정으로 볼 수 있지만, 실제로는 연속된 두 시간절편만 필요하다. HMM에서는 <span class="math inline">\(S^{(t)},S^{(t+1)},O^{(t+1)}\)</span>만 포함하는 작은 클리크 트리를 만들고, 이전 믿음상태를 입력 메시지로 넣어 다음 믿음상태를 출력하면 된다.</p>
+<p>모든 시점의 2-TBN 구조는 같으므로 같은 <strong>템플릿 클리크 트리(template clique tree)</strong> <span class="math inline">\(\Upsilon\)</span>를 재사용할 수 있다. 일반 DBN에서는 과거와 미래를 연결하는 시간 <span class="math inline">\(t\)</span>의 <strong>인터페이스 변수</strong> <span class="math inline">\(\boldsymbol X_I^{(t)}\)</span>만 메시지 범위에 포함하면 된다. 현재 시점에만 존재하고 다음 시점의 부모가 아닌 변수는 메시지에서 제거할 수 있다.</p>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - 템플릿 클리크 트리를 이용한 DBN 필터링</strong></p>
+</blockquote>
+<pre class="text"><code>입력: DBN &lt;B0, B→&gt;, 관측열 o(1), o(2), ...
+1. XI ∪ X' 위에 템플릿 클리크 트리 Υ를 구성한다.
+2. σ(0) ← PB0(XI(0)).
+3. t = 1, 2, ...에 대해 반복한다.
+   a. T(t) ← Υ의 새 복사본.
+   b. σ(t-1)(XI(t-1))를 T(t)의 적절한 클리크에 곱한다.
+   c. 시간 t 관측 o(t)를 대입한다.
+   d. 클리크 트리를 보정한다.
+   e. 주변화하여 σ(t)(XI(t))를 추출한다.</code></pre>
+<p>보정된 템플릿 트리는 다음 시점 메시지뿐 아니라 현재 시점의 여러 변수에 대한 주변분포도 제공한다.</p>
+</section>
+<section id="얽힘" class="level3" data-number="14.3.4">
+<h3 data-number="14.3.4" class="anchored" data-anchor-id="얽힘"><span class="header-section-number">14.3.4</span> 얽힘</h3>
+<p>클리크 트리를 사용하면 구조를 이용해 믿음상태를 작은 인자들의 곱으로 표현할 수 있을 것처럼 보인다. 그러나 시간모형에서는 과거를 통과하는 활성경로 때문에 현재 절편의 변수들이 결국 서로 의존하게 되는 경우가 매우 많다. 이를 <strong>얽힘(entanglement)</strong>이라 한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 자동차 DBN의 얽힘</strong> 자동차 모형에서 현재의 날씨와 위치는 직관적으로 약하게 관련돼 보일 수 있다. 하지만 펼쳐진 DBN에는 과거 속도와 과거 날씨를 통과하는 활성경로가 존재한다. 현재 속도에 조건부로 두어도 이 경로가 차단되지 않을 수 있다. 충분한 시간이 지나면 현재 믿음상태에서 의미 있는 조건부독립성이 전혀 남지 않을 수 있다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>정의 - 지속 독립성</strong> DBN에서 <span class="math inline">\(\boldsymbol X,\boldsymbol Y,\boldsymbol Z\subseteq\mathcal X\)</span>에 대해</p>
+</blockquote>
+<p><span class="math display">\[
+\boldsymbol X^{(t)}\perp\boldsymbol Y^{(t)}
+\mid\boldsymbol Z^{(t)}
+\]</span></p>
+<p>가 모든 <span class="math inline">\(t\)</span>에서 성립하면 <span class="math inline">\((\boldsymbol X\perp\boldsymbol Y\mid\boldsymbol Z)\)</span>를 <strong>지속 독립성(persistent independence)</strong>이라 한다.</p>
+<p>지속 독립성은 시간에 따라 동일한 구조로 믿음상태를 인자분해할 수 있게 해 주는 독립성이다.</p>
+<blockquote class="blockquote">
+<p><strong>정의 - 영향 그래프</strong> 2-TBN <span class="math inline">\(B_{\rightarrow}\)</span>의 영향 그래프 <span class="math inline">\(\mathcal I\)</span>는 한 시간절편 변수들을 노드로 갖는 유향 순환그래프이다. <span class="math inline">\(B_{\rightarrow}\)</span>에 <span class="math inline">\(X\to Y'\)</span> 또는 <span class="math inline">\(X'\to Y'\)</span>가 있으면 <span class="math inline">\(\mathcal I\)</span>에 <span class="math inline">\(X\to Y\)</span>를 둔다. 지속간선 <span class="math inline">\(X\to X'\)</span>는 자기순환 <span class="math inline">\(X\to X\)</span>를 만든다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>명제</strong> 영향 그래프에 <span class="math inline">\(X\)</span>에서 <span class="math inline">\(Y\)</span>로 가는 유향경로가 존재할 필요충분조건은, 펼쳐진 DBN에서 모든 시점 <span class="math inline">\(t\)</span>에 대해 어떤 <span class="math inline">\(t'\ge t\)</span>에서 <span class="math inline">\(X^{(t)}\)</span>에서 <span class="math inline">\(Y^{(t')}\)</span>로 가는 유향경로가 존재하는 것이다.</p>
+</blockquote>
+<p>모든 상태변수가 지속간선 <span class="math inline">\(X\to X'\)</span>를 갖는 상태-관측 DBN을 <strong>완전 지속 DBN(fully persistent DBN)</strong>이라 하자.</p>
+<blockquote class="blockquote">
+<p><strong>정리 - 얽힘 정리</strong> 다음 조건을 만족하는 완전 지속 DBN 구조를 생각하자.</p>
+</blockquote>
+<ol type="1">
+<li>모든 상태변수는 모든 시점에 숨겨져 있고 관측변수는 매 시점 관측된다.</li>
+<li>영향 그래프는 무향으로 보았을 때 연결되어 있다.</li>
+<li>모든 상태변수에서 어떤 관측변수로 가는 유향경로가 존재한다.</li>
+</ol>
+<p>그러면 이 구조의 모든 모수화에 공통적으로 성립하는 비자명한 지속 독립성은 존재하지 않는다. 특정 모수값에서 우연한 독립성이 생길 수 있지만, 일반적인 모수에서는 믿음상태가 완전히 얽혀 있다.</p>
+<blockquote class="blockquote">
+<p><strong>증명 아이디어</strong><br>
+지속간선 때문에 각 상태의 영향은 미래로 계속 전달된다. 영향 그래프의 연결성과 모든 상태에서 관측으로 가는 경로 때문에, 관측에 조건부로 둘 때 과거의 여러 경로가 collider를 통해 활성화된다. 임의의 현재 상태변수쌍 사이에 과거와 관측을 통과하는 활성 trail을 구성할 수 있으므로 구조적으로 보장되는 지속 독립성이 사라진다.</p>
+</blockquote>
+<p>이 정리의 계산적 의미는 매우 크다. 조건부독립성이 없는 분포는 작은 인자의 곱으로 정확히 나타낼 수 없으므로, 정확 믿음상태는 인터페이스 변수 전체의 완전 결합분포로 저장해야 한다. 이산 상태변수가 <span class="math inline">\(n\)</span>개라면 크기는 상태 수의 곱으로 증가한다.</p>
+<div id="fig-temporal-car-clique-trees" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temporal-car-clique-trees-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-temporal-car-clique-trees.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temporal-car-clique-trees-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.2: 자동차 DBN의 두 클리크 트리. (a)는 이전 절편의 완전 믿음상태를 받아 다음 절편의 완전 믿음상태를 내보내므로 정확 필터링을 지원하지만 큰 클리크가 필요하다. (b)는 2-TBN 자체에는 더 작은 클리크를 만들지만 완전한 인터페이스 메시지를 수용하지 못해 반복 필터링의 정확성을 보장하지 않는다.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>예제</strong> 자동차 DBN의 정확 필터링을 위해 이전 절편의 <span class="math inline">\(W,V,L,F\)</span>를 모두 포함하는 입력클리크와 다음 절편의 <span class="math inline">\(W',V',L',F'\)</span>를 포함하는 출력클리크가 필요하다. 2-TBN만 삼각화했을 때보다 클리크가 더 커진다. 완전 지속 변수 <span class="math inline">\(n\)</span>개가 있으면 믿음상태 전달용 클리크에는 일반적으로 적어도 <span class="math inline">\(n+1\)</span>개의 변수가 들어간다.</p>
+</blockquote>
+<div id="fig-temporal-nonpersistent-clique-tree" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temporal-nonpersistent-clique-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-temporal-nonpersistent-clique-tree.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temporal-nonpersistent-clique-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.3: 비지속 변수가 있는 2-TBN과 클리크 트리. 모든 변수가 지속적이지 않아도 인터페이스 변수 전체를 포함하는 입력ㆍ출력 클리크가 필요하다. 정확 필터링용 트리는 2-TBN 단독 추론용 트리보다 클 수 있다.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>예제</strong> <span class="quarto-unresolved-ref">?fig-temporal-nonpersistent-clique-tree의</span> 인터페이스가 <span class="math inline">\(A,C\)</span>라면 정확전파를 위해 <span class="math inline">\(A,C\)</span>를 함께 포함하는 클리크와 <span class="math inline">\(A',C'\)</span>를 함께 포함하는 클리크가 필요하다. 제약 없는 2-TBN 추론보다 최대 클리크 크기가 증가한다.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>핵심 결론</strong><br>
+시간길이가 증가해도 필터링의 메모리를 일정하게 유지할 수는 있지만, 한 시점의 인터페이스 폭이 크면 메시지 자체가 지수적으로 커진다. DBN 정확추론의 병목은 시간길이보다 <strong>상태절편의 폭과 얽힘</strong>이다.</p>
+</blockquote>
+</section>
+</section>
+<section id="근사추론" class="level2" data-number="14.4">
+<h2 data-number="14.4" class="anchored" data-anchor-id="근사추론"><span class="header-section-number">14.4</span> 근사추론</h2>
+<p>얽힘 때문에 정확 믿음상태가 완전 결합분포가 되면 정확 필터링은 곧 비현실적이 된다. 펼쳐진 DBN에 정적 네트워크용 근사추론을 그대로 적용할 수도 있지만, 시간길이가 계속 증가하는 온라인 환경에서는 전체 네트워크를 유지하지 않고도 안정적인 근사를 갱신해야 한다.</p>
+<p>정적 네트워크에서 작은 오차를 보이는 알고리즘도 시간길이가 무한히 늘어나면 오차가 누적될 수 있다. 이 절에서는 최근 이력만 사용하는 일반 원리, 인자화 믿음상태, 입자필터와 결정론적 탐색을 다룬다.</p>
+<section id="핵심-아이디어" class="level3" data-number="14.4.1">
+<h3 data-number="14.4.1" class="anchored" data-anchor-id="핵심-아이디어"><span class="header-section-number">14.4.1</span> 핵심 아이디어</h3>
+<section id="제한된-이력-갱신" class="level4" data-number="14.4.1.1">
+<h4 data-number="14.4.1.1" class="anchored" data-anchor-id="제한된-이력-갱신"><span class="header-section-number">14.4.1.1</span> 제한된 이력 갱신</h4>
+<p>정확 필터링에서는 과거 전체를 믿음상태 하나로 압축한다. 근사추론에서도 비슷한 전략을 사용하지만, 대부분의 근사 알고리즘은 같은 변수나 클러스터를 여러 번 방문해야 한다. 순환 믿음 전파는 여러 차례 메시지를 교환하고, 구조화 변분근사는 변분모수를 반복 갱신하며, MCMC는 각 노드를 반복 표본화한다. 따라서 현재 절편만 남기고 과거를 즉시 버리면 필요한 반복을 수행할 수 없다.</p>
+<p>일반적인 해법은 시간 <span class="math inline">\(t-k,
+\ldots,t\)</span>의 <strong>유한한 역사창(bounded history window)</strong>만 유지하는 것이다. <span class="math inline">\(k\)</span>를 고정할 수도 있고, 현재 불확실성이나 관측의 영향에 따라 동적으로 바꿀 수도 있다. 이 장에서 자세히 다루는 인자화 메시지 전달과 입자필터는 가장 단순한 <span class="math inline">\(k=1\)</span>의 형태로, 근사 믿음상태 <span class="math inline">\(\hat\sigma^{(t)}\)</span>와 새 시간절편만 사용해 <span class="math inline">\(\hat\sigma^{(t+1)}\)</span>을 만든다.</p>
+</section>
+<section id="오차의-장기-거동" class="level4" data-number="14.4.1.2">
+<h4 data-number="14.4.1.2" class="anchored" data-anchor-id="오차의-장기-거동"><span class="header-section-number">14.4.1.2</span> 오차의 장기 거동</h4>
+<p>근사 믿음상태를 다시 근사 갱신의 입력으로 사용하면 오차가 계속 누적될 것처럼 보인다. 실제로 결정론적이거나 거의 결정론적인 시스템에서는 과거의 작은 오류가 사라지지 않아 발산할 수 있다.</p>
+<p>그러나 충분히 확률적인 동적시스템에서는 서로 다른 초기분포가 전이와 관측갱신을 거치면서 가까워지는 <strong>망각(forgetting)</strong> 현상이 나타난다. 어떤 거리 <span class="math inline">\(d\)</span>에 대해 필터 연산 <span class="math inline">\(F\)</span>가</p>
+<p><span class="math display">\[
+d\{F(p),F(q)\}\le \rho d(p,q),
+\qquad 0\le\rho&lt;1
+\]</span></p>
+<p>인 축소성을 가진다고 생각하자. 이전 시점의 근사오차는 매 갱신마다 <span class="math inline">\(\rho\)</span>배 이하로 줄고, 새로 발생하는 근사오차만 더해진다. 한 시점당 오차가 <span class="math inline">\(\epsilon\)</span> 이하라면 장기오차는 대략</p>
+<p><span class="math display">\[
+\epsilon+\rho\epsilon+\rho^2\epsilon+
+\cdots
+\le \frac{\epsilon}{1-\rho}
+\]</span></p>
+<p>와 같이 제한될 수 있다. 실제 정리는 알고리즘과 거리척도에 따라 훨씬 복잡하지만, 확률적 시스템에서 근사오차가 항상 무한히 누적되는 것은 아니라는 핵심 직관을 제공한다.</p>
+<blockquote class="blockquote">
+<p><strong>주의</strong><br>
+장기간 변하지 않는 잠재계층, 환자 고유의 고정 취약성, 영구적인 장비고장처럼 결정론적으로 유지되는 변수가 있으면 시스템의 망각성이 약해진다. 이 경우 작은 초기 근사오류가 계속 남아 필터가 잘못된 상태에 고착될 수 있다.</p>
+</blockquote>
+</section>
+</section>
+<section id="인자화-믿음상태-방법" class="level3" data-number="14.4.2">
+<h3 data-number="14.4.2" class="anchored" data-anchor-id="인자화-믿음상태-방법"><span class="header-section-number">14.4.2</span> 인자화 믿음상태 방법</h3>
+<p>얽힘은 결국 모든 현재 변수를 상관시키지만, 긴 과거경로를 통해 생긴 상관은 약한 경우가 많다. 따라서 정확 믿음상태를 작은 범위의 인자들로 근사하고 일부 약한 의존성을 의도적으로 버릴 수 있다.</p>
+<p>시간 <span class="math inline">\(t\)</span>의 근사 믿음상태를</p>
+<p><span class="math display">\[
+\hat\sigma^{(t)}(\boldsymbol X^{(t)})
+=
+\prod_r
+\left\{
+\beta_r^{(t)}(\boldsymbol X_r^{(t)})
+\right\}^{\kappa_r}
+\]</span></p>
+<p>로 나타내자. 영역이 서로 겹치지 않으면 단순한 주변분포의 곱이고, 겹치는 영역을 사용하면 중복계산을 보정하기 위한 counting number <span class="math inline">\(\kappa_r\)</span>가 필요하다.</p>
+<p>한 시점의 갱신은 다음과 같은 <strong>갱신-투영(update-project)</strong> 순환이다.</p>
+<ol type="1">
+<li><span class="math inline">\(\hat\sigma^{(t)}\)</span>를 전이모형과 관측모형에 정확 또는 근사적으로 결합해 더 복잡한 <span class="math inline">\(\sigma^{(\cdot t+1)}\)</span>를 만든다.</li>
+<li>이 분포를 유지 가능한 인자족으로 투영해 <span class="math inline">\(\hat\sigma^{(t+1)}\)</span>를 만든다.</li>
+<li>다음 시점에서는 이 근사분포를 다시 입력메시지로 사용한다.</li>
+</ol>
+<p>이는 <strong>가정된 밀도 필터링(assumed density filtering)</strong>이며, 기대전파(EP)의 시간방향 한 번 패스에 해당한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제 - 고속도로의 여러 자동차</strong> 자동차 <span class="math inline">\(i\)</span>의 상태변수를 <span class="math inline">\(\boldsymbol Y_i\)</span>, 날씨와 교통밀도 같은 전역변수를 <span class="math inline">\(\boldsymbol Z\)</span>라 하자. 가장 단순한 근사는</p>
+</blockquote>
+<p><span class="math display">\[
+\hat\sigma^{(t)}
+=
+\beta_g^{(t)}(\boldsymbol Z^{(t)})
+\prod_{i=1}^k
+\beta_i^{(t)}(\boldsymbol Y_i^{(t)})
+\]</span></p>
+<p>로 자동차 간 상관을 모두 무시한다. 더 나은 근사는 각 자동차와 전역상태의 상관을 보존하여</p>
+<p><span class="math display">\[
+\hat\sigma^{(t)}
+=
+\left\{
+\beta_g^{(t)}(\boldsymbol Z^{(t)})
+\right\}^{-(k-1)}
+\prod_{i=1}^k
+\beta_i^{(t)}(\boldsymbol Z^{(t)},\boldsymbol Y_i^{(t)})
+\]</span></p>
+<p>로 나타낼 수 있다. 이는 전역상태가 주어졌을 때 자동차들이 조건부독립이라는 근사이다.</p>
+<p>근사 메시지의 인자구조가 작으면 한 시간절편 안에서 2-TBN용 작은 클리크 트리나 클러스터 그래프를 사용할 수 있다. 정확 필터링처럼 인터페이스 전체를 한 클리크에 넣지 않아도 되므로 계산량이 크게 감소한다.</p>
+<p>필터링은 전방메시지만 사용하므로 일반 EP의 후방 믿음갱신과 달리 이전 메시지로 나누는 단계가 필요하지 않다. 또한 매 시점 동일한 인자구조를 사용하면 같은 <strong>템플릿 클러스터 그래프</strong>를 반복 재사용할 수 있다. 반면 자동차 사이의 거리처럼 강한 상관구조가 시간에 따라 변하면 근사 인자구조를 동적으로 바꾸는 것이 유리하다.</p>
+</section>
+<section id="입자필터" class="level3" data-number="14.4.3">
+<h3 data-number="14.4.3" class="anchored" data-anchor-id="입자필터"><span class="header-section-number">14.4.3</span> 입자필터</h3>
+<p>입자기반 방법 중 전방 표본추출은 시간모형에 자연스럽다. 한 시점씩 궤적을 연장할 수 있기 때문이다. 하지만 단순 거부표본은 시간이 길어질수록 모든 입자가 언젠가 관측과 불일치하므로 사용할 수 없다. 중요도 표본추출과 재표본화가 핵심이다.</p>
+<section id="순진한-가능도-가중법" class="level4" data-number="14.4.3.1">
+<h4 data-number="14.4.3.1" class="anchored" data-anchor-id="순진한-가능도-가중법"><span class="header-section-number">14.4.3.1</span> 순진한 가능도 가중법</h4>
+<p>시간 <span class="math inline">\(t\)</span>의 입자 <span class="math inline">\(m\)</span>을</p>
+<p><span class="math display">\[
+\bar\xi^{(t)}[m]
+\]</span></p>
+<p>이라 하고 가중치를 <span class="math inline">\(w[m]\)</span>이라 하자. 각 시점에서 이전 입자를 2-TBN을 통해 전방표본하고, 관측노드는 관측값으로 고정하며 그 조건부확률을 가중치에 곱한다.</p>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - 2-TBN의 가능도 가중 입자 생성</strong></p>
+</blockquote>
+<pre class="text"><code>입력: 2-TBN B→, 시간 t-1의 할당 ξ, 시간 t의 관측 o(t)
+1. 시간 t 변수 X'1,...,X'n을 위상순서로 정렬한다.
+2. w ← 1.
+3. 각 X'i에 대해 부모의 현재 할당 ui를 얻는다.
+4. X'i가 관측되지 않았으면 P(X'i | ui)에서 표본한다.
+5. 관측되었으면 x'i ← o(t)[X'i]로 두고
+   w ← w × P(x'i | ui)로 갱신한다.
+6. 새 시간절편 할당과 w를 반환한다.</code></pre>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - DBN 필터링을 위한 가능도 가중법</strong></p>
+</blockquote>
+<pre class="text"><code>1. B0에서 M개의 초기입자를 표본하고 w[m] ← 1로 둔다.
+2. 각 시간 t에 대해
+   a. 모든 입자를 앞의 가능도 가중 입자 생성 절차로 한 시점 전파한다.
+   b. 새 관측 가능도를 기존 누적가중치에 곱한다.
+   c. 정규화된 가중입자 분포로 σ^(t)를 근사한다.</code></pre>
+<p>이 방법은 상태궤적을 사전 전이모형에서 생성하고 관측은 가중치에만 반영한다. 시간이 길어지면 대부분의 무작위 궤적은 실제 관측과 맞지 않으며, 가중치 분산이 지수적으로 커진다.</p>
+<div id="fig-temporal-likelihood-weighting-error" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temporal-likelihood-weighting-error-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-temporal-likelihood-weighting-error.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temporal-likelihood-weighting-error-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.4: 시간에 따른 가능도 가중법의 오차. 입자 수를 크게 늘려도 시간이 지날수록 평균 절대오차가 증가한다. 이는 관측과 일치하는 매우 소수의 입자에 가중치가 집중되기 때문이다.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="부트스트랩-필터" class="level4" data-number="14.4.3.2">
+<h4 data-number="14.4.3.2" class="anchored" data-anchor-id="부트스트랩-필터"><span class="header-section-number">14.4.3.2</span> 부트스트랩 필터</h4>
+<p><strong>입자필터(particle filter)</strong> 또는 <strong>순차 중요도 표본추출(sequential importance sampling)</strong>의 핵심은 현재 관측을 잘 설명하는 고가중치 입자를 다음 시점에 더 많이 번식시키는 것이다.</p>
+<p>시간 <span class="math inline">\(t\)</span>의 가중 입자집합을</p>
+<p><span class="math display">\[
+D^{(t)}=
+\{(\bar x^{(0:t)}[m],w^{(t)}[m])
+:m=1,\ldots,M\}
+\]</span></p>
+<p>라 하자. 이 집합이 정의하는 경험분포는</p>
+<p><span class="math display">\[
+\hat P_{D^{(t)}}(x^{(0:t)})
+\propto
+\sum_{m=1}^M
+w^{(t)}[m]
+\mathbf 1\{\bar x^{(0:t)}[m]=x^{(0:t)}\}.
+\]</span></p>
+<p>가장 널리 쓰이는 <strong>부트스트랩 필터(bootstrap filter)</strong>는 이 경험분포에서 <span class="math inline">\(M\)</span>개의 부모입자를 다시 뽑고, 각 입자를 전이모형으로 전파한 뒤 현재 관측의 가능도로 새 가중치를 만든다.</p>
+<div id="fig-temporal-particle-filter-step" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temporal-particle-filter-step-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-temporal-particle-filter-step.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temporal-particle-filter-step-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.5: 입자필터의 한 반복. 가중입자를 현재 가중치에 비례하여 재표본하고, 전이모형으로 이동시킨 뒤, 새 관측에 대한 가능도로 다시 가중한다. 큰 원은 높은 가중치를 뜻하며, 낮은 가중치의 입자는 다음 세대에서 사라진다.
+</figcaption>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p><strong>알고리즘 - DBN 입자필터</strong></p>
+</blockquote>
+<pre class="text"><code>입력: DBN &lt;B0,B→&gt;, 입자 수 M, 관측열
+1. B0에서 M개 입자를 표본하고 초기 가중치를 1/M으로 둔다.
+2. 시간 t = 1,2,...에 대해
+   a. 이전 가중 경험분포에서 부모입자 M개를 재표본한다.
+   b. 각 부모입자를 2-TBN으로 한 시점 전파한다.
+   c. 시간 t 관측의 가능도를 새 가중치로 계산한다.
+   d. 새 가중입자집합 D(t)를 구성한다.
+   e. D(t)의 경험분포로 현재 믿음상태를 근사한다.</code></pre>
+<p>재표본 단계에서 이전 가중치가 선택확률에 이미 반영되므로, 전파 후 가중치에 이전 가중치를 다시 곱하면 이중계산이 된다. 필터링만 필요하면 입자의 과거궤적은 버리고 현재상태만 유지할 수 있다.</p>
+<div id="fig-temporal-long-run-error" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temporal-long-run-error-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-temporal-long-run-error.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temporal-long-run-error-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.6: 가능도 가중법과 입자필터의 장기 성능. 가능도 가중법의 오차는 빠르게 증가하지만, 재표본화를 포함한 입자필터의 오차는 매우 긴 시간에도 대체로 제한된 범위에 머문다.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="순차-중요도-표본추출과-최적-제안분포" class="level4" data-number="14.4.3.3">
+<h4 data-number="14.4.3.3" class="anchored" data-anchor-id="순차-중요도-표본추출과-최적-제안분포"><span class="header-section-number">14.4.3.3</span> 순차 중요도 표본추출과 최적 제안분포</h4>
+<p>목표는 궤적 사후분포</p>
+<p><span class="math display">\[
+P(x^{(0:t)}\mid o^{(0:t)})
+\]</span></p>
+<p>에서 표본하는 것이다. 제안분포 <span class="math inline">\(\alpha^{(t)}\)</span>로 궤적을 순차 생성하면 중요도가중치는 재귀적으로</p>
+<p><span class="math display">\[
+w(x^{(0:t)})
+=
+\frac{P(x^{(0:t)}\mid o^{(0:t)})}
+{\alpha^{(t)}(x^{(0:t)})}
+\]</span></p>
+<p>가 된다. 이전 궤적 <span class="math inline">\(x^{(0:t-1)}\)</span>가 정해졌을 때 현재 단계의 가중치 분산을 최소화하는 제안분포는</p>
+<p><span class="math display">\[
+\alpha^{(t)}(X^{(t)}\mid x^{(0:t-1)})
+=
+P(X^{(t)}\mid x^{(0:t-1)},o^{(0:t)}).
+\]</span></p>
+<p>Markov 성질을 사용하면 사실상</p>
+<p><span class="math display">\[
+P(X^{(t)}\mid x^{(t-1)},o^{(t)})
+\]</span></p>
+<p>에서 표본하는 것이 이상적이다. 이를 <strong>사후 입자필터(posterior particle filter)</strong>라 한다. 이 경우 새 입자의 가중치는 대략</p>
+<p><span class="math display">\[
+P(o^{(t)}\mid x^{(t-1)})
+\]</span></p>
+<p>에 비례한다. 즉 현재 상태를 먼저 사전 전이에서 뽑고 관측으로 사후 보정하는 대신, 관측을 반영한 상태사후에서 직접 뽑는다.</p>
+<p>하지만 이러한 최적 제안분포에서 표본하는 것 자체가 어려울 수 있다. 단순 가능도 가중, 간선반전, 한 절편의 정확추론, EP나 unscented 변환을 이용한 근사제안 등 여러 절충이 사용된다.</p>
+</section>
+<section id="입자-선택과-재표본화" class="level4" data-number="14.4.3.4">
+<h4 data-number="14.4.3.4" class="anchored" data-anchor-id="입자-선택과-재표본화"><span class="header-section-number">14.4.3.4</span> 입자 선택과 재표본화</h4>
+<p>입자 <span class="math inline">\(m\)</span>이 다음 세대에 남기는 자손 수를 <span class="math inline">\(K_m^{(t)}\)</span>라 하자. 고정 입자 수를 유지하려면</p>
+<p><span class="math display">\[
+\sum_{m=1}^M K_m^{(t)}=M
+\]</span></p>
+<p>이어야 한다. 부트스트랩 필터는 정규화 가중치를 확률로 하는 다항분포에서 <span class="math inline">\(M\)</span>번 독립추출한다. 이 방식은 불편성은 유지하지만 자손 수의 분산이 큰 편이다.</p>
+<p>실무에서는 잔차 재표본화, 층화 재표본화, 체계적 재표본화처럼 분산이 작은 방법을 많이 사용한다. 또한 매 시점 재표본하면 입자 다양성이 불필요하게 줄 수 있으므로, 유효표본크기</p>
+<p><span class="math display">\[
+\operatorname{ESS}
+=
+\frac{1}{\sum_{m=1}^M(\tilde w_m)^2}
+\]</span></p>
+<p>가 임계값 아래로 내려갈 때만 재표본하는 방법이 일반적이다. <span class="math inline">\(\tilde w_m\)</span>은 정규화된 가중치이다.</p>
+<p>계산시간 제약이 유연하다면 ESS가 낮은 시점에 입자 수를 늘리고, 분포가 안정된 시점에 줄이는 적응적 입자 수 전략도 사용할 수 있다.</p>
+</section>
+<section id="확장-방법" class="level4" data-number="14.4.3.5">
+<h4 data-number="14.4.3.5" class="anchored" data-anchor-id="확장-방법"><span class="header-section-number">14.4.3.5</span> 확장 방법</h4>
+<p>입자필터의 가장 큰 실무 문제 중 하나는 <strong>입자 빈곤(particle impoverishment)</strong>이다. 재표본이 반복되면 소수 조상의 복사본만 남아 여러 가능한 가설을 유지하지 못한다.</p>
+<p>이를 완화하는 방법은 다음과 같다.</p>
+<ul>
+<li>재표본 뒤 MCMC 이동을 수행해 입자를 주변의 고확률영역으로 재분산한다.</li>
+<li>한 시간절편의 작은 클리크 트리에서 직접 표본하여 더 좋은 제안분포를 만든다.</li>
+<li>관측방향 간선을 일부 반전해 전방표본이 관측을 더 직접 반영하게 한다.</li>
+<li>EP, Laplace 근사, EKF 또는 UKF로 현재 사후를 근사해 제안분포로 사용한다.</li>
+<li>최근 몇 시점의 미래관측을 사용하는 lookahead 또는 auxiliary particle filter를 사용한다.</li>
+</ul>
+<section id="rao-blackwellized-입자필터" class="level5" data-number="14.4.3.5.1">
+<h5 data-number="14.4.3.5.1" class="anchored" data-anchor-id="rao-blackwellized-입자필터"><span class="header-section-number">14.4.3.5.1</span> Rao-Blackwellized 입자필터</h5>
+<p>상태변수를 표본화할 변수 <span class="math inline">\(\boldsymbol X_p\)</span>와 조건부분포를 해석적으로 유지할 변수 <span class="math inline">\(\boldsymbol X_d\)</span>로 나누면 각 입자는</p>
+<p><span class="math display">\[
+\left(
+x_p^{(t)}[m],
+w^{(t)}[m],
+q_m^{(t)}(\boldsymbol X_d^{(t)})
+\right)
+\]</span></p>
+<p>가 된다. 이를 <strong>Rao-Blackwellized particle filter(RBPF)</strong> 또는 축약 입자필터라 한다.</p>
+<p><span class="math inline">\(\boldsymbol X_p\)</span>는 중요도 표본으로 갱신하고, 각 입자에 조건부인 <span class="math inline">\(\boldsymbol X_d\)</span>의 분포는 정확추론으로 계산한다. 표본화하지 않은 변수를 적분해 제거하므로 같은 입자 수에서 분산이 감소한다. 다만 <span class="math inline">\(q_m^{(t)}\)</span>가 시간에 따라 얽혀 지나치게 복잡해지지 않도록 지속 가능한 조건부 인자구조를 선택해야 한다.</p>
+</section>
+</section>
+</section>
+<section id="결정론적-탐색" class="level3" data-number="14.4.4">
+<h3 data-number="14.4.4" class="anchored" data-anchor-id="결정론적-탐색"><span class="header-section-number">14.4.4</span> 결정론적 탐색</h3>
+<p>전이가 매우 치우쳐 있거나 가능한 후속상태가 소수이면 무작위 표본은 동일한 입자를 반복 생성하여 계산을 낭비한다. 이런 경우 고확률 궤적을 체계적으로 유지하는 결정론적 탐색이 유리하다.</p>
+<p>HMM에서 전체 경로의 정확 MAP는 <strong>Viterbi 알고리즘</strong>으로 계산할 수 있다. 하지만 상태공간이 매우 크거나 온라인 스트림이 끝없이 이어지면 모든 후보를 유지하기 어렵다. <strong>빔 탐색(beam search)</strong>은 각 시점에서 점수가 높은 상위 <span class="math inline">\(K\)</span>개 경로 또는 임계값 안의 경로만 남긴다.</p>
+<p>빔 탐색은 확률질량 전체를 근사하는 방법이 아니라 고확률 경로를 찾는 최적화 방법이다. 음성인식처럼 전이의 대부분이 거의 불가능하고 소수 경로만 유망한 문제에 적합하다. 관심 없는 세부상태를 주변화하면서 단어열 같은 상위 수준 경로만 최적화하면 marginal MAP 근사가 된다.</p>
+</section>
+</section>
+<section id="혼합-동적-베이즈-네트워크" class="level2" data-number="14.5">
+<h2 data-number="14.5" class="anchored" data-anchor-id="혼합-동적-베이즈-네트워크"><span class="header-section-number">14.5</span> 혼합 동적 베이즈 네트워크</h2>
+<p>실제 동적시스템은 연속상태와 이산상태를 함께 포함하는 경우가 많다. <span class="quarto-unresolved-ref">?sec-inference-hybrid-networks에서</span> 다룬 연속ㆍ혼합 네트워크 추론법은 시간모형에도 적용할 수 있다. 여기서는 순수 연속시스템의 Kalman 계열과 이산ㆍ연속 혼합시스템의 가우시안 혼합 축소를 다룬다.</p>
+<section id="연속-모형" class="level3" data-number="14.5.1">
+<h3 data-number="14.5.1" class="anchored" data-anchor-id="연속-모형"><span class="header-section-number">14.5.1</span> 연속 모형</h3>
+<section id="kalman-filter" class="level4" data-number="14.5.1.1">
+<h4 data-number="14.5.1.1" class="anchored" data-anchor-id="kalman-filter"><span class="header-section-number">14.5.1.1</span> Kalman filter</h4>
+<p>선형 동적시스템(linear dynamical system, LDS)의 상태와 관측을</p>
+<p><span class="math display">\[
+P(\boldsymbol X^{(t)}\mid\boldsymbol X^{(t-1)})
+=
+\mathcal N(A\boldsymbol X^{(t-1)};Q),
+\]</span></p>
+<p><span class="math display">\[
+P(\boldsymbol O^{(t)}\mid\boldsymbol X^{(t)})
+=
+\mathcal N(H\boldsymbol X^{(t)};R)
+\]</span></p>
+<p>로 나타내자. <span class="math inline">\(A\)</span>는 상태전이행렬, <span class="math inline">\(Q\)</span>는 과정잡음 공분산, <span class="math inline">\(H\)</span>는 관측행렬, <span class="math inline">\(R\)</span>은 측정잡음 공분산이다.</p>
+<p>가우시안은 선형변환, 주변화와 조건화에 대해 닫혀 있으므로 믿음상태는 항상</p>
+<p><span class="math display">\[
+\sigma^{(t)}
+=
+\mathcal N(\mu^{(t)};\Sigma^{(t)})
+\]</span></p>
+<p>로 유지된다. 이산모형에서 얽힘은 지수 크기의 결합표를 만들지만, 가우시안 결합분포는 평균벡터와 공분산행렬로 <span class="math inline">\(O(n^2)\)</span> 공간에 표현된다.</p>
+<section id="상태전이-갱신" class="level5" data-number="14.5.1.1.1">
+<h5 data-number="14.5.1.1.1" class="anchored" data-anchor-id="상태전이-갱신"><span class="header-section-number">14.5.1.1.1</span> 상태전이 갱신</h5>
+<p><span class="math display">\[
+\mu^{(\cdot t+1)}=A\mu^{(t)},
+\]</span></p>
+<p><span class="math display">\[
+\Sigma^{(\cdot t+1)}
+=A\Sigma^{(t)}A^T+Q.
+\]</span></p>
+<p>평균은 선형 동역학으로 이동하고, 공분산은 이전 불확실성의 선형변환에 새 과정잡음이 더해진다.</p>
+</section>
+<section id="관측-갱신" class="level5" data-number="14.5.1.1.2">
+<h5 data-number="14.5.1.1.2" class="anchored" data-anchor-id="관측-갱신"><span class="header-section-number">14.5.1.1.2</span> 관측 갱신</h5>
+<p>Kalman gain을</p>
+<p><span class="math display">\[
+K^{(t+1)}
+=
+\Sigma^{(\cdot t+1)}H^T
+\left(
+H\Sigma^{(\cdot t+1)}H^T+R
+\right)^{-1}
+\]</span></p>
+<p>로 정의하면</p>
+<p><span class="math display">\[
+\mu^{(t+1)}
+=
+\mu^{(\cdot t+1)}
++
+K^{(t+1)}
+\left(
+o^{(t+1)}-H\mu^{(\cdot t+1)}
+\right),
+\]</span></p>
+<p><span class="math display">\[
+\Sigma^{(t+1)}
+=
+\left(I-K^{(t+1)}H\right)
+\Sigma^{(\cdot t+1)}.
+\]</span></p>
+<p>괄호 안은 <strong>관측잔차(innovation)</strong>이다. Kalman gain은 예측과 관측 중 어느 쪽을 더 신뢰할지 결정한다. 측정잡음 <span class="math inline">\(R\)</span>이 작으면 관측을 강하게 반영하고, 사전 공분산이 매우 작으면 이미 상태를 확신하므로 관측의 영향이 작다.</p>
+<p>선형ㆍ정상 시스템에서는 공분산이 자료값과 무관하게 일정한 극한으로 수렴할 수 있다. 이는 공분산 갱신을 미리 계산할 수 있다는 장점이 있지만, 실제 관측의 내용에 따라 불확실성이 달라지지 않는 선형 가우시안 모형의 한계이기도 하다.</p>
+<p>정밀도행렬 <span class="math inline">\(J=\Sigma^{-1}\)</span>과 정보벡터 <span class="math inline">\(h=J\mu\)</span>를 유지하는 <strong>정보형 Kalman filter</strong>도 있다. 공분산형에서는 전이갱신이 단순하고 관측갱신에 역행렬이 필요하지만, 정보형에서는 관측갱신이 단순한 덧셈이 되고 전이갱신이 더 복잡해진다. 희소 관측이나 큰 공간모형에서는 정보형이 유리할 수 있다.</p>
+</section>
+</section>
+<section id="비선형-시스템" class="level4" data-number="14.5.1.2">
+<h4 data-number="14.5.1.2" class="anchored" data-anchor-id="비선형-시스템"><span class="header-section-number">14.5.1.2</span> 비선형 시스템</h4>
+<p>비선형 상태공간모형을</p>
+<p><span class="math display">\[
+\boldsymbol X^{(t+1)}
+=f(\boldsymbol X^{(t)},\boldsymbol U^{(t)}),
+\]</span></p>
+<p><span class="math display">\[
+\boldsymbol O^{(t+1)}
+=g(\boldsymbol X^{(t+1)},\boldsymbol W^{(t+1)})
+\]</span></p>
+<p>로 나타내자. <span class="math inline">\(\boldsymbol U,\boldsymbol W\)</span>는 가우시안 잡음이다. 비선형 변환 뒤 분포는 일반적으로 가우시안이 아니므로 매 단계 가우시안으로 다시 근사한다.</p>
+<ul>
+<li><strong>확장 Kalman filter(EKF):</strong> 현재 평균 주변에서 <span class="math inline">\(f,g\)</span>를 1차 Taylor 전개하고 Jacobian을 이용한다.</li>
+<li><strong>무향 Kalman filter(UKF):</strong> 평균과 공분산을 대표하는 시그마점들을 비선형 함수에 통과시켜 변환된 평균과 공분산을 계산한다.</li>
+</ul>
+<p>UKF의 상태전이에서는 <span class="math inline">\(\sigma^{(t)}\)</span>와 과정잡음의 결합 가우시안을 만들고, 시그마점에 <span class="math inline">\(f\)</span>를 적용하여 <span class="math inline">\(\mu^{(\cdot t+1)},\Sigma^{(\cdot t+1)}\)</span>를 얻는다. 관측갱신에서는 상태와 관측의 결합 모멘트를 <span class="math inline">\(g\)</span>를 통해 근사한 뒤 가우시안 조건화를 적용한다.</p>
+<p>EKF는 계산이 빠르지만 도함수가 필요하고 곡률이 크면 편향될 수 있다. UKF는 도함수가 필요 없고 저차 비선형 모멘트를 더 정확히 포착하지만 함수평가가 더 많다. 두 방법 모두 다봉 사후분포를 단일 가우시안으로 표현하는 한계가 있다.</p>
+</section>
+</section>
+<section id="사례연구-추적-위치추정과-지도작성" class="level3" data-number="14.5.2">
+<h3 data-number="14.5.2" class="anchored" data-anchor-id="사례연구-추적-위치추정과-지도작성"><span class="header-section-number">14.5.2</span> 사례연구: 추적, 위치추정과 지도작성</h3>
+<section id="이동물체-추적" class="level4" data-number="14.5.2.1">
+<h4 data-number="14.5.2.1" class="anchored" data-anchor-id="이동물체-추적"><span class="header-section-number">14.5.2.1</span> 이동물체 추적</h4>
+<p>2차원 물체의 위치와 속도를</p>
+<p><span class="math display">\[
+\boldsymbol X^{(t)}
+=
+(X_1^{(t)},X_2^{(t)},\dot X_1^{(t)},\dot X_2^{(t)})^T
+\]</span></p>
+<p>로 두고, 거의 일정한 속도로 움직이되 가우시안 과정잡음이 있다고 하자. 관측은 위치만 포함하는 잡음측정이다. 초기상태도 가우시안이면 Kalman filter를 직접 적용할 수 있다.</p>
+<div id="fig-temporal-kalman-tracking" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temporal-kalman-tracking-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-temporal-kalman-tracking.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temporal-kalman-tracking-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.7: Kalman filter를 이용한 추적. 왼쪽은 실제 궤적과 잡음관측, 오른쪽은 사후평균과 95% 신뢰타원이다. 초기 불확실성의 영향은 시간이 지나면서 줄고 공분산은 정상상태에 접근한다.
+</figcaption>
+</figure>
+</div>
+<p>거리와 방위각처럼 관측모형이 삼각함수를 포함하면 EKF나 UKF가 필요하다. 이상치와 clutter가 많으면 Student-<span class="math inline">\(t\)</span> 잡음, 혼합모형 또는 입자필터가 더 적절할 수 있다. 여러 물체와 여러 관측을 연결해야 하면 자료연결(data association) 불확실성이 추가된다.</p>
+</section>
+<section id="monte-carlo-위치추정" class="level4" data-number="14.5.2.2">
+<h4 data-number="14.5.2.2" class="anchored" data-anchor-id="monte-carlo-위치추정"><span class="header-section-number">14.5.2.2</span> Monte Carlo 위치추정</h4>
+<p>알려진 지도 <span class="math inline">\(M\)</span>에서 로봇 위치 <span class="math inline">\(X^{(t)}\)</span>를 추정하는 목표는</p>
+<p><span class="math display">\[
+P(X^{(t)}\mid y^{(1:t)},M)
+\]</span></p>
+<p>이다. 레이저나 초음파 관측은 지도상의 벽까지 거리와 관련되지만, 위치에 대한 함수가 비연속적이고 서로 다른 장소가 비슷한 관측을 낼 수 있어 사후가 쉽게 다봉이 된다. 단일 가우시안보다 입자표현이 자연스럽다.</p>
+<div id="fig-temporal-monte-carlo-localization" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temporal-monte-carlo-localization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-temporal-monte-carlo-localization.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temporal-monte-carlo-localization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.8: 로봇 위치추정을 위한 입자필터. 초기에는 입자가 지도 전체에 퍼져 있지만 관측이 누적되면서 실제 위치 주변으로 집중된다. 여러 후보위치를 동시에 유지할 수 있다는 점이 장점이다.
+</figcaption>
+</figure>
+</div>
+<p>로봇이 길을 잃은 상태에서는 부트스트랩 제안이 지도 전체에 입자를 흩뿌리고 대부분을 즉시 제거하므로 비효율적이다. 관측과 잘 맞는 후보위치를 제안분포에 직접 포함하거나, 측정잡음을 일시적으로 크게 두어 입자의 생존가능성을 높이는 방법을 사용할 수 있다.</p>
+</section>
+<section id="slam" class="level4" data-number="14.5.2.3">
+<h4 data-number="14.5.2.3" class="anchored" data-anchor-id="slam"><span class="header-section-number">14.5.2.3</span> SLAM</h4>
+<p>지도가 알려지지 않았을 때 로봇의 위치와 지도를 동시에 추정하는 문제는 <strong>동시 위치추정 및 지도작성(simultaneous localization and mapping, SLAM)</strong>이다.</p>
+<p><span class="math display">\[
+P(X^{(t)},M\mid y^{(1:t)}).
+\]</span></p>
+<p>랜드마크 위치가 연속이고 관측모형이 선형 가우시안이라면 상태벡터에 모든 랜드마크를 포함한 Kalman filter를 사용할 수 있다. 하지만 랜드마크 수 <span class="math inline">\(K\)</span>가 커지면 공분산행렬의 크기가 <span class="math inline">\(O(K^2)\)</span>이고 행렬연산은 더 비싸진다.</p>
+<div id="fig-temporal-gaussian-slam" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temporal-gaussian-slam-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-temporal-gaussian-slam.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temporal-gaussian-slam-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.9: 가우시안 SLAM. (a) 로봇 궤적과 랜드마크 주변분포의 타원. (b) 역공분산행렬과 이에 대응하는 희소 마르코프 네트워크. 실제 상관은 조밀해도 조건부의존성을 나타내는 정보행렬은 상당히 희소할 수 있다.
+</figcaption>
+</figure>
+</div>
+<p>강한 상관만 유지하는 희소 가우시안 근사나 적응적 클리크 트리로 계산을 줄일 수 있다. 또 다른 방법은 로봇의 전체 궤적을 입자로 표본화하는 것이다. 궤적이 주어지면 서로 다른 랜드마크 관측은 조건부독립이 되어 지도분포가 랜드마크별 가우시안의 곱으로 분해된다.</p>
+<p>이 방식이 <strong>FastSLAM</strong>이다. 각 입자는 로봇궤적과 <span class="math inline">\(K\)</span>개의 작은 랜드마크 필터를 가진다. 큰 <span class="math inline">\((2K+2)\)</span>차원 가우시안 한 개 대신, 소수의 궤적입자와 여러 2차원 가우시안을 유지한다.</p>
+<div id="fig-temporal-fastslam" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temporal-fastslam-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-temporal-fastslam.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temporal-fastslam-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.10: SLAM의 축약 입자필터. (a) 로봇궤적이 주어졌을 때 랜드마크들이 조건부독립이 되는 DBN. (b) EKF-SLAM과 FastSLAM의 추정궤적 비교. 적은 수의 입자로도 유사한 정확도를 얻을 수 있다.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="혼합-모형" class="level3" data-number="14.5.3">
+<h3 data-number="14.5.3" class="anchored" data-anchor-id="혼합-모형"><span class="header-section-number">14.5.3</span> 혼합 모형</h3>
+<p>이산상태와 연속상태를 함께 가진 조건부 선형 가우시안 DBN은 <strong>전환 선형 동적시스템(switching linear dynamical system, SLDS)</strong>이라 한다. 이산상태가 바뀌면 연속 동역학의 행렬이나 잡음수준이 전환된다.</p>
+<p>이산 경로가 완전히 주어지면 연속부분은 하나의 선형 가우시안 시스템이다. 그러나 이산경로를 주변화하면 각 경로에 대응하는 가우시안들의 혼합이 된다. 시점당 이산상태 수가 <span class="math inline">\(M\)</span>이면 <span class="math inline">\(t\)</span>시점 뒤 정확 혼합성분 수는 최대 <span class="math inline">\(M^t\)</span>로 증가한다.</p>
+<blockquote class="blockquote">
+<p><strong>예제</strong> 이산변수 <span class="math inline">\(D\)</span>와 연속변수 <span class="math inline">\(X\)</span>가 모두 지속되고 <span class="math inline">\(D'\to X'\)</span>가 있는 1차원 SLDS에서 시간 <span class="math inline">\(t\)</span>의 <span class="math inline">\(X^{(t)}\)</span> 주변분포는 과거의 모든 <span class="math inline">\(D^{(1:t)}\)</span> 경로에 대응하는 가우시안 혼합이다. 정확한 성분 수는 시간에 대해 지수적으로 늘어난다.</p>
+</blockquote>
+<section id="혼합-가지치기와-붕괴" class="level4" data-number="14.5.3.1">
+<h4 data-number="14.5.3.1" class="anchored" data-anchor-id="혼합-가지치기와-붕괴"><span class="header-section-number">14.5.3.1</span> 혼합 가지치기와 붕괴</h4>
+<ul>
+<li><strong>혼합 가지치기(mixture pruning):</strong> 가중치가 큰 상위 <span class="math inline">\(N\)</span>개 성분만 남기고 나머지를 제거한 뒤 재정규화한다. 경로 공간의 빔 탐색과 같다.</li>
+<li><strong>혼합 붕괴(mixture collapsing):</strong> 유사한 성분들을 여러 집합으로 나누고 각 집합을 하나의 가우시안으로 모멘트 일치한다.</li>
+</ul>
+<p>가우시안 혼합 <span class="math inline">\(p\)</span>를 하나의 가우시안 <span class="math inline">\(\hat p\)</span>로 붕괴할 때 일반적으로 <span class="math inline">\(D(p\|\hat p)\)</span>를 최소화하는 M-투영을 사용한다. 혼합평균과 전체분산 법칙으로 평균과 공분산을 계산한다.</p>
+</section>
+<section id="일반-의사-bayes-알고리즘" class="level4" data-number="14.5.3.2">
+<h4 data-number="14.5.3.2" class="anchored" data-anchor-id="일반-의사-bayes-알고리즘"><span class="header-section-number">14.5.3.2</span> 일반 의사-Bayes 알고리즘</h4>
+<p>최근 <span class="math inline">\(k-1\)</span>개 이산상태의 경로가 같은 혼합성분들을 묶는 계열을 <strong>general pseudo-Bayesian(GPB)</strong> 알고리즘이라 한다. 시간 <span class="math inline">\(t\)</span>의 믿음상태는 <span class="math inline">\(M^{k-1}\)</span>개의 가우시안을 유지하고, 한 번 전파하면 <span class="math inline">\(M^k\)</span>개가 된 뒤 다시 <span class="math inline">\(M^{k-1}\)</span>개 집합으로 붕괴한다.</p>
+<section id="gpb1" class="level5" data-number="14.5.3.2.1">
+<h5 data-number="14.5.3.2.1" class="anchored" data-anchor-id="gpb1"><span class="header-section-number">14.5.3.2.1</span> GPB1</h5>
+<p><span class="math inline">\(k=1\)</span>인 GPB1은 연속상태에 대해 단 하나의 가우시안과 현재 이산상태의 주변분포를 유지한다.</p>
+<p><span class="math display">\[
+\hat\sigma^{(t)}(A^{(t)},X^{(t)})
+\approx
+\hat\sigma^{(t)}(A^{(t)})
+\hat\sigma^{(t)}(X^{(t)}).
+\]</span></p>
+<p>전파하면 <span class="math inline">\(A^{(t+1)}\)</span>의 각 값에 대해 하나씩 <span class="math inline">\(M\)</span>개의 가우시안이 생기며, 관측을 반영한 뒤 모두 하나로 붕괴한다. 계산은 싸지만 이산상태와 연속상태의 상관을 버린다.</p>
+</section>
+<section id="gpb2" class="level5" data-number="14.5.3.2.2">
+<h5 data-number="14.5.3.2.2" class="anchored" data-anchor-id="gpb2"><span class="header-section-number">14.5.3.2.2</span> GPB2</h5>
+<p>GPB2는 현재 <span class="math inline">\(A^{(t)}\)</span>의 각 값에 조건부인 <span class="math inline">\(M\)</span>개의 가우시안을 유지한다.</p>
+<p><span class="math display">\[
+\hat\sigma^{(t)}(A^{(t)},X^{(t)})
+=
+\hat\sigma^{(t)}(A^{(t)})
+\hat\sigma^{(t)}(X^{(t)}\mid A^{(t)}).
+\]</span></p>
+<p>한 번 전파하면 <span class="math inline">\((A^{(t)},A^{(t+1)})\)</span>의 조합에 대응하는 <span class="math inline">\(M^2\)</span>개 가우시안이 생긴다. <span class="math inline">\(A^{(t+1)}\)</span>값별로 <span class="math inline">\(M\)</span>개씩 묶어 붕괴하면 다시 <span class="math inline">\(M\)</span>개가 된다. GPB1보다 정확하지만 매 시점 <span class="math inline">\(M^2\)</span>개 성분을 계산한다.</p>
+</section>
+<section id="imm" class="level5" data-number="14.5.3.2.3">
+<h5 data-number="14.5.3.2.3" class="anchored" data-anchor-id="imm"><span class="header-section-number">14.5.3.2.3</span> IMM</h5>
+<p><strong>상호작용 다중모형(interacting multiple model, IMM)</strong>은 GPB2처럼 <span class="math inline">\(M\)</span>개 조건부 가우시안을 유지하지만, 먼저 이산전이확률 <span class="math inline">\(P(A^{(t+1)}\mid A^{(t)})\)</span>를 사용해 각 새 모드별 혼합가중치를 계산한다. 그다음 <span class="math inline">\(A^{(t+1)}\)</span>값마다 이전 가우시안들을 한 번 붕괴하고, 각 붕괴결과를 해당 연속동역학으로 전파한다.</p>
+<p>따라서 새로 전파해야 하는 가우시안은 <span class="math inline">\(M\)</span>개뿐이다. 계산량은 GPB1보다 약간 크고 GPB2보다 훨씬 작지만, 실제 성능은 종종 GPB2에 가깝다.</p>
+<div id="fig-temporal-gpb-imm-collapse" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Figure 삽입 위치">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temporal-gpb-imm-collapse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/fig-temporal-gpb-imm-collapse.svg" class="img-fluid figure-img" alt="Figure 삽입 위치">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temporal-gpb-imm-collapse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.11: 가우시안 혼합 붕괴의 세 방식. (a) GPB1은 이산ㆍ연속 믿음상태를 분리하고 한 개의 가우시안으로 붕괴한다. (b) GPB2는 현재 이산상태별 가우시안을 유지한다. (c) IMM은 다음 이산상태별로 서로 다른 혼합가중치를 계산한 뒤 붕괴하고 전파한다.
+</figcaption>
+</figure>
+</div>
+<p>이 방법들은 모두 EP의 메시지 투영으로 해석할 수 있다. GPB1은 이산과 연속을 분리하는 메시지족, GPB2는 이산 부모별 조건부 가우시안 메시지족, IMM은 중간 단계에서 다음 모드에 조건부인 가우시안 메시지족을 사용한다.</p>
+<p>단순히 같은 이산상태에 해당하는 가우시안을 묶는 것이 항상 최선은 아니다. 서로 다른 모드의 가우시안이 실제로 더 비슷할 수 있으며, 같은 모드 안의 성분이 멀리 떨어질 수도 있다. 따라서 거리나 KL 발산을 기준으로 성분을 동적으로 군집화하면 더 나은 붕괴를 얻을 수 있다.</p>
+<p>이산상태 공간 자체가 너무 크면 2-TBN에 혼합 클러스터 그래프를 만들고, 클러스터 간 메시지를 선택한 정준표 또는 혼합가우시안족으로 M-투영하는 일반 EP 접근을 사용할 수 있다.</p>
+
+
+</section>
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./13-inference-in-hybrid-networks.html" class="pagination-link" aria-label="혼합 네트워크에서의 추론">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">혼합 네트워크에서의 추론</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./15-learning-graphical-models-overview.html" class="pagination-link" aria-label="그래프모형 학습 개요">
+        <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">그래프모형 학습 개요</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
