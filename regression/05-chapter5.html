@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>5&nbsp; 모형비교와 변수선택 – Regression Analysis</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./06-chapter6.html" rel="next">
+<link href="./04-chapter4.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-9e3e5b9121e68b3f077afb32f2c64d95.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./05-chapter5.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">모형비교와 변수선택</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Regression Analysis</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">목 차</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-chapter1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">서론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-chapter2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">단순선형회귀분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-chapter3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">다중선형회귀분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-chapter4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">회귀진단 및 보정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-chapter5.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">모형비교와 변수선택</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-chapter6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">가변수 회귀모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-chapter7.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">다중회귀분석 예제</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-chapter8.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">일반화 가중회귀모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-chapter9.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">벌점화 회귀모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-appendix.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">부록: 기초 행렬 이론</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#다중공선성" id="toc-다중공선성" class="nav-link active" data-scroll-target="#다중공선성"><span class="header-section-number">5.1</span> 다중공선성</a>
+  <ul class="collapse">
+  <li><a href="#다중공선성-문제" id="toc-다중공선성-문제" class="nav-link" data-scroll-target="#다중공선성-문제"><span class="header-section-number">5.1.1</span> 다중공선성 문제</a></li>
+  <li><a href="#분산팽창계수" id="toc-분산팽창계수" class="nav-link" data-scroll-target="#분산팽창계수"><span class="header-section-number">5.1.2</span> 분산팽창계수</a></li>
+  <li><a href="#다중공선성이-존재하는-경우" id="toc-다중공선성이-존재하는-경우" class="nav-link" data-scroll-target="#다중공선성이-존재하는-경우"><span class="header-section-number">5.1.3</span> 다중공선성이 존재하는 경우</a></li>
+  </ul></li>
+  <li><a href="#모형-비교와-f-검정" id="toc-모형-비교와-f-검정" class="nav-link" data-scroll-target="#모형-비교와-f-검정"><span class="header-section-number">5.2</span> 모형 비교와 F-검정</a></li>
+  <li><a href="#변수선택" id="toc-변수선택" class="nav-link" data-scroll-target="#변수선택"><span class="header-section-number">5.3</span> 변수선택</a>
+  <ul class="collapse">
+  <li><a href="#단계적-변수선택법" id="toc-단계적-변수선택법" class="nav-link" data-scroll-target="#단계적-변수선택법"><span class="header-section-number">5.3.1</span> 단계적 변수선택법</a></li>
+  <li><a href="#후진-제거법" id="toc-후진-제거법" class="nav-link" data-scroll-target="#후진-제거법"><span class="header-section-number">5.3.2</span> 후진 제거법</a></li>
+  <li><a href="#단계별-선택법" id="toc-단계별-선택법" class="nav-link" data-scroll-target="#단계별-선택법"><span class="header-section-number">5.3.3</span> 단계별 선택법</a></li>
+  <li><a href="#단계적-변수선택법의-한계" id="toc-단계적-변수선택법의-한계" class="nav-link" data-scroll-target="#단계적-변수선택법의-한계"><span class="header-section-number">5.3.4</span> 단계적 변수선택법의 한계</a></li>
+  <li><a href="#최적-부분집합-선택" id="toc-최적-부분집합-선택" class="nav-link" data-scroll-target="#최적-부분집합-선택"><span class="header-section-number">5.3.5</span> 최적 부분집합 선택</a></li>
+  <li><a href="#모형-선택기준" id="toc-모형-선택기준" class="nav-link" data-scroll-target="#모형-선택기준"><span class="header-section-number">5.3.6</span> 모형 선택기준</a></li>
+  <li><a href="#모형선택-기준의-비교" id="toc-모형선택-기준의-비교" class="nav-link" data-scroll-target="#모형선택-기준의-비교"><span class="header-section-number">5.3.7</span> 모형선택 기준의 비교</a></li>
+  <li><a href="#교차검증을-이용한-모형선택" id="toc-교차검증을-이용한-모형선택" class="nav-link" data-scroll-target="#교차검증을-이용한-모형선택"><span class="header-section-number">5.3.8</span> 교차검증을 이용한 모형선택</a></li>
+  <li><a href="#벌점회귀를-이용한-변수선택" id="toc-벌점회귀를-이용한-변수선택" class="nav-link" data-scroll-target="#벌점회귀를-이용한-변수선택"><span class="header-section-number">5.3.9</span> 벌점회귀를 이용한 변수선택</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="chapter5" class="quarto-section-identifier"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">모형비교와 변수선택</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>다중회귀분석에서는 설명변수를 많이 포함할수록 모형이 복잡해진다. 설명변수가 많아지면 훈련자료에서는 적합도가 좋아질 수 있지만, 불필요한 변수가 포함되면 회귀계수의 해석이 어려워지고 예측 성능이 오히려 나빠질 수 있다. 따라서 좋은 회귀모형은 단순히 많은 변수를 포함한 모형이 아니라, 분석 목적에 필요한 변수를 적절하게 포함한 모형이다.</p>
+<p>이 장에서 특히 중요하게 생각해야 할 질문은 다음과 같다.</p>
+<ol type="1">
+<li>다중공선성이 있으면 왜 회귀계수의 표준오차가 커지는가?</li>
+<li>변수를 제거하면 어떤 장점과 단점이 있는가?</li>
+<li>완전모형과 축소모형은 언제 F-검정으로 비교할 수 있는가?</li>
+<li>설명을 위한 변수선택과 예측을 위한 변수선택은 어떻게 다른가?</li>
+<li>AIC와 BIC가 선택하는 모형이 다를 때 어떤 기준으로 판단해야 하는가?</li>
+<li>단계별 변수선택 결과를 그대로 최종모형으로 사용해도 되는가?</li>
+</ol>
+<ul>
+<li><p>이 장에서는 설명변수들의 부분집합 중 반응변수와의 관계를 가장 잘 설명하는 부분집합을 선택하는 변수선택(variable selection)에 대해 설명함</p></li>
+<li><p>불필요한 설명변수가 제거되면 간단하면서도 설명력이 높은 모형을 선택할 수 있음</p></li>
+<li><p>설명변수들을 선별하는 단계에서 설명변수들 간의 관계에 대해 점검해 볼 필요가 있으므로 먼저 다중공선성 문제를 다룸</p></li>
+</ul>
+<p>변수선택은 단순히 p-value가 유의한 변수만 남기는 절차가 아니다. 분석 목적이 설명이라면 연구 질문에 중요한 변수를 포함하고, 교란변수 또는 보정변수를 적절히 고려하는 것이 중요하다. 반면 분석 목적이 예측이라면 개별 회귀계수의 유의성보다 새로운 자료에서의 예측오차가 더 중요할 수 있다. 따라서 변수선택을 수행할 때는 먼저 분석 목적이 설명 중심인지, 예측 중심인지, 또는 간결한 모형 제시가 목적인지를 명확히 해야 한다.</p>
+<section id="다중공선성" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="다중공선성"><span class="header-section-number">5.1</span> 다중공선성</h2>
+<ul>
+<li><p>설명변수 간에 연관성이 많으면 반응변수의 변화가 주요 설명변수보다 이 설명변수와 관련이 많은 다른 설명변수에 의존하게 되어 회귀모형 추정에 있어 문제가 발생함</p></li>
+<li><p>그러므로 설명변수들의 다중공선성(multicollinearity) 등 설명변수들 간의 관계를 명확히 이해하는 것은 다중회귀분석에 있어 꼭 필요한 과정임</p></li>
+</ul>
+<section id="다중공선성-문제" class="level3" data-number="5.1.1">
+<h3 data-number="5.1.1" class="anchored" data-anchor-id="다중공선성-문제"><span class="header-section-number">5.1.1</span> 다중공선성 문제</h3>
+<ul>
+<li>두 설명변수에 대해 상수항 <span class="math inline">\(c_0, c_1, c_2\)</span>가 존재해 다음의 선형식이 성립하면 두 변수 간 완전한 공선성이 존재함(collinear)</li>
+</ul>
+<p><span class="math display">\[
+c_1X_1 + c_2X_2 = c_0
+\]</span></p>
+<ul>
+<li><p>공선성이 있는 경우 회귀모형에서 두 변수를 모두 포함한다면 추정에 문제가 발생하게 되어 공선성 문제를 야기함</p></li>
+<li><p>이상점이 공선성을 유도하는 경우</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="at">sd=</span><span class="fl">0.1</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>x2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="at">sd=</span><span class="fl">0.1</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x1, x2, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>), <span class="at">xlab =</span> <span class="st">"x1"</span>, <span class="at">ylab =</span> <span class="st">"x2"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="fl">2.5</span>, <span class="fl">2.5</span>, <span class="at">pch =</span> <span class="dv">19</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="05-chapter5_files/figure-html/ch6_1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><p>이상점이 공선성을 유도하는 경우로 이상점 때문에 두 변수간의 관련성이 높아짐</p></li>
+<li><p>이상점이 공선성을 숨기는 경우</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="at">sd=</span><span class="fl">0.1</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>x2 <span class="ot">&lt;-</span> <span class="dv">1-2</span><span class="sc">*</span>x1<span class="sc">+</span><span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="at">sd=</span><span class="fl">0.1</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x1, x2, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>), <span class="at">xlab =</span> <span class="st">"x1"</span>, <span class="at">ylab =</span> <span class="st">"x2"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="fl">2.5</span>, <span class="fl">2.5</span>, <span class="at">pch =</span> <span class="dv">19</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="05-chapter5_files/figure-html/ch6_2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><p>이상점을 제거하면 두 변수 간의 관련성이 높아짐</p></li>
+<li><p>설명변수가 서로 독립이고 모형 설계시 고려되지 않은 다른 설명변수와 독립이라면 상관없지만 현실에서 설명변수가 완벽하게 독립인 경우는 거의 없음</p></li>
+<li><p>설명변수 중 한 개가 다른 설명변수들의 선형조합으로 표현된다면 <span class="math inline">\(\mathbf{X'X}\)</span>가 특이한(singular) 상황이 되며 다중공선성을 가지게 됨</p></li>
+<li><p>이러한 경우 <span class="math inline">\((\mathbf{X'X})^{-1}\)</span>를 구할 수 없어 회귀계수벡터 <span class="math inline">\(\beta\)</span>에 대한 최소제곱추정량을 구하는 데 문제가 발생함</p></li>
+<li><p>예) 아래와 같이 설명변수가 2개인 다중회귀모형</p></li>
+</ul>
+<p><span class="math display">\[
+Y=\beta_0 + \beta_1X_1 + \beta_2X_2 +\epsilon
+\]</span></p>
+<ul>
+<li><span class="math inline">\(r_{12}\)</span>를 <span class="math inline">\(X_1\)</span>과 <span class="math inline">\(X_2\)</span>의 상관계수라 할 때,</li>
+</ul>
+<p><span class="math display">\[
+Var(\hat{\beta}_j)=\sigma^2(\frac{1}{1-r_{12}^2})(\frac{1}{S_{X_jX_j}})
+\]</span></p>
+<ul>
+<li><p><span class="math inline">\(Var(\hat{\beta}_1)\)</span>과 <span class="math inline">\(Var(\hat{\beta}_2)\)</span>은 <span class="math inline">\(r_{12}^2=0\)</span>일 때 최소값을 가지며 <span class="math inline">\(r_{12}^2\approx 1\)</span>이면 <span class="math inline">\(\hat{\beta}_1\)</span>과 <span class="math inline">\(\hat{\beta}_2\)</span>의 분산은 크게 팽창되어(inflated) 회귀계수 추정값은 매우 불안정한 값이 됨</p></li>
+<li><p>다중 공선성이 존재하는 경우 반응변수의 민감도는 설명변수의 위치에 따라 크게 좌우될 수 있으며 관측된 데이터에서 멀어지는 경우 예측값을 불안정하게 만드는 원인이 될 수 있음</p></li>
+</ul>
+<p>다중공선성이 심하다고 해서 반드시 예측값 자체가 크게 나빠지는 것은 아니다. 서로 강하게 관련된 설명변수들이 함께 반응변수를 설명하면 적합값은 비교적 안정적일 수 있다. 그러나 개별 회귀계수를 분리해서 해석하기는 어려워진다. 즉, 다중공선성의 핵심 문제는 “모형 전체가 의미 없는가”라기보다 “각 설명변수의 독립적인 효과를 안정적으로 추정하고 해석할 수 있는가”에 있다.</p>
+<section id="다중공선성이-판단되는-경우" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="다중공선성이-판단되는-경우">다중공선성이 판단되는 경우</h4>
+<ol type="1">
+<li><p>설명변수들 간의 상관행렬에서 절대값이 큰 상관계수를 갖는 경우</p></li>
+<li><p><span class="math inline">\(j\)</span>번째 설명변수를 반응변수 위치에 놓고 나머지 설명변수들로 회귀모형을 적합했을 때 결정계수 <span class="math inline">\(R_j^2\)</span>이 1에 가까운 경우</p></li>
+<li><p><span class="math inline">\(\mathbf{X'X}\)</span>의 고유값을 구한 후 크기 순서대로 늘어놓아 가장 큰 고유값을 <span class="math inline">\(\lambda_1\)</span>이라 놓으면 <span class="math inline">\(\lambda_1&gt;\lambda_2&gt;\cdots&gt;\lambda_{p+1}\)</span>을 만족하며 가장 작은 고유값 <span class="math inline">\(\lambda_{p+1}\)</span>에 대해 조건수(condition number)는 다음과 같음</p></li>
+</ol>
+<p><span class="math display">\[
+\kappa = \sqrt{\frac{\lambda_1}{\lambda_{p+1}}}
+\]</span></p>
+<ul>
+<li>만일 <span class="math inline">\(\kappa\ge 30\)</span>이면 다중공선성이 있다고 판단함</li>
+</ul>
+</section>
+</section>
+<section id="분산팽창계수" class="level3" data-number="5.1.2">
+<h3 data-number="5.1.2" class="anchored" data-anchor-id="분산팽창계수"><span class="header-section-number">5.1.2</span> 분산팽창계수</h3>
+<ul>
+<li>설명변수를 <span class="math inline">\(p\)</span>개 포함한 일반적인 다중회귀모형</li>
+</ul>
+<p><span class="math display">\[
+Y=\beta_0 + \beta_1X_1 +\cdots +\beta_pX_p + \epsilon
+\]</span></p>
+<ul>
+<li>회귀계수추정량의 분산</li>
+</ul>
+<p><span class="math display">\[
+Var(\hat{\beta}_j)=\sigma^2(\frac{1}{1-R_{j}^2})(\frac{1}{S_{X_jX_j}}), \,\,\, j=1,\ldots, p
+\]</span></p>
+<ul>
+<li><p>여기서 <span class="math inline">\(R_j^2\)</span>은 <span class="math inline">\(j\)</span>번째 설명변수를 반응변수 위치에 놓고 나머지 설명변수들로 회귀모형을 적합했을 때의 결정계수</p></li>
+<li><p>만약 <span class="math inline">\(j\)</span>번째 설명변수가 나머지 변수들의 어떤 부분집합에 거의 선형종속이면 <span class="math inline">\(R_j^2\)</span>은 1에 가깝게 되고 <span class="math inline">\(\frac{1}{1-R_j^2}\)</span>은 커지게 됨</p></li>
+</ul>
+<section id="분산팽창계수variance-inflation-factor" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="분산팽창계수variance-inflation-factor">분산팽창계수(variance inflation factor)</h4>
+<p><span class="math display">\[
+VIF_j = \frac{1}{1-R_j^2}
+\]</span></p>
+<ul>
+<li><p>일반적으로 다중공선성의 존재를 조사하는 방법으로 분산팽창계수가 널리 쓰임</p></li>
+<li><p>한 개 또는 그 이상의 <span class="math inline">\(VIF\)</span> 값이 크면 다중공선성 문제가 있음을 나타냄</p></li>
+<li><p><span class="math inline">\(R_j^2\ge 0.6\)</span>이상인 경우 즉, 분산팽창계수 <span class="math inline">\(VIF_j\ge 2.5\)</span> 이상이면 다중공선성을 의심해 볼 수 있음</p></li>
+<li><p>일반적으로 <span class="math inline">\(VIF_j \ge 10\)</span>이면 다중공선성 문제가 있다고 함</p></li>
+</ul>
+<p>VIF 기준은 분야와 분석 목적에 따라 다르게 적용될 수 있다. 예측이 주목적인 경우에는 VIF가 다소 크더라도 예측 성능이 충분히 좋다면 모형을 사용할 수 있다. 반면 특정 설명변수의 효과를 해석하는 것이 목적이라면 VIF가 크지 않은지 더 엄격하게 확인해야 한다. 특히 의학·보건학 연구에서 보정효과를 해석할 때는 회귀계수의 방향, 표준오차, 신뢰구간이 다중공선성에 의해 불안정해지지 않았는지 확인해야 한다.</p>
+<ul>
+<li>R에서는 car package의 vif() 함수를 이용하여 분산팽창계수를 구할 수 있음</li>
+</ul>
+</section>
+</section>
+<section id="다중공선성이-존재하는-경우" class="level3" data-number="5.1.3">
+<h3 data-number="5.1.3" class="anchored" data-anchor-id="다중공선성이-존재하는-경우"><span class="header-section-number">5.1.3</span> 다중공선성이 존재하는 경우</h3>
+<ul>
+<li><p>다중공선성은 추정식과 예측값을 불안정하게 함</p></li>
+<li><p>설명변수들 간의 상관관계로 인해 회귀계수에 대한 검정이 유의하지 않을 수 있으며 이러한 경우 추정식이 유의하지 않게 되며 따라서 예측값에 대해 신뢰할 수 없게 됨</p></li>
+<li><p>또한 설명변수의 위치에 따라 예측값이 크게 좌우될 수 있으며 관측된 데이터에서 멀어지는 경우 예측값을 불안정하게 만드는 원인이 될 수 있음</p></li>
+</ul>
+<section id="다중공선성을-감안하는-방법" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="다중공선성을-감안하는-방법">다중공선성을 감안하는 방법</h4>
+<ol type="1">
+<li><p>상관성이 큰 설명변수를 제거한 후 분석</p></li>
+<li><p>모든 설명변수를 포함시키고자 한다면 능형회귀(ridge regression) 등의 대안 모형을 모색</p></li>
+</ol>
+<p><br></p>
+</section>
+</section>
+</section>
+<section id="모형-비교와-f-검정" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="모형-비교와-f-검정"><span class="header-section-number">5.2</span> 모형 비교와 F-검정</h2>
+<ul>
+<li><p>설명변수 간 다중공선성이 존재하는 경우 설명변수를 제거하여 모형을 개선하고 다중공선성을 줄일 수 있음</p></li>
+<li><p>설명변수를 2개를 모두 포함한 완전모형</p></li>
+</ul>
+<p><span class="math display">\[
+Y=\beta_0+\beta_1X_1+\beta_2X_2+\epsilon
+\]</span></p>
+<ul>
+<li>부분집합 모형으로 <span class="math inline">\(X_2\)</span>를 제거하여 설명변수가 1개인 경우의 축소모형</li>
+</ul>
+<p><span class="math display">\[
+Y=\beta_0+\beta_1X_1+\epsilon
+\]</span></p>
+<ul>
+<li>편의상 <span class="math inline">\(S_{X_1X_1}=S_{X_2X_2}=1\)</span>로 가정하면, 완전모형에서 <span class="math inline">\(\beta_1\)</span>에 대한 추정에서 모형이 사실일 경우</li>
+</ul>
+<p><span class="math display">\[
+E(\hat{\beta}_1)=\beta_1, \,\,\, Var(\hat{\beta}_1)=\frac{\sigma^2}{1-r_{12}^2}
+\]</span></p>
+<ul>
+<li>축소모형이 사실이라면</li>
+</ul>
+<p><span class="math display">\[
+E(\hat{\beta}_1)=\beta_1+r_{12}\beta_2, \,\,\, Var(\hat{\beta}_1)=\sigma^2
+\]</span></p>
+<ul>
+<li>완전모형과 축소모형의 분산을 비교해 보면</li>
+</ul>
+<p><span class="math display">\[
+Var(\hat{\beta}_1)_{full}=\frac{\sigma^2}{1-r_{12}^2}\ge\sigma^2=Var(\hat{\beta}_1)_{reduce}
+\]</span></p>
+<ul>
+<li><p>축소모형에서의 회귀계수 추정량의 분산이 완전모형보다 작음을 알 수 있으므로 공선성이 존재할 경우에는 축소모형을 선택하는 것이 좋음</p></li>
+<li><p><span class="math inline">\(p\)</span>개의 설명변수가 있는 다중회귀모형에서 모형비교</p></li>
+</ul>
+<p><span class="math display">\[
+\mathbf{Y=X\beta+\epsilon}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\mathbf{X}\)</span>를 <span class="math inline">\(\mathbf{X}_1\)</span>과 <span class="math inline">\(\mathbf{X}_2\)</span>로 분할하고 마찬가지로 해당되는 회귀계수벡터 <span class="math inline">\(\beta\)</span>를 <span class="math inline">\(\beta_1\)</span>과 <span class="math inline">\(\beta_2\)</span>로 분할하면</li>
+</ul>
+<p><span class="math display">\[
+\mathbf{Y=X_1\beta_1+X_2\beta_2+\epsilon}
+\]</span></p>
+<ul>
+<li>여기서 일부의 설명변수 <span class="math inline">\(\mathbf{X}_2\)</span>를 제거한 축소모형</li>
+</ul>
+<p><span class="math display">\[
+\mathbf{Y=X_1\beta_1+\epsilon}
+\]</span></p>
+<ul>
+<li><p>축소된 회귀모형은 완전모형에서 <span class="math inline">\(\beta_2=0\)</span>일 경우 동일한 모형이 됨</p></li>
+<li><p>축소된 모형에서의 <span class="math inline">\(\beta_1\)</span>에 대한 추정량</p></li>
+</ul>
+<p><span class="math display">\[
+\hat{\beta}_1=\mathbf{(X_1'X_1)^{-1}X_1'Y}
+\]</span></p>
+<ul>
+<li><p>두 모형 비교를 위한 통계적 가설</p>
+<ul>
+<li><span class="math inline">\(H_0: \mathbf{Y=X_1\beta_1+\epsilon}\)</span></li>
+<li><span class="math inline">\(H_1: \mathbf{Y=X_1\beta_1+X_2\beta_2+\epsilon}\)</span></li>
+</ul></li>
+<li><p><span class="math inline">\(H_0\)</span>하에서의 잔차제곱합 <span class="math inline">\(RSS_{H_0}\)</span>는 자유도 <span class="math inline">\(df_{H_0}\)</span>를 가지며, <span class="math inline">\(H_1\)</span>하에서의 잔차제곱합 <span class="math inline">\(RSS_{H_1}\)</span>는 자유도 <span class="math inline">\(df_{H_1}\)</span>를 가짐</p></li>
+<li><p>대립가설하에서 모수의 개수가 더 많으므로 <span class="math inline">\(df_{H_0}&gt;df_{H_1}\)</span>이 됨</p></li>
+<li><p>검정통계량</p></li>
+</ul>
+<p><span class="math display">\[
+F=\frac{(RSS_{H_0}-RSS_{H_1})/(df_{H_0}-df_{H_1})}{RSS_{H_1}/df_{H_1}} \sim F_{df_{H_0}-df_{H_1},df_{H_1}}
+\]</span></p>
+<ul>
+<li>유의수준 <span class="math inline">\(\alpha\)</span> 검정</li>
+</ul>
+<p>완전모형과 축소모형을 F-검정으로 비교할 때는 두 모형이 <strong>중첩모형(nested model)</strong> 이어야 한다. 즉, 축소모형은 완전모형에서 일부 설명변수를 제거한 형태여야 한다. 예를 들어 <code>y ~ x1 + x2 + x3</code>와 <code>y ~ x1 + x2</code>는 중첩모형이므로 F-검정으로 비교할 수 있다. 하지만 <code>y ~ x1 + x2</code>와 <code>y ~ x3 + x4</code>처럼 서로 포함관계가 없는 모형은 일반적인 중첩모형 F-검정으로 직접 비교하기 어렵다.</p>
+<p>F-검정에서 귀무가설이 기각되면 제거하려던 변수들이 반응변수 설명에 유의하게 기여한다고 볼 수 있다. 반대로 귀무가설이 기각되지 않으면 축소모형이 충분히 간단하면서도 자료를 설명하는 데 큰 손실이 없다고 해석할 수 있다.</p>
+<ul>
+<li>유의수준 <span class="math inline">\(\alpha\)</span> 검정</li>
+</ul>
+<p><span class="math display">\[
+F\ge F_{df_{H_0}-df_{H_1},df_{H_1}} \,\,\, then \,\,\, reject \,\,\, H_0
+\]</span></p>
+<p><br></p>
+</section>
+<section id="변수선택" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="변수선택"><span class="header-section-number">5.3</span> 변수선택</h2>
+<p>회귀분석에서는 여러 개의 설명변수 중 어떤 변수를 회귀모형에 포함할 것인지를 결정해야 하는 경우가 많다. 가능한 모든 설명변수를 모형에 포함하면 자료에 대한 설명력은 높아질 수 있지만, 불필요한 변수가 포함되면서 모형이 지나치게 복잡해지고 해석이 어려워질 수 있다.</p>
+<p>반대로 설명변수를 지나치게 제거하면 반응변수와 중요한 관련성을 갖는 변수가 제외되어 모형의 편향(bias)이 증가할 수 있다.</p>
+<p>따라서 회귀분석에서는 연구목적과 자료의 특성을 고려하여 <strong>필요한 설명변수를 선택하고 불필요한 설명변수를 제외함으로써 적절한 회귀모형을 구성하는 과정</strong>이 필요하다. 이를 <strong>변수선택(variable selection)</strong> 또는 <strong>모형선택(model selection)</strong>이라 한다.</p>
+<p>변수선택의 주요 목적은 다음과 같다.</p>
+<ul>
+<li>불필요한 설명변수를 제거하여 모형을 단순화</li>
+<li>모형의 해석가능성(interpretability) 향상</li>
+<li>불필요한 설명변수로 인한 회귀계수 추정의 불안정성 감소</li>
+<li>과적합(overfitting) 가능성 감소</li>
+<li>새로운 자료에 대한 예측성능 향상</li>
+<li>경우에 따라 설명변수들 사이의 다중공선성(multicollinearity) 완화</li>
+<li>자료를 설명하는 데 필요한 핵심 변수의 파악</li>
+</ul>
+<p>그러나 <strong>다중공선성이 크다는 이유만으로 설명변수를 기계적으로 제거하는 것은 적절하지 않을 수 있다.</strong></p>
+<p>예를 들어 연구적으로 반드시 보정해야 하는 변수나 중요한 교란변수(confounder)는 통계적으로 유의하지 않더라도 모형에 포함해야 할 수 있다. 따라서 변수선택은 단순히 통계적 기준만으로 결정하기보다 <strong>연구목적, 변수의 의미, 통계적 적합도, 예측성능 등을 종합적으로 고려하는 과정</strong>으로 이해해야 한다.</p>
+<section id="모수절약의-원칙" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="모수절약의-원칙">모수절약의 원칙</h4>
+<p><strong>모수절약의 원칙(principle of parsimony)</strong>은 비슷한 수준의 설명력이나 예측력을 갖는 여러 모형이 있다면 가능한 한 단순한 모형을 선호한다는 원칙이다.</p>
+<p>예를 들어 3개의 설명변수로 구성된 회귀모형과 10개의 설명변수로 구성된 회귀모형의 예측성능이 거의 동일하다면, 일반적으로 3개의 설명변수로 구성된 모형을 선호할 수 있다.</p>
+<p>단순한 모형은 다음과 같은 장점이 있다.</p>
+<ul>
+<li>해석이 쉽다.</li>
+<li>필요한 자료의 수집 비용을 줄일 수 있다.</li>
+<li>불필요한 변수에 의한 추정의 불안정성을 줄일 수 있다.</li>
+<li>새로운 자료에서 재현될 가능성이 높아질 수 있다.</li>
+<li>과적합 가능성을 낮출 수 있다.</li>
+</ul>
+<p>그러나 단순한 모형이 항상 좋은 모형이라는 의미는 아니다.</p>
+<p>중요한 설명변수까지 제거하면 모형의 편향이 증가하고 중요한 관계를 놓칠 수 있다. 반대로 설명변수를 지나치게 많이 포함하면 모형의 분산(variance)이 증가하고 표본자료에 과도하게 적합될 수 있다.</p>
+<p>즉, 변수선택은 다음과 같은 두 문제 사이의 균형을 찾는 과정이다.</p>
+<blockquote class="blockquote">
+<p><strong>너무 단순한 모형 → 편향 증가</strong></p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>너무 복잡한 모형 → 분산 및 과적합 증가</strong></p>
+</blockquote>
+<p>따라서 변수선택은 <strong>모형의 적합도와 복잡도 사이의 균형</strong>, 또는 <strong>편향과 분산 사이의 균형(bias-variance trade-off)</strong>을 찾는 과정으로 이해할 수 있다.</p>
+</section>
+<section id="변수선택의-주요-접근방법" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="변수선택의-주요-접근방법">변수선택의 주요 접근방법</h4>
+<p>전통적인 회귀분석의 변수선택 방법은 크게 다음과 같이 구분할 수 있다.</p>
+<ol type="1">
+<li>전진 선택법(forward selection)</li>
+<li>후진 제거법(backward elimination)</li>
+<li>단계별 선택법(stepwise selection)</li>
+<li>최적 부분집합 선택(best subset selection)</li>
+</ol>
+<p>앞의 세 방법은 현재 모형에서 설명변수를 하나씩 추가하거나 제거하면서 적절한 모형을 탐색한다는 점에서 <strong>단계적 탐색방법(sequential variable selection)</strong>에 해당한다.</p>
+<p>반면 최적 부분집합 선택은 가능한 설명변수들의 여러 조합을 직접 비교한다.</p>
+</section>
+<section id="단계적-변수선택법" class="level3" data-number="5.3.1">
+<h3 data-number="5.3.1" class="anchored" data-anchor-id="단계적-변수선택법"><span class="header-section-number">5.3.1</span> 단계적 변수선택법</h3>
+<p>단계적 변수선택법은 설명변수를 하나씩 추가하거나 제거하면서 적절한 설명변수의 조합을 찾아가는 방법이다.</p>
+<p>변수를 추가하거나 제거하는 기준으로는 다음과 같은 통계량을 사용할 수 있다.</p>
+<ul>
+<li>부분 <span class="math inline">\(F\)</span>-검정(partial <span class="math inline">\(F\)</span>-test)</li>
+<li>회귀계수에 대한 <span class="math inline">\(t\)</span>-검정</li>
+<li>p-value</li>
+<li>AIC</li>
+<li>BIC</li>
+<li>기타 모형 적합도 기준</li>
+</ul>
+<p>전통적으로는 유의수준을 이용한 <span class="math inline">\(F\)</span>-검정 또는 p-value를 많이 사용하였으나, 최근에는 AIC나 BIC와 같은 정보기준을 이용하여 단계적 탐색을 수행하기도 한다.</p>
+<section id="전진-선택법" class="level4" data-number="5.3.1.1">
+<h4 data-number="5.3.1.1" class="anchored" data-anchor-id="전진-선택법"><span class="header-section-number">5.3.1.1</span> 전진 선택법</h4>
+<p><strong>전진 선택법(forward selection)</strong>은 설명변수가 하나도 포함되지 않은 모형에서 시작하여 설명변수를 하나씩 추가하는 방법이다.</p>
+<p>일반적으로 초기모형은 절편(intercept)만을 포함한다.</p>
+<p><span class="math display">\[
+Y_i=\beta_0+\epsilon_i
+\]</span></p>
+<p>이 모형에서 출발하여 반응변수를 가장 잘 설명하는 설명변수를 하나씩 추가한다.</p>
+</section>
+<section id="전진-선택법의-절차" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="전진-선택법의-절차">전진 선택법의 절차</h4>
+<ol type="1">
+<li>절편만 포함하는 모형에서 시작한다.</li>
+<li>현재 모형에 포함되어 있지 않은 설명변수를 각각 하나씩 추가하여 모형을 적합한다.</li>
+<li>후보 설명변수 중 모형을 가장 크게 개선하는 변수를 찾는다.</li>
+<li>해당 변수의 추가가 사전에 설정한 기준을 만족하면 모형에 포함한다.</li>
+<li>남아 있는 설명변수들에 대하여 동일한 과정을 반복한다.</li>
+<li>더 이상 추가할 설명변수가 없거나 변수를 추가해도 모형이 충분히 개선되지 않으면 선택을 종료한다.</li>
+</ol>
+<p>예를 들어 설명변수가</p>
+<p><span class="math display">\[
+X_1,\;X_2,\;X_3,\;X_4
+\]</span></p>
+<p>라고 하자.</p>
+<p>처음에는</p>
+<p><span class="math display">\[
+Y=\beta_0+\epsilon
+\]</span></p>
+<p>에서 시작하고, 각각</p>
+<p><span class="math display">\[
+Y=\beta_0+\beta_1X_1+\epsilon
+\]</span></p>
+<p><span class="math display">\[
+Y=\beta_0+\beta_2X_2+\epsilon
+\]</span></p>
+<p><span class="math display">\[
+Y=\beta_0+\beta_3X_3+\epsilon
+\]</span></p>
+<p><span class="math display">\[
+Y=\beta_0+\beta_4X_4+\epsilon
+\]</span></p>
+<p>을 비교한다.</p>
+<p>이 가운데 <span class="math inline">\(X_2\)</span>를 포함하는 모형이 가장 좋은 경우 <span class="math inline">\(X_2\)</span>를 먼저 선택한다.</p>
+<p>다음 단계에서는</p>
+<p><span class="math display">\[
+(X_2,X_1),\quad
+(X_2,X_3),\quad
+(X_2,X_4)
+\]</span></p>
+<p>를 비교하여 추가할 변수를 선택한다.</p>
+</section>
+<section id="전진-선택법의-특징" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="전진-선택법의-특징">전진 선택법의 특징</h4>
+<p>전진 선택법은 후보 설명변수가 많더라도 상대적으로 계산량이 적다는 장점이 있다. 그러나 한 번 모형에 포함된 변수는 이후 단계에서 다시 제거하지 않는 것이 일반적인 전진 선택법의 특징이다. 따라서 초기에 선택된 변수가 이후 변수선택에 큰 영향을 줄 수 있으며, 초기에 부적절한 변수가 포함된 경우 더 좋은 변수조합을 찾지 못할 가능성이 있다.</p>
+</section>
+</section>
+<section id="후진-제거법" class="level3" data-number="5.3.2">
+<h3 data-number="5.3.2" class="anchored" data-anchor-id="후진-제거법"><span class="header-section-number">5.3.2</span> 후진 제거법</h3>
+<p><strong>후진 제거법(backward elimination)</strong>은 모든 후보 설명변수를 포함한 완전모형(full model)에서 시작하여 필요하지 않은 설명변수를 하나씩 제거하는 방법이다.</p>
+<p>후보 설명변수가 <span class="math inline">\(p\)</span>개라면 최초의 완전모형은</p>
+<p><span class="math display">\[
+Y_i
+=
+\beta_0
++\beta_1X_{i1}
++\beta_2X_{i2}
++\cdots
++\beta_pX_{ip}
++\epsilon_i
+\]</span></p>
+<p>가 된다.</p>
+<section id="후진-제거법의-절차" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="후진-제거법의-절차">후진 제거법의 절차</h4>
+<ol type="1">
+<li>모든 후보 설명변수를 포함하는 완전모형을 적합한다.</li>
+<li>모형에 포함된 각 설명변수가 모형에 기여하는 정도를 평가한다.</li>
+<li>모형에 가장 적게 기여하는 설명변수를 찾는다.</li>
+<li>해당 변수를 제거해도 모형이 유의하게 나빠지지 않는다면 변수를 제거한다.</li>
+<li>축소된 모형을 다시 적합한다.</li>
+<li>더 이상 제거할 변수가 없을 때까지 같은 과정을 반복한다.</li>
+</ol>
+<p>p-value를 이용하는 경우에는 일반적으로 <strong>p-value가 가장 큰 변수부터 제거하는 방식</strong>을 생각할 수 있다.</p>
+</section>
+<section id="후진-제거법의-특징" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="후진-제거법의-특징">후진 제거법의 특징</h4>
+<p>후진 제거법의 장점은 처음부터 모든 설명변수를 동시에 고려한다는 것이다.</p>
+<p>따라서 특정 설명변수가 다른 변수들이 모형에 포함되어 있는 상황에서 어떤 역할을 하는지 평가할 수 있다.</p>
+<p>그러나 모든 후보 설명변수가 포함된 완전모형을 적합할 수 있어야 한다는 제약이 있다.</p>
+<p>특히 다음과 같은 경우에는 적용하기 어렵다.</p>
+<ul>
+<li>표본 수가 작고 후보 설명변수가 매우 많은 경우</li>
+<li>설명변수의 수가 표본 수와 비슷하거나 더 많은 경우</li>
+<li>심한 다중공선성으로 완전모형의 추정이 불안정한 경우</li>
+</ul>
+</section>
+</section>
+<section id="단계별-선택법" class="level3" data-number="5.3.3">
+<h3 data-number="5.3.3" class="anchored" data-anchor-id="단계별-선택법"><span class="header-section-number">5.3.3</span> 단계별 선택법</h3>
+<p><strong>단계별 선택법(stepwise selection)</strong>은 전진 선택법과 후진 제거법의 특성을 결합한 방법이다. 전진 선택법에서는 한 번 선택된 설명변수가 이후 제거되지 않는다. 그러나 새로운 설명변수가 모형에 추가되면 기존에 선택된 설명변수의 중요성이 달라질 수 있다. 단계별 선택법에서는 이러한 문제를 해결하기 위하여 <strong>새로운 설명변수를 추가한 후 기존에 포함되어 있던 변수들의 필요성을 다시 평가한다.</strong></p>
+<p>따라서 한 번 선택되었던 변수라도 이후에 모형에서 제거될 수 있다.</p>
+<section id="단계별-선택법의-절차" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="단계별-선택법의-절차">단계별 선택법의 절차</h4>
+<ol type="1">
+<li>절편만 포함하는 모형 또는 연구자가 지정한 초기모형에서 시작한다.</li>
+<li>현재 모형에 포함되지 않은 설명변수를 하나씩 추가하여 모형의 개선 정도를 평가한다.</li>
+<li>모형을 가장 크게 개선하는 설명변수가 선택기준을 만족하면 해당 변수를 모형에 추가한다.</li>
+<li>새로운 변수가 추가되면 현재 모형에 이미 포함되어 있는 모든 설명변수의 필요성을 다시 평가한다.</li>
+<li>새 변수가 추가됨에 따라 기존 변수 중 더 이상 모형에 충분히 기여하지 않는 변수가 있으면 해당 변수를 제거한다.</li>
+<li>다시 모형에 포함되지 않은 변수 중 추가할 변수가 있는지를 검토한다.</li>
+<li>변수의 추가 또는 제거가 더 이상 발생하지 않을 때까지 이 과정을 반복한다.</li>
+</ol>
+</section>
+<section id="예시" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="예시">예시</h4>
+<p>처음에 <span class="math inline">\(X_1\)</span>이 선택되었다고 하자.</p>
+<p><span class="math display">\[
+Y=\beta_0+\beta_1X_1+\epsilon
+\]</span></p>
+<p>다음 단계에서 <span class="math inline">\(X_2\)</span>가 추가되면</p>
+<p><span class="math display">\[
+Y=\beta_0+\beta_1X_1+\beta_2X_2+\epsilon
+\]</span></p>
+<p>이 된다.</p>
+<p>이때 <span class="math inline">\(X_2\)</span>가 추가되기 전에는 <span class="math inline">\(X_1\)</span>이 유의하였지만, <span class="math inline">\(X_2\)</span>와 <span class="math inline">\(X_1\)</span>이 높은 상관관계를 갖는다면 <span class="math inline">\(X_2\)</span>가 추가된 후 <span class="math inline">\(X_1\)</span>의 추가적인 설명력이 매우 작아질 수 있다. 단계별 선택법에서는 이 시점에서 <span class="math inline">\(X_1\)</span>의 필요성을 다시 평가하여 필요하면 제거한다. 이러한 점이 전진 선택법과 단계별 선택법의 중요한 차이이다.</p>
+</section>
+<section id="변수의-진입기준과-제거기준" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="변수의-진입기준과-제거기준">변수의 진입기준과 제거기준</h4>
+<p>부분 <span class="math inline">\(F\)</span>-검정이나 p-value를 이용하여 단계별 변수선택을 수행하는 경우에는 설명변수의 <strong>진입기준(entry criterion)</strong>과 <strong>제거기준(removal criterion)</strong>을 설정할 수 있다.</p>
+<p>예를 들어</p>
+<p><span class="math display">\[
+\alpha_{\text{entry}}=0.05
+\]</span></p>
+<p>를 변수의 진입기준으로 사용하면 p-value가 0.05보다 작은 설명변수를 모형에 포함할 수 있다.</p>
+<p>또한</p>
+<p><span class="math display">\[
+\alpha_{\text{remove}}=0.10
+\]</span></p>
+<p>을 제거기준으로 사용하면 모형에 포함된 변수의 p-value가 0.10보다 커졌을 때 제거할 수 있다.</p>
+<p>일반적으로 단계별 선택에서 변수들이 지나치게 반복해서 들어왔다 나가는 현상을 줄이기 위해</p>
+<p><span class="math display">\[
+\alpha_{\text{entry}}
+&lt;
+\alpha_{\text{remove}}
+\]</span></p>
+<p>와 같이 설정하기도 한다.</p>
+<p>그러나 구체적인 기준은 분석목적과 소프트웨어에 따라 달라질 수 있다.</p>
+</section>
+</section>
+<section id="단계적-변수선택법의-한계" class="level3" data-number="5.3.4">
+<h3 data-number="5.3.4" class="anchored" data-anchor-id="단계적-변수선택법의-한계"><span class="header-section-number">5.3.4</span> 단계적 변수선택법의 한계</h3>
+<p>전진선택, 후진제거 및 단계별 선택은 사용하기 쉽고 직관적이기 때문에 널리 사용되어 왔다. 그러나 다음과 같은 중요한 한계가 있다.</p>
+<section id="선택-결과의-불안정성" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="선택-결과의-불안정성">선택 결과의 불안정성</h4>
+<p>선택된 변수의 조합이 표본에 민감할 수 있다. 특히 설명변수들 사이의 상관관계가 높은 경우에는 자료의 일부가 조금만 달라져도 서로 다른 변수가 선택될 수 있다. 예를 들어 <span class="math inline">\(X_1\)</span>과 <span class="math inline">\(X_2\)</span>가 매우 높은 상관관계를 가지고 반응변수와 비슷한 정도의 관련성을 가진다면 어떤 표본에서는 <span class="math inline">\(X_1\)</span>이 선택되고 다른 표본에서는 <span class="math inline">\(X_2\)</span>가 선택될 수 있다. 따라서 선택된 변수 자체를 절대적인 결과로 해석할 때 주의해야 한다.</p>
+</section>
+<section id="반복검정에-따른-문제" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="반복검정에-따른-문제">반복검정에 따른 문제</h4>
+<p>단계적 변수선택에서는 많은 후보변수에 대하여 반복적으로 통계적 검정을 수행한다. 따라서 최종모형에서 얻어진 p-value를 마치 처음부터 해당 모형이 정해져 있었던 것처럼 해석하는 것은 적절하지 않을 수 있다. 일반적인 회귀분석의 p-value와 신뢰구간은 분석 전에 모형이 정해져 있다고 가정하여 계산된다. 그러나 변수선택을 수행한 경우에는</p>
+<blockquote class="blockquote">
+<p>“어떤 변수를 선택할 것인가?”</p>
+</blockquote>
+<p>라는 과정 자체가 자료에 의해 결정된다. 따라서 선택 후의 회귀계수, p-value 및 신뢰구간에는 <strong>모형선택 과정에서 발생한 추가적인 불확실성</strong>이 충분히 반영되지 않을 수 있다.</p>
+</section>
+<section id="최적모형을-보장하지-않음" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="최적모형을-보장하지-않음">최적모형을 보장하지 않음</h4>
+<p>단계적 변수선택은 모든 가능한 변수조합을 비교하지 않는다. 현재 단계에서 가장 좋은 선택을 순차적으로 반복하는 탐욕적 탐색(greedy search)에 가깝기 때문에 최종적으로 얻어진 모형이 가능한 모든 모형 중 가장 좋은 모형이라는 보장은 없다. 따라서 단계별 변수선택 결과는 <strong>최종적인 정답이라기보다 적절한 후보모형을 탐색하는 방법</strong>으로 사용하는 것이 바람직하다.</p>
+</section>
+<section id="연구적으로-중요한-변수가-제외될-수-있음" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="연구적으로-중요한-변수가-제외될-수-있음">연구적으로 중요한 변수가 제외될 수 있음</h4>
+<p>단계적 변수선택은 주로 자료에서 계산되는 통계량에 의해 변수의 포함 여부를 결정한다. 그러나 임상적·과학적·이론적으로 중요한 변수는 통계적 유의성이 낮더라도 반드시 포함해야 하는 경우가 있다. 특히 다음 변수들은 통계적 기준만으로 제거하지 않도록 주의해야 한다.</p>
+<ul>
+<li>연구설계에서 사전에 지정한 핵심 설명변수</li>
+<li>중요한 교란변수</li>
+<li>층화변수</li>
+<li>임상적으로 중요한 변수</li>
+<li>선행연구에서 중요성이 확립된 변수</li>
+</ul>
+</section>
+<section id="r에서-단계적-변수선택" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="r에서-단계적-변수선택">R에서 단계적 변수선택</h4>
+<p>R의 기본 함수인 <code>step()</code>을 이용하면 단계적 변수선택을 수행할 수 있다.</p>
+<p>예를 들어 완전모형이 다음과 같다고 하자.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>full_model <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> x3 <span class="sc">+</span> x4 <span class="sc">+</span> x5, <span class="at">data =</span> dat)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="후진-제거" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="후진-제거">후진 제거</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>backward_model <span class="ot">&lt;-</span> <span class="fu">step</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  full_model,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">direction =</span> <span class="st">"backward"</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="양방향-단계별-선택" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="양방향-단계별-선택">양방향 단계별 선택</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>stepwise_model <span class="ot">&lt;-</span> <span class="fu">step</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  full_model,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">direction =</span> <span class="st">"both"</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>또한 <code>MASS</code> 패키지의 <code>stepAIC()</code>를 이용할 수도 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MASS)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>stepwise_model <span class="ot">&lt;-</span> <span class="fu">stepAIC</span>(</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  full_model,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">direction =</span> <span class="st">"both"</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>step()</code>과 <code>stepAIC()</code>는 기본적으로 AIC 계열의 기준을 이용하여 모형을 비교한다.</p>
+<p>따라서 단순히 개별 회귀계수의 p-value가 가장 큰 변수를 순차적으로 제거하는 절차와는 구분할 필요가 있다.</p>
+</section>
+</section>
+<section id="최적-부분집합-선택" class="level3" data-number="5.3.5">
+<h3 data-number="5.3.5" class="anchored" data-anchor-id="최적-부분집합-선택"><span class="header-section-number">5.3.5</span> 최적 부분집합 선택</h3>
+<p><strong>최적 부분집합 선택(best subset selection)</strong>은 후보 설명변수로 만들 수 있는 여러 부분집합 모형을 비교하여 가장 적절한 변수조합을 찾는 방법이다. 후보 설명변수가 <span class="math inline">\(p\)</span>개인 경우 각 설명변수는</p>
+<ul>
+<li>모형에 포함하거나</li>
+<li>모형에 포함하지 않는</li>
+</ul>
+<p>두 가지 선택이 가능하다.</p>
+<p>따라서 가능한 변수의 부분집합은 이론적으로</p>
+<p><span class="math display">\[
+2^p
+\]</span></p>
+<p>개이다. 예를 들어 후보 설명변수가 5개라면</p>
+<p><span class="math display">\[
+2^5=32
+\]</span></p>
+<p>개의 변수조합이 존재한다. 따라서 설명변수의 수가 증가하면 가능한 모형의 수가 매우 빠르게 증가한다.</p>
+<section id="최적-부분집합-선택의-기본-과정" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="최적-부분집합-선택의-기본-과정">최적 부분집합 선택의 기본 과정</h4>
+<ol type="1">
+<li>후보 설명변수들로 구성할 수 있는 부분집합 모형들을 고려한다.</li>
+<li>설명변수가 1개인 모형 중 가장 좋은 모형을 선택한다.</li>
+<li>설명변수가 2개인 모형 중 가장 좋은 모형을 선택한다.</li>
+<li>동일한 방법으로 변수 수가 증가하는 경우의 최적모형을 찾는다.</li>
+<li>각 변수 개수별 대표모형을 모형선택 기준으로 비교한다.</li>
+<li>수정결정계수, Mallows의 <span class="math inline">\(C_p\)</span>, AIC, BIC, 예측오차 등을 이용하여 최종모형을 선택한다.</li>
+</ol>
+<p>즉, 최적 부분집합 선택은 다음의 두 단계를 구분하여 생각하는 것이 중요하다.</p>
+<blockquote class="blockquote">
+<p><strong>1단계:</strong> 각 크기의 모형 중 가장 좋은 부분집합을 찾음</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>2단계:</strong> 서로 다른 크기의 모형들을 평가기준으로 비교하여 최종모형을 결정</p>
+</blockquote>
+</section>
+<section id="r에서-최적-부분집합-선택" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="r에서-최적-부분집합-선택">R에서 최적 부분집합 선택</h4>
+<p><code>leaps</code> 패키지의 <code>regsubsets()</code> 함수를 이용할 수 있다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(leaps)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">regsubsets</span>(</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  y <span class="sc">~</span> .,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">nvmax =</span> <span class="dv">10</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>summary()</code> 결과를 이용하여 수정결정계수, Mallows의 <span class="math inline">\(C_p\)</span>, BIC 등을 비교할 수 있다.</p>
+</section>
+</section>
+<section id="모형-선택기준" class="level3" data-number="5.3.6">
+<h3 data-number="5.3.6" class="anchored" data-anchor-id="모형-선택기준"><span class="header-section-number">5.3.6</span> 모형 선택기준</h3>
+<p>변수선택에서는 단순히 <strong>어떻게 후보모형을 탐색할 것인가</strong>뿐만 아니라 <strong>어떤 기준으로 후보모형을 평가할 것인가</strong>가 중요하다. 대표적인 모형 선택기준에는 다음이 있다.</p>
+<ul>
+<li>결정계수 <span class="math inline">\(R^2\)</span></li>
+<li>수정결정계수 <span class="math inline">\(R_{\text{adj}}^2\)</span></li>
+<li>Mallows의 <span class="math inline">\(C_p\)</span></li>
+<li>AIC</li>
+<li>BIC</li>
+<li>검증자료 또는 교차검증을 이용한 예측오차</li>
+</ul>
+<p>각 기준은 서로 다른 특성을 가지므로 항상 동일한 모형을 선택하는 것은 아니다.</p>
+<section id="결정계수" class="level4" data-number="5.3.6.1">
+<h4 data-number="5.3.6.1" class="anchored" data-anchor-id="결정계수"><span class="header-section-number">5.3.6.1</span> 결정계수</h4>
+<p>결정계수(coefficient of determination) <span class="math inline">\(R^2\)</span>는 전체 반응변수 변동 중 회귀모형이 설명하는 비율을 나타낸다.</p>
+<p><span class="math display">\[
+R^2
+=
+1-
+\frac{SSE}{SST}
+\]</span></p>
+<p>여기서</p>
+<ul>
+<li><span class="math inline">\(SSE\)</span>: 오차제곱합(error sum of squares)</li>
+<li><span class="math inline">\(SST\)</span>: 총제곱합(total sum of squares)</li>
+</ul>
+<p>이다.</p>
+<p>결정계수는</p>
+<p><span class="math display">\[
+0\le R^2\le1
+\]</span></p>
+<p>의 범위를 가지며 일반적으로 1에 가까울수록 모형의 자료 설명력이 높다고 해석한다. 그러나 <span class="math inline">\(R^2\)</span>에는 변수선택 기준으로 중요한 한계가 있다.</p>
+<p><strong>동일한 자료에서 새로운 설명변수를 추가하면 <span class="math inline">\(R^2\)</span>는 감소하지 않는다.</strong></p>
+<p>새로운 설명변수가 실제로 중요하지 않더라도</p>
+<p><span class="math display">\[
+R^2_{\text{new}}
+\ge
+R^2_{\text{old}}
+\]</span></p>
+<p>가 성립한다. 따라서 단순히 <span class="math inline">\(R^2\)</span>가 가장 큰 모형을 선택한다면 가장 많은 설명변수가 포함된 모형을 선택하게 될 가능성이 높다. 이 때문에 <span class="math inline">\(R^2\)</span> 자체는 변수 수가 다른 모형들을 비교하는 기준으로 제한점이 있다.</p>
+</section>
+<section id="수정결정계수" class="level4" data-number="5.3.6.2">
+<h4 data-number="5.3.6.2" class="anchored" data-anchor-id="수정결정계수"><span class="header-section-number">5.3.6.2</span> 수정결정계수</h4>
+<p>결정계수의 이러한 문제를 보완하기 위해 <strong>수정결정계수(adjusted <span class="math inline">\(R^2\)</span>)</strong>를 사용할 수 있다. 표본의 크기를 <span class="math inline">\(n\)</span>, 모형에 포함된 설명변수의 수를 <span class="math inline">\(d\)</span>라고 하면</p>
+<p><span class="math display">\[
+R_{\text{adj}}^2
+=
+1-(1-R^2)
+\frac{n-1}{n-d-1}
+\]</span></p>
+<p>이다. 여기서 <span class="math inline">\(d\)</span>는 <strong>절편을 제외한 설명변수의 수</strong>이다. 또한 다음과 같이 나타낼 수도 있다.</p>
+<p><span class="math display">\[
+R_{\text{adj}}^2
+=
+1-
+\frac{SSE/(n-d-1)}
+{SST/(n-1)}
+\]</span></p>
+<p>수정결정계수에는 설명변수의 수에 대한 보정이 포함되어 있다.</p>
+<p>새로운 설명변수를 추가하면 일반적인 <span class="math inline">\(R^2\)</span>는 반드시 증가하거나 동일하지만, 수정결정계수는 새 변수가 모형의 설명력을 충분히 향상시키지 못하는 경우 감소할 수 있다. 따라서 변수 수가 서로 다른 모형들을 비교할 때 일반적인 <span class="math inline">\(R^2\)</span>보다 수정결정계수가 더 적절한 기준이 될 수 있다.</p>
+<p>수정결정계수를 이용하여 여러 후보모형을 비교하는 경우에는 일반적으로 수정결정계수가 <strong>큰 모형을 선호</strong>한다. 그러나 수정결정계수만으로 최종모형을 결정하는 것보다는 다른 모형선택 기준과 함께 검토하는 것이 바람직하다.</p>
+</section>
+<section id="mallows의-c_p" class="level4" data-number="5.3.6.3">
+<h4 data-number="5.3.6.3" class="anchored" data-anchor-id="mallows의-c_p"><span class="header-section-number">5.3.6.3</span> Mallows의 <span class="math inline">\(C_p\)</span></h4>
+<p><strong>Mallows의 <span class="math inline">\(C_p\)</span></strong>는 부분집합 회귀모형의 적합도와 복잡도를 함께 평가하기 위해 사용되는 대표적인 모형선택 통계량이다. 완전모형에서 얻은 오차분산의 추정치를 기준으로 각 부분집합 모형의 오차를 평가한다.</p>
+<p>후보모형에 절편을 제외하고 <span class="math inline">\(d\)</span>개의 설명변수가 포함되어 있다고 하자. 후보모형에 포함된 전체 회귀계수의 수는 절편을 포함하여 <span class="math inline">\(k=d+1\)</span>이 된다. 후보모형의 오차제곱합을 <span class="math inline">\(SSE_d\)</span>, 완전모형의 평균오차제곱을 <span class="math inline">\(MSE_{\text{full}}\)</span>이라고 하면 Mallows의 <span class="math inline">\(C_p\)</span>는</p>
+<p><span class="math display">\[
+C_p
+=
+\frac{SSE_d}{MSE_{\text{full}}}
+-n+2(d+1)
+\]</span></p>
+<p>로 나타낼 수 있다.</p>
+</section>
+<section id="mallows의-c_p의-해석" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="mallows의-c_p의-해석">Mallows의 <span class="math inline">\(C_p\)</span>의 해석</h4>
+<p>좋은 후보모형에서는 중요한 변수가 빠져 있지 않아 모형의 편향이 크지 않아야 한다. 이러한 경우 일반적으로 <span class="math inline">\(E(C_p)\approx k\)</span> 즉, <span class="math inline">\(C_p\approx k\)</span>가 되는 것이 바람직하다. 여기서 <span class="math inline">\(k\)</span>는 <strong>절편을 포함한 후보모형의 회귀계수 수</strong>이다.</p>
+<p>따라서 Mallows의 <span class="math inline">\(C_p\)</span>를 이용한 모형선택에서는 다음 두 가지를 함께 고려한다.</p>
+<ul>
+<li><span class="math inline">\(C_p\)</span>가 작을 것</li>
+<li><span class="math inline">\(C_p\)</span>가 후보모형의 모수 수 <span class="math inline">\(k\)</span>에 가까울 것</li>
+</ul>
+<p>예를 들어 설명변수 4개와 절편으로 구성된 모형이라면 <span class="math inline">\(k=5\)</span>이다. 이때 <span class="math inline">\(C_p\approx5\)</span>인 모형은 중요한 변수가 빠져 있지 않은 적절한 후보모형일 가능성이 있다.</p>
+<p>반대로 <span class="math inline">\(C_p\gg k\)</span>라면 현재 부분집합에서 중요한 설명변수가 제외되어 있을 가능성을 생각할 수 있다. 단, <span class="math inline">\(C_p\)</span>가 정확히 <span class="math inline">\(k\)</span>와 같아야 한다는 의미는 아니며 여러 후보모형 사이의 비교를 위한 지표로 사용한다.</p>
+</section>
+<section id="정보기준을-이용한-모형-선택" class="level4" data-number="5.3.6.4">
+<h4 data-number="5.3.6.4" class="anchored" data-anchor-id="정보기준을-이용한-모형-선택"><span class="header-section-number">5.3.6.4</span> 정보기준을 이용한 모형 선택</h4>
+<p>변수선택에서는 수정결정계수나 Mallows의 <span class="math inline">\(C_p\)</span> 외에도 <strong>정보기준(information criterion)</strong>이 널리 사용된다. 대표적인 정보기준은 다음과 같다.</p>
+<ul>
+<li>AIC(Akaike information criterion)</li>
+<li>BIC(Bayesian information criterion)</li>
+</ul>
+<p>정보기준은 기본적으로 다음의 두 요소를 동시에 고려한다.</p>
+<blockquote class="blockquote">
+<p><strong>자료에 대한 모형의 적합도</strong></p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>+ 모형 복잡도에 대한 벌점(penalty)</strong></p>
+</blockquote>
+<p>자료에 대한 적합도만 고려한다면 설명변수가 많고 복잡한 모형이 유리해질 가능성이 높다. 따라서 설명변수와 모수의 수가 많아질수록 벌점을 부여하여 지나치게 복잡한 모형의 선택을 방지한다.</p>
+</section>
+<section id="aic" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="aic">AIC</h4>
+<p>AIC(Akaike information criterion)는 다음과 같이 정의된다.</p>
+<p><span class="math display">\[
+AIC
+=
+-2\log L+2k
+\]</span></p>
+<p>여기서</p>
+<ul>
+<li><span class="math inline">\(L\)</span>: 최대가능도(maximized likelihood)</li>
+<li><span class="math inline">\(k\)</span>: 모형에서 추정하는 모수의 수</li>
+</ul>
+<p>이다. AIC는 다음 두 부분으로 구성된다. <span class="math inline">\(-2\log L\)</span> 은 모형의 자료 적합도와 관련된 항이고, <span class="math inline">\(2k\)</span>는 모형의 복잡도에 대한 벌점이다. 자료에 잘 적합할수록 첫 번째 항이 작아지는 방향으로 작용하지만, 많은 모수를 포함하면 두 번째 항이 증가한다. 따라서 AIC는 <strong>자료에 잘 적합하면서 지나치게 복잡하지 않은 모형을 선택하도록 한다.</strong></p>
+</section>
+<section id="aic의-선택기준" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="aic의-선택기준">AIC의 선택기준</h4>
+<p>여러 후보모형을 비교할 때 <span class="math inline">\(AIC\)</span>가 <strong>가장 작은 모형을 선호</strong>한다. AIC 값 자체의 절대적인 크기보다는 동일한 자료에 적합한 후보모형들 사이의 <strong>상대적 차이</strong>가 중요하다. AIC는 새로운 자료에 대한 예측성능의 관점에서 좋은 모형을 선택하는 데 많이 사용된다.</p>
+</section>
+<section id="bic" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="bic">BIC</h4>
+<p>BIC(Bayesian information criterion)는 다음과 같이 정의한다.</p>
+<p><span class="math display">\[
+BIC
+=
+-2\log L+k\log(n)
+\]</span></p>
+<p>여기서</p>
+<ul>
+<li><span class="math inline">\(L\)</span>: 최대가능도</li>
+<li><span class="math inline">\(k\)</span>: 추정되는 모수의 수</li>
+<li><span class="math inline">\(n\)</span>: 표본의 크기</li>
+</ul>
+<p>이다. AIC와 BIC는 모두 모형 적합도와 복잡도를 고려하지만 복잡도에 대한 벌점의 크기가 다르다. AIC의 벌점은 <span class="math inline">\(2k\)</span>이고, BIC의 벌점은 <span class="math inline">\(k\log(n)\)</span>이다. 표본 수가 충분히 커지면 일반적으로 <span class="math inline">\(\log(n)&gt;2\)</span>가 되므로 BIC가 AIC보다 복잡한 모형에 더 큰 벌점을 부여하게 된다.</p>
+<p>따라서 많은 상황에서 BIC는 AIC보다 <strong>설명변수가 적은 간결한 모형을 선택하는 경향</strong>이 있다.</p>
+</section>
+<section id="aic와-bic의-비교" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="aic와-bic의-비교">AIC와 BIC의 비교</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>기준</th>
+<th>식</th>
+<th>복잡도 벌점</th>
+<th>일반적인 특성</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>AIC</td>
+<td><span class="math inline">\(-2\log L+2k\)</span></td>
+<td><span class="math inline">\(2k\)</span></td>
+<td>예측성능을 중요하게 고려</td>
+</tr>
+<tr class="even">
+<td>BIC</td>
+<td><span class="math inline">\(-2\log L+k\log n\)</span></td>
+<td><span class="math inline">\(k\log n\)</span></td>
+<td>더 간결한 모형을 선택하는 경향</td>
+</tr>
+</tbody>
+</table>
+<p>특히 표본 수가 증가할수록 BIC의 복잡도 벌점이 커지므로 AIC와 BIC가 서로 다른 모형을 선택할 수 있다.</p>
+<p>예를 들어</p>
+<ul>
+<li>AIC는 설명변수 6개인 모형</li>
+<li>BIC는 설명변수 4개인 모형</li>
+</ul>
+<p>을 선택하는 상황이 발생할 수 있다. 이는 어느 한 기준이 잘못되었다는 의미가 아니라 두 기준이 모형의 복잡성에 대해 서로 다른 관점을 적용하고 있기 때문이다.</p>
+</section>
+</section>
+<section id="모형선택-기준의-비교" class="level3" data-number="5.3.7">
+<h3 data-number="5.3.7" class="anchored" data-anchor-id="모형선택-기준의-비교"><span class="header-section-number">5.3.7</span> 모형선택 기준의 비교</h3>
+<p>변수선택에서 자주 사용하는 기준을 정리하면 다음과 같다.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 23%">
+<col style="width: 30%">
+<col style="width: 23%">
+<col style="width: 23%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>기준</th>
+<th style="text-align: right;">좋은 모형의 방향</th>
+<th>복잡도 고려</th>
+<th>특징</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(R^2\)</span></td>
+<td style="text-align: right;">클수록 좋음</td>
+<td>없음</td>
+<td>변수 추가 시 감소하지 않음</td>
+</tr>
+<tr class="even">
+<td>수정 <span class="math inline">\(R^2\)</span></td>
+<td style="text-align: right;">클수록 좋음</td>
+<td>설명변수 수 보정</td>
+<td>설명력과 복잡도를 동시에 고려</td>
+</tr>
+<tr class="odd">
+<td>Mallows의 <span class="math inline">\(C_p\)</span></td>
+<td style="text-align: right;">작고 모수 수에 가까움</td>
+<td>있음</td>
+<td>완전모형의 MSE를 기준으로 평가</td>
+</tr>
+<tr class="even">
+<td>AIC</td>
+<td style="text-align: right;">작을수록 좋음</td>
+<td><span class="math inline">\(2k\)</span></td>
+<td>예측 관점에서 널리 사용</td>
+</tr>
+<tr class="odd">
+<td>BIC</td>
+<td style="text-align: right;">작을수록 좋음</td>
+<td><span class="math inline">\(k\log n\)</span></td>
+<td>상대적으로 간결한 모형을 선호</td>
+</tr>
+</tbody>
+</table>
+<p>이러한 기준들이 항상 동일한 모형을 선택하는 것은 아니다. 따라서 실제 분석에서는 하나의 수치만 기계적으로 적용하기보다 여러 기준을 종합적으로 검토하는 것이 바람직하다.</p>
+</section>
+<section id="교차검증을-이용한-모형선택" class="level3" data-number="5.3.8">
+<h3 data-number="5.3.8" class="anchored" data-anchor-id="교차검증을-이용한-모형선택"><span class="header-section-number">5.3.8</span> 교차검증을 이용한 모형선택</h3>
+<p>수정결정계수, Mallows의 <span class="math inline">\(C_p\)</span>, AIC 및 BIC는 주어진 자료에서 모형의 적합도와 복잡성을 평가한다. 그러나 분석목적이 <strong>새로운 관측값을 정확하게 예측하는 것</strong>이라면 실제 예측성능을 직접 평가하는 것이 중요하다. 이를 위해 검증자료(validation data) 또는 <strong>교차검증(cross-validation)</strong>을 이용할 수 있다.</p>
+<section id="학습자료와-검증자료" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="학습자료와-검증자료">학습자료와 검증자료</h4>
+<p>전체 자료를 다음과 같이 나눌 수 있다.</p>
+<ul>
+<li>학습자료(training data): 모형을 추정하는 데 사용</li>
+<li>검증자료(validation data): 추정된 모형의 예측성능을 평가하는 데 사용</li>
+</ul>
+<p>각 후보모형을 학습자료에서 적합한 후 검증자료에서 예측오차를 계산하여 비교할 수 있다. 예측성능을 평가하는 대표적인 지표는 다음과 같다.</p>
+</section>
+<section id="평균제곱오차" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="평균제곱오차">평균제곱오차</h4>
+<p><span class="math display">\[
+MSE
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+(y_i-\hat y_i)^2
+\]</span></p>
+</section>
+<section id="평균제곱근오차" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="평균제곱근오차">평균제곱근오차</h4>
+<p><span class="math display">\[
+RMSE
+=
+\sqrt{
+\frac{1}{n}
+\sum_{i=1}^{n}
+(y_i-\hat y_i)^2
+}
+\]</span></p>
+</section>
+<section id="평균절대오차" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="평균절대오차">평균절대오차</h4>
+<p><span class="math display">\[
+MAE
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+|y_i-\hat y_i|
+\]</span></p>
+<p>일반적으로 이러한 예측오차가 작은 모형을 선호한다.</p>
+</section>
+<section id="k-겹-교차검증" class="level4" data-number="5.3.8.1">
+<h4 data-number="5.3.8.1" class="anchored" data-anchor-id="k-겹-교차검증"><span class="header-section-number">5.3.8.1</span> <span class="math inline">\(K\)</span>-겹 교차검증</h4>
+<p>자료의 수가 충분하지 않아 별도의 검증자료를 확보하기 어려운 경우에는 <strong><span class="math inline">\(K\)</span>-겹 교차검증(<span class="math inline">\(K\)</span>-fold cross-validation)</strong>을 사용할 수 있다. 전체 자료를 비슷한 크기의 <span class="math inline">\(K\)</span>개 집단으로 나눈다.</p>
+<p>예를 들어 5-fold cross-validation에서는 자료를 5개 집단으로 나눈다.</p>
+<ol type="1">
+<li>첫 번째 집단을 검증자료로 사용하고 나머지 4개 집단으로 모형을 적합한다.</li>
+<li>두 번째 집단을 검증자료로 사용하고 나머지 자료로 모형을 적합한다.</li>
+<li>이 과정을 모든 집단에 대하여 반복한다.</li>
+<li>각 단계에서 계산된 예측오차의 평균을 구한다.</li>
+</ol>
+<p>이를 식으로 나타내면</p>
+<p><span class="math display">\[
+CV_K
+=
+\frac{1}{K}
+\sum_{j=1}^{K}
+E_j
+\]</span></p>
+<p>와 같이 생각할 수 있다. 여기서 <span class="math inline">\(E_j\)</span>는 <span class="math inline">\(j\)</span>번째 fold를 검증자료로 사용했을 때의 예측오차이다. 후보모형들 가운데 평균 교차검증 오차가 작은 모형을 선택할 수 있다.</p>
+</section>
+<section id="교차검증의-장점" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="교차검증의-장점">교차검증의 장점</h4>
+<ul>
+<li>새로운 자료에 대한 예측성능을 직접적으로 평가할 수 있다.</li>
+<li>하나의 학습자료/검증자료 분할에 지나치게 의존하는 문제를 줄일 수 있다.</li>
+<li>예측을 주목적으로 하는 모형선택에서 유용하다.</li>
+</ul>
+<p>따라서 예측이 중요한 분석에서는 AIC나 BIC뿐만 아니라 <strong>교차검증을 이용한 예측성능을 함께 평가하는 것이 바람직하다.</strong></p>
+</section>
+</section>
+<section id="벌점회귀를-이용한-변수선택" class="level3" data-number="5.3.9">
+<h3 data-number="5.3.9" class="anchored" data-anchor-id="벌점회귀를-이용한-변수선택"><span class="header-section-number">5.3.9</span> 벌점회귀를 이용한 변수선택</h3>
+<p>후보 설명변수가 많거나 설명변수 사이에 높은 상관관계가 존재하는 경우에는 전통적인 단계별 변수선택과 다른 접근을 사용할 수 있다. 대표적인 방법이 <strong>벌점회귀(penalized regression)</strong>이다. 벌점회귀에서는 일반적인 잔차제곱합에 회귀계수의 크기에 대한 벌점을 추가한다. 대표적인 방법으로 다음이 있다.</p>
+<ul>
+<li>Ridge regression</li>
+<li>LASSO</li>
+<li>Elastic net</li>
+</ul>
+<section id="ridge-regression" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="ridge-regression">Ridge regression</h4>
+<p>Ridge 회귀는 다음 목적함수를 최소화한다.</p>
+<p><span class="math display">\[
+\sum_{i=1}^{n}
+\left(
+y_i-\beta_0-\sum_{j=1}^{p}x_{ij}\beta_j
+\right)^2
++
+\lambda
+\sum_{j=1}^{p}\beta_j^2
+\]</span></p>
+<p>여기서 <span class="math inline">\(\lambda\ge0\)</span>는 벌점의 크기를 결정하는 조절모수(tuning parameter)이다. <span class="math inline">\(\lambda\)</span>가 증가할수록 회귀계수들이 0 방향으로 축소된다. Ridge 회귀는 다중공선성이 존재할 때 회귀계수의 분산을 줄이고 추정을 안정화하는 데 효과적이다. 그러나 일반적으로 회귀계수를 정확히 0으로 만들지는 않기 때문에 엄밀한 의미에서 직접적인 변수선택을 수행하는 방법은 아니다.</p>
+</section>
+<section id="lasso" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="lasso">LASSO</h4>
+<p><strong>LASSO(least absolute shrinkage and selection operator)</strong>는 다음 목적함수를 최소화한다.</p>
+<p><span class="math display">\[
+\sum_{i=1}^{n}
+\left(
+y_i-\beta_0-\sum_{j=1}^{p}x_{ij}\beta_j
+\right)^2
++
+\lambda
+\sum_{j=1}^{p}|\beta_j|
+\]</span></p>
+<p>Ridge 회귀가 제곱된 회귀계수에 벌점을 부과하는 것과 달리 LASSO는 회귀계수의 절댓값에 벌점을 부과한다. 이러한 <span class="math inline">\(L_1\)</span> 벌점의 특성으로 인해 일부 회귀계수가 정확하게 <span class="math inline">\(\beta_j=0\)</span>이 될 수 있다. 따라서 LASSO는</p>
+<blockquote class="blockquote">
+<p><strong>회귀계수의 축소(shrinkage) + 변수선택(variable selection)</strong></p>
+</blockquote>
+<p>을 동시에 수행할 수 있다.</p>
+</section>
+<section id="elastic-net" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="elastic-net">Elastic net</h4>
+<p><strong>Elastic net</strong>은 Ridge와 LASSO의 벌점을 결합한 방법이다. 개념적으로 다음과 같은 벌점을 사용한다.</p>
+<p><span class="math display">\[
+\lambda
+\left[
+\alpha\sum_{j=1}^{p}|\beta_j|
++
+(1-\alpha)\sum_{j=1}^{p}\beta_j^2
+\right]
+\]</span></p>
+<p>여기서 <span class="math inline">\(0\le\alpha\le1\)</span>이다.</p>
+<ul>
+<li><span class="math inline">\(\alpha=1\)</span>: LASSO</li>
+<li><span class="math inline">\(\alpha=0\)</span>: Ridge regression</li>
+<li><span class="math inline">\(0&lt;\alpha&lt;1\)</span>: Elastic net</li>
+</ul>
+<p>설명변수들 사이의 상관관계가 매우 높은 경우에는 LASSO가 상관된 변수 중 하나만 선택하는 경향을 보일 수 있다. Elastic net은 이러한 상황에서 관련 변수들을 함께 고려할 수 있다는 장점이 있다.</p>
+<!-- End -->
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./04-chapter4.html" class="pagination-link" aria-label="회귀진단 및 보정">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">회귀진단 및 보정</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./06-chapter6.html" class="pagination-link" aria-label="가변수 회귀모형">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">가변수 회귀모형</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

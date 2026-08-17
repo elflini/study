@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>7&nbsp; 다중회귀분석 예제 – Regression Analysis</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./08-chapter8.html" rel="next">
+<link href="./06-chapter6.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-9e3e5b9121e68b3f077afb32f2c64d95.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "일치 없음",
+    "search-matching-documents-text": "일치된 문서",
+    "search-copy-link-title": "검색 링크 복사",
+    "search-hide-matches-text": "추가 검색 결과 숨기기",
+    "search-more-match-text": "추가 검색결과",
+    "search-more-matches-text": "추가 검색결과",
+    "search-clear-button-title": "제거",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "취소",
+    "search-submit-button-title": "검색",
+    "search-label": "검색"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./07-chapter7.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">다중회귀분석 예제</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="사이드바 전환" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="검색" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Regression Analysis</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="검색"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">목 차</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-chapter1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">서론</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-chapter2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">단순선형회귀분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-chapter3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">다중선형회귀분석</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-chapter4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">회귀진단 및 보정</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-chapter5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">모형비교와 변수선택</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-chapter6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">가변수 회귀모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-chapter7.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">다중회귀분석 예제</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-chapter8.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">일반화 가중회귀모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-chapter9.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">벌점화 회귀모형</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-appendix.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">부록: 기초 행렬 이론</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">목차</h2>
+   
+  <ul>
+  <li><a href="#데이터-탐색" id="toc-데이터-탐색" class="nav-link active" data-scroll-target="#데이터-탐색"><span class="header-section-number">7.1</span> 데이터 탐색</a></li>
+  <li><a href="#다중선형회귀분석" id="toc-다중선형회귀분석" class="nav-link" data-scroll-target="#다중선형회귀분석"><span class="header-section-number">7.2</span> 다중선형회귀분석</a></li>
+  <li><a href="#단계별-회귀에-의한-변수-선택" id="toc-단계별-회귀에-의한-변수-선택" class="nav-link" data-scroll-target="#단계별-회귀에-의한-변수-선택"><span class="header-section-number">7.3</span> 단계별 회귀에 의한 변수 선택</a></li>
+  <li><a href="#다중공선성" id="toc-다중공선성" class="nav-link" data-scroll-target="#다중공선성"><span class="header-section-number">7.4</span> 다중공선성</a></li>
+  <li><a href="#지렛대점과-이상점" id="toc-지렛대점과-이상점" class="nav-link" data-scroll-target="#지렛대점과-이상점"><span class="header-section-number">7.5</span> 지렛대점과 이상점</a></li>
+  <li><a href="#잔차분석" id="toc-잔차분석" class="nav-link" data-scroll-target="#잔차분석"><span class="header-section-number">7.6</span> 잔차분석</a></li>
+  <li><a href="#모형-제안-및-예측" id="toc-모형-제안-및-예측" class="nav-link" data-scroll-target="#모형-제안-및-예측"><span class="header-section-number">7.7</span> 모형 제안 및 예측</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="chapter7" class="quarto-section-identifier"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">다중회귀분석 예제</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>이 장은 앞에서 배운 다중회귀분석, 모형비교, 변수선택, 회귀진단을 하나의 자료에 적용하는 예제 장이다. 실제 분석에서는 회귀모형을 한 번 적합하고 끝내는 것이 아니라, 자료 탐색, 모형 적합, 변수선택, 다중공선성 확인, 영향점 진단, 잔차진단, 최종모형 해석의 순서로 분석을 진행한다.</p>
+<p>이 장의 분석 흐름은 다음과 같다.</p>
+<ol type="1">
+<li>데이터 구조와 변수 분포 확인</li>
+<li>산점도 행렬을 이용한 변수 간 관계 탐색</li>
+<li>모든 설명변수를 포함한 완전모형 적합</li>
+<li>회귀계수, 결정계수, 수정결정계수 해석</li>
+<li>단계별 변수선택을 이용한 후보모형 설정</li>
+<li>VIF를 이용한 다중공선성 진단</li>
+<li>Cook의 거리, DFFITS, 지렛대값을 이용한 영향점 진단</li>
+<li>잔차그림과 통계적 검정을 이용한 회귀가정 점검</li>
+<li>최종모형 제안 및 예측</li>
+</ol>
+<section id="데이터-탐색" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="데이터-탐색"><span class="header-section-number">7.1</span> 데이터 탐색</h2>
+<ul>
+<li>데이터</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(multi)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'data.frame':   40 obs. of  7 variables:
+ $ Y : int  443 290 676 536 481 296 453 617 514 400 ...
+ $ X1: int  49 27 115 92 67 31 105 114 98 15 ...
+ $ X2: int  79 70 92 62 42 54 60 85 72 59 ...
+ $ X3: int  76 31 130 92 94 34 47 84 71 99 ...
+ $ X4: int  8 6 0 5 16 14 5 17 12 15 ...
+ $ X5: int  15 6 9 8 3 11 10 20 -1 11 ...
+ $ X6: int  205 129 339 247 202 119 212 285 242 174 ...</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(multi)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    Y  X1 X2  X3 X4 X5  X6
+1 443  49 79  76  8 15 205
+2 290  27 70  31  6  6 129
+3 676 115 92 130  0  9 339
+4 536  92 62  92  5  8 247
+5 481  67 42  94 16  3 202
+6 296  31 54  34 14 11 119</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(multi)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       Y               X1               X2               X3        
+ Min.   :157.0   Min.   : 15.00   Min.   : 11.00   Min.   :  7.00  
+ 1st Qu.:382.5   1st Qu.: 52.00   1st Qu.: 44.75   1st Qu.: 59.00  
+ Median :460.0   Median : 67.00   Median : 63.50   Median : 71.50  
+ Mean   :464.9   Mean   : 68.78   Mean   : 66.40   Mean   : 72.33  
+ 3rd Qu.:552.0   3rd Qu.: 89.75   3rd Qu.: 87.25   3rd Qu.: 84.00  
+ Max.   :688.0   Max.   :115.00   Max.   :125.00   Max.   :130.00  
+       X4              X5               X6       
+ Min.   : 0.00   Min.   :-1.000   Min.   : 45.0  
+ 1st Qu.: 7.75   1st Qu.: 5.750   1st Qu.:173.0  
+ Median :11.00   Median : 8.000   Median :205.0  
+ Mean   :10.72   Mean   : 8.425   Mean   :208.5  
+ 3rd Qu.:14.00   3rd Qu.:11.250   3rd Qu.:258.2  
+ Max.   :20.00   Max.   :20.000   Max.   :340.0  </code></pre>
+</div>
+</div>
+<p>자료의 구조를 확인하는 것은 회귀분석의 첫 단계이다. 반응변수와 설명변수가 모두 수치형인지, 결측값이나 비정상적인 값이 있는지, 변수의 범위가 분석 목적에 적절한지 확인해야 한다. 이 예제에서는 <code>Y</code>를 반응변수로, <code>X1</code>부터 <code>X6</code>까지를 설명변수로 사용한다.</p>
+<ul>
+<li>산점도 행렬</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pairs</span>(multi)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-chapter7_files/figure-html/ch7_1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>산점도 행렬을 살펴보면, 반응변수 <span class="math inline">\(Y\)</span>와 여러 설명변수 사이에 선형적인 관계가 나타나는지 확인할 수 있다. 특히 일부 설명변수는 <span class="math inline">\(Y\)</span>와 뚜렷한 선형 관계를 보이며, 설명변수들 사이에도 서로 관련성이 존재할 수 있다.</li>
+</ul>
+<p>산점도 행렬은 두 가지 목적에서 중요하다. 첫째, 반응변수와 설명변수 사이의 관계가 선형회귀모형으로 설명하기에 적절한지 살펴볼 수 있다. 둘째, 설명변수들 사이의 강한 관련성을 미리 확인하여 다중공선성 가능성을 점검할 수 있다. 따라서 산점도 행렬은 단순한 그림이 아니라 이후 모형 적합과 회귀진단의 방향을 정하는 탐색 단계로 이해해야 한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">cor</span>(multi), <span class="dv">3</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       Y     X1    X2     X3     X4     X5    X6
+Y  1.000  0.770 0.784  0.703  0.151  0.029 0.968
+X1 0.770  1.000 0.465  0.452 -0.045 -0.025 0.831
+X2 0.784  0.465 1.000  0.307  0.105  0.102 0.780
+X3 0.703  0.452 0.307  1.000 -0.009  0.045 0.721
+X4 0.151 -0.045 0.105 -0.009  1.000 -0.005 0.023
+X5 0.029 -0.025 0.102  0.045 -0.005  1.000 0.052
+X6 0.968  0.831 0.780  0.721  0.023  0.052 1.000</code></pre>
+</div>
+</div>
+<p>상관행렬을 함께 확인하면 산점도에서 보이는 관계를 수치로 요약할 수 있다. 다만 상관계수는 두 변수 사이의 쌍별 관계만 보여주므로, 다중회귀분석에서의 보정 효과와는 구분해서 해석해야 한다.</p>
+<p><br></p>
+</section>
+<section id="다중선형회귀분석" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="다중선형회귀분석"><span class="header-section-number">7.2</span> 다중선형회귀분석</h2>
+<ul>
+<li>6개의 설명변수 <span class="math inline">\(X\)</span>와 반응변수 <span class="math inline">\(Y\)</span>와의 다중선형회귀모형</li>
+</ul>
+<p><span class="math display">\[
+Y_i=\beta_0+\beta_1X_{1i}+\beta_2X_{2i}+\beta_3X_{3i}+\beta_4X_{4i}+\beta_5X_{5i}+\beta_6X_{6i}+\epsilon_i, \,\,\, i=1,2,\cdots, 40
+\]</span></p>
+<ul>
+<li>모형을 행렬로 다시 표현하면</li>
+</ul>
+<p><span class="math display">\[
+\mathbf{Y}=\mathbf{X}\beta+\epsilon
+\]</span></p>
+<ul>
+<li>여기서</li>
+</ul>
+<p><span class="math display">\[
+\begin{pmatrix} Y_1\\Y_2\\\vdots\\Y_{40} \end{pmatrix}=\begin{pmatrix}1 &amp; X_{1,1}&amp;X_{1,2}&amp;\cdots&amp;X_{1,6}\\
+1 &amp;X_{2,1}&amp;X_{2,2}&amp;\cdots &amp;X_{2,6}\\
+&amp;\vdots &amp; &amp;\vdots &amp;\\ 1&amp;X_{40,1}&amp;X_{40,2}&amp;\cdots&amp;X_{40,6} \end{pmatrix} \begin{pmatrix}\beta_0\\ \beta_1\\ \vdots \\ \beta_6 \end{pmatrix}+\begin{pmatrix} \epsilon_1\\ \epsilon_2 \\ \vdots \\ \epsilon_{40} \end{pmatrix}
+\]</span></p>
+<p>&nbsp; &nbsp; &nbsp; 여기서 <span class="math inline">\(\mathbf{Y}\)</span>는 반응변수벡터, <span class="math inline">\(\mathbf{X}\)</span>는 <span class="math inline">\(40\times 7\)</span> 설계행렬(design matrix), <span class="math inline">\(\beta\)</span>는 회귀계수벡터이고 <span class="math inline">\(\epsilon\)</span>은 오차벡터</p>
+<ul>
+<li>완전모형에 대한 최소제곱 추정</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fit_full <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y <span class="sc">~</span> X1 <span class="sc">+</span> X2 <span class="sc">+</span> X3 <span class="sc">+</span> X4 <span class="sc">+</span> X5 <span class="sc">+</span> X6, <span class="at">data =</span> multi)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_full)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = Y ~ X1 + X2 + X3 + X4 + X5 + X6, data = multi)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-54.267 -15.427   2.524  13.633  71.438 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)   
+(Intercept)  35.1772    22.0755   1.593  0.12058   
+X1            2.8547     5.3372   0.535  0.59632   
+X2            3.2753     5.3330   0.614  0.54332   
+X3            3.1863     5.2887   0.602  0.55098   
+X4            3.1878     0.9918   3.214  0.00292 **
+X5           -0.6677     0.8934  -0.747  0.46014   
+X6           -1.1658     5.3217  -0.219  0.82794   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 28.5 on 33 degrees of freedom
+Multiple R-squared:  0.9559,    Adjusted R-squared:  0.9479 
+F-statistic: 119.3 on 6 and 33 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>완전모형은 사용 가능한 모든 설명변수를 포함한 모형이다. 완전모형을 먼저 적합하면 각 설명변수의 보정 효과를 확인할 수 있고, 이후 변수선택이나 모형비교의 출발점으로 사용할 수 있다. 다만 완전모형이 항상 최종모형이 되는 것은 아니다. 불필요한 설명변수나 다중공선성이 존재하면 회귀계수의 해석이 불안정해질 수 있다.</p>
+<ul>
+<li>따라서 추정된 회귀식은</li>
+</ul>
+<p><span class="math display">\[
+\hat{Y}=\hat{\beta}_0+\hat{\beta}_1X1+\hat{\beta}_2X2+\hat{\beta}_3X3+\hat{\beta}_4X4+\hat{\beta}_5X5+\hat{\beta}_6X6
+\]</span></p>
+<ul>
+<li>추정된 회귀식은 자료에 따라 달라질 수 있으므로, 실제 수치는 <code>summary(fit_full)</code> 결과의 <code>Estimate</code> 값을 이용하여 해석한다.</li>
+</ul>
+<p>수정된 <span class="math inline">\(R^2\)</span>는 설명변수의 개수를 고려하여 모형의 설명력을 평가하는 지표이다. <span class="math inline">\(R^2\)</span>가 높다는 것은 반응변수의 변동 중 상당 부분이 회귀모형으로 설명된다는 의미이지만, 이것만으로 모형이 적절하다고 결론 내릴 수는 없다. 회귀계수의 해석 가능성, 다중공선성, 영향점, 잔차진단 결과를 함께 확인해야 한다.</p>
+<ul>
+<li>회귀계수의 신뢰구간</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(fit_full)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                 2.5 %    97.5 %
+(Intercept)  -9.735797 80.090161
+X1           -8.003869 13.713291
+X2           -7.574837 14.125465
+X3           -7.573708 13.946270
+X4            1.169946  5.205616
+X5           -2.485251  1.149908
+X6          -11.992923  9.661246</code></pre>
+</div>
+</div>
+<p>회귀계수의 신뢰구간은 각 설명변수의 보정 효과가 어느 범위에 있을 것으로 추정되는지를 보여준다. 신뢰구간이 0을 포함하면 해당 설명변수의 회귀계수가 통계적으로 유의하지 않을 가능성이 있다.</p>
+<ul>
+<li>적합값(fitted value)과 신뢰구간</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(fit_full, <span class="at">newdata =</span> multi[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, <span class="sc">-</span><span class="dv">1</span>], <span class="at">interval =</span> <span class="st">"confidence"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        fit      lwr      upr
+1  452.4554 433.3659 471.5449
+2  305.0285 279.0820 330.9751
+3  677.7860 643.3030 712.2690
+4  516.6533 499.0103 534.2963
+5  477.0185 447.7383 506.2987
+6  307.4235 283.9517 330.8953
+7  443.3003 413.2674 473.3332
+8  615.2384 581.3873 649.0894
+9  533.7755 511.6633 555.8877
+10 424.2996 393.8434 454.7557
+11 460.0212 439.2757 480.7668
+12 135.0956 104.7676 165.4236
+13 468.7317 445.1542 492.3093
+14 489.0569 460.9848 517.1290
+15 303.8659 268.0056 339.7262
+16 546.6217 520.9281 572.3154
+17 560.7264 538.1571 583.2956
+18 614.9388 593.1832 636.6944
+19 582.0898 562.0308 602.1488
+20 441.8124 424.8033 458.8214</code></pre>
+</div>
+</div>
+<p>신뢰구간은 주어진 설명변수 값에서 평균 반응값의 불확실성을 나타낸다. 즉, 같은 조건을 가진 집단의 평균적인 <span class="math inline">\(Y\)</span> 값이 어느 범위에 있을지를 보여준다.</p>
+<ul>
+<li>예측값(predicted value)과 신뢰구간</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>new_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">X1 =</span> <span class="fu">sample</span>(multi<span class="sc">$</span>X1, <span class="dv">20</span>),</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">X2 =</span> <span class="fu">sample</span>(multi<span class="sc">$</span>X2, <span class="dv">20</span>),</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">X3 =</span> <span class="fu">sample</span>(multi<span class="sc">$</span>X3, <span class="dv">20</span>),</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">X4 =</span> <span class="fu">sample</span>(multi<span class="sc">$</span>X4, <span class="dv">20</span>),</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">X5 =</span> <span class="fu">sample</span>(multi<span class="sc">$</span>X5, <span class="dv">20</span>),</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">X6 =</span> <span class="fu">sample</span>(multi<span class="sc">$</span>X6, <span class="dv">20</span>)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(fit_full, <span class="at">newdata =</span> new_data, <span class="at">interval =</span> <span class="st">"prediction"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         fit         lwr       upr
+1  492.81278   286.67527  698.9503
+2  605.81374  -545.35218 1756.9797
+3  467.70965   -98.36490 1033.7842
+4  588.07764   215.00801  961.1473
+5  376.04787  -331.57448 1083.6702
+6  528.31136   446.76674  609.8560
+7  423.94061   333.94863  513.9326
+8  792.16036  -419.21484 2003.5356
+9  384.62735   294.53663  474.7181
+10 505.47204  -697.14343 1708.0875
+11 574.93093   498.80402  651.0578
+12 602.50783  -523.45907 1728.4747
+13 260.32958  -854.21612 1374.8753
+14 342.26278   214.26336  470.2622
+15 378.12132  -861.80536 1618.0480
+16 486.36314   295.52217  677.2041
+17 419.29614  -655.18958 1493.7819
+18 450.56553    15.61173  885.5193
+19 640.44523  -335.88826 1616.7787
+20  59.62998 -1390.11241 1509.3724</code></pre>
+</div>
+</div>
+<p>예측구간은 새로운 개별 관측값이 어느 범위에 있을지를 보여준다. 개별 관측값의 변동성까지 반영하므로 일반적으로 신뢰구간보다 더 넓다.</p>
+<p><br></p>
+</section>
+<section id="단계별-회귀에-의한-변수-선택" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="단계별-회귀에-의한-변수-선택"><span class="header-section-number">7.3</span> 단계별 회귀에 의한 변수 선택</h2>
+<ul>
+<li><p>회귀모형에서 종속변수를 설명하기 위한 독립변수들 중에서 어떤 독립변수를 포함시키는 것이 최적의 모형이 되는지를 판단하는 것은 매우 중요한 문제임</p></li>
+<li><p>단계별 변수선택법에서는 선택 기준에 따라 설명변수를 추가하거나 제거하여 상대적으로 간결한 후보 회귀모형을 설정할 수 있음</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>fit_full <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y <span class="sc">~</span> X1 <span class="sc">+</span> X2 <span class="sc">+</span> X3 <span class="sc">+</span> X4 <span class="sc">+</span> X5 <span class="sc">+</span> X6, <span class="at">data =</span> multi)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">"MASS"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  step_fit <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">stepAIC</span>(fit_full, <span class="at">direction =</span> <span class="st">"both"</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  step_fit <span class="ot">&lt;-</span> <span class="fu">step</span>(fit_full, <span class="at">direction =</span> <span class="st">"both"</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>step_fit<span class="sc">$</span>anova</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Stepwise Model Path 
+Analysis of Deviance Table
+
+Initial Model:
+Y ~ X1 + X2 + X3 + X4 + X5 + X6
+
+Final Model:
+Y ~ X1 + X2 + X3 + X4
+
+
+  Step Df  Deviance Resid. Df Resid. Dev      AIC
+1                          33   26812.94 274.3104
+2 - X6  1  38.99477        34   26851.94 272.3686
+3 - X5  1 441.25106        35   27293.19 271.0205</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">formula</span>(step_fit)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Y ~ X1 + X2 + X3 + X4</code></pre>
+</div>
+</div>
+<p>단계별 변수선택은 AIC와 같은 기준을 이용하여 후보모형을 탐색하는 방법이다. 그러나 선택된 모형이 항상 이론적으로 가장 좋은 모형이라는 뜻은 아니다. 최종모형은 변수선택 결과뿐 아니라 변수의 의미, 다중공선성, 영향점, 잔차진단 결과를 함께 고려하여 결정해야 한다.</p>
+<ul>
+<li>단계별 변수선택 결과를 참고하여 최종 후보모형으로 <code>X1</code>, <code>X2</code>, <code>X3</code>, <code>X4</code>를 포함한 모형을 적합한다.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>fit_reduced <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y <span class="sc">~</span> X1 <span class="sc">+</span> X2 <span class="sc">+</span> X3 <span class="sc">+</span> X4, <span class="at">data =</span> multi)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_reduced)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = Y ~ X1 + X2 + X3 + X4, data = multi)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-55.05 -17.03   2.83  17.08  72.40 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  28.3469    18.9141   1.499  0.14291    
+X1            1.7006     0.1958   8.684 2.97e-10 ***
+X2            2.0907     0.1809  11.558 1.68e-13 ***
+X3            2.0209     0.2117   9.544 2.83e-11 ***
+X4            3.2295     0.9654   3.345  0.00197 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 27.92 on 35 degrees of freedom
+Multiple R-squared:  0.9551,    Adjusted R-squared:   0.95 
+F-statistic: 186.3 on 4 and 35 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>축소모형의 회귀계수는 네 개의 설명변수를 서로 보정한 후의 효과로 해석한다. 예를 들어 <code>X1</code>의 회귀계수는 <code>X2</code>, <code>X3</code>, <code>X4</code>가 같은 조건에서 <code>X1</code>이 한 단위 증가할 때 <code>Y</code>의 평균이 얼마나 달라지는지를 의미한다.</p>
+<ul>
+<li>따라서 축소된 회귀모형은</li>
+</ul>
+<p><span class="math display">\[
+\hat{Y}=\hat{\beta}_0+\hat{\beta}_1X1+\hat{\beta}_2X2+\hat{\beta}_3X3+\hat{\beta}_4X4
+\]</span></p>
+<ul>
+<li>실제 회귀식의 수치는 <code>summary(fit_reduced)</code> 결과에서 확인한다.</li>
+</ul>
+<p>축소모형의 수정된 <span class="math inline">\(R^2\)</span>가 완전모형과 비슷하다면, 더 적은 설명변수로도 반응변수의 변동을 충분히 설명할 수 있음을 의미한다. 이 경우 모형의 간결성과 해석 가능성 측면에서 축소모형이 더 적절할 수 있다.</p>
+<p><br></p>
+</section>
+<section id="다중공선성" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="다중공선성"><span class="header-section-number">7.4</span> 다중공선성</h2>
+<ul>
+<li>다중공선성을 확인하기 위해 분산팽창계수 VIF를 고려함</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>vif_lm <span class="ot">&lt;-</span> <span class="cf">function</span>(model) {</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  X <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(model)[, <span class="sc">-</span><span class="dv">1</span>, drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  vif_values <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">seq_len</span>(<span class="fu">ncol</span>(X)), <span class="cf">function</span>(j) {</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    r2 <span class="ot">&lt;-</span> <span class="fu">summary</span>(<span class="fu">lm</span>(X[, j] <span class="sc">~</span> X[, <span class="sc">-</span>j, <span class="at">drop =</span> <span class="cn">FALSE</span>]))<span class="sc">$</span>r.squared</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> r2)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(vif_values) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(X)</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  vif_values</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="fu">vif_lm</span>(fit_reduced)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      X1       X2       X3       X4 
+1.489950 1.322866 1.276587 1.022997 </code></pre>
+</div>
+</div>
+<ul>
+<li>VIF가 모두 10 이하라면 심각한 다중공선성 가능성은 낮다고 볼 수 있다. 다만 VIF 기준은 절대적인 것은 아니며, 회귀계수의 표준오차와 신뢰구간도 함께 확인하는 것이 좋다.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">vif_lm</span>(fit_full)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         X1          X2          X3          X4          X5          X6 
+1062.167136 1103.595644  764.394462    1.036287    1.023312 5310.504807 </code></pre>
+</div>
+</div>
+<ul>
+<li><p>완전모형에서 일부 설명변수의 VIF가 높게 나타난다면 다중공선성 문제를 고려해야 한다. 다중공선성이 심하면 개별 회귀계수의 표준오차가 커지고, 변수별 효과 해석이 불안정해질 수 있다.</p></li>
+<li><p>회귀계수간 상관성</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>corr <span class="ot">&lt;-</span> <span class="fu">summary</span>(fit_full, <span class="at">correlation =</span> <span class="cn">TRUE</span>)<span class="sc">$</span>correlation</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">col</span>(corr), <span class="fu">row</span>(corr), <span class="at">cex =</span> <span class="dv">10</span> <span class="sc">*</span> <span class="fu">abs</span>(corr),</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">ncol</span>(corr) <span class="sc">+</span> <span class="dv">1</span>),</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">ncol</span>(corr) <span class="sc">+</span> <span class="dv">1</span>),</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Coefficient index"</span>,</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"Coefficient index"</span>)</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fu">col</span>(corr), <span class="fu">row</span>(corr), <span class="at">labels =</span> <span class="fu">round</span>(corr, <span class="dv">2</span>), <span class="at">cex =</span> <span class="fl">0.7</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-chapter7_files/figure-html/ch7_12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><br></p>
+</section>
+<section id="지렛대점과-이상점" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="지렛대점과-이상점"><span class="header-section-number">7.5</span> 지렛대점과 이상점</h2>
+<ul>
+<li><p>회귀분석 문제의 데이터에서 종종 특이하거나 극단적인 관측값을 볼 수 있음</p></li>
+<li><p>영향력을 진단하는 방법인 지렛대점, 모자행렬, 잔차들을 이용하여 이상점을 찾아보고자 함</p></li>
+<li><p>쿡의 거리는 모든 개체를 이용한 예측값 <span class="math inline">\(\hat{Y}_i\)</span>와 <span class="math inline">\(i\)</span>번째 관측값을 제외하고 구한 예측값 <span class="math inline">\(\hat{Y}_{(i)}\)</span>과의 차이에 근거한 통계량으로, 이 값이 클수록 <span class="math inline">\(i\)</span>번째 관측값은 이상점 혹은 영향점일 가능성이 높음</p></li>
+<li><p>기준값 1 이상이면 이상점으로 판단될 수 있으며, 영향점의 기준은 <span class="math inline">\(D&gt;4/n\)</span> 또는 <span class="math inline">\(D&gt;4/(n-p-1)\)</span>을 이용</p></li>
+<li><p>Cook’s D plot: identify <span class="math inline">\(D\)</span> values <span class="math inline">\(&gt;4/(n-p-1)=0.1212\)</span></p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">coef</span>(fit_reduced)) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>cutoff <span class="ot">&lt;-</span> <span class="dv">4</span> <span class="sc">/</span> (<span class="fu">nrow</span>(multi) <span class="sc">-</span> p <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit_reduced, <span class="at">which=</span><span class="dv">4</span>, <span class="at">cook.levels=</span>cutoff)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-chapter7_files/figure-html/ch7_21-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>Cook’s D 값</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>cook_values <span class="ot">&lt;-</span> <span class="fu">cooks.distance</span>(fit_reduced)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>cook_values</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           1            2            3            4            5            6 
+0.0040425103 0.0116141630 0.0015259657 0.0109580685 0.0035882257 0.0054170163 
+           7            8            9           10           11           12 
+0.0071203481 0.0030085420 0.0037724075 0.0845608578 0.0029561177 0.0464073376 
+          13           14           15           16           17           18 
+0.0512331630 0.0061171243 0.0058952052 0.0177805853 0.0975388310 0.0003397407 
+          19           20           21           22           23           24 
+0.0089275397 0.0120393349 0.0032175818 0.0009346946 0.0104706759 0.0261316480 
+          25           26           27           28           29           30 
+0.0247340417 0.0059275798 0.0080658277 0.0188522811 0.0004751104 0.0016070184 
+          31           32           33           34           35           36 
+0.0094665269 0.0012165739 0.0605882937 0.2425048789 0.0072849928 0.0077147168 
+          37           38           39           40 
+0.0075519438 0.3041838521 0.0136368104 0.0542270594 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">which</span>(cook_values <span class="sc">&gt;</span> cutoff)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>34 38 
+34 38 </code></pre>
+</div>
+</div>
+<p>Cook의 거리 기준을 초과하는 관측값은 영향점 후보로 볼 수 있다. 이 관측값들은 제거 여부를 바로 결정하기보다, 자료 입력 오류 여부와 분석 결과에 미치는 영향을 함께 확인해야 한다.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">coef</span>(fit_reduced)) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>cutoff <span class="ot">&lt;-</span> <span class="dv">4</span> <span class="sc">/</span> (<span class="fu">nrow</span>(multi) <span class="sc">-</span> p <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit_reduced, <span class="at">which=</span><span class="dv">5</span>, <span class="at">cook.levels=</span>cutoff)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-chapter7_files/figure-html/ch7_22-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>DFFITS는 쿡의 거리 측도를 변형한 형태로 기준값은 <span class="math inline">\(2\sqrt{(p+1)/(n-p-1)}=0.81\)</span></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">coef</span>(fit_reduced)) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>dffits_cutoff <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sqrt</span>((p <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">/</span> (<span class="fu">nrow</span>(multi) <span class="sc">-</span> p <span class="sc">-</span> <span class="dv">1</span>))</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>dffits_values <span class="ot">&lt;-</span> <span class="fu">dffits</span>(fit_reduced)</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>dffits_values</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          1           2           3           4           5           6 
+-0.14061665 -0.23837081 -0.08611240  0.23249772  0.13225515 -0.16268470 
+          7           8           9          10          11          12 
+ 0.18635486 -0.12103362 -0.13587027 -0.65174652  0.12047791  0.47946774 
+         13          14          15          16          17          18 
+-0.51006523 -0.17347354  0.16951088 -0.29623024  0.72688515  0.04062836 
+         19          20          21          22          23          24 
+ 0.20983789  0.24749875  0.12529044  0.06740046 -0.22670678 -0.37135284 
+         25          26          27          28          29          30 
+ 0.35630621  0.16997599 -0.20107645  0.30444729  0.04804765 -0.08845918 
+         31          32          33          34          35          36 
+ 0.21597930  0.07694221  0.55685302 -1.16947699  0.18930180 -0.19488673 
+         37          38          39          40 
+-0.19260558  1.38391019 -0.26201959 -0.53554690 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dffits_values, <span class="at">type =</span> <span class="st">"h"</span>,</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Observation index"</span>,</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"DFFITS"</span>)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fu">c</span>(<span class="sc">-</span>dffits_cutoff, dffits_cutoff), <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-chapter7_files/figure-html/ch7_23-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>기준값을 초과하는 DFFITS 값을 가진 관측값은 영향점 후보로 볼 수 있다. Cook의 거리 결과와 함께 비교하면 어떤 관측값이 모형 적합에 큰 영향을 미치는지 더 안정적으로 판단할 수 있다.</p>
+<ul>
+<li><p>모자행렬의 대각원소 <span class="math inline">\(h_{ii}\)</span>는 어떠한 관측의 값이 특이한지 아닌지를 알아내는 데 유용한 측도임</p></li>
+<li><p>지렛대점에 대한 <span class="math inline">\(h_{ii}\)</span>는 일반적으로 평균 지렛대값 <span class="math inline">\(\bar{h}\)</span>보다 두 배 이상이면 크다고 간주함</p></li>
+<li><p>관측값 <span class="math inline">\(Y_i\)</span>가 일반적으로 지렛대점에 상응되어 나타나면 좋은 지렛대점이라 하며, 관측값들에 비해 떨어져 있으며 이상점과 대응되어 나타나면 나쁜 지렛대점이라고 함</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">coef</span>(fit_reduced)) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>cutoff <span class="ot">&lt;-</span> <span class="dv">4</span> <span class="sc">/</span> (<span class="fu">nrow</span>(multi) <span class="sc">-</span> p <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit_reduced, <span class="at">which=</span><span class="dv">6</span>, <span class="at">cook.levels=</span>cutoff)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-chapter7_files/figure-html/ch7_24-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><p>아래 영향력 그림은 모자행렬에 대한 스튜던트화 잔차의 영향점 그림으로 지렛대값에 대한 스튜던트화 잔차와 더불어 쿡의 거리를 원의 크기로 표현한 그림</p></li>
+<li><p>원의 크기를 보면 34번째, 38번째 관측에 대한 쿡의 거리값이 가장 크게 나타남</p></li>
+<li><p>수직 참조선은 <span class="math inline">\(\hat{h}\)</span>의 평균값이며 수평 참조선은 -2, 0, 2의 값을 나타냄</p></li>
+<li><p>Influence plot</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">"car"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  car<span class="sc">::</span><span class="fu">influencePlot</span>(fit_reduced)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(<span class="fu">hatvalues</span>(fit_reduced), <span class="fu">rstudent</span>(fit_reduced),</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">xlab =</span> <span class="st">"Leverage"</span>,</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">ylab =</span> <span class="st">"Studentized residual"</span>)</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abline</span>(<span class="at">h =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">2</span>), <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-chapter7_files/figure-html/ch7_3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      StudRes       Hat       CookD
+3  -0.1269232 0.3152134 0.001525966
+10 -1.0784317 0.2675253 0.084560858
+34 -2.3406250 0.1997716 0.242504879
+38  3.1738803 0.1597507 0.304183852</code></pre>
+</div>
+</div>
+<ul>
+<li>이상점 검정</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">"car"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  car<span class="sc">::</span><span class="fu">influencePlot</span>(fit_reduced)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  car<span class="sc">::</span><span class="fu">outlierTest</span>(fit_reduced)</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">"Package 'car' is required for influencePlot() and outlierTest()."</span>)</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-chapter7_files/figure-html/ch7_32-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>No Studentized residuals with Bonferroni p &lt; 0.05
+Largest |rstudent|:
+   rstudent unadjusted p-value Bonferroni p
+38  3.17388          0.0031874       0.1275</code></pre>
+</div>
+</div>
+<ul>
+<li>영향력 판단과 이상점 검정을 통해 38번째 관측값을 자세히 살펴볼 필요가 있음</li>
+</ul>
+<p><br></p>
+</section>
+<section id="잔차분석" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="잔차분석"><span class="header-section-number">7.6</span> 잔차분석</h2>
+<ul>
+<li>다중선형회귀모형에서 오차항에 대한 선형성, 등분산성, 독립성, 정규성 가정에 대한 검토가 필요함</li>
+</ul>
+<p>잔차분석은 최종모형을 제안하기 전 반드시 수행해야 하는 단계이다. 회귀계수의 p-value나 수정결정계수가 좋아 보이더라도 잔차에서 뚜렷한 패턴이 나타나면 모형이 자료의 구조를 충분히 반영하지 못하고 있을 수 있다. 따라서 잔차와 적합값의 관계, Q-Q plot, 등분산성 검정, 독립성 검정을 함께 확인한다.</p>
+<ul>
+<li>적합값 vs.&nbsp;잔차 그림</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit_reduced, <span class="at">which =</span> <span class="dv">1</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-chapter7_files/figure-html/ch7_4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit_reduced, <span class="at">which =</span> <span class="dv">3</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-chapter7_files/figure-html/ch7_4-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><p>잔차 그림에서는 기본적으로 잔차에 대한 등분산성을 살펴볼 수 있음</p></li>
+<li><p>그림을 살펴보면 0을 중심으로 랜덤하게 분포되어 보이기는 하지만 관측값 38번, 34번에 의해 수평대의 형태를 약간 벗어난 것으로 보임. 그러나 전반적으로 잔차가 수평대 이내에 놓여 있고 양이나 음의 값이 계통적(systematic)인 경향을 보이지 않고 랜덤하게 나타나고 있으므로 선형성을 대체로 만족한다고 할 수 있음.</p></li>
+<li><p>편잔차그림을 이용해 다중회귀의 선형성에 대한 검토를 할 수 있음</p></li>
+<li><p>편잔차그림에서 직선을 살펴보면 선형성을 만족하는 경우의 점선에 가까운 편이므로 모형에 적합된 변수들이 선형성을 크게 벗어나지 않는다고 여겨져 선형모형의 타당성을 뒷받침 함</p></li>
+<li><p>편잔차그림</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">"car"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  car<span class="sc">::</span><span class="fu">crPlots</span>(fit_reduced)</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">"Package 'car' is required for crPlots()."</span>)</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-chapter7_files/figure-html/ch7_42-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><p>정규성 가정에 대한 검토는 잔차에 대한 Q-Q plot, 스튜던트화 잔차에 대한 t-분포 Q-Q plot, 잔차에 대한 Shapiro-Wilk 검정 등을 통해 수행함</p></li>
+<li><p>정규성 검정</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit_reduced, <span class="at">which =</span> <span class="dv">2</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-chapter7_files/figure-html/ch7_5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">"car"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  car<span class="sc">::</span><span class="fu">qqPlot</span>(fit_reduced)</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">qqnorm</span>(<span class="fu">rstudent</span>(fit_reduced))</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">qqline</span>(<span class="fu">rstudent</span>(fit_reduced), <span class="at">col =</span> <span class="dv">2</span>)</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-chapter7_files/figure-html/ch7_5-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 34 38</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>residual <span class="ot">&lt;-</span> <span class="fu">resid</span>(fit_reduced)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="fu">shapiro.test</span>(residual)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Shapiro-Wilk normality test
+
+data:  residual
+W = 0.98271, p-value = 0.7883</code></pre>
+</div>
+</div>
+<p>Shapiro-Wilk 검정의 p-value가 충분히 크면 정규성 가정을 강하게 위반한다고 보기 어렵다. 다만 표본 수가 작을 때는 검정력이 낮고, 표본 수가 클 때는 작은 차이도 유의하게 나타날 수 있으므로 Q-Q plot과 함께 해석해야 한다.</p>
+<ul>
+<li>등분산성 검정(non-constant error variance test)</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">"car"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  car<span class="sc">::</span><span class="fu">spreadLevelPlot</span>(fit_reduced)</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  car<span class="sc">::</span><span class="fu">ncvTest</span>(fit_reduced)</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(<span class="fu">fitted</span>(fit_reduced), <span class="fu">sqrt</span>(<span class="fu">abs</span>(<span class="fu">rstudent</span>(fit_reduced))),</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">xlab =</span> <span class="st">"Fitted values"</span>,</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">ylab =</span> <span class="st">"Sqrt(|studentized residual|)"</span>)</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-chapter7_files/figure-html/ch7_6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Non-constant Variance Score Test 
+Variance formula: ~ fitted.values 
+Chisquare = 3.507139, Df = 1, p = 0.061105</code></pre>
+</div>
+</div>
+<p>등분산성 검정에서 유의한 결과가 나타나지 않으면 등분산성 가정에 큰 문제가 없다고 볼 수 있다. 그러나 이 역시 잔차그림에서 분산이 일정하게 보이는지와 함께 판단하는 것이 좋다.</p>
+<ul>
+<li>독립성 검정</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">"car"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  car<span class="sc">::</span><span class="fu">durbinWatsonTest</span>(fit_reduced)</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">"Package 'car' is required for durbinWatsonTest()."</span>)</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> lag Autocorrelation D-W Statistic p-value
+   1       -0.212897      2.344761    0.27
+ Alternative hypothesis: rho != 0</code></pre>
+</div>
+</div>
+<p>Durbin-Watson 검정은 잔차의 자기상관을 확인하는 데 사용된다. 자료가 시간순으로 관측된 경우에는 특히 중요하며, 횡단면 자료에서도 관측 순서가 의미를 갖는다면 독립성 검토가 필요하다.</p>
+<p><br></p>
+</section>
+<section id="모형-제안-및-예측" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="모형-제안-및-예측"><span class="header-section-number">7.7</span> 모형 제안 및 예측</h2>
+<ul>
+<li>영향점 후보가 일부 확인되었지만, 자료 맥락과 전체 진단 결과를 고려하여 모든 관측값을 포함한 <code>X1</code>, <code>X2</code>, <code>X3</code>, <code>X4</code> 모형을 최종 후보모형으로 제안한다.</li>
+</ul>
+<p>최종모형을 제안할 때는 다음 내용을 함께 보고하는 것이 좋다.</p>
+<ol type="1">
+<li>최종모형에 포함된 설명변수</li>
+<li>각 회귀계수의 추정값과 신뢰구간</li>
+<li>수정결정계수와 전체 모형의 유의성</li>
+<li>다중공선성 진단 결과</li>
+<li>영향점 및 잔차진단 결과</li>
+<li>예측값과 예측구간</li>
+</ol>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>fit_reduced <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y <span class="sc">~</span> X1 <span class="sc">+</span> X2 <span class="sc">+</span> X3 <span class="sc">+</span> X4, <span class="at">data =</span> multi)</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>pred_pre <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_reduced, <span class="at">interval =</span> <span class="st">"prediction"</span>)</span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>pred_con <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_reduced, <span class="at">interval =</span> <span class="st">"confidence"</span>)</span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>pred_dat <span class="ot">&lt;-</span> <span class="fu">cbind</span>(pred_con, pred_pre[, <span class="sc">-</span><span class="dv">1</span>])</span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a><span class="fu">matplot</span>(pred_dat,</span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">3</span>),</span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">type =</span> <span class="st">"l"</span>,</span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">xlab =</span> <span class="st">"Observation index"</span>,</span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">"Predicted value"</span>)</span>
+<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-13"><a href="#cb55-13" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>,</span>
+<span id="cb55-14"><a href="#cb55-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"Fitted"</span>, <span class="st">"Confidence interval"</span>, <span class="st">"Prediction interval"</span>),</span>
+<span id="cb55-15"><a href="#cb55-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>),</span>
+<span id="cb55-16"><a href="#cb55-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="07-chapter7_files/figure-html/ch7_7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(pred_con)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       fit      lwr      upr
+1 456.2634 440.5912 471.9357
+2 302.6355 278.0991 327.1718
+3 678.9751 647.1467 710.8035
+4 516.4949 499.2540 533.7359
+5 471.7316 451.7075 491.7557
+6 307.8860 288.5233 327.2487</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(pred_pre)</span></code></pre></div><button title="클립보드 복사" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       fit      lwr      upr
+1 456.2634 397.4462 515.0806
+2 302.6355 240.8627 364.4082
+3 678.9751 613.9606 743.9896
+4 516.4949 457.2405 575.7494
+5 471.7316 411.6084 531.8549
+6 307.8860 247.9797 367.7922</code></pre>
+</div>
+</div>
+<p>신뢰구간은 평균 반응값에 대한 불확실성을 나타내고, 예측구간은 개별 관측값에 대한 불확실성을 나타낸다. 따라서 예측구간은 신뢰구간보다 넓게 나타나는 것이 일반적이다.</p>
+<!-- End -->
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./06-chapter6.html" class="pagination-link" aria-label="가변수 회귀모형">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">가변수 회귀모형</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./08-chapter8.html" class="pagination-link" aria-label="일반화 가중회귀모형">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">일반화 가중회귀모형</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
