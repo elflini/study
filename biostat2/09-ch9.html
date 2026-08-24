@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>9&nbsp; 생존자료와 생존 확률 – 생명과학데이터분석</title>
+<title>9&nbsp; 생존자료와 생존 확률 – Applied Biostatistics</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -166,7 +166,7 @@ window.Quarto = {
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="./">생명과학데이터분석</a> 
+      <a href="./">Applied Biostatistics</a> 
     </div>
       </div>
         <div class="mt-2 flex-shrink-0 align-items-center">
@@ -372,26 +372,10 @@ window.Quarto = {
 <p>이러한 자료를 <strong>time-to-event data</strong>라고 한다. Time-to-event 자료에서 중요한 정보는 단순히 사건이 발생했는지 여부가 아니다. 사건이 발생했다면 <strong>언제 발생했는지</strong>, 사건이 발생하지 않았다면 <strong>언제까지 사건 없이 관찰되었는지</strong>가 중요하다.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="fig_adv9/f1_time_to_event_structure.png" class="img-fluid figure-img" style="width:88.0%"></p>
-<figcaption>Time-to-event 자료는 시간과 사건 발생 여부를 함께 기록한다.</figcaption>
+<p><img src="fig_adv9/f1_time_to_event_structure.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:88.0%"></p>
 </figure>
 </div>
-<p>생존분석의 가장 중요한 특징은 <strong>censoring</strong>을 다룬다는 점이다. 연구 종료 시점까지 사건이 발생하지 않았거나, 추적 중 탈락했거나, 다른 병원으로 전원된 대상자는 정확한 사건 발생 시간을 모른다. 하지만 이 대상자들은 “적어도 관찰된 시간까지는 사건이 발생하지 않았다”는 중요한 정보를 제공한다.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>핵심 메시지
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>생존분석은 사건 발생 여부, 사건 발생까지의 시간, censoring 정보를 함께 고려하여 시간에 따른 사건 발생 양상을 분석하는 방법이다.</p>
-</div>
-</div>
-<p>이번 장에서는 생존분석의 기본 개념을 정리하고, Kaplan-Meier curve와 log-rank test를 중심으로 학습한다. 다음 장에서는 Cox proportional hazards model로 확장한다.</p>
-<hr>
+<p>생존분석의 가장 중요한 특징은 <strong>중도절단(censoring)</strong>을 다룬다는 점이다. 연구 종료 시점까지 사건이 발생하지 않았거나, 추적 중 탈락했거나, 다른 병원으로 전원된 대상자는 정확한 사건 발생 시간을 모른다. 하지만 이 대상자들은 “적어도 관찰된 시간까지는 사건이 발생하지 않았다”는 중요한 정보를 제공한다. 생존분석은 사건 발생 여부, 사건 발생까지의 시간, censoring 정보를 함께 고려하여 시간에 따른 사건 발생 양상을 분석하는 방법이다.</p>
 <section id="time-to-event-data" class="level2" data-number="9.1">
 <h2 data-number="9.1" class="anchored" data-anchor-id="time-to-event-data"><span class="header-section-number">9.1</span> Time-to-event data</h2>
 <section id="생존자료의-구조" class="level3" data-number="9.1.1">
@@ -473,8 +457,6 @@ window.Quarto = {
 </tr>
 </tbody>
 </table>
-<p>R의 <code>Surv()</code> 함수에서도 일반적으로 사건 발생을 1, censoring을 0으로 코딩한다.</p>
-<hr>
 </section>
 <section id="시간의-시작점과-종료점" class="level3" data-number="9.1.2">
 <h3 data-number="9.1.2" class="anchored" data-anchor-id="시간의-시작점과-종료점"><span class="header-section-number">9.1.2</span> 시간의 시작점과 종료점</h3>
@@ -516,20 +498,6 @@ window.Quarto = {
 </tbody>
 </table>
 <p>시간의 시작점을 잘못 정의하면 immortal time bias, selection bias, 해석 오류가 발생할 수 있다. 예를 들어 치료 시작 이후 생존자를 대상으로 치료군을 정의하면 치료를 받기 전까지 살아남아야 하는 기간이 생겨 치료효과가 과장될 수 있다.</p>
-<div class="callout callout-style-default callout-important callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Important</span>시간축 정의
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>생존분석에서 가장 먼저 정해야 할 것은 “0시점이 언제인가?”와 “무엇을 사건으로 볼 것인가?”이다.</p>
-</div>
-</div>
-<hr>
 </section>
 <section id="일반-분석으로-부족한-이유" class="level3" data-number="9.1.3">
 <h3 data-number="9.1.3" class="anchored" data-anchor-id="일반-분석으로-부족한-이유"><span class="header-section-number">9.1.3</span> 일반 분석으로 부족한 이유</h3>
@@ -566,12 +534,10 @@ window.Quarto = {
 </table>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="fig_adv9/f2_survival_need.png" class="img-fluid figure-img" style="width:92.0%"></p>
-<figcaption>생존자료는 일반적인 이진/연속형 분석만으로 충분하지 않다.</figcaption>
+<p><img src="fig_adv9/f2_survival_need.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:92.0%"></p>
 </figure>
 </div>
 <p>사건이 발생하지 않은 대상자는 실패한 정보가 아니라, 특정 시점까지 사건이 없었다는 정보를 제공한다. 생존분석은 이 정보를 버리지 않고 사용한다.</p>
-<hr>
 </section>
 </section>
 <section id="중도-절단censoring" class="level2" data-number="9.2">
@@ -591,7 +557,6 @@ window.Quarto = {
 <li>관심 사건이 아닌 다른 이유로 관찰 종료</li>
 <li>자료 수집 기간이 끝남</li>
 </ul>
-<hr>
 </section>
 <section id="right-censoring" class="level3" data-number="9.2.2">
 <h3 data-number="9.2.2" class="anchored" data-anchor-id="right-censoring"><span class="header-section-number">9.2.2</span> Right censoring</h3>
@@ -637,7 +602,6 @@ window.Quarto = {
 <p>상태변수는 다음과 같다.</p>
 <p><span class="math display">\[\delta_i=I(T_i \leq C_i)\]</span></p>
 <p>즉 사건이 관찰되면 <span class="math inline">\(\delta_i=1\)</span>, censoring이면 <span class="math inline">\(\delta_i=0\)</span>이다.</p>
-<hr>
 </section>
 <section id="다른-censoring-유형" class="level3" data-number="9.2.3">
 <h3 data-number="9.2.3" class="anchored" data-anchor-id="다른-censoring-유형"><span class="header-section-number">9.2.3</span> 다른 censoring 유형</h3>
@@ -684,26 +648,11 @@ window.Quarto = {
 </tbody>
 </table>
 <p>대부분의 기본 Kaplan-Meier 방법과 Cox 모형은 right censoring을 전제로 설명된다.</p>
-<hr>
 </section>
 <section id="비정보성-censoring" class="level3" data-number="9.2.4">
 <h3 data-number="9.2.4" class="anchored" data-anchor-id="비정보성-censoring"><span class="header-section-number">9.2.4</span> 비정보성 censoring</h3>
 <p>Kaplan-Meier와 Cox 모형의 중요한 가정 중 하나는 censoring이 비정보성(non-informative)이라는 것이다. 즉 censoring된 대상자의 향후 사건위험이 같은 시점까지 추적 중인 대상자와 크게 다르지 않다고 가정한다.</p>
-<p>예를 들어 연구 종료 때문에 censoring된 경우는 대체로 비정보성 censoring에 가까울 수 있다. 반면 상태가 악화되어 병원을 옮긴 환자가 추적 탈락했다면 censoring이 사건위험과 관련될 수 있다.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Warning</span>비정보성 censoring 가정
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Censoring이 사건 발생 위험과 관련되어 있으면 Kaplan-Meier 추정이 bias될 수 있다. 추적 탈락률과 탈락 이유를 반드시 확인해야 한다.</p>
-</div>
-</div>
-<hr>
+<p>예를 들어 연구 종료 때문에 censoring된 경우는 대체로 비정보성 censoring에 가까울 수 있다. 반면 상태가 악화되어 병원을 옮긴 환자가 추적 탈락했다면 censoring이 사건위험과 관련될 수 있다. Censoring이 사건 발생 위험과 관련되어 있으면 Kaplan-Meier 추정이 bias될 수 있다. 추적 탈락률과 탈락 이유를 반드시 확인해야 한다.</p>
 </section>
 </section>
 <section id="survival-function과-hazard-function" class="level2" data-number="9.3">
@@ -723,7 +672,6 @@ window.Quarto = {
 <li>사건이 발생하면 감소한다.</li>
 <li>Censoring 시점에서는 직접 감소하지 않는다.</li>
 </ol>
-<hr>
 </section>
 <section id="cumulative-distribution-function과의-관계" class="level3" data-number="9.3.2">
 <h3 data-number="9.3.2" class="anchored" data-anchor-id="cumulative-distribution-function과의-관계"><span class="header-section-number">9.3.2</span> Cumulative distribution function과의 관계</h3>
@@ -734,7 +682,6 @@ window.Quarto = {
 <p>즉</p>
 <p><span class="math display">\[F(t)=1-S(t)\]</span></p>
 <p>이다.</p>
-<hr>
 </section>
 <section id="hazard-function" class="level3" data-number="9.3.3">
 <h3 data-number="9.3.3" class="anchored" data-anchor-id="hazard-function"><span class="header-section-number">9.3.3</span> Hazard function</h3>
@@ -751,15 +698,13 @@ P(t \leq T &lt; t+\Delta t \mid T \geq t)
 <blockquote class="blockquote">
 <p>지금까지 사건 없이 남아 있던 사람이 바로 다음 순간 사건을 경험할 조건부 위험</p>
 </blockquote>
-<p>Hazard는 확률 그 자체가 아니라 시간 단위당 위험률에 가깝다. 따라서 0과 1 사이로 제한되지 않는다.</p>
-<hr>
+<p><strong>Hazard는 확률 그 자체가 아니라 시간 단위당 위험률에 가깝다</strong>. 따라서 0과 1 사이로 제한되지 않는다.</p>
 </section>
 <section id="survival과-hazard의-차이" class="level3" data-number="9.3.4">
 <h3 data-number="9.3.4" class="anchored" data-anchor-id="survival과-hazard의-차이"><span class="header-section-number">9.3.4</span> Survival과 hazard의 차이</h3>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="fig_adv9/f4_survival_hazard.png" class="img-fluid figure-img" style="width:92.0%"></p>
-<figcaption>Survival은 누적 확률, hazard는 조건부 순간위험이다.</figcaption>
+<p><img src="fig_adv9/f4_survival_hazard.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:92.0%"></p>
 </figure>
 </div>
 <table class="caption-top table">
@@ -798,7 +743,6 @@ P(t \leq T &lt; t+\Delta t \mid T \geq t)
 <p>여기서 cumulative hazard는 다음이다.</p>
 <p><span class="math display">\[H(t)=\int_0^t h(u)\,du\]</span></p>
 <p>이 관계는 다음 장 Cox 모형에서 중요하게 사용된다.</p>
-<hr>
 </section>
 </section>
 <section id="kaplan-meier-estimator" class="level2" data-number="9.4">
@@ -819,19 +763,16 @@ P(t \leq T &lt; t+\Delta t \mid T \geq t)
 <li><span class="math inline">\(n_j\)</span>: 해당 시점 직전 risk set에 있는 대상자 수</li>
 </ul>
 <p>이다.</p>
-<hr>
 </section>
 <section id="risk-set" class="level3" data-number="9.4.2">
 <h3 data-number="9.4.2" class="anchored" data-anchor-id="risk-set"><span class="header-section-number">9.4.2</span> Risk set</h3>
 <p>Risk set은 특정 시점 직전에 아직 사건이 발생하지 않았고 censoring도 되지 않아 사건을 경험할 가능성이 남아 있는 대상자들의 집합이다.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="fig_adv9/f6_risk_set.png" class="img-fluid figure-img" style="width:90.0%"></p>
-<figcaption>Risk set은 각 사건 시점 직전에 아직 사건 가능성이 있는 대상자이다.</figcaption>
+<p><img src="fig_adv9/f6_risk_set.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
 </figure>
 </div>
 <p>예를 들어 6개월에 사건이 발생한 환자는 이후 risk set에서 제외된다. 8개월에 censoring된 환자도 8개월 이후 risk set에서 제외된다. 하지만 8개월 전까지는 risk set에 포함되어 정보를 제공한다.</p>
-<hr>
 </section>
 <section id="kaplan-meier-계산-예제" class="level3" data-number="9.4.3">
 <h3 data-number="9.4.3" class="anchored" data-anchor-id="kaplan-meier-계산-예제"><span class="header-section-number">9.4.3</span> Kaplan-Meier 계산 예제</h3>
@@ -895,15 +836,13 @@ P(t \leq T &lt; t+\Delta t \mid T \geq t)
 =
 0.267\]</span></p>
 <p>Kaplan-Meier estimator는 이러한 조건부 생존확률의 곱이다.</p>
-<hr>
 </section>
 <section id="kaplan-meier-curve" class="level3" data-number="9.4.4">
 <h3 data-number="9.4.4" class="anchored" data-anchor-id="kaplan-meier-curve"><span class="header-section-number">9.4.4</span> Kaplan-Meier curve</h3>
 <p>Kaplan-Meier curve는 계단 모양의 생존곡선이다.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="fig_adv9/f5_km_curve_censoring.png" class="img-fluid figure-img" style="width:82.0%"></p>
-<figcaption>Kaplan-Meier curve는 사건 시점에서만 감소한다.</figcaption>
+<p><img src="fig_adv9/f5_km_curve_censoring.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:82.0%"></p>
 </figure>
 </div>
 <p>특징은 다음과 같다.</p>
@@ -914,20 +853,6 @@ P(t \leq T &lt; t+\Delta t \mid T \geq t)
 <li>시간이 지날수록 risk set이 줄어든다.</li>
 <li>후반부에는 risk set이 작아져 추정이 불안정해진다.</li>
 </ol>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>기억하기
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Kaplan-Meier curve는 사건 시점에서만 감소한다. Censoring은 곡선을 직접 낮추지 않지만, 이후 risk set을 줄인다.</p>
-</div>
-</div>
-<hr>
 </section>
 <section id="median-survival-time" class="level3" data-number="9.4.5">
 <h3 data-number="9.4.5" class="anchored" data-anchor-id="median-survival-time"><span class="header-section-number">9.4.5</span> Median survival time</h3>
@@ -939,12 +864,10 @@ P(t \leq T &lt; t+\Delta t \mid T \geq t)
 </blockquote>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="fig_adv9/f8_median_survival.png" class="img-fluid figure-img" style="width:82.0%"></p>
-<figcaption>Median survival time은 생존확률이 0.5가 되는 시간이다.</figcaption>
+<p><img src="fig_adv9/f8_median_survival.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:82.0%"></p>
 </figure>
 </div>
 <p>주의할 점은 생존곡선이 0.5 아래로 내려가지 않으면 median survival time은 추정되지 않는다는 것이다. 이런 경우 “median survival not reached”라고 보고한다.</p>
-<hr>
 </section>
 </section>
 <section id="특정-시점-생존확률" class="level2" data-number="9.5">
@@ -957,7 +880,6 @@ P(t \leq T &lt; t+\Delta t \mid T \geq t)
 <li>5-year overall survival: 61%</li>
 </ul>
 <p>특정 시점 생존확률은 임상적으로 해석하기 쉬울 수 있다. 다만 해당 시점의 risk set이 충분히 남아 있는지 확인해야 한다.</p>
-<hr>
 </section>
 <section id="log-rank-test" class="level2" data-number="9.6">
 <h2 data-number="9.6" class="anchored" data-anchor-id="log-rank-test"><span class="header-section-number">9.6</span> Log-rank test</h2>
@@ -969,19 +891,16 @@ P(t \leq T &lt; t+\Delta t \mid T \geq t)
 S_1(t)=S_2(t)
 \quad \text{for all } t\]</span></p>
 <p>대립가설은 두 생존곡선이 같지 않다는 것이다.</p>
-<hr>
 </section>
 <section id="직관적-의미" class="level3" data-number="9.6.2">
 <h3 data-number="9.6.2" class="anchored" data-anchor-id="직관적-의미"><span class="header-section-number">9.6.2</span> 직관적 의미</h3>
 <p>Log-rank test는 각 사건 시점마다 각 그룹에서 관찰된 사건 수와, 귀무가설하에서 기대되는 사건 수를 비교한다.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="fig_adv9/f7_logrank_observed_expected.png" class="img-fluid figure-img" style="width:82.0%"></p>
-<figcaption>Log-rank test는 관찰 사건 수와 기대 사건 수를 비교한다.</figcaption>
+<p><img src="fig_adv9/f7_logrank_observed_expected.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:82.0%"></p>
 </figure>
 </div>
 <p>각 사건 시점에서 전체 risk set과 전체 사건 수를 기준으로 그룹별 기대 사건 수를 계산한다. 그 차이를 모든 사건 시점에 걸쳐 누적하여 검정통계량을 만든다.</p>
-<hr>
 </section>
 <section id="해석" class="level3" data-number="9.6.3">
 <h3 data-number="9.6.3" class="anchored" data-anchor-id="해석"><span class="header-section-number">9.6.3</span> 해석</h3>
@@ -998,7 +917,6 @@ S_1(t)=S_2(t)
 <li>생존곡선이 교차할 때의 복잡한 차이</li>
 </ul>
 <p>이러한 내용은 Cox model이나 다른 생존모형으로 확장해서 평가한다.</p>
-<hr>
 </section>
 </section>
 <section id="risk-table과-그래프-해석" class="level2" data-number="9.7">
@@ -1008,8 +926,7 @@ S_1(t)=S_2(t)
 <p>Kaplan-Meier curve 아래에는 risk table이 함께 제시되는 경우가 많다. Risk table은 각 시점에 risk set에 남아 있는 대상자 수를 보여준다.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="fig_adv9/f9_km_risk_table.png" class="img-fluid figure-img" style="width:90.0%"></p>
-<figcaption>Risk table은 후반부 생존곡선 해석의 안정성을 보여준다.</figcaption>
+<p><img src="fig_adv9/f9_km_risk_table.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%"></p>
 </figure>
 </div>
 <p>Risk table을 확인해야 하는 이유는 다음과 같다.</p>
@@ -1019,7 +936,6 @@ S_1(t)=S_2(t)
 <li>특정 시점 생존확률이 충분한 대상자 수에 기반하는지 확인할 수 있다.</li>
 <li>censoring이 한쪽 그룹에 집중되어 있는지 의심할 수 있다.</li>
 </ol>
-<hr>
 </section>
 <section id="생존곡선-해석-체크포인트" class="level3" data-number="9.7.2">
 <h3 data-number="9.7.2" class="anchored" data-anchor-id="생존곡선-해석-체크포인트"><span class="header-section-number">9.7.2</span> 생존곡선 해석 체크포인트</h3>
@@ -1066,7 +982,6 @@ S_1(t)=S_2(t)
 </tr>
 </tbody>
 </table>
-<hr>
 </section>
 </section>
 <section id="생존분석과-cox-model의-연결" class="level2" data-number="9.8">
@@ -1082,7 +997,6 @@ S_1(t)=S_2(t)
 <li>비례위험 가정을 평가해야 하는 상황을 다루기 어렵다.</li>
 </ol>
 <p>이러한 문제를 다루기 위해 다음 장에서 Cox proportional hazards model을 학습한다.</p>
-<hr>
 </section>
 <section id="cox-model의-기본-형태" class="level3" data-number="9.8.2">
 <h3 data-number="9.8.2" class="anchored" data-anchor-id="cox-model의-기본-형태"><span class="header-section-number">9.8.2</span> Cox model의 기본 형태</h3>
@@ -1099,7 +1013,6 @@ h_0(t)\exp(\beta X)\]</span></p>
 <p>회귀계수를 지수화하면 hazard ratio가 된다.</p>
 <p><span class="math display">\[HR=e^\beta\]</span></p>
 <p>Cox model은 생존분석에서 가장 널리 사용되는 회귀모형으로 다음 장에서 자세히 알아본다.</p>
-<hr>
 </section>
 </section>
 <section id="r-실습" class="level2" data-number="9.9">
@@ -1146,7 +1059,6 @@ h_0(t)\exp(\beta X)\]</span></p>
 6  7.345033      0   Control 78.48596</code></pre>
 </div>
 </div>
-<hr>
 </section>
 <section id="사건과-censoring-확인" class="level3" data-number="9.9.2">
 <h3 data-number="9.9.2" class="anchored" data-anchor-id="사건과-censoring-확인"><span class="header-section-number">9.9.2</span> 사건과 censoring 확인</h3>
@@ -1181,7 +1093,6 @@ h_0(t)\exp(\beta X)\]</span></p>
   Treatment 0.5945946 0.4054054</code></pre>
 </div>
 </div>
-<hr>
 </section>
 <section id="survival-패키지-불러오기" class="level3" data-number="9.9.3">
 <h3 data-number="9.9.3" class="anchored" data-anchor-id="survival-패키지-불러오기"><span class="header-section-number">9.9.3</span> survival 패키지 불러오기</h3>
@@ -1189,7 +1100,6 @@ h_0(t)\exp(\beta X)\]</span></p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survival)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><code>survival</code> 패키지는 생존분석의 기본 패키지이다. Kaplan-Meier curve, log-rank test, Cox model을 수행할 수 있다.</p>
-<hr>
 </section>
 <section id="surv-객체-만들기" class="level3" data-number="9.9.4">
 <h3 data-number="9.9.4" class="anchored" data-anchor-id="surv-객체-만들기"><span class="header-section-number">9.9.4</span> Surv 객체 만들기</h3>
@@ -1205,7 +1115,6 @@ h_0(t)\exp(\beta X)\]</span></p>
 </div>
 </div>
 <p><code>Surv()</code> 객체는 생존시간과 상태변수를 결합한 객체이다. <code>+</code> 표시가 붙은 값은 censored observation을 의미한다.</p>
-<hr>
 </section>
 <section id="전체-kaplan-meier-curve" class="level3" data-number="9.9.5">
 <h3 data-number="9.9.5" class="anchored" data-anchor-id="전체-kaplan-meier-curve"><span class="header-section-number">9.9.5</span> 전체 Kaplan-Meier curve</h3>
@@ -1361,7 +1270,6 @@ h_0(t)\exp(\beta X)\]</span></p>
  19.99077     13       1    0.214 0.04458        0.142        0.321</code></pre>
 </div>
 </div>
-<hr>
 </section>
 <section id="전체-생존곡선-그리기" class="level3" data-number="9.9.6">
 <h3 data-number="9.9.6" class="anchored" data-anchor-id="전체-생존곡선-그리기"><span class="header-section-number">9.9.6</span> 전체 생존곡선 그리기</h3>
@@ -1382,7 +1290,6 @@ h_0(t)\exp(\beta X)\]</span></p>
 </div>
 </div>
 <p><code>mark.time = TRUE</code>는 censoring 시점을 표시한다.</p>
-<hr>
 </section>
 <section id="그룹별-kaplan-meier-curve" class="level3" data-number="9.9.7">
 <h3 data-number="9.9.7" class="anchored" data-anchor-id="그룹별-kaplan-meier-curve"><span class="header-section-number">9.9.7</span> 그룹별 Kaplan-Meier curve</h3>
@@ -1543,7 +1450,6 @@ treatment=Treatment 111     45  17.89   15.37      NA</code></pre>
  19.896      9       1    0.343 0.07965        0.218        0.541</code></pre>
 </div>
 </div>
-<hr>
 </section>
 <section id="그룹별-생존곡선-그리기" class="level3" data-number="9.9.8">
 <h3 data-number="9.9.8" class="anchored" data-anchor-id="그룹별-생존곡선-그리기"><span class="header-section-number">9.9.8</span> 그룹별 생존곡선 그리기</h3>
@@ -1572,7 +1478,6 @@ treatment=Treatment 111     45  17.89   15.37      NA</code></pre>
 </div>
 </div>
 </div>
-<hr>
 </section>
 <section id="median-survival-time-1" class="level3" data-number="9.9.9">
 <h3 data-number="9.9.9" class="anchored" data-anchor-id="median-survival-time-1"><span class="header-section-number">9.9.9</span> Median survival time</h3>
@@ -1588,7 +1493,6 @@ treatment=Treatment 15.365122       NA</code></pre>
 </div>
 </div>
 <p><code>median</code> 열은 median survival time을 보여준다. 만약 <code>NA</code>가 나오면 생존곡선이 0.5 아래로 내려가지 않았다는 뜻이다.</p>
-<hr>
 </section>
 <section id="특정-시점-생존확률-1" class="level3" data-number="9.9.10">
 <h3 data-number="9.9.10" class="anchored" data-anchor-id="특정-시점-생존확률-1"><span class="header-section-number">9.9.10</span> 특정 시점 생존확률</h3>
@@ -1614,7 +1518,6 @@ treatment=Treatment 15.365122       NA</code></pre>
    18     15       6    0.497  0.0675        0.381        0.648</code></pre>
 </div>
 </div>
-<hr>
 </section>
 <section id="log-rank-test-1" class="level3" data-number="9.9.11">
 <h3 data-number="9.9.11" class="anchored" data-anchor-id="log-rank-test-1"><span class="header-section-number">9.9.11</span> Log-rank test</h3>
@@ -1648,7 +1551,6 @@ treatment=Treatment 111       45     70.6       9.3      20.4
 <pre><code>[1] 6.414944e-06</code></pre>
 </div>
 </div>
-<hr>
 </section>
 <section id="kaplan-meier-curve와-risk-table" class="level3" data-number="9.9.12">
 <h3 data-number="9.9.12" class="anchored" data-anchor-id="kaplan-meier-curve와-risk-table"><span class="header-section-number">9.9.12</span> Kaplan-Meier curve와 risk table</h3>
@@ -1668,7 +1570,6 @@ treatment=Treatment 111       45     70.6       9.3      20.4
 <span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>기본 R만 사용하는 경우에는 <code>summary(fit_group, times = ...)</code>로 특정 시점의 number at risk를 확인할 수 있다.</p>
-<hr>
 </section>
 <section id="censoring이-많은-경우" class="level3" data-number="9.9.13">
 <h3 data-number="9.9.13" class="anchored" data-anchor-id="censoring이-많은-경우"><span class="header-section-number">9.9.13</span> Censoring이 많은 경우</h3>
@@ -1723,7 +1624,6 @@ treatment=Treatment 111       45     70.6       9.3      20.4
 </div>
 </div>
 <p>Censoring이 많고 risk set이 빠르게 줄어들면 후반부 생존확률은 매우 불안정할 수 있다.</p>
-<hr>
 </section>
 <section id="간단한-cox-model-연결" class="level3" data-number="9.9.14">
 <h3 data-number="9.9.14" class="anchored" data-anchor-id="간단한-cox-model-연결"><span class="header-section-number">9.9.14</span> 간단한 Cox model 연결</h3>
@@ -1769,7 +1669,6 @@ age                0.9943290 1.0278483</code></pre>
 </div>
 </div>
 <p>여기서 지수화한 계수는 hazard ratio이다. 자세한 해석과 비례위험 가정은 다음 장에서 다룬다.</p>
-<hr>
 
 
 </section>
